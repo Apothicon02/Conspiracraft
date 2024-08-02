@@ -3,6 +3,7 @@ package org.apothicon.core.rendering;
 import org.apothicon.Main;
 import org.apothicon.core.WindowManager;
 import org.apothicon.core.elements.Element;
+import org.apothicon.core.elements.Mesh;
 import org.apothicon.core.utilities.Transformation;
 import org.apothicon.core.utilities.Utils;
 import org.lwjgl.opengl.GL40;
@@ -34,12 +35,14 @@ public class Renderer {
         shader.setUniform("transformationMatrix", Transformation.createTransformationMatrix(element));
         shader.setUniform("projectionMatrix", window.updateProjectionMatrix());
         shader.setUniform("viewMatrix", Transformation.getViewMatrix(camera));
-        GL40.glBindVertexArray(element.getModel().getId());
+        Mesh mesh = element.getMesh();
+        GL40.glBindVertexArray(mesh.getVaoId());
         GL40.glEnableVertexAttribArray(0);
         GL40.glEnableVertexAttribArray(1);
-        GL40.glActiveTexture(GL40.GL_TEXTURE);
-        GL40.glBindTexture(GL40.GL_TEXTURE_2D, element.getModel().getTexture().getId());
-        GL40.glDrawElements(GL40.GL_TRIANGLES, element.getModel().getVertexCount(), GL40.GL_UNSIGNED_INT, 0);
+        //GL40.glActiveTexture(GL40.GL_TEXTURE_2D);
+        //GL40.glBindTexture(GL40.GL_TEXTURE_2D, mesh.getTexture().getId());
+        GL40.glDrawElements(GL40.GL_TRIANGLES, mesh.getVertexCount(), GL40.GL_UNSIGNED_INT, 0); //this line is causing the crash somehow
+
         GL40.glDisableVertexAttribArray(0);
         GL40.glDisableVertexAttribArray(1);
         GL40.glBindVertexArray(0);

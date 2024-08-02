@@ -1,13 +1,13 @@
 package org.apothicon.core;
 
 import org.apothicon.Main;
+import org.apothicon.core.elements.Element;
+import org.apothicon.core.elements.Mesh;
+import org.apothicon.core.elements.Models;
+import org.apothicon.core.grids.Grids;
 import org.apothicon.core.rendering.Camera;
 import org.apothicon.core.rendering.Renderer;
 import org.apothicon.core.utilities.Constants;
-import org.apothicon.core.elements.Element;
-import org.apothicon.core.elements.ElementLoader;
-import org.apothicon.core.elements.Model;
-import org.apothicon.core.elements.Texture;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -15,7 +15,6 @@ import org.lwjgl.opengl.GL40;
 
 public class Terraflat implements ILogic {
     private final Renderer renderer;
-    private final ElementLoader loader;
     private final WindowManager window;
 
     private Element sun;
@@ -28,7 +27,6 @@ public class Terraflat implements ILogic {
     public Terraflat() {
         renderer = new Renderer();
         window = Main.getWindow();
-        loader = new ElementLoader();
         camera = new Camera();
         cameraInc = new Vector3f(0, 0, 0);
     }
@@ -37,9 +35,8 @@ public class Terraflat implements ILogic {
     public void init() throws Exception {
         renderer.init();
 
-        Model model = loader.loadOBJModel("/models/blocks/cube.obj");
-        model.setTexture(new Texture(loader.loadTexture(getClass().getResource("/textures/blocks/sun.png").getPath().toString().substring(1))));
-        sun = new Element(model, new Vector3f(0, 0, -5), new Vector3f(0, 0, 0), 1);
+        //model.setTexture(new Texture(loader.loadTexture(getClass().getResource("/textures/blocks/sun.png").getPath().toString().substring(1))));
+        sun = new Element(Grids.SUN, new Vector3f(0, 0, 0), new Vector3f(45, 45, 45), new Mesh(Models.CUBE));
     }
 
     @Override
@@ -102,6 +99,5 @@ public class Terraflat implements ILogic {
     @Override
     public void cleanup() {
         renderer.cleanup();
-        loader.cleanup();
     }
 }

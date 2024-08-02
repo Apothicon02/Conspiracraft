@@ -1,7 +1,8 @@
 package org.apothicon.core.utilities;
 
-import org.apothicon.core.rendering.Camera;
 import org.apothicon.core.elements.Element;
+import org.apothicon.core.elements.Mesh;
+import org.apothicon.core.rendering.Camera;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -9,10 +10,10 @@ public class Transformation {
     public static Matrix4f createTransformationMatrix(Element element) {
         Matrix4f matrix = new Matrix4f();
         matrix.identity().translate(element.getPos()).
-                rotateX((float) Math.toRadians(element.getRotation().x)).
-                rotateY((float) Math.toRadians(element.getRotation().y)).
-                rotateZ((float) Math.toRadians(element.getRotation().z)).
-                scale(element.getScale());
+                rotateX((float) Math.toRadians(element.getRot().x)).
+                rotateY((float) Math.toRadians(element.getRot().y)).
+                rotateZ((float) Math.toRadians(element.getRot().z)).
+                scale(element.getGrid().getScale());
         return matrix;
     }
 

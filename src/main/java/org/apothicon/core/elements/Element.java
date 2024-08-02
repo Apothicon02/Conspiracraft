@@ -1,56 +1,91 @@
 package org.apothicon.core.elements;
 
+import org.apothicon.core.grids.Grid;
+import org.apothicon.core.grids.Grids;
 import org.joml.Vector3f;
 
 public class Element {
-    private Model model;
-    private Vector3f pos, rotation;
-    private float scale;
+    Grid grid;
+    Vector3f pos;
+    Vector3f rot;
+    Mesh mesh;
 
-    public Element(Model model, Vector3f pos, Vector3f rotation, float scale) {
-        this.model = model;
+    public Element() {
+        this.grid = Grids.TERRAIN;
+        this.pos =  new Vector3f(0, 0, 0);
+        this.rot =  new Vector3f(0, 0, 0);
+        this.mesh = new Mesh(Models.CUBE);
+    }
+
+    public Element(Vector3f pos) {
+        this.grid = Grids.TERRAIN;
         this.pos = pos;
-        this.rotation = rotation;
-        this.scale = scale;
+        this.rot = new Vector3f(0, 0, 0);
+        this.mesh = new Mesh(Models.CUBE);
     }
 
-    public void incrementPos(float x, float y, float z) {
-        this.pos.x += x;
-        this.pos.y += y;
-        this.pos.z +=z ;
+    public Element(Vector3f pos, Mesh mesh) {
+        this.grid = Grids.TERRAIN;
+        this.pos = pos;
+        this.rot = new Vector3f(0, 0, 0);
+        this.mesh = mesh;
     }
 
-    public void setPos(float x, float y, float z) {
-        this.pos.x = x;
-        this.pos.y = y;
-        this.pos.z =z ;
+    public Element(Vector3f pos, Vector3f rot) {
+        this.grid = Grids.TERRAIN;
+        this.pos = pos;
+        this.rot = rot;
+        this.mesh = new Mesh(Models.CUBE);
     }
 
-    public void incrementRot(float x, float y, float z) {
-        this.rotation.x += x;
-        this.rotation.y += y;
-        this.rotation.z +=z ;
+    public Element(Vector3f pos, Vector3f rot, Mesh mesh) {
+        this.grid = Grids.TERRAIN;
+        this.pos = pos;
+        this.rot = rot;
+        this.mesh = mesh;
     }
 
-    public void setRot(float x, float y, float z) {
-        this.rotation.x = x;
-        this.rotation.y = y;
-        this.rotation.z =z ;
+    public Element(Grid grid, Vector3f pos) {
+        this.grid = grid;
+        this.pos = pos;
+        this.rot = new Vector3f(0, 0, 0);
+        this.mesh = new Mesh(Models.CUBE);
     }
 
-    public Model getModel() {
-        return model;
+    public Element(Grid grid, Vector3f pos, Mesh mesh) {
+        this.grid = grid;
+        this.pos = pos;
+        this.rot = new Vector3f(0, 0, 0);
+        this.mesh = mesh;
+    }
+
+    public Element(Grid grid, Vector3f pos, Vector3f rot) {
+        this.grid = grid;
+        this.pos = pos;
+        this.rot = rot;
+        this.mesh = new Mesh(Models.CUBE);
+    }
+
+    public Element(Grid grid, Vector3f pos, Vector3f rot, Mesh mesh) {
+        this.grid = grid;
+        this.pos = pos;
+        this.rot = rot;
+        this.mesh = mesh;
     }
 
     public Vector3f getPos() {
         return pos;
     }
 
-    public Vector3f getRotation() {
-        return rotation;
+    public Vector3f getRot() {
+        return rot;
     }
-
-    public float getScale() {
-        return scale;
+    
+    public Grid getGrid() {
+        return grid;
+    }
+    
+    public Mesh getMesh() {
+        return mesh;
     }
 }
