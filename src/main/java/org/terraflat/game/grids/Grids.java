@@ -1,4 +1,4 @@
-package org.apothicon.core.grids;
+package org.terraflat.game.grids;
 
 import java.util.HashMap;
 import java.util.Map;

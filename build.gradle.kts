@@ -17,6 +17,8 @@ repositories {
 dependencies {
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
 
+    implementation("org.tinylog:tinylog-api-kotlin:2.7.0")
+    implementation("org.tinylog:tinylog-impl:2.7.0")
     implementation("org.lwjgl", "lwjgl")
     implementation("org.lwjgl", "lwjgl-assimp")
     implementation("org.lwjgl", "lwjgl-bgfx")

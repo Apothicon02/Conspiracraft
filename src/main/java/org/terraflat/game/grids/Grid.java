@@ -1,6 +1,7 @@
-package org.apothicon.core.grids;
+package org.terraflat.game.grids;
 
-import org.apothicon.core.elements.Element;
+import org.joml.Quaternionf;
+import org.terraflat.game.elements.Element;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -9,41 +10,41 @@ import java.util.Map;
 
 public class Grid {
     Vector3f pos;
-    Vector3f rot;
+    Quaternionf rot;
     float scale;
     Map<Vector3i, Element> elements = new HashMap<>();
 
     public Grid() {
         this.pos = new Vector3f(0, 0, 0);
-        this.rot = new Vector3f(0, 0, 0);
+        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
         this.scale = 1;
     }
 
     public Grid(Vector3f pos) {
         this.pos = pos;
-        this.rot = new Vector3f(0, 0, 0);
+        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
         this.scale = 1;
     }
 
     public Grid(float scale) {
         this.pos = new Vector3f(0, 0, 0);
-        this.rot = new Vector3f(0, 0, 0);
+        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
         this.scale = scale;
     }
 
     public Grid(Vector3f pos, float scale) {
         this.pos = pos;
-        this.rot = new Vector3f(0, 0, 0);
+        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
         this.scale = scale;
     }
 
-    public Grid(Vector3f pos, Vector3f rot) {
+    public Grid(Vector3f pos, Quaternionf rot) {
         this.pos = pos;
         this.rot = rot;
         this.scale = 1;
     }
 
-    public Grid(Vector3f pos, Vector3f rot, float scale) {
+    public Grid(Vector3f pos, Quaternionf rot, float scale) {
         this.pos = pos;
         this.rot = rot;
         this.scale = scale;
@@ -57,12 +58,16 @@ public class Grid {
         this.pos = pos;
     }
 
-    public Vector3f getRot() {
+    public Quaternionf getRot() {
         return rot;
     }
 
-    public void setRot(Vector3f rot) {
+    public void setRot(Quaternionf rot) {
         this.rot = rot;
+    }
+
+    public void setRotFromRad(float x, float y, float z, float angle) {
+        this.rot.fromAxisAngleRad(x, y, z, angle);
     }
 
     public float getScale() {

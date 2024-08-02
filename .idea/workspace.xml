@@ -5,11 +5,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Models.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grids.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Engine.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/ILogic.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/MouseInput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/WindowManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Element.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Model.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Models.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grids.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Camera.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Shaders.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Constants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Transformation.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Utils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/models/blocks/cube.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/shaders/fragment.fsh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/shaders/vertex.vsh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/textures/blocks/sun.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,19 +93,22 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.org.terraflat.game.Main">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="org.apothicon.Main" />
       <module name="Terraflat.main" />
@@ -90,6 +116,24 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="org.terraflat.game.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.terraflat.game.Main" />
+      <module name="Terraflat.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.terraflat.game.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.org.terraflat.game.Main" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -124,12 +168,21 @@
       <option name="project" value="LOCAL" />
       <updated>1722559772024</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
+      <option name="closed" value="true" />
+      <created>1722613150852</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1722613150852</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- Initial commit." />
     <MESSAGE value="- Update .gitignore." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Update .gitignore." />
+    <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
   </component>
 </project>
