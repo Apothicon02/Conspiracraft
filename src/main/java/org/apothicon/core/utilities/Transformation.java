@@ -9,7 +9,7 @@ import org.joml.Vector3f;
 public class Transformation {
     public static Matrix4f createTransformationMatrix(Element element) {
         Matrix4f matrix = new Matrix4f();
-        matrix.identity().translate(element.getPos()).
+        matrix.identity().translate(Utils.vec3iToVec3f(element.getPos())).
                 rotateX((float) Math.toRadians(element.getRot().x)).
                 rotateY((float) Math.toRadians(element.getRot().y)).
                 rotateZ((float) Math.toRadians(element.getRot().z)).

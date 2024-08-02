@@ -4,20 +4,20 @@ import org.apothicon.Main;
 import org.apothicon.core.elements.Element;
 import org.apothicon.core.elements.Mesh;
 import org.apothicon.core.elements.Models;
+import org.apothicon.core.grids.Grid;
 import org.apothicon.core.grids.Grids;
 import org.apothicon.core.rendering.Camera;
 import org.apothicon.core.rendering.Renderer;
 import org.apothicon.core.utilities.Constants;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL40;
 
 public class Terraflat implements ILogic {
     private final Renderer renderer;
     private final WindowManager window;
-
-    private Element sun;
     private Camera camera;
     Vector3f cameraInc;
     private boolean wireframeMode = false;
@@ -36,7 +36,7 @@ public class Terraflat implements ILogic {
         renderer.init();
 
         //model.setTexture(new Texture(loader.loadTexture(getClass().getResource("/textures/blocks/sun.png").getPath().toString().substring(1))));
-        sun = new Element(Grids.SUN, new Vector3f(0, 0, 0), new Vector3f(45, 45, 45), new Mesh(Models.CUBE));
+        Grids.createGrid("sun", new Grid(new Vector3f(0, 1, 0), new Vector3f(45, 45, 45), 1)).addElement(new Element()); //10000 1000)
     }
 
     @Override
@@ -93,7 +93,11 @@ public class Terraflat implements ILogic {
         }
 
         window.setClearColor(0, 0, 0, 0);
-        renderer.render(sun, camera);
+        Grids.getGrids().forEach((String name, Grid grid) -> {
+            grid.getElements().forEach((Vector3i pos, Element element) -> {
+                renderer.render(element, camera);
+            });
+        });
     }
 
     @Override

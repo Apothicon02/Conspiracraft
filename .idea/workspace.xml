@@ -4,22 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Initial commit.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Models.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grids.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Element.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/ElementLoader.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Model.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Texture.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Transformation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Transformation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/models/blocks/cube.obj" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/models/blocks/cube.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/shaders/vertex.vsh" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/shaders/vertex.vsh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +48,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Apothicon02&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Apothicon02/Terraflat.git&quot;,
+    &quot;accountId&quot;: &quot;2d456709-eacc-4081-a0f2-70e4677dc448&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 8
@@ -106,11 +108,28 @@
       <option name="project" value="LOCAL" />
       <updated>1722308629838</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="- Initial commit.">
+      <option name="closed" value="true" />
+      <created>1722559709809</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1722559709809</updated>
+    </task>
+    <task id="LOCAL-00003" summary="- Update .gitignore.">
+      <option name="closed" value="true" />
+      <created>1722559772024</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1722559772024</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- Initial commit." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Initial commit." />
+    <MESSAGE value="- Update .gitignore." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Update .gitignore." />
   </component>
 </project>

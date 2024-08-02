@@ -20,9 +20,9 @@ public class Mesh {
         FloatBuffer verticesBuffer = null;
         try {
             vertexCount = indices.length;
+            indiceVboId = glGenBuffers();
             indicesBuffer = MemoryUtil.memAllocInt(vertexCount);
             indicesBuffer.put(indices).flip();
-            indiceVboId = glGenBuffers();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiceVboId);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 

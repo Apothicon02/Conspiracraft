@@ -1,5 +1,7 @@
 package org.apothicon.core.utilities;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.BufferedReader;
@@ -14,6 +16,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Utils {
+    public static Vector3f vec3iToVec3f(Vector3i vec3i) {
+        return new Vector3f(vec3i.x, vec3i.y, vec3i.z);
+    }
+
     public static FloatBuffer storeDataInFloatBuffer(float[] data) {
         FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
         buffer.put(data).flip();
