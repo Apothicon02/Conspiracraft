@@ -4,35 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Models.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grids.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Rewrite.">
+      <change afterPath="$PROJECT_DIR$/resources/models/cube/dirt.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass_side.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass_top.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Engine.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/ILogic.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/MouseInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/Terraflat.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/WindowManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Element.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Mesh.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Model.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/elements/Models.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grid.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/grids/Grids.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Camera.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Renderer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/rendering/Shaders.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Constants.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Transformation.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apothicon/core/utilities/Utils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/models/blocks/cube.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/shaders/fragment.fsh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/shaders/vertex.vsh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/textures/blocks/sun.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,23 +62,34 @@
     &quot;accountId&quot;: &quot;2d456709-eacc-4081-a0f2-70e4677dc448&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4f.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4fc.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Quaternionf.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="2jvTeEmSvbd4S1Ezm22MYkd0vov" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true"
+    "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "it.czerwinski.intellij.wavefront.settings.WavefrontObjSettingsConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -176,13 +166,23 @@
       <option name="project" value="LOCAL" />
       <updated>1722613150852</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="- Rewrite.">
+      <option name="closed" value="true" />
+      <created>1722638056821</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1722638056821</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="- Initial commit." />
     <MESSAGE value="- Update .gitignore." />
     <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
+    <MESSAGE value="- Rewrite." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Rewrite." />
   </component>
 </project>

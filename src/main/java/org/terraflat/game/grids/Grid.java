@@ -1,93 +1,59 @@
 package org.terraflat.game.grids;
 
-import org.joml.Quaternionf;
+import org.joml.Matrix4f;
 import org.terraflat.game.elements.Element;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Grid {
-    Vector3f pos;
-    Quaternionf rot;
+    private Matrix4f matrix;
     float scale;
     Map<Vector3i, Element> elements = new HashMap<>();
 
     public Grid() {
-        this.pos = new Vector3f(0, 0, 0);
-        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
-        this.scale = 1;
+        matrix = new Matrix4f();
+        scale = 1;
+    }
+    public Grid(Matrix4f newMatrix) {
+        matrix = newMatrix;
+        scale = 1;
+    }
+    public Grid(float newScale) {
+        matrix = new Matrix4f();
+        scale = newScale;
+    }
+    public Grid(Matrix4f newMatrix, float newScale) {
+        matrix = newMatrix;
+        scale = newScale;
     }
 
-    public Grid(Vector3f pos) {
-        this.pos = pos;
-        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
-        this.scale = 1;
+    public void setMatrix(Matrix4f newMatrix) {
+        matrix = newMatrix;
     }
-
-    public Grid(float scale) {
-        this.pos = new Vector3f(0, 0, 0);
-        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
-        this.scale = scale;
+    public Matrix4f getMatrix() {
+        return matrix;
     }
-
-    public Grid(Vector3f pos, float scale) {
-        this.pos = pos;
-        this.rot = new Quaternionf(0f, 0f, 0f, 0f);
-        this.scale = scale;
-    }
-
-    public Grid(Vector3f pos, Quaternionf rot) {
-        this.pos = pos;
-        this.rot = rot;
-        this.scale = 1;
-    }
-
-    public Grid(Vector3f pos, Quaternionf rot, float scale) {
-        this.pos = pos;
-        this.rot = rot;
-        this.scale = scale;
-    }
-
-    public Vector3f getPos() {
-        return pos;
-    }
-
-    public void setPos(Vector3f pos) {
-        this.pos = pos;
-    }
-
-    public Quaternionf getRot() {
-        return rot;
-    }
-
-    public void setRot(Quaternionf rot) {
-        this.rot = rot;
-    }
-
-    public void setRotFromRad(float x, float y, float z, float angle) {
-        this.rot.fromAxisAngleRad(x, y, z, angle);
-    }
-
     public float getScale() {
         return scale;
     }
-
     public void setScale(float scale) {
         this.scale = scale;
     }
-
     public Element addElement(Element element) {
         element.setGrid(this);
-        this.elements.put(element.getPos(), element);
+        this.elements.put(new Vector3i(0, 0, 0), element);
         return element;
     }
-
+    public Element addElement(Element element, Vector3i pos) {
+        element.setGrid(this);
+        this.elements.put(pos, element);
+        return element;
+    }
     public Element getElement(Vector3i pos) {
         return elements.get(pos);
     }
-
     public Map<Vector3i, Element> getElements() {
         return elements;
     }
