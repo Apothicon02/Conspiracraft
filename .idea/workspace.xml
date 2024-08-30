@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Rewrite.">
-      <change afterPath="$PROJECT_DIR$/resources/models/cube/dirt.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass.mtl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass_side.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/models/cube/grass_top.png" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Thing.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/SceneRender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/SceneRender.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,20 +74,23 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "settings.editor.selected.configurable": "it.czerwinski.intellij.wavefront.settings.WavefrontObjSettingsConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;it.czerwinski.intellij.wavefront.settings.WavefrontObjSettingsConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
@@ -174,7 +172,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722638056821</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="- Thing.">
+      <option name="closed" value="true" />
+      <created>1724971018346</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1724971018346</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -183,6 +189,7 @@
     <MESSAGE value="- Update .gitignore." />
     <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
     <MESSAGE value="- Rewrite." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Rewrite." />
+    <MESSAGE value="- Thing." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Thing." />
   </component>
 </project>

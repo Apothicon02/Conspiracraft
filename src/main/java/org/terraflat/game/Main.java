@@ -35,8 +35,10 @@ public class Main implements IAppLogic {
     public void init(Window window, Scene scene, Render render) {
         Models.init(scene);
 
-        Grid sun = Grids.createGrid("sun", new Grid(new Matrix4f().translate(0, 420, 0), 32));
+        Grid sun = Grids.createGrid("sun", new Grid(new Matrix4f().translate(0, 600,  333), 32));
         sun.addElement(new Element());
+        Grid moon = Grids.createGrid("moon", new Grid(new Matrix4f().translate(0, 420, -333), 1));
+        moon.addElement(new Element());
         Grid terrain = Grids.createGrid("terrain", new Grid(new Matrix4f().translate(0, 0, 0), 1));
         FastNoiseLite noise = new FastNoiseLite();
         noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
@@ -47,7 +49,6 @@ public class Main implements IAppLogic {
                     double baseGradient = TerraflatMath.gradient(y, 128, 0, 2, -1);
                     if (baseCellularNoise+baseGradient > 0) {
                         terrain.addElement(new Element(), new Vector3i(x, y, z));
-                        y = -1;
                     }
                 }
             }
@@ -58,6 +59,12 @@ public class Main implements IAppLogic {
     public void input(Window window, Scene scene, long diffTimeMillis) {
         float move = diffTimeMillis * MOVEMENT_SPEED;
         Camera camera = scene.getCamera();
+        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+            move*=10;
+        }
+        if (window.isKeyPressed(GLFW_KEY_CAPS_LOCK)) {
+            move*=100;
+        }
         if (window.isKeyPressed(GLFW_KEY_W)) {
             camera.moveForward(move);
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
@@ -86,9 +93,9 @@ public class Main implements IAppLogic {
     public void update(Window window, Scene scene, long diffTimeMillis) {
         Grids.getGrids().forEach((String name, Grid grid) -> {
             Matrix4f gridMatrix = grid.getMatrix();
-            if (name.equals("sun")) {
+            if (name.equals("sun") || name.equals("moon")) {
                 gridMatrix.rotateXYZ(new Vector3f(0.001f, 0.002f, 0.005f));
-                gridMatrix.rotateLocalX(0.001f);
+                gridMatrix.rotateLocalY(0.001f);
                 grid.setMatrix(gridMatrix);
             }
             grid.getElements().forEach((Vector3i pos, Element element) -> {

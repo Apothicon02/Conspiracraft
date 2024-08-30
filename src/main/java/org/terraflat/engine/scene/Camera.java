@@ -41,7 +41,7 @@ public class Camera {
 
     public void moveDown(float inc) {
         viewMatrix.positiveY(up).mul(inc);
-        position.sub(up);
+        position.sub(new Vector3f(0, inc, 0));
         recalculate();
     }
 
@@ -65,7 +65,7 @@ public class Camera {
 
     public void moveUp(float inc) {
         viewMatrix.positiveY(up).mul(inc);
-        position.add(up);
+        position.add(new Vector3f(0, inc, 0));
         recalculate();
     }
 

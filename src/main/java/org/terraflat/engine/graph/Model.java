@@ -9,6 +9,12 @@ public class Model {
     private final String id;
     private Map<String, Entity> entitiesMap;
     private List<Material> materialList;
+    boolean cullNegX = true;
+    boolean cullPosX = true;
+    boolean cullNegY = true;
+    boolean cullPosY = true;
+    boolean cullNegZ = true;
+    boolean cullPosZ = true;
 
     public Model(String id, List<Material> materialList) {
         this.id = id;
