@@ -1,22 +1,20 @@
 package org.terraflat.game;
 
 import org.joml.*;
-import org.lwjgl.opengl.GL40;
 import org.terraflat.engine.*;
-import org.terraflat.engine.graph.*;
-import org.terraflat.engine.scene.*;
-import org.terraflat.game.elements.Element;
-import org.terraflat.game.elements.Models;
-import org.terraflat.game.grids.Grid;
-import org.terraflat.game.grids.Grids;
+import org.terraflat.game.space.Chunk;
+import org.terraflat.game.space.Voxel;
+import org.terraflat.game.blocks.Blocks;
+import org.terraflat.game.space.Grid;
+import org.terraflat.game.space.Grids;
 
-import java.awt.geom.AffineTransform;
 import java.lang.Math;
+import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Main implements IAppLogic {
-
+public class Main {
+    Camera camera = new Camera();
     private static final float MOUSE_SENSITIVITY = 0.1f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
@@ -26,19 +24,11 @@ public class Main implements IAppLogic {
         gameEng.start();
     }
 
-    @Override
-    public void cleanup() {
-        // Nothing to be done yet
-    }
-
-    @Override
-    public void init(Window window, Scene scene, Render render) {
-        Models.init(scene);
-
+    public void init(Window window) {
         Grid sun = Grids.createGrid("sun", new Grid(new Matrix4f().translate(0, 600,  333), 32));
-        sun.addElement(new Element());
+        sun.setVoxel(0, 0, 0, new Voxel(Blocks.SUN));
         Grid moon = Grids.createGrid("moon", new Grid(new Matrix4f().translate(0, 420, -333), 1));
-        moon.addElement(new Element());
+        moon.setVoxel(0, 0, 0, new Voxel(Blocks.GRASS));
         Grid terrain = Grids.createGrid("terrain", new Grid(new Matrix4f().translate(0, 0, 0), 1));
         FastNoiseLite noise = new FastNoiseLite();
         noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
@@ -48,7 +38,7 @@ public class Main implements IAppLogic {
                 for (int y = 128; y >= 0; y--) {
                     double baseGradient = TerraflatMath.gradient(y, 128, 0, 2, -1);
                     if (baseCellularNoise+baseGradient > 0) {
-                        terrain.addElement(new Element(), new Vector3i(x, y, z));
+                        terrain.setVoxel(x, y, z, new Voxel(Blocks.GRASS));
                         y = -1; //temporarily prevent terrain from being thick
                     }
                 }
@@ -56,10 +46,8 @@ public class Main implements IAppLogic {
         }
     }
 
-    @Override
-    public void input(Window window, Scene scene, long diffTimeMillis) {
+    public void input(Window window, long diffTimeMillis) {
         float move = diffTimeMillis * MOVEMENT_SPEED;
-        Camera camera = scene.getCamera();
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             move*=10;
         }
@@ -90,8 +78,7 @@ public class Main implements IAppLogic {
         }
     }
 
-    @Override
-    public void update(Window window, Scene scene, long diffTimeMillis) {
+    public void update(Window window, long diffTimeMillis) {
         Grids.getGrids().forEach((String name, Grid grid) -> {
             Matrix4f gridMatrix = grid.getMatrix();
             if (name.equals("sun") || name.equals("moon")) {
@@ -99,21 +86,23 @@ public class Main implements IAppLogic {
                 gridMatrix.rotateLocalY(0.001f);
                 grid.setMatrix(gridMatrix);
             }
-            grid.getElements().forEach((Vector3i pos, Element element) -> {
-                String entityId = name+pos.x+"/"+pos.y+"/"+pos.z;
-                Entity entity = scene.getModelMap().get(element.getModel()).getEntitiesMap().get(entityId);
-                boolean isNew = false;
-                if (entity == null) {
-                    isNew = true;
-                    entity = new Entity(entityId, element.getModel());
-                    entity.setScale(grid.getScale());
-                }
-
-                entity.setMatrix(new Matrix4f(gridMatrix).translate(pos.x*2, pos.y*2, pos.z*2).scale(entity.getScale()));
-
-                if (isNew) {
-                    scene.addEntity(entity);
-                }
+            grid.getChunks().forEach((Byte chunkX, Map<Byte, Map<Byte, Chunk>> chunkXMap) -> {
+                chunkXMap.forEach((Byte chunkY, Map<Byte, Chunk> chunkYMap) -> {
+                    chunkYMap.forEach((Byte chunkZ, Chunk chunk) -> {
+                        //create a mesh
+                        for (byte x = 0; x < 32; x++) {
+                            for (byte y = 0; y < 32; y++) {
+                                for (byte z = 0; z < 32; z++) {
+                                    Voxel voxel = chunk.getVoxel(x, y, z);
+                                    short[] voxelGridPos = Chunk.chunkPosToGridPos(chunkX, chunkY, chunkZ);
+                                    voxelGridPos = new short[] {(short) (voxelGridPos[0]+x), (short) (voxelGridPos[1]+y), (short) (voxelGridPos[2]+z)};
+                                    Matrix4f voxelMatrix = new Matrix4f(gridMatrix).translate(voxelGridPos[0]*2, voxelGridPos[1]*2, voxelGridPos[2]*2).scale(grid.getScale());
+                                    //add voxels' faces to the mesh, excluding ones that have another voxel next to them.
+                                }
+                            }
+                        }
+                    });
+                });
             });
         });
     }

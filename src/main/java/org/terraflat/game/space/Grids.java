@@ -1,4 +1,4 @@
-package org.terraflat.game.grids;
+package org.terraflat.game.space;
 
 import java.util.HashMap;
 import java.util.Map;

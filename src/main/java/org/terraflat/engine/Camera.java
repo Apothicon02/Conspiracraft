@@ -1,4 +1,4 @@
-package org.terraflat.engine.scene;
+package org.terraflat.engine;
 
 import org.joml.*;
 

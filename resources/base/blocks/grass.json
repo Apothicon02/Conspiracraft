@@ -1,0 +1,8 @@
+{
+  "default": {
+    "model": "base:cube",
+    "top": "base:textures/blocks/grass_top.png",
+    "sides": "base:textures/blocks/grass_side.png",
+    "bottom": "base:textures/blocks/dirt.png"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "default": {
+    "model": "base:cube",
+    "all": "base:textures/blocks/air.png"
+  }
+}

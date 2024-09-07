@@ -1,42 +1,34 @@
 package org.terraflat.engine;
 
-import org.terraflat.engine.graph.Render;
-import org.terraflat.engine.scene.Scene;
+import org.terraflat.game.Main;
 
 public class Engine {
 
     public static final int TARGET_UPS = 30;
-    private final IAppLogic appLogic;
+    private final Main main;
     private final Window window;
-    private Render render;
     private boolean running;
-    private Scene scene;
     private int targetFps;
     private int targetUps;
 
-    public Engine(String windowTitle, Window.WindowOptions opts, IAppLogic appLogic) {
+    public Engine(String windowTitle, Window.WindowOptions opts, Main main) {
         window = new Window(windowTitle, opts, () -> {
             resize();
             return null;
         });
         targetFps = opts.fps;
         targetUps = opts.ups;
-        this.appLogic = appLogic;
-        render = new Render();
-        scene = new Scene(window.getWidth(), window.getHeight());
-        appLogic.init(window, scene, render);
+        this.main = main;
+        main.init(window);
         running = true;
     }
 
     private void cleanup() {
-        appLogic.cleanup();
-        render.cleanup();
-        scene.cleanup();
         window.cleanup();
     }
 
     private void resize() {
-        scene.resize(window.getWidth(), window.getHeight());
+        //resize stuff
     }
 
     private void run() {
@@ -56,18 +48,18 @@ public class Engine {
 
             if (targetFps <= 0 || deltaFps >= 1) {
                 window.getMouseInput().input();
-                appLogic.input(window, scene, now - initialTime);
+                main.input(window,  now - initialTime);
             }
 
             if (deltaUpdate >= 1) {
                 long diffTimeMillis = now - updateTime;
-                appLogic.update(window, scene, diffTimeMillis);
+                main.update(window, diffTimeMillis);
                 updateTime = now;
                 deltaUpdate--;
             }
 
             if (targetFps <= 0 || deltaFps >= 1) {
-                render.render(window, scene);
+                //render stuff
                 deltaFps--;
                 window.update();
             }
