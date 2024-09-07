@@ -1,3 +1,3 @@
-# Hydrocosmical
+# Terraflat
 
-Worldgen mod for Cosmic Reach. 
+Terraflat
