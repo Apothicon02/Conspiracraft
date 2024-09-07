@@ -1,6 +1,10 @@
 package org.terraflat.engine.graph;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3i;
+import org.joml.Vector4f;
 import org.terraflat.engine.scene.*;
+import org.terraflat.game.grids.Grids;
 
 import java.util.*;
 
@@ -30,6 +34,7 @@ public class SceneRender {
         uniformsMap.createUniform("viewMatrix");
         uniformsMap.createUniform("txtSampler");
         uniformsMap.createUniform("material.diffuse");
+        uniformsMap.createUniform("sunMatrix");
     }
 
     public void render(Scene scene) {
@@ -39,6 +44,7 @@ public class SceneRender {
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 
         uniformsMap.setUniform("txtSampler", 0);
+        uniformsMap.setUniform("sunMatrix", new Matrix4f(Grids.getGrid("sun").getMatrix()));
 
         Collection<Model> models = scene.getModelMap().values();
         TextureCache textureCache = scene.getTextureCache();

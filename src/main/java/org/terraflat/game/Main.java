@@ -49,6 +49,7 @@ public class Main implements IAppLogic {
                     double baseGradient = TerraflatMath.gradient(y, 128, 0, 2, -1);
                     if (baseCellularNoise+baseGradient > 0) {
                         terrain.addElement(new Element(), new Vector3i(x, y, z));
+                        y = -1; //temporarily prevent terrain from being thick
                     }
                 }
             }
