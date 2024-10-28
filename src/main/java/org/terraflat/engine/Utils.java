@@ -1,21 +1,16 @@
 package org.terraflat.engine;
 
-import java.io.IOException;
-import java.nio.file.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.List;
 
 public class Utils {
-
-    private Utils() {
-        // Utility class
-    }
-
     public static String readFile(String filePath) {
-        String str;
-        try {
-            str = new String(Files.readAllBytes(Paths.get(filePath)));
-        } catch (IOException excp) {
-            throw new RuntimeException("Error reading file [" + filePath + "]", excp);
+        List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
+        StringBuilder data = new StringBuilder();
+        for (String s : file) {
+            data.append(s).append("\n");
         }
-        return str;
+        return data.toString();
     }
 }

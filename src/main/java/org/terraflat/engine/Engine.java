@@ -1,6 +1,9 @@
 package org.terraflat.engine;
 
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLCapabilities;
 import org.terraflat.game.Main;
+import org.terraflat.game.Renderer;
 
 public class Engine {
 
@@ -11,7 +14,7 @@ public class Engine {
     private int targetFps;
     private int targetUps;
 
-    public Engine(String windowTitle, Window.WindowOptions opts, Main main) {
+    public Engine(String windowTitle, Window.WindowOptions opts, Main main) throws Exception {
         window = new Window(windowTitle, opts, () -> {
             resize();
             return null;
@@ -59,7 +62,7 @@ public class Engine {
             }
 
             if (targetFps <= 0 || deltaFps >= 1) {
-                //render stuff
+                Renderer.render(window);
                 deltaFps--;
                 window.update();
             }

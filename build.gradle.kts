@@ -2,6 +2,12 @@ plugins {
     id("java")
 }
 
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "org.terraflat.game.Main"
+    }
+}
+
 group = "org.apothicon"
 version = "0.1-SNAPSHOT"
 
@@ -108,4 +114,21 @@ dependencies {
     runtimeOnly("org.lwjgl", "lwjgl-zstd", classifier = lwjglNatives)
     implementation("org.joml", "joml", jomlVersion)
     implementation("org.joml", "joml-primitives", `joml-primitivesVersion`)
+}
+
+tasks {
+    val fatJar = register<Jar>("fatJar") {
+        dependsOn.addAll(listOf("compileJava", "processResources")) // We need this for Gradle optimization to work
+        archiveClassifier.set("standalone") // Naming the jar
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        manifest { attributes(mapOf("Main-Class" to "org.terraflat.game.Main")) } // Provided we set it up in the application plugin configuration
+        val sourcesMain = sourceSets.main.get()
+        val contents = configurations.runtimeClasspath.get()
+            .map { if (it.isDirectory) it else zipTree(it) } +
+                sourcesMain.output
+        from(contents)
+    }
+    build {
+        dependsOn(fatJar) // Trigger fat jar creation during build
+    }
 }

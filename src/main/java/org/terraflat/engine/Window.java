@@ -1,6 +1,7 @@
 package org.terraflat.engine;
 
 import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 import org.tinylog.Logger;
 

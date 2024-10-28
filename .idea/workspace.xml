@@ -1,48 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="Terraflat:jar" />
+    </artifacts-to-build>
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added sunlight.">
-      <change afterPath="$PROJECT_DIR$/resources/base/blocks/air.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/base/blocks/grass.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/base/blocks/sun.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/base/textures/blocks/air.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/base/textures/blocks/sun.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Camera.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/blocks/Block.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/blocks/Blocks.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Chunk.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Voxel.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/renderdoc/renderdoc.cap" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/ShaderProgram.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/cube/cube.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/cube/dirt.png" beforeDir="false" afterPath="$PROJECT_DIR$/resources/base/textures/blocks/dirt.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/cube/grass.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/cube/grass_side.png" beforeDir="false" afterPath="$PROJECT_DIR$/resources/base/textures/blocks/grass_side.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/cube/grass_top.png" beforeDir="false" afterPath="$PROJECT_DIR$/resources/base/textures/blocks/grass_top.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/models/default/default_texture.png" beforeDir="false" afterPath="$PROJECT_DIR$/resources/base/textures/misc/default_texture.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid4792.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/blocks/air.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/air.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/blocks/grass.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/grass.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/blocks/sun.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/sun.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/air.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/air.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/dirt.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/dirt.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/grass_side.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/grass_side.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/grass_top.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/grass_top.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/sun.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/sun.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/base/textures/misc/default_texture.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/misc/default_texture.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/shaders/scene.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/shaders/scene.vert" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/IAppLogic.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/Material.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/Mesh.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/Model.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/Render.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/SceneRender.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/ShaderProgram.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/Texture.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/TextureCache.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/graph/UniformsMap.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/scene/Camera.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/scene/Entity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/scene/ModelLoader.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/scene/Projection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/scene/Scene.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Element.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/elements/Models.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grid.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Grid.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/grids/Grids.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Grids.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,12 +48,26 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="Terraflat" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Terraflat" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Terraflat" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -116,12 +121,17 @@
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "settings.editor.selected.configurable": "it.czerwinski.intellij.wavefront.settings.WavefrontObjSettingsConfigurable"
+    "project.structure.last.edited": "Problems",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -133,26 +143,19 @@
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\resources\assets" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\resources" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\resources" />
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\textures\misc" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\textures\blocks" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\models\misc" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.org.terraflat.game.Main">
-    <configuration name="Main" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="org.apothicon.Main" />
-      <module name="Terraflat.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="org.terraflat.game.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Gradle.Terraflat [build]">
+    <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="org.terraflat.game.Main" />
       <module name="Terraflat.main" />
       <extension name="coverage">
@@ -165,9 +168,36 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Terraflat [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Application.Run" />
+      <item itemvalue="Gradle.Terraflat [build]" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.org.terraflat.game.Main" />
+        <item itemvalue="Gradle.Terraflat [build]" />
+        <item itemvalue="Application.Run" />
       </list>
     </recent_temporary>
   </component>
@@ -244,7 +274,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725723181471</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="- Rewrite.">
+      <option name="closed" value="true" />
+      <created>1725742948486</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1725742948486</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -263,9 +301,9 @@
     <MESSAGE value="- Initial commit." />
     <MESSAGE value="- Update .gitignore." />
     <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
-    <MESSAGE value="- Rewrite." />
     <MESSAGE value="- Thing." />
     <MESSAGE value="- Added sunlight." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added sunlight." />
+    <MESSAGE value="- Rewrite." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Rewrite." />
   </component>
 </project>
