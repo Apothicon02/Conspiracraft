@@ -6,13 +6,11 @@ layout(std430, binding = 0) buffer subChunkBuffer
 };
 in vec4 pos;
 
+uniform sampler2D tex;
+
 out vec4 fragColor;
 
 void main()
 {
-    if (subChunkBufferData[0] == 0) {
-        fragColor = vec4(255, 0, 0, 1);
-    } else {
-        fragColor = vec4(0, 255, 0, 1);
-    }
+    fragColor = texture(tex, vec2(0, 0));
 }
