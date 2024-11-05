@@ -20,8 +20,6 @@ public class Renderer {
     public static int sceneVaoId;
     public static int subChunkSSBOId;
     public static IntBuffer voxelRegionBuffer;
-    public static ByteBuffer atlasBuffer;
-    public static int atlasId;
 
     public void init() throws Exception {
         GL.createCapabilities();
@@ -47,8 +45,12 @@ public class Renderer {
         voxelRegionBuffer = BufferUtils.createIntBuffer(3);
         voxelRegionBuffer.put(new int[]{0, 0, 2}).flip();
 
-        atlasBuffer = Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png")));
-        atlasId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, glGenTextures());
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32000, 16000, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
 
         glBindVertexArray(0);
     }
@@ -66,13 +68,6 @@ public class Renderer {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, subChunkSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glBindTexture(GL_TEXTURE_2D, atlasId);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32000, 16000, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasBuffer);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
