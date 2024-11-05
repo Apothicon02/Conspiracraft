@@ -2,31 +2,27 @@ package org.terraflat.game;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
 import org.terraflat.engine.ShaderProgram;
 import org.terraflat.engine.Utils;
 import org.terraflat.engine.Window;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL40.*;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL43.*;
 
 
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
+    public static int subChunkSSBOId;
+    public static IntBuffer subChunkBuffer;
 
     public void init() throws Exception {
         GL.createCapabilities();
+        GLUtil.setupDebugMessageCallback();
 
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
@@ -45,13 +41,9 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int subChunkVboId = glGenBuffers();
-        IntBuffer subChunkBuffer = BufferUtils.createIntBuffer(3);
+        subChunkSSBOId = glGenBuffers();
+        subChunkBuffer = BufferUtils.createIntBuffer(3);
         subChunkBuffer.put(new int[]{155, 0, 30}).flip();
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, subChunkVboId);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, subChunkBuffer, GL_STATIC_DRAW);
-        glBindBufferBase(subChunkVboId, 0, GL_SHADER_STORAGE_BUFFER);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindVertexArray(0);
     }
@@ -64,6 +56,11 @@ public class Renderer {
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, subChunkSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, subChunkSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, subChunkBuffer, GL_STATIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

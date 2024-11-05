@@ -1,7 +1,5 @@
 package org.terraflat.engine;
 
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
 import org.terraflat.game.Main;
 import org.terraflat.game.Renderer;
 

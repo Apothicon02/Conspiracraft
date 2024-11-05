@@ -1,6 +1,7 @@
 package org.terraflat.game;
 
 import org.joml.*;
+import org.lwjgl.system.Configuration;
 import org.terraflat.engine.*;
 import org.terraflat.game.space.Voxel;
 import org.terraflat.game.blocks.Blocks;

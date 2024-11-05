@@ -9,31 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/renderdoc/renderdoc.cap" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/ShaderProgram.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.vert" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Now works with renderdoc.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid4792.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/blocks/air.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/air.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/blocks/grass.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/grass.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/blocks/sun.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/sun.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/air.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/air.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/dirt.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/dirt.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/grass_side.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/grass_side.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/grass_top.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/grass_top.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/blocks/sun.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/blocks/sun.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/base/textures/misc/default_texture.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/misc/default_texture.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/shaders/scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/shaders/scene.vert" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/renderdoc/renderdoc.cap" beforeDir="false" afterPath="$PROJECT_DIR$/renderdoc/renderdoc.cap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,6 +65,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="098c19c74fc0d85e45aacb15c9a40c7b7b1716ad" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -154,7 +140,7 @@
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.Terraflat [build]">
+  <component name="RunManager" selected="Application.Run">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="org.terraflat.game.Main" />
       <module name="Terraflat.main" />
@@ -196,6 +182,8 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.Terraflat [build]" />
+        <item itemvalue="Application.Run" />
         <item itemvalue="Gradle.Terraflat [build]" />
         <item itemvalue="Application.Run" />
       </list>
@@ -282,7 +270,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725742948486</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="- Now works with renderdoc.">
+      <option name="closed" value="true" />
+      <created>1730076809766</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1730076809766</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -304,6 +300,7 @@
     <MESSAGE value="- Thing." />
     <MESSAGE value="- Added sunlight." />
     <MESSAGE value="- Rewrite." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Rewrite." />
+    <MESSAGE value="- Now works with renderdoc." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Now works with renderdoc." />
   </component>
 </project>
