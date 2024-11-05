@@ -20,8 +20,7 @@ public class Utils {
 
     public static ByteBuffer imageToBuffer(BufferedImage image) {
         int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-        int l = pixels.length * 4;
-        ByteBuffer buffer = BufferUtils.createByteBuffer(l);
+        ByteBuffer buffer = BufferUtils.createByteBuffer(pixels.length * 4);
         for (int pixel : pixels) {
             buffer.put((byte) ((pixel >> 16) & 0xFF));
             buffer.put((byte) ((pixel >> 8) & 0xFF));

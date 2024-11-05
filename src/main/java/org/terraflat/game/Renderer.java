@@ -8,8 +8,6 @@ import org.terraflat.engine.Utils;
 import org.terraflat.engine.Window;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -21,7 +19,7 @@ public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
     public static int subChunkSSBOId;
-    public static IntBuffer subChunkBuffer;
+    public static IntBuffer voxelRegionBuffer;
     public static ByteBuffer atlasBuffer;
     public static int atlasId;
 
@@ -46,8 +44,8 @@ public class Renderer {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         subChunkSSBOId = glGenBuffers();
-        subChunkBuffer = BufferUtils.createIntBuffer(3);
-        subChunkBuffer.put(new int[]{155, 0, 30}).flip();
+        voxelRegionBuffer = BufferUtils.createIntBuffer(3);
+        voxelRegionBuffer.put(new int[]{0, 0, 2}).flip();
 
         atlasBuffer = Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png")));
         atlasId = glGenTextures();
@@ -66,12 +64,14 @@ public class Renderer {
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, subChunkSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, subChunkSSBOId);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, subChunkBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindTexture(GL_TEXTURE_2D, atlasId);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32000, 16000, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasBuffer);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
