@@ -1,5 +1,6 @@
 package org.terraflat.game;
 
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -9,19 +10,23 @@ import org.terraflat.engine.Window;
 
 import javax.imageio.ImageIO;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 
-
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
-    public static int subChunkSSBOId;
-    public static IntBuffer voxelRegionBuffer;
+    public static int regionVoxelsSSBOId;
+    public static FloatBuffer voxelRegionBuffer;
+    public static int resUniform;
+    public static int camPosUniform;
 
     public void init() throws Exception {
+        float i = 0003.0000f;
+
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
         sceneVaoId = glGenVertexArrays();
@@ -41,9 +46,11 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        subChunkSSBOId = glGenBuffers();
-        voxelRegionBuffer = BufferUtils.createIntBuffer(3);
-        voxelRegionBuffer.put(new int[]{0, 0, 2}).flip();
+        regionVoxelsSSBOId = glGenBuffers();
+        voxelRegionBuffer = BufferUtils.createFloatBuffer(12);
+        voxelRegionBuffer.put(new float[]{0, 0, 0, 0000.0000f,
+                0, -1, 0, 0001.0000f,
+                0, -1, 1, 0001.0000f}).flip();
 
         glBindTexture(GL_TEXTURE_2D, glGenTextures());
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -52,20 +59,26 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32000, 16000, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
 
+        resUniform = glGetUniformLocation(scene.programId, "res");
+        camPosUniform = glGetUniformLocation(scene.programId, "camPos");
+
         glBindVertexArray(0);
     }
 
     public static void render(Window window) {
-        ShaderProgram scene = Renderer.scene;
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         scene.bind();
 
+        glUniform2f(resUniform, window.getWidth(), window.getHeight());
+        Matrix4f camMatrix = Main.camera.getViewMatrix();
+        glUniform3f(camPosUniform, camMatrix.m30(), camMatrix.m31(), camMatrix.m32());
+
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, subChunkSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, subChunkSSBOId);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

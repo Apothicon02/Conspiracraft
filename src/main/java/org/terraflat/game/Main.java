@@ -1,7 +1,6 @@
 package org.terraflat.game;
 
 import org.joml.*;
-import org.lwjgl.system.Configuration;
 import org.terraflat.engine.*;
 import org.terraflat.game.space.Voxel;
 import org.terraflat.game.blocks.Blocks;
@@ -12,7 +11,7 @@ import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    Camera camera = new Camera();
+    public static Camera camera = new Camera();
     public static final Renderer renderer = new Renderer();
     private static final float MOUSE_SENSITIVITY = 0.1f;
     private static final float MOVEMENT_SPEED = 0.005f;
