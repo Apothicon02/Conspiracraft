@@ -6,21 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Blocks {
-    public static Map<Short, Block> allBlocks = new HashMap<>(Map.of());
+    public static Map<Integer, Block> allBlocks = new HashMap<>(Map.of());
 
-    private static short nextAvailableID = -32768; //Minimum short value.
-    public static short AIR = createBlock(getID(), new Block());
-    public static short SUN = createBlock(getID(), new Block());
-    public static short GRASS = createBlock(getID(), new Block());
+    public static float AIR = createBlock(allBlocks.size(), new Block());
+    public static float SUN = createBlock(allBlocks.size(), new Block());
+    public static float GRASS = createBlock(allBlocks.size(), new Block());
 
-    private static short createBlock(short id, Block block) {
+    private static float createBlock(int id, Block block) {
         block.setDefaultVoxel(new Voxel(id));
         allBlocks.put(id, block);
         return id;
-    }
-
-    private static short getID() {
-        nextAvailableID++;
-        return nextAvailableID;
     }
 }

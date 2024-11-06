@@ -1,16 +1,16 @@
 package org.terraflat.game.space;
 
 public class Voxel {
-    private short blockID;
+    private float blockID;
 
-    public Voxel(short blockID) {
+    public Voxel(float blockID) {
         this.blockID = blockID;
     }
 
-    public void setBlockID(short blockID) {
+    public void setBlockID(float blockID) {
         this.blockID = blockID;
     }
-    public short getBlockID() {
+    public float getBlockID() {
         return blockID;
     }
     public static byte[] gridToVoxelPos(short x, short y, short z) {

@@ -24,12 +24,15 @@ void main()
         float traveled = 0;
         for (int i = 0; i < 1000; i++) {
             vec3 rayPos = camPos + (dir * traveled);
-            for (int v = 0; v <= regionVoxelsData.length(); v += 4) {
-                if (int(rayPos.x) == regionVoxelsData[v] && int(rayPos.y) == regionVoxelsData[v+1] && int(rayPos.z) == regionVoxelsData[v+2]) {
+            for (int v = 0; v < regionVoxelsData.length(); v += 4) {
+                float x = rayPos.x-regionVoxelsData[v];
+                float y = rayPos.y-regionVoxelsData[v+1];
+                float z = rayPos.z-regionVoxelsData[v+2];
+                if (int(x) == 0 && x >= 0 && int(y) == 0 && y >= 0 && int(z) == 0 && z >= 0) {
                     float voxelInfo = regionVoxelsData[v+3];
                     int voxelType = int(voxelInfo);
-                    int voxelSubtype = int(voxelInfo-voxelType)*10000;
-                    vec4 voxelColor = texture(atlas, vec2(((voxelType*8)+1)/32000f, ((voxelSubtype*64)+1)/16000f)); //offset based on ray decimal
+                    int voxelSubtype = int((voxelInfo-voxelType)*10000);
+                    vec4 voxelColor = texture(atlas, vec2(((x+voxelType)/1248f), ((int((y-1)*-8)+z+(voxelSubtype*8))/1248f)));
                     color = vec3(voxelColor);
                     alpha += voxelColor.a;
                     if (alpha >= 1) {
@@ -39,7 +42,7 @@ void main()
                 }
             }
 
-            traveled += 0.1;
+            traveled += 0.02;
         }
 
         fragColor = vec4(color, 1);
