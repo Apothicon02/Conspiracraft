@@ -19,10 +19,10 @@ void main()
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
         vec3 dir = normalize(vec3(uv, 1));
-        vec3 color = vec3(0, 0, 0);
+        vec4 color = vec4(0, 0, 0, 0);
         float alpha = 0;
         float traveled = 0;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 500; i++) {
             vec3 rayPos = camPos + (dir * traveled);
             for (int v = 0; v < regionVoxelsData.length(); v += 4) {
                 float x = rayPos.x-regionVoxelsData[v];
@@ -33,19 +33,18 @@ void main()
                     int voxelType = int(voxelInfo);
                     int voxelSubtype = int((voxelInfo-voxelType)*10000);
                     vec4 voxelColor = texture(atlas, vec2(((x+voxelType)/1248f), ((int((y-1)*-8)+z+(voxelSubtype*8))/1248f)));
-                    color = vec3(voxelColor);
-                    alpha += voxelColor.a;
-                    if (alpha >= 1) {
+                    color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
+                    if (voxelColor.a >= 1) {
                         i = 1000;
                         break;
                     }
                 }
             }
 
-            traveled += 0.02;
+            traveled += 0.025;
         }
 
-        fragColor = vec4(color, 1);
+        fragColor = color;
         //fragColor = texture(atlas, vec2(0, 48f/16000f));
     }
 }

@@ -57,7 +57,7 @@ public class Renderer {
                             terrain.add((float) x);
                             terrain.add((float) y);
                             terrain.add((float) z);
-                            terrain.add(0000.0000f);
+                            terrain.add(0000.2000f);
                             upmost = false;
                         }
                     }
@@ -70,31 +70,32 @@ public class Renderer {
         }
         voxelRegionBuffer = BufferUtils.createFloatBuffer(voxels.length);
         voxelRegionBuffer.put(new float[]{
-                0f, 2f, 0f, 0003.0000f,
+                0f, 2f, 0f, 0005.0000f,
 
-                0f, 2f, 1f, 0002.0000f,
-                1f, 1f, 0f, 0002.0000f,
-                1f, 1f, 1f, 0002.0000f,
-                0f, 2f, 2f, 0002.0000f,
-                2f, 1f, 0f, 0002.0000f,
-                2f, 1f, 1f, 0002.0000f,
-                1f, 2f, 2f, 0002.0000f,
-                2f, 1f, 2f, 0002.0000f,
+                0f, 2f, 1f, 0004.0000f,
+                1f, 1f, 0f, 0004.0000f,
+                1f, 1f, 1f, 0004.0000f,
+                0f, 2f, 2f, 0004.0000f,
+                2f, 1f, 1f, 0004.0000f,
+                1f, 2f, 2f, 0004.0000f,
+                2f, 1f, 2f, 0004.0000f,
 
-                0f, 1f, 0f, 0000.0000f,
-                0f, 1f, 1f, 0000.0000f,
-                1f, 0f, 0f, 0000.0000f,
-                1f, 0f, 1f, 0000.0000f,
-                0f, 1f, 2f, 0000.0000f,
-                2f, 0f, 0f, 0000.0000f,
-                2f, 0f, 1f, 0000.0000f,
-                1f, 1f, 2f, 0000.0000f,
-                2f, 0f, 2f, 0000.0000f,
+                0f, 0f, 0f, 0003.0000f,
+                0f, 0f, 1f, 0003.0000f,
+                0f, 0f, 2f, 0003.0000f,
+                1f, 0f, 2f, 0003.0000f,
 
-                0f, 0f, 0f, 0001.0000f,
-                0f, 0f, 1f, 0001.0000f,
-                0f, 0f, 2f, 0001.0000f,
-                1f, 0f, 2f, 0001.0000f
+                0f, 1f, 0f, 0002.0000f,
+                0f, 1f, 1f, 0002.0000f,
+                1f, 0f, 0f, 0002.0000f,
+                1f, 0f, 1f, 0002.0000f,
+                0f, 1f, 2f, 0002.0000f,
+                2f, 0f, 1f, 0002.0000f,
+                1f, 1f, 2f, 0002.0000f,
+                2f, 0f, 2f, 0002.0000f,
+
+                2f, 0f, 0f, 0001.0000f,
+                3f, 0f, 0f, 0001.0001f
         }).flip();
         regionVoxelsSSBOId = glGenBuffers();
 
