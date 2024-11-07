@@ -49,18 +49,18 @@ public class Renderer {
         List<Float> terrain = new ArrayList<>();
         FastNoiseLite noise = new FastNoiseLite();
         noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-        for (int x = 1; x <= 7; x++) {
-            for (int z = 1; z <= 7; z++) {
-                if (x == 1 || x == 7 || z == 1 || z == 7) {
+        for (int x = 1; x <= 15; x++) {
+            for (int z = 1; z <= 15; z++) {
+                if (x == 1 || x == 15 || z == 1 || z == 15) {
                     terrain.add((float) x);
-                    terrain.add((float) 0);
+                    terrain.add((float) 1);
                     terrain.add((float) z);
                     terrain.add(0001.0000f);
                 } else {
-                    float baseCellularNoise = noise.GetNoise(x, z);
+                    float baseCellularNoise = noise.GetNoise(x*10, z*10);
                     boolean upmost = true;
-                    for (int y = 5; y >= 0; y--) {
-                        double baseGradient = TerraflatMath.gradient(y, 5, 0, 2, -1);
+                    for (int y = 6; y >= 1; y--) {
+                        double baseGradient = TerraflatMath.gradient(y, 6, 1, 2, -1);
                         if (baseCellularNoise + baseGradient > 0) {
                             if (upmost) {
                                 terrain.add((float) x);
