@@ -75,6 +75,12 @@ public class Main {
             camera.addRotation((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                     (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
         }
+
+        if (window.isKeyPressed(GLFW_KEY_F3)) {
+            if (window.isKeyPressed(GLFW_KEY_T)) {
+                Renderer.atlasChanged = true;
+            }
+        }
     }
 
     public void update(Window window, long diffTimeMillis) {

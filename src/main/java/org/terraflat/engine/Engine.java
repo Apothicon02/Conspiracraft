@@ -3,6 +3,8 @@ package org.terraflat.engine;
 import org.terraflat.game.Main;
 import org.terraflat.game.Renderer;
 
+import java.io.IOException;
+
 public class Engine {
 
     public static final int TARGET_UPS = 30;
@@ -32,7 +34,7 @@ public class Engine {
         //resize stuff
     }
 
-    private void run() {
+    private void run() throws IOException {
         long initialTime = System.currentTimeMillis();
         float timeU = 1000.0f / targetUps;
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
@@ -70,7 +72,7 @@ public class Engine {
         cleanup();
     }
 
-    public void start() {
+    public void start() throws IOException {
         running = true;
         run();
     }

@@ -1,7 +1,7 @@
 #version 460
 
 uniform vec2 res;
-uniform vec3 camPos;
+uniform mat4 cam;
 layout(binding = 0) uniform sampler2D atlas;
 layout(std430, binding = 0) buffer regionVoxels
 {
@@ -18,12 +18,12 @@ void main()
     if (uv.x >= -0.004 && uv.x <= 0.004 && uv.y >= -0.004385 && uv.y <= 0.004385) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
+        vec3 camPos = vec3(cam[3]);
         vec3 dir = normalize(vec3(uv, 1));
         vec4 color = vec4(0, 0, 0, 0);
-        float alpha = 0;
-        float traveled = 0;
-        for (int i = 0; i < 500; i++) {
-            vec3 rayPos = camPos + (dir * traveled);
+        vec3 prevVoxelPos = vec3(-100000, -100000, -100000);
+        for (float traveled = 0f; traveled <= 15;) {
+            vec3 rayPos = vec3(cam * vec4((dir * traveled)+camPos, 1));
             for (int v = 0; v < regionVoxelsData.length(); v += 4) {
                 float x = rayPos.x-regionVoxelsData[v];
                 float y = rayPos.y-regionVoxelsData[v+1];
@@ -35,16 +35,23 @@ void main()
                     vec4 voxelColor = texture(atlas, vec2(((x+voxelType)/1248f), ((int((y-1)*-8)+z+(voxelSubtype*8))/1248f)));
                     color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
                     if (voxelColor.a >= 1) {
-                        i = 1000;
+                        traveled = 100000;
                         break;
                     }
                 }
             }
-
-            traveled += 0.025;
+            //march forward until entering another coordinate.
+            int coordinateScale = 8;
+            prevVoxelPos = vec3(int(rayPos.x*coordinateScale), int(rayPos.y*coordinateScale), int(rayPos.z*coordinateScale));
+            for (float march = 0.05f; march <= 15; march += 0.05f) {
+                traveled += march;
+                rayPos = vec3(cam * vec4((dir * traveled)+camPos, 1));
+                if (prevVoxelPos != vec3(int(rayPos.x*coordinateScale), int(rayPos.y*coordinateScale), int(rayPos.z*coordinateScale))) {
+                    break;
+                }
+            }
         }
 
         fragColor = color;
-        //fragColor = texture(atlas, vec2(0, 48f/16000f));
     }
 }
