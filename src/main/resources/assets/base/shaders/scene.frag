@@ -22,7 +22,7 @@ void main()
         vec3 dir = normalize(vec3(uv, 1));
         vec4 color = vec4(0, 0, 0, 0);
         vec3 prevVoxelPos = vec3(-100000, -100000, -100000);
-        for (float traveled = 0f; traveled < 20;) {
+        for (float traveled = 0f; traveled < 125;) {
             int coordinateScale = 1;
             vec3 rayPos = vec3(cam * vec4((dir * traveled)+camPos, 1));
             if (rayPos.y < 1) {
@@ -32,30 +32,16 @@ void main()
                 int gridX = int(rayPos.x);
                 int gridY = int(rayPos.y);
                 int gridZ = int(rayPos.z);
-                float voxelInfo = regionVoxelsData[gridX + gridY * 64 + gridZ * 64*64];
-                if (voxelInfo != 0f) {
-                    int voxelType = int(voxelInfo);
-                    int voxelSubtype = int((voxelInfo-voxelType)*1000);
-                    vec4 voxelColor = texture(atlas, vec2((((rayPos.x-gridX)+voxelType)/1248f), ((int(((rayPos.y-gridY)-1)*-8)+(rayPos.z-gridZ)+(voxelSubtype*8))/1248f)));
-                    color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
+                if (gridX > 0 && gridX <= 128 && gridY > 0 && gridY < 16 && gridZ > 0 && gridZ <= 128) {
+                    float voxelInfo = regionVoxelsData[gridX + gridY * 128 + gridZ * 128*128];
+                    if (voxelInfo != 0f) {
+                        coordinateScale = 8;
+                        int voxelType = int(voxelInfo);
+                        int voxelSubtype = int((voxelInfo-voxelType)*1000);
+                        vec4 voxelColor = texture(atlas, vec2((((rayPos.x-gridX)+voxelType)/1248f), ((int(((rayPos.y-gridY)-1)*-8)+(rayPos.z-gridZ)+(voxelSubtype*8))/1248f)));
+                        color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
+                    }
                 }
-//                for (int v = 0; v < regionVoxelsData.length(); v += 4) {
-//                    float x = rayPos.x-regionVoxelsData[v];
-//                    float y = rayPos.y-regionVoxelsData[v+1];
-//                    float z = rayPos.z-regionVoxelsData[v+2];
-//                    if (int(x) == 0 && x >= 0 && int(y) == 0 && y >= 0 && int(z) == 0 && z >= 0) {
-//                        coordinateScale = 8;
-//                        float voxelInfo = regionVoxelsData[v+3];
-//                        int voxelType = int(voxelInfo);
-//                        int voxelSubtype = int((voxelInfo-voxelType)*1000);
-//                        vec4 voxelColor = texture(atlas, vec2(((x+voxelType)/1248f), ((int((y-1)*-8)+z+(voxelSubtype*8))/1248f)));
-//                        color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
-//                        if (voxelColor.a >= 1) {
-//                            traveled = 100000;
-//                            break;
-//                        }
-//                    }
-//                }
                 if (color.a >= 1) {
                     break;
                 } else { //march forward until entering another scaled coordinate.

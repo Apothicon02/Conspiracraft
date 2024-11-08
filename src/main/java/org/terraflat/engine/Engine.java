@@ -1,5 +1,6 @@
 package org.terraflat.engine;
 
+import org.lwjgl.glfw.GLFW;
 import org.terraflat.game.Main;
 import org.terraflat.game.Renderer;
 
@@ -40,6 +41,7 @@ public class Engine {
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
         float deltaUpdate = 0;
         float deltaFps = 0;
+        int framesUntilUpdate = 0;
 
         long updateTime = initialTime;
         while (running && !window.windowShouldClose()) {
@@ -65,6 +67,12 @@ public class Engine {
                 Renderer.render(window);
                 deltaFps--;
                 window.update();
+                framesUntilUpdate--;
+                if (framesUntilUpdate <= 0) {
+                    int fps = (int)(1000f/(now - initialTime));
+                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Terraflat | " + fps + "fps");
+                    framesUntilUpdate = 40;
+                }
             }
             initialTime = now;
         }
