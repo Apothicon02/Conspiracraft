@@ -85,35 +85,38 @@ public class Renderer {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
         if (worldChanged) {
             worldChanged = false;
-            float[] terrain = new float[2146689];
-            voxelRegionBuffer = BufferUtils.createFloatBuffer(2146689);
+            int seaLevel = 12;
+            int size = 811;
+            int fullSize = (size+1)*(size+1)*(size+1);
+            float[] terrain = new float[fullSize];
             FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
             noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-            for (int x = 1; x <= 128; x++) {
-                for (int z = 1; z <= 128; z++) {
-                    if (x == 1 || x == 128 || z == 1 || z == 128) {
-                        int pos = x + 1 * 128 + z * 128 * 128;
-                        terrain[pos] = 0001.000f;
-                    } else {
-                        float baseCellularNoise = noise.GetNoise(x*10, z*10);
-                        boolean upmost = true;
-                        for (int y = 6; y >= 1; y--) {
-                            int pos = x + y * 128 + z * 128 * 128;
-                            double baseGradient = TerraflatMath.gradient(y, 6, 1, 2, -1);
-                            if (baseCellularNoise + baseGradient > 0) {
-                                if (upmost) {
-                                    terrain[pos] = 0002.000f;
-                                    terrain[x + (y+1) * 128 + z * 128 * 128] = 0004.000f + (Math.random() > 0.98f ? 1f : 0f);
-                                    upmost = false;
-                                } else {
-                                    terrain[pos] = 0003.000f;
-                                }
+            for (int x = 1; x <= size; x++) {
+                for (int z = 1; z <= size; z++) {
+                    float baseCellularNoise = noise.GetNoise(x, z);
+                    boolean upmost = true;
+                    for (int y = 30; y >= 1; y--) {
+                        int pos = x + y * size + z * size * size;
+                        double baseGradient = TerraflatMath.gradient(y, 30, 1, 2, -1);
+                        if (baseCellularNoise + baseGradient > 0) {
+                            if (upmost && y >= seaLevel) {
+                                terrain[pos] = 0002.000f;
+                                terrain[x + (y+1) * size + z * size * size] = 0004.000f + (Math.random() > 0.98f ? 1f : 0f);
+                                upmost = false;
+                            } else {
+                                terrain[pos] = 0003.000f;
+                            }
+                        } else {
+                            if (y <= seaLevel) {
+                                terrain[pos] = 0001.000f;
+                            } else {
+                                terrain[pos] = 0000.000f;
                             }
                         }
                     }
                 }
             }
-            voxelRegionBuffer.put(terrain).flip();
+            voxelRegionBuffer = BufferUtils.createFloatBuffer(fullSize).put(terrain).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

@@ -15,7 +15,7 @@ public class Camera {
         direction = new Vector3f();
         right = new Vector3f();
         up = new Vector3f();
-        position = new Vector3f(0, 0, 5);
+        position = new Vector3f(-10, 10, -10);
         viewMatrix = new Matrix4f();
         rotation = new Vector2f();
         recalculate();
