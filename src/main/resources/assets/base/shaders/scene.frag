@@ -41,6 +41,8 @@ void main()
                         vec4 voxelColor = texture(atlas, vec2((((rayPos.x-gridX)+voxelType)/1248f), ((int(((rayPos.y-gridY)-1)*-8)+(rayPos.z-gridZ)+(voxelSubtype*8))/1248f)));
                         color = vec4(max(color.r, voxelColor.r), max(color.g, voxelColor.g), max(color.b, voxelColor.b), color.a+voxelColor.a);
                     }
+                } else {
+                    break;
                 }
                 if (color.a >= 1) {
                     break;

@@ -79,6 +79,8 @@ public class Main {
         if (window.isKeyPressed(GLFW_KEY_F3)) {
             if (window.isKeyPressed(GLFW_KEY_T)) {
                 Renderer.atlasChanged = true;
+            } else if (window.isKeyPressed(GLFW_KEY_G)) {
+                Renderer.worldChanged = true;
             }
         }
     }

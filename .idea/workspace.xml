@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -350,7 +349,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731025712011</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.">
+      <option name="closed" value="true" />
+      <created>1731030584184</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1731030584184</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -382,6 +389,7 @@
     <MESSAGE value="- Added water. &#10;- Added transparency support." />
     <MESSAGE value="- More optimizations." />
     <MESSAGE value="- Big optimization." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Big optimization." />
+    <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter." />
   </component>
 </project>

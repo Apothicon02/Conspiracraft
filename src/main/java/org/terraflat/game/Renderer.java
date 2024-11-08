@@ -46,68 +46,6 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        float[] terrain = new float[2146689];
-        voxelRegionBuffer = BufferUtils.createFloatBuffer(2146689);
-        FastNoiseLite noise = new FastNoiseLite();
-        noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-        for (int x = 1; x <= 128; x++) {
-            for (int z = 1; z <= 128; z++) {
-                if (x == 1 || x == 128 || z == 1 || z == 128) {
-                    int pos = x + 1 * 128 + z * 128 * 128;
-                    terrain[pos] = 0001.000f;
-                } else {
-                    float baseCellularNoise = noise.GetNoise(x*10, z*10);
-                    boolean upmost = true;
-                    for (int y = 6; y >= 1; y--) {
-                        int pos = x + y * 128 + z * 128 * 128;
-                        double baseGradient = TerraflatMath.gradient(y, 6, 1, 2, -1);
-                        if (baseCellularNoise + baseGradient > 0) {
-                            if (upmost) {
-                                terrain[pos] = 0002.000f;
-                                terrain[x + (y+1) * 128 + z * 128 * 128] = 0004.000f + (Math.random() > 0.98f ? 1f : 0f);
-                                upmost = false;
-                            } else {
-                                terrain[pos] = 0003.000f;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        voxelRegionBuffer.put(terrain).flip();
-        //float[] voxels = new float[terrain.size()];
-        //for (int i = 0; i < terrain.size(); i++) {
-        //    voxels[i] = terrain.get(i);
-        //}
-        //voxelRegionBuffer = BufferUtils.createFloatBuffer(voxels.length);
-//        voxelRegionBuffer.put(new float[]{
-//                0f, 2f, 0f, 0005.000f,
-//
-//                0f, 2f, 1f, 0004.000f,
-//                1f, 1f, 0f, 0004.000f,
-//                1f, 1f, 1f, 0004.000f,
-//                0f, 2f, 2f, 0004.000f,
-//                2f, 1f, 1f, 0004.000f,
-//                1f, 2f, 2f, 0004.000f,
-//                2f, 1f, 2f, 0004.000f,
-//
-//                0f, 0f, 0f, 0003.000f,
-//                0f, 0f, 1f, 0003.000f,
-//                0f, 0f, 2f, 0003.000f,
-//                1f, 0f, 2f, 0003.000f,
-//
-//                0f, 1f, 0f, 0002.000f,
-//                0f, 1f, 1f, 0002.000f,
-//                1f, 0f, 0f, 0002.000f,
-//                1f, 0f, 1f, 0002.000f,
-//                0f, 1f, 2f, 0002.000f,
-//                2f, 0f, 1f, 0002.000f,
-//                1f, 1f, 2f, 0002.000f,
-//                2f, 0f, 2f, 0002.000f,
-//
-//                2f, 0f, 0f, 0001.000f,
-//                3f, 0f, 0f, 0001.001f
-//        }).flip();
         regionVoxelsSSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
@@ -147,6 +85,35 @@ public class Renderer {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
         if (worldChanged) {
             worldChanged = false;
+            float[] terrain = new float[2146689];
+            voxelRegionBuffer = BufferUtils.createFloatBuffer(2146689);
+            FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
+            noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+            for (int x = 1; x <= 128; x++) {
+                for (int z = 1; z <= 128; z++) {
+                    if (x == 1 || x == 128 || z == 1 || z == 128) {
+                        int pos = x + 1 * 128 + z * 128 * 128;
+                        terrain[pos] = 0001.000f;
+                    } else {
+                        float baseCellularNoise = noise.GetNoise(x*10, z*10);
+                        boolean upmost = true;
+                        for (int y = 6; y >= 1; y--) {
+                            int pos = x + y * 128 + z * 128 * 128;
+                            double baseGradient = TerraflatMath.gradient(y, 6, 1, 2, -1);
+                            if (baseCellularNoise + baseGradient > 0) {
+                                if (upmost) {
+                                    terrain[pos] = 0002.000f;
+                                    terrain[x + (y+1) * 128 + z * 128 * 128] = 0004.000f + (Math.random() > 0.98f ? 1f : 0f);
+                                    upmost = false;
+                                } else {
+                                    terrain[pos] = 0003.000f;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            voxelRegionBuffer.put(terrain).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
