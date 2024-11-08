@@ -9,21 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain. &#10;- Prevented rays from existing out of world bounds.">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid12948.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid14704.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid14856.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid18408.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid18752.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid2332.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid408.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid6824.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid9188.log" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Camera.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,25 +98,25 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "project.structure.last.edited": "Problems",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Problems&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -149,7 +137,7 @@
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run">
+  <component name="RunManager" selected="Gradle.Terraflat [build]">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="org.terraflat.game.Main" />
       <module name="Terraflat.main" />
@@ -375,7 +363,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731031635535</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale.">
+      <option name="closed" value="true" />
+      <created>1731092591340</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1731092591340</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -410,6 +406,7 @@
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter." />
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain." />
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain. &#10;- Prevented rays from existing out of world bounds." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain. &#10;- Prevented rays from existing out of world bounds." />
+    <MESSAGE value="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale." />
   </component>
 </project>
