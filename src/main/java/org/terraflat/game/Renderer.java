@@ -46,77 +46,68 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        List<Float> terrain = new ArrayList<>();
+        float[] terrain = new float[262144];
+        voxelRegionBuffer = BufferUtils.createFloatBuffer(262144);
         FastNoiseLite noise = new FastNoiseLite();
         noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
         for (int x = 1; x <= 15; x++) {
             for (int z = 1; z <= 15; z++) {
                 if (x == 1 || x == 15 || z == 1 || z == 15) {
-                    terrain.add((float) x);
-                    terrain.add((float) 1);
-                    terrain.add((float) z);
-                    terrain.add(0001.0000f);
+                    int pos = x + 1 * 64 + z * 64 * 64;
+                    terrain[pos] = 0001.000f;
                 } else {
                     float baseCellularNoise = noise.GetNoise(x*10, z*10);
                     boolean upmost = true;
                     for (int y = 6; y >= 1; y--) {
+                        int pos = x + y * 64 + z * 64 * 64;
                         double baseGradient = TerraflatMath.gradient(y, 6, 1, 2, -1);
                         if (baseCellularNoise + baseGradient > 0) {
                             if (upmost) {
-                                terrain.add((float) x);
-                                terrain.add((float) y);
-                                terrain.add((float) z);
-                                terrain.add(0002.0000f);
-                                terrain.add((float) x);
-                                terrain.add((float) y + 1);
-                                terrain.add((float) z);
-                                terrain.add(0004.0000f + (Math.random() > 0.7f ? 1f : 0f));
+                                terrain[pos] = 0002.000f;
+                                terrain[x + (y+1) * 64 + z * 64 * 64] = 0004.000f + (Math.random() > 0.7f ? 1f : 0f);
                                 upmost = false;
                             } else {
-                                terrain.add((float) x);
-                                terrain.add((float) y);
-                                terrain.add((float) z);
-                                terrain.add(0003.0000f);
+                                terrain[pos] = 0003.000f;
                             }
                         }
                     }
                 }
             }
         }
-        float[] voxels = new float[terrain.size()];
-        for (int i = 0; i < terrain.size(); i++) {
-            voxels[i] = terrain.get(i);
-        }
-        voxelRegionBuffer = BufferUtils.createFloatBuffer(voxels.length);
+        voxelRegionBuffer.put(terrain).flip();
+        //float[] voxels = new float[terrain.size()];
+        //for (int i = 0; i < terrain.size(); i++) {
+        //    voxels[i] = terrain.get(i);
+        //}
+        //voxelRegionBuffer = BufferUtils.createFloatBuffer(voxels.length);
 //        voxelRegionBuffer.put(new float[]{
-//                0f, 2f, 0f, 0005.0000f,
+//                0f, 2f, 0f, 0005.000f,
 //
-//                0f, 2f, 1f, 0004.0000f,
-//                1f, 1f, 0f, 0004.0000f,
-//                1f, 1f, 1f, 0004.0000f,
-//                0f, 2f, 2f, 0004.0000f,
-//                2f, 1f, 1f, 0004.0000f,
-//                1f, 2f, 2f, 0004.0000f,
-//                2f, 1f, 2f, 0004.0000f,
+//                0f, 2f, 1f, 0004.000f,
+//                1f, 1f, 0f, 0004.000f,
+//                1f, 1f, 1f, 0004.000f,
+//                0f, 2f, 2f, 0004.000f,
+//                2f, 1f, 1f, 0004.000f,
+//                1f, 2f, 2f, 0004.000f,
+//                2f, 1f, 2f, 0004.000f,
 //
-//                0f, 0f, 0f, 0003.0000f,
-//                0f, 0f, 1f, 0003.0000f,
-//                0f, 0f, 2f, 0003.0000f,
-//                1f, 0f, 2f, 0003.0000f,
+//                0f, 0f, 0f, 0003.000f,
+//                0f, 0f, 1f, 0003.000f,
+//                0f, 0f, 2f, 0003.000f,
+//                1f, 0f, 2f, 0003.000f,
 //
-//                0f, 1f, 0f, 0002.0000f,
-//                0f, 1f, 1f, 0002.0000f,
-//                1f, 0f, 0f, 0002.0000f,
-//                1f, 0f, 1f, 0002.0000f,
-//                0f, 1f, 2f, 0002.0000f,
-//                2f, 0f, 1f, 0002.0000f,
-//                1f, 1f, 2f, 0002.0000f,
-//                2f, 0f, 2f, 0002.0000f,
+//                0f, 1f, 0f, 0002.000f,
+//                0f, 1f, 1f, 0002.000f,
+//                1f, 0f, 0f, 0002.000f,
+//                1f, 0f, 1f, 0002.000f,
+//                0f, 1f, 2f, 0002.000f,
+//                2f, 0f, 1f, 0002.000f,
+//                1f, 1f, 2f, 0002.000f,
+//                2f, 0f, 2f, 0002.000f,
 //
-//                2f, 0f, 0f, 0001.0000f,
-//                3f, 0f, 0f, 0001.0001f
+//                2f, 0f, 0f, 0001.000f,
+//                3f, 0f, 0f, 0001.001f
 //        }).flip();
-        voxelRegionBuffer.put(voxels).flip();
         regionVoxelsSSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
