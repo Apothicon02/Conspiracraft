@@ -7,6 +7,10 @@ layout(std430, binding = 0) buffer regionVoxels
 {
     float[] regionVoxelsData;
 };
+layout(std430, binding = 1) buffer lod1
+{
+    uint[] lod1Data;
+};
 in vec2 gl_FragCoord;
 in vec4 pos;
 
@@ -22,7 +26,7 @@ void main()
         vec3 dir = normalize(vec3(uv, 1));
         vec4 color = vec4(0, 0, 0, 0);
         vec4 tint = vec4(0, 0, 0, 0);
-        int size = 811;
+        int size = 808;
         float interval = 0f;
         mat4 centeredCam = cam;
         centeredCam[3] = vec4(0, 0, 0, cam[3][3]);
@@ -34,7 +38,7 @@ void main()
             }
         }
         for (float traveled = 0f; traveled < size;) {
-            int coordinateScale = 1;
+            float coordinateScale = 1;
             vec3 rayPos = vec3(cam * vec4((dir * traveled)+camPos, 1));
             if (rayPos.y < 1) {
                 color = vec4(max(color.r, 0.73), max(color.g, 0.75), max(color.b, 0.8), 1);
@@ -44,15 +48,20 @@ void main()
                 int gridY = int(rayPos.y);
                 int gridZ = int(rayPos.z);
                 if (gridX > 0 && gridX <= size && gridY > 0 && gridY < 512 && gridZ > 0 && gridZ <= size && traveled < size-2) {
-                    float voxelInfo = regionVoxelsData[gridX + gridY * size + gridZ * size*size];
-                    if (voxelInfo != 0f) {
-                        coordinateScale = 8;
-                        int voxelType = int(voxelInfo);
-                        int voxelSubtype = int((voxelInfo-voxelType)*1000);
-                        color = texture(atlas, vec2((((rayPos.x-gridX)+voxelType)/1248f), ((int(((rayPos.y-gridY)-1)*-8)+(rayPos.z-gridZ)+(voxelSubtype*8))/1248f)));
-                        if (color.a < 1f && tint.a < 1f) {
-                            tint = vec4(max(tint.r, color.r), max(tint.g, color.g), max(tint.b, color.b), min(1f, (tint.a+color.a)/2));
+                    int lod1Size = size/4;
+                    if (lod1Data[int(int(gridX/4) + int(gridY/4) * lod1Size + int(gridZ/4) * lod1Size*lod1Size)] != 0) {
+                        float voxelInfo = regionVoxelsData[gridX + gridY * size + gridZ * size*size];
+                        if (voxelInfo != 0f) {
+                            coordinateScale = 8;
+                            int voxelType = int(voxelInfo);
+                            int voxelSubtype = int((voxelInfo-voxelType)*1000);
+                            color = texture(atlas, vec2((((rayPos.x-gridX)+voxelType)/1248f), ((int(((rayPos.y-gridY)-1)*-8)+(rayPos.z-gridZ)+(voxelSubtype*8))/1248f)));
+                            if (color.a < 1f && tint.a < 1f) {
+                                tint = vec4(max(tint.r, color.r), max(tint.g, color.g), max(tint.b, color.b), min(1f, (tint.a+color.a)/2));
+                            }
                         }
+                    } else {
+                        coordinateScale = 0.25;
                     }
                 } else {
                     color = vec4(max(color.r, 0.63), max(color.g, 0.75), max(color.b, 1), 1);

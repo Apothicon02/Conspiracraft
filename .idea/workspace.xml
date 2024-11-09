@@ -9,8 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Big unfinished optimization.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -137,7 +138,7 @@
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.Terraflat [build]">
+  <component name="RunManager" selected="Application.Run">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="org.terraflat.game.Main" />
       <module name="Terraflat.main" />
@@ -371,7 +372,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731092591340</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="- Big unfinished optimization.">
+      <option name="closed" value="true" />
+      <created>1731109735614</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1731109735614</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -407,6 +416,7 @@
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain." />
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain. &#10;- Prevented rays from existing out of world bounds." />
     <MESSAGE value="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale." />
+    <MESSAGE value="- Big unfinished optimization." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Big unfinished optimization." />
   </component>
 </project>

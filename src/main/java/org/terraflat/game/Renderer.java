@@ -10,8 +10,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
@@ -20,7 +19,9 @@ public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
     public static int regionVoxelsSSBOId;
+    public static int lod1SSBOId;
     public static FloatBuffer voxelRegionBuffer;
+    public static IntBuffer lod1Buffer;
     public static int resUniform;
     public static int camUniform;
     public static boolean worldChanged = true;
@@ -47,6 +48,7 @@ public class Renderer {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         regionVoxelsSSBOId = glGenBuffers();
+        lod1SSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -81,12 +83,10 @@ public class Renderer {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 9984, 9984, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
         }
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
         if (worldChanged) {
             worldChanged = false;
             int seaLevel = 12;
-            int size = 811;
+            int size = 808;
             int fullSize = (size+1)*(size+1)*(size+1);
             float[] terrain = new float[fullSize];
             FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
@@ -116,10 +116,40 @@ public class Renderer {
                     }
                 }
             }
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
             voxelRegionBuffer = BufferUtils.createFloatBuffer(fullSize).put(terrain).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+            int lodSize = size/4;
+            int lodFullSize = (lodSize+1)*(lodSize+1)*(lodSize+1);
+            int[] lod1 = new int[lodFullSize];
+            for (int x = 0; x < lodSize; x++) {
+                for (int z = 0; z < lodSize; z++) {
+                    for (int y = 0; y < lodSize; y++) {
+                        int lodPos = x + y * lodSize + z * lodSize * lodSize;
+                        for (int i = 0; i < 4; i++) {
+                            if (terrain[((x*4)+i) + ((y*4)+i) * size + ((z*4)+i) * size * size] != 0f) {
+                                lod1[lodPos] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, lod1SSBOId);
+            lod1Buffer = BufferUtils.createIntBuffer(lodFullSize).put(lod1).flip();
+            glBufferData(GL_SHADER_STORAGE_BUFFER, lod1Buffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        } else {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, lod1SSBOId);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
