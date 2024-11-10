@@ -9,7 +9,6 @@ import org.terraflat.engine.*;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL40.*;
@@ -18,9 +17,9 @@ import static org.lwjgl.opengl.GL43.*;
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
-    public static int regionVoxelsSSBOId;
+    public static int region1SSBOId;
     public static int lod1SSBOId;
-    public static FloatBuffer voxelRegionBuffer;
+    public static IntBuffer region1Buffer;
     public static IntBuffer lod1Buffer;
     public static int resUniform;
     public static int camUniform;
@@ -47,7 +46,7 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        regionVoxelsSSBOId = glGenBuffers();
+        region1SSBOId = glGenBuffers();
         lod1SSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
@@ -88,7 +87,7 @@ public class Renderer {
             int seaLevel = 12;
             int size = 808;
             int fullSize = (size+1)*(size+1)*(size+1);
-            float[] terrain = new float[fullSize];
+            int[] terrain = new int[fullSize];
             FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
             noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
             for (int x = 1; x <= size; x++) {
@@ -100,26 +99,26 @@ public class Renderer {
                         double baseGradient = TerraflatMath.gradient(y, 30, 1, 2, -1);
                         if (baseCellularNoise + baseGradient > 0) {
                             if (upmost && y >= seaLevel) {
-                                terrain[pos] = 0002.000f;
-                                terrain[x + (y+1) * size + z * size * size] = 0004.000f + (Math.random() > 0.98f ? 1f : 0f);
+                                terrain[pos] = 2;
+                                terrain[x + (y+1) * size + z * size * size] = 4 + (Math.random() > 0.98f ? 1 : 0);
                                 upmost = false;
                             } else {
-                                terrain[pos] = 0003.000f;
+                                terrain[pos] = 3;
                             }
                         } else {
                             if (y <= seaLevel) {
-                                terrain[pos] = 0001.000f;
+                                terrain[pos] = 1;
                             } else {
-                                terrain[pos] = 0000.000f;
+                                terrain[pos] = 0;
                             }
                         }
                     }
                 }
             }
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
-            voxelRegionBuffer = BufferUtils.createFloatBuffer(fullSize).put(terrain).flip();
-            glBufferData(GL_SHADER_STORAGE_BUFFER, voxelRegionBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, region1SSBOId);
+            region1Buffer = BufferUtils.createIntBuffer(fullSize).put(terrain).flip();
+            glBufferData(GL_SHADER_STORAGE_BUFFER, region1Buffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
             int lodSize = size/4;
@@ -143,8 +142,8 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, lod1Buffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, regionVoxelsSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, regionVoxelsSSBOId);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, region1SSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, lod1SSBOId);
