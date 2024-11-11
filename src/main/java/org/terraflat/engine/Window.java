@@ -108,8 +108,8 @@ public class Window {
         return windowHandle;
     }
 
-    public boolean isKeyPressed(int keyCode) {
-        return glfwGetKey(windowHandle, keyCode) == GLFW_PRESS;
+    public boolean isKeyPressed(int keyCode, int action) {
+        return glfwGetKey(windowHandle, keyCode) == action;
     }
 
     public void keyCallBack(int key, int action) {

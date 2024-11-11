@@ -23,6 +23,8 @@ public class Renderer {
     public static IntBuffer lod1Buffer;
     public static int resUniform;
     public static int camUniform;
+    public static int renderDistanceUniform;
+    public static int renderDistanceMul = 0;
     public static boolean worldChanged = true;
     public static boolean atlasChanged = true;
 
@@ -51,6 +53,7 @@ public class Renderer {
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
+        renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
 
         glBindVertexArray(0);
     }
@@ -61,12 +64,13 @@ public class Renderer {
         scene.bind();
 
         glUniform2f(resUniform, window.getWidth(), window.getHeight());
-        Matrix4f camMatrix = Main.camera.getViewMatrix();
+        Matrix4f camMatrix = Main.camera.viewMatrix;
         glUniformMatrix4fv(camUniform, true, new float[]{
                 camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
                 camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
+        glUniform1i(renderDistanceUniform, 500+(250*renderDistanceMul));
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);

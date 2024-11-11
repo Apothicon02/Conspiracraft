@@ -45,44 +45,65 @@ public class Main {
         }
     }
 
+    boolean wasTDown = false;
+    boolean wasGDown = false;
+    boolean wasUpDown = false;
+    boolean wasDownDown = false;
+
     public void input(Window window, long diffTimeMillis) {
         float move = diffTimeMillis * MOVEMENT_SPEED;
-        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
             move*=10;
         }
-        if (window.isKeyPressed(GLFW_KEY_CAPS_LOCK)) {
+        if (window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS)) {
             move*=100;
         }
-        if (window.isKeyPressed(GLFW_KEY_W)) {
-            camera.moveForward(move);
-        } else if (window.isKeyPressed(GLFW_KEY_S)) {
-            camera.moveBackwards(move);
+        if (window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
+            camera.move(0, 0, move);
+        } else if (window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
+            camera.move(0, 0, -move);
         }
-        if (window.isKeyPressed(GLFW_KEY_A)) {
-            camera.moveLeft(move);
-        } else if (window.isKeyPressed(GLFW_KEY_D)) {
-            camera.moveRight(move);
+        if (window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS)) {
+            camera.move(-move, 0, 0);
+        } else if (window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS)) {
+            camera.move(move, 0, 0);
         }
-        if (window.isKeyPressed(GLFW_KEY_SPACE)) {
-            camera.moveUp(move);
-        } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-            camera.moveDown(move);
+        if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS)) {
+            camera.move(0, move, 0);
+        } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS)) {
+            camera.move(0, -move, 0);
         }
 
         MouseInput mouseInput = window.getMouseInput();
         if (mouseInput.isRightButtonPressed()) {
             Vector2f displVec = mouseInput.getDisplVec();
-            camera.addRotation((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
+            camera.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                     (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
         }
 
-        if (window.isKeyPressed(GLFW_KEY_F3)) {
-            if (window.isKeyPressed(GLFW_KEY_T)) {
+        if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+            if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                 Renderer.atlasChanged = true;
-            } else if (window.isKeyPressed(GLFW_KEY_G)) {
+            }
+            if (wasGDown && !window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS)) {
                 Renderer.worldChanged = true;
             }
+            if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
+                if (Renderer.renderDistanceMul < 32) {
+                    Renderer.renderDistanceMul++;
+                }
+            }
+            if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
+                if (Renderer.renderDistanceMul > 0) {
+                    Renderer.renderDistanceMul--;
+                }
+            }
         }
+
+        wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
+        wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
+        wasUpDown = window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS);
+        wasDownDown = window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS);
     }
 
     public void update(Window window, long diffTimeMillis) {
