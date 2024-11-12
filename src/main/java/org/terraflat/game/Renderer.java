@@ -103,17 +103,17 @@ public class Renderer {
                         double baseGradient = TerraflatMath.gradient(y, 30, 1, 2, -1);
                         if (baseCellularNoise + baseGradient > 0) {
                             if (upmost && y >= seaLevel) {
-                                terrain[pos] = 2;
-                                terrain[x + (y+1) * size + z * size * size] = 4 + (Math.random() > 0.98f ? 1 : 0);
+                                terrain[pos] = Utils.packInts(2, 0);
+                                terrain[x + (y+1) * size + z * size * size] = Utils.packInts(4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3));
                                 upmost = false;
                             } else {
-                                terrain[pos] = 3;
+                                terrain[pos] = Utils.packInts(3, 0);
                             }
                         } else {
                             if (y <= seaLevel) {
-                                terrain[pos] = 1;
+                                terrain[pos] = Utils.packInts(1, 0);
                             } else {
-                                terrain[pos] = 0;
+                                terrain[pos] = Utils.packInts(0, 0);
                             }
                         }
                     }

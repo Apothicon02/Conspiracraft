@@ -30,4 +30,8 @@ public class Utils {
         buffer.flip();
         return buffer;
     }
+
+    public static int packInts(int first4, int last4) {
+        return (first4 << 16) | last4;
+    }
 }

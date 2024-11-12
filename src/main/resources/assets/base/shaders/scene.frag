@@ -6,7 +6,7 @@ uniform mat4 cam;
 layout(binding = 0) uniform sampler2D atlas;
 layout(std430, binding = 0) buffer region1
 {
-    uint[] region1BlockData;
+    int[] region1BlockData;
 };
 layout(std430, binding = 1) buffer lod1
 {
@@ -44,9 +44,11 @@ void main()
                 color = vec4(max(color.r, 0.63+(0.37*whiteness)), max(color.g, 0.75+(0.25*whiteness)), max(color.b, 1), 1);
                 break;
             } else {
-                uint voxelInfo = region1BlockData[blockX + blockY * size + blockZ * size * size];
-                if (voxelInfo != 0f) {
-                    color = texture(atlas, vec2(((voxelInfo)/1248f)+(((mapPos.x-(int(mapPos.x/8)*8))+1)/9984f), (((mapPos.y-(int(mapPos.y/8)*8)-8)*-8) + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1)))/9984f));
+                int blockInfo = region1BlockData[blockX + blockY * size + blockZ * size * size];
+                int blockType = (blockInfo >> 16) & 0xFFFF;
+                int blockSubtype = blockInfo & 0xFFFF;
+                if (blockType != 0f) {
+                    color = texture(atlas, vec2(((blockType)/1248f)+(((mapPos.x-(int(mapPos.x/8)*8))+1)/9984f), (blockSubtype/156f)+((((mapPos.y-(int(mapPos.y/8)*8)-8)*-8) + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1)))/9984f)));
                     if (color.a < 1f && tint.a < 1f) {
                         tint = vec4(max(tint.r, color.r), max(tint.g, color.g), max(tint.b, color.b), min(1f, (tint.a+color.a)/2));
                     }
