@@ -51,7 +51,6 @@ void main()
                 int blockType = (blockInfo >> 16) & 0xFFFF;
                 int blockSubtype = blockInfo & 0xFFFF;
                 if (blockType != 0f) {
-                    //color = texture(atlas, vec2(((blockType)/1248f)+(((mapPos.x-(int(mapPos.x/8)*8))+1)/9984f), (blockSubtype/156f)+((((mapPos.y-(int(mapPos.y/8)*8)-8)*-8) + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1)))/9984f)));
                     int colorData = atlasData[(9984*((blockType*8)+((mapPos.x-(int(mapPos.x/8)*8))))) + (blockSubtype*64) + (((mapPos.y-(int(mapPos.y/8)*8))-8)*-8)-1 + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1))];
                     color = vec4(0xFF & colorData >> 16, 0xFF & colorData >> 8, 0xFF & colorData, 0xFF & colorData >> 24)/255;
                     if (color.a < 1f && tint.a < 1f) {

@@ -99,13 +99,6 @@ public class Renderer {
             atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-//            glBindTexture(GL_TEXTURE_2D, glGenTextures());
-//            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 9984, 9984, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
         }
 
         if (worldChanged) {
