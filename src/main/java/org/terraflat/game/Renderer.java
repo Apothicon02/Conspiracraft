@@ -5,8 +5,11 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.terraflat.engine.*;
+import org.terraflat.engine.Window;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -16,9 +19,11 @@ import static org.lwjgl.opengl.GL43.*;
 
 public class Renderer {
     public static ShaderProgram scene;
-    public static int sceneVaoId;
+    public static int sceneVaoId;;
+    public static int atlasSSBOId;
     public static int region1SSBOId;
     public static int lod1SSBOId;
+    public static IntBuffer atlasBuffer;
     public static IntBuffer region1Buffer;
     public static IntBuffer lod1Buffer;
     public static int resUniform;
@@ -48,6 +53,7 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         lod1SSBOId = glGenBuffers();
 
@@ -77,13 +83,29 @@ public class Renderer {
 
         if (atlasChanged) {
             atlasChanged = false;
-            glBindTexture(GL_TEXTURE_2D, glGenTextures());
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 9984, 9984, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atlasSSBOId);
+
+            BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
+            int size = 9984*9984+9984;
+            int[] atlasData = new int[size];
+            for (int x = 0; x < 9984; x++) {
+                for (int y = 0; y < 9984; y++) {
+                    Color color = new Color(atlasImage.getRGB(x, y), true);
+                    atlasData[(9984*x)+y] = color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
+                }
+            }
+
+            atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
+            glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+//            glBindTexture(GL_TEXTURE_2D, glGenTextures());
+//            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 9984, 9984, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"))));
         }
 
         if (worldChanged) {
@@ -120,7 +142,7 @@ public class Renderer {
                 }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             region1Buffer = BufferUtils.createIntBuffer(fullSize).put(terrain).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, region1Buffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -141,16 +163,16 @@ public class Renderer {
                 }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, lod1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);
             lod1Buffer = BufferUtils.createIntBuffer(lodFullSize).put(lod1).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, lod1Buffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, lod1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 

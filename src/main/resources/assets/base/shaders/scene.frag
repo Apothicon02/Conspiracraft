@@ -3,12 +3,15 @@
 uniform int renderDistance;
 uniform vec2 res;
 uniform mat4 cam;
-layout(binding = 0) uniform sampler2D atlas;
-layout(std430, binding = 0) buffer region1
+layout(std430, binding = 0) buffer atlas
+{
+    int[] atlasData;
+};
+layout(std430, binding = 1) buffer region1
 {
     int[] region1BlockData;
 };
-layout(std430, binding = 1) buffer lod1
+layout(std430, binding = 2) buffer lod1
 {
     uint[] lod1Data;
 };
@@ -22,7 +25,7 @@ void main()
     vec2 uv = (gl_FragCoord*2. - res.xy) / res.y;
     if (uv.x >= -0.004 && uv.x <= 0.004 && uv.y >= -0.004385 && uv.y <= 0.004385) {
         fragColor = vec4(0.9, 0.9, 1, 1);
-    } else {
+    } else if (uv.x >= -1.87 && uv.x <= 1.87 && uv.y >= -1 && uv.y <= 1) {
         vec3 camPos = vec3(cam[3]);
         vec3 dir = vec3(cam*vec4(normalize(vec3(uv, 1)), 0));
         vec4 color = vec4(0, 0, 0, 0);
@@ -48,7 +51,9 @@ void main()
                 int blockType = (blockInfo >> 16) & 0xFFFF;
                 int blockSubtype = blockInfo & 0xFFFF;
                 if (blockType != 0f) {
-                    color = texture(atlas, vec2(((blockType)/1248f)+(((mapPos.x-(int(mapPos.x/8)*8))+1)/9984f), (blockSubtype/156f)+((((mapPos.y-(int(mapPos.y/8)*8)-8)*-8) + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1)))/9984f)));
+                    //color = texture(atlas, vec2(((blockType)/1248f)+(((mapPos.x-(int(mapPos.x/8)*8))+1)/9984f), (blockSubtype/156f)+((((mapPos.y-(int(mapPos.y/8)*8)-8)*-8) + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1)))/9984f)));
+                    int colorData = atlasData[(9984*((blockType*8)+((mapPos.x-(int(mapPos.x/8)*8))))) + (blockSubtype*64) + (((mapPos.y-(int(mapPos.y/8)*8))-8)*-8)-1 + (mapPos.z-(((int(mapPos.z/8)+1)*8)-1))];
+                    color = vec4(0xFF & colorData >> 16, 0xFF & colorData >> 8, 0xFF & colorData, 0xFF & colorData >> 24)/255;
                     if (color.a < 1f && tint.a < 1f) {
                         tint = vec4(max(tint.r, color.r), max(tint.g, color.g), max(tint.b, color.b), min(1f, (tint.a+color.a)/2));
                     }
@@ -64,5 +69,7 @@ void main()
         }
 
         fragColor = color;
+    } else {
+        fragColor = vec4(0, 0, 0, 1);
     }
 }
