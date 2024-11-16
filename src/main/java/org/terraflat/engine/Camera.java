@@ -3,7 +3,7 @@ package org.terraflat.engine;
 import org.joml.*;
 
 public class Camera {
-    public Matrix4f viewMatrix = new Matrix4f().setTranslation(new Vector3f(100, 200, 100));
+    public Matrix4f viewMatrix = new Matrix4f().setTranslation(new Vector3f(100, 50, 100));
 
     public void rotate(float x, float y) {
         viewMatrix.rotateXYZ(x, y, 0);
