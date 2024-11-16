@@ -29,7 +29,7 @@ public class Renderer {
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
-    public static int renderDistanceMul = 0;
+    public static int renderDistanceMul = 10;
     public static boolean worldChanged = true;
     public static boolean atlasChanged = true;
 
@@ -76,7 +76,7 @@ public class Renderer {
                 camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
-        glUniform1i(renderDistanceUniform, 500+(250*renderDistanceMul));
+        glUniform1i(renderDistanceUniform, 250+(50*renderDistanceMul));
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
