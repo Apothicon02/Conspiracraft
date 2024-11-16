@@ -11,7 +11,19 @@ layout(std430, binding = 1) buffer region1
 {
     int[] region1BlockData;
 };
-layout(std430, binding = 2) buffer lod1
+layout(std430, binding = 2) buffer region2
+{
+    int[] region2BlockData;
+};
+layout(std430, binding = 3) buffer region3
+{
+    int[] region3BlockData;
+};
+layout(std430, binding = 4) buffer region4
+{
+    int[] region4BlockData;
+};
+layout(std430, binding = 5) buffer lod1
 {
     uint[] lod1Data;
 };

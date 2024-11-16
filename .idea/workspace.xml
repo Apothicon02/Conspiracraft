@@ -9,8 +9,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Finished new multi-level dda. &#10;- Added fog.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Updated render distance default value to 10.&#10;- Altered render distance calculation.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/blocks/Block.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/blocks/Blocks.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Chunk.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Grid.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Grids.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/space/Voxel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -442,7 +452,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731783933105</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="- Updated render distance default value to 10.&#10;- Altered render distance calculation.">
+      <option name="closed" value="true" />
+      <created>1731784089993</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1731784089993</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -458,7 +476,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added sunlight." />
     <MESSAGE value="- Rewrite." />
     <MESSAGE value="- Now works with renderdoc." />
     <MESSAGE value="- Fixed SSBO not working." />
@@ -483,6 +500,7 @@
     <MESSAGE value="- Culled pixels off-screne. &#10;- Converted atlas to a SSBO." />
     <MESSAGE value="- Removed old code." />
     <MESSAGE value="- Finished new multi-level dda. &#10;- Added fog." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Finished new multi-level dda. &#10;- Added fog." />
+    <MESSAGE value="- Updated render distance default value to 10.&#10;- Altered render distance calculation." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Updated render distance default value to 10.&#10;- Altered render distance calculation." />
   </component>
 </project>
