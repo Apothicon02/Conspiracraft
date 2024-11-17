@@ -9,40 +9,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockTypes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/LightBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/properties/Emission.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Renamed to Conspiracraft.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid12948.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid12948.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid14704.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid14704.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid14856.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid14856.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid18408.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid18408.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid18752.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid18752.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid2332.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid2332.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid408.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid408.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid6824.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid6824.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid9188.log" beforeDir="false" afterPath="$PROJECT_DIR$/hs_err_pid9188.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/renderdoc/renderdoc.cap" beforeDir="false" afterPath="$PROJECT_DIR$/renderdoc/renderdoc.cap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/FastNoiseLite.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/FastNoiseLite.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/MouseInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/MouseInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/ShaderProgram.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ShaderProgram.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/TerraflatMath.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/TerraflatMath.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/terraflat/game/World.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid12948.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid14704.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid14856.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid18408.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid18752.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid2332.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid408.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid6824.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid9188.log" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,26 +106,27 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Debug",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "project.structure.last.edited": "Problems",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Problems&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -494,7 +472,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731792107235</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="- Renamed to Conspiracraft.">
+      <option name="closed" value="true" />
+      <created>1731867206346</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1731867206346</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +496,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Now works with renderdoc." />
     <MESSAGE value="- Fixed SSBO not working." />
     <MESSAGE value="- Added atlas." />
     <MESSAGE value="- Fixed atlas." />
@@ -535,7 +520,8 @@
     <MESSAGE value="- Finished new multi-level dda. &#10;- Added fog." />
     <MESSAGE value="- Updated render distance default value to 10.&#10;- Altered render distance calculation." />
     <MESSAGE value="- There can now only be one renderer. &#10;- Added the World class." />
-    <option name="LAST_COMMIT_MESSAGE" value="- There can now only be one renderer. &#10;- Added the World class." />
+    <MESSAGE value="- Renamed to Conspiracraft." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Renamed to Conspiracraft." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
