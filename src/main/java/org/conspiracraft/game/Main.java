@@ -1,7 +1,7 @@
-package org.terraflat.game;
+package org.conspiracraft.game;
 
 import org.joml.*;
-import org.terraflat.engine.*;
+import org.conspiracraft.engine.*;
 
 import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Main main = new Main();
-        Engine gameEng = new Engine("Terraflat", new Window.WindowOptions(), main);
+        Engine gameEng = new Engine("Conspiracraft", new Window.WindowOptions(), main);
         gameEng.start();
     }
 

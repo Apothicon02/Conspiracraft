@@ -1,11 +1,11 @@
-package org.terraflat.game;
+package org.conspiracraft.game;
 
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
-import org.terraflat.engine.*;
-import org.terraflat.engine.Window;
+import org.conspiracraft.engine.*;
+import org.conspiracraft.engine.Window;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,16 +16,13 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
-import static org.terraflat.game.World.*;
+import static org.conspiracraft.game.World.*;
 
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;;
     public static int atlasSSBOId;
     public static int region1SSBOId;
-    public static int region2SSBOId;
-    public static int region3SSBOId;
-    public static int region4SSBOId;
     public static int lod1SSBOId;
     public static IntBuffer atlasBuffer;
     public static IntBuffer lod1Buffer;
@@ -58,9 +55,6 @@ public class Renderer {
 
         atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
-        region2SSBOId = glGenBuffers();
-        region3SSBOId = glGenBuffers();
-        region4SSBOId = glGenBuffers();
         lod1SSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
@@ -109,68 +103,14 @@ public class Renderer {
 
         if (worldChanged) {
             worldChanged = false;
-//            int fullSize = (size+1)*(size+1)*(size+1);
-//            int[] terrain = new int[fullSize];
-//            FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
-//            noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-//            for (int x = 1; x <= size; x++) {
-//                for (int z = 1; z <= size; z++) {
-//                    float baseCellularNoise = noise.GetNoise(x, z);
-//                    boolean upmost = true;
-//                    for (int y = 30; y >= 1; y--) {
-//                        int pos = x + y * size + z * size * size;
-//                        double baseGradient = TerraflatMath.gradient(y, 30, 1, 2, -1);
-//                        if (baseCellularNoise + baseGradient > 0) {
-//                            if (upmost && y >= seaLevel) {
-//                                terrain[pos] = Utils.packInts(2, 0);
-//                                terrain[x + (y+1) * size + z * size * size] = Utils.packInts(4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3));
-//                                upmost = false;
-//                            } else {
-//                                terrain[pos] = Utils.packInts(3, 0);
-//                            }
-//                        } else {
-//                            if (y <= seaLevel) {
-//                                terrain[pos] = Utils.packInts(1, 0);
-//                            } else {
-//                                terrain[pos] = Utils.packInts(0, 0);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-//            region1Buffer = BufferUtils.createIntBuffer(fullSize).put(terrain).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, region1Buffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-//            int lodSize = size/4;
-//            int lodFullSize = (lodSize+1)*(lodSize+1)*(lodSize+1);
-//            int[] lod1 = new int[lodFullSize];
-//            for (int x = 0; x < lodSize; x++) {
-//                for (int z = 0; z < lodSize; z++) {
-//                    for (int y = 0; y < lodSize; y++) {
-//                        int lodPos = x + y * lodSize + z * lodSize * lodSize;
-//                        for (int i = 0; i < 4; i++) {
-//                            if (terrain[((x*4)+i) + ((y*4)+i) * size + ((z*4)+i) * size * size] != 0f) {
-//                                lod1[lodPos] = 1;
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
-//            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);
-//            lod1Buffer = BufferUtils.createIntBuffer(lodFullSize).put(lod1).flip();
-//            glBufferData(GL_SHADER_STORAGE_BUFFER, lod1Buffer, GL_STATIC_DRAW);
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
-//            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);

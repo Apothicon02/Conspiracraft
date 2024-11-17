@@ -1,6 +1,6 @@
-package org.terraflat.engine;
+package org.conspiracraft.engine;
 
-public class TerraflatMath {
+public class ConspiracraftMath {
     public static double gradient(int y, int fromY, int toY, float fromValue, float toValue) {
         return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
     }

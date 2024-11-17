@@ -1,4 +1,4 @@
-package org.terraflat.engine;
+package org.conspiracraft.engine;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;

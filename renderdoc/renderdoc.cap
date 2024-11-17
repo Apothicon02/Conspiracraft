@@ -2,7 +2,7 @@
     "rdocCaptureSettings": 1,
     "settings": {
         "autoStart": false,
-        "commandLine": "-jar C:\\Users\\Tyler\\Documents\\Github\\Terraflat\\build\\libs\\Terraflat-0.1-SNAPSHOT-standalone.jar",
+        "commandLine": "-jar C:\\Users\\Tyler\\Documents\\Github\\Conspiracraft\\build\\libs\\Conspiracraft-0.1-SNAPSHOT-standalone.jar",
         "environment": [
         ],
         "executable": "C:\\Program Files\\Java\\jdk-21\\bin\\java.exe",
@@ -23,6 +23,6 @@
             "verifyBufferAccess": false
         },
         "queuedFrameCap": 0,
-        "workingDir": "C:/Users/Tyler/Documents/Github/Terraflat/renderdoc"
+        "workingDir": "C:/Users/Tyler/Documents/Github/Conspiracraft/renderdoc"
     }
 }

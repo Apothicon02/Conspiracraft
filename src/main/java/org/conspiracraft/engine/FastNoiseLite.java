@@ -52,7 +52,7 @@
 // /*FNLfloat*/ float
 // /*FNLfloat*/ double
 
-package org.terraflat.engine;
+package org.conspiracraft.engine;
 
 public class FastNoiseLite
 {

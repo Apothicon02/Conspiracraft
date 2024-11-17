@@ -1,2 +1,2 @@
-rootProject.name = "Terraflat"
+rootProject.name = "Conspiracraft"
 

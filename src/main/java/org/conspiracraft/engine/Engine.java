@@ -1,8 +1,8 @@
-package org.terraflat.engine;
+package org.conspiracraft.engine;
 
 import org.lwjgl.glfw.GLFW;
-import org.terraflat.game.Main;
-import org.terraflat.game.Renderer;
+import org.conspiracraft.game.Main;
+import org.conspiracraft.game.Renderer;
 
 import java.io.IOException;
 
@@ -70,7 +70,7 @@ public class Engine {
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
                     int fps = (int)(1000f/(now - initialTime));
-                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Terraflat | " + fps + "fps");
+                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + fps + "fps");
                     framesUntilUpdate = 40;
                 }
             }
