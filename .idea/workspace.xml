@@ -9,17 +9,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Renamed to Conspiracraft.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Removed log files.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Light.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid12948.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid14704.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid14856.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid18408.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid18752.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid2332.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid408.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid6824.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid9188.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/LightBlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/properties/Emission.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,27 +106,28 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Problems&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Run.executor": "Run",
+    "Gradle.Build Terraflat.executor": "Run",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
+    "project.structure.last.edited": "Problems",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -480,7 +481,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731867206346</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="- Removed log files.">
+      <option name="closed" value="true" />
+      <created>1731867381930</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1731867381930</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -496,7 +505,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed SSBO not working." />
     <MESSAGE value="- Added atlas." />
     <MESSAGE value="- Fixed atlas." />
     <MESSAGE value="- Atlas is now freed from memory after being bound." />
@@ -521,7 +529,8 @@
     <MESSAGE value="- Updated render distance default value to 10.&#10;- Altered render distance calculation." />
     <MESSAGE value="- There can now only be one renderer. &#10;- Added the World class." />
     <MESSAGE value="- Renamed to Conspiracraft." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Renamed to Conspiracraft." />
+    <MESSAGE value="- Removed log files." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Removed log files." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -23,15 +23,15 @@ public class Renderer {
     public static int sceneVaoId;;
     public static int atlasSSBOId;
     public static int region1SSBOId;
-    public static int lod1SSBOId;
+    public static int region1LightingSSBOId;
     public static IntBuffer atlasBuffer;
-    public static IntBuffer lod1Buffer;
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
     public static int renderDistanceMul = 10;
-    public static boolean worldChanged = true;
     public static boolean atlasChanged = true;
+    public static boolean worldChanged = true;
+    public static boolean lightChanged = true;
 
     public static void init() throws Exception {
         GL.createCapabilities();
@@ -55,7 +55,7 @@ public class Renderer {
 
         atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
-        lod1SSBOId = glGenBuffers();
+        region1LightingSSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -91,8 +91,7 @@ public class Renderer {
             int[] atlasData = new int[size];
             for (int x = 0; x < 9984; x++) {
                 for (int y = 0; y < 9984; y++) {
-                    Color color = new Color(atlasImage.getRGB(x, y), true);
-                    atlasData[(9984*x)+y] = color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
+                    atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                 }
             }
 
@@ -100,7 +99,6 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
-
         if (worldChanged) {
             worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
@@ -112,9 +110,17 @@ public class Renderer {
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, lod1SSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lod1SSBOId);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        if (lightChanged) {
+            lightChanged = false;
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1LightingSSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, region1LightingBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        } else {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1LightingSSBOId);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

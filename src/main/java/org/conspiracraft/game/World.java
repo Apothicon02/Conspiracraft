@@ -1,5 +1,7 @@
 package org.conspiracraft.game;
 
+import org.conspiracraft.game.blocks.Light;
+import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.FastNoiseLite;
 import org.conspiracraft.engine.ConspiracraftMath;
@@ -54,12 +56,41 @@ public class World {
         }
     }
 
+    public static int condensePos(Vector3i pos) {
+        return pos.x + pos.y * size + pos.z * size * size;
+    }
+    public static int condensePos(int x, int y, int z) {
+        return x + y * size + z * size * size;
+    }
+
     public static void setBlock(int x, int y, int z, int blockType, int blockSubtype) {
         if (x <= size && z <= size) {
-            int pos = x + y * size + z * size * size;
+            int pos = condensePos(x, y, z);
             int blockId = Utils.packInts(blockType, blockSubtype);
             region1Buffer.put(pos, blockId);
-            region1Blocks.put(pos, new Block(blockId));
+            region1Blocks.put(pos, new Block((short)(blockType), (short)(blockSubtype), new Vector3i(x, y, z)));
+            Renderer.worldChanged = true;
         }
+    }
+
+    public static Light getLight(int x, int y, int z) {
+        Block block = region1Blocks.get(x + y * size + z * size * size);
+        if (block != null) {
+            return block.light;
+        } else {
+            return new Light(0, 0, 0, 0);
+        }
+    }
+
+    public static void updateLight(Vector3i pos) {
+        Block block = region1Blocks.get(condensePos(pos));
+        if (block != null) {
+            block.updateLight(pos);
+        }
+    }
+
+    public static void updateLightBuffer(Vector3i pos, Light light) {
+        region1LightingBuffer.put(condensePos(pos), Utils.lightToInt(light));
+        Renderer.lightChanged = true;
     }
 }

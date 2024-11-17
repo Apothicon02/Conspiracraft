@@ -1,7 +1,9 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.game.blocks.Light;
 import org.lwjgl.BufferUtils;
 
+import java.awt.*;
 import java.awt.image.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -33,5 +35,12 @@ public class Utils {
 
     public static int packInts(int first4, int last4) {
         return (first4 << 16) | last4;
+    }
+
+    public static int colorToInt(Color color) {
+        return color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
+    }
+    public static int lightToInt(Light light) {
+        return light.r() << 16 | light.g() << 8 | light.b() | light.s() << 24;
     }
 }

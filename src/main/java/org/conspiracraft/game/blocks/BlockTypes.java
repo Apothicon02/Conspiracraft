@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BlockTypes {
-    public static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
+    public static Map<Short, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
-    private static int key = 0;
+    private static short key = 0;
 
     public static BlockType AIR = create(new BlockType());
     public static BlockType WATER = create(new BlockType());

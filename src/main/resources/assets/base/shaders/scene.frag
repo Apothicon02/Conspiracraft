@@ -11,21 +11,9 @@ layout(std430, binding = 1) buffer region1
 {
     int[] region1BlockData;
 };
-layout(std430, binding = 2) buffer region2
+layout(std430, binding = 2) buffer region1Lighting
 {
-    int[] region2BlockData;
-};
-layout(std430, binding = 3) buffer region3
-{
-    int[] region3BlockData;
-};
-layout(std430, binding = 4) buffer region4
-{
-    int[] region4BlockData;
-};
-layout(std430, binding = 5) buffer lod1
-{
-    uint[] lod1Data;
+    int[] region1LightingData;
 };
 in vec2 gl_FragCoord;
 in vec4 pos;
@@ -39,7 +27,7 @@ vec3 stepMask(vec3 sideDist) {
     mask.z = b1.z && b2.z;
     mask.x = b1.x && b2.x;
     mask.y = b1.y && b2.y;
-    if(!any(mask)) // Thank you Spalmer
+    if(!any(mask))
     mask.z = true;
 
     return vec3(mask);
@@ -74,6 +62,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
 int size = 808;
 vec3 rayMapPos = vec3(0);
+//vec4 lighting = vec4(0);
 
 vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
@@ -87,8 +76,13 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
         if (rayMapPos.x <= 0 || rayMapPos.x > size || rayMapPos.y < 0 || rayMapPos.y > 50 || rayMapPos.z < 0 || rayMapPos.z > size) { //cull rays that go out of bounds
             break;
         }
-        int blockInfo = region1BlockData[int(rayMapPos.x) + int(rayMapPos.y) * size + int(rayMapPos.z) * size * size];
+        int blockPos = int(rayMapPos.x) + int(rayMapPos.y) * size + int(rayMapPos.z) * size * size;
+        int blockInfo = region1BlockData[blockPos];
         int blockType = (blockInfo >> 16) & 0xFFFF;
+        //        int lightingData = region1LightingData[blockPos];
+        //        vec4 blockLighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24)/127;
+        //        lighting = vec4(max(lighting.r, blockLighting.r), max(lighting.g, blockLighting.g), max(lighting.b, blockLighting.b), max(lighting.a, blockLighting.a));
+
         if (blockType != 0f) {
             int blockSubtype = blockInfo & 0xFFFF;
 
@@ -131,6 +125,7 @@ void main()
         } else {
             fragColor = vec4(mix(vec3(fragColor), fogColor*1.2, distance(camPos, rayMapPos)/renderDistance), 1);
         }
+        //fragColor += vec4(vec3(lighting), 0);
     } else {
         fragColor = vec4(0, 0, 0, 1);
     }
