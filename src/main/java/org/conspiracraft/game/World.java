@@ -1,6 +1,8 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Light;
+import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.FastNoiseLite;
@@ -15,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public class World {
-    public static int seaLevel = 12;
-    public static int size = 808;
+    public static int seaLevel = 137; //137
+    public static int size = 512;
     public static int fullSize = (size+1)*(size+1)*(size+1);
 
     public static Map<Integer, Block> region1Blocks = new HashMap<>(Map.of());
@@ -50,34 +52,56 @@ public class World {
     }
 
     public static void generateWorld() {
+        FastNoiseLite cellularNoise = new FastNoiseLite((int) (Math.random()*9999));
         FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
-        noise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+        cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+        Vector2i middle = new Vector2i(size/2, size/2);
         for (int x = 1; x <= size; x++) {
             for (int z = 1; z <= size; z++) {
-                float baseCellularNoise = noise.GetNoise(x, z);
+                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z));
+                float baseCellularNoise = cellularNoise.GetNoise(x, z);
+                float basePerlinNoise = noise.GetNoise(x, z);
+                double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
+                double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 boolean upmost = true;
-                for (int y = 30; y >= 1; y--) {
-                    double baseGradient = ConspiracraftMath.gradient(y, 30, 1, 2, -1);
-                    if (baseCellularNoise + baseGradient > 0) {
+                for (int y = 157; y >= 1; y--) {
+                    double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
+                    double negativeDensity = (basePerlinNoise-1) + negativeGradient;
+                    double baseDensity = 0;
+                    if (negativeDensity < 0) {
+                        baseDensity = 0;
+                    } else {
+                        double baseGradient = ConspiracraftMath.gradient(y, 157, 126, 2, -1);
+                        baseDensity = baseCellularNoise + baseGradient;
+                    }
+                    if (baseDensity > 0) {
                         if (upmost && y >= seaLevel) {
-                            setBlock(x, y, z, 2, 0);
+                            setBlock(x, y, z, 2, 0, false);
                             double torchChance = Math.random();
                             if (torchChance > 0.9999d) {
-                                setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0);
+                                setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0, false);
                                 lightQueue.add(new Vector3i(x, y+1, z));
                             } else {
-                                setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3));
+                                setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false);
                             }
                             upmost = false;
                         } else {
-                            setBlock(x, y, z, 3, 0);
+                            setBlock(x, y, z, 3, 0, false);
+                            if (upmost) {
+                                boolean replace = false;
+                                int seaFloor = y+1;
+                                if (seaLevelNegativeDensity-0.1 < 0) {
+                                    seaFloor = 1;
+                                    replace = true;
+                                }
+                                for (int waterY = seaFloor; waterY <= seaLevel; waterY++) {
+                                    setBlock(x, waterY, z, 1, 0, replace);
+                                }
+                            }
                         }
                     } else {
-                        if (y <= seaLevel) {
-                            setBlock(x, y, z, 1, 0);
-                        } else {
-                            setBlock(x, y, z, 0, 0);
-                        }
+                        setBlock(x, y, z, 0, 0, false);
                     }
                 }
             }
@@ -98,18 +122,20 @@ public class World {
         return null;
     }
 
-    public static Block setBlock(int x, int y, int z, int blockType, int blockSubtype) {
+    public static Block setBlock(int x, int y, int z, int blockType, int blockSubtype, boolean replace) {
         if (x > 0 && x <= size && z > 0 && z <= size) {
             int pos = condensePos(x, y, z);
-            int blockId = Utils.packInts(blockType, blockSubtype);
-            region1Buffer.put(pos, blockId);
-            Block block = new Block((short)(blockType), (short)(blockSubtype));
-            region1Blocks.put(pos, block);
-            Renderer.worldChanged = true;
-            return block;
-        } else {
-            return null;
+            Block existing = region1Blocks.get(pos);
+            if (replace || (existing == null || existing.blockType.equals(BlockTypes.AIR))) {
+                int blockId = Utils.packInts(blockType, blockSubtype);
+                region1Buffer.put(pos, blockId);
+                Block block = new Block((short) (blockType), (short) (blockSubtype));
+                region1Blocks.put(pos, block);
+                Renderer.worldChanged = true;
+                return block;
+            }
         }
+        return null;
     }
 
     public static Light getLight(int x, int y, int z) {
