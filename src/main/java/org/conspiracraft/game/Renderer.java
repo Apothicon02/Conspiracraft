@@ -1,6 +1,7 @@
 package org.conspiracraft.game;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -20,7 +21,7 @@ import static org.conspiracraft.game.World.*;
 
 public class Renderer {
     public static ShaderProgram scene;
-    public static int sceneVaoId;;
+    public static int sceneVaoId;
     public static int atlasSSBOId;
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
@@ -30,8 +31,8 @@ public class Renderer {
     public static int renderDistanceUniform;
     public static int renderDistanceMul = 10;
     public static boolean atlasChanged = true;
-    public static boolean worldChanged = true;
-    public static boolean lightChanged = true;
+    public static boolean worldChanged = false;
+    public static boolean lightChanged = false;
 
     public static void init() throws Exception {
         GL.createCapabilities();
@@ -113,12 +114,23 @@ public class Renderer {
         if (lightChanged) {
             lightChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, region1LightingBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
+            for (int i = 0; i <= 100; i++) {
+                if (!lightQueue.isEmpty()) {
+                    Vector3i lightPos = lightQueue.getFirst();
+                    updateLight(lightPos);
+                    lightQueue.removeFirst();
+                    int pos = condensePos(lightPos);
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{region1LightingBuffer.get(pos)});
+                } else {
+                    break;
+                }
+            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 

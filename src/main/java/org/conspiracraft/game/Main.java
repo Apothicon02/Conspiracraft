@@ -24,6 +24,7 @@ public class Main {
 
     boolean wasTDown = false;
     boolean wasGDown = false;
+    boolean wasLDown = false;
     boolean wasUpDown = false;
     boolean wasDownDown = false;
 
@@ -63,7 +64,10 @@ public class Main {
                 Renderer.atlasChanged = true;
             }
             if (wasGDown && !window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS)) {
-                Renderer.worldChanged = true;
+                World.regenerateWorld();
+            }
+            if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
+                Renderer.lightChanged = true;
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                 if (Renderer.renderDistanceMul < 32) {
@@ -79,6 +83,7 @@ public class Main {
 
         wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
         wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
+        wasLDown = window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS);
         wasUpDown = window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS);
         wasDownDown = window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS);
     }

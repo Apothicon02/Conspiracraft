@@ -62,7 +62,9 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
 int size = 808;
 vec3 rayMapPos = vec3(0);
-//vec4 lighting = vec4(0);
+vec4 prevLighting = vec4(0);
+vec4 lighting = vec4(0);
+vec3 lightFog = vec3(0);
 
 vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
@@ -79,9 +81,10 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
         int blockPos = int(rayMapPos.x) + int(rayMapPos.y) * size + int(rayMapPos.z) * size * size;
         int blockInfo = region1BlockData[blockPos];
         int blockType = (blockInfo >> 16) & 0xFFFF;
-        //        int lightingData = region1LightingData[blockPos];
-        //        vec4 blockLighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24)/127;
-        //        lighting = vec4(max(lighting.r, blockLighting.r), max(lighting.g, blockLighting.g), max(lighting.b, blockLighting.b), max(lighting.a, blockLighting.a));
+        int lightingData = region1LightingData[blockPos];
+        prevLighting = lighting;
+        lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
+        lightFog = vec3(max(lightFog.r, lighting.r), max(lightFog.g, lighting.g), max(lightFog.b, lighting.b));
 
         if (blockType != 0f) {
             int blockSubtype = blockInfo & 0xFFFF;
@@ -125,7 +128,10 @@ void main()
         } else {
             fragColor = vec4(mix(vec3(fragColor), fogColor*1.2, distance(camPos, rayMapPos)/renderDistance), 1);
         }
-        //fragColor += vec4(vec3(lighting), 0);
+        vec4 maxLighting = vec4(max(prevLighting.r, lighting.r), max(prevLighting.g, lighting.g), max(prevLighting.b, lighting.b), max(prevLighting.a, lighting.a));
+        float brightness = max(maxLighting.r, max(maxLighting.g, max(maxLighting.b, maxLighting.a)))*0.01f;
+        vec3 blockLightFog = vec3(lightFog)*0.01f;
+        fragColor = vec4(mix((vec3(fragColor.r, fragColor.g, fragColor.b)*max(0.1, brightness)), blockLightFog, brightness*2), 1);
     } else {
         fragColor = vec4(0, 0, 0, 1);
     }
