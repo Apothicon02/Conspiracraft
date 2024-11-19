@@ -70,7 +70,7 @@ public class Main {
                 Renderer.lightChanged = true;
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                if (Renderer.renderDistanceMul < 32) {
+                if (Renderer.renderDistanceMul < 4) {
                     Renderer.renderDistanceMul++;
                 }
             }
@@ -78,6 +78,10 @@ public class Main {
                 if (Renderer.renderDistanceMul > 0) {
                     Renderer.renderDistanceMul--;
                 }
+            }
+        } else {
+            if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
+                Renderer.timeOfDay = Renderer.timeOfDay == 1 ? 0 : 1;
             }
         }
 

@@ -12,16 +12,14 @@ import org.conspiracraft.game.blocks.Block;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class World {
     public static int seaLevel = 137; //137
     public static int size = 512;
     public static int fullSize = (size+1)*(size+1)*(size+1);
 
-    public static Map<Integer, Block> region1Blocks = new HashMap<>(Map.of());
+    public static Block[] region1Blocks = new Block[fullSize];
     public static IntBuffer region1Buffer;
     public static IntBuffer region1LightingBuffer;
 
@@ -65,7 +63,7 @@ public class World {
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 boolean upmost = true;
-                for (int y = 157; y >= 1; y--) {
+                for (int y = size-1; y >= 1; y--) {
                     double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
                     double negativeDensity = (basePerlinNoise-1) + negativeGradient;
                     double baseDensity = 0;
@@ -117,7 +115,7 @@ public class World {
 
     public static Block getBlock(Vector3i blockPos) {
         if (blockPos.x > 0 && blockPos.x <= size && blockPos.z > 0 && blockPos.z <= size) {
-            return region1Blocks.get(condensePos(blockPos.x, blockPos.y, blockPos.z));
+            return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
         }
         return null;
     }
@@ -125,12 +123,12 @@ public class World {
     public static Block setBlock(int x, int y, int z, int blockType, int blockSubtype, boolean replace) {
         if (x > 0 && x <= size && z > 0 && z <= size) {
             int pos = condensePos(x, y, z);
-            Block existing = region1Blocks.get(pos);
+            Block existing = region1Blocks[pos];
             if (replace || (existing == null || existing.blockType.equals(BlockTypes.AIR))) {
                 int blockId = Utils.packInts(blockType, blockSubtype);
                 region1Buffer.put(pos, blockId);
                 Block block = new Block((short) (blockType), (short) (blockSubtype));
-                region1Blocks.put(pos, block);
+                region1Blocks[pos] = block;
                 Renderer.worldChanged = true;
                 return block;
             }
@@ -139,7 +137,7 @@ public class World {
     }
 
     public static Light getLight(int x, int y, int z) {
-        Block block = region1Blocks.get(x + y * size + z * size * size);
+        Block block = region1Blocks[x + y * size + z * size * size];
         if (block != null) {
             Light blockLight = block.light;
             if (blockLight == null) {
@@ -153,7 +151,7 @@ public class World {
     }
 
     public static void updateLight(Vector3i pos) {
-        Block block = region1Blocks.get(condensePos(pos));
+        Block block = region1Blocks[condensePos(pos)];
         if (block != null) {
             block.updateLight(pos);
         }

@@ -29,7 +29,9 @@ public class Renderer {
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
-    public static int renderDistanceMul = 10;
+    public static int timeOfDayUniform;
+    public static int renderDistanceMul = 4;
+    public static float timeOfDay = 1f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
     public static boolean lightChanged = false;
@@ -61,6 +63,7 @@ public class Renderer {
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
         renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
+        timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
 
         glBindVertexArray(0);
     }
@@ -78,6 +81,7 @@ public class Renderer {
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
         glUniform1i(renderDistanceUniform, 250+(50*renderDistanceMul));
+        glUniform1f(timeOfDayUniform, timeOfDay);
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
@@ -99,6 +103,14 @@ public class Renderer {
             atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+            glBindTexture(GL_TEXTURE_2D, glGenTextures());
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/coherent_noise.png"))));
         }
         if (worldChanged) {
             worldChanged = false;
