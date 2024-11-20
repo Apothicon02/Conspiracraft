@@ -1,11 +1,13 @@
 package org.conspiracraft.game.blocks;
 
+import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.World;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.joml.Vector3i;
+import org.conspiracraft.game.types.Vector3s;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
@@ -18,37 +20,47 @@ public class Block {
         blockSubtype = subtype;
     }
 
-    public void updateLight(Vector3i pos) {
+    public int updateLight(Vector3s pos) {
         if (blockType.isTransparent) {
             if (light == null) {
-                light = new Light(0, 0, 0,0);
+                if (blockType instanceof LightBlockType) {
+                    light = ((LightBlockType) blockType).emission;
+                } else {
+                    light = new Light(0, 0, 0,0);
+                }
             }
-            Map<Vector3i, Light> neighborLights = Map.of(
-                    new Vector3i(pos.x, pos.y, pos.z + 1), World.getLight(pos.x, pos.y, pos.z + 1),
-                    new Vector3i(pos.x + 1, pos.y, pos.z), World.getLight(pos.x + 1, pos.y, pos.z),
-                    new Vector3i(pos.x, pos.y, pos.z - 1), World.getLight(pos.x, pos.y, pos.z - 1),
-                    new Vector3i(pos.x - 1, pos.y, pos.z), World.getLight(pos.x - 1, pos.y, pos.z),
-                    new Vector3i(pos.x, pos.y + 1, pos.z), World.getLight(pos.x, pos.y + 1, pos.z),
-                    new Vector3i(pos.x, pos.y - 1, pos.z), World.getLight(pos.x, pos.y - 1, pos.z)
-            );
+            Vector3s[] neighborBlocks = new Vector3s[]{
+                    new Vector3s(pos.x, pos.y, pos.z + 1),
+                    new Vector3s(pos.x + 1, pos.y, pos.z),
+                    new Vector3s(pos.x, pos.y, pos.z - 1),
+                    new Vector3s(pos.x - 1, pos.y, pos.z),
+                    new Vector3s(pos.x, pos.y + 1, pos.z),
+                    new Vector3s(pos.x, pos.y - 1, pos.z)
+            };
+            Map<Vector3s, Light> neighborLights = new HashMap<>(Map.of());
+            for (int i = 0; i < neighborBlocks.length; i++) {
+                Vector3s blockPos = neighborBlocks[i];
+                Light neighborLight = World.getLight(blockPos);
+                if (neighborLight != null) {
+                    neighborLights.put(blockPos, neighborLight);
+                }
+            }
             Light maxNeighborLight = new Light(0, 0, 0, 0);
-            neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
+            neighborLights.forEach((Vector3s neighborPos, Light neighborLight) -> {
                 maxNeighborLight.r(Math.max(maxNeighborLight.r(), neighborLight.r()));
                 maxNeighborLight.g(Math.max(maxNeighborLight.g(), neighborLight.g()));
                 maxNeighborLight.b(Math.max(maxNeighborLight.b(), neighborLight.b()));
                 maxNeighborLight.s(Math.max(maxNeighborLight.s(), neighborLight.s()));
             });
-            if (blockType instanceof LightBlockType) {
-                light = ((LightBlockType) blockType).emission;
-            }
-            light = new Light(Math.max(light.r(), maxNeighborLight.r() - 1), Math.max(light.g(), maxNeighborLight.g() - 1), Math.max(light.b(), maxNeighborLight.b() - 1), Math.max(light.s(), maxNeighborLight.s() - 1));
-            World.updateLightBuffer(pos, light);
-            neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
-                if (isDarker(neighborLight) && World.getBlock(neighborPos) != null && !World.lightQueue.contains(neighborPos)) {
+            light = new Light(Math.max(light.r(), maxNeighborLight.r())- 1, Math.max(light.g(), maxNeighborLight.g())- 1, Math.max(light.b(), maxNeighborLight.b())- 1, Math.max(light.s(), maxNeighborLight.s())- 1);
+            neighborLights.forEach((Vector3s neighborPos, Light neighborLight) -> {
+                if (isDarker(neighborLight) && !World.lightQueue.contains(neighborPos)) {
                     World.lightQueue.add(neighborPos);
                 }
             });
+            return Utils.lightToInt(light);
         }
+        return 0;
     }
 
     public boolean isDarker(Light darker) {

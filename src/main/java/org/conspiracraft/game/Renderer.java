@@ -1,7 +1,9 @@
 package org.conspiracraft.game;
 
+import org.conspiracraft.game.types.Vector2s;
+import org.conspiracraft.game.types.Vector3s;
 import org.joml.Matrix4f;
-import org.joml.Vector3i;
+import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -14,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
@@ -25,7 +29,6 @@ public class Renderer {
     public static int atlasSSBOId;
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
-    public static IntBuffer atlasBuffer;
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
@@ -34,7 +37,6 @@ public class Renderer {
     public static float timeOfDay = 1f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
-    public static boolean lightChanged = false;
 
     public static void init() throws Exception {
         GL.createCapabilities();
@@ -100,7 +102,7 @@ public class Renderer {
                 }
             }
 
-            atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
+            IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -113,36 +115,56 @@ public class Renderer {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/coherent_noise.png"))));
         }
         if (worldChanged) {
-            worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, region1Buffer, GL_STATIC_DRAW);
+            int[] blocks = new int[fullSize];
+            for (Vector2i blockData : blockQueue) {
+                blocks[blockData.x] = blockData.y;
+            }
+
+            blockQueue = new ArrayList<>(List.of());
+            glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        }
-        if (lightChanged) {
-            lightChanged = false;
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, region1LightingBuffer, GL_STATIC_DRAW);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        } else {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
             for (int i = 0; i <= 100; i++) {
-                if (!lightQueue.isEmpty()) {
-                    Vector3i lightPos = lightQueue.getFirst();
-                    updateLight(lightPos);
-                    lightQueue.removeFirst();
-                    int pos = condensePos(lightPos);
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{region1LightingBuffer.get(pos)});
+                if (!blockQueue.isEmpty()) {
+                    Vector2i blockData = blockQueue.getFirst();
+                    blockQueue.removeFirst();
+                    if (blockData != null) {
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, blockData.x*4L, new int[]{blockData.y});
+                    }
                 } else {
                     break;
                 }
             }
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
+        if (worldChanged) {
+            worldChanged = false;
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, new int[fullSize], GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        } else {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
+            for (int i = 0; i <= 1000; i++) {
+                if (!lightQueue.isEmpty()) {
+                    Vector3s lightPos = lightQueue.getFirst();
+                    lightQueue.removeFirst();
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
+                } else {
+                    break;
+                }
+            }
+//            Vector3s[] lights = lightQueue.toArray(new Vector3s[0]);
+//            lightQueue.clear();
+//            for (int i = 0; i<lights.length; i++) {
+//                Vector3s lightPos = lights[i];
+//                glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
+//            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 

@@ -1,38 +1,32 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Light;
+import org.conspiracraft.game.types.Vector2s;
+import org.conspiracraft.game.types.Vector3s;
 import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
-import org.lwjgl.BufferUtils;
+import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.engine.FastNoiseLite;
 import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
+import org.joml.Vector2i;
 
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class World {
-    public static int seaLevel = 137; //137
+    public static int seaLevel = 137;
     public static int size = 512;
     public static int fullSize = (size+1)*(size+1)*(size+1);
 
     public static Block[] region1Blocks = new Block[fullSize];
-    public static IntBuffer region1Buffer;
-    public static IntBuffer region1LightingBuffer;
 
-    public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
+    public static List<Vector3s> lightQueue = new ArrayList<>(List.of());
+    public static List<Vector2i> blockQueue = new ArrayList<>(List.of());
 
     public static void init() {
         clearWorld();
         generateWorld();
-    }
-
-    public static void tick() {
-        updateLight(lightQueue.getFirst());
-        lightQueue.removeFirst();
     }
 
     public static void regenerateWorld() {
@@ -41,12 +35,7 @@ public class World {
     }
 
     public static void clearWorld() {
-        int[] empty = new int[fullSize];
-        region1Buffer = BufferUtils.createIntBuffer(fullSize).put(empty).flip();
-        region1LightingBuffer = BufferUtils.createIntBuffer(fullSize).put(empty).flip();
-        empty = null;
         Renderer.worldChanged = true;
-        Renderer.lightChanged = true;
     }
 
     public static void generateWorld() {
@@ -54,10 +43,10 @@ public class World {
         FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
         cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-        Vector2i middle = new Vector2i(size/2, size/2);
+        Vector2s middle = new Vector2s(size/2, size/2);
         for (int x = 1; x <= size; x++) {
             for (int z = 1; z <= size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z));
+                int distance = (int)(Vector2i.distance(middle.x, middle.z, x, z));
                 float baseCellularNoise = cellularNoise.GetNoise(x, z);
                 float basePerlinNoise = noise.GetNoise(x, z);
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
@@ -79,7 +68,6 @@ public class World {
                             double torchChance = Math.random();
                             if (torchChance > 0.9999d) {
                                 setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0, false);
-                                lightQueue.add(new Vector3i(x, y+1, z));
                             } else {
                                 setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false);
                             }
@@ -104,16 +92,17 @@ public class World {
                 }
             }
         }
+        Renderer.worldChanged = true;
     }
 
-    public static int condensePos(Vector3i pos) {
-        return pos.x + pos.y * size + pos.z * size * size;
-    }
     public static int condensePos(int x, int y, int z) {
         return x + y * size + z * size * size;
     }
+    public static int condensePos(Vector3s pos) {
+        return pos.x + pos.y * size + pos.z * size * size;
+    }
 
-    public static Block getBlock(Vector3i blockPos) {
+    public static Block getBlock(Vector3s blockPos) {
         if (blockPos.x > 0 && blockPos.x <= size && blockPos.z > 0 && blockPos.z <= size) {
             return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
         }
@@ -126,10 +115,12 @@ public class World {
             Block existing = region1Blocks[pos];
             if (replace || (existing == null || existing.blockType.equals(BlockTypes.AIR))) {
                 int blockId = Utils.packInts(blockType, blockSubtype);
-                region1Buffer.put(pos, blockId);
+                blockQueue.add(new Vector2i(pos, blockId));
                 Block block = new Block((short) (blockType), (short) (blockSubtype));
                 region1Blocks[pos] = block;
-                Renderer.worldChanged = true;
+                if (block.blockType instanceof LightBlockType) {
+                    lightQueue.add(new Vector3s(x, y, z));
+                }
                 return block;
             }
         }
@@ -137,27 +128,30 @@ public class World {
     }
 
     public static Light getLight(int x, int y, int z) {
-        Block block = region1Blocks[x + y * size + z * size * size];
+        Block block = region1Blocks[condensePos(x, y, z)];
         if (block != null) {
-            Light blockLight = block.light;
-            if (blockLight == null) {
-                return new Light(0, 0, 0,0);
-            } else {
-                return blockLight;
+            if (block.blockType.isTransparent) {
+                Light blockLight = block.light;
+                if (blockLight != null) {
+                    return blockLight;
+                } else {
+                    return new Light(0);
+                }
             }
-        } else {
-            return new Light(0, 0, 0, 0);
         }
+        return null;
     }
 
-    public static void updateLight(Vector3i pos) {
+    public static Light getLight(Vector3s pos) {
+        return getLight(pos.x, pos.y, pos.z);
+    }
+
+    public static int updateLight(Vector3s pos) {
         Block block = region1Blocks[condensePos(pos)];
         if (block != null) {
-            block.updateLight(pos);
+            return block.updateLight(pos);
+        } else {
+            return 0;
         }
-    }
-
-    public static void updateLightBuffer(Vector3i pos, Light light) {
-        region1LightingBuffer.put(condensePos(pos), Utils.lightToInt(light));
     }
 }

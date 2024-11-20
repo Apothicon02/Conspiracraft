@@ -7,10 +7,17 @@ public class Light {
     private byte s;
 
     public Light(int red, int green, int blue, int sun) {
-        r = (byte) red;
-        g = (byte) green;
-        b = (byte) blue;
-        s = (byte) sun;
+        r = (byte) Math.max(red, 0);
+        g = (byte) Math.max(green, 0);;
+        b = (byte) Math.max(blue, 0);;
+        s = (byte) Math.max(sun, 0);;
+    }
+
+    public Light(int all) {
+        r = (byte) Math.max(all, 0);
+        g = (byte) Math.max(all, 0);;
+        b = (byte) Math.max(all, 0);;
+        s = (byte) Math.max(all, 0);;
     }
 
     public byte r() {

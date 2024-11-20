@@ -67,7 +67,7 @@ public class Main {
                 World.regenerateWorld();
             }
             if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
-                Renderer.lightChanged = true;
+                Renderer.worldChanged = true;
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                 if (Renderer.renderDistanceMul < 4) {
