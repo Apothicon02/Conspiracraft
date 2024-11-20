@@ -5,7 +5,8 @@ import org.conspiracraft.game.World;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.game.types.Vector3s;
+import org.joml.Vector3i;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class Block {
         blockSubtype = subtype;
     }
 
-    public int updateLight(Vector3s pos) {
+    public int updateLight(Vector3i pos) {
         if (blockType.isTransparent) {
             if (light == null) {
                 if (blockType instanceof LightBlockType) {
@@ -29,31 +30,31 @@ public class Block {
                     light = new Light(0, 0, 0,0);
                 }
             }
-            Vector3s[] neighborBlocks = new Vector3s[]{
-                    new Vector3s(pos.x, pos.y, pos.z + 1),
-                    new Vector3s(pos.x + 1, pos.y, pos.z),
-                    new Vector3s(pos.x, pos.y, pos.z - 1),
-                    new Vector3s(pos.x - 1, pos.y, pos.z),
-                    new Vector3s(pos.x, pos.y + 1, pos.z),
-                    new Vector3s(pos.x, pos.y - 1, pos.z)
+            Vector3i[] neighborBlocks = new Vector3i[]{
+                    new Vector3i(pos.x, pos.y, pos.z + 1),
+                    new Vector3i(pos.x + 1, pos.y, pos.z),
+                    new Vector3i(pos.x, pos.y, pos.z - 1),
+                    new Vector3i(pos.x - 1, pos.y, pos.z),
+                    new Vector3i(pos.x, pos.y + 1, pos.z),
+                    new Vector3i(pos.x, pos.y - 1, pos.z)
             };
-            Map<Vector3s, Light> neighborLights = new HashMap<>(Map.of());
+            Map<Vector3i, Light> neighborLights = new HashMap<>(Map.of());
             for (int i = 0; i < neighborBlocks.length; i++) {
-                Vector3s blockPos = neighborBlocks[i];
+                Vector3i blockPos = neighborBlocks[i];
                 Light neighborLight = World.getLight(blockPos);
                 if (neighborLight != null) {
                     neighborLights.put(blockPos, neighborLight);
                 }
             }
             Light maxNeighborLight = new Light(0, 0, 0, 0);
-            neighborLights.forEach((Vector3s neighborPos, Light neighborLight) -> {
+            neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
                 maxNeighborLight.r(Math.max(maxNeighborLight.r(), neighborLight.r()));
                 maxNeighborLight.g(Math.max(maxNeighborLight.g(), neighborLight.g()));
                 maxNeighborLight.b(Math.max(maxNeighborLight.b(), neighborLight.b()));
                 maxNeighborLight.s(Math.max(maxNeighborLight.s(), neighborLight.s()));
             });
             light = new Light(Math.max(light.r(), maxNeighborLight.r())- 1, Math.max(light.g(), maxNeighborLight.g())- 1, Math.max(light.b(), maxNeighborLight.b())- 1, Math.max(light.s(), maxNeighborLight.s())- 1);
-            neighborLights.forEach((Vector3s neighborPos, Light neighborLight) -> {
+            neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
                 if (isDarker(neighborLight) && !World.lightQueue.contains(neighborPos)) {
                     World.lightQueue.add(neighborPos);
                 }

@@ -1,8 +1,7 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Light;
-import org.conspiracraft.game.types.Vector2s;
-import org.conspiracraft.game.types.Vector3s;
+
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.engine.FastNoiseLite;
@@ -10,6 +9,7 @@ import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class World {
 
     public static Block[] region1Blocks = new Block[fullSize];
 
-    public static List<Vector3s> lightQueue = new ArrayList<>(List.of());
+    public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
     public static List<Vector2i> blockQueue = new ArrayList<>(List.of());
 
     public static void init() {
@@ -35,7 +35,9 @@ public class World {
     }
 
     public static void clearWorld() {
-        Renderer.worldChanged = true;
+        region1Blocks = new Block[fullSize];
+        lightQueue = new ArrayList<>(List.of());
+        blockQueue = new ArrayList<>(List.of());
     }
 
     public static void generateWorld() {
@@ -43,10 +45,10 @@ public class World {
         FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
         cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-        Vector2s middle = new Vector2s(size/2, size/2);
+        Vector2i middle = new Vector2i(size/2, size/2);
         for (int x = 1; x <= size; x++) {
             for (int z = 1; z <= size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.z, x, z));
+                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z));
                 float baseCellularNoise = cellularNoise.GetNoise(x, z);
                 float basePerlinNoise = noise.GetNoise(x, z);
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
@@ -98,11 +100,11 @@ public class World {
     public static int condensePos(int x, int y, int z) {
         return x + y * size + z * size * size;
     }
-    public static int condensePos(Vector3s pos) {
+    public static int condensePos(Vector3i pos) {
         return pos.x + pos.y * size + pos.z * size * size;
     }
 
-    public static Block getBlock(Vector3s blockPos) {
+    public static Block getBlock(Vector3i blockPos) {
         if (blockPos.x > 0 && blockPos.x <= size && blockPos.z > 0 && blockPos.z <= size) {
             return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
         }
@@ -119,7 +121,7 @@ public class World {
                 Block block = new Block((short) (blockType), (short) (blockSubtype));
                 region1Blocks[pos] = block;
                 if (block.blockType instanceof LightBlockType) {
-                    lightQueue.add(new Vector3s(x, y, z));
+                    lightQueue.add(new Vector3i(x, y, z));
                 }
                 return block;
             }
@@ -142,11 +144,11 @@ public class World {
         return null;
     }
 
-    public static Light getLight(Vector3s pos) {
+    public static Light getLight(Vector3i pos) {
         return getLight(pos.x, pos.y, pos.z);
     }
 
-    public static int updateLight(Vector3s pos) {
+    public static int updateLight(Vector3i pos) {
         Block block = region1Blocks[condensePos(pos)];
         if (block != null) {
             return block.updateLight(pos);

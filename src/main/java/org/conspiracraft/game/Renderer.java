@@ -1,9 +1,8 @@
 package org.conspiracraft.game;
 
-import org.conspiracraft.game.types.Vector2s;
-import org.conspiracraft.game.types.Vector3s;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -152,17 +151,17 @@ public class Renderer {
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
             for (int i = 0; i <= 1000; i++) {
                 if (!lightQueue.isEmpty()) {
-                    Vector3s lightPos = lightQueue.getFirst();
+                    Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
                 } else {
                     break;
                 }
             }
-//            Vector3s[] lights = lightQueue.toArray(new Vector3s[0]);
+//            Vector3i[] lights = lightQueue.toArray(new Vector3i[0]);
 //            lightQueue.clear();
 //            for (int i = 0; i<lights.length; i++) {
-//                Vector3s lightPos = lights[i];
+//                Vector3i lightPos = lights[i];
 //                glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
 //            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
