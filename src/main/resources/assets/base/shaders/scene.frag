@@ -129,14 +129,14 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
         //cloud start
         float offset = noise(vec2(rayMapPos.x, rayMapPos.z)/2)*50;
-        float offsetY = rayMapPos.y+offset;
+        vec3 cloudPos = vec3(rayMapPos.x+(timeOfDay*17000), rayMapPos.y+offset-(timeOfDay*34), rayMapPos.z+(timeOfDay*43000));
 
-        if (offsetY < 100+offset) {
-            cloudiness = max(cloudiness, (noise(vec2(rayMapPos.x, rayMapPos.z))+0.5f)*min(gradient(offsetY, 30+offset, 100+offset, 0, 0.5), gradient(offsetY, 0+offset, 30+offset, 0.5, 0)));
-        } else if (offsetY > 256+offset && offsetY < 400+offset) {
-            cloudiness = max(cloudiness, noise(vec2(rayMapPos.x, rayMapPos.z)/4)*min(gradient(offsetY, 378+offset, 400+offset, 0, 0.5), gradient(offsetY, 256+offset, 378+offset, 0.5, 0)));
-        } else if (offsetY > 400+offset && offsetY < 512+offset) {
-            cloudiness = max(cloudiness, (noise(vec2(rayMapPos.x, rayMapPos.z)/2)+0.2f)*min(gradient(offsetY, 456+offset, 512+offset, 0, 0.5), gradient(offsetY, 400+offset, 456+offset, 0.5, 0)));
+        if (cloudPos.y < 100+offset) {
+            cloudiness = max(cloudiness, (noise(vec2(cloudPos.x, cloudPos.z))+0.5f)*min(gradient(cloudPos.y, 30+offset, 100+offset, 0, 0.5), gradient(cloudPos.y, 0+offset, 30+offset, 0.5, 0)));
+        } else if (cloudPos.y > 256+offset && cloudPos.y < 400+offset) {
+            cloudiness = max(cloudiness, noise(vec2(cloudPos.x, cloudPos.z)/4)*min(gradient(cloudPos.y, 378+offset, 400+offset, 0, 0.5), gradient(cloudPos.y, 256+offset, 378+offset, 0.5, 0)));
+        } else if (cloudPos.y > 400+offset && cloudPos.y < 512+offset) {
+            cloudiness = max(cloudiness, (noise(vec2(cloudPos.x, cloudPos.z)/2)+0.2f)*min(gradient(cloudPos.y, 456+offset, 512+offset, 0, 0.5), gradient(cloudPos.y, 400+offset, 456+offset, 0.5, 0)));
         }
         if (cloudiness >= 1) {
             break;
@@ -189,7 +189,7 @@ void main()
         } else {
             max(max(prevLighting.r, lighting.r), max(max(prevLighting.g, lighting.g), max(prevLighting.b, lighting.b)))*0.02f;
         }
-        float distanceFogginess = clamp(((distance(camPos, hitPos)/renderDistance)*1.25)+gradient(hitPos.y, 0, 16, 0, 1.25), 0, 1);
+        float distanceFogginess = clamp((((distance(camPos, hitPos)+(max(0, noise(vec2(hitPos.x, hitPos.z)))*250))/renderDistance)*1.25)+gradient(hitPos.y, 0, 16, 0, 1.25), 0, 1);
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, min(distanceFogginess*1.25, 1)), vec3(1), cloudiness), 1); //distant fog, void fog, clouds
         float sunBrightness = max(0.1, (7*0.142f)*timeOfDay); //(max(prevLighting.a, lighting.a)*0.142f)*timeOfDay
         vec3 blockLightFog = lightFog*0.02f;

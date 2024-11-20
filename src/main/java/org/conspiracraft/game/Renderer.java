@@ -33,7 +33,7 @@ public class Renderer {
     public static int renderDistanceUniform;
     public static int timeOfDayUniform;
     public static int renderDistanceMul = 4;
-    public static float timeOfDay = 1f;
+    public static float timeOfDay = 0.5f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
 

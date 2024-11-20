@@ -81,7 +81,7 @@ public class Main {
             }
         } else {
             if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                Renderer.timeOfDay = Renderer.timeOfDay == 1 ? 0 : 1;
+                updateTime(diffTimeMillis, 6000);
             }
         }
 
@@ -92,7 +92,21 @@ public class Main {
         wasDownDown = window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS);
     }
 
-    public void update(Window window, long diffTimeMillis) {
+    byte meridiem = 1;
 
+    public void updateTime(long diffTimeMillis, float mul) {
+        float time = Renderer.timeOfDay+((diffTimeMillis/600000f)*mul)*meridiem;
+        if (time < 0f) {
+            time = 0;
+            meridiem = 1;
+        } else if (time > 1f) {
+            time = 1;
+            meridiem = -1;
+        }
+        Renderer.timeOfDay = time;
+    }
+
+    public void update(Window window, long diffTimeMillis) {
+        updateTime(diffTimeMillis, 1);
     }
 }
