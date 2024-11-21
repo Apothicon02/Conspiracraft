@@ -16,6 +16,8 @@ public class BlockTypes {
     public static BlockType ROSE = create(new BlockType(true));
     public static BlockType TORCH = create(new LightBlockType(true, 20, 12, 0));
     public static BlockType TEAL_TORCH = create(new LightBlockType(true, 0, 12, 20));
+    public static BlockType YELLOW_STAR = create(new LightBlockType(true, 3, 3, 0));
+    public static BlockType WHITE_STAR = create(new LightBlockType(true, 4, 4, 3));
 
     private static BlockType create(BlockType type) {
         blockTypeMap.put(key, type);

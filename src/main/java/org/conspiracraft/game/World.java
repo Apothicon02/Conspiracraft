@@ -2,6 +2,7 @@ package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Light;
 
+import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.engine.FastNoiseLite;
@@ -10,6 +11,7 @@ import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +22,10 @@ public class World {
     public static int fullSize = (size+1)*(size+1)*(size+1);
 
     public static Block[] region1Blocks = new Block[fullSize];
+    public static int[] heightmap = new int[(size+1)*(size+1)];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
-    public static List<Vector2i> blockQueue = new ArrayList<>(List.of());
+    public static List<Vector4i> blockQueue = new ArrayList<>(List.of());
 
     public static void init() {
         clearWorld();
@@ -53,6 +56,14 @@ public class World {
                 float basePerlinNoise = noise.GetNoise(x, z);
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
+                if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
+                    double random = Math.random();
+                    if (random > 0.9995) {
+                        setBlock(x, (int) ((basePerlinNoise*12)+299), z, 8, 0, false, true);
+                    } else if (random > 0.999) {
+                        setBlock(x, (int) ((basePerlinNoise*12)+299), z, 9, 0, false, true);
+                    }
+                }
                 boolean upmost = true;
                 for (int y = size-1; y >= 1; y--) {
                     double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
@@ -66,16 +77,16 @@ public class World {
                     }
                     if (baseDensity > 0) {
                         if (upmost && y >= seaLevel) {
-                            setBlock(x, y, z, 2, 0, false);
+                            setBlock(x, y, z, 2, 0, false, true);
                             double torchChance = Math.random();
                             if (torchChance > 0.9999d) {
-                                setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0, false);
+                                setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0, false, true);
                             } else {
-                                setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false);
+                                setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
                             }
                             upmost = false;
                         } else {
-                            setBlock(x, y, z, 3, 0, false);
+                            setBlock(x, y, z, 3, 0, false, true);
                             if (upmost) {
                                 boolean replace = false;
                                 int seaFloor = y+1;
@@ -84,19 +95,23 @@ public class World {
                                     replace = true;
                                 }
                                 for (int waterY = seaFloor; waterY <= seaLevel; waterY++) {
-                                    setBlock(x, waterY, z, 1, 0, replace);
+                                    setBlock(x, waterY, z, 1, 0, replace, true);
                                 }
                             }
                         }
                     } else {
-                        setBlock(x, y, z, 0, 0, false);
+                        setBlock(x, y, z, 0, 0, false, true);
                     }
                 }
+                updateSunlight(x, z);
             }
         }
         Renderer.worldChanged = true;
     }
 
+    public static int condensePos(int x, int z) {
+        return x * size + z;
+    }
     public static int condensePos(int x, int y, int z) {
         return x + y * size + z * size * size;
     }
@@ -111,28 +126,64 @@ public class World {
         return null;
     }
 
-    public static Block setBlock(int x, int y, int z, int blockType, int blockSubtype, boolean replace) {
+    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
         if (x > 0 && x <= size && z > 0 && z <= size) {
             int pos = condensePos(x, y, z);
             Block existing = region1Blocks[pos];
-            if (replace || (existing == null || existing.blockType.equals(BlockTypes.AIR))) {
-                int blockId = Utils.packInts(blockType, blockSubtype);
-                blockQueue.add(new Vector2i(pos, blockId));
-                Block block = new Block((short) (blockType), (short) (blockSubtype));
-                region1Blocks[pos] = block;
-                if (block.blockType instanceof LightBlockType) {
-                    lightQueue.add(new Vector3i(x, y, z));
+            if (replace || (existing == null || existing.blockTypeId == 0)) {
+                int blockId = Utils.packInts(blockTypeId, blockSubtypeId);
+                if (instant) {
+                    Vector3i BlockPos = new Vector3i(x, y, z);
+                    Block block = new Block((short) blockTypeId, (short) blockSubtypeId);
+                    BlockType blockType = BlockTypes.blockTypeMap.get((short)(blockTypeId));
+                    if (blockType instanceof LightBlockType) {
+                        lightQueue.add(BlockPos);
+                    }
+                    region1Blocks[pos] = block;
+                    updateHeightmap(x, blockType.isTransparent ? 0 : y, z);
+                } else {
+                    blockQueue.add(new Vector4i(x, y, z, blockId));
+                    updateHeightmap(x, BlockTypes.blockTypeMap.get((short)(blockTypeId)).isTransparent ? 0 : y, z);
+                    updateSunlight(x, z);
                 }
-                return block;
             }
         }
-        return null;
+    }
+
+    public static void updateSunlight(int x, int z) {
+        boolean shadow = false;
+        int heightmapPos = heightmap[condensePos(x, z)];
+        for (int blockY = 512; blockY > 0; blockY--) {
+            Block block = getBlock(new Vector3i(x, blockY, z));
+            if (block != null && BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+                int sun = blockY > heightmapPos ? 12 : 0;
+                if (block.light == null) {
+                    block.light = new Light(0, 0, 0, sun);
+                } else {
+                    block.light.s(sun);
+                }
+                if (sun == 0 && !shadow) {
+                    shadow = true;
+                    lightQueue.add(new Vector3i(x, blockY, z));
+                }
+            }
+        }
+    }
+
+    public static void updateHeightmap(int x, int y, int z) {
+        int horizontalPos = condensePos(x, z);
+        if (heightmap[horizontalPos] < y) {
+            heightmap[horizontalPos] = y;
+        }
+    }
+    public static void updateHeightmap(Vector3i pos) {
+        updateHeightmap(pos.x, pos.y, pos.z);
     }
 
     public static Light getLight(int x, int y, int z) {
-        Block block = region1Blocks[condensePos(x, y, z)];
+        Block block = getBlock(new Vector3i(x, y, z));
         if (block != null) {
-            if (block.blockType.isTransparent) {
+            if (BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
                 Light blockLight = block.light;
                 if (blockLight != null) {
                     return blockLight;

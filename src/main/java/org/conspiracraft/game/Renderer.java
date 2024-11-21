@@ -1,8 +1,14 @@
 package org.conspiracraft.game;
 
+import org.conspiracraft.game.blocks.Block;
+import org.conspiracraft.game.blocks.Light;
+import org.conspiracraft.game.blocks.types.BlockType;
+import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -117,10 +123,15 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             int[] blocks = new int[fullSize];
-            for (Vector2i blockData : blockQueue) {
-                blocks[blockData.x] = blockData.y;
+            for (int i = 0; i < region1Blocks.length; i++) {
+                Block block = region1Blocks[i];
+                if (block != null) {
+                    blocks[i] = block.id();
+                }
             }
-
+            for (Vector4i blockData : blockQueue) {
+                blocks[World.condensePos(blockData.x, blockData.y, blockData.z)] = blockData.w;
+            }
             blockQueue = new ArrayList<>(List.of());
             glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -129,10 +140,19 @@ public class Renderer {
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             for (int i = 0; i <= 100; i++) {
                 if (!blockQueue.isEmpty()) {
-                    Vector2i blockData = blockQueue.getFirst();
+                    Vector4i blockData = blockQueue.getFirst();
                     blockQueue.removeFirst();
                     if (blockData != null) {
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, blockData.x*4L, new int[]{blockData.y});
+                        Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
+                        int condensedPos = World.condensePos(pos);
+                        Block block = new Block(blockData.w);
+                        if (BlockTypes.blockTypeMap.get(block.blockTypeId) instanceof LightBlockType) {
+                            lightQueue.add(pos);
+                        }
+                        BlockType blockType = BlockTypes.blockTypeMap.get((short)(Utils.unpackInt(blockData.w).x));
+                        region1Blocks[condensedPos] = block;
+                        updateHeightmap(blockData.x, blockType.isTransparent ? 0 : blockData.y, blockData.z);
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
                     }
                 } else {
                     break;
@@ -144,7 +164,14 @@ public class Renderer {
             worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, new int[fullSize], GL_STATIC_DRAW);
+            int[] lights = new int[fullSize];
+            for (int i = 0; i < region1Blocks.length; i++) {
+                Block block = region1Blocks[i];
+                if (block != null && block.light != null) {
+                    lights[i] = Utils.lightToInt(block.light);
+                }
+            }
+            glBufferData(GL_SHADER_STORAGE_BUFFER, lights, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);

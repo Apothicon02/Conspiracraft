@@ -1,6 +1,7 @@
 package org.conspiracraft.engine;
 
 import org.conspiracraft.game.blocks.Light;
+import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
 
 import java.awt.*;
@@ -35,6 +36,9 @@ public class Utils {
 
     public static int packInts(int first4, int last4) {
         return (first4 << 16) | last4;
+    }
+    public static Vector2i unpackInt(int all8) {
+        return new Vector2i(all8 << 16, all8 >> 16);
     }
 
     public static int colorToInt(Color color) {

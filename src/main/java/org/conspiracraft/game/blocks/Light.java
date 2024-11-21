@@ -41,7 +41,7 @@ public class Light {
     public byte s() {
         return s;
     }
-    public void s(int blue) {
-        s = (byte) blue;
+    public void s(int sun) {
+        s = (byte) sun;
     }
 }

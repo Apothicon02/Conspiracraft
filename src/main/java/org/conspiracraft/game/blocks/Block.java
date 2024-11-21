@@ -5,6 +5,7 @@ import org.conspiracraft.game.World;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 
@@ -12,24 +13,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
-    public BlockType blockType;
-    public short blockSubtype;
+    public short blockTypeId;
+    public short blockSubtypeId;
     public Light light;
 
     public Block(short type, short subtype) {
-        blockType = BlockTypes.blockTypeMap.get(type);
-        blockSubtype = subtype;
+        blockTypeId = type;
+        blockSubtypeId = subtype;
+    }
+    public Block(int id) {
+        Vector2i unpackedId = Utils.unpackInt(id);
+        blockTypeId = (short)(unpackedId.x);
+        blockSubtypeId = (short) unpackedId.y;
+    }
+
+    public int id() {
+        return Utils.packInts(blockTypeId, blockSubtypeId);
     }
 
     public int updateLight(Vector3i pos) {
+        BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
         if (blockType.isTransparent) {
             if (light == null) {
-                if (blockType instanceof LightBlockType) {
-                    light = ((LightBlockType) blockType).emission;
-                } else {
-                    light = new Light(0, 0, 0,0);
-                }
+                light = new Light(0, 0, 0,0);
             }
+            if (blockType instanceof LightBlockType) {
+                light = ((LightBlockType) blockType).emission;
+            }
+            int heightmap = World.heightmap[World.condensePos(pos.x, pos.z)];
+            light.s(pos.y > heightmap ? 12 : 0);
             Vector3i[] neighborBlocks = new Vector3i[]{
                     new Vector3i(pos.x, pos.y, pos.z + 1),
                     new Vector3i(pos.x + 1, pos.y, pos.z),
