@@ -193,7 +193,7 @@ void main()
         }
         float distanceFogginess = clamp((((distance(camPos, hitPos)*(max(0, noise(vec2(hitPos.x, hitPos.z)))+1))/renderDistance)*1.25)+gradient(hitPos.y, 0, 16, 0, 1.25), 0, 1);
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, min(distanceFogginess*1.25, 1)), vec3(1), cloudiness), 1); //distant fog, void fog, clouds
-        float sunBrightness = max(0.1, (sunLight*sunLight)*timeOfDay);
+        float sunBrightness = max(0.1, sunLight*timeOfDay);
         vec3 blockLightFog = lightFog*0.02f;
         fragColor = vec4((vec3(fragColor)*max(blockLightBrightness, sunBrightness))+blockLightFog, 1); //brightness, blocklight fog
     } else {

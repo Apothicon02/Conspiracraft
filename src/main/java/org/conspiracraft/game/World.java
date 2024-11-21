@@ -22,7 +22,7 @@ public class World {
     public static int fullSize = (size+1)*(size+1)*(size+1);
 
     public static Block[] region1Blocks = new Block[fullSize];
-    public static int[] heightmap = new int[(size+1)*(size+1)];
+    public static Vector2i[] heightmap = new Vector2i[(size+1)*(size+1)];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
     public static List<Vector4i> blockQueue = new ArrayList<>(List.of());
@@ -152,11 +152,11 @@ public class World {
 
     public static void updateSunlight(int x, int z) {
         boolean shadow = false;
-        int heightmapPos = heightmap[condensePos(x, z)];
-        for (int blockY = 512; blockY > 0; blockY--) {
+        Vector2i heightmapPos = heightmap[condensePos(x, z)];
+        for (int blockY = 511; blockY >= 0; blockY--) {
             Block block = getBlock(new Vector3i(x, blockY, z));
             if (block != null && BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
-                int sun = blockY > heightmapPos ? 12 : 0;
+                int sun = blockY > heightmapPos.y ? 12 : 0;
                 if (block.light == null) {
                     block.light = new Light(0, 0, 0, sun);
                 } else {
@@ -168,12 +168,34 @@ public class World {
                 }
             }
         }
+        boolean shadowInv = false;
+        for (int blockY = 0; blockY < 512; blockY++) {
+            Block block = getBlock(new Vector3i(x, blockY, z));
+            if (block != null && BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+                int sun = blockY < heightmapPos.y ? 6 : 0;
+                if (block.light == null) {
+                    block.light = new Light(0, 0, 0, sun);
+                } else {
+                    block.light.s(Math.max(sun, block.light.s()));
+                }
+                if (sun == 0 && !shadowInv) {
+                    shadowInv = true;
+                    lightQueue.add(new Vector3i(x, blockY, z));
+                }
+            }
+        }
     }
 
     public static void updateHeightmap(int x, int y, int z) {
         int horizontalPos = condensePos(x, z);
-        if (heightmap[horizontalPos] < y) {
-            heightmap[horizontalPos] = y;
+        if (heightmap[horizontalPos] == null) {
+            heightmap[horizontalPos] = new Vector2i(0, 0);
+        }
+        if (heightmap[horizontalPos].x > x) {
+            heightmap[horizontalPos].x = y;
+        }
+        if (heightmap[horizontalPos].y < y) {
+            heightmap[horizontalPos].y = y;
         }
     }
     public static void updateHeightmap(Vector3i pos) {
