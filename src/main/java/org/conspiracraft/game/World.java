@@ -134,8 +134,8 @@ public class World {
                 int blockId = Utils.packInts(blockTypeId, blockSubtypeId);
                 if (instant) {
                     Vector3i BlockPos = new Vector3i(x, y, z);
-                    Block block = new Block((short) blockTypeId, (short) blockSubtypeId);
-                    BlockType blockType = BlockTypes.blockTypeMap.get((short)(blockTypeId));
+                    Block block = new Block(blockTypeId, blockSubtypeId);
+                    BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
                     if (blockType instanceof LightBlockType) {
                         lightQueue.add(BlockPos);
                     }
@@ -143,7 +143,7 @@ public class World {
                     updateHeightmap(x, blockType.isTransparent ? 0 : y, z);
                 } else {
                     blockQueue.add(new Vector4i(x, y, z, blockId));
-                    updateHeightmap(x, BlockTypes.blockTypeMap.get((short)(blockTypeId)).isTransparent ? 0 : y, z);
+                    updateHeightmap(x, BlockTypes.blockTypeMap.get(blockTypeId).isTransparent ? 0 : y, z);
                     updateSunlight(x, z);
                 }
             }

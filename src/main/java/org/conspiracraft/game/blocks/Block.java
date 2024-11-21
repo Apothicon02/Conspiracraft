@@ -13,18 +13,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
-    public short blockTypeId;
-    public short blockSubtypeId;
+    public int blockTypeId;
+    public int blockSubtypeId;
     public Light light;
 
-    public Block(short type, short subtype) {
+    public Block(int type, int subtype) {
         blockTypeId = type;
         blockSubtypeId = subtype;
     }
     public Block(int id) {
         Vector2i unpackedId = Utils.unpackInt(id);
-        blockTypeId = (short)(unpackedId.x);
-        blockSubtypeId = (short) unpackedId.y;
+        blockTypeId = unpackedId.x;
+        blockSubtypeId = unpackedId.y;
     }
 
     public int id() {
@@ -40,8 +40,6 @@ public class Block {
             if (blockType instanceof LightBlockType) {
                 light = ((LightBlockType) blockType).emission;
             }
-            int heightmap = World.heightmap[World.condensePos(pos.x, pos.z)];
-            light.s(pos.y > heightmap ? 12 : 0);
             Vector3i[] neighborBlocks = new Vector3i[]{
                     new Vector3i(pos.x, pos.y, pos.z + 1),
                     new Vector3i(pos.x + 1, pos.y, pos.z),
@@ -65,7 +63,7 @@ public class Block {
                 maxNeighborLight.b(Math.max(maxNeighborLight.b(), neighborLight.b()));
                 maxNeighborLight.s(Math.max(maxNeighborLight.s(), neighborLight.s()));
             });
-            light = new Light(Math.max(light.r(), maxNeighborLight.r())- 1, Math.max(light.g(), maxNeighborLight.g())- 1, Math.max(light.b(), maxNeighborLight.b())- 1, Math.max(light.s(), maxNeighborLight.s())- 1);
+            light = new Light(Math.max(light.r(), maxNeighborLight.r()-1), Math.max(light.g(), maxNeighborLight.g()-1), Math.max(light.b(), maxNeighborLight.b()-1), Math.max(pos.y > World.heightmap[World.condensePos(pos.x, pos.z)] ? 12 : 0, maxNeighborLight.s()-1));
             neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
                 if (isDarker(neighborLight) && !World.lightQueue.contains(neighborPos)) {
                     World.lightQueue.add(neighborPos);

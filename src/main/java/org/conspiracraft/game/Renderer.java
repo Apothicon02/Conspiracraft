@@ -149,7 +149,7 @@ public class Renderer {
                         if (BlockTypes.blockTypeMap.get(block.blockTypeId) instanceof LightBlockType) {
                             lightQueue.add(pos);
                         }
-                        BlockType blockType = BlockTypes.blockTypeMap.get((short)(Utils.unpackInt(blockData.w).x));
+                        BlockType blockType = BlockTypes.blockTypeMap.get(Utils.unpackInt(blockData.w).x);
                         region1Blocks[condensedPos] = block;
                         updateHeightmap(blockData.x, blockType.isTransparent ? 0 : blockData.y, blockData.z);
                         glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
