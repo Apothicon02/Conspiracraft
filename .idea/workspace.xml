@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -542,7 +541,23 @@
       <option name="project" value="LOCAL" />
       <updated>1732162779450</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="- Added an inverted heightmap to use for extra sunlight.">
+      <option name="closed" value="true" />
+      <created>1732224369390</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1732224369390</updated>
+    </task>
+    <task id="LOCAL-00044" summary="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color.">
+      <option name="closed" value="true" />
+      <created>1732232458046</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1732232458046</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -558,8 +573,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Big optimization." />
-    <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter." />
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain." />
     <MESSAGE value="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.&#10;- Added a keybind to regenerate terrain. &#10;- Prevented rays from existing out of world bounds." />
     <MESSAGE value="- Added tint system for transparent voxels. &#10;- Increased world size to 811x811x811. &#10;- Improved temporary terrain gen by adding lakes &amp; increasing scale." />
@@ -583,7 +596,9 @@
     <MESSAGE value="- Tweaked torch colors. &#10;- Removed the vector2 and vector3 shorts to fix HORRIBLE performance and infinite light spreading (no idea why they caused this.) &#10;- Fixed world regenerating not working." />
     <MESSAGE value="- Added day/night cycle. &#10;- Added cloud movement. &#10;- Added noise to the distance fog." />
     <MESSAGE value="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog." />
+    <MESSAGE value="- Added an inverted heightmap to use for extra sunlight." />
+    <MESSAGE value="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
