@@ -52,8 +52,7 @@ public class Engine {
             deltaFps += (now - initialTime) / timeR;
 
             if (targetFps <= 0 || deltaFps >= 1) {
-                window.getMouseInput().input();
-                main.input(window,  now - initialTime);
+                main.input(window, now,  now - initialTime);
             }
 
             if (deltaUpdate >= 1) {

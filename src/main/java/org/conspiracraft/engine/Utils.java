@@ -38,7 +38,7 @@ public class Utils {
         return (first4 << 16) | last4;
     }
     public static Vector2i unpackInt(int all8) {
-        return new Vector2i(all8 << 16, all8 >> 16);
+        return new Vector2i(all8 >> 16, all8 & 0xFFFF);
     }
 
     public static int colorToInt(Color color) {

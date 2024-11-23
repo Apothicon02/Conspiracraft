@@ -42,6 +42,7 @@ public class Renderer {
     public static float timeOfDay = 0.5f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
+    public static int[] atlasData = null;
 
     public static void init() throws Exception {
         GL.createCapabilities();
@@ -100,7 +101,7 @@ public class Renderer {
 
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
-            int[] atlasData = new int[size];
+            atlasData = new int[size];
             for (int x = 0; x < 9984; x++) {
                 for (int y = 0; y < 9984; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
@@ -146,12 +147,11 @@ public class Renderer {
                         Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
                         int condensedPos = World.condensePos(pos);
                         Block block = new Block(blockData.w);
-                        if (BlockTypes.blockTypeMap.get(block.blockTypeId) instanceof LightBlockType) {
-                            lightQueue.add(pos);
-                        }
                         BlockType blockType = BlockTypes.blockTypeMap.get(Utils.unpackInt(blockData.w).x);
                         region1Blocks[condensedPos] = block;
                         updateHeightmap(blockData.x, blockType.isTransparent ? 0 : blockData.y, blockData.z);
+                        updateSunlight(blockData.x, blockData.z);
+                        lightQueue.addFirst(pos);
                         glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
                     }
                 } else {
@@ -176,7 +176,7 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            for (int i = 0; i <= 1000; i++) {
+            for (int i = 0; i <= 100; i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
@@ -185,12 +185,6 @@ public class Renderer {
                     break;
                 }
             }
-//            Vector3i[] lights = lightQueue.toArray(new Vector3i[0]);
-//            lightQueue.clear();
-//            for (int i = 0; i<lights.length; i++) {
-//                Vector3i lightPos = lights[i];
-//                glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
-//            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 

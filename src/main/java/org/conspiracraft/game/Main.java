@@ -1,5 +1,7 @@
 package org.conspiracraft.game;
 
+import org.conspiracraft.game.blocks.Block;
+import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.*;
 import org.conspiracraft.engine.*;
 
@@ -8,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
     public static Camera camera = new Camera();
-    private static final float MOUSE_SENSITIVITY = 0.1f;
+    private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
     public static void main(String[] args) throws Exception {
@@ -28,7 +30,11 @@ public class Main {
     boolean wasUpDown = false;
     boolean wasDownDown = false;
 
-    public void input(Window window, long diffTimeMillis) {
+    long lastBlockBroken = 0L;
+    Block selectedBlock = new Block(2, 0);
+
+    public void input(Window window, long timeMillis, long diffTimeMillis) {
+        window.getMouseInput().input(window);
         float move = diffTimeMillis * MOVEMENT_SPEED;
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
             move*=10;
@@ -53,10 +59,56 @@ public class Main {
         }
 
         MouseInput mouseInput = window.getMouseInput();
-        if (mouseInput.isRightButtonPressed()) {
-            Vector2f displVec = mouseInput.getDisplVec();
-            camera.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
-                    (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
+        Vector2f displVec = mouseInput.getDisplVec();
+        camera.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
+                (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
+        if (timeMillis-lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
+            boolean lmbDown = mouseInput.isLeftButtonPressed();
+            boolean mmbDown = mouseInput.isMiddleButtonPressed();
+            boolean rmbDown = mouseInput.isRightButtonPressed();
+            if (lmbDown || mmbDown || rmbDown) {
+                Vector3f blockPos = null;
+                Vector3f pos = null;
+                Matrix4f ray = new Matrix4f(camera.viewMatrix);
+                for (int i = 0; i < 100; i++) {
+                    ray.translate(0, 0, 0.1f);
+                    Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
+                    if (rayPos.x >= 0 && rayPos.x < World.size && rayPos.y >= 0 && rayPos.y < World.size && rayPos.z >= 0 && rayPos.z < World.size) {
+                        Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
+                        if (block != null) {
+                            int typeId = block.blockTypeId;
+                            int subTypeId = block.blockSubtypeId;
+                            int color = Renderer.atlasData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)];
+                            int alpha = color >> 24 & 0xFFFF;
+                            if (alpha > 0) {
+                                if (lmbDown || mmbDown) {
+                                    pos = rayPos;
+                                } else {
+                                    pos = blockPos;
+                                }
+                                break;
+                            } else {
+                                blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
+                            }
+                        }
+                    }
+                }
+
+                if (pos != null) {
+                    if (mmbDown) {
+                        selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                    } else if (BlockTypes.blockTypeMap.get(selectedBlock.blockTypeId) != null) {
+                        lastBlockBroken = timeMillis;
+                        int blockTypeId = selectedBlock.blockTypeId;
+                        int blockSubtypeId = selectedBlock.blockSubtypeId;
+                        if (lmbDown) {
+                            blockTypeId = 0;
+                            blockSubtypeId = 0;
+                        }
+                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                    }
+                }
+            }
         }
 
         if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {

@@ -125,6 +125,12 @@ public class World {
         }
         return null;
     }
+    public static Block getBlock(int x, int y, int z) {
+        return getBlock(new Vector3i(x, y, z));
+    }
+    public static Block getBlock(float x, float y, float z) {
+        return getBlock(new Vector3i((int) x, (int) y, (int) z));
+    }
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
         if (x > 0 && x <= size && z > 0 && z <= size) {
@@ -143,8 +149,6 @@ public class World {
                     updateHeightmap(x, blockType.isTransparent ? 0 : y, z);
                 } else {
                     blockQueue.add(new Vector4i(x, y, z, blockId));
-                    updateHeightmap(x, BlockTypes.blockTypeMap.get(blockTypeId).isTransparent ? 0 : y, z);
-                    updateSunlight(x, z);
                 }
             }
         }

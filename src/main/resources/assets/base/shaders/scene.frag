@@ -76,6 +76,8 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
 
+    vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
+
     while (mapPos.x <= 7.0 && mapPos.x >= 0.0 && mapPos.y <= 7.0 && mapPos.y >= 0.0 && mapPos.z <= 7.0 && mapPos.z >= 0.0) {
         int colorData = atlasData[(9984*((blockType*8)+int(mapPos.x))) + (blockSubtype*64) + ((abs(int(mapPos.y)-8)-1)*8) + int(mapPos.z)];
         vec4 voxelColor = vec4(0xFF & colorData >> 16, 0xFF & colorData >> 8, 0xFF & colorData, 0xFF & colorData >> 24)/255;
@@ -83,12 +85,28 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             if (hitPos == vec3(256)) {
                 hitPos = rayMapPos;
             }
-            float brightness = 0.8f;
-            if (mask.y > 0) {
-                brightness = 1f;
-            } else if (mask.x > 0) {
-                brightness = 0.9f;
+            //face-based brightness start
+            //up should always be 1, down should always be 0.7, facing the sun should be 0.95, perpendicular to the sun should be 0.85, facing away from the sun should be 0.75
+            float brightness = 1f;
+            ivec3 normal = ivec3(mapPos - prevMapPos);
+            if (normal == ivec3(0, 0, 0)) {
+                brightness = 0f;
             }
+            if (normal.y == 1) { //down
+                brightness = 0.7f;
+            } else if (normal.y == -1) { //up
+                brightness = 1f;
+            } else if (normal.z == 1) { //south
+                brightness = 0.85f;
+            } else if (normal.z == -1) { //north
+                brightness = 0.85f;
+            } else if (normal.x == 1) { //west
+                brightness = 0.75f;
+            } else if (normal.x == -1) { //east
+                brightness = 0.95f;
+            }
+            //face-based brightness end
+
             return vec4(vec3(voxelColor)*brightness, 1);
         } else {
             vec4 oldTint = tint;
@@ -100,6 +118,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
         }
 
+        prevMapPos = mapPos;
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
         sideDist += mask * raySign * deltaDist;
