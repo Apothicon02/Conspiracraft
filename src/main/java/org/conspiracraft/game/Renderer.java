@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
@@ -139,23 +141,24 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-            for (int i = 0; i <= 100; i++) {
-                if (!blockQueue.isEmpty()) {
-                    Vector4i blockData = blockQueue.getFirst();
-                    blockQueue.removeFirst();
-                    if (blockData != null) {
-                        Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
-                        int condensedPos = World.condensePos(pos);
-                        Block block = new Block(blockData.w);
-                        BlockType blockType = BlockTypes.blockTypeMap.get(Utils.unpackInt(blockData.w).x);
-                        region1Blocks[condensedPos] = block;
-                        updateHeightmap(blockData.x, blockType.isTransparent ? 0 : blockData.y, blockData.z);
-                        updateSunlight(blockData.x, blockData.z);
-                        lightQueue.addFirst(pos);
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
+            for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
+                Vector4i blockData = blockQueue.getFirst();
+                blockQueue.removeFirst();
+                if (blockData != null) {
+                    Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
+                    int condensedPos = World.condensePos(pos);
+                    Block oldBlock = region1Blocks[condensedPos];
+                    Block block = new Block(blockData.w);
+                    region1Blocks[condensedPos] = block;
+                    updateHeightmap(blockData.x, blockData.y, blockData.z, BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent);
+                    Light oldLight = oldBlock.light;
+                    if (oldLight == null) {
+                        block.updateLight(pos);
+                        oldLight = block.light;
                     }
-                } else {
-                    break;
+                    recalculateLight(pos, oldLight);
+                    updateSunlight(blockData.x, blockData.z);
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
                 }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -176,13 +179,11 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            for (int i = 0; i <= 100; i++) {
+            for (int i = 0; i < 8000; i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
-                } else {
-                    break;
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos) * 4L, new int[]{updateLight(lightPos)});
                 }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

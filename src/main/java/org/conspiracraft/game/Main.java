@@ -133,7 +133,7 @@ public class Main {
             }
         } else {
             if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                updateTime(diffTimeMillis, 6000);
+                updateTime(100000L, 1);
             }
         }
 

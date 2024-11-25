@@ -14,6 +14,7 @@ public class Engine {
     private boolean running;
     private int targetFps;
     private int targetUps;
+    public static int fps;
 
     public Engine(String windowTitle, Window.WindowOptions opts, Main main) throws Exception {
         window = new Window(windowTitle, opts, () -> {
@@ -68,7 +69,7 @@ public class Engine {
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
-                    int fps = (int)(1000f/(now - initialTime));
+                    fps = (int)(1000f/(now - initialTime));
                     GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + fps + "fps");
                     framesUntilUpdate = 40;
                 }

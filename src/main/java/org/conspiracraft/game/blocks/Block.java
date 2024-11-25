@@ -33,7 +33,7 @@ public class Block {
 
     public int updateLight(Vector3i pos) {
         BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
-        if (blockType.isTransparent) {
+        if (blockType.isTransparent || blockType instanceof LightBlockType) {
             if (light == null) {
                 light = new Light(0, 0, 0,0);
             }
@@ -51,9 +51,15 @@ public class Block {
             Map<Vector3i, Light> neighborLights = new HashMap<>(Map.of());
             for (int i = 0; i < neighborBlocks.length; i++) {
                 Vector3i blockPos = neighborBlocks[i];
-                Light neighborLight = World.getLight(blockPos);
-                if (neighborLight != null) {
-                    neighborLights.put(blockPos, neighborLight);
+                Block neighbor = World.getBlock(blockPos);
+                if (neighbor != null) {
+                    BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.blockTypeId);
+                    if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
+                        Light neighborLight = neighbor.light;
+                        if (neighborLight != null) {
+                            neighborLights.put(blockPos, neighborLight);
+                        }
+                    }
                 }
             }
             Light maxNeighborLight = new Light(0, 0, 0, 0);
@@ -66,8 +72,8 @@ public class Block {
             Vector2i height = World.heightmap[World.condensePos(pos.x, pos.z)];
             light = new Light(Math.max(light.r(), maxNeighborLight.r()-1), Math.max(light.g(), maxNeighborLight.g()-1), Math.max(light.b(), maxNeighborLight.b()-1), Math.max(pos.y > height.y ? 12 : (pos.y < height.x ? 6 : 0), maxNeighborLight.s()-1));
             neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
-                if (isDarker(neighborLight) && !World.lightQueue.contains(neighborPos)) {
-                    World.lightQueue.add(neighborPos);
+                if (isDarker(neighborLight)) {
+                    World.queueLightUpdate(neighborPos, false);
                 }
             });
             return Utils.lightToInt(light);
