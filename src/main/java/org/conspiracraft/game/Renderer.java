@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.lwjgl.opengl.ARBColorBufferFloat.GL_CLAMP_FRAGMENT_COLOR_ARB;
+import static org.lwjgl.opengl.ARBColorBufferFloat.glClampColorARB;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.conspiracraft.game.World.*;
@@ -179,11 +181,13 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            for (int i = 0; i < 8000; i++) {
+            for (int i = 0; i < Math.min(Engine.fps*5, 1000); i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos) * 4L, new int[]{updateLight(lightPos)});
+                } else {
+                    break;
                 }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

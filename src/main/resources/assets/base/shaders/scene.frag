@@ -204,20 +204,26 @@ void main()
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else if (uv.x >= -1.87 && uv.x <= 1.87 && uv.y >= -1 && uv.y <= 1) {
         vec3 camPos = vec3(cam[3]);
-        fragColor = traceWorld(camPos, vec3(cam*vec4(normalize(vec3(uv, 1)), 0)));
-        float whiteness = clamp((abs(rayMapPos.y-size)/size)-0.45f, -0.25f, 0.1f);
+        vec3 dir = vec3(cam*vec4(normalize(vec3(uv, 1)), 0));
+        fragColor = traceWorld(camPos, dir);
+        float whiteness = clamp((abs(rayMapPos.y-size)/size)-0.75f, -0.25f, 0.1f);
         vec3 unmixedFogColor = vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75);
         vec3 fogColor = mix(vec3(tint)/(abs(tint.a-1)), unmixedFogColor, abs(tint.a-1));
         vec3 blockLightBrightness = vec3(0);
         float sunLight = max(prevLighting.a, lighting.a)*0.0834f;
+        float fogNoise = 1f;
+        if (hitPos == vec3(256)) {
+            hitPos = camPos+(dir*256);
+        }
         if (fragColor.a != 1) {
             fragColor = vec4(fogColor, 1);
             sunLight = 12*0.0834f;
         } else {
+            fogNoise += max(0, noise(vec2(hitPos.x, hitPos.z)));
             blockLightBrightness = vec3(max(prevLighting.r, lighting.r), max(prevLighting.g, lighting.g), max(prevLighting.b, lighting.b))*0.045f;
         }
-        float distanceFogginess = clamp(((((distance(camPos, hitPos)*(max(0, noise(vec2(hitPos.x, hitPos.z)))+1))/renderDistance)*1.25)+gradient(hitPos.y, 0, 16, 0, 1.25))*1.25, 0, 1);
-        fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor*1.1, distanceFogginess), vec3(0.8), cloudiness), 1); //distant fog, void fog, clouds
+        float distanceFogginess = clamp(((((distance(camPos, hitPos)*fogNoise)/renderDistance)*1.25)+gradient(hitPos.y, 0, 16, 0, 1.25))*1.25, 0, 1);
+        fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor*1.2, distanceFogginess), vec3(0.8), cloudiness), 1); //distant fog, void fog, clouds
         float adjustedTime = clamp(timeOfDay*1.8, 0, 1);
         float sunBrightness = sunLight*adjustedTime;
         vec3 finalLightFog = mix(vec3(lightFog)*0.01f, mix(vec3(0.06, 0, 0.1), vec3(0.33, 0.3, 0.25), adjustedTime), lightFog.a/7);
