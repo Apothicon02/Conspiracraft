@@ -43,19 +43,19 @@ public class Main {
             move*=100;
         }
         if (window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
-            camera.move(0, 0, move);
+            camera.move(0, 0, move, true);
         } else if (window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
-            camera.move(0, 0, -move);
+            camera.move(0, 0, -move, true);
         }
         if (window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS)) {
-            camera.move(-move, 0, 0);
+            camera.move(-move, 0, 0, true);
         } else if (window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS)) {
-            camera.move(move, 0, 0);
+            camera.move(move, 0, 0, true);
         }
         if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS)) {
-            camera.move(0, move, 0);
+            camera.move(0, move, 0, false);
         } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS)) {
-            camera.move(0, -move, 0);
+            camera.move(0, -move, 0, false);
         }
 
         MouseInput mouseInput = window.getMouseInput();

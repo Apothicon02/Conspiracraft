@@ -85,7 +85,7 @@ public class Renderer {
                 camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
-        glUniform1i(renderDistanceUniform, 250+(50*renderDistanceMul));
+        glUniform1i(renderDistanceUniform, 150+(40*renderDistanceMul));
         glUniform1f(timeOfDayUniform, timeOfDay);
 
         glBindVertexArray(sceneVaoId);
@@ -176,7 +176,7 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            for (int i = 0; i < Math.min(Engine.fps*5, 1000); i++) {
+            for (int i = 0; i < 400; i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();

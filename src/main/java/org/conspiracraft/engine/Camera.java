@@ -8,7 +8,13 @@ public class Camera {
     public void rotate(float x, float y) {
         viewMatrix.rotateXYZ(x, y, 0);
     }
-    public void move(float x, float y, float z) {
-        viewMatrix.translate(x, y, z);
+    public void move(float x, float y, float z, boolean countRotation) {
+        if (countRotation) {
+            viewMatrix.translate(x, y, z);
+        } else {
+            Vector3f prevTranslation = new Vector3f();
+            viewMatrix.getTranslation(prevTranslation);
+            viewMatrix.setTranslation(new Vector3f(x+prevTranslation.x, y+prevTranslation.y, z+prevTranslation.z));
+        }
     }
 }
