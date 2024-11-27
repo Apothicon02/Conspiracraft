@@ -56,9 +56,10 @@ public class Block {
                     BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.blockTypeId);
                     if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
                         Light neighborLight = neighbor.light;
-                        if (neighborLight != null) {
-                            neighborLights.put(blockPos, neighborLight);
+                        if (neighborLight == null) {
+                            neighborLight = new Light(0, 0, 0, 0);
                         }
+                        neighborLights.put(blockPos, neighborLight);
                     }
                 }
             }
@@ -69,8 +70,7 @@ public class Block {
                 maxNeighborLight.b(Math.max(maxNeighborLight.b(), neighborLight.b()));
                 maxNeighborLight.s(Math.max(maxNeighborLight.s(), neighborLight.s()));
             });
-            Vector2i height = World.heightmap[World.condensePos(pos.x, pos.z)];
-            light = new Light(Math.max(light.r(), maxNeighborLight.r()-1), Math.max(light.g(), maxNeighborLight.g()-1), Math.max(light.b(), maxNeighborLight.b()-1), Math.max(pos.y > height.y ? 12 : (pos.y < height.x ? 6 : 0), maxNeighborLight.s()-1));
+            light = new Light(Math.max(light.r(), maxNeighborLight.r()-1), Math.max(light.g(), maxNeighborLight.g()-1), Math.max(light.b(), maxNeighborLight.b()-1), Math.max(light.s(), maxNeighborLight.s()-1));
             neighborLights.forEach((Vector3i neighborPos, Light neighborLight) -> {
                 if (isDarker(neighborLight)) {
                     World.queueLightUpdate(neighborPos, false);

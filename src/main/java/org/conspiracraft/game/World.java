@@ -14,17 +14,17 @@ import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class World {
     public static int seaLevel = 137;
     public static int size = 512;
-    public static int fullSize = (size+1)*(size+1)*(size+1);
+    private static final int max = size-1;
+    public static int fullSize = size*size*size;
 
     public static Block[] region1Blocks = new Block[fullSize];
-    public static Vector2i[] heightmap = new Vector2i[(size+1)*(size+1)];
+    public static int[] heightmap = new int[size*size];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
     public static List<Vector4i> blockQueue = new ArrayList<>(List.of());
@@ -43,6 +43,7 @@ public class World {
         region1Blocks = new Block[fullSize];
         lightQueue = new ArrayList<>(List.of());
         blockQueue = new ArrayList<>(List.of());
+        Arrays.fill(heightmap, max);
     }
 
     public static void generateWorld() {
@@ -51,8 +52,8 @@ public class World {
         cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
         Vector2i middle = new Vector2i(size/2, size/2);
-        for (int x = 1; x <= size; x++) {
-            for (int z = 1; z <= size; z++) {
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
                 int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z));
                 float baseCellularNoise = cellularNoise.GetNoise(x, z);
                 float basePerlinNoise = noise.GetNoise(x, z);
@@ -103,9 +104,15 @@ public class World {
                         }
                     } else {
                         setBlock(x, y, z, 0, 0, false, true);
+                        Block block = getBlock(x, y+1, z);
+                        if (block != null) {
+                            if (!BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+                                queueLightUpdate(new Vector3i(x, y, z), false);
+                            }
+                        }
                     }
                 }
-                updateSunlight(x, z);
+                updateHeightmap(x, z, false);
             }
         }
         Renderer.worldChanged = true;
@@ -122,7 +129,7 @@ public class World {
     }
 
     public static Block getBlock(Vector3i blockPos) {
-        if (blockPos.x > 0 && blockPos.x <= size && blockPos.z > 0 && blockPos.z <= size) {
+        if (blockPos.x >= 0 && blockPos.x < max && blockPos.z >= 0 && blockPos.z < max) {
             return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
         }
         return null;
@@ -148,7 +155,6 @@ public class World {
                         queueLightUpdate(BlockPos, false);
                     }
                     region1Blocks[pos] = block;
-                    updateHeightmap(x, y, z, blockType.isTransparent);
                 } else {
                     blockQueue.add(new Vector4i(x, y, z, blockId));
                 }
@@ -156,65 +162,33 @@ public class World {
         }
     }
 
-    public static void updateSunlight(int x, int z) {
-        boolean shadow = false;
-        Vector2i heightmapPos = heightmap[condensePos(x, z)];
-        for (int blockY = 511; blockY >= 0; blockY--) {
-            Block block = getBlock(new Vector3i(x, blockY, z));
-            if (block != null && BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
-                int sun = blockY > heightmapPos.y ? 12 : 0;
-                if (block.light == null) {
-                    block.light = new Light(0, 0, 0, sun);
-                } else {
-                    block.light.s(sun);
-                }
-                if (sun == 0 && !shadow) {
-                    shadow = true;
-                    queueLightUpdate(new Vector3i(x, blockY, z), false);
-                }
-            }
-        }
-        boolean shadowInv = false;
-        for (int blockY = 0; blockY < 512; blockY++) {
-            Block block = getBlock(new Vector3i(x, blockY, z));
-            if (block != null && BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
-                int sun = blockY < heightmapPos.y ? 6 : 0;
-                if (block.light == null) {
-                    block.light = new Light(0, 0, 0, sun);
-                } else {
-                    block.light.s(Math.max(sun, block.light.s()));
-                }
-                if (sun == 0 && !shadowInv) {
-                    shadowInv = true;
-                    queueLightUpdate(new Vector3i(x, blockY, z), false);
+    public static void updateHeightmap(int x, int z, boolean update) {
+        int pos = condensePos(x, z);
+        int oldHeight = heightmap[pos];
+        int tempHeight = max;
+        for (int scanY = max; scanY >= 0; scanY--) {
+            if (scanY == 0) {
+                tempHeight = 0;
+            } else {
+                Block block = getBlock(x, scanY, z);
+                if (block != null) {
+                    if (!BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+                        tempHeight = scanY;
+                        break;
+                    } else {
+                        if (block.light == null) {
+                            block.light = new Light(0, 0, 0, 12);
+                        } else {
+                            block.light.s(12);
+                        }
+                        if (update && oldHeight >= scanY) {
+                            queueLightUpdate(new Vector3i(x, scanY, z), false);
+                        }
+                    }
                 }
             }
         }
-    }
-
-    public static void updateHeightmap(int x, int y, int z, boolean transparent) {
-        int horizontalPos = condensePos(x, z);
-        if (heightmap[horizontalPos] == null) {
-            heightmap[horizontalPos] = new Vector2i(0, 0);
-        }
-        if (!transparent) {
-            if (heightmap[horizontalPos].x > y) {
-                heightmap[horizontalPos].x = y;
-            }
-            if (heightmap[horizontalPos].y < y) {
-                heightmap[horizontalPos].y = y;
-            }
-        } else {
-            if (heightmap[horizontalPos].x == y) {
-                //starting at y, scan down until finding a solid block, then make that the new heightmap pos.
-            }
-            if (heightmap[horizontalPos].y == y) {
-                //starting at y, scan up until finding a solid block, then make that the new heightmap pos.
-            }
-        }
-    }
-    public static void updateHeightmap(Vector3i pos, boolean transparent) {
-        updateHeightmap(pos.x, pos.y, pos.z, transparent);
+        heightmap[pos] = tempHeight;
     }
 
     public static Light getLight(int x, int y, int z) {
@@ -251,8 +225,24 @@ public class World {
                 if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
                     Light neighborLight = neighbor.light;
                     if (neighborLight != null) {
+                        boolean sunlit =  neighbor.light.s() == 12;
+                        if (sunlit) {
+                            if (heightmap[condensePos(neighborPos.x, neighborPos.z)] >= neighborPos.y) {
+                                sunlit = false;
+                                for (int belowY = neighborPos.y; belowY >= 0; belowY--) {
+                                    Vector3i belowPos = new Vector3i(neighborPos.x, belowY, neighborPos.z);
+                                    Block block = getBlock(belowPos);
+                                    if (block != null && block.light != null && block.light.s() == 12) {
+                                        block.light.s(0);
+                                        recalculateLight(belowPos, new Light(block.light.r(), block.light.g(), block.light.b(), 12));
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         if ((neighborLight.r() > 0 && neighborLight.r() < light.r()) || (neighborLight.g() > 0 && neighborLight.g() < light.g()) || (neighborLight.b() > 0 && neighborLight.b() < light.b()) || (neighborLight.s() > 0 && neighborLight.s() < light.s())) {
-                            neighbor.light = new Light(0, 0, 0, neighborLight.s());
+                            neighbor.light = new Light(0, 0, 0, sunlit ? 12 : 0);
                             recalculateLight(neighborPos, neighborLight);
                         }
                         queueLightUpdate(pos, true);

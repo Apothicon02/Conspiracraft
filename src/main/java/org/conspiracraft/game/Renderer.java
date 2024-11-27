@@ -2,11 +2,8 @@ package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.Light;
-import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.joml.Matrix4f;
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
@@ -22,12 +19,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.lwjgl.opengl.ARBColorBufferFloat.GL_CLAMP_FRAGMENT_COLOR_ARB;
-import static org.lwjgl.opengl.ARBColorBufferFloat.glClampColorARB;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.conspiracraft.game.World.*;
@@ -152,14 +145,16 @@ public class Renderer {
                     Block oldBlock = region1Blocks[condensedPos];
                     Block block = new Block(blockData.w);
                     region1Blocks[condensedPos] = block;
-                    updateHeightmap(blockData.x, blockData.y, blockData.z, BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent);
+                    updateHeightmap(blockData.x, blockData.z, true);
                     Light oldLight = oldBlock.light;
                     if (oldLight == null) {
                         block.updateLight(pos);
                         oldLight = block.light;
+                        if (oldLight == null) {
+                            oldLight = new Light(0, 0, 0, 0);
+                        }
                     }
                     recalculateLight(pos, oldLight);
-                    updateSunlight(blockData.x, blockData.z);
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensedPos*4L, new int[]{blockData.w});
                 }
             }
