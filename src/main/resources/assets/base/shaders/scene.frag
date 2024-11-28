@@ -186,6 +186,8 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
             }
 
             //lighting start
+//            int lightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
+//            lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
             int centerLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
             vec4 centerLighting = vec4(0xFF & centerLightingData >> 16, 0xFF & centerLightingData >> 8, 0xFF & centerLightingData, 0xFF & centerLightingData >> 24);
             int aboveLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y+1) * size + int(lightPos.z) * size * size];
@@ -233,7 +235,7 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
                     easternLighting = mix(centerLighting, westLighting, clamp(easternness, -0.5f, 0.0f)*-1);
                 }
             }
-            lighting = verticalLighting;//somehow factor in northern and eastern lighting
+            lighting = max(verticalLighting, max(northernLighting, eastLighting));
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
             //lighting end
         } else {
