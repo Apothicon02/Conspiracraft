@@ -67,6 +67,7 @@ public class World {
                         setBlock(x, (int) ((basePerlinNoise*12)+299), z, 9, 0, false, true);
                     }
                 }
+                int height = size-1;
                 boolean upmost = true;
                 for (int y = size-1; y >= 1; y--) {
                     double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
@@ -87,9 +88,10 @@ public class World {
                             } else {
                                 setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
                             }
+                            height = y;
                             upmost = false;
                         } else {
-                            setBlock(x, y, z, 3, 0, false, true);
+                            setBlock(x, y, z, y > height - 3 ? 3 : 10, 0, false, true);
                             if (upmost) {
                                 boolean replace = false;
                                 int seaFloor = y+1;
@@ -112,6 +114,50 @@ public class World {
                         }
                     }
                 }
+                updateHeightmap(x, z, false);
+            }
+        }
+        int radius = 16;
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                if (x > radius+2 && x < size-radius-2 && z > radius+2 && z < size-radius-2) {
+                    FastNoiseLite heightNoise = new FastNoiseLite((int) (Math.random() * 9999));
+                    heightNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+                    FastNoiseLite horizontalNoise = new FastNoiseLite((int) (Math.random() * 9999));
+                    horizontalNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+                    float horizontalDensity = horizontalNoise.GetNoise(x/25f, z/25f);
+                    if (horizontalDensity > -0.001 && horizontalDensity < 0.001) {
+                        int height = (int) (heightNoise.GetNoise(x/64f, z/64f) * 256);
+                        if (height < 0) {
+                            height = height/2;
+                        }
+                        int centerY = 100 + height;
+                        for (int rX = x - radius; rX < x + radius; rX++) {
+                            for (int rZ = z - radius; rZ < z + radius; rZ++) {
+                                for (int rY = centerY - radius; rY < centerY + radius; rY++) {
+                                    Block block = getBlock(rX, rY, rZ);
+                                    Block aboveBlock = getBlock(rX, rY+1, rZ);
+                                    Block northBlock = getBlock(rX, rY, rZ+1);
+                                    Block southBlock = getBlock(rX, rY, rZ-1);
+                                    Block eastBlock = getBlock(rX+1, rY, rZ);
+                                    Block westBlock = getBlock(rX-1, rY, rZ);
+                                    if (!(block != null && block.blockTypeId == 1) && !(aboveBlock != null && aboveBlock.blockTypeId == 1) && !(northBlock != null && northBlock.blockTypeId == 1) && !(southBlock != null && southBlock.blockTypeId == 1) && !(eastBlock != null && eastBlock.blockTypeId == 1) && !(westBlock != null && westBlock.blockTypeId == 1)) {
+                                        if (Vector3i.distance(x, centerY, z, rX, rY, rZ) < radius) {
+                                            setBlock(rX, rY, rZ, 0, 0, true, true);
+                                            if (heightmap[condensePos(rX, rZ)] == rY) {
+                                                queueLightUpdate(new Vector3i(rX, rY, rZ), false);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
                 updateHeightmap(x, z, false);
             }
         }
@@ -157,6 +203,13 @@ public class World {
                     region1Blocks[pos] = block;
                 } else {
                     blockQueue.add(new Vector4i(x, y, z, blockId));
+                }
+                Block aboveBlock = getBlock(x, y+1, z);
+                if (aboveBlock != null) {
+                    int aboveBlockId = aboveBlock.blockTypeId;
+                    if (aboveBlockId == 4 || aboveBlockId == 5) {
+                        setBlock(x, y + 1, z, 0, 0, true, instant);
+                    }
                 }
             }
         }
