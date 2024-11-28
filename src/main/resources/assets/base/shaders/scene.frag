@@ -186,56 +186,8 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
             }
 
             //lighting start
-//            int lightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
-//            lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
-            int centerLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
-            vec4 centerLighting = vec4(0xFF & centerLightingData >> 16, 0xFF & centerLightingData >> 8, 0xFF & centerLightingData, 0xFF & centerLightingData >> 24);
-            int aboveLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y+1) * size + int(lightPos.z) * size * size];
-            vec4 aboveLighting = vec4(0xFF & aboveLightingData >> 16, 0xFF & aboveLightingData >> 8, 0xFF & aboveLightingData, 0xFF & aboveLightingData >> 24);
-            int belowLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y-1) * size + int(lightPos.z) * size * size];
-            vec4 belowLighting = vec4(0xFF & belowLightingData >> 16, 0xFF & belowLightingData >> 8, 0xFF & belowLightingData, 0xFF & belowLightingData >> 24);
-            int northLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z+1) * size * size];
-            vec4 northLighting = vec4(0xFF & northLightingData >> 16, 0xFF & northLightingData >> 8, 0xFF & northLightingData, 0xFF & northLightingData >> 24);
-            int southLightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z-1) * size * size];
-            vec4 southLighting = vec4(0xFF & southLightingData >> 16, 0xFF & southLightingData >> 8, 0xFF & southLightingData, 0xFF & southLightingData >> 24);
-            int eastLightingData = region1LightingData[int(lightPos.x+1) + int(lightPos.y) * size + int(lightPos.z) * size * size];
-            vec4 eastLighting = vec4(0xFF & eastLightingData >> 16, 0xFF & eastLightingData >> 8, 0xFF & eastLightingData, 0xFF & eastLightingData >> 24);
-            int westLightingData = region1LightingData[int(lightPos.x-1) + int(lightPos.y) * size + int(lightPos.z) * size * size];
-            vec4 westLighting = vec4(0xFF & westLightingData >> 16, 0xFF & westLightingData >> 8, 0xFF & westLightingData, 0xFF & westLightingData >> 24);
-            float vertical = uv3d.y-0.5f;
-            vec4 verticalLighting = centerLighting;
-            if (vertical > 0f) {
-                if (aboveLighting != vec4(0, 0, 0, 0)) {
-                    verticalLighting = mix(centerLighting, aboveLighting, clamp(vertical, 0f, 0.5f));
-                }
-            } else {
-                if (belowLighting != vec4(0, 0, 0, 0)) {
-                    verticalLighting = mix(centerLighting, belowLighting, clamp(vertical, -0.5f, 0.0f)*-1);
-                }
-            }
-            vec4 northernLighting = centerLighting;
-            float northernness = uv3d.z-0.5f;
-            if (northernness > 0f) {
-                if (northLighting != vec4(0, 0, 0, 0)) {
-                    northernLighting = mix(centerLighting, northLighting, clamp(northernness, 0f, 0.5f));
-                }
-            } else {
-                if (southLighting != vec4(0, 0, 0, 0)) {
-                    northernLighting = mix(centerLighting, southLighting, clamp(northernness, -0.5f, 0.0f)*-1);
-                }
-            }
-            vec4 easternLighting = centerLighting;
-            float easternness = uv3d.x-0.5f;
-            if (easternness > 0f) {
-                if (eastLighting != vec4(0, 0, 0, 0)) {
-                    easternLighting = mix(centerLighting, eastLighting, clamp(easternness, 0f, 0.5f));
-                }
-            } else {
-                if (westLighting != vec4(0, 0, 0, 0)) {
-                    easternLighting = mix(centerLighting, westLighting, clamp(easternness, -0.5f, 0.0f)*-1);
-                }
-            }
-            lighting = max(verticalLighting, max(northernLighting, eastLighting));
+            int lightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
+            lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
             //lighting end
         } else {

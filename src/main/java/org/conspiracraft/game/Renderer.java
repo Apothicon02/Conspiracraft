@@ -2,7 +2,6 @@ package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.Light;
-import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -21,6 +20,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.conspiracraft.game.World.*;
@@ -31,6 +31,8 @@ public class Renderer {
     public static int atlasSSBOId;
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
+    public static int coherentNoiseId;
+    public static int region1LightingId;
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
@@ -43,7 +45,6 @@ public class Renderer {
 
     public static void init() throws Exception {
         GL.createCapabilities();
-        GLUtil.setupDebugMessageCallback();
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
 
@@ -61,6 +62,8 @@ public class Renderer {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        coherentNoiseId = glGenTextures();
+        region1LightingId = glGenTextures();
         atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         region1LightingSSBOId = glGenBuffers();
@@ -109,8 +112,7 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-            glBindTexture(GL_TEXTURE_2D, glGenTextures());
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -131,7 +133,7 @@ public class Renderer {
                 blocks[World.condensePos(blockData.x, blockData.y, blockData.z)] = blockData.w;
             }
             blockQueue = new ArrayList<>(List.of());
-            glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_STATIC_DRAW);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_DYNAMIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
@@ -171,7 +173,7 @@ public class Renderer {
                     lights[i] = Utils.lightToInt(block.light);
                 }
             }
-            glBufferData(GL_SHADER_STORAGE_BUFFER, lights, GL_STATIC_DRAW);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, lights, GL_DYNAMIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
