@@ -19,11 +19,10 @@ import java.util.List;
 
 public class World {
     public static int seaLevel = 137;
-    public static int size = 512;
-    private static final int max = size-1;
-    public static int fullSize = size*size*size;
+    public static int size = 1024;
+    public static int height = 256;
 
-    public static Block[] region1Blocks = new Block[fullSize];
+    public static Block[] region1Blocks = new Block[size*size*height];
     public static int[] heightmap = new int[size*size];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
@@ -40,23 +39,23 @@ public class World {
     }
 
     public static void clearWorld() {
-        region1Blocks = new Block[fullSize];
+        region1Blocks = new Block[size*size*height];
         lightQueue = new ArrayList<>(List.of());
         blockQueue = new ArrayList<>(List.of());
-        Arrays.fill(heightmap, max);
+        Arrays.fill(heightmap, height);
     }
 
     public static void generateWorld() {
-        FastNoiseLite cellularNoise = new FastNoiseLite((int) (Math.random()*9999));
-        FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
-        cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+        //FastNoiseLite cellularNoise = new FastNoiseLite((int) (Math.random()*9999));
+        //FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
+        //cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+        //noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
         Vector2i middle = new Vector2i(size/2, size/2);
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z));
-                float baseCellularNoise = cellularNoise.GetNoise(x, z);
-                float basePerlinNoise = noise.GetNoise(x, z);
+                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
+                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
+                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
@@ -67,9 +66,9 @@ public class World {
                         setBlock(x, (int) ((basePerlinNoise*12)+299), z, 9, 0, false, true);
                     }
                 }
-                int height = size-1;
+                int surface = height-1;
                 boolean upmost = true;
-                for (int y = size-1; y >= 1; y--) {
+                for (int y = surface; y >= 1; y--) {
                     double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
                     double negativeDensity = (basePerlinNoise-1) + negativeGradient;
                     double baseDensity = 0;
@@ -88,10 +87,10 @@ public class World {
                             } else {
                                 setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
                             }
-                            height = y;
+                            surface = y;
                             upmost = false;
                         } else {
-                            setBlock(x, y, z, y > height - 3 ? 3 : 10, 0, false, true);
+                            setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true);
                             if (upmost) {
                                 boolean replace = false;
                                 int seaFloor = y+1;
@@ -117,50 +116,50 @@ public class World {
                 updateHeightmap(x, z, false);
             }
         }
-        int radius = 16;
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                if (x > radius+2 && x < size-radius-2 && z > radius+2 && z < size-radius-2) {
-                    FastNoiseLite heightNoise = new FastNoiseLite((int) (Math.random() * 9999));
-                    heightNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-                    FastNoiseLite horizontalNoise = new FastNoiseLite((int) (Math.random() * 9999));
-                    horizontalNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-                    float horizontalDensity = horizontalNoise.GetNoise(x/25f, z/25f);
-                    if (horizontalDensity > -0.001 && horizontalDensity < 0.001) {
-                        int height = (int) (heightNoise.GetNoise(x/64f, z/64f) * 256);
-                        if (height < 0) {
-                            height = height/2;
-                        }
-                        int centerY = 100 + height;
-                        for (int rX = x - radius; rX < x + radius; rX++) {
-                            for (int rZ = z - radius; rZ < z + radius; rZ++) {
-                                for (int rY = centerY - radius; rY < centerY + radius; rY++) {
-                                    Block block = getBlock(rX, rY, rZ);
-                                    Block aboveBlock = getBlock(rX, rY+1, rZ);
-                                    Block northBlock = getBlock(rX, rY, rZ+1);
-                                    Block southBlock = getBlock(rX, rY, rZ-1);
-                                    Block eastBlock = getBlock(rX+1, rY, rZ);
-                                    Block westBlock = getBlock(rX-1, rY, rZ);
-                                    if (!(block != null && block.blockTypeId == 1) && !(aboveBlock != null && aboveBlock.blockTypeId == 1) && !(northBlock != null && northBlock.blockTypeId == 1) && !(southBlock != null && southBlock.blockTypeId == 1) && !(eastBlock != null && eastBlock.blockTypeId == 1) && !(westBlock != null && westBlock.blockTypeId == 1)) {
-                                        if (Vector3i.distance(x, centerY, z, rX, rY, rZ) < radius) {
-                                            setBlock(rX, rY, rZ, 0, 0, true, true);
-                                            if (heightmap[condensePos(rX, rZ)] == rY) {
-                                                queueLightUpdate(new Vector3i(rX, rY, rZ), false);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                updateHeightmap(x, z, false);
-            }
-        }
+//        int radius = 16;
+//        for (int x = 0; x < size; x++) {
+//            for (int z = 0; z < size; z++) {
+//                if (x > radius+2 && x < size-radius-2 && z > radius+2 && z < size-radius-2) {
+//                    FastNoiseLite heightNoise = new FastNoiseLite((int) (Math.random() * 9999));
+//                    heightNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+//                    FastNoiseLite horizontalNoise = new FastNoiseLite((int) (Math.random() * 9999));
+//                    horizontalNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+//                    float horizontalDensity = horizontalNoise.GetNoise(x/25f, z/25f);
+//                    if (horizontalDensity > -0.001 && horizontalDensity < 0.001) {
+//                        int height = (int) (heightNoise.GetNoise(x/64f, z/64f) * 256);
+//                        if (height < 0) {
+//                            height = height/2;
+//                        }
+//                        int centerY = 100 + height;
+//                        for (int rX = x - radius; rX < x + radius; rX++) {
+//                            for (int rZ = z - radius; rZ < z + radius; rZ++) {
+//                                for (int rY = centerY - radius; rY < centerY + radius; rY++) {
+//                                    Block block = getBlock(rX, rY, rZ);
+//                                    Block aboveBlock = getBlock(rX, rY+1, rZ);
+//                                    Block northBlock = getBlock(rX, rY, rZ+1);
+//                                    Block southBlock = getBlock(rX, rY, rZ-1);
+//                                    Block eastBlock = getBlock(rX+1, rY, rZ);
+//                                    Block westBlock = getBlock(rX-1, rY, rZ);
+//                                    if (!(block != null && block.blockTypeId == 1) && !(aboveBlock != null && aboveBlock.blockTypeId == 1) && !(northBlock != null && northBlock.blockTypeId == 1) && !(southBlock != null && southBlock.blockTypeId == 1) && !(eastBlock != null && eastBlock.blockTypeId == 1) && !(westBlock != null && westBlock.blockTypeId == 1)) {
+//                                        if (Vector3i.distance(x, centerY, z, rX, rY, rZ) < radius) {
+//                                            setBlock(rX, rY, rZ, 0, 0, true, true);
+//                                            if (heightmap[condensePos(rX, rZ)] == rY) {
+//                                                queueLightUpdate(new Vector3i(rX, rY, rZ), false);
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        for (int x = 0; x < size; x++) {
+//            for (int z = 0; z < size; z++) {
+//                updateHeightmap(x, z, false);
+//            }
+//        }
         Renderer.worldChanged = true;
     }
 
@@ -168,14 +167,14 @@ public class World {
         return x * size + z;
     }
     public static int condensePos(int x, int y, int z) {
-        return x + y * size + z * size * size;
+        return (((x*size)+z)*height)+y;
     }
     public static int condensePos(Vector3i pos) {
-        return pos.x + pos.y * size + pos.z * size * size;
+        return (((pos.x*size)+pos.z)*height)+pos.y;
     }
 
     public static Block getBlock(Vector3i blockPos) {
-        if (blockPos.x >= 0 && blockPos.x < max && blockPos.z >= 0 && blockPos.z < max) {
+        if (blockPos.x >= 0 && blockPos.x < size && blockPos.z >= 0 && blockPos.z < size && blockPos.y >= 0 && blockPos.y < height) {
             return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
         }
         return null;
@@ -188,7 +187,7 @@ public class World {
     }
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
-        if (x > 0 && x <= size && z > 0 && z <= size) {
+        if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
             int pos = condensePos(x, y, z);
             Block existing = region1Blocks[pos];
             if (replace || (existing == null || existing.blockTypeId == 0)) {
@@ -218,8 +217,8 @@ public class World {
     public static void updateHeightmap(int x, int z, boolean update) {
         int pos = condensePos(x, z);
         int oldHeight = heightmap[pos];
-        int tempHeight = max;
-        for (int scanY = max; scanY >= 0; scanY--) {
+        int tempHeight = height-1;
+        for (int scanY = tempHeight; scanY >= 0; scanY--) {
             if (scanY == 0) {
                 tempHeight = 0;
             } else {

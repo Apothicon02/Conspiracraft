@@ -117,12 +117,12 @@ public class Renderer {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/coherent_noise.png"))));
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.COHERERENT_NOISE));
         }
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-            int[] blocks = new int[fullSize];
+            int[] blocks = new int[size*size*height];
             for (int i = 0; i < region1Blocks.length; i++) {
                 Block block = region1Blocks[i];
                 if (block != null) {
@@ -166,7 +166,7 @@ public class Renderer {
             worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            int[] lights = new int[fullSize];
+            int[] lights = new int[size*size*height];
             for (int i = 0; i < region1Blocks.length; i++) {
                 Block block = region1Blocks[i];
                 if (block != null && block.light != null) {

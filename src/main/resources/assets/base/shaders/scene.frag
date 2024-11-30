@@ -59,7 +59,8 @@ vec3 stepMask(vec3 sideDist) {
     return vec3(mask);
 }
 
-int size = 512;
+int size = 1024;
+int height = 256;
 vec3 rayMapPos = vec3(0);
 vec3 lightPos = vec3(0);
 vec4 lighting = vec4(0);
@@ -137,9 +138,9 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
     vec3 mask = stepMask(sideDist);
 
     while (distance(rayMapPos, rayPos) < renderDistance) {
-        bool inBounds = rayMapPos.y >= 0 && rayMapPos.y < size && rayMapPos.x >= 0 && rayMapPos.x < size && rayMapPos.z >= 0 && rayMapPos.z < size;
+        bool inBounds = rayMapPos.y >= 0 && rayMapPos.y < height && rayMapPos.x >= 0 && rayMapPos.x < size && rayMapPos.z >= 0 && rayMapPos.z < size;
         //block start
-        int blockPos = int(rayMapPos.x) + int(rayMapPos.y) * size + int(rayMapPos.z) * size * size;
+        int blockPos = (((int(rayMapPos.x)*size)+int(rayMapPos.z))*height)+int(rayMapPos.y);
         int blockInfo = region1BlockData[blockPos];
         int blockType = (blockInfo >> 16) & 0xFFFF;
 
@@ -186,7 +187,7 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
             }
 
             //lighting start
-            int lightingData = region1LightingData[int(lightPos.x) + int(lightPos.y) * size + int(lightPos.z) * size * size];
+            int lightingData = region1LightingData[(((int(lightPos.x)*size)+int(lightPos.z))*height)+int(lightPos.y)];
             lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
             //lighting end

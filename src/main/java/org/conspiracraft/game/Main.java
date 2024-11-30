@@ -20,6 +20,7 @@ public class Main {
     }
 
     public void init(Window window) throws Exception {
+        Noise.init();
         World.init();
         Renderer.init();
     }
