@@ -10,8 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -202,14 +208,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
-      <option name="closed" value="true" />
-      <created>1722613150852</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1722613150852</updated>
     </task>
     <task id="LOCAL-00005" summary="- Rewrite.">
       <option name="closed" value="true" />
@@ -595,7 +593,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733007186228</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="- Raised world height to Y320.">
+      <option name="closed" value="true" />
+      <created>1733195633126</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1733195633127</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -611,7 +617,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Rewrote camera. &#10;- Added adjustable render distance. &#10;- Fixed issue with keybinds spamming. &#10;- Fixed rendering being slightly broken on the z axis." />
     <MESSAGE value="- Improved grass and flower textures. &#10;- Re-added block sub-types." />
     <MESSAGE value="- Culled pixels off-screne. &#10;- Converted atlas to a SSBO." />
     <MESSAGE value="- Removed old code." />
@@ -636,7 +641,8 @@
     <MESSAGE value="- Re-enabled light fog. &#10;- Recreated sky. &#10;- Moved clouds. &#10;- Increased minimum light. &#10;- Tweaked render distance. &#10;- Got rid of the dynamic fps-based max light updates. &#10;- Vertical movement is now independent of camera rotation." />
     <MESSAGE value="- Added stone. &#10;- Added caves. &#10;- Grass is now broken when the block below is." />
     <MESSAGE value="- Increased world size to 1024x256x1024. &#10;- Noise for worldgen is now pre-computed." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Increased world size to 1024x256x1024. &#10;- Noise for worldgen is now pre-computed." />
+    <MESSAGE value="- Raised world height to Y320." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Raised world height to Y320." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

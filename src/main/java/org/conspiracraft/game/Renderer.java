@@ -82,7 +82,7 @@ public class Renderer {
         scene.bind();
 
         glUniform2f(resUniform, window.getWidth(), window.getHeight());
-        Matrix4f camMatrix = Main.camera.viewMatrix;
+        Matrix4f camMatrix = Main.player.getCameraMatrix();
         glUniformMatrix4fv(camUniform, true, new float[]{
                 camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
                 camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),

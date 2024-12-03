@@ -8,14 +8,14 @@ public class BlockTypes {
 
     private static int key = 0;
 
-    public static BlockType AIR = create(new BlockType(true));
-    public static BlockType WATER = create(new BlockType(true));
+    public static BlockType AIR = create(new BlockType(true, false));
+    public static BlockType WATER = create(new BlockType(true, false));
     public static BlockType GRASS = create(new BlockType(false));
     public static BlockType DIRT = create(new BlockType(false));
-    public static BlockType TALL_GRASS = create(new BlockType(true));
-    public static BlockType ROSE = create(new BlockType(true));
-    public static BlockType TORCH = create(new LightBlockType(true, 20, 15, 0));
-    public static BlockType TEAL_TORCH = create(new LightBlockType(true, 0, 12, 20));
+    public static BlockType TALL_GRASS = create(new BlockType(true, false));
+    public static BlockType ROSE = create(new BlockType(true, false));
+    public static BlockType TORCH = create(new LightBlockType(true, false, 20, 15, 0));
+    public static BlockType TEAL_TORCH = create(new LightBlockType(true, false, 0, 12, 20));
     public static BlockType YELLOW_STAR = create(new LightBlockType(true, 8, 7, 2));
     public static BlockType WHITE_STAR = create(new LightBlockType(true, 10, 9, 8));
     public static BlockType STONE = create(new BlockType(false));
