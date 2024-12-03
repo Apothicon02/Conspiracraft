@@ -5,7 +5,6 @@ import org.conspiracraft.game.blocks.Light;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.engine.FastNoiseLite;
 import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
@@ -20,7 +19,7 @@ import java.util.List;
 public class World {
     public static int seaLevel = 137;
     public static int size = 1024;
-    public static int height = 256;
+    public static int height = 320;
 
     public static Block[] region1Blocks = new Block[size*size*height];
     public static int[] heightmap = new int[size*size];
@@ -108,7 +107,7 @@ public class World {
                         Block block = getBlock(x, y+1, z);
                         if (block != null) {
                             if (!BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
-                                queueLightUpdate(new Vector3i(x, y, z), false);
+                                //queueLightUpdate(new Vector3i(x, y, z), false);
                             }
                         }
                     }

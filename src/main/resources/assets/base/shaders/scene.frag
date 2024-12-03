@@ -60,7 +60,7 @@ vec3 stepMask(vec3 sideDist) {
 }
 
 int size = 1024;
-int height = 256;
+int height = 320;
 vec3 rayMapPos = vec3(0);
 vec3 lightPos = vec3(0);
 vec4 lighting = vec4(0);
