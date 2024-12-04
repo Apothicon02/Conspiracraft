@@ -3,6 +3,7 @@ package org.conspiracraft.game;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;

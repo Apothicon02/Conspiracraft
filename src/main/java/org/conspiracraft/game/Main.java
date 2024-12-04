@@ -2,6 +2,7 @@ package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
 
@@ -143,22 +144,20 @@ public class Main {
         for (int i = 0; i < range; i++) {
             ray.translate(0, 0, 0.1f);
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-            if (rayPos.x >= 0 && rayPos.x < World.size && rayPos.y >= 0 && rayPos.y < World.size && rayPos.z >= 0 && rayPos.z < World.size) {
-                Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
-                if (block != null) {
-                    int typeId = block.blockTypeId;
-                    int subTypeId = block.blockSubtypeId;
-                    int color = Renderer.atlasData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)];
-                    int alpha = color >> 24 & 0xFFFF;
-                    if (alpha > 0) {
-                        if (prevPos) {
-                            return rayPos;
-                        } else {
-                            return blockPos;
-                        }
+            Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
+            if (block != null) {
+                int typeId = block.blockTypeId;
+                int subTypeId = block.blockSubtypeId;
+                int color = Renderer.atlasData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)];
+                int alpha = color >> 24 & 0xFFFF;
+                if (alpha > 0) {
+                    if (prevPos) {
+                        return rayPos;
                     } else {
-                        blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
+                        return blockPos;
                     }
+                } else {
+                    blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
                 }
             }
         }

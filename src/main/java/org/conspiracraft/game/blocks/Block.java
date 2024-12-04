@@ -1,7 +1,7 @@
 package org.conspiracraft.game.blocks;
 
 import org.conspiracraft.engine.Utils;
-import org.conspiracraft.game.World;
+import org.conspiracraft.game.world.World;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;

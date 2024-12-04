@@ -1,5 +1,7 @@
-package org.conspiracraft.game;
+package org.conspiracraft.game.world;
 
+import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.blocks.Light;
 
 import org.conspiracraft.game.blocks.types.BlockType;
@@ -19,9 +21,11 @@ import java.util.List;
 public class World {
     public static int seaLevel = 137;
     public static int size = 1024;
+    public static int sizeChunks = 64;
     public static int height = 320;
+    public static int heightChunks = 20;
 
-    public static Block[] region1Blocks = new Block[size*size*height];
+    public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static int[] heightmap = new int[size*size];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
@@ -38,7 +42,7 @@ public class World {
     }
 
     public static void clearWorld() {
-        region1Blocks = new Block[size*size*height];
+        //Arrays.fill(region1Chunks, new Chunk());
         lightQueue = new ArrayList<>(List.of());
         blockQueue = new ArrayList<>(List.of());
         Arrays.fill(heightmap, height);
@@ -59,9 +63,9 @@ public class World {
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
                     double random = Math.random();
-                    if (random > 0.9995) {
+                    if (random > 0.99995) {
                         setBlock(x, (int) ((basePerlinNoise*12)+299), z, 8, 0, false, true);
-                    } else if (random > 0.999) {
+                    } else if (random > 0.9999) {
                         setBlock(x, (int) ((basePerlinNoise*12)+299), z, 9, 0, false, true);
                     }
                 }
@@ -81,8 +85,8 @@ public class World {
                         if (upmost && y >= seaLevel) {
                             setBlock(x, y, z, 2, 0, false, true);
                             double torchChance = Math.random();
-                            if (torchChance > 0.9999d) {
-                                setBlock(x, y+1, z, torchChance > 0.99995d ? 6 : 7, 0, false, true);
+                            if (torchChance > 0.99997d) {
+                                setBlock(x, y+1, z, torchChance > 0.999985d ? 6 : 7, 0, false, true);
                             } else {
                                 setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
                             }
@@ -171,10 +175,29 @@ public class World {
     public static int condensePos(Vector3i pos) {
         return (((pos.x*size)+pos.z)*height)+pos.y;
     }
+    public static int condenseLocalPos(int x, int y, int z) {
+        return (((x*16)+z)*16)+y;
+    }
+    public static int condenseLocalPos(Vector3i pos) {
+        return (((pos.x*16)+pos.z)*16)+pos.y;
+    }
+    public static int condenseChunkPos(Vector3i pos) {
+        return (((pos.x*sizeChunks)+pos.z)*heightChunks)+pos.y;
+    }
+    public static int condenseChunkPos(int x, int y, int z) {
+        return (((x*sizeChunks)+z)*heightChunks)+y;
+    }
 
     public static Block getBlock(Vector3i blockPos) {
         if (blockPos.x >= 0 && blockPos.x < size && blockPos.z >= 0 && blockPos.z < size && blockPos.y >= 0 && blockPos.y < height) {
-            return region1Blocks[condensePos(blockPos.x, blockPos.y, blockPos.z)];
+            Vector3i chunkPos = new Vector3i(blockPos.x/16, blockPos.y/16, blockPos.z/16);
+            int condensedChunkPos = condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z);
+            Chunk chunk = region1Chunks[condensedChunkPos];
+            if (chunk == null) {
+                region1Chunks[condensedChunkPos] = new Chunk();
+                chunk = region1Chunks[condensedChunkPos];
+            }
+            return chunk.blocks[condenseLocalPos(blockPos.x-(chunkPos.x*16), blockPos.y-(chunkPos.y*16), blockPos.z-(chunkPos.z*16))];
         }
         return null;
     }
@@ -187,18 +210,15 @@ public class World {
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
         if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
-            int pos = condensePos(x, y, z);
-            Block existing = region1Blocks[pos];
+            Block existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.blockTypeId == 0)) {
                 int blockId = Utils.packInts(blockTypeId, blockSubtypeId);
                 if (instant) {
-                    Vector3i BlockPos = new Vector3i(x, y, z);
-                    Block block = new Block(blockTypeId, blockSubtypeId);
-                    BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
-                    if (blockType instanceof LightBlockType) {
-                        queueLightUpdate(BlockPos, false);
+                    Vector3i chunkPos = new Vector3i(x/16, y/16, z/16);
+                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].blocks[condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16))] = new Block(blockTypeId, blockSubtypeId);
+                    if (BlockTypes.blockTypeMap.get(blockTypeId) instanceof LightBlockType) {
+                        queueLightUpdate(new Vector3i(x, y, z), false);
                     }
-                    region1Blocks[pos] = block;
                 } else {
                     blockQueue.add(new Vector4i(x, y, z, blockId));
                 }
@@ -314,7 +334,7 @@ public class World {
     }
 
     public static int updateLight(Vector3i pos) {
-        Block block = region1Blocks[condensePos(pos)];
+        Block block = getBlock(pos);
         if (block != null) {
             return block.updateLight(pos);
         } else {
