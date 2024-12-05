@@ -8,6 +8,14 @@ tasks.withType<Jar> {
     }
 }
 
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("--enable-preview")
+}
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs("--enable-preview")
+}
+
 group = "org.apothicon"
 version = "0.1-SNAPSHOT"
 

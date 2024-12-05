@@ -11,7 +11,11 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,30 +91,30 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run with VisualVM&quot;,
-    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Run.executor": "Run",
+    "Gradle.Build Conspiracraft.executor": "Run",
+    "Gradle.Build Terraflat.executor": "Run",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
+    "JAR Application.VisualVMLauncher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.updates"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -136,11 +140,11 @@
   </component>
   <component name="RunManager" selected="Application.Run">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
-      <option name="ALTERNATIVE_JRE_PATH" value="21" />
+      <option name="ALTERNATIVE_JRE_PATH" value="23" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="org.conspiracraft.game.Main" />
       <module name="Conspiracraft.main" />
-      <option name="VM_PARAMETERS" value="-Xmx16384m" />
+      <option name="VM_PARAMETERS" value="-Xmx16384m --enable-preview" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.conspiracraft.game.blocks.properties.*" />
@@ -177,8 +181,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.Terraflat [build]" />
         <item itemvalue="Application.Run" />
+        <item itemvalue="Gradle.Terraflat [build]" />
       </list>
     </recent_temporary>
   </component>
@@ -190,14 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00008" summary="- Added sunlight.">
-      <option name="closed" value="true" />
-      <created>1725723181471</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1725723181471</updated>
     </task>
     <task id="LOCAL-00009" summary="- Rewrite.">
       <option name="closed" value="true" />
@@ -583,7 +579,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733364743052</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="- Increased cloud detail.">
+      <option name="closed" value="true" />
+      <created>1733410987670</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1733410987671</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -599,7 +603,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Finished new multi-level dda. &#10;- Added fog." />
     <MESSAGE value="- Updated render distance default value to 10.&#10;- Altered render distance calculation." />
     <MESSAGE value="- There can now only be one renderer. &#10;- Added the World class." />
     <MESSAGE value="- Renamed to Conspiracraft." />
@@ -624,7 +627,8 @@
     <MESSAGE value="- Removed unused files." />
     <MESSAGE value="- Reduced amount of lights that generate. &#10;- Added chunks." />
     <MESSAGE value="- Re-added sunlight spreading during worldgen." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Re-added sunlight spreading during worldgen." />
+    <MESSAGE value="- Increased cloud detail." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Increased cloud detail." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
