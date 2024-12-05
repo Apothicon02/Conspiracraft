@@ -131,14 +131,14 @@ public class Renderer {
                         int id = block.id();
                         blocks[condensePos(x, y, z)] = id;
                         Vector3i chunkPos = new Vector3i(x/16, y/16, z/16);
-                        region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].blocks[condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16))] = block;
+                        region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), block);
                     }
                 }
             }
             for (Vector4i blockData : blockQueue) {
                 blocks[World.condensePos(blockData.x, blockData.y, blockData.z)] = blockData.w;
                 Vector3i chunkPos = new Vector3i(blockData.x/16, blockData.y/16, blockData.z/16);
-                region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].blocks[condenseLocalPos(blockData.x-(chunkPos.x*16), blockData.y-(chunkPos.y*16), blockData.z-(chunkPos.z*16))] = new Block(blockData.w);
+                region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(blockData.x-(chunkPos.x*16), blockData.y-(chunkPos.y*16), blockData.z-(chunkPos.z*16)), new Block(blockData.w));
             }
             blockQueue = new ArrayList<>(List.of());
             glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_DYNAMIC_DRAW);
@@ -154,7 +154,8 @@ public class Renderer {
                     Block oldBlock = getBlock(pos);
                     Block block = new Block(blockData.w);
                     Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
-                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].blocks[condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16))] = block;
+                    Chunk chunk = region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)];
+                    chunk.setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), block);
                     updateHeightmap(blockData.x, blockData.z, true);
                     Light oldLight = oldBlock.light;
                     if (oldLight == null) {

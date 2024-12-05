@@ -5,7 +5,6 @@ import org.conspiracraft.game.world.World;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 
@@ -13,26 +12,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
-    public int blockTypeId;
-    public int blockSubtypeId;
+    private int id;
     public Light light;
 
     public Block(int type, int subtype) {
-        blockTypeId = type;
-        blockSubtypeId = subtype;
+        id = Utils.packInts(type, subtype);
     }
-    public Block(int id) {
-        Vector2i unpackedId = Utils.unpackInt(id);
-        blockTypeId = unpackedId.x;
-        blockSubtypeId = unpackedId.y;
+    public Block(int blockId) {
+        id = blockId;
     }
 
+    public int typeId() {
+        return Utils.unpackInt(id).x;
+    }
+    public int subtypeId() {
+        return Utils.unpackInt(id).y;
+    }
     public int id() {
-        return Utils.packInts(blockTypeId, blockSubtypeId);
+        return id;
     }
 
     public int updateLight(Vector3i pos) {
-        BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
+        BlockType blockType = BlockTypes.blockTypeMap.get(typeId());
         if (blockType.isTransparent || blockType instanceof LightBlockType) {
             if (light == null) {
                 light = new Light(0, 0, 0,0);
@@ -53,7 +54,7 @@ public class Block {
                 Vector3i blockPos = neighborBlocks[i];
                 Block neighbor = World.getBlock(blockPos);
                 if (neighbor != null) {
-                    BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.blockTypeId);
+                    BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.typeId());
                     if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
                         Light neighborLight = neighbor.light;
                         if (neighborLight == null) {

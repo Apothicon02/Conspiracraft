@@ -21,9 +21,9 @@ import java.util.List;
 public class World {
     public static int seaLevel = 137;
     public static int size = 1024;
-    public static int sizeChunks = 64;
+    public static int sizeChunks = size/16;
     public static int height = 320;
-    public static int heightChunks = 20;
+    public static int heightChunks = size/16;
 
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static int[] heightmap = new int[size*size];
@@ -71,7 +71,7 @@ public class World {
                 }
                 int surface = height-1;
                 boolean upmost = true;
-                for (int y = surface; y >= 1; y--) {
+                for (int y = surface; y >= 0; y--) {
                     double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
                     double negativeDensity = (basePerlinNoise-1) + negativeGradient;
                     double baseDensity = 0;
@@ -108,10 +108,12 @@ public class World {
                         }
                     } else {
                         setBlock(x, y, z, 0, 0, false, true);
-                        Block block = getBlock(x, y+1, z);
-                        if (block != null) {
-                            if (!BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
-                                //queueLightUpdate(new Vector3i(x, y, z), false);
+                        if (x % 4 == 0 && z % 4 == 0) { //temporary to improve world load speed during testing.
+                            Block block = getBlock(x, y + 1, z);
+                            if (block != null) {
+                                if (!BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
+                                    queueLightUpdate(new Vector3i(x, y, z), false);
+                                }
                             }
                         }
                     }
@@ -197,7 +199,7 @@ public class World {
                 region1Chunks[condensedChunkPos] = new Chunk();
                 chunk = region1Chunks[condensedChunkPos];
             }
-            return chunk.blocks[condenseLocalPos(blockPos.x-(chunkPos.x*16), blockPos.y-(chunkPos.y*16), blockPos.z-(chunkPos.z*16))];
+            return chunk.getBlock(condenseLocalPos(blockPos.x-(chunkPos.x*16), blockPos.y-(chunkPos.y*16), blockPos.z-(chunkPos.z*16)));
         }
         return null;
     }
@@ -211,11 +213,11 @@ public class World {
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
         if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
             Block existing = getBlock(x, y, z);
-            if (replace || (existing == null || existing.blockTypeId == 0)) {
+            if (replace || (existing == null || existing.typeId() == 0)) {
                 int blockId = Utils.packInts(blockTypeId, blockSubtypeId);
                 if (instant) {
                     Vector3i chunkPos = new Vector3i(x/16, y/16, z/16);
-                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].blocks[condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16))] = new Block(blockTypeId, blockSubtypeId);
+                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), new Block(blockTypeId, blockSubtypeId));
                     if (BlockTypes.blockTypeMap.get(blockTypeId) instanceof LightBlockType) {
                         queueLightUpdate(new Vector3i(x, y, z), false);
                     }
@@ -224,7 +226,7 @@ public class World {
                 }
                 Block aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
-                    int aboveBlockId = aboveBlock.blockTypeId;
+                    int aboveBlockId = aboveBlock.typeId();
                     if (aboveBlockId == 4 || aboveBlockId == 5) {
                         setBlock(x, y + 1, z, 0, 0, true, instant);
                     }
@@ -243,7 +245,7 @@ public class World {
             } else {
                 Block block = getBlock(x, scanY, z);
                 if (block != null) {
-                    if (!BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+                    if (!BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
                         tempHeight = scanY;
                         break;
                     } else {
@@ -265,7 +267,7 @@ public class World {
     public static Light getLight(int x, int y, int z) {
         Block block = getBlock(new Vector3i(x, y, z));
         if (block != null) {
-            if (BlockTypes.blockTypeMap.get(block.blockTypeId).isTransparent) {
+            if (BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
                 Light blockLight = block.light;
                 if (blockLight != null) {
                     return blockLight;
@@ -292,7 +294,7 @@ public class World {
         }) {
             Block neighbor = World.getBlock(neighborPos);
             if (neighbor != null) {
-                BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.blockTypeId);
+                BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.typeId());
                 if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
                     Light neighborLight = neighbor.light;
                     if (neighborLight != null) {

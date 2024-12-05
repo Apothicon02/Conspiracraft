@@ -73,10 +73,10 @@ public class Main {
                 if (pos != null) {
                     if (mmbDown) {
                         selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                    } else if (BlockTypes.blockTypeMap.get(selectedBlock.blockTypeId) != null) {
+                    } else if (BlockTypes.blockTypeMap.get(selectedBlock.typeId()) != null) {
                         lastBlockBroken = timeMillis;
-                        int blockTypeId = selectedBlock.blockTypeId;
-                        int blockSubtypeId = selectedBlock.blockSubtypeId;
+                        int blockTypeId = selectedBlock.typeId();
+                        int blockSubtypeId = selectedBlock.subtypeId();
                         if (lmbDown) {
                             blockTypeId = 0;
                             blockSubtypeId = 0;
@@ -146,8 +146,8 @@ public class Main {
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
             Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
-                int typeId = block.blockTypeId;
-                int subTypeId = block.blockSubtypeId;
+                int typeId = block.typeId();
+                int subTypeId = block.subtypeId();
                 int color = Renderer.atlasData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)];
                 int alpha = color >> 24 & 0xFFFF;
                 if (alpha > 0) {

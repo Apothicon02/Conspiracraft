@@ -19,7 +19,7 @@ public class Player {
 
     public void tick() {
         Block belowBlock = World.getBlock(new Vector3i(blockPos.x, (int) (pos.y-0.125f), blockPos.z));
-        if (belowBlock == null || !BlockTypes.blockTypeMap.get(belowBlock.blockTypeId).isCollidable) {
+        if (belowBlock == null || !BlockTypes.blockTypeMap.get(belowBlock.typeId()).isCollidable) {
             move(0, -0.125f, 0, false);
         }
     }
