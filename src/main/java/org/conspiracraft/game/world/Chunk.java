@@ -10,13 +10,9 @@ public class Chunk {
     private final List<Block> palette = new ArrayList<>(List.of());
 
     public Block getBlock(int pos) {
-        short index = blocks[pos];
-        if (palette.size() > index) {
-            Block block = palette.get(index);
-            if (block == null) {
-                return new Block(0);
-            }
-            return block;
+        short index = blocks[pos]; //get the short / palette index from the blocks array
+        if (!palette.isEmpty()) { //if palette is empty / chunk has no blocks return air
+            return palette.get(index);
         }
         return new Block(0);
     }
@@ -30,8 +26,8 @@ public class Chunk {
             }
         }
         if (!wasInPalette) {
-            blocks[pos] = (short) palette.size();
-            palette.add(block);
+            blocks[pos] = (short) palette.size(); //palette.size() is where the new palette entry will be
+            palette.addLast(block);
         }
     }
 }

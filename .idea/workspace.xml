@@ -9,17 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Reduced memory usage from 20gb to 0.9gb.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Light.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,14 +190,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00010" summary="- Now works with renderdoc.">
-      <option name="closed" value="true" />
-      <created>1730076809766</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1730076809766</updated>
     </task>
     <task id="LOCAL-00011" summary="- Fixed SSBO not working.">
       <option name="closed" value="true" />
@@ -591,7 +575,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733416303034</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="- Reduced memory usage from 20gb to 0.9gb.">
+      <option name="closed" value="true" />
+      <created>1733439042049</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1733439042049</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +599,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- There can now only be one renderer. &#10;- Added the World class." />
     <MESSAGE value="- Renamed to Conspiracraft." />
     <MESSAGE value="- Removed log files." />
     <MESSAGE value="- Added lighting." />
@@ -632,7 +623,8 @@
     <MESSAGE value="- Re-added sunlight spreading during worldgen." />
     <MESSAGE value="- Increased cloud detail." />
     <MESSAGE value="- Updated to java 23." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Updated to java 23." />
+    <MESSAGE value="- Reduced memory usage from 20gb to 0.9gb." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Reduced memory usage from 20gb to 0.9gb." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
