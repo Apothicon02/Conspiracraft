@@ -43,7 +43,7 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
 }
 
 float noise(vec2 coords) {
-    return (texture(coherent_noise, coords/2048).r)-0.5;
+    return (texture(coherent_noise, coords/1024).r)-0.5;
 }
 
 vec3 stepMask(vec3 sideDist) {
