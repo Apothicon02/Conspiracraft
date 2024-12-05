@@ -148,9 +148,7 @@ public class Main {
             if (block != null) {
                 int typeId = block.typeId();
                 int subTypeId = block.subtypeId();
-                int color = Renderer.atlasData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)];
-                int alpha = color >> 24 & 0xFFFF;
-                if (alpha > 0) {
+                if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
                     if (prevPos) {
                         return rayPos;
                     } else {

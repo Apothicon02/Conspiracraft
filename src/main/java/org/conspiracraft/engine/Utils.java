@@ -1,7 +1,7 @@
 package org.conspiracraft.engine;
 
-import org.conspiracraft.game.blocks.Light;
 import org.joml.Vector2i;
+import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 
 import java.awt.*;
@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Utils {
+    public static byte emptyByte = (byte)0;
     public static String readFile(String filePath) {
         List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
         StringBuilder data = new StringBuilder();
@@ -44,7 +45,7 @@ public class Utils {
     public static int colorToInt(Color color) {
         return color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
     }
-    public static int lightToInt(Light light) {
-        return light.r() << 16 | light.g() << 8 | light.b() | light.s() << 24;
+    public static int vector4iToInt(Vector4i vector4i) {
+        return vector4i.x() << 16 | vector4i.y() << 8 | vector4i.z() | vector4i.w() << 24;
     }
 }

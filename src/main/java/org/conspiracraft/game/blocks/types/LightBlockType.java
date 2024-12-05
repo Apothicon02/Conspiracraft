@@ -1,16 +1,20 @@
 package org.conspiracraft.game.blocks.types;
 
-import org.conspiracraft.game.blocks.Light;
-
 public class LightBlockType extends BlockType {
-    public Light emission;
+    public byte r;
+    public byte g;
+    public byte b;
 
-    public LightBlockType(boolean transparent, boolean collidable, int r, int g, int b) {
+    public LightBlockType(boolean transparent, boolean collidable, int red, int green, int blue) {
         super(transparent, collidable);
-        emission = new Light(r, g, b, 0);
+        r = (byte) red;
+        g = (byte) green;
+        b = (byte) blue;
     }
-    public LightBlockType(boolean transparent, int r, int g, int b) {
+    public LightBlockType(boolean transparent, int red, int green, int blue) {
         super(transparent, true);
-        emission = new Light(r, g, b, 0);
+        r = (byte) red;
+        g = (byte) green;
+        b = (byte) blue;
     }
 }

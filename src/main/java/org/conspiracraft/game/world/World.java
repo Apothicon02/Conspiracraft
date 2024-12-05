@@ -2,8 +2,8 @@ package org.conspiracraft.game.world;
 
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Renderer;
-import org.conspiracraft.game.blocks.Light;
 
+import org.conspiracraft.game.blocks.BlockHelper;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
@@ -22,11 +22,11 @@ public class World {
     public static int seaLevel = 137;
     public static int size = 1024;
     public static int sizeChunks = size/16;
-    public static int height = 320;
+    public static short height = 320;
     public static int heightChunks = size/16;
 
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
-    public static int[] heightmap = new int[size*size];
+    public static short[] heightmap = new short[size*size];
 
     public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
     public static List<Vector4i> blockQueue = new ArrayList<>(List.of());
@@ -249,11 +249,9 @@ public class World {
                         tempHeight = scanY;
                         break;
                     } else {
-                        if (block.light == null) {
-                            block.light = new Light(0, 0, 0, 12);
-                        } else {
-                            block.light.s(12);
-                        }
+                        Vector3i chunkPos = new Vector3i(x/16, scanY/16, z/16);
+                        region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), scanY-(chunkPos.y*16), z-(chunkPos.z*16)),
+                                new Block(block.id(), (byte) 0, (byte) 0, (byte) 0, (byte) 12));
                         if (update && oldHeight >= scanY) {
                             queueLightUpdate(new Vector3i(x, scanY, z), false);
                         }
@@ -261,29 +259,22 @@ public class World {
                 }
             }
         }
-        heightmap[pos] = tempHeight;
+        heightmap[pos] = (short) tempHeight;
     }
 
-    public static Light getLight(int x, int y, int z) {
+    public static byte[] getLight(int x, int y, int z) {
         Block block = getBlock(new Vector3i(x, y, z));
         if (block != null) {
-            if (BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
-                Light blockLight = block.light;
-                if (blockLight != null) {
-                    return blockLight;
-                } else {
-                    return new Light(0);
-                }
-            }
+            return new byte[]{block.r(), block.g(), block.b(), block.s()};
         }
         return null;
     }
 
-    public static Light getLight(Vector3i pos) {
+    public static byte[] getLight(Vector3i pos) {
         return getLight(pos.x, pos.y, pos.z);
     }
 
-    public static void recalculateLight(Vector3i pos, Light light) {
+    public static void recalculateLight(Vector3i pos, byte r, byte g, byte b, byte s) {
         for (Vector3i neighborPos : new Vector3i[]{
                 new Vector3i(pos.x, pos.y, pos.z + 1),
                 new Vector3i(pos.x + 1, pos.y, pos.z),
@@ -296,30 +287,31 @@ public class World {
             if (neighbor != null) {
                 BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.typeId());
                 if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
-                    Light neighborLight = neighbor.light;
-                    if (neighborLight != null) {
-                        boolean sunlit =  neighbor.light.s() == 12;
-                        if (sunlit) {
-                            if (heightmap[condensePos(neighborPos.x, neighborPos.z)] >= neighborPos.y) {
-                                sunlit = false;
-                                for (int belowY = neighborPos.y; belowY >= 0; belowY--) {
-                                    Vector3i belowPos = new Vector3i(neighborPos.x, belowY, neighborPos.z);
-                                    Block block = getBlock(belowPos);
-                                    if (block != null && block.light != null && block.light.s() == 12) {
-                                        block.light.s(0);
-                                        recalculateLight(belowPos, new Light(block.light.r(), block.light.g(), block.light.b(), 12));
-                                    } else {
-                                        break;
-                                    }
+                    boolean sunlit =  neighbor.s() == 12;
+                    if (sunlit) {
+                        if (heightmap[condensePos(neighborPos.x, neighborPos.z)] >= neighborPos.y) {
+                            sunlit = false;
+                            for (int belowY = neighborPos.y; belowY >= 0; belowY--) {
+                                Vector3i belowPos = new Vector3i(neighborPos.x, belowY, neighborPos.z);
+                                Block block = getBlock(belowPos);
+                                if (block != null && block.s() == 12) {
+                                    Vector3i chunkPos = new Vector3i(neighborPos.x/16, belowY/16, neighborPos.z/16);
+                                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(neighborPos.x-(chunkPos.x*16), belowY-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
+                                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 0));
+                                    recalculateLight(belowPos, block.r(), block.g(), block.b(), (byte) 12);
+                                } else {
+                                    break;
                                 }
                             }
                         }
-                        if ((neighborLight.r() > 0 && neighborLight.r() < light.r()) || (neighborLight.g() > 0 && neighborLight.g() < light.g()) || (neighborLight.b() > 0 && neighborLight.b() < light.b()) || (neighborLight.s() > 0 && neighborLight.s() < light.s())) {
-                            neighbor.light = new Light(0, 0, 0, sunlit ? 12 : 0);
-                            recalculateLight(neighborPos, neighborLight);
-                        }
-                        queueLightUpdate(pos, true);
                     }
+                    if ((neighbor.r() > 0 && neighbor.r() < r) || (neighbor.g() > 0 && neighbor.g() < g) || (neighbor.b() > 0 && neighbor.b() < b) || (neighbor.s() > 0 && neighbor.s() < s)) {
+                        Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
+                        region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
+                                new Block(neighbor.id(), (byte) 0, (byte) 0, (byte) 0, (byte) (sunlit ? 12 : 0)));
+                        recalculateLight(neighborPos, neighbor.r(), neighbor.g(), neighbor.b(), neighbor.s());
+                    }
+                    queueLightUpdate(pos, true);
                 }
             }
         }
@@ -338,7 +330,7 @@ public class World {
     public static int updateLight(Vector3i pos) {
         Block block = getBlock(pos);
         if (block != null) {
-            return block.updateLight(pos);
+            return BlockHelper.updateLight(pos, block);
         } else {
             return 0;
         }

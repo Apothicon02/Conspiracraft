@@ -1,7 +1,6 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Block;
-import org.conspiracraft.game.blocks.Light;
 import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.Matrix4f;
@@ -42,7 +41,7 @@ public class Renderer {
     public static float timeOfDay = 0.5f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
-    public static int[] atlasData = null;
+    public static boolean[] collisionData = new boolean[9984*9984+9984];
 
     public static void init() throws Exception {
         GL.createCapabilities();
@@ -102,10 +101,11 @@ public class Renderer {
 
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
-            atlasData = new int[size];
+            int[] atlasData = new int[size];
             for (int x = 0; x < 9984; x++) {
                 for (int y = 0; y < 9984; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
+                    collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
                 }
             }
 
@@ -157,15 +157,7 @@ public class Renderer {
                     Chunk chunk = region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)];
                     chunk.setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), block);
                     updateHeightmap(blockData.x, blockData.z, true);
-                    Light oldLight = oldBlock.light;
-                    if (oldLight == null) {
-                        block.updateLight(pos);
-                        oldLight = block.light;
-                        if (oldLight == null) {
-                            oldLight = new Light(0, 0, 0, 0);
-                        }
-                    }
-                    recalculateLight(pos, oldLight);
+                    recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos)*4L, new int[]{blockData.w});
                 }
             }
@@ -180,8 +172,8 @@ public class Renderer {
                 for (int z = 0; z < size; z++) {
                     for (int y = 0; y < height; y++) {
                         Block block = getBlock(x, y, z);
-                        if (block != null && block.light != null) {
-                            lights[condensePos(x, y, z)] = Utils.lightToInt(block.light);
+                        if (block != null) {
+                            lights[condensePos(x, y, z)] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
                         }
                     }
                 }
