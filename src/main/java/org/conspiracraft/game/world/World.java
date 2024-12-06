@@ -23,7 +23,7 @@ public class World {
     public static int size = 1024;
     public static int sizeChunks = size/16;
     public static short height = 320;
-    public static int heightChunks = size/16;
+    public static int heightChunks = height/16;
 
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
@@ -42,7 +42,7 @@ public class World {
     }
 
     public static void clearWorld() {
-        //Arrays.fill(region1Chunks, new Chunk());
+        region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
         lightQueue = new ArrayList<>(List.of());
         blockQueue = new ArrayList<>(List.of());
         Arrays.fill(heightmap, height);
@@ -56,9 +56,9 @@ public class World {
         Vector2i middle = new Vector2i(size/2, size/2);
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
-                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
-                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
+                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/4);
+                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x/2, z/2))/128)-1;
+                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x/2, z/2))/128)-1;
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
@@ -169,10 +169,13 @@ public class World {
     }
 
     public static int condensePos(int x, int z) {
-        return x * size + z;
+        return (x * size) + z;
     }
     public static int condensePos(int x, int y, int z) {
         return (((x*size)+z)*height)+y;
+    }
+    public static int condensePos(int x, int y, int z, int customSize) {
+        return (((x*customSize)+z)*height)+y;
     }
     public static int condensePos(Vector3i pos) {
         return (((pos.x*size)+pos.z)*height)+pos.y;

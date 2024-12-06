@@ -123,25 +123,18 @@ public class Renderer {
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
-            int[] blocks = new int[size*size*height];
+            glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
+
+            int[] blocks = new int[height];
             for (int x = 0; x < size; x++) {
                 for (int z = 0; z < size; z++) {
                     for (int y = 0; y < height; y++) {
-                        Block block = getBlock(x, y, z);
-                        int id = block.id();
-                        blocks[condensePos(x, y, z)] = id;
-                        Vector3i chunkPos = new Vector3i(x/16, y/16, z/16);
-                        region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), block);
+                        blocks[y] = getBlock(x, y, z).id();
                     }
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (((x*size)+z)*height)*4, blocks);
                 }
             }
-            for (Vector4i blockData : blockQueue) {
-                blocks[World.condensePos(blockData.x, blockData.y, blockData.z)] = blockData.w;
-                Vector3i chunkPos = new Vector3i(blockData.x/16, blockData.y/16, blockData.z/16);
-                region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(blockData.x-(chunkPos.x*16), blockData.y-(chunkPos.y*16), blockData.z-(chunkPos.z*16)), new Block(blockData.w));
-            }
-            blockQueue = new ArrayList<>(List.of());
-            glBufferData(GL_SHADER_STORAGE_BUFFER, blocks, GL_DYNAMIC_DRAW);
+
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
@@ -167,18 +160,19 @@ public class Renderer {
             worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
-            int[] lights = new int[size*size*height];
+            glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
+
+            int[] lights = new int[height];
             for (int x = 0; x < size; x++) {
                 for (int z = 0; z < size; z++) {
                     for (int y = 0; y < height; y++) {
                         Block block = getBlock(x, y, z);
-                        if (block != null) {
-                            lights[condensePos(x, y, z)] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
-                        }
+                        lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
                     }
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (((x*size)+z)*height)*4, lights);
                 }
             }
-            glBufferData(GL_SHADER_STORAGE_BUFFER, lights, GL_DYNAMIC_DRAW);
+
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
