@@ -59,6 +59,9 @@ public class BlockHelper {
             final Vector4i light = new Vector4i(r, g, b, s);
             neighborLights.forEach((Vector3i neighborPos, Vector4i neighborLight) -> {
                 if (isDarker(light, neighborLight)) {
+                    Block neighbor = World.getBlock(neighborPos);
+                    Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
+                    World.region1Chunks[World.condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(World.condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)), new Block(neighbor.typeId(), neighbor.subtypeId(), (byte) light.x, (byte) light.y, (byte) light.z, (byte) light.w));
                     World.queueLightUpdate(neighborPos, false);
                 }
             });

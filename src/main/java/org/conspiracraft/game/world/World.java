@@ -28,8 +28,8 @@ public class World {
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
 
-    public static List<Vector3i> lightQueue = new ArrayList<>(List.of());
-    public static List<Vector4i> blockQueue = new ArrayList<>(List.of());
+    public static List<Short> lightQueue = new ArrayList<>(List.of());
+    public static List<Short> blockQueue = new ArrayList<>(List.of());
 
     public static void init() {
         clearWorld();
@@ -217,15 +217,24 @@ public class World {
         if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
             Block existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.typeId() == 0)) {
-                int blockId = Utils.packInts(blockTypeId, blockSubtypeId);
                 if (instant) {
                     Vector3i chunkPos = new Vector3i(x/16, y/16, z/16);
-                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), new Block(blockTypeId, blockSubtypeId));
-                    if (BlockTypes.blockTypeMap.get(blockTypeId) instanceof LightBlockType) {
+                    byte r = 0;
+                    byte g = 0;
+                    byte b = 0;
+                    if (BlockTypes.blockTypeMap.get(blockTypeId) instanceof LightBlockType lType) {
+                        r = lType.r;
+                        g = lType.g;
+                        b = lType.b;
                         queueLightUpdate(new Vector3i(x, y, z), false);
                     }
+                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), new Block(blockTypeId, blockSubtypeId, r, g, b, (byte) 0));
                 } else {
-                    blockQueue.add(new Vector4i(x, y, z, blockId));
+                    blockQueue.addLast((short) x);
+                    blockQueue.addLast((short) y);
+                    blockQueue.addLast((short) z);
+                    blockQueue.addLast((short) blockTypeId);
+                    blockQueue.addLast((short) blockSubtypeId);
                 }
                 Block aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
@@ -254,7 +263,7 @@ public class World {
                     } else {
                         Vector3i chunkPos = new Vector3i(x/16, scanY/16, z/16);
                         region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), scanY-(chunkPos.y*16), z-(chunkPos.z*16)),
-                                new Block(block.id(), (byte) 0, (byte) 0, (byte) 0, (byte) 12));
+                                new Block(block.id(), block.r(), block.g(), block.b(), (byte) 12));
                         if (update && oldHeight >= scanY) {
                             queueLightUpdate(new Vector3i(x, scanY, z), false);
                         }
@@ -321,12 +330,14 @@ public class World {
     }
 
     public static void queueLightUpdate(Vector3i pos, boolean priority) {
-        if (!lightQueue.contains(pos)) {
-            if (priority) {
-                lightQueue.addFirst(pos);
-            } else {
-                lightQueue.addLast(pos);
-            }
+        if (priority) {
+            lightQueue.addFirst((short) pos.z);
+            lightQueue.addFirst((short) pos.y);
+            lightQueue.addFirst((short) pos.x);
+        } else {
+            lightQueue.addLast((short) pos.x);
+            lightQueue.addLast((short) pos.y);
+            lightQueue.addLast((short) pos.z);
         }
     }
 

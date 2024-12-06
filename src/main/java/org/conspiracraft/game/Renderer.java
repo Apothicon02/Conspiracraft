@@ -1,6 +1,8 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.game.blocks.Block;
+import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.Matrix4f;
@@ -140,18 +142,28 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
             for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
-                Vector4i blockData = blockQueue.getFirst();
+                Vector4i blockData = new Vector4i(blockQueue.getFirst(), blockQueue.get(1), blockQueue.get(2), Utils.packInts(blockQueue.get(3), blockQueue.get(4)));
                 blockQueue.removeFirst();
-                if (blockData != null) {
-                    Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
-                    Block oldBlock = getBlock(pos);
-                    Block block = new Block(blockData.w);
-                    Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
-                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), block);
-                    updateHeightmap(blockData.x, blockData.z, true);
-                    recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos)*4L, new int[]{blockData.w});
+                blockQueue.removeFirst();
+                blockQueue.removeFirst();
+                blockQueue.removeFirst();
+                blockQueue.removeFirst();
+                Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
+                Block oldBlock = getBlock(pos);
+                byte r = 0;
+                byte g = 0;
+                byte b = 0;
+                if (BlockTypes.blockTypeMap.get(Utils.unpackInt(blockData.w()).x) instanceof LightBlockType lType) {
+                    r = lType.r;
+                    g = lType.g;
+                    b = lType.b;
+                    queueLightUpdate(pos, false);
                 }
+                Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
+                region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), new Block(blockData.w, r, g, b, (byte) 0));
+                updateHeightmap(blockData.x, blockData.z, true);
+                recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos)*4L, new int[]{blockData.w});
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
@@ -166,7 +178,11 @@ public class Renderer {
                 for (int z = 0; z < size; z++) {
                     for (int y = 0; y < height; y++) {
                         Block block = getBlock(x, y, z);
-                        lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
+                        if (block.r() > 0) {
+                            lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
+                        } else {
+                            lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
+                        }
                     }
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, (((x*size)+z)*height)*4, lights);
                 }
@@ -178,7 +194,9 @@ public class Renderer {
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
             for (int i = 0; i < 400; i++) {
                 if (!lightQueue.isEmpty()) {
-                    Vector3i lightPos = lightQueue.getFirst();
+                    Vector3i lightPos = new Vector3i(lightQueue.getFirst(), lightQueue.get(1), lightQueue.get(2));
+                    lightQueue.removeFirst();
+                    lightQueue.removeFirst();
                     lightQueue.removeFirst();
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(lightPos)*4L, new int[]{updateLight(lightPos)});
                 } else {
