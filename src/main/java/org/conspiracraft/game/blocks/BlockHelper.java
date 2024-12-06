@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BlockHelper {
+    public static Block litAirBlock = new Block(0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 14);
+    public static Block unlitAirBlock = new Block(0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0);
+
     public static int updateLight(Vector3i pos, Block block) {
         BlockType blockType = BlockTypes.blockTypeMap.get(block.typeId());
         if (blockType.isTransparent || blockType instanceof LightBlockType) {

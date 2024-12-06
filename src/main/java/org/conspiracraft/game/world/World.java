@@ -112,7 +112,7 @@ public class World {
                             Block block = getBlock(x, y + 1, z);
                             if (block != null) {
                                 if (!BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
-                                    queueLightUpdate(new Vector3i(x, y, z), false);
+                                    //queueLightUpdate(new Vector3i(x, y, z), false);
                                 }
                             }
                         }
