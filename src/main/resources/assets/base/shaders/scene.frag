@@ -109,6 +109,22 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             //face-based brightness end
 
             lightPos = (prevMapPos/8f)+rayMapPos;
+            //snow start
+//            int aboveBlockType = blockType;
+//            int aboveBlockSubtype = blockSubtype;
+//            int aboveY = int(mapPos.y+1);
+//            if (aboveY == 8) {
+//                aboveY = 0;
+//                int aboveBlocKInfo = region1BlockData[(((int(rayMapPos.x)*size)+int(rayMapPos.z))*height)+int(rayMapPos.y+1)];
+//                aboveBlockType = (aboveBlocKInfo >> 16) & 0xFFFF;
+//                aboveBlockSubtype = aboveBlocKInfo & 0xFFFF;
+//            }
+//            int aboveColorData = atlasData[(9984*((aboveBlockType*8)+int(mapPos.x))) + (aboveBlockSubtype*64) + ((abs(aboveY-8)-1)*8) + int(mapPos.z)];
+//            if ((0xFF & aboveColorData >> 24) <= 0 || aboveBlockType == 4 || aboveBlockType == 5) {
+//                voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0), 0.9f);
+//                brightness = 1f;
+//            }
+            //snow end
             return vec4(vec3(voxelColor)*brightness, 1);
         } else {
             vec4 oldTint = tint;

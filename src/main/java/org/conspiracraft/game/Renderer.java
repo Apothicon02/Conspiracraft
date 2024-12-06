@@ -147,8 +147,7 @@ public class Renderer {
                     Block oldBlock = getBlock(pos);
                     Block block = new Block(blockData.w);
                     Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
-                    Chunk chunk = region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)];
-                    chunk.setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), block);
+                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), block);
                     updateHeightmap(blockData.x, blockData.z, true);
                     recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos)*4L, new int[]{blockData.w});

@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed palette compression.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -89,30 +88,30 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.updates"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.updates&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -192,14 +191,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00013" summary="- Fixed atlas.">
-      <option name="closed" value="true" />
-      <created>1730825019273</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1730825019273</updated>
     </task>
     <task id="LOCAL-00014" summary="- Atlas is now freed from memory after being bound.">
       <option name="closed" value="true" />
@@ -585,7 +576,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733445131425</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption.">
+      <option name="closed" value="true" />
+      <created>1733459093023</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1733459093023</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -601,7 +600,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added lighting." />
     <MESSAGE value="- Fixed world rendering as just some white dots. &#10;- F3 + L now re-sends lighting data to the gpu. &#10;- Finished volumetric block lighting.&#10;- Added volumetric block fog." />
     <MESSAGE value="- Decreased region size to 512. &#10;- Raised rendering height limit from 64 to 512. &#10;- Raised terrain generation to Y157. &#10;- Raised sea level to Y137. &#10;- Improved lighting calculations. &#10;- Added void fog. &#10;- Added clouds." />
     <MESSAGE value="- Added a keybind (T) to toggle day/night. &#10;- Clouds now use a texture instead of being calculated in real-time. &#10;- Decreased max &amp; default render distance to 4.&#10;- World now generated air all the way up to Y512. &#10;- Greatly reduced memory usage by storing blocks in an array instead of a map. (4gb less ram required also with 4x the blocks)&#10;- Reduced brightness of torches.&#10;- Fixed block light fog being super bright when touching the end of your render distance. &#10;- Fixed pretty much every weird side-effect of the lighting and fog.&#10;- Various minor optimizations." />
@@ -626,7 +624,8 @@
     <MESSAGE value="- Reduced memory usage from 20gb to 0.9gb." />
     <MESSAGE value="- Simplified palette compression." />
     <MESSAGE value="- Fixed palette compression." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed palette compression." />
+    <MESSAGE value="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -639,6 +638,11 @@
           <properties class="java.lang.OutOfMemoryError" package="java.lang" />
           <option name="timeStamp" value="35" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java</url>
+          <line>333</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
