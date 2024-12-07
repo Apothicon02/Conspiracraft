@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized lighting more.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Works.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,12 +149,12 @@
       </extension>
       <method v="2" />
     </configuration>
-    <configuration name="Terraflat [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="build" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -174,12 +173,12 @@
     </configuration>
     <list>
       <item itemvalue="Application.Run" />
-      <item itemvalue="Gradle.Terraflat [build]" />
+      <item itemvalue="Gradle.build" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.build" />
         <item itemvalue="Application.Run" />
-        <item itemvalue="Gradle.Terraflat [build]" />
       </list>
     </recent_temporary>
   </component>
@@ -191,14 +190,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00017" summary="- Added water. &#10;- Added transparency support.">
-      <option name="closed" value="true" />
-      <created>1730937352188</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1730937352188</updated>
     </task>
     <task id="LOCAL-00018" summary="- More optimizations.">
       <option name="closed" value="true" />
@@ -584,7 +575,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733541708696</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="- Works.">
+      <option name="closed" value="true" />
+      <created>1733543728910</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1733543728910</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -600,7 +599,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Tweaked torch colors. &#10;- Removed the vector2 and vector3 shorts to fix HORRIBLE performance and infinite light spreading (no idea why they caused this.) &#10;- Fixed world regenerating not working." />
     <MESSAGE value="- Added day/night cycle. &#10;- Added cloud movement. &#10;- Added noise to the distance fog." />
     <MESSAGE value="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog." />
     <MESSAGE value="- Added an inverted heightmap to use for extra sunlight." />
@@ -625,7 +623,8 @@
     <MESSAGE value="- Added (disabled) snow rendering." />
     <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
     <MESSAGE value="- Optimized lighting more." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Optimized lighting more." />
+    <MESSAGE value="- Works." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Works." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
