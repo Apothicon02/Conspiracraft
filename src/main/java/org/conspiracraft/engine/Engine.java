@@ -1,7 +1,7 @@
 package org.conspiracraft.engine;
 
 import org.lwjgl.glfw.GLFW;
-import org.conspiracraft.game.Main;
+import org.conspiracraft.Main;
 import org.conspiracraft.game.Renderer;
 
 import java.io.IOException;

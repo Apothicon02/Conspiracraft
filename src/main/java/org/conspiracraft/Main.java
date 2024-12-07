@@ -1,5 +1,8 @@
-package org.conspiracraft.game;
+package org.conspiracraft;
 
+import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.Player;
+import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.World;

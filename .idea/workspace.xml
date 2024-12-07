@@ -9,8 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed not launching on AMD gpus.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,30 +93,30 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.updates"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.updates&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -126,6 +132,9 @@
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base" />
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures" />
     </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.conspiracraft.game.types" />
       <recent name="org.conspiracraft.game.blocks.types" />
@@ -138,9 +147,9 @@
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="23" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-      <option name="MAIN_CLASS_NAME" value="org.conspiracraft.game.Main" />
+      <option name="MAIN_CLASS_NAME" value="org.conspiracraft.Main" />
       <module name="Conspiracraft.main" />
-      <option name="VM_PARAMETERS" value="-Xmx16384m --enable-preview" />
+      <option name="VM_PARAMETERS" value="-Xmx16384m --enable-preview -Xss1g" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.conspiracraft.game.blocks.properties.*" />
@@ -190,14 +199,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00019" summary="- Big optimization.">
-      <option name="closed" value="true" />
-      <created>1731025712011</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1731025712011</updated>
     </task>
     <task id="LOCAL-00020" summary="- Increased temporary terrain generation to 128x128. &#10;- Added a fps counter.">
       <option name="closed" value="true" />
@@ -583,7 +584,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733544171618</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="- Fixed rays reaching the edge of render distance without intersecting any light not defaulting to full sunlight. &#10;- Allowed render distance to be increased from default.">
+      <option name="closed" value="true" />
+      <created>1733545546319</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1733545546319</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -599,8 +608,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog." />
-    <MESSAGE value="- Added an inverted heightmap to use for extra sunlight." />
     <MESSAGE value="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color." />
     <MESSAGE value="- Increased brightness of stars. &#10;- Made torches more yellow. &#10;- Reduced blocklight fog intensity." />
     <MESSAGE value="- Optimized light spreading.&#10;- Allowed lights to be broken.  &#10;- Max light &amp; block updates per frame is now decreased based on fps to prevent poor performance. &#10;- Time skipping is now a fixed amount instead of a multiplier.&#10;- Slowed cloud movement. &#10;- Added volumetric god rays. &#10;- Tweaked sky color. &#10;- Dawn and dusk are now much shorter. &#10;- Made the lower cloud layer less flat. &#10;- Increased fog brightness. &#10;- Lowered fog whiteness altitude." />
@@ -624,7 +631,9 @@
     <MESSAGE value="- Optimized lighting more." />
     <MESSAGE value="- Works." />
     <MESSAGE value="- Fixed not launching on AMD gpus." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed not launching on AMD gpus." />
+    <MESSAGE value="- Fixed rays reaching the edge of render distance without intersecting any light not defaulting to full sunlight. &#10;- Allowed render distance to be increased from default." />
+    <MESSAGE value="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
