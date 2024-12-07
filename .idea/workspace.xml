@@ -9,7 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Works.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed not launching on AMD gpus.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -94,7 +94,7 @@
     "Gradle.Build Conspiracraft.executor": "Run",
     "Gradle.Build Terraflat.executor": "Run",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "Gradle.Terraflat [build].executor": "Run",
@@ -190,14 +190,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00018" summary="- More optimizations.">
-      <option name="closed" value="true" />
-      <created>1731001887125</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1731001887125</updated>
     </task>
     <task id="LOCAL-00019" summary="- Big optimization.">
       <option name="closed" value="true" />
@@ -583,7 +575,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733543728910</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="- Fixed not launching on AMD gpus.">
+      <option name="closed" value="true" />
+      <created>1733544171618</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1733544171618</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -599,7 +599,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added day/night cycle. &#10;- Added cloud movement. &#10;- Added noise to the distance fog." />
     <MESSAGE value="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog." />
     <MESSAGE value="- Added an inverted heightmap to use for extra sunlight." />
     <MESSAGE value="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color." />
@@ -624,7 +623,8 @@
     <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
     <MESSAGE value="- Optimized lighting more." />
     <MESSAGE value="- Works." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Works." />
+    <MESSAGE value="- Fixed not launching on AMD gpus." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed not launching on AMD gpus." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

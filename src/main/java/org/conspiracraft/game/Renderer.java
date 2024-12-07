@@ -3,8 +3,6 @@ package org.conspiracraft.game;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.game.world.Chunk;
-import org.conspiracraft.game.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -19,8 +17,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL40.*;

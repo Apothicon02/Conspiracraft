@@ -221,6 +221,8 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
         sideDist += mask * raySign * deltaDist;
     }
 
+    lighting = vec4(0, 0, 0, 12);
+    lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
     return vec4(0.0);
 }
 

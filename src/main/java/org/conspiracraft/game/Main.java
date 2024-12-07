@@ -98,7 +98,7 @@ public class Main {
                 Renderer.worldChanged = true;
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                if (Renderer.renderDistanceMul < 4) {
+                if (Renderer.renderDistanceMul < 32) {
                     Renderer.renderDistanceMul++;
                 }
             }
