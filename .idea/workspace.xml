@@ -9,11 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added (disabled) snow rendering.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,14 +193,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00015" summary="- Added a crosshair. &#10;- Added the dirt voxel type. &#10;- Added rendering.">
-      <option name="closed" value="true" />
-      <created>1730858997326</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1730858997326</updated>
     </task>
     <task id="LOCAL-00016" summary="- Fixed voxel subtype sampling. &#10;- Disabled mipping. &#10;- Fixed an extra voxel type being rendered.&#10;- Added tall grass. &#10;- Added roses.">
       <option name="closed" value="true" />
@@ -585,7 +578,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733508075027</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="- Fixed light propagation. &#10;- Optimized light propagation.">
+      <option name="closed" value="true" />
+      <created>1733512868862</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1733512868862</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -601,7 +602,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Decreased region size to 512. &#10;- Raised rendering height limit from 64 to 512. &#10;- Raised terrain generation to Y157. &#10;- Raised sea level to Y137. &#10;- Improved lighting calculations. &#10;- Added void fog. &#10;- Added clouds." />
     <MESSAGE value="- Added a keybind (T) to toggle day/night. &#10;- Clouds now use a texture instead of being calculated in real-time. &#10;- Decreased max &amp; default render distance to 4.&#10;- World now generated air all the way up to Y512. &#10;- Greatly reduced memory usage by storing blocks in an array instead of a map. (4gb less ram required also with 4x the blocks)&#10;- Reduced brightness of torches.&#10;- Fixed block light fog being super bright when touching the end of your render distance. &#10;- Fixed pretty much every weird side-effect of the lighting and fog.&#10;- Various minor optimizations." />
     <MESSAGE value="- Tweaked torch colors. &#10;- Removed the vector2 and vector3 shorts to fix HORRIBLE performance and infinite light spreading (no idea why they caused this.) &#10;- Fixed world regenerating not working." />
     <MESSAGE value="- Added day/night cycle. &#10;- Added cloud movement. &#10;- Added noise to the distance fog." />
@@ -626,7 +626,8 @@
     <MESSAGE value="- Fixed palette compression." />
     <MESSAGE value="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption." />
     <MESSAGE value="- Added (disabled) snow rendering." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added (disabled) snow rendering." />
+    <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed light propagation. &#10;- Optimized light propagation." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

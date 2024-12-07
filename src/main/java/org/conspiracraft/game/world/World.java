@@ -8,11 +8,9 @@ import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.engine.ConspiracraftMath;
-import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import org.joml.Vector4i;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,9 +54,9 @@ public class World {
         Vector2i middle = new Vector2i(size/2, size/2);
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/4);
-                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x/2, z/2))/128)-1;
-                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x/2, z/2))/128)-1;
+                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
+                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
+                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
                 if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
@@ -112,7 +110,7 @@ public class World {
                             Block block = getBlock(x, y + 1, z);
                             if (block != null) {
                                 if (!BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
-                                    //queueLightUpdate(new Vector3i(x, y, z), false);
+                                    queueLightUpdate(new Vector3i(x, y, z));
                                 }
                             }
                         }
@@ -226,7 +224,7 @@ public class World {
                         r = lType.r;
                         g = lType.g;
                         b = lType.b;
-                        queueLightUpdate(new Vector3i(x, y, z), false);
+                        queueLightUpdate(new Vector3i(x, y, z));
                     }
                     region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), y-(chunkPos.y*16), z-(chunkPos.z*16)), new Block(blockTypeId, blockSubtypeId, r, g, b, (byte) 0));
                 } else {
@@ -265,7 +263,7 @@ public class World {
                         region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*16), scanY-(chunkPos.y*16), z-(chunkPos.z*16)),
                                 new Block(block.id(), block.r(), block.g(), block.b(), (byte) 12));
                         if (update && oldHeight >= scanY) {
-                            queueLightUpdate(new Vector3i(x, scanY, z), false);
+                            queueLightUpdate(new Vector3i(x, scanY, z));
                         }
                     }
                 }
@@ -323,21 +321,38 @@ public class World {
                                 new Block(neighbor.id(), (byte) 0, (byte) 0, (byte) 0, (byte) (sunlit ? 12 : 0)));
                         recalculateLight(neighborPos, neighbor.r(), neighbor.g(), neighbor.b(), neighbor.s());
                     }
-                    queueLightUpdate(pos, true);
+                    queueLightUpdatePriority(pos);
                 }
             }
         }
     }
 
-    public static void queueLightUpdate(Vector3i pos, boolean priority) {
-        if (priority) {
-            lightQueue.addFirst((short) pos.z);
-            lightQueue.addFirst((short) pos.y);
-            lightQueue.addFirst((short) pos.x);
-        } else {
+    public static void queueLightUpdate(Vector3i pos) {
+        boolean exists = false;
+        for (int i = 0; i < lightQueue.size(); i+=3) {
+            if (lightQueue.get(i) == pos.x && lightQueue.get(i+1) == pos.y && lightQueue.get(i+2) == pos.z) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
             lightQueue.addLast((short) pos.x);
             lightQueue.addLast((short) pos.y);
             lightQueue.addLast((short) pos.z);
+        }
+    }
+    public static void queueLightUpdatePriority(Vector3i pos) {
+        boolean exists = false;
+        for (int i = 0; i < lightQueue.size(); i+=3) {
+            if (lightQueue.get(i) == pos.x && lightQueue.get(i+1) == pos.y && lightQueue.get(i+2) == pos.z) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            lightQueue.addFirst((short) pos.z);
+            lightQueue.addFirst((short) pos.y);
+            lightQueue.addFirst((short) pos.x);
         }
     }
 

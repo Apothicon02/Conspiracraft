@@ -157,7 +157,7 @@ public class Renderer {
                     r = lType.r;
                     g = lType.g;
                     b = lType.b;
-                    queueLightUpdate(pos, false);
+                    queueLightUpdate(pos);
                 }
                 Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
                 region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(pos.x-(chunkPos.x*16), pos.y-(chunkPos.y*16), pos.z-(chunkPos.z*16)), new Block(blockData.w, r, g, b, (byte) 0));
