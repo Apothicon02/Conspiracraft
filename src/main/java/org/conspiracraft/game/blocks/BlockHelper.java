@@ -8,7 +8,7 @@ import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 public class BlockHelper {
-    public static Block litAirBlock = new Block(0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 14);
+    public static Block litAirBlock = new Block(0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 12);
     public static Block unlitAirBlock = new Block(0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0);
 
     private static final Vector3i[] neighborBlocks = new Vector3i[6];
