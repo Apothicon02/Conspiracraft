@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-org.conspiracraft.Main-Class: org.conspiracraft.Main
-
+Main-Class: org.conspiracraft.Main

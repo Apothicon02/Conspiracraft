@@ -116,9 +116,6 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             //face-based brightness start
             float brightness = 1.f;
             ivec3 normal = ivec3(mapPos - prevMapPos);
-            if (normal == ivec3(0, 0, 0)) {
-                brightness = 0.f;
-            }
             if (normal.y == 1) { //down
                 brightness = 0.7f;
             } else if (normal.y == -1) { //up
