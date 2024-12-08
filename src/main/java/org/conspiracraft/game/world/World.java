@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class World {
-    public static int seaLevel = 137;
+    public static int seaLevel = 138;
     public static int size = 1024;
     public static int sizeChunks = size/16;
     public static short height = 320;

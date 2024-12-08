@@ -22,6 +22,24 @@ in vec4 pos;
 
 out vec4 fragColor;
 
+float interpolate1D(float v1, float v2, float x){
+    return v1*(1-x) + v2*x;
+}
+
+float interpolate2D(float v1, float v2, float v3, float v4, float x, float y){
+
+    float s = interpolate1D(v1, v2, x);
+    float t = interpolate1D(v3, v4, x);
+    return interpolate1D(s, t, y);
+}
+
+float interpolate3D(float v1, float v2, float v3, float v4, float v5, float v6, float v7, float v8, float x, float y, float z)
+{
+    float s = interpolate2D(v1, v2, v3, v4, x, y);
+    float t = interpolate2D(v5, v6, v7, v8, x, y);
+    return interpolate1D(s, t, z);
+}
+
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
 }
@@ -79,7 +97,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
-    while (mapPos.x <= 7.0 && mapPos.x >= 0.0 && mapPos.y <= 7.0 && mapPos.y >= 0.0 && mapPos.z <= 7.0 && mapPos.z >= 0.0) {
+    while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         int colorData = atlasData[(9984*((blockType*8)+int(mapPos.x))) + (blockSubtype*64) + ((abs(int(mapPos.y)-8)-1)*8) + int(mapPos.z)];
         vec4 voxelColor = vec4(0xFF & colorData >> 16, 0xFF & colorData >> 8, 0xFF & colorData, 0xFF & colorData >> 24)/255;
         if (voxelColor.a >= 1) {
@@ -108,7 +126,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
             //face-based brightness end
 
-            lightPos = (prevMapPos/8.f)+rayMapPos;
+            lightPos = floor(((prevMapPos/8.f)+rayMapPos)*8.f)/8.f;
             //snow start
             //            int aboveBlockType = blockType;
             //            int aboveBlockSubtype = blockSubtype;
@@ -197,18 +215,58 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
         vec4 color = vec4(1, 1, 1, 0);
         if (inBounds) {
-            lightPos = rayMapPos;
             if (blockType != 0.f) {
                 color = traceBlock(uv3d * 8.0, rayDir, mask, blockType, blockInfo & 0xFFFF);
             }
 
             //lighting start
+            vec3 relativePos = lightPos-rayMapPos;
             int lightingData = region1LightingData[(((int(lightPos.x)*size)+int(lightPos.z))*height)+int(lightPos.y)];
-            lighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
-            lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
+            vec4 centerLighting = vec4(0xFF & lightingData >> 16, 0xFF & lightingData >> 8, 0xFF & lightingData, 0xFF & lightingData >> 24);
+            int verticalLightingData = region1LightingData[(((int(lightPos.x)*size)+int(lightPos.z))*height)+int(lightPos.y+(relativePos.y >= 0 ? 1 : -1))];
+            vec4 verticalLighting = vec4(0xFF & verticalLightingData >> 16, 0xFF & verticalLightingData >> 8, 0xFF & verticalLightingData, 0xFF & verticalLightingData >> 24);
+            if (verticalLighting.r == -1 && verticalLighting.g == -1 && verticalLighting.b == -1 && verticalLighting.s == -1) {
+                verticalLighting = centerLighting;
+            }
+            int northLightingData = region1LightingData[(((int(lightPos.x)*size)+int(lightPos.z+(relativePos.z >= 0 ? 1 : -1)))*height)+int(lightPos.y)];
+            vec4 northLighting = vec4(0xFF & northLightingData >> 16, 0xFF & northLightingData >> 8, 0xFF & northLightingData, 0xFF & northLightingData >> 24);
+            if (northLighting.r == -1 && northLighting.g == -1 && northLighting.b == -1 && northLighting.s == -1) {
+                northLighting = centerLighting;
+            }
+            int northVerticalLightingData = region1LightingData[(((int(lightPos.x)*size)+int(lightPos.z+(relativePos.z >= 0 ? 1 : -1)))*height)+int(lightPos.y+(relativePos.y >= 0 ? 1 : -1))];
+            vec4 northVerticalLighting = vec4(0xFF & northVerticalLightingData >> 16, 0xFF & northVerticalLightingData >> 8, 0xFF & northVerticalLightingData, 0xFF & northVerticalLightingData >> 24);
+            if (northVerticalLighting.r == -1 && northVerticalLighting.g == -1 && northVerticalLighting.b == -1 && northVerticalLighting.s == -1) {
+                northVerticalLighting = centerLighting;
+            }
+            int eastLightingData = region1LightingData[(((int(lightPos.x+(relativePos.x >= 0 ? 1 : -1))*size)+int(lightPos.z))*height)+int(lightPos.y)];
+            vec4 eastLighting = vec4(0xFF & eastLightingData >> 16, 0xFF & eastLightingData >> 8, 0xFF & eastLightingData, 0xFF & eastLightingData >> 24);
+            if (eastLighting.r == -1 && eastLighting.g == -1 && eastLighting.b == -1 && eastLighting.s == -1) {
+                eastLighting = centerLighting;
+            }
+            int eastVerticalLightingData = region1LightingData[(((int(lightPos.x+(relativePos.x >= 0 ? 1 : -1))*size)+int(lightPos.z))*height)+int(lightPos.y+(relativePos.y >= 0 ? 1 : -1))];
+            vec4 eastVerticalLighting = vec4(0xFF & eastVerticalLightingData >> 16, 0xFF & eastVerticalLightingData >> 8, 0xFF & eastVerticalLightingData, 0xFF & eastVerticalLightingData >> 24);
+            if (eastVerticalLighting.r == -1 && eastVerticalLighting.g == -1 && eastVerticalLighting.b == -1 && eastVerticalLighting.s == -1) {
+                eastVerticalLighting = centerLighting;
+            }
+            int northEastLightingData = region1LightingData[(((int(lightPos.x+(relativePos.x >= 0 ? 1 : -1))*size)+int(lightPos.z+(relativePos.z >= 0 ? 1 : -1)))*height)+int(lightPos.y)];
+            vec4 northEastLighting = vec4(0xFF & northEastLightingData >> 16, 0xFF & northEastLightingData >> 8, 0xFF & northEastLightingData, 0xFF & northEastLightingData >> 24);
+            if (northEastLighting.r == -1 && northEastLighting.g == -1 && northEastLighting.b == -1 && northEastLighting.s == -1) {
+                northEastLighting = centerLighting;
+            }
+            int northEastVerticalLightingData = region1LightingData[(((int(lightPos.x+(relativePos.x >= 0 ? 1 : -1))*size)+int(lightPos.z+(relativePos.z >= 0 ? 1 : -1)))*height)+int(lightPos.y+(relativePos.y >= 0 ? 1 : -1))];
+            vec4 northEastVerticalLighting = vec4(0xFF & northEastVerticalLightingData >> 16, 0xFF & northEastVerticalLightingData >> 8, 0xFF & northEastVerticalLightingData, 0xFF & northEastVerticalLightingData >> 24);
+            if (northEastVerticalLighting.r == -1 && northEastVerticalLighting.g == -1 && northEastVerticalLighting.b == -1 && northEastVerticalLighting.s == -1) {
+                northEastVerticalLighting = centerLighting;
+            }
+            lighting = vec4(
+            interpolate3D(centerLighting.r, northLighting.r, eastLighting.r, northEastLighting.r, verticalLighting.r, northVerticalLighting.r, eastVerticalLighting.r, northEastVerticalLighting.r, relativePos.z, relativePos.x, relativePos.y),
+            interpolate3D(centerLighting.g, northLighting.g, eastLighting.g, northEastLighting.g, verticalLighting.g, northVerticalLighting.g, eastVerticalLighting.g, northEastVerticalLighting.g, relativePos.z, relativePos.x, relativePos.y),
+            interpolate3D(centerLighting.b, northLighting.b, eastLighting.b, northEastLighting.g, verticalLighting.b, northVerticalLighting.b, eastVerticalLighting.b, northEastVerticalLighting.b, relativePos.z, relativePos.x, relativePos.y),
+            interpolate3D(centerLighting.s, northLighting.s, eastLighting.s, northEastLighting.s, verticalLighting.s, northVerticalLighting.s, eastVerticalLighting.s, northEastVerticalLighting.s, relativePos.z, relativePos.x, relativePos.y));
+            //lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
             //lighting end
         } else {
-            lighting = vec4(0, 0, 0, 12);
+            lighting = vec4(0, 0, 0, 20);
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
         }
 
