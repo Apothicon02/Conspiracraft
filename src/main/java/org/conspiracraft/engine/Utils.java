@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Utils {
-    public static byte emptyByte = (byte)-1;
+    public static byte emptyByte = (byte)0;
     public static String readFile(String filePath) {
         List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
         StringBuilder data = new StringBuilder();
