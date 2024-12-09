@@ -29,6 +29,7 @@ vec3 lightPos = vec3(0);
 vec4 lighting = vec4(0);
 vec4 lightFog = vec4(0);
 vec3 hitPos = vec3(256);
+vec4 tint = vec4(1, 1, 1, 0);
 float cloudiness = 0;
 
 vec4 intToColor(int color) {
@@ -107,6 +108,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
+    vec4 prevVoxelColor = vec4(1, 1, 1, 0);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, blockType, blockSubtype);
         if (voxelColor.a >= 1) {
@@ -149,8 +151,12 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             //            }
             //snow end
             return vec4(vec3(voxelColor)*brightness, 1);
+        } else if (voxelColor.a > 0.f) {
+            tint = vec4(min(vec3(tint), vec3(prevVoxelColor)/0.5), max(0.5, max(tint.a, prevVoxelColor.a)));
+            tint = vec4(vec3(tint)*vec3(voxelColor), tint.a+(voxelColor.a/25));
         }
 
+        prevVoxelColor = voxelColor;
         prevMapPos = mapPos;
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
@@ -277,6 +283,7 @@ void main()
             fogNoise += max(0, noise(vec2(hitPos.x, hitPos.z)));
             blockLightBrightness = vec3(lighting.r, lighting.g, lighting.b)*0.045f;
         }
+        fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1); //transparency
         float distanceFogginess = clamp(((((distance(camPos, hitPos)*fogNoise)/renderDistance)*0.75)+gradient(hitPos.y, 0, 16, 0, 1.25))*1.25, 0, 1);
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), vec3(0.8), cloudiness), 1); //distant fog, void fog, clouds
         float adjustedTime = clamp(timeOfDay*2.8, 0, 1);
