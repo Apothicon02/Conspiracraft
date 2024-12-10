@@ -120,10 +120,18 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                 hitPos = rayMapPos;
             }
             //bubbles start
-            vec3 idk = rayMapPos+(mapPos);
-            float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(mapPos.y+(timeOfDay*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
-            if (samp > 0 && samp < 0.002) {
-                voxelColor = vec4(1, 1, 1, 1);
+            if (blockType == 1) {
+                vec3 idk = rayMapPos+(mapPos);
+                float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+((rayMapPos.y*8)+mapPos.y+(timeOfDay*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
+                if (samp > 0 && samp < 0.002) {
+                    voxelColor = vec4(1, 1, 1, 1);
+                }
+            } else {
+                vec3 idk = rayMapPos+(mapPos);
+                float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(rayMapPos.y*8)+mapPos.y)+(vec2(rayMapPos.x, rayMapPos.z)*8));
+                if (samp > 0 && samp < 0.002) {
+                    voxelColor = vec4(1, 1, 1, 1);
+                }
             }
             //bubbles end
             tint = vec4(min(vec3(tint), vec3(prevVoxelColor)/0.5), max(0.5, max(tint.a, prevVoxelColor.a)));

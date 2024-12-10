@@ -9,16 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/renderdoc/hs_err_pid20656.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/white_noise.png" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added white noise.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,22 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00024" summary="- Added an lod.">
-      <option name="closed" value="true" />
-      <created>1731119949338</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1731119949338</updated>
-    </task>
-    <task id="LOCAL-00025" summary="- Added DDA.">
-      <option name="closed" value="true" />
-      <created>1731214467856</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1731214467856</updated>
     </task>
     <task id="LOCAL-00026" summary="- Added horizon fog.">
       <option name="closed" value="true" />
@@ -594,7 +571,23 @@
       <option name="project" value="LOCAL" />
       <updated>1733698224528</updated>
     </task>
-    <option name="localTasksCounter" value="73" />
+    <task id="LOCAL-00073" summary="- Fixed weird interaction with fog and transparent objects. &#10;- Added purple stained glass. &#10;- Added lime stained glass. &#10;- Added ability to cycle through selected block with the 'Q' and 'E' keys. &#10;- Added bubbles.">
+      <option name="closed" value="true" />
+      <created>1733789274427</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1733789274427</updated>
+    </task>
+    <task id="LOCAL-00074" summary="- Added white noise.">
+      <option name="closed" value="true" />
+      <created>1733789294073</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1733789294073</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,8 +603,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed sky / distance fog getting dimmer at the center of islands. &#10;- Lowered the altitude that the sky turns white." />
-    <MESSAGE value="- Added WIP smooth lighting. &#10;- Temporarily disabled light fog. &#10;- Fixed sunlight. &#10;- Optimized world loading speed. &#10;- Increased minimum light. &#10;- Increasd blocklight fog. &#10;- Removed inverted sunlight." />
     <MESSAGE value="- Re-enabled light fog. &#10;- Recreated sky. &#10;- Moved clouds. &#10;- Increased minimum light. &#10;- Tweaked render distance. &#10;- Got rid of the dynamic fps-based max light updates. &#10;- Vertical movement is now independent of camera rotation." />
     <MESSAGE value="- Added stone. &#10;- Added caves. &#10;- Grass is now broken when the block below is." />
     <MESSAGE value="- Increased world size to 1024x256x1024. &#10;- Noise for worldgen is now pre-computed." />
@@ -635,7 +626,9 @@
     <MESSAGE value="- Temporarily made water white. &#10;- Added WIP smooth lighting. &#10;- Temporarily disabled light fog." />
     <MESSAGE value="- Finished smooth lighting. &#10;- Added ambient occlusion. &#10;- Re-enabled light fog. &#10;- Restored water texture. &#10;- Reduced resolution of atlas to only what is needed to improve load times. &#10;- Removed old transparency rendering." />
     <MESSAGE value="- Fixed jar not being launchable. &#10;- Downgraded back to Java 21." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed jar not being launchable. &#10;- Downgraded back to Java 21." />
+    <MESSAGE value="- Fixed weird interaction with fog and transparent objects. &#10;- Added purple stained glass. &#10;- Added lime stained glass. &#10;- Added ability to cycle through selected block with the 'Q' and 'E' keys. &#10;- Added bubbles." />
+    <MESSAGE value="- Added white noise." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added white noise." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
