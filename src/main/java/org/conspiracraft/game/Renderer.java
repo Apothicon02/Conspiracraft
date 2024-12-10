@@ -31,7 +31,7 @@ public class Renderer {
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
     public static int coherentNoiseId;
-    public static int region1LightingId;
+    public static int whiteNoiseId;
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
@@ -62,10 +62,24 @@ public class Renderer {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         coherentNoiseId = glGenTextures();
-        region1LightingId = glGenTextures();
+        whiteNoiseId = glGenTextures();
         atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         region1LightingSSBOId = glGenBuffers();
+
+        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.COHERERENT_NOISE));
+
+        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.WHITE_NOISE));
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -93,6 +107,10 @@ public class Renderer {
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
         if (atlasChanged) {
             atlasChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
@@ -101,7 +119,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 88; x++) {
+            for (int x = 0; x < 104; x++) {
                 for (int y = 0; y < 256; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -111,13 +129,6 @@ public class Renderer {
             IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-            glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.COHERERENT_NOISE));
         }
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);

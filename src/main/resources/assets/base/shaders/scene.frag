@@ -5,6 +5,7 @@ uniform int renderDistance;
 uniform vec2 res;
 uniform mat4 cam;
 layout(binding = 0) uniform sampler2D coherent_noise;
+layout(binding = 1) uniform sampler2D white_noise;
 layout(std430, binding = 0) buffer atlas
 {
     int[] atlasData;
@@ -84,6 +85,9 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
 float noise(vec2 coords) {
     return (texture(coherent_noise, coords/1024).r)-0.5;
 }
+float whiteNoise(vec2 coords) {
+    return (texture(white_noise, coords/1024).r)-0.5;
+}
 
 vec3 stepMask(vec3 sideDist) {
     bvec3 mask;
@@ -111,6 +115,20 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     vec4 prevVoxelColor = vec4(1, 1, 1, 0);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, blockType, blockSubtype);
+        if (voxelColor.a > 0.f && voxelColor.a < 1.f) {
+            if (hitPos == vec3(256)) {
+                hitPos = rayMapPos;
+            }
+            //bubbles start
+            vec3 idk = rayMapPos+(mapPos);
+            float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(mapPos.y+(timeOfDay*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
+            if (samp > 0 && samp < 0.002) {
+                voxelColor = vec4(1, 1, 1, 1);
+            }
+            //bubbles end
+            tint = vec4(min(vec3(tint), vec3(prevVoxelColor)/0.5), max(0.5, max(tint.a, prevVoxelColor.a)));
+            tint = vec4(vec3(tint)*vec3(voxelColor), tint.a+(voxelColor.a/25));
+        }
         if (voxelColor.a >= 1) {
             if (hitPos == vec3(256)) {
                 hitPos = rayMapPos;
@@ -151,9 +169,6 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             //            }
             //snow end
             return vec4(vec3(voxelColor)*brightness, 1);
-        } else if (voxelColor.a > 0.f) {
-            tint = vec4(min(vec3(tint), vec3(prevVoxelColor)/0.5), max(0.5, max(tint.a, prevVoxelColor.a)));
-            tint = vec4(vec3(tint)*vec3(voxelColor), tint.a+(voxelColor.a/25));
         }
 
         prevVoxelColor = voxelColor;

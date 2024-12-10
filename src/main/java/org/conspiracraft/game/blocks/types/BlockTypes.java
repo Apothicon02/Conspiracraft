@@ -19,6 +19,8 @@ public class BlockTypes {
     public static BlockType YELLOW_STAR = create(new LightBlockType(true, 8, 7, 2));
     public static BlockType WHITE_STAR = create(new LightBlockType(true, 10, 9, 8));
     public static BlockType STONE = create(new BlockType(false));
+    public static BlockType PURPLE_STAINED_GLASS = create(new BlockType(true));
+    public static BlockType LIME_STAINED_GLASS = create(new BlockType(true));
 
     private static BlockType create(BlockType type) {
         blockTypeMap.put(key, type);

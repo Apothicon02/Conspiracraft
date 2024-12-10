@@ -4,7 +4,9 @@ import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.blocks.Block;
+import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
@@ -34,6 +36,8 @@ public class Main {
     boolean wasLDown = false;
     boolean wasUpDown = false;
     boolean wasDownDown = false;
+    boolean wasEDown = false;
+    boolean wasQDown = false;
 
     long lastBlockBroken = 0L;
     Block selectedBlock = new Block(2, 0);
@@ -90,6 +94,30 @@ public class Main {
             }
         }
 
+        if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+            int newId = selectedBlock.typeId()+1;
+            if (newId >= BlockTypes.blockTypeMap.size()) {
+                newId = 0;
+            }
+            BlockType type = BlockTypes.blockTypeMap.get(newId);
+            if (type instanceof LightBlockType lType) {
+                selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+            } else {
+                selectedBlock = new Block(newId, 0);
+            }
+        } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+            int newId = selectedBlock.typeId()-1;
+            if (newId < 0) {
+                newId = BlockTypes.blockTypeMap.size()-1;
+            }
+            BlockType type = BlockTypes.blockTypeMap.get(newId);
+            if (type instanceof LightBlockType lType) {
+                selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+            } else {
+                selectedBlock = new Block(newId, 0);
+            }
+        }
+
         if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
             if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                 Renderer.atlasChanged = true;
@@ -116,6 +144,8 @@ public class Main {
             }
         }
 
+        wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
+        wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
         wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
         wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
         wasLDown = window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS);
