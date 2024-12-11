@@ -3,9 +3,7 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.BlockHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.conspiracraft.game.world.World.chunkSize;
 
@@ -13,7 +11,7 @@ public class Chunk {
     private static int totalBlocks = chunkSize*chunkSize*chunkSize;
     private byte[] blocks = new byte[totalBlocks];
     private short[] blocksShorts = null;
-    private final List<Block> palette = new ArrayList<>();
+    private List<Block> palette = new ArrayList<>();
 
     public Chunk() {
         Arrays.fill(blocks, (byte) -1);
@@ -33,6 +31,9 @@ public class Chunk {
         return palette.get(index);
     }
     public void setBlock(int pos, Block block) {
+        setBlock(pos, block, false);
+    }
+    public void setBlock(int pos, Block block, boolean update) {
         if (block.equals(BlockHelper.litAirBlock)) { //optimization for fully sun-lit air blocks to not require their own instance in each chunk.
             if (blocks == null) {
                 blocksShorts[pos] = 0;
@@ -40,34 +41,6 @@ public class Chunk {
                 blocks[pos] = 0;
             }
         } else {
-            int oldIndex;
-            byte existing = 0;
-            if (blocks == null) {
-                oldIndex = blocksShorts[pos];
-                if (oldIndex >= 1) {
-                    for (int i = 0; i < blocksShorts.length && existing <= 1; i++) {
-                        if (blocksShorts[i] == oldIndex) {
-                            existing++;
-                        }
-                    }
-                } else {
-                    existing = 2;
-                }
-            } else {
-                oldIndex = blocks[pos];
-                if (oldIndex >= 1) {
-                    for (int i = 0; i < blocks.length && existing <= 1; i++) {
-                        if (blocks[i] == oldIndex) {
-                            existing++;
-                        }
-                    }
-                } else {
-                    existing = 2;
-                }
-            }
-            if (existing < 1) {
-                palette.set(oldIndex, null);
-            }
             boolean wasInPalette = false;
             for (int i = 0; i < palette.size(); i++) { //iterate through palette until finding a matching block, and upon doing so set the palette index for that block position to the index of the matching palette entry
                 if (block.equals(palette.get(i))) {
@@ -85,7 +58,7 @@ public class Chunk {
                 if (size == 127) {
                     blocksShorts = new short[totalBlocks];
                     Arrays.fill(blocksShorts, (short) -1);
-                    for (byte i = 0; i < blocks.length; i++) {
+                    for (int i = 0; i < blocks.length; i++) {
                         blocksShorts[i] = blocks[i];
                     }
                     blocks = null;
@@ -108,6 +81,86 @@ public class Chunk {
                     palette.set(index, block);
                     blocks[pos] = (byte) index;
                 }
+            }
+        }
+        if (update) {
+            cleanPalette();
+        }
+    }
+    public void cleanPalette() {
+        if (!palette.isEmpty()) {
+            if (blocks == null) {
+                int[] pointerUses = new int[palette.size()+1];
+                for (short block : blocksShorts) {
+                    if (block >= 0) {
+                        pointerUses[block] += 1;
+                    }
+                }
+                List<Block> newPalette = new ArrayList<>();
+                newPalette.add(null);
+                for (short entry = 1; entry < palette.size(); entry++) {
+                    int pointer = pointerUses[entry];
+                    if (pointer > 0) {
+                        newPalette.addLast(palette.get(entry));
+                    }
+                }
+                if (newPalette.size() < 127) {
+                    blocks = new byte[totalBlocks];
+                    Arrays.fill(blocks, (byte) -1);
+
+                    for (int i = 0; i < blocksShorts.length; i++) {
+                        byte index = blocks[i];
+                        if (index >= 0) {
+                            Block block = palette.get(index);
+                            for (byte p = 0; p < newPalette.size(); p++) {
+                                if (newPalette.get(p).equals(block)) {
+                                    blocks[i] = p;
+                                }
+                            }
+                        }
+                    }
+                    blocksShorts = null;
+                } else {
+                    for (int i = 0; i < blocksShorts.length; i++) {
+                        short index = blocksShorts[i];
+                        if (index > 0) {
+                            Block block = palette.get(index);
+                            for (short p = 1; p < newPalette.size(); p++) {
+                                if (newPalette.get(p).equals(block)) {
+                                    blocksShorts[i] = p;
+                                }
+                            }
+                        }
+                    }
+                }
+                palette = newPalette;
+            } else {
+                int[] pointerUses = new int[palette.size()+1];
+                for (byte block : blocks) {
+                    if (block >= 0) {
+                        pointerUses[block] += 1;
+                    }
+                }
+                List<Block> newPalette = new ArrayList<>();
+                newPalette.add(null);
+                for (byte entry = 1; entry < palette.size(); entry++) {
+                    int pointer = pointerUses[entry];
+                    if (pointer > 0) {
+                        newPalette.addLast(palette.get(entry));
+                    }
+                }
+                for (int i = 0; i < blocks.length; i++) {
+                    byte index = blocks[i];
+                    if (index > 0) {
+                        Block block = palette.get(index);
+                        for (byte p = 1; p < newPalette.size(); p++) {
+                            if (newPalette.get(p).equals(block)) {
+                                blocks[i] = p;
+                            }
+                        }
+                    }
+                }
+                palette = newPalette;
             }
         }
     }

@@ -7,6 +7,7 @@ import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
+import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
@@ -127,6 +128,9 @@ public class Main {
             }
             if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
                 Renderer.worldChanged = true;
+                for (Chunk chunk : World.region1Chunks) {
+                    chunk.cleanPalette();
+                }
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                 if (Renderer.renderDistanceMul < 32) {

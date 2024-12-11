@@ -284,7 +284,7 @@ public class World {
                             if (BlockTypes.blockTypeMap.get(blockExtra.typeId()).isTransparent) {
                                 Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
                                 region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
-                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0));
+                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0), true);
                                 recalculateLight(new Vector3i(x, scanExtraY, z), blockExtra.r(), blockExtra.g(), blockExtra.b(), blockExtra.s());
                             } else {
                                 break;
@@ -295,7 +295,7 @@ public class World {
                 } else if (block.s() < 20) {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, scanY/chunkSize, z/chunkSize);
                     region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), scanY-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)),
-                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 20));
+                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 20), update);
                     if (update) {
                         queueLightUpdate(new Vector3i(x, scanY, z));
                     }
@@ -316,7 +316,7 @@ public class World {
                             if (BlockTypes.blockTypeMap.get(blockExtra.typeId()).isTransparent) {
                                 Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
                                 region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
-                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0));
+                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0), true);
                                 recalculateLight(new Vector3i(x, scanExtraY, z), blockExtra.r(), blockExtra.g(), blockExtra.b(), blockExtra.s());
                             } else {
                                 break;
@@ -324,10 +324,10 @@ public class World {
                         }
                     }
                     break;
-                } else if (block.s() < 16) {
+                } else if (block.s() < 19) {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, scanY/chunkSize, z/chunkSize);
                     region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), scanY-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)),
-                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 16));
+                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 19), update);
                     if (update) {
                         queueLightUpdate(new Vector3i(x, scanY, z));
                     }
@@ -364,7 +364,7 @@ public class World {
                     if ((neighbor.r() > 0 && neighbor.r() < r) || (neighbor.g() > 0 && neighbor.g() < g) || (neighbor.b() > 0 && neighbor.b() < b) || (neighbor.s() > 0 && neighbor.s() < s)) {
                         Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
                         region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
-                                new Block(neighbor.id(), (byte) 0, (byte) 0, (byte) 0, (byte) (neighbor.s() == 20 ? 20 : 0)));
+                                new Block(neighbor.id(), (byte) 0, (byte) 0, (byte) 0, (byte) (neighbor.s() == 20 ? 20 : 0)), true);
                         recalculateLight(neighborPos, neighbor.r(), neighbor.g(), neighbor.b(), neighbor.s());
                     }
                     queueLightUpdatePriority(pos);
