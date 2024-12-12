@@ -11,6 +11,7 @@ import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
+import org.lwjgl.opengl.GL;
 
 import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
@@ -29,7 +30,7 @@ public class Main {
     public void init(Window window) throws Exception {
         Noise.init();
         World.init();
-        Renderer.init();
+        GL.createCapabilities();
     }
 
     boolean wasTDown = false;
@@ -171,9 +172,17 @@ public class Main {
         Renderer.timeOfDay = time;
     }
 
-    public void update(Window window, long diffTimeMillis) {
-        updateTime(diffTimeMillis, 1);
-        player.tick();
+    public static boolean postWorldgenInitialization = false;
+    public void update(Window window, long diffTimeMillis) throws Exception {
+        World.run();
+        if (World.worldGenerated) {
+            if (!postWorldgenInitialization) {
+                postWorldgenInitialization = true;
+                Renderer.init();
+            }
+            updateTime(diffTimeMillis, 1);
+            player.tick();
+        }
     }
 
     public Vector3f raycast(Matrix4f ray, boolean prevPos, int range) {

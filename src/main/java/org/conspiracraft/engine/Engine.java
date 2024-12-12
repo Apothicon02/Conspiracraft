@@ -1,5 +1,6 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.game.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
 import org.conspiracraft.game.Renderer;
@@ -36,7 +37,7 @@ public class Engine {
         //resize stuff
     }
 
-    private void run() throws IOException {
+    private void run() throws Exception {
         long initialTime = System.currentTimeMillis();
         float timeU = 1000.0f / targetUps;
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
@@ -64,7 +65,9 @@ public class Engine {
             }
 
             if (targetFps <= 0 || deltaFps >= 1) {
-                Renderer.render(window);
+                if (Main.postWorldgenInitialization) {
+                    Renderer.render(window);
+                }
                 deltaFps--;
                 window.update();
                 framesUntilUpdate--;
@@ -80,7 +83,7 @@ public class Engine {
         cleanup();
     }
 
-    public void start() throws IOException {
+    public void start() throws Exception {
         running = true;
         run();
     }

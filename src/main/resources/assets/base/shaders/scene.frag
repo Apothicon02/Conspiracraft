@@ -121,13 +121,11 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
             //bubbles start
             if (blockType == 1) {
-                vec3 idk = rayMapPos+(mapPos);
                 float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+((rayMapPos.y*8)+mapPos.y+(timeOfDay*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
                 if (samp > 0 && samp < 0.002) {
                     voxelColor = vec4(1, 1, 1, 1);
                 }
             } else {
-                vec3 idk = rayMapPos+(mapPos);
                 float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(rayMapPos.y*8)+mapPos.y)+(vec2(rayMapPos.x, rayMapPos.z)*8));
                 if (samp > 0 && samp < 0.002) {
                     voxelColor = vec4(1, 1, 1, 1);
@@ -161,20 +159,20 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
             lightPos = (prevMapPos/8.f)+rayMapPos;
             //snow start
-            //            int aboveBlockType = blockType;
-            //            int aboveBlockSubtype = blockSubtype;
-            //            int aboveY = int(mapPos.y+1);
-            //            if (aboveY == 8) {
-            //                aboveY = 0;
-            //                int aboveBlocKInfo = region1BlockData[(((int(rayMapPos.x)*size)+int(rayMapPos.z))*height)+int(rayMapPos.y+1)];
-            //                aboveBlockType = (aboveBlocKInfo >> 16) & 0xFFFF;
-            //                aboveBlockSubtype = aboveBlocKInfo & 0xFFFF;
-            //            }
-            //            int aboveColorData = atlasData[(9984*((aboveBlockType*8)+int(mapPos.x))) + (aboveBlockSubtype*64) + ((abs(aboveY-8)-1)*8) + int(mapPos.z)];
-            //            if ((0xFF & aboveColorData >> 24) <= 0 || aboveBlockType == 4 || aboveBlockType == 5) {
-            //                voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0), 0.9f);
-            //                brightness = 1f;
-            //            }
+            int aboveBlockType = blockType;
+            int aboveBlockSubtype = blockSubtype;
+            int aboveY = int(mapPos.y+1);
+            if (aboveY == 8) {
+                aboveY = 0;
+                ivec2 aboveBlocKInfo = getBlock(rayMapPos.x, rayMapPos.y+1, rayMapPos.z);
+                aboveBlockType = aboveBlocKInfo.x;
+                aboveBlockSubtype = aboveBlocKInfo.y;
+            }
+            vec4 aboveColorData = getVoxel(mapPos.x, aboveY, mapPos.z, aboveBlockType, aboveBlockSubtype);
+            if (aboveColorData.a <= 0 || aboveBlockType == 4 || aboveBlockType == 5) {
+                voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0), 0.9f);
+                brightness = 1f;
+            }
             //snow end
             return vec4(vec3(voxelColor)*brightness, 1);
         }
@@ -264,6 +262,14 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
         } else {
             lighting = vec4(0, 0, 0, 20);
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
+        }
+
+        if (blockInfo.x == 0 && lighting.a == 20) {
+            float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(timeOfDay*7500)));
+            float samp2 = noise(vec2(rayMapPos.x, rayMapPos.z)*8);
+            if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
+                color = vec4(1, 1, 1, 1);
+            }
         }
 
         if (color.a >= 1) {

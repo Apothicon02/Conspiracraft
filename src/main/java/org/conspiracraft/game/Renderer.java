@@ -43,7 +43,6 @@ public class Renderer {
     public static boolean[] collisionData = new boolean[9984*9984+9984];
 
     public static void init() throws Exception {
-        GL.createCapabilities();
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
 

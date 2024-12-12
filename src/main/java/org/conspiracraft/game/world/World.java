@@ -31,14 +31,65 @@ public class World {
     public static List<Short> lightQueue = new ArrayList<>(List.of());
     public static List<Short> blockQueue = new ArrayList<>(List.of());
 
+    public static boolean worldGenerated = false;
+    public static int currentChunk = -1;
+
     public static void init() {
         clearWorld();
-        generateWorld();
+    }
+
+    public static void run() {
+        if (!worldGenerated) {
+            currentChunk++;
+            if (currentChunk == sizeChunks) {
+                boolean prevSolid = false;
+                for (int x = 0; x < size; x++) {
+                    for (int z = 0; z < size; z++) {
+                        updateHeightmap(x, z, false);
+                    }
+                }
+                for (int x = 1; x < size-1; x++) {
+                    for (int z = 1; z < size-1; z++) {
+                        for (int y = height-1; y > 1; y--) {
+                            Block block = getBlock(x, y, z);
+                            boolean solid = !BlockTypes.blockTypeMap.get(block.typeId()).isTransparent;
+                            if (block.s() < 20 && !solid && prevSolid) {
+                                //check if any neighbors are a higher brightness
+                                if (getBlock(x, y, z+1).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                } else if (getBlock(x+1, y, z).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                } else if (getBlock(x, y, z-1).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                } else if (getBlock(x-1, y, z).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                } else if (getBlock(x, y+1, z).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                } else if (getBlock(x, y-1, z).s() > block.s()) {
+                                    queueLightUpdate(new Vector3i(x, y, z));
+                                }
+                            }
+                            prevSolid = solid;
+                        }
+                    }
+                }
+                worldGenerated = true;
+                Renderer.worldChanged = true;
+            } else {
+                generateWorld();
+                for (int z = 0; z < sizeChunks; z++) {
+                    for (int y = 0; y < heightChunks; y++) {
+                        region1Chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
+                    }
+                }
+            }
+        }
     }
 
     public static void regenerateWorld() {
+        currentChunk = -1;
+        worldGenerated = false;
         clearWorld();
-        generateWorld();
     }
 
     public static void clearWorld() {
@@ -55,7 +106,7 @@ public class World {
         //cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
         //noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
         Vector2i middle = new Vector2i(size/2, size/2);
-        for (int x = 0; x < size; x++) {
+        for (int x = currentChunk*16; x < (currentChunk*16)+16; x++) {
             for (int z = 0; z < size; z++) {
                 int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
                 float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
@@ -114,33 +165,6 @@ public class World {
                 for (int y = height-1; y > surface; y--) {
                     setBlock(x, y, z, 0, 0, false, true);
                 }
-                updateHeightmap(x, z, false);
-            }
-        }
-        boolean prevSolid = false;
-        for (int x = 1; x < size-1; x++) {
-            for (int z = 1; z < size-1; z++) {
-                for (int y = height-1; y > 1; y--) {
-                    Block block = getBlock(x, y, z);
-                    boolean solid = !BlockTypes.blockTypeMap.get(block.typeId()).isTransparent;
-                    if (block.s() < 20 && !solid && prevSolid) {
-                        //check if any neighbors are a higher brightness
-                        if (getBlock(x, y, z+1).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        } else if (getBlock(x+1, y, z).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        } else if (getBlock(x, y, z-1).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        } else if (getBlock(x-1, y, z).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        } else if (getBlock(x, y+1, z).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        } else if (getBlock(x, y-1, z).s() > block.s()) {
-                            queueLightUpdate(new Vector3i(x, y, z));
-                        }
-                    }
-                    prevSolid = solid;
-                }
             }
         }
 //        int radius = 16;
@@ -187,7 +211,6 @@ public class World {
 //                updateHeightmap(x, z, false);
 //            }
 //        }
-        Renderer.worldChanged = true;
     }
 
     public static int condensePos(int x, int z) {
