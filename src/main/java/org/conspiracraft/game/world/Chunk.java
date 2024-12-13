@@ -9,17 +9,12 @@ import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
     private static int totalBlocks = chunkSize*chunkSize*chunkSize;
-    private static byte[] defaultBlockBytes;
-    private byte[] blockBytes;
+    private byte[] blockBytes = new byte[totalBlocks];
     private short[] blockShorts = null;
     private List<Block> palette = new ArrayList<>();
 
     public Chunk() {
-        if (defaultBlockBytes == null) {
-            defaultBlockBytes = new byte[totalBlocks];
-            Arrays.fill(defaultBlockBytes, (byte) -1);
-        }
-        blockBytes = defaultBlockBytes;
+        Arrays.fill(blockBytes, (byte) -1);
         palette.add(null);
     }
 
@@ -116,7 +111,7 @@ public class Chunk {
                         byte index = (byte) blockShorts[i];
                         if (index >= 0) {
                             Block block = palette.get(index);
-                            for (byte p = 0; p < newPalette.size(); p++) {
+                            for (byte p = 1; p < newPalette.size(); p++) {
                                 if (newPalette.get(p).equals(block)) {
                                     blockBytes[i] = p;
                                 }
