@@ -5,6 +5,7 @@ import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
@@ -36,11 +37,14 @@ public class Renderer {
     public static int camUniform;
     public static int renderDistanceUniform;
     public static int timeOfDayUniform;
+    public static int selectedUniform;
+    public static int uiUniform;
     public static int renderDistanceMul = 4;
     public static float timeOfDay = 0.5f;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
     public static boolean[] collisionData = new boolean[9984*9984+9984];
+    public static boolean showUI = true;
 
     public static void init() throws Exception {
         sceneVaoId = glGenVertexArrays();
@@ -84,6 +88,8 @@ public class Renderer {
         camUniform = glGetUniformLocation(scene.programId, "cam");
         renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
         timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
+        selectedUniform = glGetUniformLocation(scene.programId, "selected");
+        uiUniform = glGetUniformLocation(scene.programId, "ui");
 
         glBindVertexArray(0);
     }
@@ -102,6 +108,12 @@ public class Renderer {
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
         glUniform1i(renderDistanceUniform, 150+(40*renderDistanceMul));
         glUniform1f(timeOfDayUniform, timeOfDay);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100);
+        if (selected == null) {
+            selected = new Vector3f(-1000, -1000, -1000);
+        }
+        glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
+        glUniform1i(uiUniform, showUI ? 1 : 0);
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
@@ -118,7 +130,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 104; x++) {
+            for (int x = 0; x < 128; x++) {
                 for (int y = 0; y < 256; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -185,11 +197,7 @@ public class Renderer {
                 for (int z = 0; z < size; z++) {
                     for (int y = 0; y < height; y++) {
                         Block block = getBlock(x, y, z);
-                        if (block.r() > 0) {
-                            lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
-                        } else {
-                            lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
-                        }
+                        lights[y] = Utils.vector4iToInt(new Vector4i(block.r(), block.g(), block.b(), block.s()));
                     }
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, (((x*size)+z)*height)*4, lights);
                 }

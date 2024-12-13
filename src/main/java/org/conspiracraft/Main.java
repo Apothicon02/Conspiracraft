@@ -40,6 +40,7 @@ public class Main {
     boolean wasDownDown = false;
     boolean wasEDown = false;
     boolean wasQDown = false;
+    boolean wasF1Down = false;
 
     long lastBlockBroken = 0L;
     Block selectedBlock = new Block(2, 0);
@@ -96,31 +97,21 @@ public class Main {
             }
         }
 
-        if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-            int newId = selectedBlock.typeId()+1;
-            if (newId >= BlockTypes.blockTypeMap.size()) {
-                newId = 0;
-            }
-            BlockType type = BlockTypes.blockTypeMap.get(newId);
-            if (type instanceof LightBlockType lType) {
-                selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
-            } else {
-                selectedBlock = new Block(newId, 0);
-            }
-        } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-            int newId = selectedBlock.typeId()-1;
-            if (newId < 0) {
-                newId = BlockTypes.blockTypeMap.size()-1;
-            }
-            BlockType type = BlockTypes.blockTypeMap.get(newId);
-            if (type instanceof LightBlockType lType) {
-                selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
-            } else {
-                selectedBlock = new Block(newId, 0);
-            }
+        if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
+            Renderer.showUI = !Renderer.showUI;
         }
 
         if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+            if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                int newSubId = selectedBlock.subtypeId()+1;
+                selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
+            } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                int newSubId = selectedBlock.subtypeId()-1;
+                if (newSubId < 0) {
+                    newSubId = 0;
+                }
+                selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
+            }
             if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                 Renderer.atlasChanged = true;
             }
@@ -144,11 +135,35 @@ public class Main {
                 }
             }
         } else {
+            if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                int newId = selectedBlock.typeId()+1;
+                if (newId >= BlockTypes.blockTypeMap.size()) {
+                    newId = 0;
+                }
+                BlockType type = BlockTypes.blockTypeMap.get(newId);
+                if (type instanceof LightBlockType lType) {
+                    selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+                } else {
+                    selectedBlock = new Block(newId, 0);
+                }
+            } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                int newId = selectedBlock.typeId()-1;
+                if (newId < 0) {
+                    newId = BlockTypes.blockTypeMap.size()-1;
+                }
+                BlockType type = BlockTypes.blockTypeMap.get(newId);
+                if (type instanceof LightBlockType lType) {
+                    selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+                } else {
+                    selectedBlock = new Block(newId, 0);
+                }
+            }
             if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                 updateTime(100000L, 1);
             }
         }
 
+        wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);
         wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
         wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
         wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
@@ -185,7 +200,7 @@ public class Main {
         }
     }
 
-    public Vector3f raycast(Matrix4f ray, boolean prevPos, int range) {
+    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range) {
         Vector3f blockPos = null;
         for (int i = 0; i < range; i++) {
             ray.translate(0, 0, 0.1f);

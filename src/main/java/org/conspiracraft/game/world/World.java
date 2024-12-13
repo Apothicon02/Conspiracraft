@@ -359,18 +359,6 @@ public class World {
         }
     }
 
-    public static byte[] getLight(int x, int y, int z) {
-        Block block = getBlock(new Vector3i(x, y, z));
-        if (block != null) {
-            return new byte[]{block.r(), block.g(), block.b(), block.s()};
-        }
-        return null;
-    }
-
-    public static byte[] getLight(Vector3i pos) {
-        return getLight(pos.x, pos.y, pos.z);
-    }
-
     public static void recalculateLight(Vector3i pos, byte r, byte g, byte b, byte s) {
         for (Vector3i neighborPos : new Vector3i[]{
                 new Vector3i(pos.x, pos.y, pos.z + 1),
@@ -386,8 +374,16 @@ public class World {
                 if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
                     if ((neighbor.r() > 0 && neighbor.r() < r) || (neighbor.g() > 0 && neighbor.g() < g) || (neighbor.b() > 0 && neighbor.b() < b) || (neighbor.s() > 0 && neighbor.s() < s)) {
                         Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
+                        byte nr = 0;
+                        byte ng = 0;
+                        byte nb = 0;
+                        if (neighborBlockType instanceof LightBlockType lBlock) {
+                            nr = lBlock.r;
+                            ng = lBlock.g;
+                            nb = lBlock.b;
+                        }
                         region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
-                                new Block(neighbor.id(), (byte) 0, (byte) 0, (byte) 0, (byte) (neighbor.s() == 20 ? 20 : 0)), true);
+                                new Block(neighbor.id(), nr, ng, nb, (byte) (neighbor.s() == 20 ? 20 : 0)), true);
                         recalculateLight(neighborPos, neighbor.r(), neighbor.g(), neighbor.b(), neighbor.s());
                     }
                     queueLightUpdatePriority(pos);

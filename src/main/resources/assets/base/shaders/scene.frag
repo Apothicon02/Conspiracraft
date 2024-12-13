@@ -4,6 +4,8 @@ uniform float timeOfDay;
 uniform int renderDistance;
 uniform vec2 res;
 uniform mat4 cam;
+uniform ivec3 selected;
+uniform bool ui;
 layout(binding = 0) uniform sampler2D coherent_noise;
 layout(binding = 1) uniform sampler2D white_noise;
 layout(std430, binding = 0) buffer atlas
@@ -44,13 +46,6 @@ vec4 getVoxel(float x, float y, float z, int blockType, int blockSubtype) {
     return getVoxel(int(x), int(y), int(z), blockType, blockSubtype);
 }
 
-vec4 getLighting(int x, int y, int z) {
-    return intToColor(region1LightingData[(((x*size)+z)*height)+y]);
-}
-vec4 getLighting(float x, float y, float z) {
-    return getLighting(int(x), int(y), int(z));
-}
-
 int getBlockData(int x, int y, int z) {
     return region1BlockData[(((x*size)+z)*height)+y];
 }
@@ -60,6 +55,17 @@ ivec2 getBlock(int x, int y, int z) {
 }
 ivec2 getBlock(float x, float y, float z) {
     return getBlock(int(x), int(y), int(z));
+}
+
+vec4 getLighting(int x, int y, int z) {
+    ivec2 block = getBlock(x, y, z);
+    if (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13) { //return pure darkness if block isnt transparent.
+        return vec4(0, 0, 0, 0);
+    }
+    return intToColor(region1LightingData[(((x*size)+z)*height)+y]);
+}
+vec4 getLighting(float x, float y, float z) {
+    return getLighting(int(x), int(y), int(z));
 }
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
@@ -159,20 +165,20 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
             lightPos = (prevMapPos/8.f)+rayMapPos;
             //snow start
-            int aboveBlockType = blockType;
-            int aboveBlockSubtype = blockSubtype;
-            int aboveY = int(mapPos.y+1);
-            if (aboveY == 8) {
-                aboveY = 0;
-                ivec2 aboveBlocKInfo = getBlock(rayMapPos.x, rayMapPos.y+1, rayMapPos.z);
-                aboveBlockType = aboveBlocKInfo.x;
-                aboveBlockSubtype = aboveBlocKInfo.y;
-            }
-            vec4 aboveColorData = getVoxel(mapPos.x, aboveY, mapPos.z, aboveBlockType, aboveBlockSubtype);
-            if (aboveColorData.a <= 0 || aboveBlockType == 4 || aboveBlockType == 5) {
-                voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0), 0.9f);
-                brightness = 1f;
-            }
+//            int aboveBlockType = blockType;
+//            int aboveBlockSubtype = blockSubtype;
+//            int aboveY = int(mapPos.y+1);
+//            if (aboveY == 8) {
+//                aboveY = 0;
+//                ivec2 aboveBlocKInfo = getBlock(rayMapPos.x, rayMapPos.y+1, rayMapPos.z);
+//                aboveBlockType = aboveBlocKInfo.x;
+//                aboveBlockSubtype = aboveBlocKInfo.y;
+//            }
+//            vec4 aboveColorData = getVoxel(mapPos.x, aboveY, mapPos.z, aboveBlockType, aboveBlockSubtype);
+//            if (aboveColorData.a <= 0 || aboveBlockType == 4 || aboveBlockType == 5) {
+//                voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0), 0.9f);
+//                brightness = 1f;
+//            }
             //snow end
             return vec4(vec3(voxelColor)*brightness, 1);
         }
@@ -264,13 +270,15 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/2));
         }
 
-        if (blockInfo.x == 0 && lighting.a == 20) {
-            float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(timeOfDay*7500)));
-            float samp2 = noise(vec2(rayMapPos.x, rayMapPos.z)*8);
-            if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
-                color = vec4(1, 1, 1, 1);
-            }
-        }
+        //snow start
+//        if (blockInfo.x == 0 && lighting.a == 20) {
+//            float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(timeOfDay*7500)));
+//            float samp2 = noise(vec2(rayMapPos.x, rayMapPos.z)*8);
+//            if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
+//                color = vec4(1, 1, 1, 1);
+//            }
+//        }
+        //snow end
 
         if (color.a >= 1) {
             return color;
@@ -290,9 +298,9 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 void main()
 {
     vec2 uv = (vec2(gl_FragCoord)*2. - res.xy) / res.y;
-    if (uv.x >= -0.004 && uv.x <= 0.004 && uv.y >= -0.004385 && uv.y <= 0.004385) {
+    if (ui && uv.x >= -0.004 && uv.x <= 0.004 && uv.y >= -0.004385 && uv.y <= 0.004385) {
         fragColor = vec4(0.9, 0.9, 1, 1);
-    } else if (uv.x >= -1.87 && uv.x <= 1.87 && uv.y >= -1 && uv.y <= 1) {
+    } else {
         vec3 camPos = vec3(cam[3]);
         vec3 dir = vec3(cam*vec4(normalize(vec3(uv, 1)), 0));
         fragColor = traceWorld(camPos, dir);
@@ -309,6 +317,11 @@ void main()
             fragColor = vec4(unmixedFogColor, 1);
             sunLight = 20*0.05f;
         } else {
+            //selection start
+            if (ui && selected == ivec3(rayMapPos)) {
+                fragColor = vec4(mix(vec3(fragColor), vec3(0.7, 0.7, 1), 0.5f), 1);
+            }
+            //selection end
             fogNoise += max(0, noise(vec2(hitPos.x, hitPos.z)));
             blockLightBrightness = vec3(lighting.r, lighting.g, lighting.b)*0.045f;
         }
@@ -319,7 +332,5 @@ void main()
         float sunBrightness = sunLight*adjustedTime;
         vec3 finalLightFog = mix(vec3(lightFog)/20, mix(vec3(0.06, 0, 0.1), vec3(0.33, 0.3, 0.25), adjustedTime), lightFog.a/11.67f)*atmosphere;
         fragColor = vec4((vec3(fragColor)*max(vec3(0.18), max(blockLightBrightness, vec3(sunBrightness))))+finalLightFog, 1); //brightness, blocklight fog
-    } else {
-        fragColor = vec4(0, 0, 0, 1);
     }
 }

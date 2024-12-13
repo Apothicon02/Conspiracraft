@@ -9,15 +9,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid1504.log" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added snow. &#10;- Converted arrays to buffers for chunk data.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,14 +201,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00027" summary="- Rewrote camera. &#10;- Added adjustable render distance. &#10;- Fixed issue with keybinds spamming. &#10;- Fixed rendering being slightly broken on the z axis.">
-      <option name="closed" value="true" />
-      <created>1731302910040</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1731302910040</updated>
     </task>
     <task id="LOCAL-00028" summary="- Improved grass and flower textures. &#10;- Re-added block sub-types.">
       <option name="closed" value="true" />
@@ -594,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733790865417</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary="- Added snow. &#10;- Converted arrays to buffers for chunk data.">
+      <option name="closed" value="true" />
+      <created>1734047506673</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1734047506673</updated>
+    </task>
+    <option name="localTasksCounter" value="77" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,7 +610,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added stone. &#10;- Added caves. &#10;- Grass is now broken when the block below is." />
     <MESSAGE value="- Increased world size to 1024x256x1024. &#10;- Noise for worldgen is now pre-computed." />
     <MESSAGE value="- Raised world height to Y320." />
     <MESSAGE value="- Removed unused files." />
@@ -635,7 +634,8 @@
     <MESSAGE value="- Fixed weird interaction with fog and transparent objects. &#10;- Added purple stained glass. &#10;- Added lime stained glass. &#10;- Added ability to cycle through selected block with the 'Q' and 'E' keys. &#10;- Added bubbles." />
     <MESSAGE value="- Added white noise." />
     <MESSAGE value="- Bubbles in stained-glass no longer move. &#10;- Improved bubbles to be more random." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Bubbles in stained-glass no longer move. &#10;- Improved bubbles to be more random." />
+    <MESSAGE value="- Added snow. &#10;- Converted arrays to buffers for chunk data." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added snow. &#10;- Converted arrays to buffers for chunk data." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -3,33 +3,32 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.BlockHelper;
 
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.*;
 
 import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
-    private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
-    private static byte[] defaultBytes = new byte[totalBlocks];
-    private static byte[] defaultShortsBytes = new byte[totalBlocks*2];
-    private ByteBuffer blocksBytes = ByteBuffer.allocateDirect(totalBlocks);
-    private ByteBuffer blocksShortsBytes = null;
-    private ShortBuffer blocksShorts = null;
+    private static int totalBlocks = chunkSize*chunkSize*chunkSize;
+    private static byte[] defaultBlockBytes;
+    private byte[] blockBytes;
+    private short[] blockShorts = null;
     private List<Block> palette = new ArrayList<>();
 
     public Chunk() {
-        Arrays.fill(defaultBytes, (byte) -1);
-        blocksBytes.put(defaultBytes);
+        if (defaultBlockBytes == null) {
+            defaultBlockBytes = new byte[totalBlocks];
+            Arrays.fill(defaultBlockBytes, (byte) -1);
+        }
+        blockBytes = defaultBlockBytes;
         palette.add(null);
     }
 
     public Block getBlock(int pos) {
         int index; //get the palette index from the blocks array
-        if (blocksBytes == null) {
-            index = blocksShorts.get(pos);
+        if (blockShorts != null) {
+            index = blockShorts[pos];
         } else {
-            index = blocksBytes.get(pos);
+            index = blockBytes[pos];
         }
         if (index <= 0) {  //optimization for fully sun-lit air blocks to not require their own instance in each chunk.
             return BlockHelper.litAirBlock;
@@ -41,19 +40,19 @@ public class Chunk {
     }
     public void setBlock(int pos, Block block, boolean update) {
         if (block.equals(BlockHelper.litAirBlock)) { //optimization for fully sun-lit air blocks to not require their own instance in each chunk.
-            if (blocksBytes == null) {
-                blocksShorts.put(pos, (short) 0);
+            if (blockShorts != null) {
+                blockShorts[pos] = 0;
             } else {
-                blocksBytes.put(pos, (byte) 0);
+                blockBytes[pos] = 0;
             }
         } else {
             boolean wasInPalette = false;
             for (int i = 0; i < palette.size(); i++) { //iterate through palette until finding a matching block, and upon doing so set the palette index for that block position to the index of the matching palette entry
                 if (block.equals(palette.get(i))) {
-                    if (blocksBytes == null) {
-                        blocksShorts.put(pos, (short) i);
+                    if (blockShorts != null) {
+                        blockShorts[pos] = (short) i;
                     } else {
-                        blocksBytes.put(pos, (byte) i);
+                        blockBytes[pos] = (byte) i;
                     }
                     wasInPalette = true;
                     break;
@@ -61,14 +60,13 @@ public class Chunk {
             }
             if (!wasInPalette) {
                 int size = palette.size();
-                if (size == 127) {
-                    blocksShortsBytes = ByteBuffer.allocateDirect(totalBlocks*2);
-                    blocksShortsBytes.put(ByteBuffer.wrap(defaultShortsBytes));
-                    blocksShorts = blocksShortsBytes.asShortBuffer();
-                    for (int i = 0; i < totalBlocks; i++) {
-                        blocksShorts.put(i, blocksBytes.get(i));
+                if (size == 127 && blockBytes != null) {
+                    blockShorts = new short[totalBlocks];
+                    Arrays.fill(blockShorts, (short) -1);
+                    for (int i = 0; i < blockBytes.length; i++) {
+                        blockShorts[i] = blockBytes[i];
                     }
-                    blocksBytes = null;
+                    blockBytes = null;
                 }
 
                 int index = palette.size();
@@ -81,12 +79,12 @@ public class Chunk {
                 if (index == size) {
                     palette.addLast(null);
                 }
-                if (blocksBytes == null) {
+                if (blockShorts != null) {
                     palette.set(index, block);
-                    blocksShorts.put(pos, (short) index);
+                    blockShorts[pos] = (short) index;
                 } else {
                     palette.set(index, block);
-                    blocksBytes.put(pos, (byte) index);
+                    blockBytes[pos] = (byte) index;
                 }
             }
         }
@@ -96,10 +94,9 @@ public class Chunk {
     }
     public void cleanPalette() {
         if (!palette.isEmpty()) {
-            if (blocksBytes == null) {
-                int[] pointerUses = new int[palette.size()+1];
-                for (int i = 0; i < totalBlocks; i++) {
-                    short block = blocksShorts.get(i);
+            int[] pointerUses = new int[palette.size()+1];
+            if (blockShorts != null) {
+                for (short block : blockShorts) {
                     if (block >= 0) {
                         pointerUses[block] += 1;
                     }
@@ -113,29 +110,28 @@ public class Chunk {
                     }
                 }
                 if (newPalette.size() < 127) {
-                    blocksBytes = ByteBuffer.allocateDirect(totalBlocks);
-                    blocksBytes.put(ByteBuffer.wrap(defaultBytes));
+                    blockBytes = new byte[totalBlocks];
+                    Arrays.fill(blockBytes, (byte) -1);
                     for (int i = 0; i < totalBlocks; i++) {
-                        byte index = blocksBytes.get(i);
+                        byte index = (byte) blockShorts[i];
                         if (index >= 0) {
                             Block block = palette.get(index);
                             for (byte p = 0; p < newPalette.size(); p++) {
                                 if (newPalette.get(p).equals(block)) {
-                                    blocksBytes.put(i, p);
+                                    blockBytes[i] = p;
                                 }
                             }
                         }
                     }
-                    blocksShorts = null;
-                    blocksShortsBytes = null;
+                    blockShorts = null;
                 } else {
                     for (int i = 0; i < totalBlocks; i++) {
-                        short index = blocksShorts.get(i);
+                        short index = blockShorts[i];
                         if (index > 0) {
                             Block block = palette.get(index);
                             for (short p = 1; p < newPalette.size(); p++) {
                                 if (newPalette.get(p).equals(block)) {
-                                    blocksShorts.put(i, p);
+                                    blockShorts[i] = p;
                                 }
                             }
                         }
@@ -143,9 +139,7 @@ public class Chunk {
                 }
                 palette = newPalette;
             } else {
-                int[] pointerUses = new int[palette.size()+1];
-                for (int i = 0; i < totalBlocks; i++) {
-                    byte block = blocksBytes.get(i);
+                for (byte block : blockBytes) {
                     if (block >= 0) {
                         pointerUses[block] += 1;
                     }
@@ -159,12 +153,12 @@ public class Chunk {
                     }
                 }
                 for (int i = 0; i < totalBlocks; i++) {
-                    byte index = blocksBytes.get(i);
+                    byte index = blockBytes[i];
                     if (index > 0) {
                         Block block = palette.get(index);
                         for (byte p = 1; p < newPalette.size(); p++) {
                             if (newPalette.get(p).equals(block)) {
-                                blocksBytes.put(i, p);
+                                blockBytes[i] = p;
                             }
                         }
                     }
