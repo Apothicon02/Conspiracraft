@@ -1,11 +1,14 @@
 #version 460
+#extension GL_NV_gpu_shader5 : enable
 
 uniform float timeOfDay;
+uniform double time;
 uniform int renderDistance;
 uniform vec2 res;
 uniform mat4 cam;
 uniform ivec3 selected;
 uniform bool ui;
+uniform vec3 sun;
 layout(binding = 0) uniform sampler2D coherent_noise;
 layout(binding = 1) uniform sampler2D white_noise;
 layout(std430, binding = 0) buffer atlas
@@ -19,6 +22,10 @@ layout(std430, binding = 1) buffer region1
 layout(std430, binding = 2) buffer region1Lighting
 {
     int[] region1LightingData;
+};
+layout(std430, binding = 3) buffer region1Corners
+{
+    int8_t[] region1CornersData;
 };
 in vec4 gl_FragCoord;
 in vec4 pos;
@@ -39,11 +46,63 @@ vec4 intToColor(int color) {
     return vec4(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
 }
 
-vec4 getVoxel(int x, int y, int z, int blockType, int blockSubtype) {
+bool[8] getCorners(int x, int y, int z) {
+    int8_t data = region1CornersData[(((x*size)+z)*height)+y];
+    //return bool[8]((data & (int8_t(1) << 7)) != 0, (data & (int8_t(1) << 6)) != 0, (data & (int8_t(1) << 5)) != 0, (data & (int8_t(1) << 4)) != 0, (data & (int8_t(1) << 3)) != 0, (data & (int8_t(1) << 2)) != 0, (data & (int8_t(1) << 1)) != 0, (data & (int8_t(1) << 0)) != 0);
+    return bool[8](data == 0, data == 0, data == 0, data == 0, data == 0, data == 0, data == 0, data == 0);
+}
+
+vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
+    bool[8] corners = getCorners(bX, bY, bZ);
+    if (x < 4) {
+        if (z < 4) {
+            if (y < 4) {
+                if (!corners[0]) {
+                    return vec4(0);
+                }
+            } else {
+                if (!corners[1]) {
+                    return vec4(0);
+                }
+            }
+        } else {
+            if (y < 4) {
+                if (!corners[2]) {
+                    return vec4(0);
+                }
+            } else {
+                if (!corners[3]) {
+                    return vec4(0);
+                }
+            }
+        }
+    } else {
+        if (z < 4) {
+            if (y < 4) {
+                if (!corners[4]) {
+                    return vec4(0);
+                }
+            } else {
+                if (!corners[5]) {
+                    return vec4(0);
+                }
+            }
+        } else {
+            if (y < 4) {
+                if (!corners[6]) {
+                    return vec4(0);
+                }
+            } else {
+                if (!corners[7]) {
+                    return vec4(0);
+                }
+            }
+        }
+    }
     return intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255;
 }
-vec4 getVoxel(float x, float y, float z, int blockType, int blockSubtype) {
-    return getVoxel(int(x), int(y), int(z), blockType, blockSubtype);
+vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype) {
+    return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype);
 }
 
 int getBlockData(int x, int y, int z) {
@@ -120,14 +179,14 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
     vec4 prevVoxelColor = vec4(1, 1, 1, 0);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
-        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, blockType, blockSubtype);
+        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype);
         if (voxelColor.a > 0.f && voxelColor.a < 1.f) {
             if (hitPos == vec3(256)) {
                 hitPos = rayMapPos;
             }
             //bubbles start
             if (blockType == 1) {
-                float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+((rayMapPos.y*8)+mapPos.y+(timeOfDay*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
+                float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+((rayMapPos.y*8)+mapPos.y+(float(time)*10000)))+(vec2(rayMapPos.x, rayMapPos.z)*8));
                 if (samp > 0 && samp < 0.002) {
                     voxelColor = vec4(1, 1, 1, 1);
                 }
@@ -272,7 +331,7 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
         //snow start
 //        if (blockInfo.x == 0 && lighting.a == 20) {
-//            float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(timeOfDay*7500)));
+//            float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(float(time)*7500)));
 //            float samp2 = noise(vec2(rayMapPos.x, rayMapPos.z)*8);
 //            if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
 //                color = vec4(1, 1, 1, 1);
@@ -328,9 +387,9 @@ void main()
         fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1); //transparency
         float distanceFogginess = clamp(((((distance(camPos, hitPos)*fogNoise)/renderDistance)*0.75)+gradient(hitPos.y, 0, 16, 0, 1.25))*1.25, 0, 1);
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), vec3(0.8), cloudiness), 1); //distant fog, void fog, clouds
-        float adjustedTime = clamp(timeOfDay*2.8, 0, 1);
-        float sunBrightness = sunLight*adjustedTime;
-        vec3 finalLightFog = mix(vec3(lightFog)/20, mix(vec3(0.06, 0, 0.1), vec3(0.33, 0.3, 0.25), adjustedTime), lightFog.a/11.67f)*atmosphere;
-        fragColor = vec4((vec3(fragColor)*max(vec3(0.18), max(blockLightBrightness, vec3(sunBrightness))))+finalLightFog, 1); //brightness, blocklight fog
+        float adjustedTime = min(1, abs(1-clamp(distance(vec2(rayMapPos.x, rayMapPos.z), vec2(sun.x, sun.z))/(size/2), 0, 1))*2);
+        vec3 sunBrightness = mix(vec3(1, 0.66, 0.1), vec3(1, 1, 0.98), adjustedTime)*adjustedTime;
+        vec3 finalLightFog = mix(vec3(lightFog)/20, max(vec3(0.06, 0, 0.1), sunBrightness/3), lightFog.a/11.67f)*atmosphere;
+        fragColor = vec4((vec3(fragColor)*max(vec3(0.18), max(blockLightBrightness, sunBrightness)))+finalLightFog, 1); //brightness, blocklight fog
     }
 }

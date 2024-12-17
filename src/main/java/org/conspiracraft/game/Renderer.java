@@ -31,16 +31,20 @@ public class Renderer {
     public static int atlasSSBOId;
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
+    public static int region1CornersSSBOId;
     public static int coherentNoiseId;
     public static int whiteNoiseId;
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
     public static int timeOfDayUniform;
+    public static int timeUniform;
     public static int selectedUniform;
     public static int uiUniform;
+    public static int sunUniform;
     public static int renderDistanceMul = 4;
     public static float timeOfDay = 0.5f;
+    public static double time = 0.5d;
     public static boolean atlasChanged = true;
     public static boolean worldChanged = false;
     public static boolean[] collisionData = new boolean[9984*9984+9984];
@@ -69,6 +73,7 @@ public class Renderer {
         atlasSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         region1LightingSSBOId = glGenBuffers();
+        region1CornersSSBOId = glGenBuffers();
 
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -88,8 +93,10 @@ public class Renderer {
         camUniform = glGetUniformLocation(scene.programId, "cam");
         renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
         timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
+        timeUniform = glGetUniformLocation(scene.programId, "time");
         selectedUniform = glGetUniformLocation(scene.programId, "selected");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
+        sunUniform = glGetUniformLocation(scene.programId, "sun");
 
         glBindVertexArray(0);
     }
@@ -108,12 +115,17 @@ public class Renderer {
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
         glUniform1i(renderDistanceUniform, 150+(40*renderDistanceMul));
         glUniform1f(timeOfDayUniform, timeOfDay);
+        glUniform1d(timeUniform, time);
         Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }
         glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
         glUniform1i(uiUniform, showUI ? 1 : 0);
+        float halfSize = size/2f;
+        Vector3f sunPos = new Vector3f(size/8f, 0, size/8f);
+        sunPos.rotateY((float) time);
+        glUniform3f(sunUniform, sunPos.x+halfSize, height, sunPos.z+halfSize);
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
@@ -187,7 +199,6 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         if (worldChanged) {
-            worldChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
@@ -220,6 +231,41 @@ public class Renderer {
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
+        if (worldChanged) {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1CornersSSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, size*size*height, GL_DYNAMIC_DRAW);
+
+            ByteBuffer corners = ByteBuffer.allocate(height);
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    for (int y = 0; y < height; y++) {
+                        corners.put(y, getCorners(x, y, z));
+                    }
+                    corners.flip();
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, ((x*size)+z)*height, corners);
+                    corners.flip();
+                    corners.clear();
+                }
+            }
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        } else {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1CornersSSBOId);
+            for (int i = 0; i < 400; i++) {
+                if (!cornerQueue.isEmpty()) {
+                    Vector3i pos = new Vector3i(cornerQueue.getFirst(), cornerQueue.get(1), cornerQueue.get(2));
+                    cornerQueue.removeFirst();
+                    cornerQueue.removeFirst();
+                    cornerQueue.removeFirst();
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos), ByteBuffer.wrap(new byte[]{getCorners(pos.x, pos.y, pos.z)}).flip());
+                } else {
+                    break;
+                }
+            }
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -227,6 +273,7 @@ public class Renderer {
         glBindVertexArray(0);
 
         scene.unbind();
+        worldChanged = false;
     }
 
     public void cleanup() {

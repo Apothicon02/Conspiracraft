@@ -176,6 +176,7 @@ public class Main {
     byte meridiem = 1;
 
     public void updateTime(long diffTimeMillis, float mul) {
+        Renderer.time += (diffTimeMillis/600000f)*mul;
         float time = Renderer.timeOfDay+((diffTimeMillis/600000f)*mul)*meridiem;
         if (time < 0f) {
             time = 0;

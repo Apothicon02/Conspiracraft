@@ -1,5 +1,6 @@
 package org.conspiracraft.game.world;
 
+import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Renderer;
 
@@ -28,6 +29,7 @@ public class World {
     public static short[] heightmap = new short[size*size];
     public static short[] invHeightmap = new short[size*size];
 
+    public static List<Short> cornerQueue = new ArrayList<>(List.of());
     public static List<Short> lightQueue = new ArrayList<>(List.of());
     public static List<Short> blockQueue = new ArrayList<>(List.of());
 
@@ -236,6 +238,14 @@ public class World {
     }
     public static int condenseChunkPos(int x, int y, int z) {
         return (((x*sizeChunks)+z)*heightChunks)+y;
+    }
+
+    public static byte getCorners(int x, int y, int z) {
+        if (x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height) {
+            Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
+            return region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].getCorners(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)));
+        }
+        return Utils.convertBoolArrayToByte(new boolean[]{true, true, true, true, true, true, true, true});
     }
 
     public static Block getBlock(Vector3i blockPos) {

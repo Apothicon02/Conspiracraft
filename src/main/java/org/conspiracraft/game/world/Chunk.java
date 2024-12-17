@@ -1,5 +1,6 @@
 package org.conspiracraft.game.world;
 
+import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.BlockHelper;
 
@@ -9,15 +10,20 @@ import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
     private static int totalBlocks = chunkSize*chunkSize*chunkSize;
+    private byte[] corners = new byte[totalBlocks];
     private byte[] blockBytes = new byte[totalBlocks];
     private short[] blockShorts = null;
     private List<Block> palette = new ArrayList<>();
 
     public Chunk() {
         Arrays.fill(blockBytes, (byte) -1);
+        Arrays.fill(corners, Utils.convertBoolArrayToByte(new boolean[]{true, true, false, true, true, true, true, true}));
         palette.add(null);
     }
 
+    public byte getCorners(int pos) {
+        return corners[pos];
+    }
     public Block getBlock(int pos) {
         int index; //get the palette index from the blocks array
         if (blockShorts != null) {
