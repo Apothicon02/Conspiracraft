@@ -9,8 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Finished sun.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -195,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00031" summary="- Finished new multi-level dda. &#10;- Added fog.">
-      <option name="closed" value="true" />
-      <created>1731783933105</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1731783933105</updated>
     </task>
     <task id="LOCAL-00032" summary="- Updated render distance default value to 10.&#10;- Altered render distance calculation.">
       <option name="closed" value="true" />
@@ -588,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734456226355</updated>
     </task>
-    <option name="localTasksCounter" value="80" />
+    <task id="LOCAL-00080" summary="- Finished sun.">
+      <option name="closed" value="true" />
+      <created>1734488421438</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1734488421438</updated>
+    </task>
+    <option name="localTasksCounter" value="81" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Reduced amount of lights that generate. &#10;- Added chunks." />
     <MESSAGE value="- Re-added sunlight spreading during worldgen." />
     <MESSAGE value="- Increased cloud detail." />
     <MESSAGE value="- Updated to java 23." />
@@ -629,7 +630,8 @@
     <MESSAGE value="- Fixed random crash related to chunk data conversion. &#10;- Fixed light updates not working properly with overlapping light sources. &#10;- The block you are looking at is now highlighted. &#10;- F1 now toggles crosshair / block highlight visibility. &#10;- Can now cycle through block subtype ids with F3+Q / F3+E. &#10;- Added oak log block type. &#10;- Added oak planks block type." />
     <MESSAGE value="- Fixed crash." />
     <MESSAGE value="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners." />
+    <MESSAGE value="- Finished sun." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Finished sun." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -126,10 +126,8 @@ public class World {
                 int surface = height-1;
                 boolean upmost = true;
                 for (int y = surface; y >= 0; y--) {
-                    double negativeGradient = ConspiracraftMath.gradient(y, distance, 0, -4, 3);
-                    double negativeDensity = (basePerlinNoise-1) + negativeGradient;
                     double baseDensity = 0;
-                    if (negativeDensity < 0) {
+                    if (distance > size/4.02) {
                         baseDensity = 0;
                     } else {
                         double baseGradient = ConspiracraftMath.gradient(y, 157, 126, 2, -1);

@@ -123,7 +123,7 @@ public class Renderer {
         glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
         glUniform1i(uiUniform, showUI ? 1 : 0);
         float halfSize = size/2f;
-        Vector3f sunPos = new Vector3f(size/8f, 0, size/8f);
+        Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
         sunPos.rotateY((float) time);
         glUniform3f(sunUniform, sunPos.x+halfSize, height, sunPos.z+halfSize);
 
