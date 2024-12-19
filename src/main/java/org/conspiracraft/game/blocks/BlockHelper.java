@@ -50,7 +50,7 @@ public class BlockHelper {
             }
             Vector3i chunkPos = new Vector3i(pos.x/chunkSize, pos.y/chunkSize, pos.z/chunkSize);
             int condensedPos = World.condensePos(pos.x, pos.z);
-            World.region1Chunks[World.condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(World.condenseLocalPos(pos.x-(chunkPos.x*chunkSize), pos.y-(chunkPos.y*chunkSize), pos.z-(chunkPos.z*chunkSize)), new Block(block.typeId(), block.subtypeId(), r, g, b, (byte) (pos.y > World.heightmap[condensedPos] ? 20 : (pos.y <= World.invHeightmap[condensedPos] ? Math.max(19, s) : s))), true);
+            World.region1Chunks[World.condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(World.condenseLocalPos(pos.x-(chunkPos.x*chunkSize), pos.y-(chunkPos.y*chunkSize), pos.z-(chunkPos.z*chunkSize)), new Block(block.typeId(), block.subtypeId(), r, g, b, (byte) (pos.y > World.heightmap[condensedPos] ? 20 : s)), true);
             for (byte i = 0; i < 6; i++) {
                 if (neighborPositions[i] != null) {
                     if (isDarker(r, g, b, s, neighborLights[i])) {

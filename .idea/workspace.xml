@@ -9,11 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Finished sun.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- World now generates as a cylinder.&#10;- Fixed atmosphere issues.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,14 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00032" summary="- Updated render distance default value to 10.&#10;- Altered render distance calculation.">
-      <option name="closed" value="true" />
-      <created>1731784089993</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1731784089993</updated>
     </task>
     <task id="LOCAL-00033" summary="- There can now only be one renderer. &#10;- Added the World class.">
       <option name="closed" value="true" />
@@ -590,7 +581,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734488421438</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="- World now generates as a cylinder.&#10;- Fixed atmosphere issues.">
+      <option name="closed" value="true" />
+      <created>1734563280826</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1734563280826</updated>
+    </task>
+    <option name="localTasksCounter" value="82" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -606,7 +605,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Re-added sunlight spreading during worldgen." />
     <MESSAGE value="- Increased cloud detail." />
     <MESSAGE value="- Updated to java 23." />
     <MESSAGE value="- Reduced memory usage from 20gb to 0.9gb." />
@@ -631,7 +629,8 @@
     <MESSAGE value="- Fixed crash." />
     <MESSAGE value="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners." />
     <MESSAGE value="- Finished sun." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Finished sun." />
+    <MESSAGE value="- World now generates as a cylinder.&#10;- Fixed atmosphere issues." />
+    <option name="LAST_COMMIT_MESSAGE" value="- World now generates as a cylinder.&#10;- Fixed atmosphere issues." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
