@@ -1,6 +1,7 @@
-package org.conspiracraft.game;
+package org.conspiracraft.game.rendering;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
@@ -9,15 +10,16 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL;
 import org.conspiracraft.engine.*;
 import org.conspiracraft.engine.Window;
+import org.lwjgl.system.MemoryStack;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -27,6 +29,7 @@ import static org.conspiracraft.game.world.World.*;
 
 public class Renderer {
     public static ShaderProgram scene;
+    public static Projection projection;
     public static int sceneVaoId;
     public static int atlasSSBOId;
     public static int region1SSBOId;
@@ -42,6 +45,10 @@ public class Renderer {
     public static int selectedUniform;
     public static int uiUniform;
     public static int sunUniform;
+    public static int raytraceUniform;
+    public static int projectionUniform;
+    public static int viewUniform;
+    public static int modelUniform;
     public static int renderDistanceMul = 4;
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
@@ -50,23 +57,40 @@ public class Renderer {
     public static boolean[] collisionData = new boolean[9984*9984+9984];
     public static boolean showUI = true;
 
-    public static void init() throws Exception {
+    public static void init(Window window) throws Exception {
+        projection = new Projection(window.getWidth(), window.getHeight());
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
+        FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(117);
+        verticesBuffer.put(new float[]{
+                -1, -1, 0, 3, -1, 0, -1, 3, 0,
+
+                -20, -20, -20, -20, 20, -20, 20, -20, -20,
+                20, 20, -20, -20, 20, -20, 20, -20, -20,
+
+                -20, -20, 20, -20, 20, 20, 20, -20, 20,
+                20, 20, 20, -20, 20, 20, 20, -20, 20,
+
+                -20, 20, -20, -20, 20, 20, 20, 20, -20,
+                20, 20, 20, -20, 20, 20, 20, 20, -20,
+
+                -20, -20, -20, -20, -20, 20, 20, -20, -20,
+                20, -20, 20, -20, -20, 20, 20, -20, -20,
+
+                20, -20, -20, 20, -20, 20, 20, 20, -20,
+                -20, 20, 20, -20, -20, 20, -20, 20, -20,
+
+                -20, -20, -20, -20, -20, 20, -20, 20, -20,
+                20, 20, 20, 20, -20, 20, 20, 20, -20,
+        }).flip();
+        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
         scene = new ShaderProgram();
         scene.createVertexShader(Utils.readFile("assets/base/shaders/scene.vert"));
         scene.createFragmentShader(Utils.readFile("assets/base/shaders/scene.frag"));
         scene.link();
-
-        int sceneVboId = glGenBuffers();
-        ByteBuffer verticesBuffer = BufferUtils.createByteBuffer(6);
-        verticesBuffer.put(new byte[]{-1, -1, 3, -1, -1, 3}).flip();
-        glBindBuffer(GL_ARRAY_BUFFER, sceneVboId);
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_BYTE, false, 0, 0);
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         coherentNoiseId = glGenTextures();
         whiteNoiseId = glGenTextures();
@@ -97,8 +121,10 @@ public class Renderer {
         selectedUniform = glGetUniformLocation(scene.programId, "selected");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
         sunUniform = glGetUniformLocation(scene.programId, "sun");
-
-        glBindVertexArray(0);
+        raytraceUniform = glGetUniformLocation(scene.programId, "raytrace");
+        projectionUniform = glGetUniformLocation(scene.programId, "projection");
+        viewUniform = glGetUniformLocation(scene.programId, "view");
+        modelUniform = glGetUniformLocation(scene.programId, "model");
     }
 
     public static void render(Window window) throws IOException {
@@ -125,10 +151,17 @@ public class Renderer {
         float halfSize = size/2f;
         Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
         sunPos.rotateY((float) time);
-        glUniform3f(sunUniform, sunPos.x+halfSize, height, sunPos.z+halfSize);
-
-        glBindVertexArray(sceneVaoId);
-        glEnableVertexAttribArray(0);
+        sunPos = new Vector3f(sunPos.x+halfSize, height, sunPos.z+halfSize);
+        glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(projectionUniform, false, projection.getProjMatrix().get(stack.mallocFloat(16)));
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(viewUniform, false, new Matrix4f(camMatrix).setTranslation(camMatrix.m30()*-1, camMatrix.m31()*-1, camMatrix.m32()).get(stack.mallocFloat(16)));
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(modelUniform, false, new Matrix4f().translate(sunPos.x, sunPos.y, sunPos.z*-1).get(stack.mallocFloat(16)));
+        }
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
@@ -267,10 +300,14 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUniform1i(raytraceUniform, 1);
 
+        glBindVertexArray(sceneVaoId);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUniform1i(raytraceUniform, 0);
+        glDrawArrays(GL_TRIANGLES, 3, 36);
         glDisableVertexAttribArray(0);
-        glBindVertexArray(0);
 
         scene.unbind();
         worldChanged = false;

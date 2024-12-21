@@ -1,5 +1,7 @@
 package org.conspiracraft.game;
 
+import org.conspiracraft.game.rendering.Renderer;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

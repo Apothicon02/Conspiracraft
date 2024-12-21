@@ -2,7 +2,7 @@ package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.Noise;
-import org.conspiracraft.game.Renderer;
+import org.conspiracraft.game.rendering.Renderer;
 
 import org.conspiracraft.game.blocks.BlockHelper;
 import org.conspiracraft.game.blocks.types.BlockType;

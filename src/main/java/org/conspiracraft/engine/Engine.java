@@ -1,11 +1,8 @@
 package org.conspiracraft.engine;
 
-import org.conspiracraft.game.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
-import org.conspiracraft.game.Renderer;
-
-import java.io.IOException;
+import org.conspiracraft.game.rendering.Renderer;
 
 public class Engine {
 

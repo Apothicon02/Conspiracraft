@@ -2,7 +2,7 @@ package org.conspiracraft;
 
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Player;
-import org.conspiracraft.game.Renderer;
+import org.conspiracraft.game.rendering.Renderer;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -12,6 +12,7 @@ import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL40;
 
 import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
@@ -31,6 +32,8 @@ public class Main {
         Noise.init();
         World.init();
         GL.createCapabilities();
+//        GL40.glEnable(GL40.GL_CULL_FACE);
+//        GL40.glCullFace(GL40.GL_BACK);
     }
 
     boolean wasTDown = false;
@@ -194,7 +197,7 @@ public class Main {
         if (World.worldGenerated) {
             if (!postWorldgenInitialization) {
                 postWorldgenInitialization = true;
-                Renderer.init();
+                Renderer.init(window);
             }
             updateTime(diffTimeMillis, 1);
             player.tick();

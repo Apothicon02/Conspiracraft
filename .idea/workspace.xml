@@ -9,10 +9,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- World now generates as a cylinder.&#10;- Fixed atmosphere issues.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Removed inverted heightmap.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Projection.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -196,14 +202,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00033" summary="- There can now only be one renderer. &#10;- Added the World class.">
-      <option name="closed" value="true" />
-      <created>1731792107235</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1731792107235</updated>
     </task>
     <task id="LOCAL-00034" summary="- Renamed to Conspiracraft.">
       <option name="closed" value="true" />
@@ -589,7 +587,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734563280826</updated>
     </task>
-    <option name="localTasksCounter" value="82" />
+    <task id="LOCAL-00082" summary="- Removed inverted heightmap.">
+      <option name="closed" value="true" />
+      <created>1734644502835</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1734644502835</updated>
+    </task>
+    <option name="localTasksCounter" value="83" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -605,7 +611,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Increased cloud detail." />
     <MESSAGE value="- Updated to java 23." />
     <MESSAGE value="- Reduced memory usage from 20gb to 0.9gb." />
     <MESSAGE value="- Simplified palette compression." />
@@ -630,7 +635,8 @@
     <MESSAGE value="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners." />
     <MESSAGE value="- Finished sun." />
     <MESSAGE value="- World now generates as a cylinder.&#10;- Fixed atmosphere issues." />
-    <option name="LAST_COMMIT_MESSAGE" value="- World now generates as a cylinder.&#10;- Fixed atmosphere issues." />
+    <MESSAGE value="- Removed inverted heightmap." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Removed inverted heightmap." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
