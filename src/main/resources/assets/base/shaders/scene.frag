@@ -16,15 +16,19 @@ layout(std430, binding = 0) buffer atlas
 {
     int[] atlasData;
 };
-layout(std430, binding = 1) buffer region1
+layout(std430, binding = 1) buffer chunks
+{
+    int[] chunksData;
+};
+layout(std430, binding = 2) buffer region1
 {
     int[] region1BlockData;
 };
-layout(std430, binding = 2) buffer region1Lighting
+layout(std430, binding = 3) buffer region1Lighting
 {
     int[] region1LightingData;
 };
-layout(std430, binding = 3) buffer region1Corners
+layout(std430, binding = 4) buffer region1Corners
 {
     int8_t[] region1CornersData;
 };
@@ -33,6 +37,7 @@ in vec4 gl_FragCoord;
 out vec4 fragColor;
 
 int size = 1024;
+int chunkSize = 16;
 int height = 320;
 vec3 rayMapPos = vec3(0);
 vec3 sunBrightness = vec3(0);
@@ -108,7 +113,12 @@ vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int block
 }
 
 int getBlockData(int x, int y, int z) {
-    return region1BlockData[(((x*size)+z)*height)+y];
+    ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
+    ivec3 localPos = ivec3(x-chunkPos.x, y-chunkPos.y, z-chunkPos.z);
+    return region1BlockData[
+        (chunksData[(((chunkPos.x*chunkSize)+chunkPos.z)*chunkSize)+chunkPos.y]/4)+
+        ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y)
+    ];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);

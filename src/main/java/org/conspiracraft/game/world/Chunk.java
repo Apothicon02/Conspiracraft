@@ -9,7 +9,7 @@ import java.util.*;
 import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
-    private static int totalBlocks = chunkSize*chunkSize*chunkSize;
+    private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     private byte[] corners = new byte[totalBlocks];
     private byte[] blockBytes = new byte[totalBlocks];
     private short[] blockShorts = null;
@@ -23,6 +23,14 @@ public class Chunk {
 
     public byte getCorners(int pos) {
         return corners[pos];
+    }
+    public int[] getAllBlocks() {
+        int[] returnObj = new int[totalBlocks];
+        for (int i = 0; i < totalBlocks; i++) {
+            Block block = getBlock(i);
+            returnObj[i] = Utils.packInts(block.typeId(), block.subtypeId());
+        }
+        return returnObj;
     }
     public Block getBlock(int pos) {
         int index; //get the palette index from the blocks array

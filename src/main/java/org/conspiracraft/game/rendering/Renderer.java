@@ -5,6 +5,7 @@ import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
+import org.conspiracraft.game.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -12,7 +13,10 @@ import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.*;
 import org.conspiracraft.engine.Window;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
+import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,17 +25,22 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.conspiracraft.game.world.World.*;
+import static org.lwjgl.util.vma.Vma.vmaCreateVirtualBlock;
+import static org.lwjgl.util.vma.Vma.vmaVirtualAllocate;
+import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 public class Renderer {
     public static ShaderProgram scene;
     public static Projection projection;
     public static int sceneVaoId;
     public static int atlasSSBOId;
+    public static int chunksSSBOId;
     public static int region1SSBOId;
     public static int region1LightingSSBOId;
     public static int region1CornersSSBOId;
@@ -56,6 +65,8 @@ public class Renderer {
     public static boolean worldChanged = false;
     public static boolean[] collisionData = new boolean[9984*9984+9984];
     public static boolean showUI = true;
+    public static PointerBuffer block = BufferUtils.createPointerBuffer(1);
+    public static int[] chunkPointers =  new int[(((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks];
 
     public static void init(Window window) throws Exception {
         projection = new Projection(window.getWidth(), window.getHeight());
@@ -95,6 +106,7 @@ public class Renderer {
         coherentNoiseId = glGenTextures();
         whiteNoiseId = glGenTextures();
         atlasSSBOId = glGenBuffers();
+        chunksSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         region1LightingSSBOId = glGenBuffers();
         region1CornersSSBOId = glGenBuffers();
@@ -125,6 +137,13 @@ public class Renderer {
         projectionUniform = glGetUniformLocation(scene.programId, "projection");
         viewUniform = glGetUniformLocation(scene.programId, "view");
         modelUniform = glGetUniformLocation(scene.programId, "model");
+
+        VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
+        blockCreateInfo.size(1000000000);
+        long result = vmaCreateVirtualBlock(blockCreateInfo, block);
+//        if (result != VK_SUCCESS) {
+//            int nothing = 0;
+//        }
     }
 
     public static void render(Window window) throws IOException {
@@ -188,23 +207,34 @@ public class Renderer {
         }
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1SSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
 
-            int[] blocks = new int[height];
-            for (int x = 0; x < size; x++) {
-                for (int z = 0; z < size; z++) {
-                    for (int y = 0; y < height; y++) {
-                        blocks[y] = getBlock(x, y, z).id();
+            for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+                for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                    for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
+                        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                        allocCreateInfo.size(16384);
+
+                        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                        LongBuffer offset = BufferUtils.createLongBuffer(1);
+                        long res = vmaVirtualAllocate(block.get(0), allocCreateInfo, alloc, offset);
+                        if (res == VK_SUCCESS) {
+                            int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
+                            int pointer = (int) offset.get(0);
+                            chunkPointers[condensedChunkPos] = pointer;
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getAllBlocks());
+                        } else {
+                            // Allocation failed - no space for it could be found. Handle this error!
+                        }
                     }
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (((x*size)+z)*height)*4, blocks);
                 }
             }
 
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1SSBOId);
             for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
                 Vector4i blockData = new Vector4i(blockQueue.getFirst(), blockQueue.get(1), blockQueue.get(2), Utils.packInts(blockQueue.get(3), blockQueue.get(4)));
                 blockQueue.removeFirst();
@@ -231,9 +261,13 @@ public class Renderer {
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunksSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkPointers, GL_DYNAMIC_READ);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1LightingSSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
 
             int[] lights = new int[height];
@@ -250,7 +284,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1LightingSSBOId);
             for (int i = 0; i < 400; i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = new Vector3i(lightQueue.getFirst(), lightQueue.get(1), lightQueue.get(2));
@@ -266,7 +300,7 @@ public class Renderer {
         }
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, region1CornersSSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, size*size*height, GL_DYNAMIC_DRAW);
 
             ByteBuffer corners = ByteBuffer.allocate(height);
@@ -285,7 +319,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, region1CornersSSBOId);
             for (int i = 0; i < 400; i++) {
                 if (!cornerQueue.isEmpty()) {
                     Vector3i pos = new Vector3i(cornerQueue.getFirst(), cornerQueue.get(1), cornerQueue.get(2));
