@@ -139,7 +139,7 @@ public class Renderer {
         modelUniform = glGetUniformLocation(scene.programId, "model");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
-        blockCreateInfo.size(Integer.MAX_VALUE/16);
+        blockCreateInfo.size(Integer.MAX_VALUE);
         long result = vmaCreateVirtualBlock(blockCreateInfo, block);
         if (result != VK_SUCCESS) {
             int nothing = 0;

@@ -1,6 +1,8 @@
 package org.conspiracraft.game.blocks;
 
 import org.conspiracraft.engine.Utils;
+import org.joml.Vector2i;
+import org.joml.Vector4i;
 
 public record Block(int id, byte r, byte g, byte b, byte s) {
     public Block {}
@@ -22,5 +24,11 @@ public record Block(int id, byte r, byte g, byte b, byte s) {
     }
     public int id() {
         return id;
+    }
+    public Vector2i idVec() {
+        return Utils.unpackInt(id);
+    }
+    public Vector4i light() {
+        return new Vector4i(r, g, b, s);
     }
 }
