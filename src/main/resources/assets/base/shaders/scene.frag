@@ -24,11 +24,15 @@ layout(std430, binding = 2) buffer region1
 {
     int[] region1BlockData;
 };
-layout(std430, binding = 3) buffer region1Lighting
+layout(std430, binding = 3) buffer chunksLight
+{
+    int[] chunksLightData;
+};
+layout(std430, binding = 4) buffer region1Lighting
 {
     int[] region1LightingData;
 };
-layout(std430, binding = 4) buffer region1Corners
+layout(std430, binding = 5) buffer region1Corners
 {
     int8_t[] region1CornersData;
 };
@@ -135,7 +139,12 @@ vec4 getLighting(int x, int y, int z) {
     if (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13) { //return pure darkness if block isnt transparent.
         return vec4(0, 0, 0, 0);
     }
-    return intToColor(region1LightingData[(((x*size)+z)*height)+y]);
+    ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
+    ivec3 localPos = ivec3(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize));
+    return intToColor(region1LightingData[
+        chunksLightData[(((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y]+
+        ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y)
+    ]);
 }
 vec4 getLighting(float x, float y, float z) {
     return getLighting(int(x), int(y), int(z));
@@ -416,7 +425,7 @@ void main()
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), vec3(0.8), cloudiness*fogginess), 1);//distant fog, clouds
         vec3 finalLightFog = (mix(vec3(lightFog)/20, vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunBrightness), lightFog.a/11.67f)*atmosphere)*fogginess; //fog blending + sun distance fog
         float adjustedTime = min(1, abs(1-clamp((distance(rayMapPos, sun-vec3(0, height/2, 0))+distance(rayMapPos.y, sun.y-(height/2)))/(size/2.013), 0, 1))*2);
-        sunBrightness = mix(sunBrightness, (mix(vec3(1, 0.66, 0.1), vec3(1, 1, 0.98), adjustedTime)*adjustedTime)*fogginess, 0.5f);
+        sunBrightness = mix(sunBrightness, (mix(vec3(1, 0.66, 0.1), vec3(1, 1, 0.98), adjustedTime)*adjustedTime)*fogginess, 0.5f)*sunLight;
         fragColor = vec4((vec3(fragColor)*max(vec3(0.18)*fogginess, max(blockLightBrightness, sunBrightness)))+finalLightFog, 1);//brightness, blocklight fog, sun
     } else {
         fragColor = vec4(1.0, 1.0, 0.0, 1.0);

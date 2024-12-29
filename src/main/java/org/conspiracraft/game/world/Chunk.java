@@ -30,6 +30,19 @@ public class Chunk {
     public byte getCorners(int pos) {
         return corners[pos];
     }
+    public int[] getAllLights() {
+        int[] returnObj = new int[totalBlocks];
+        for (int x = 0; x < chunkSize; x++) {
+            for (int z = 0; z < chunkSize; z++) {
+                for (int y = 0; y < chunkSize; y++) {
+                    int pos = World.condenseLocalPos(x, y, z);
+                    Block block = getBlock(pos);
+                    returnObj[pos] = block.r() << 16 | block.g() << 8 | block.b() | block.s() << 24;
+                }
+            }
+        }
+        return returnObj;
+    }
     public int[] getAllBlocks() {
         int[] returnObj = new int[totalBlocks];
         for (int x = 0; x < chunkSize; x++) {

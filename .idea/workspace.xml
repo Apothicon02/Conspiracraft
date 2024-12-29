@@ -9,11 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Got chunked voxel data working.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Block.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00037" summary="- Fixed world rendering as just some white dots. &#10;- F3 + L now re-sends lighting data to the gpu. &#10;- Finished volumetric block lighting.&#10;- Added volumetric block fog.">
-      <option name="closed" value="true" />
-      <created>1731896982320</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1731896982320</updated>
     </task>
     <task id="LOCAL-00038" summary="- Decreased region size to 512. &#10;- Raised rendering height limit from 64 to 512. &#10;- Raised terrain generation to Y157. &#10;- Raised sea level to Y137. &#10;- Improved lighting calculations. &#10;- Added void fog. &#10;- Added clouds.">
       <option name="closed" value="true" />
@@ -590,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735497475504</updated>
     </task>
-    <option name="localTasksCounter" value="86" />
+    <task id="LOCAL-00086" summary="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes.">
+      <option name="closed" value="true" />
+      <created>1735506918998</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1735506918998</updated>
+    </task>
+    <option name="localTasksCounter" value="87" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -606,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed palette compression." />
     <MESSAGE value="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption." />
     <MESSAGE value="- Added (disabled) snow rendering." />
     <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
@@ -631,7 +630,8 @@
     <MESSAGE value="- Added a rasterized cube for the sun." />
     <MESSAGE value="- Started adding chunks to the GPU." />
     <MESSAGE value="- Got chunked voxel data working." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Got chunked voxel data working." />
+    <MESSAGE value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
