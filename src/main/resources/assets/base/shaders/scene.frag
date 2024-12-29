@@ -37,8 +37,10 @@ in vec4 gl_FragCoord;
 out vec4 fragColor;
 
 int size = 1024;
-int chunkSize = 16;
 int height = 320;
+int chunkSize = 16;
+int sizeChunks = size/chunkSize;
+int heightChunks = height/chunkSize;
 vec3 rayMapPos = vec3(0);
 vec3 sunBrightness = vec3(0);
 float fogginess = 0.f;
@@ -114,9 +116,9 @@ vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int block
 
 int getBlockData(int x, int y, int z) {
     ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
-    ivec3 localPos = ivec3(x-chunkPos.x, y-chunkPos.y, z-chunkPos.z);
+    ivec3 localPos = ivec3(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize));
     return region1BlockData[
-        (chunksData[(((chunkPos.x*chunkSize)+chunkPos.z)*chunkSize)+chunkPos.y]/4)+
+        chunksData[(((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y]+
         ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y)
     ];
 }

@@ -139,11 +139,11 @@ public class Renderer {
         modelUniform = glGetUniformLocation(scene.programId, "model");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
-        blockCreateInfo.size(1000000000);
+        blockCreateInfo.size(Integer.MAX_VALUE/16);
         long result = vmaCreateVirtualBlock(blockCreateInfo, block);
-//        if (result != VK_SUCCESS) {
-//            int nothing = 0;
-//        }
+        if (result != VK_SUCCESS) {
+            int nothing = 0;
+        }
     }
 
     public static void render(Window window) throws IOException {
@@ -222,7 +222,7 @@ public class Renderer {
                         if (res == VK_SUCCESS) {
                             int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
                             int pointer = (int) offset.get(0);
-                            chunkPointers[condensedChunkPos] = pointer;
+                            chunkPointers[condensedChunkPos] = pointer/4;
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getAllBlocks());
                         } else {
                             // Allocation failed - no space for it could be found. Handle this error!
@@ -254,16 +254,18 @@ public class Renderer {
                     queueLightUpdate(pos);
                 }
                 Vector3i chunkPos = new Vector3i(pos.x/chunkSize, pos.y/chunkSize, pos.z/chunkSize);
-                region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(pos.x-(chunkPos.x*chunkSize), pos.y-(chunkPos.y*chunkSize), pos.z-(chunkPos.z*chunkSize)), new Block(blockData.w, r, g, b, (byte) 0), true);
+                int condensedChunkPos = World.condenseChunkPos(chunkPos);
+                int localPos = condenseLocalPos(pos.x-(chunkPos.x*chunkSize), pos.y-(chunkPos.y*chunkSize), pos.z-(chunkPos.z*chunkSize));
+                region1Chunks[condensedChunkPos].setBlock(localPos, new Block(blockData.w, r, g, b, (byte) 0), true);
                 updateHeightmap(blockData.x, blockData.z, true);
                 recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos)*4L, new int[]{blockData.w});
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkPointers[condensedChunkPos]+localPos)*4L, new int[]{blockData.w});
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunksSSBOId);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkPointers, GL_DYNAMIC_READ);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkPointers, GL_DYNAMIC_DRAW); //change to only upload changes for better fps
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);

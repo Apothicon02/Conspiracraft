@@ -26,9 +26,14 @@ public class Chunk {
     }
     public int[] getAllBlocks() {
         int[] returnObj = new int[totalBlocks];
-        for (int i = 0; i < totalBlocks; i++) {
-            Block block = getBlock(i);
-            returnObj[i] = Utils.packInts(block.typeId(), block.subtypeId());
+        for (int x = 0; x < chunkSize; x++) {
+            for (int z = 0; z < chunkSize; z++) {
+                for (int y = 0; y < chunkSize; y++) {
+                    int pos = World.condenseLocalPos(x, y, z);
+                    Block block = getBlock(pos);
+                    returnObj[pos] = Utils.packInts(block.typeId(), block.subtypeId());
+                }
+            }
         }
         return returnObj;
     }
