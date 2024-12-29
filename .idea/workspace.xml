@@ -9,12 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-    </list>
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -197,14 +192,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00038" summary="- Decreased region size to 512. &#10;- Raised rendering height limit from 64 to 512. &#10;- Raised terrain generation to Y157. &#10;- Raised sea level to Y137. &#10;- Improved lighting calculations. &#10;- Added void fog. &#10;- Added clouds.">
-      <option name="closed" value="true" />
-      <created>1731960315242</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1731960315242</updated>
     </task>
     <task id="LOCAL-00039" summary="- Added a keybind (T) to toggle day/night. &#10;- Clouds now use a texture instead of being calculated in real-time. &#10;- Decreased max &amp; default render distance to 4.&#10;- World now generated air all the way up to Y512. &#10;- Greatly reduced memory usage by storing blocks in an array instead of a map. (4gb less ram required also with 4x the blocks)&#10;- Reduced brightness of torches.&#10;- Fixed block light fog being super bright when touching the end of your render distance. &#10;- Fixed pretty much every weird side-effect of the lighting and fog.&#10;- Various minor optimizations.">
       <option name="closed" value="true" />
@@ -590,7 +577,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735506918998</updated>
     </task>
-    <option name="localTasksCounter" value="87" />
+    <task id="LOCAL-00087" summary="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting.">
+      <option name="closed" value="true" />
+      <created>1735509889180</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1735509889180</updated>
+    </task>
+    <option name="localTasksCounter" value="88" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -606,7 +601,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption." />
     <MESSAGE value="- Added (disabled) snow rendering." />
     <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
     <MESSAGE value="- Optimized lighting more." />
@@ -631,7 +625,8 @@
     <MESSAGE value="- Started adding chunks to the GPU." />
     <MESSAGE value="- Got chunked voxel data working." />
     <MESSAGE value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
+    <MESSAGE value="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -425,7 +425,7 @@ void main()
         fragColor = vec4(mix(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), vec3(0.8), cloudiness*fogginess), 1);//distant fog, clouds
         vec3 finalLightFog = (mix(vec3(lightFog)/20, vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunBrightness), lightFog.a/11.67f)*atmosphere)*fogginess; //fog blending + sun distance fog
         float adjustedTime = min(1, abs(1-clamp((distance(rayMapPos, sun-vec3(0, height/2, 0))+distance(rayMapPos.y, sun.y-(height/2)))/(size/2.013), 0, 1))*2);
-        sunBrightness = mix(sunBrightness, (mix(vec3(1, 0.66, 0.1), vec3(1, 1, 0.98), adjustedTime)*adjustedTime)*fogginess, 0.5f)*sunLight;
+        sunBrightness = mix(sunBrightness, (mix(vec3(1, 0.66, 0.1), vec3(1, 1, 0.98), adjustedTime)*adjustedTime)*fogginess, 0.5f)*sunLight; //the *sunlight fixes the darkness not existing near the sun problem even on blocks with no sunlight & makes lighting appear much better, but could potentially (unconfirmed) cause issues with slab-like blocks.
         fragColor = vec4((vec3(fragColor)*max(vec3(0.18)*fogginess, max(blockLightBrightness, sunBrightness)))+finalLightFog, 1);//brightness, blocklight fog, sun
     } else {
         fragColor = vec4(1.0, 1.0, 0.0, 1.0);
