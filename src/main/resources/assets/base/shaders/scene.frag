@@ -294,7 +294,8 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
                 flattenedPos.y = -100000;
             }
         }
-        fogginess = max(fogginess, min(1, abs(clamp((distance(flattenedPos, vec3(size/2, height/2, size/2))+distance(flattenedPos.y, height/2))/(size/2.013), 0, 1)-1)*50));
+        float thisFogginess = min(1, abs(clamp((distance(flattenedPos, vec3(size/2, height/2, size/2))+distance(flattenedPos.y, height/2))/(size/2.013), 0, 1)-1)*50);
+        fogginess = max(fogginess, thisFogginess);
         float adjustedTime = min(1, abs(1-clamp((distance(flattenedPos, sun)+distance(flattenedPos.y, sun.y-(height/2)))/(size/2.013), 0, 1))*2)*fogginess;
         sunBrightness = max(sunBrightness, mix(vec3(1, 0.66, 0.05), vec3(1, 1, 0.98), adjustedTime)*adjustedTime);
 
@@ -317,19 +318,17 @@ vec4 traceWorld(vec3 rayPos, vec3 rayDir) {
 
 
         //cloud start
-        float offset = noise(vec2(rayMapPos.x, rayMapPos.z)/2)*50;
+        float offset = distance(vec2(rayMapPos.x, rayMapPos.z), vec2(size/2))*0.2f;
         vec3 cloudPos = vec3(rayMapPos.x+(timeOfDay*2400), rayMapPos.y+offset-(timeOfDay*34), rayMapPos.z+(timeOfDay*4700));
 
         float potentialCloudiness = 0.f;
-        if (cloudPos.y < 100+(offset*2)) {
-            potentialCloudiness += (noise(vec2(cloudPos.x, cloudPos.z))+0.5f)*min(gradient(cloudPos.y, 50+(offset*2), 100+(offset*2), 0, 0.5), gradient(cloudPos.y, 0+(offset*2), 50+(offset*2), 0.5, 0));
-        } else if (cloudPos.y > 192+offset && cloudPos.y < 300+offset) {
-            potentialCloudiness += noise(vec2(cloudPos.x, cloudPos.z)/4)*min(gradient(cloudPos.y, 246+offset, 300+offset, 0, 0.5), gradient(cloudPos.y, 192+offset, 246+offset, 0.5, 0));
+        if (cloudPos.y > 192 && cloudPos.y < 300) {
+            potentialCloudiness += noise(vec2(cloudPos.x, cloudPos.z)/4)*min(gradient(cloudPos.y, 256, 300, 0, 2), gradient(cloudPos.y, 202, 256, 2, 0));
         }
-        if (cloudPos.y > 246+offset && cloudPos.y < 400+offset) {
-            potentialCloudiness += (noise(vec2(cloudPos.x, cloudPos.z)/2)+0.2f)*min(gradient(cloudPos.y, 323+offset, 400+offset, 0, 0.5), gradient(cloudPos.y, 246+offset, 323+offset, 0.5, 0));
+        if (cloudPos.y > 246 && cloudPos.y < 400) {
+            potentialCloudiness += (noise(vec2(cloudPos.x, cloudPos.z)/2)+0.2f)*min(gradient(cloudPos.y, 333, 400, 0, 2), gradient(cloudPos.y, 256, 333, 2, 0));
         }
-        cloudiness = max(cloudiness, potentialCloudiness);
+        cloudiness = max(cloudiness, min(0.99f, (potentialCloudiness*potentialCloudiness)*thisFogginess));
         if (cloudiness >= 1) {
             break;
         }

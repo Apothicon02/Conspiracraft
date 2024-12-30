@@ -113,14 +113,6 @@ public class World {
                 float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
                 double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
                 double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
-                if (basePerlinNoise > -0.3 && basePerlinNoise < 0.3) {
-                    double random = Math.random();
-                    if (random > 0.99995) {
-                        setBlock(x, (int) ((basePerlinNoise*12)+299), z, 8, 0, false, true);
-                    } else if (random > 0.9999) {
-                        setBlock(x, (int) ((basePerlinNoise*12)+299), z, 9, 0, false, true);
-                    }
-                }
                 int surface = height-1;
                 boolean upmost = true;
                 for (int y = surface; y >= 0; y--) {
