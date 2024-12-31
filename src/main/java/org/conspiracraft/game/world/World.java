@@ -16,6 +16,7 @@ import org.joml.Vector4i;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class World {
@@ -29,10 +30,9 @@ public class World {
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
 
-    public static List<Short> cornerQueue = new ArrayList<>(List.of());
-    public static List<Short> lightQueue = new ArrayList<>(List.of());
-    public static List<Short> blockQueue = new ArrayList<>(List.of());
-    public static List<Short> cleaningQueue = new ArrayList<>(List.of());
+    public static LinkedList<Vector3i> lightQueue = new LinkedList<>();
+    public static LinkedList<Vector4i> blockQueue = new LinkedList<>();
+    public static LinkedList<Vector3i> cleaningQueue = new LinkedList<>();
 
     public static boolean cleanPalettes = false;
     public static boolean worldGenerated = false;
@@ -98,9 +98,7 @@ public class World {
             }
         }
         if (cleaningQueue.size() > 3) {
-            Vector3i blockData = new Vector3i(cleaningQueue.getFirst(), cleaningQueue.get(1), cleaningQueue.get(2));
-            cleaningQueue.removeFirst();
-            cleaningQueue.removeFirst();
+            Vector3i blockData = cleaningQueue.getFirst();
             cleaningQueue.removeFirst();
             region1Chunks[condenseChunkPos(blockData.x, blockData.y, blockData.z)].cleanPalette();
         }
@@ -114,8 +112,8 @@ public class World {
 
     public static void clearWorld() {
         region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
-        lightQueue = new ArrayList<>(List.of());
-        blockQueue = new ArrayList<>(List.of());
+        lightQueue = new LinkedList<>();
+        blockQueue = new LinkedList<>();
     }
 
     public static void generateWorld() {
@@ -145,13 +143,13 @@ public class World {
                         if (upmost && y >= seaLevel) {
                             setBlock(x, y, z, 2, 0, false, true);
                             double torchChance = Math.random();
-                            if (torchChance > 0.99997d) {
-                                if (torchChance > 0.999997d) {
+                            if (torchChance > 0.99995d) {
+                                if (torchChance > 0.99997d) {
                                     setBlock(x, y, z, 7, 0, true, true);
                                     setBlock(x, y+1, z, 7, 0, true, true);
                                     setBlock(x, y+2, z, 7, 0, false, true);
                                 } else {
-                                    setBlock(x, y+1, z, torchChance > 0.999985d ? 6 : 14, 0, false, true);
+                                    setBlock(x, y+1, z, 14, 0, false, true);
                                 }
                             } else if (torchChance < exponentialFoliageNoise*0.015f) { //tree 0.015
                                 int maxHeight = (int) (Math.random()*4)+8;
@@ -266,17 +264,8 @@ public class World {
 
     public static void queueCleaning(Vector3i pos) {
         Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
-        boolean exists = false;
-        for (int i = 0; i < cleaningQueue.size(); i+=3) {
-            if (cleaningQueue.get(i+2) == chunkPos.z && cleaningQueue.get(i+1) == chunkPos.y && cleaningQueue.get(i) == chunkPos.x) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            World.cleaningQueue.addLast((short) (chunkPos.x));
-            World.cleaningQueue.addLast((short) (chunkPos.y));
-            World.cleaningQueue.addLast((short) (chunkPos.z));
+        if (!cleaningQueue.contains(chunkPos)) {
+            World.cleaningQueue.addLast(chunkPos);
         }
     }
 
@@ -325,11 +314,7 @@ public class World {
                     }
                     region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), new Block(blockTypeId, blockSubtypeId, r, g, b, (byte) 0), new Vector3i(x, y, z));
                 } else {
-                    blockQueue.addLast((short) x);
-                    blockQueue.addLast((short) y);
-                    blockQueue.addLast((short) z);
-                    blockQueue.addLast((short) blockTypeId);
-                    blockQueue.addLast((short) blockSubtypeId);
+                    blockQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
                 }
                 Block aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
@@ -416,31 +401,15 @@ public class World {
     }
 
     public static void queueLightUpdate(Vector3i pos) {
-        boolean exists = false;
-        for (int i = 0; i < lightQueue.size(); i+=3) {
-            if (lightQueue.get(i+2) == pos.z && lightQueue.get(i+1) == pos.y && lightQueue.get(i) == pos.x) {
-                exists = true;
-                break;
-            }
-        }
+        boolean exists = lightQueue.contains(pos);
         if (!exists) {
-            lightQueue.addLast((short) pos.x);
-            lightQueue.addLast((short) pos.y);
-            lightQueue.addLast((short) pos.z);
+            lightQueue.addLast(pos);
         }
     }
     public static void queueLightUpdatePriority(Vector3i pos) {
-        boolean exists = false;
-        for (int i = 0; i < lightQueue.size(); i+=3) {
-            if (lightQueue.get(i+2) == pos.z && lightQueue.get(i+1) == pos.y && lightQueue.get(i) == pos.x) {
-                exists = true;
-                break;
-            }
-        }
+        boolean exists = lightQueue.contains(pos);
         if (!exists) {
-            lightQueue.addFirst((short) pos.z);
-            lightQueue.addFirst((short) pos.y);
-            lightQueue.addFirst((short) pos.x);
+            lightQueue.addFirst(pos);
         }
     }
 

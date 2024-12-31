@@ -244,11 +244,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1SSBOId);
             for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
-                Vector4i blockData = new Vector4i(blockQueue.getFirst(), blockQueue.get(1), blockQueue.get(2), Utils.packInts(blockQueue.get(3), blockQueue.get(4)));
-                blockQueue.removeFirst();
-                blockQueue.removeFirst();
-                blockQueue.removeFirst();
-                blockQueue.removeFirst();
+                Vector4i blockData = blockQueue.getFirst();
                 blockQueue.removeFirst();
                 Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
                 Block oldBlock = getBlock(pos);
@@ -307,9 +303,7 @@ public class Renderer {
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, region1LightingSSBOId);
             for (int i = 0; i < 400; i++) {
                 if (!lightQueue.isEmpty()) {
-                    Vector3i lightPos = new Vector3i(lightQueue.getFirst(), lightQueue.get(1), lightQueue.get(2));
-                    lightQueue.removeFirst();
-                    lightQueue.removeFirst();
+                    Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
                     Vector3i chunkPos = new Vector3i(lightPos.x/chunkSize, lightPos.y/chunkSize, lightPos.z/chunkSize);
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkLightPointers[World.condenseChunkPos(chunkPos)]+ condenseLocalPos(lightPos.x-(chunkPos.x*chunkSize), lightPos.y-(chunkPos.y*chunkSize), lightPos.z-(chunkPos.z*chunkSize)))*4L, new int[]{updateLight(lightPos)});
@@ -345,17 +339,6 @@ public class Renderer {
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, region1CornersSSBOId);
-            for (int i = 0; i < 400; i++) {
-                if (!cornerQueue.isEmpty()) {
-                    Vector3i pos = new Vector3i(cornerQueue.getFirst(), cornerQueue.get(1), cornerQueue.get(2));
-                    cornerQueue.removeFirst();
-                    cornerQueue.removeFirst();
-                    cornerQueue.removeFirst();
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, condensePos(pos), ByteBuffer.wrap(new byte[]{getCorners(pos.x, pos.y, pos.z)}).flip());
-                } else {
-                    break;
-                }
-            }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 
