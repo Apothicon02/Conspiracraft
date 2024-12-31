@@ -12,6 +12,7 @@ import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.game.blocks.Block;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,9 @@ public class World {
     public static List<Short> cornerQueue = new ArrayList<>(List.of());
     public static List<Short> lightQueue = new ArrayList<>(List.of());
     public static List<Short> blockQueue = new ArrayList<>(List.of());
+    public static List<Short> cleaningQueue = new ArrayList<>(List.of());
 
+    public static boolean cleanPalettes = false;
     public static boolean worldGenerated = false;
     public static int currentChunk = -1;
 
@@ -42,48 +45,64 @@ public class World {
     public static void run() {
         if (!worldGenerated) {
             currentChunk++;
-            if (currentChunk == sizeChunks) {
-                boolean prevSolid = false;
-                for (int x = 0; x < size; x++) {
-                    for (int z = 0; z < size; z++) {
-                        updateHeightmap(x, z, false);
+            if (!cleanPalettes) {
+                if (currentChunk == sizeChunks) {
+                    for (int x = 0; x < size; x++) {
+                        for (int z = 0; z < size; z++) {
+                            updateHeightmap(x, z, false);
+                        }
                     }
-                }
-                for (int x = 1; x < size-1; x++) {
-                    for (int z = 1; z < size-1; z++) {
-                        for (int y = height-1; y > 1; y--) {
-                            Block block = getBlock(x, y, z);
-                            boolean solid = !BlockTypes.blockTypeMap.get(block.typeId()).isTransparent;
-                            if (block.s() < 20 && !solid && prevSolid) {
-                                //check if any neighbors are a higher brightness
-                                if (getBlock(x, y, z+1).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
-                                } else if (getBlock(x+1, y, z).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
-                                } else if (getBlock(x, y, z-1).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
-                                } else if (getBlock(x-1, y, z).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
-                                } else if (getBlock(x, y+1, z).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
-                                } else if (getBlock(x, y-1, z).s() > block.s()) {
-                                    queueLightUpdate(new Vector3i(x, y, z));
+                    for (int x = 1; x < size - 1; x++) {
+                        for (int z = 1; z < size - 1; z++) {
+                            for (int y = height - 1; y > 1; y--) {
+                                Block block = getBlock(x, y, z);
+                                if (block.s() < 20 && BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
+                                    //check if any neighbors are a higher brightness
+                                    boolean shouldQ = false;
+                                    if (getBlock(x, y, z + 1).s() > block.s()) {
+                                        shouldQ = true;
+                                    } else if (getBlock(x + 1, y, z).s() > block.s()) {
+                                        shouldQ = true;
+                                    } else if (getBlock(x, y, z - 1).s() > block.s()) {
+                                        shouldQ = true;
+                                    } else if (getBlock(x - 1, y, z).s() > block.s()) {
+                                        shouldQ = true;
+                                    } else if (getBlock(x, y + 1, z).s() > block.s()) {
+                                        shouldQ = true;
+                                    } else if (getBlock(x, y - 1, z).s() > block.s()) {
+                                        shouldQ = true;
+                                    }
+                                    if (shouldQ) {
+                                        BlockHelper.updateLight(new Vector3i(x, y, z), block, false);
+                                    }
                                 }
                             }
-                            prevSolid = solid;
+                        }
+                    }
+                    cleanPalettes = true;
+                    currentChunk = -1;
+                } else {
+                    generateWorld();
+                }
+            } else {
+                if (currentChunk == sizeChunks) {
+                    worldGenerated = true;
+                    Renderer.worldChanged = true;
+                } else {
+                    for (int z = 0; z < sizeChunks; z++) {
+                        for (int y = 0; y < heightChunks; y++) {
+                            region1Chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
                         }
                     }
                 }
-                worldGenerated = true;
-                Renderer.worldChanged = true;
-            } else {
-                generateWorld();
-                for (int z = 0; z < sizeChunks; z++) {
-                    for (int y = 0; y < heightChunks; y++) {
-                        region1Chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
-                    }
-                }
             }
+        }
+        if (cleaningQueue.size() > 3) {
+            Vector3i blockData = new Vector3i(cleaningQueue.getFirst(), cleaningQueue.get(1), cleaningQueue.get(2));
+            cleaningQueue.removeFirst();
+            cleaningQueue.removeFirst();
+            cleaningQueue.removeFirst();
+            region1Chunks[condenseChunkPos(blockData.x, blockData.y, blockData.z)].cleanPalette();
         }
     }
 
@@ -97,7 +116,6 @@ public class World {
         region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
         lightQueue = new ArrayList<>(List.of());
         blockQueue = new ArrayList<>(List.of());
-        Arrays.fill(heightmap, height);
     }
 
     public static void generateWorld() {
@@ -111,8 +129,8 @@ public class World {
                 int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
                 float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
                 float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
-                double seaLevelNegativeGradient = ConspiracraftMath.gradient(seaLevel, distance, 0, -4, 3);
-                double seaLevelNegativeDensity = (basePerlinNoise-1) + seaLevelNegativeGradient;
+                float foliageNoise = (basePerlinNoise+0.5f);
+                float exponentialFoliageNoise = foliageNoise*foliageNoise;
                 int surface = height-1;
                 boolean upmost = true;
                 for (int y = surface; y >= 0; y--) {
@@ -128,7 +146,32 @@ public class World {
                             setBlock(x, y, z, 2, 0, false, true);
                             double torchChance = Math.random();
                             if (torchChance > 0.99997d) {
-                                setBlock(x, y+1, z, torchChance > 0.999985d ? 6 : 7, 0, false, true);
+                                if (torchChance > 0.999997d) {
+                                    setBlock(x, y, z, 7, 0, true, true);
+                                    setBlock(x, y+1, z, 7, 0, true, true);
+                                    setBlock(x, y+2, z, 7, 0, false, true);
+                                } else {
+                                    setBlock(x, y+1, z, torchChance > 0.999985d ? 6 : 14, 0, false, true);
+                                }
+                            } else if (torchChance < exponentialFoliageNoise*0.015f) { //tree 0.015
+                                int maxHeight = (int) (Math.random()*4)+8;
+                                for (int i = 0; i < maxHeight; i++) {
+                                    setBlock(x, y+i, z, 16, 0, true, true);
+                                }
+                                int radius = (int) (maxHeight+(torchChance*100));
+                                for (int lX = x-radius; lX <= x+radius; lX++) {
+                                    for (int lZ = z-radius; lZ <= z+radius; lZ++) {
+                                        for (int lY = y+maxHeight-radius; lY <= y+maxHeight+radius; lY++) {
+                                            int xDist = lX-x;
+                                            int yDist = lY-(y+maxHeight);
+                                            int zDist = lZ-z;
+                                            int dist = xDist*xDist+zDist*zDist+yDist*yDist;
+                                            if (dist <= radius*3) {
+                                                setBlock(lX, lY, lZ, 17, 0, false, true);
+                                            }
+                                        }
+                                    }
+                                }
                             } else {
                                 setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
                             }
@@ -136,20 +179,13 @@ public class World {
                             upmost = false;
                         } else {
                             setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true);
-                            if (upmost) {
-                                boolean replace = false;
-                                int seaFloor = y+1;
-                                if (seaLevelNegativeDensity-0.1 < 0) {
-                                    seaFloor = 1;
-                                    replace = true;
-                                }
-                                for (int waterY = seaFloor; waterY <= seaLevel; waterY++) {
-                                    setBlock(x, waterY, z, 1, 0, replace, true);
-                                }
-                            }
                         }
                     } else {
-                        setBlock(x, y, z, 0, 0, false, true);
+                        if (y <= seaLevel) {
+                            setBlock(x, y, z, 1, 0, false, true);
+                        } else {
+                            setBlock(x, y, z, 0, 0, false, true);
+                        }
                     }
                 }
                 for (int y = height-1; y > surface; y--) {
@@ -228,6 +264,22 @@ public class World {
         return (((x*sizeChunks)+z)*heightChunks)+y;
     }
 
+    public static void queueCleaning(Vector3i pos) {
+        Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
+        boolean exists = false;
+        for (int i = 0; i < cleaningQueue.size(); i+=3) {
+            if (cleaningQueue.get(i+2) == chunkPos.z && cleaningQueue.get(i+1) == chunkPos.y && cleaningQueue.get(i) == chunkPos.x) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            World.cleaningQueue.addLast((short) (chunkPos.x));
+            World.cleaningQueue.addLast((short) (chunkPos.y));
+            World.cleaningQueue.addLast((short) (chunkPos.z));
+        }
+    }
+
     public static byte getCorners(int x, int y, int z) {
         if (x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height) {
             Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
@@ -269,9 +321,9 @@ public class World {
                         r = lType.r;
                         g = lType.g;
                         b = lType.b;
-                        queueLightUpdate(new Vector3i(x, y, z));
+                        updateLight(new Vector3i(x, y, z));
                     }
-                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), new Block(blockTypeId, blockSubtypeId, r, g, b, (byte) 0));
+                    region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), new Block(blockTypeId, blockSubtypeId, r, g, b, (byte) 0), new Vector3i(x, y, z));
                 } else {
                     blockQueue.addLast((short) x);
                     blockQueue.addLast((short) y);
@@ -292,12 +344,17 @@ public class World {
 
     public static void updateHeightmap(int x, int z, boolean update) {
         int pos = condensePos(x, z);
+        boolean setHeightmap = false;
         for (int scanY = height-1; scanY >= 0; scanY--) {
             if (scanY == 0) {
                 heightmap[pos] = (short) 0;
                 break;
             } else {
                 Block block = getBlock(x, scanY, z);
+                if (block.typeId() != 0 && !setHeightmap) {
+                    setHeightmap = true;
+                    heightmap[pos] = (short) (scanY);
+                }
                 if (!BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
                     if (update) {
                         for (int scanExtraY = scanY - 1; scanExtraY >= 0; scanExtraY--) {
@@ -305,7 +362,7 @@ public class World {
                             if (BlockTypes.blockTypeMap.get(blockExtra.typeId()).isTransparent) {
                                 Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
                                 region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
-                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0), true);
+                                        new Block(blockExtra.id(), blockExtra.r(), blockExtra.g(), blockExtra.b(), (byte) 0), new Vector3i(x, scanExtraY, z));
                                 recalculateLight(new Vector3i(x, scanExtraY, z), blockExtra.r(), blockExtra.g(), blockExtra.b(), blockExtra.s());
                             } else {
                                 break;
@@ -313,12 +370,12 @@ public class World {
                         }
                     }
                     break;
-                } else if (block.s() < 20) {
+                } else {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, scanY/chunkSize, z/chunkSize);
                     region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), scanY-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)),
-                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) 20), update);
+                            new Block(block.id(), block.r(), block.g(), block.b(), (byte) Math.min(20, 20+Math.max(-20, scanY-Math.max(scanY, heightmap[pos])))), new Vector3i(x, scanY, z));
                     if (update) {
-                        queueLightUpdate(new Vector3i(x, scanY, z));
+                        updateLight(new Vector3i(x, scanY, z));
                     }
                 }
             }
@@ -349,7 +406,7 @@ public class World {
                             nb = lBlock.b;
                         }
                         region1Chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
-                                new Block(neighbor.id(), nr, ng, nb, (byte) (neighbor.s() == 20 ? 20 : 0)), true);
+                                new Block(neighbor.id(), nr, ng, nb, (byte) (neighbor.s() == 20 ? 20 : 0)), pos);
                         recalculateLight(neighborPos, neighbor.r(), neighbor.g(), neighbor.b(), neighbor.s());
                     }
                     queueLightUpdatePriority(pos);

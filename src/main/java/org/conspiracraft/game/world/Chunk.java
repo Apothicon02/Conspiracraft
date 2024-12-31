@@ -3,6 +3,7 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.Block;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import java.util.*;
@@ -87,10 +88,7 @@ public class Chunk {
         }
         return new Block(id.x, id.y, (byte) light.x, (byte) light.y, (byte) light.z, (byte) light.w);
     }
-    public void setBlock(int pos, Block block) {
-        setBlock(pos, block, false);
-    }
-    public void setBlock(int pos, Block block, boolean update) {
+    public void setBlock(int pos, Block block, Vector3i globalPos) {
         boolean wasInPalette = false;
         for (int i = 0; i < blockPalette.size(); i++) { //iterate through blockPalette until finding a matching block, and upon doing so set the blockPalette index for that block position to the index of the matching blockPalette entry
             if (block.idVec().equals(blockPalette.get(i))) {
@@ -194,8 +192,8 @@ public class Chunk {
 
             }
         }
-        if (update) {
-            cleanPalette();
+        if (World.worldGenerated) {
+            World.queueCleaning(globalPos);
         }
     }
     public void cleanPalette() {

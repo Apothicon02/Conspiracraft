@@ -136,7 +136,7 @@ ivec2 getBlock(float x, float y, float z) {
 
 vec4 getLighting(int x, int y, int z) {
     ivec2 block = getBlock(x, y, z);
-    if (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13) { //return pure darkness if block isnt transparent.
+    if (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17) { //return pure darkness if block isnt transparent.
         return vec4(0, 0, 0, 0);
     }
     ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
@@ -417,7 +417,7 @@ void main()
             }
             //selection end
             fogNoise += max(0, noise(vec2(hitPos.x, hitPos.z)));
-            blockLightBrightness = vec3(lighting.r, lighting.g, lighting.b)*0.045f;
+            blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f;
         }
         fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
         float distanceFogginess = clamp(((distance(camPos, hitPos)*fogNoise)/renderDistance)*0.9375, 0, 1)*fogginess;

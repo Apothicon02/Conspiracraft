@@ -202,7 +202,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 128; x++) {
+            for (int x = 0; x < 144; x++) {
                 for (int y = 0; y < 256; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -259,12 +259,12 @@ public class Renderer {
                     r = lType.r;
                     g = lType.g;
                     b = lType.b;
-                    queueLightUpdate(pos);
+                    updateLight(pos);
                 }
                 Vector3i chunkPos = new Vector3i(pos.x/chunkSize, pos.y/chunkSize, pos.z/chunkSize);
                 int condensedChunkPos = World.condenseChunkPos(chunkPos);
                 int localPos = condenseLocalPos(pos.x-(chunkPos.x*chunkSize), pos.y-(chunkPos.y*chunkSize), pos.z-(chunkPos.z*chunkSize));
-                region1Chunks[condensedChunkPos].setBlock(localPos, new Block(blockData.w, r, g, b, (byte) 0), true);
+                region1Chunks[condensedChunkPos].setBlock(localPos, new Block(blockData.w, r, g, b, (byte) 0), pos);
                 updateHeightmap(blockData.x, blockData.z, true);
                 recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkPointers[condensedChunkPos]+localPos)*4L, new int[]{blockData.w});
@@ -312,9 +312,7 @@ public class Renderer {
                     lightQueue.removeFirst();
                     lightQueue.removeFirst();
                     Vector3i chunkPos = new Vector3i(lightPos.x/chunkSize, lightPos.y/chunkSize, lightPos.z/chunkSize);
-                    int condensedChunkPos = World.condenseChunkPos(chunkPos);
-                    int localPos = condenseLocalPos(lightPos.x-(chunkPos.x*chunkSize), lightPos.y-(chunkPos.y*chunkSize), lightPos.z-(chunkPos.z*chunkSize));
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkLightPointers[condensedChunkPos]+localPos)*4L, new int[]{updateLight(lightPos)});
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkLightPointers[World.condenseChunkPos(chunkPos)]+ condenseLocalPos(lightPos.x-(chunkPos.x*chunkSize), lightPos.y-(chunkPos.y*chunkSize), lightPos.z-(chunkPos.z*chunkSize)))*4L, new int[]{updateLight(lightPos)});
                 } else {
                     break;
                 }

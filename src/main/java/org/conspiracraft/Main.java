@@ -18,7 +18,7 @@ import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(100, 150, 100));
+    public static Player player = new Player(new Vector3f(333, 250, 333));
     private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
