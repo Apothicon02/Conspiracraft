@@ -9,13 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added a useful comment.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00040" summary="- Tweaked torch colors. &#10;- Removed the vector2 and vector3 shorts to fix HORRIBLE performance and infinite light spreading (no idea why they caused this.) &#10;- Fixed world regenerating not working.">
-      <option name="closed" value="true" />
-      <created>1732070048235</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1732070048235</updated>
     </task>
     <task id="LOCAL-00041" summary="- Added day/night cycle. &#10;- Added cloud movement. &#10;- Added noise to the distance fog.">
       <option name="closed" value="true" />
@@ -592,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735510391521</updated>
     </task>
-    <option name="localTasksCounter" value="89" />
+    <task id="LOCAL-00089" summary="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees.">
+      <option name="closed" value="true" />
+      <created>1735614335525</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1735614335525</updated>
+    </task>
+    <option name="localTasksCounter" value="90" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -608,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed light propagation. &#10;- Optimized light propagation." />
     <MESSAGE value="- Optimized lighting more." />
     <MESSAGE value="- Works." />
     <MESSAGE value="- Fixed not launching on AMD gpus." />
@@ -633,7 +628,8 @@
     <MESSAGE value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
     <MESSAGE value="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting." />
     <MESSAGE value="- Added a useful comment." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added a useful comment." />
+    <MESSAGE value="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
