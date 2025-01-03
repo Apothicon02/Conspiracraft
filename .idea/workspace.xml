@@ -9,12 +9,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,14 +199,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00042" summary="- Added sunlight. &#10;- Improved block placement system. &#10;- Reduced intensity of distance fog.">
-      <option name="closed" value="true" />
-      <created>1732162779450</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1732162779450</updated>
     </task>
     <task id="LOCAL-00043" summary="- Added an inverted heightmap to use for extra sunlight.">
       <option name="closed" value="true" />
@@ -591,7 +584,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735618241356</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture.">
+      <option name="closed" value="true" />
+      <created>1735665345708</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1735665345708</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +608,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Works." />
     <MESSAGE value="- Fixed not launching on AMD gpus." />
     <MESSAGE value="- Fixed rays reaching the edge of render distance without intersecting any light not defaulting to full sunlight. &#10;- Allowed render distance to be increased from default." />
     <MESSAGE value="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20." />
@@ -632,7 +632,8 @@
     <MESSAGE value="- Added a useful comment." />
     <MESSAGE value="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees." />
     <MESSAGE value="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up." />
+    <MESSAGE value="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

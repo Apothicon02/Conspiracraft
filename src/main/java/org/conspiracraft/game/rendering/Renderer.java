@@ -169,7 +169,7 @@ public class Renderer {
         glUniform1i(renderDistanceUniform, 150+(40*renderDistanceMul));
         glUniform1f(timeOfDayUniform, timeOfDay);
         glUniform1d(timeUniform, time);
-        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100, true);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }

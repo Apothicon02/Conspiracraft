@@ -50,27 +50,14 @@ public class Main {
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         window.getMouseInput().input(window);
-        float move = diffTimeMillis * MOVEMENT_SPEED;
-        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
-            move*=10;
-        }
-        if (window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS)) {
-            move*=100;
-        }
-        if (window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
-            player.move(0, 0, move, true);
-        } else if (window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
-            player.move(0, 0, -move, true);
-        }
-        if (window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS)) {
-            player.move(-move, 0, 0, true);
-        } else if (window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS)) {
-            player.move(move, 0, 0, true);
-        }
-        if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS)) {
-            player.move(0, move, 0, false);
-        } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS)) {
-            player.move(0, -move, 0, false);
+        player.sprint = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
+        player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
+        player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
+        player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
+        player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
+
+        if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis-player.lastJump > 200) { //only jump at most five times a second
+            player.jump = timeMillis;
         }
 
         MouseInput mouseInput = window.getMouseInput();
@@ -82,7 +69,7 @@ public class Main {
             boolean mmbDown = mouseInput.isMiddleButtonPressed();
             boolean rmbDown = mouseInput.isRightButtonPressed();
             if (lmbDown || mmbDown || rmbDown) {
-                Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100);
+                Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
                 if (pos != null) {
                     if (mmbDown) {
                         selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
@@ -192,7 +179,10 @@ public class Main {
     }
 
     public static boolean postWorldgenInitialization = false;
-    public void update(Window window, long diffTimeMillis) throws Exception {
+    public static double timePassed = 0;
+    public static double tickTime = 50;
+
+    public void update(Window window, long diffTimeMillis, long time) throws Exception {
         World.run();
         if (World.worldGenerated) {
             if (!postWorldgenInitialization) {
@@ -200,29 +190,35 @@ public class Main {
                 Renderer.init(window);
             }
             updateTime(diffTimeMillis, 1);
-            player.tick();
+            while (timePassed >= tickTime) {
+                timePassed -= tickTime;
+                player.tick(time);
+            }
+            timePassed += diffTimeMillis;
         }
     }
 
-    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range) {
+    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countCollisionless) { //prevPos is inverted
         Vector3f blockPos = null;
         for (int i = 0; i < range; i++) {
-            ray.translate(0, 0, 0.1f);
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
             Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
                 int typeId = block.typeId();
-                int subTypeId = block.subtypeId();
-                if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
-                    if (prevPos) {
-                        return rayPos;
+                if (countCollisionless || BlockTypes.blockTypeMap.get(typeId).isCollidable) {
+                    int subTypeId = block.subtypeId();
+                    if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
+                        if (prevPos) {
+                            return rayPos;
+                        } else {
+                            return blockPos;
+                        }
                     } else {
-                        return blockPos;
+                        blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
                     }
-                } else {
-                    blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
                 }
             }
+            ray.translate(0, 0, 0.1f);
         }
         return null;
     }
