@@ -9,8 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved sunsets greatly.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +96,7 @@
     "Gradle.Build Conspiracraft.executor": "Run",
     "Gradle.Build Terraflat.executor": "Run",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "Gradle.Terraflat [build].executor": "Run",
@@ -195,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00044" summary="- Added face-based voxel brightness differences. &#10;- Blocklight color now affects the actual light color and not just the fog color.">
-      <option name="closed" value="true" />
-      <created>1732232458046</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1732232458046</updated>
     </task>
     <task id="LOCAL-00045" summary="- Increased brightness of stars. &#10;- Made torches more yellow. &#10;- Reduced blocklight fog intensity.">
       <option name="closed" value="true" />
@@ -588,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735869891255</updated>
     </task>
-    <option name="localTasksCounter" value="93" />
+    <task id="LOCAL-00093" summary="- Improved sunsets greatly.">
+      <option name="closed" value="true" />
+      <created>1735881131918</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1735881131918</updated>
+    </task>
+    <option name="localTasksCounter" value="94" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed rays reaching the edge of render distance without intersecting any light not defaulting to full sunlight. &#10;- Allowed render distance to be increased from default." />
     <MESSAGE value="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20." />
     <MESSAGE value="- Temporarily made water white. &#10;- Added WIP smooth lighting. &#10;- Temporarily disabled light fog." />
     <MESSAGE value="- Finished smooth lighting. &#10;- Added ambient occlusion. &#10;- Re-enabled light fog. &#10;- Restored water texture. &#10;- Reduced resolution of atlas to only what is needed to improve load times. &#10;- Removed old transparency rendering." />
@@ -629,7 +630,8 @@
     <MESSAGE value="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up." />
     <MESSAGE value="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture." />
     <MESSAGE value="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle." />
+    <MESSAGE value="- Improved sunsets greatly." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved sunsets greatly." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

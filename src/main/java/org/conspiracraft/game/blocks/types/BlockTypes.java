@@ -25,7 +25,7 @@ public class BlockTypes {
     public static BlockType PORECAP = create(new LightBlockType(true, false, 0, 12, 6));
     public static BlockType WILLOW_PLANKS = create(new BlockType(false));
     public static BlockType WILLOW_LOG = create(new BlockType(false));
-    public static BlockType WILLOW_LEAVES = create(new BlockType(true));
+    public static BlockType WILLOW_LEAVES = create(new BlockType(true, false));
 
     private static BlockType create(BlockType type) {
         blockTypeMap.put(key, type);
