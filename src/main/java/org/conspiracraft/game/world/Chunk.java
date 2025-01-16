@@ -33,29 +33,57 @@ public class Chunk {
     }
     public int[] getAllLights() {
         int[] returnObj = new int[totalBlocks];
-        for (int x = 0; x < chunkSize; x++) {
-            for (int z = 0; z < chunkSize; z++) {
-                for (int y = 0; y < chunkSize; y++) {
-                    int pos = World.condenseLocalPos(x, y, z);
-                    Block block = getBlock(pos);
-                    returnObj[pos] = block.r() << 16 | block.g() << 8 | block.b() | block.s() << 24;
-                }
-            }
+        for (int i = 0; i < totalBlocks/2; i++) {
+            returnObj[i] = Utils.packInts(getLightKey((i*2)), getLightKey((i*2)+1));
         }
         return returnObj;
     }
     public int[] getAllBlocks() {
-        int[] returnObj = new int[totalBlocks];
-        for (int x = 0; x < chunkSize; x++) {
-            for (int z = 0; z < chunkSize; z++) {
-                for (int y = 0; y < chunkSize; y++) {
-                    int pos = World.condenseLocalPos(x, y, z);
-                    Block block = getBlock(pos);
-                    returnObj[pos] = Utils.packInts(block.typeId(), block.subtypeId());
-                }
-            }
+        int[] returnObj = new int[totalBlocks/2];
+        for (int i = 0; i < totalBlocks/2; i++) {
+            returnObj[i] = Utils.packInts(getBlockKey((i*2)), getBlockKey((i*2)+1));
         }
         return returnObj;
+    }
+    public int[] getPalette() {
+        int[] returnObj = new int[blockPalette.size()];
+        for (int i = 0; i < returnObj.length; i++) {
+            Vector2i block = blockPalette.get(i);
+            returnObj[i] = Utils.packInts(block.x, block.y);
+        }
+        return returnObj;
+    }
+    public int[] getLightPalette() {
+        int[] returnObj = new int[lightPalette.size()];
+        for (int i = 0; i < returnObj.length; i++) {
+            Vector4i light = lightPalette.get(i);
+            returnObj[i] = light.x() << 16 | light.y() << 8 | light.z() | light.w() << 24;
+        }
+        return returnObj;
+    }
+    public int getPaletteSize() {
+        return blockPalette.size();
+    }
+    public int getLightPaletteSize() {
+        return lightPalette.size();
+    }
+    public int getBlockKey(int pos) {
+        if (blockShorts != null) {
+            return blockShorts[pos];
+        } else if (blockBytes != null) {
+            return blockBytes[pos];
+        } else {
+            return blockBools.get(pos) ? 0 : -1;
+        }
+    }
+    public int getLightKey(int pos) {
+        if (lightShorts != null) {
+            return lightShorts[pos];
+        } else if (lightBytes != null) {
+            return lightBytes[pos];
+        } else {
+            return lightBools.get(pos) ? 0 : -1;
+        }
     }
     public Block getBlock(int pos) {
         int index; //get the blockPalette index from the blocks array

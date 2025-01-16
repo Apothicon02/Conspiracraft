@@ -9,10 +9,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved sunsets greatly.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid15136.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid4888.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid5856.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid6776.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid9632.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -89,32 +95,32 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Terraflat/resources/base/textures/blocks&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
@@ -197,14 +203,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00045" summary="- Increased brightness of stars. &#10;- Made torches more yellow. &#10;- Reduced blocklight fog intensity.">
-      <option name="closed" value="true" />
-      <created>1732243287057</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1732243287057</updated>
     </task>
     <task id="LOCAL-00046" summary="- Optimized light spreading.&#10;- Allowed lights to be broken.  &#10;- Max light &amp; block updates per frame is now decreased based on fps to prevent poor performance. &#10;- Time skipping is now a fixed amount instead of a multiplier.&#10;- Slowed cloud movement. &#10;- Added volumetric god rays. &#10;- Tweaked sky color. &#10;- Dawn and dusk are now much shorter. &#10;- Made the lower cloud layer less flat. &#10;- Increased fog brightness. &#10;- Lowered fog whiteness altitude.">
       <option name="closed" value="true" />
@@ -590,7 +588,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735881131918</updated>
     </task>
-    <option name="localTasksCounter" value="94" />
+    <task id="LOCAL-00094" summary="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision.">
+      <option name="closed" value="true" />
+      <created>1736206065513</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1736206065513</updated>
+    </task>
+    <option name="localTasksCounter" value="95" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -606,7 +612,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20." />
     <MESSAGE value="- Temporarily made water white. &#10;- Added WIP smooth lighting. &#10;- Temporarily disabled light fog." />
     <MESSAGE value="- Finished smooth lighting. &#10;- Added ambient occlusion. &#10;- Re-enabled light fog. &#10;- Restored water texture. &#10;- Reduced resolution of atlas to only what is needed to improve load times. &#10;- Removed old transparency rendering." />
     <MESSAGE value="- Fixed jar not being launchable. &#10;- Downgraded back to Java 21." />
@@ -631,7 +636,8 @@
     <MESSAGE value="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture." />
     <MESSAGE value="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle." />
     <MESSAGE value="- Improved sunsets greatly." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Improved sunsets greatly." />
+    <MESSAGE value="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

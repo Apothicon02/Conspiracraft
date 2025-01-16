@@ -18,7 +18,7 @@ import java.lang.Math;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(333, 250, 333));
+    public static Player player = new Player(new Vector3f(World.size/2f, 320, World.size/2f));
     private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
@@ -115,7 +115,7 @@ public class Main {
                 }
             }
             if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                if (Renderer.renderDistanceMul < 32) {
+                if (Renderer.renderDistanceMul < 96) {
                     Renderer.renderDistanceMul++;
                 }
             }

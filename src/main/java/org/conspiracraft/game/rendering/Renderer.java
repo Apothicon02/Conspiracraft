@@ -31,8 +31,7 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.conspiracraft.game.world.World.*;
-import static org.lwjgl.util.vma.Vma.vmaCreateVirtualBlock;
-import static org.lwjgl.util.vma.Vma.vmaVirtualAllocate;
+import static org.lwjgl.util.vma.Vma.*;
 import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 public class Renderer {
@@ -41,6 +40,7 @@ public class Renderer {
     public static int sceneVaoId;
     public static int atlasSSBOId;
     public static int chunksSSBOId;
+    public static int palettesSSBOId;
     public static int region1SSBOId;
     public static int chunksLightSSBOId;
     public static int region1LightingSSBOId;
@@ -68,8 +68,10 @@ public class Renderer {
     public static boolean showUI = true;
     public static PointerBuffer block = BufferUtils.createPointerBuffer(1);
     public static PointerBuffer light = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkPointers =  new int[(((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks];
-    public static int[] chunkLightPointers =  new int[(((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks];
+    public static int[] chunkPointers =  new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*2];
+    public static long[] chunkAllocs =  new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
+    public static int[] chunkLightPointers =  new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*2];
+    public static long[] chunkLightAllocs =  new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
 
     public static void init(Window window) throws Exception {
         projection = new Projection(window.getWidth(), window.getHeight());
@@ -110,6 +112,7 @@ public class Renderer {
         whiteNoiseId = glGenTextures();
         atlasSSBOId = glGenBuffers();
         chunksSSBOId = glGenBuffers();
+        palettesSSBOId = glGenBuffers();
         region1SSBOId = glGenBuffers();
         chunksLightSSBOId = glGenBuffers();
         region1LightingSSBOId = glGenBuffers();
@@ -215,23 +218,27 @@ public class Renderer {
         }
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1SSBOId);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1SSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
 
             for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
                 for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
                     for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
                         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                        allocCreateInfo.size(16384);
+                        int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
+                        int paletteSize = region1Chunks[condensedChunkPos].getPaletteSize();
+                        allocCreateInfo.size((paletteSize+2048)*4L);
 
                         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
                         long res = vmaVirtualAllocate(block.get(0), allocCreateInfo, alloc, offset);
                         if (res == VK_SUCCESS) {
-                            int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
+                            chunkAllocs[condensedChunkPos] = res;
                             int pointer = (int) offset.get(0);
-                            chunkPointers[condensedChunkPos] = pointer/4;
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getAllBlocks());
+                            chunkPointers[condensedChunkPos*2] = pointer/4;
+                            chunkPointers[(condensedChunkPos*2)+1] = paletteSize;
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getPalette());
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllBlocks());
                         } else {
                             // Allocation failed - no space for it could be found. Handle this error!
                         }
@@ -242,7 +249,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1SSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, region1SSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, region1SSBOId);
             for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
                 Vector4i blockData = blockQueue.getFirst();
                 blockQueue.removeFirst();
@@ -263,7 +270,25 @@ public class Renderer {
                 region1Chunks[condensedChunkPos].setBlock(localPos, new Block(blockData.w, r, g, b, (byte) 0), pos);
                 updateHeightmap(blockData.x, blockData.z, true);
                 recalculateLight(pos, oldBlock.r(), oldBlock.g(), oldBlock.b(), oldBlock.s());
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkPointers[condensedChunkPos]+localPos)*4L, new int[]{blockData.w});
+
+                vmaVirtualFree(block.get(0), chunkAllocs[condensedChunkPos]);
+                VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                int paletteSize = region1Chunks[condensedChunkPos].getPaletteSize();
+                allocCreateInfo.size((paletteSize+2048)*4L);
+
+                PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                LongBuffer offset = BufferUtils.createLongBuffer(1);
+                long res = vmaVirtualAllocate(block.get(0), allocCreateInfo, alloc, offset);
+                if (res == VK_SUCCESS) {
+                    chunkAllocs[condensedChunkPos] = res;
+                    int pointer = (int) offset.get(0);
+                    chunkPointers[condensedChunkPos*2] = pointer/4;
+                    chunkPointers[(condensedChunkPos*2)+1] = paletteSize;
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getPalette());
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllBlocks());
+                } else {
+                    // Allocation failed - no space for it could be found. Handle this error!
+                }
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
@@ -273,23 +298,27 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, region1LightingSSBOId);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, (size*size*height)*4, GL_DYNAMIC_DRAW);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, region1LightingSSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
 
             for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
                 for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
                     for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
                         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                        allocCreateInfo.size(16384);
+                        int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
+                        int paletteSize = region1Chunks[condensedChunkPos].getLightPaletteSize();
+                        allocCreateInfo.size((paletteSize+2048)*4L);
 
                         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
                         long res = vmaVirtualAllocate(light.get(0), allocCreateInfo, alloc, offset);
                         if (res == VK_SUCCESS) {
-                            int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
+                            chunkLightAllocs[condensedChunkPos] = res;
                             int pointer = (int) offset.get(0);
-                            chunkLightPointers[condensedChunkPos] = pointer/4;
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getAllLights());
+                            chunkLightPointers[condensedChunkPos*2] = pointer/4;
+                            chunkLightPointers[(condensedChunkPos*2)+1] = paletteSize;
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getLightPalette());
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllLights());
                         } else {
                             // Allocation failed - no space for it could be found. Handle this error!
                         }
@@ -300,13 +329,33 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1LightingSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, region1LightingSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, region1LightingSSBOId);
             for (int i = 0; i < 400; i++) {
                 if (!lightQueue.isEmpty()) {
                     Vector3i lightPos = lightQueue.getFirst();
                     lightQueue.removeFirst();
                     Vector3i chunkPos = new Vector3i(lightPos.x/chunkSize, lightPos.y/chunkSize, lightPos.z/chunkSize);
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, (chunkLightPointers[World.condenseChunkPos(chunkPos)]+ condenseLocalPos(lightPos.x-(chunkPos.x*chunkSize), lightPos.y-(chunkPos.y*chunkSize), lightPos.z-(chunkPos.z*chunkSize)))*4L, new int[]{updateLight(lightPos)});
+                    int condensedChunkPos = World.condenseChunkPos(chunkPos);
+                    updateLight(lightPos);
+
+                    vmaVirtualFree(light.get(0), chunkLightAllocs[condensedChunkPos]);
+                    VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                    int paletteSize = region1Chunks[condensedChunkPos].getLightPaletteSize();
+                    allocCreateInfo.size((paletteSize+2048)*4L);
+
+                    PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                    LongBuffer offset = BufferUtils.createLongBuffer(1);
+                    long res = vmaVirtualAllocate(light.get(0), allocCreateInfo, alloc, offset);
+                    if (res == VK_SUCCESS) {
+                        chunkLightAllocs[condensedChunkPos] = res;
+                        int pointer = (int) offset.get(0);
+                        chunkLightPointers[condensedChunkPos*2] = pointer/4;
+                        chunkLightPointers[(condensedChunkPos*2)+1] = paletteSize;
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getLightPalette());
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllLights());
+                    } else {
+                        // Allocation failed - no space for it could be found. Handle this error!
+                    }
                 } else {
                     break;
                 }
@@ -314,12 +363,12 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunksLightSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunksLightSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, chunksLightSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW); //change to only upload changes for better fps
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         if (worldChanged) {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, region1CornersSSBOId);
             glBufferData(GL_SHADER_STORAGE_BUFFER, size*size*height, GL_DYNAMIC_DRAW);
 
             ByteBuffer corners = ByteBuffer.allocate(height);
@@ -338,7 +387,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         } else {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, region1CornersSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, region1CornersSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, region1CornersSSBOId);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 

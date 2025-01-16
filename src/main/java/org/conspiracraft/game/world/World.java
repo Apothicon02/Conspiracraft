@@ -117,124 +117,86 @@ public class World {
     }
 
     public static void generateWorld() {
-        //FastNoiseLite cellularNoise = new FastNoiseLite((int) (Math.random()*9999));
-        //FastNoiseLite noise = new FastNoiseLite((int) (Math.random()*9999));
-        //cellularNoise.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-        //noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-        Vector2i middle = new Vector2i(size/2, size/2);
-        for (int x = currentChunk*16; x < (currentChunk*16)+16; x++) {
-            for (int z = 0; z < size; z++) {
-                int distance = (int)(Vector2i.distance(middle.x, middle.y, x, z)/2);
-                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x, z))/128)-1;
-                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x, z))/128)-1;
-                float foliageNoise = (basePerlinNoise+0.5f);
-                float exponentialFoliageNoise = foliageNoise*foliageNoise;
-                int surface = height-1;
-                boolean upmost = true;
-                for (int y = surface; y >= 0; y--) {
-                    double baseDensity = 0;
-                    if (distance > size/4.02) {
-                        baseDensity = 0;
-                    } else {
-                        double baseGradient = ConspiracraftMath.gradient(y, 157, 126, 2, -1);
-                        baseDensity = baseCellularNoise + baseGradient;
-                    }
-                    if (baseDensity > 0) {
-                        if (upmost && y >= seaLevel) {
-                            setBlock(x, y, z, 2, 0, false, true);
-                            double torchChance = Math.random();
-                            if (torchChance > 0.99995d) {
-                                if (torchChance > 0.99997d) {
-                                    setBlock(x, y, z, 7, 0, true, true);
-                                    setBlock(x, y+1, z, 7, 0, true, true);
-                                    setBlock(x, y+2, z, 7, 0, false, true);
-                                } else {
-                                    setBlock(x, y+1, z, 14, 0, false, true);
-                                }
-                            } else if (torchChance < exponentialFoliageNoise*0.015f) { //tree 0.015
-                                int maxHeight = (int) (Math.random()*4)+8;
-                                for (int i = 0; i < maxHeight; i++) {
-                                    setBlock(x, y+i, z, 16, 0, true, true);
-                                }
-                                int radius = (int) (maxHeight+(torchChance*100));
-                                for (int lX = x-radius; lX <= x+radius; lX++) {
-                                    for (int lZ = z-radius; lZ <= z+radius; lZ++) {
-                                        for (int lY = y+maxHeight-radius; lY <= y+maxHeight+radius; lY++) {
-                                            int xDist = lX-x;
-                                            int yDist = lY-(y+maxHeight);
-                                            int zDist = lZ-z;
-                                            int dist = xDist*xDist+zDist*zDist+yDist*yDist;
-                                            if (dist <= radius*3) {
-                                                setBlock(lX, lY, lZ, 17, 0, false, true);
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                setBlock(x, y+1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int)(Math.random()*3), false, true);
-                            }
-                            surface = y;
-                            upmost = false;
-                        } else {
-                            setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true);
-                        }
-                    } else {
-                        if (y <= seaLevel) {
-                            setBlock(x, y, z, 1, 0, false, true);
-                        } else {
-                            setBlock(x, y, z, 0, 0, false, true);
-                        }
-                    }
-                }
-                for (int y = height-1; y > surface; y--) {
-                    setBlock(x, y, z, 0, 0, false, true);
-                }
-            }
-        }
-//        int radius = 16;
-//        for (int x = 0; x < size; x++) {
+//        for (int x = currentChunk*16; x < (currentChunk*16)+16; x++) {
 //            for (int z = 0; z < size; z++) {
-//                if (x > radius+2 && x < size-radius-2 && z > radius+2 && z < size-radius-2) {
-//                    FastNoiseLite heightNoise = new FastNoiseLite((int) (Math.random() * 9999));
-//                    heightNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-//                    FastNoiseLite horizontalNoise = new FastNoiseLite((int) (Math.random() * 9999));
-//                    horizontalNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-//                    float horizontalDensity = horizontalNoise.GetNoise(x/25f, z/25f);
-//                    if (horizontalDensity > -0.001 && horizontalDensity < 0.001) {
-//                        int height = (int) (heightNoise.GetNoise(x/64f, z/64f) * 256);
-//                        if (height < 0) {
-//                            height = height/2;
-//                        }
-//                        int centerY = 100 + height;
-//                        for (int rX = x - radius; rX < x + radius; rX++) {
-//                            for (int rZ = z - radius; rZ < z + radius; rZ++) {
-//                                for (int rY = centerY - radius; rY < centerY + radius; rY++) {
-//                                    Block block = getBlock(rX, rY, rZ);
-//                                    Block aboveBlock = getBlock(rX, rY+1, rZ);
-//                                    Block northBlock = getBlock(rX, rY, rZ+1);
-//                                    Block southBlock = getBlock(rX, rY, rZ-1);
-//                                    Block eastBlock = getBlock(rX+1, rY, rZ);
-//                                    Block westBlock = getBlock(rX-1, rY, rZ);
-//                                    if (!(block != null && block.blockTypeId == 1) && !(aboveBlock != null && aboveBlock.blockTypeId == 1) && !(northBlock != null && northBlock.blockTypeId == 1) && !(southBlock != null && southBlock.blockTypeId == 1) && !(eastBlock != null && eastBlock.blockTypeId == 1) && !(westBlock != null && westBlock.blockTypeId == 1)) {
-//                                        if (Vector3i.distance(x, centerY, z, rX, rY, rZ) < radius) {
-//                                            setBlock(rX, rY, rZ, 0, 0, true, true);
-//                                            if (heightmap[condensePos(rX, rZ)] == rY) {
-//                                                queueLightUpdate(new Vector3i(rX, rY, rZ), false);
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
+//                for (int y = height-1; y >= 0; y--) {
+//                    if (y <= seaLevel) {
+//                        setBlock(x, y, z, 2, 0, false, true);
+//                    } else {
+//                        setBlock(x, y, z, 0, 0, false, true);
 //                    }
 //                }
 //            }
 //        }
-//        for (int x = 0; x < size; x++) {
-//            for (int z = 0; z < size; z++) {
-//                updateHeightmap(x, z, false);
-//            }
-//        }
+        for (int x = currentChunk*16; x < (currentChunk*16)+16; x++) {
+            for (int z = 0; z < size; z++) {
+                if (z == 0 || z == size-1 || x == 0 || x == size-1) {
+                    for (int y = height-1; y >= 0; y--) {
+                        setBlock(x, y, z, 12, 0, false, true);
+                    }
+                } else {
+                    float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
+                    float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
+                    float foliageNoise = (basePerlinNoise + 0.5f);
+                    float exponentialFoliageNoise = foliageNoise * foliageNoise;
+                    int surface = height - 1;
+                    boolean upmost = true;
+                    for (int y = surface; y >= 0; y--) {
+                        double baseGradient = ConspiracraftMath.gradient(y, 157, 126, 2, -1);
+                        double baseDensity = baseCellularNoise + baseGradient;
+                        if (baseDensity > 0) {
+                            if (upmost && y >= seaLevel) {
+                                setBlock(x, y, z, 2, 0, false, true);
+                                double torchChance = Math.random();
+                                if (torchChance > 0.99995d) {
+                                    if (torchChance > 0.99997d) {
+                                        setBlock(x, y, z, 7, 0, true, true);
+                                        setBlock(x, y + 1, z, 7, 0, true, true);
+                                        setBlock(x, y + 2, z, 7, 0, false, true);
+                                    } else {
+                                        setBlock(x, y + 1, z, 14, 0, false, true);
+                                    }
+                                } else if (torchChance < exponentialFoliageNoise * 0.015f) { //tree 0.015
+                                    int maxHeight = (int) (Math.random() * 4) + 8;
+                                    for (int i = 0; i < maxHeight; i++) {
+                                        setBlock(x, y + i, z, 16, 0, true, true);
+                                    }
+                                    int radius = (int) (maxHeight + (torchChance * 100));
+                                    for (int lX = x - radius; lX <= x + radius; lX++) {
+                                        for (int lZ = z - radius; lZ <= z + radius; lZ++) {
+                                            for (int lY = y + maxHeight - radius; lY <= y + maxHeight + radius; lY++) {
+                                                int xDist = lX - x;
+                                                int yDist = lY - (y + maxHeight);
+                                                int zDist = lZ - z;
+                                                int dist = xDist * xDist + zDist * zDist + yDist * yDist;
+                                                if (dist <= radius * 3) {
+                                                    setBlock(lX, lY, lZ, 17, 0, false, true);
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    setBlock(x, y + 1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int) (Math.random() * 3), false, true);
+                                }
+                                surface = y;
+                                upmost = false;
+                            } else {
+                                setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true);
+                            }
+                        } else {
+                            if (y <= seaLevel) {
+                                setBlock(x, y, z, 1, 0, false, true);
+                            } else {
+                                setBlock(x, y, z, 0, 0, false, true);
+                            }
+                        }
+                    }
+                    for (int y = height - 1; y > surface; y--) {
+                        setBlock(x, y, z, 0, 0, false, true);
+                    }
+                }
+            }
+        }
     }
 
     public static int condensePos(int x, int z) {
