@@ -9,14 +9,32 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
-import static java.lang.System.in;
 
 public class Utils {
     public static byte emptyByte = (byte)0;
+
+    public static byte[] intArrayToByteArray(int[] intArr) {
+        byte[] byteArr = new byte[intArr.length*4];
+        int index = intArr.length;
+        for (int i = 0; i < intArr.length; i++) {
+            index--;
+            int val = intArr[index];
+            byteArr[(i*4)] = (byte) (val >> 24);
+            byteArr[(i*4)+1] = (byte) (val >> 16);
+            byteArr[(i*4)+2] = (byte) (val >> 8);
+            byteArr[(i*4)+3] = (byte) (val);
+        }
+        return byteArr;
+    }
+    public static int[] byteArrayToIntArray(byte[] byteArr) {
+        int[] intArr = new int[byteArr.length/4];
+        for (int i = 0; i < intArr.length; i++) {
+            intArr[i] = ((byteArr[i*4] & 0xFF) << 24) | ((byteArr[(i*4)+1] & 0xFF) << 16) | ((byteArr[(i*4)+2] & 0xFF) << 8) | (byteArr[(i*4)+3] & 0xFF);
+        }
+        return intArr;
+    }
+
     public static String readFile(String filePath) {
         List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
         StringBuilder data = new StringBuilder();

@@ -14,7 +14,16 @@ import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL40;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.Math;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
@@ -44,123 +53,130 @@ public class Main {
     boolean wasEDown = false;
     boolean wasQDown = false;
     boolean wasF1Down = false;
+    boolean isClosing = false;
 
     long lastBlockBroken = 0L;
     Block selectedBlock = new Block(2, 0);
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
-        window.getMouseInput().input(window);
-        player.sprint = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
-        player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
-        player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
-        player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
-        player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
+        if (!isClosing) {
+            if (window.isKeyPressed(GLFW_KEY_ESCAPE, GLFW_PRESS)) {
+                isClosing = true;
+            } else {
+                window.getMouseInput().input(window);
+                player.sprint = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
+                player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
+                player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
+                player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
+                player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
 
-        if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis-player.lastJump > 200) { //only jump at most five times a second
-            player.jump = timeMillis;
-        }
+                if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis - player.lastJump > 200) { //only jump at most five times a second
+                    player.jump = timeMillis;
+                }
 
-        MouseInput mouseInput = window.getMouseInput();
-        Vector2f displVec = mouseInput.getDisplVec();
-        player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
-                (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
-        if (timeMillis-lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
-            boolean lmbDown = mouseInput.isLeftButtonPressed();
-            boolean mmbDown = mouseInput.isMiddleButtonPressed();
-            boolean rmbDown = mouseInput.isRightButtonPressed();
-            if (lmbDown || mmbDown || rmbDown) {
-                Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
-                if (pos != null) {
-                    if (mmbDown) {
-                        selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                    } else if (BlockTypes.blockTypeMap.get(selectedBlock.typeId()) != null) {
-                        lastBlockBroken = timeMillis;
-                        int blockTypeId = selectedBlock.typeId();
-                        int blockSubtypeId = selectedBlock.subtypeId();
-                        if (lmbDown) {
-                            blockTypeId = 0;
-                            blockSubtypeId = 0;
+                MouseInput mouseInput = window.getMouseInput();
+                Vector2f displVec = mouseInput.getDisplVec();
+                player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
+                        (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
+                if (timeMillis - lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
+                    boolean lmbDown = mouseInput.isLeftButtonPressed();
+                    boolean mmbDown = mouseInput.isMiddleButtonPressed();
+                    boolean rmbDown = mouseInput.isRightButtonPressed();
+                    if (lmbDown || mmbDown || rmbDown) {
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
+                        if (pos != null) {
+                            if (mmbDown) {
+                                selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                            } else if (BlockTypes.blockTypeMap.get(selectedBlock.typeId()) != null) {
+                                lastBlockBroken = timeMillis;
+                                int blockTypeId = selectedBlock.typeId();
+                                int blockSubtypeId = selectedBlock.subtypeId();
+                                if (lmbDown) {
+                                    blockTypeId = 0;
+                                    blockSubtypeId = 0;
+                                }
+                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                            }
                         }
-                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
                     }
                 }
-            }
-        }
 
-        if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
-            Renderer.showUI = !Renderer.showUI;
-        }
+                if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
+                    Renderer.showUI = !Renderer.showUI;
+                }
 
-        if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
-            if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                int newSubId = selectedBlock.subtypeId()+1;
-                selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
-            } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                int newSubId = selectedBlock.subtypeId()-1;
-                if (newSubId < 0) {
-                    newSubId = 0;
-                }
-                selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
-            }
-            if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                Renderer.atlasChanged = true;
-            }
-            if (wasGDown && !window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS)) {
-                World.regenerateWorld();
-            }
-            if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
-                Renderer.worldChanged = true;
-                for (Chunk chunk : World.region1Chunks) {
-                    chunk.cleanPalette();
-                }
-            }
-            if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                if (Renderer.renderDistanceMul < 96) {
-                    Renderer.renderDistanceMul++;
-                }
-            }
-            if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
-                if (Renderer.renderDistanceMul > 0) {
-                    Renderer.renderDistanceMul--;
-                }
-            }
-        } else {
-            if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                int newId = selectedBlock.typeId()+1;
-                if (newId >= BlockTypes.blockTypeMap.size()) {
-                    newId = 0;
-                }
-                BlockType type = BlockTypes.blockTypeMap.get(newId);
-                if (type instanceof LightBlockType lType) {
-                    selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+                if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                        int newSubId = selectedBlock.subtypeId() + 1;
+                        selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
+                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                        int newSubId = selectedBlock.subtypeId() - 1;
+                        if (newSubId < 0) {
+                            newSubId = 0;
+                        }
+                        selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
+                    }
+                    if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
+                        Renderer.atlasChanged = true;
+                    }
+                    if (wasGDown && !window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS)) {
+                        World.regenerateWorld();
+                    }
+                    if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
+                        Renderer.worldChanged = true;
+                        for (Chunk chunk : World.region1Chunks) {
+                            chunk.cleanPalette();
+                        }
+                    }
+                    if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
+                        if (Renderer.renderDistanceMul < 96) {
+                            Renderer.renderDistanceMul++;
+                        }
+                    }
+                    if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
+                        if (Renderer.renderDistanceMul > 0) {
+                            Renderer.renderDistanceMul--;
+                        }
+                    }
                 } else {
-                    selectedBlock = new Block(newId, 0);
+                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                        int newId = selectedBlock.typeId() + 1;
+                        if (newId >= BlockTypes.blockTypeMap.size()) {
+                            newId = 0;
+                        }
+                        BlockType type = BlockTypes.blockTypeMap.get(newId);
+                        if (type instanceof LightBlockType lType) {
+                            selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+                        } else {
+                            selectedBlock = new Block(newId, 0);
+                        }
+                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                        int newId = selectedBlock.typeId() - 1;
+                        if (newId < 0) {
+                            newId = BlockTypes.blockTypeMap.size() - 1;
+                        }
+                        BlockType type = BlockTypes.blockTypeMap.get(newId);
+                        if (type instanceof LightBlockType lType) {
+                            selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
+                        } else {
+                            selectedBlock = new Block(newId, 0);
+                        }
+                    }
+                    if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
+                        updateTime(100000L, 1);
+                    }
                 }
-            } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                int newId = selectedBlock.typeId()-1;
-                if (newId < 0) {
-                    newId = BlockTypes.blockTypeMap.size()-1;
-                }
-                BlockType type = BlockTypes.blockTypeMap.get(newId);
-                if (type instanceof LightBlockType lType) {
-                    selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
-                } else {
-                    selectedBlock = new Block(newId, 0);
-                }
-            }
-            if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                updateTime(100000L, 1);
+
+                wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);
+                wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
+                wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
+                wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
+                wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
+                wasLDown = window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS);
+                wasUpDown = window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS);
+                wasDownDown = window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS);
             }
         }
-
-        wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);
-        wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
-        wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
-        wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
-        wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
-        wasLDown = window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS);
-        wasUpDown = window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS);
-        wasDownDown = window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS);
     }
 
     byte meridiem = 1;
@@ -183,18 +199,50 @@ public class Main {
     public static double tickTime = 50;
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
-        World.run();
-        if (World.worldGenerated) {
-            if (!postWorldgenInitialization) {
-                postWorldgenInitialization = true;
-                Renderer.init(window);
+        if (isClosing) {
+            byte[] negativeOne = Utils.intArrayToByteArray(new int[]{Integer.MIN_VALUE});
+            String path = (World.worldPath+"/");
+            new File(path).mkdirs();
+            for (int x = 0; x < World.sizeChunks; x++) {
+                for (int z = 0; z < World.sizeChunks; z++) {
+                    String chunkPath = path+x+"x"+z+"z.column";
+                    new File(chunkPath).createNewFile();
+                    FileOutputStream out = new FileOutputStream(chunkPath);
+                    for (int y = 0; y < World.heightChunks; y++) {
+                        Chunk chunk = World.region1Chunks[World.condenseChunkPos(x, y, z)];
+                        byte[] palette = Utils.intArrayToByteArray(chunk.getPalette());
+                        byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocksUncompressed());
+                        byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+                        byte[] lights = Utils.intArrayToByteArray(chunk.getAllLightsUncompressed());
+                        ByteBuffer buffer = ByteBuffer.allocate(palette.length+4+blocks.length+4+lightPalette.length+4+lights.length+4);
+                        buffer.put(palette);
+                        buffer.put(negativeOne);
+                        buffer.put(blocks);
+                        buffer.put(negativeOne);
+                        buffer.put(lightPalette);
+                        buffer.put(negativeOne);
+                        buffer.put(lights);
+                        buffer.put(negativeOne);
+                        out.write(buffer.array());
+                    }
+                    out.close();
+                }
             }
-            updateTime(diffTimeMillis, 1);
-            while (timePassed >= tickTime) {
-                timePassed -= tickTime;
-                player.tick(time);
+            glfwSetWindowShouldClose(window.getWindowHandle(), true); // We will detect this in the rendering loop
+        } else {
+            World.run();
+            if (World.worldGenerated) {
+                if (!postWorldgenInitialization) {
+                    postWorldgenInitialization = true;
+                    Renderer.init(window);
+                }
+                updateTime(diffTimeMillis, 1);
+                while (timePassed >= tickTime) {
+                    timePassed -= tickTime;
+                    player.tick(time);
+                }
+                timePassed += diffTimeMillis;
             }
-            timePassed += diffTimeMillis;
         }
     }
 

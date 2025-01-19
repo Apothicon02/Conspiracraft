@@ -14,6 +14,10 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -37,61 +41,97 @@ public class World {
     public static boolean cleanPalettes = false;
     public static boolean worldGenerated = false;
     public static int currentChunk = -1;
+    public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
 
     public static void init() {
         clearWorld();
     }
 
-    public static void run() {
+    public static void run() throws IOException {
         if (!worldGenerated) {
-            currentChunk++;
-            if (!cleanPalettes) {
-                if (currentChunk == sizeChunks) {
-                    for (int x = 0; x < size; x++) {
-                        for (int z = 0; z < size; z++) {
-                            updateHeightmap(x, z, false);
+            if (Files.exists(worldPath)) {
+                String path = (World.worldPath+"/");
+                for (int x = 0; x < World.sizeChunks; x++) {
+                    for (int z = 0; z < World.sizeChunks; z++) {
+                        String chunkPath = path+x+"x"+z+"z.column";
+                        FileInputStream in = new FileInputStream(chunkPath);
+                        Chunk chunk = new Chunk();
+                        int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
+                        List<List<Integer>> sortedData = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                        int y = 0;
+                        int dataGroup = 0;
+                        for (int integer : data) {
+                            if (integer == Integer.MIN_VALUE) {
+                                dataGroup++;
+                                if (dataGroup >= sortedData.size()) {
+                                    dataGroup = 0;
+                                    chunk.setPalette(sortedData.get(0));
+                                    chunk.setBlocks(sortedData.get(1));
+                                    chunk.setLightPalette(sortedData.get(2));
+                                    chunk.setLights(sortedData.get(3));
+                                    sortedData = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                                    World.region1Chunks[World.condenseChunkPos(x, y, z)] = chunk;
+                                    chunk = new Chunk();
+                                    y++;
+                                }
+                            } else {
+                                sortedData.get(dataGroup).addFirst(integer);
+                            }
                         }
                     }
-                    for (int x = 1; x < size - 1; x++) {
-                        for (int z = 1; z < size - 1; z++) {
-                            for (int y = height - 1; y > 1; y--) {
-                                Block block = getBlock(x, y, z);
-                                if (block.s() < 20 && BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
-                                    //check if any neighbors are a higher brightness
-                                    boolean shouldQ = false;
-                                    if (getBlock(x, y, z + 1).s() > block.s()) {
-                                        shouldQ = true;
-                                    } else if (getBlock(x + 1, y, z).s() > block.s()) {
-                                        shouldQ = true;
-                                    } else if (getBlock(x, y, z - 1).s() > block.s()) {
-                                        shouldQ = true;
-                                    } else if (getBlock(x - 1, y, z).s() > block.s()) {
-                                        shouldQ = true;
-                                    } else if (getBlock(x, y + 1, z).s() > block.s()) {
-                                        shouldQ = true;
-                                    } else if (getBlock(x, y - 1, z).s() > block.s()) {
-                                        shouldQ = true;
-                                    }
-                                    if (shouldQ) {
-                                        BlockHelper.updateLight(new Vector3i(x, y, z), block, false);
+                }
+                worldGenerated = true;
+                Renderer.worldChanged = true;
+            } else {
+                currentChunk++;
+                if (!cleanPalettes) {
+                    if (currentChunk == sizeChunks) {
+                        for (int x = 0; x < size; x++) {
+                            for (int z = 0; z < size; z++) {
+                                updateHeightmap(x, z, false);
+                            }
+                        }
+                        for (int x = 1; x < size - 1; x++) {
+                            for (int z = 1; z < size - 1; z++) {
+                                for (int y = height - 1; y > 1; y--) {
+                                    Block block = getBlock(x, y, z);
+                                    if (block.s() < 20 && BlockTypes.blockTypeMap.get(block.typeId()).isTransparent) {
+                                        //check if any neighbors are a higher brightness
+                                        boolean shouldQ = false;
+                                        if (getBlock(x, y, z + 1).s() > block.s()) {
+                                            shouldQ = true;
+                                        } else if (getBlock(x + 1, y, z).s() > block.s()) {
+                                            shouldQ = true;
+                                        } else if (getBlock(x, y, z - 1).s() > block.s()) {
+                                            shouldQ = true;
+                                        } else if (getBlock(x - 1, y, z).s() > block.s()) {
+                                            shouldQ = true;
+                                        } else if (getBlock(x, y + 1, z).s() > block.s()) {
+                                            shouldQ = true;
+                                        } else if (getBlock(x, y - 1, z).s() > block.s()) {
+                                            shouldQ = true;
+                                        }
+                                        if (shouldQ) {
+                                            BlockHelper.updateLight(new Vector3i(x, y, z), block, false);
+                                        }
                                     }
                                 }
                             }
                         }
+                        cleanPalettes = true;
+                        currentChunk = -1;
+                    } else {
+                        generateWorld();
                     }
-                    cleanPalettes = true;
-                    currentChunk = -1;
                 } else {
-                    generateWorld();
-                }
-            } else {
-                if (currentChunk == sizeChunks) {
-                    worldGenerated = true;
-                    Renderer.worldChanged = true;
-                } else {
-                    for (int z = 0; z < sizeChunks; z++) {
-                        for (int y = 0; y < heightChunks; y++) {
-                            region1Chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
+                    if (currentChunk == sizeChunks) {
+                        worldGenerated = true;
+                        Renderer.worldChanged = true;
+                    } else {
+                        for (int z = 0; z < sizeChunks; z++) {
+                            for (int y = 0; y < heightChunks; y++) {
+                                region1Chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
+                            }
                         }
                     }
                 }
