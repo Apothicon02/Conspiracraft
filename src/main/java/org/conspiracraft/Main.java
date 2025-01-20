@@ -200,7 +200,6 @@ public class Main {
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
         if (isClosing) {
-            byte[] negativeOne = Utils.intArrayToByteArray(new int[]{Integer.MIN_VALUE});
             String path = (World.worldPath+"/");
             new File(path).mkdirs();
             for (int x = 0; x < World.sizeChunks; x++) {
@@ -215,14 +214,14 @@ public class Main {
                         byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
                         byte[] lights = Utils.intArrayToByteArray(chunk.getAllLightsUncompressed());
                         ByteBuffer buffer = ByteBuffer.allocate(palette.length+4+blocks.length+4+lightPalette.length+4+lights.length+4);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{palette.length/4}));
                         buffer.put(palette);
-                        buffer.put(negativeOne);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length/4}));
                         buffer.put(blocks);
-                        buffer.put(negativeOne);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length/4}));
                         buffer.put(lightPalette);
-                        buffer.put(negativeOne);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{lights.length/4}));
                         buffer.put(lights);
-                        buffer.put(negativeOne);
                         out.write(buffer.array());
                     }
                     out.close();

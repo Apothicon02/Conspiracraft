@@ -25,7 +25,7 @@ import java.util.List;
 
 public class World {
     public static int seaLevel = 138;
-    public static int size = 1024;
+    public static int size = 2048;
     public static byte chunkSize = 16;
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;
@@ -53,31 +53,7 @@ public class World {
                 String path = (World.worldPath+"/");
                 for (int x = 0; x < World.sizeChunks; x++) {
                     for (int z = 0; z < World.sizeChunks; z++) {
-                        String chunkPath = path+x+"x"+z+"z.column";
-                        FileInputStream in = new FileInputStream(chunkPath);
-                        Chunk chunk = new Chunk();
-                        int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
-                        List<List<Integer>> sortedData = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-                        int y = 0;
-                        int dataGroup = 0;
-                        for (int integer : data) {
-                            if (integer == Integer.MIN_VALUE) {
-                                dataGroup++;
-                                if (dataGroup >= sortedData.size()) {
-                                    dataGroup = 0;
-                                    chunk.setPalette(sortedData.get(0));
-                                    chunk.setBlocks(sortedData.get(1));
-                                    chunk.setLightPalette(sortedData.get(2));
-                                    chunk.setLights(sortedData.get(3));
-                                    sortedData = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-                                    World.region1Chunks[World.condenseChunkPos(x, y, z)] = chunk;
-                                    chunk = new Chunk();
-                                    y++;
-                                }
-                            } else {
-                                sortedData.get(dataGroup).addFirst(integer);
-                            }
-                        }
+                        loadColumn(path, x, z);
                     }
                 }
                 worldGenerated = true;
@@ -141,6 +117,55 @@ public class World {
             Vector3i blockData = cleaningQueue.getFirst();
             cleaningQueue.removeFirst();
             region1Chunks[condenseChunkPos(blockData.x, blockData.y, blockData.z)].cleanPalette();
+        }
+    }
+
+    public static void loadColumn(String path, int x, int z) throws IOException {
+        String chunkPath = path+x+"x"+z+"z.column";
+        FileInputStream in = new FileInputStream(chunkPath);
+
+        int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
+        int dataIndex = 0;
+
+        for (int y = 0; y < World.heightChunks; y++) {
+            int size = data[dataIndex];
+            dataIndex++;
+            int[] palette = new int[size];
+            for (int i = size-1; i >= 0; i--) {
+                palette[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            size = data[dataIndex];
+            dataIndex++;
+            int[] blocks = new int[size];
+            for (int i = size-1; i >= 0; i--) {
+                blocks[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            size = data[dataIndex];
+            dataIndex++;
+            int[] lightPalette = new int[size];
+            for (int i = size-1; i >= 0; i--) {
+                lightPalette[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            size = data[dataIndex];
+            dataIndex++;
+            int[] lights = new int[size];
+            for (int i = size-1; i >= 0; i--) {
+                lights[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            Chunk chunk = new Chunk();
+            chunk.setPalette(palette);
+            chunk.setBlocks(blocks);
+            chunk.setLightPalette(lightPalette);
+            chunk.setLights(lights);
+            World.region1Chunks[World.condenseChunkPos(x, y, z)] = chunk;
         }
     }
 
