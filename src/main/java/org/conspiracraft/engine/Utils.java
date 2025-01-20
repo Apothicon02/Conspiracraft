@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 import java.util.List;
 
 public class Utils {
@@ -57,6 +58,30 @@ public class Utils {
         return buffer;
     }
 
+    public static int packBools(BitSet set) {
+        int value = 0;
+        for (int i = 0; i < set.length(); i++) {
+            if (set.get(i)) {
+                value |= (1 << i);
+            }
+        }
+        return value;
+    }
+    public static BitSet unpackBools(int packed) {
+        BitSet set = new BitSet(32);
+        for (int i = 0; i < 32; i++) {
+            if ((packed & (1 << i)) != 0) {
+                set.set(i);
+            }
+        }
+        return set;
+    }
+    public static int pack4Ints(int one, int two, int three, int four) {
+        return (one << 24) | (two << 16) | (three << 8) | four;
+    }
+    public static Vector4i unpackPacked4Ints(int packed) {
+        return new Vector4i(0xFF & packed >> 24, 0xFF & packed >> 16, 0xFF & packed >> 8, 0xFF & packed);
+    }
     public static int packInts(int first4, int last4) {
         return (first4 << 16) | last4;
     }
@@ -92,8 +117,5 @@ public class Utils {
 
     public static int colorToInt(Color color) {
         return color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
-    }
-    public static int vector4iToInt(Vector4i vector4i) {
-        return vector4i.x() << 16 | vector4i.y() << 8 | vector4i.z() | vector4i.w() << 24;
     }
 }

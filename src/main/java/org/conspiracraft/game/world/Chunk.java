@@ -38,9 +38,12 @@ public class Chunk {
             }
             lightBytes = null;
             lightShorts = null;
-            int i = 0;
-            for (int light : lights) {
-                lightBools.set(i++, light >= 0);
+            for (int i = 0; i < totalBlocks/32; i++) {
+                BitSet set = Utils.unpackBools(lights[i]);
+                int offset = i*32;
+                for (int e = 0; e <= 31; e++) {
+                    lightBools.set(offset+e, set.get(e));
+                }
             }
         } else if (lightPalette.size() < 127) {
             lightBools = null;
@@ -48,7 +51,11 @@ public class Chunk {
             lightShorts = null;
             int i = 0;
             for (int light : lights) {
-                lightBytes[i++] = (byte) (light);
+                Vector4i vec = Utils.unpackPacked4Ints(light);
+                lightBytes[i++] = (byte) (vec.x);
+                lightBytes[i++] = (byte) (vec.y);
+                lightBytes[i++] = (byte) (vec.z);
+                lightBytes[i++] = (byte) (vec.w);
             }
         } else {
             lightBools = null;
@@ -56,7 +63,9 @@ public class Chunk {
             lightShorts = new short[totalBlocks];
             int i = 0;
             for (int light : lights) {
-                lightShorts[i++] = (short) (light);
+                Vector2i vec = Utils.unpackInt(light);
+                lightShorts[i++] = (short) (vec.x);
+                lightShorts[i++] = (short) (vec.y);
             }
         }
     }
@@ -68,11 +77,25 @@ public class Chunk {
         return returnObj;
     }
     public int[] getAllLightsUncompressed() {
-        int[] returnObj = new int[totalBlocks];
-        for (int i = 0; i < totalBlocks; i++) {
-            returnObj[i] = getLightKey(i);
+        if (lightBools != null) {
+            int[] returnObj = new int[totalBlocks/32];
+            for (int i = 0; i < totalBlocks/32; i++) {
+                returnObj[i] = Utils.packBools(lightBools.get(i*32, (i*32)+32));
+            }
+            return returnObj;
+        } else if (lightBytes != null) {
+            int[] returnObj = new int[totalBlocks/4];
+            for (int i = 0; i < totalBlocks/4; i++) {
+                returnObj[i] = Utils.pack4Ints(getLightKey(i*4), getLightKey((i*4)+1), getLightKey((i*4)+2), getLightKey((i*4)+3));
+            }
+            return returnObj;
+        } else {
+            int[] returnObj = new int[totalBlocks/2];
+            for (int i = 0; i < totalBlocks/2; i++) {
+                returnObj[i] = Utils.packInts(getLightKey(i*2), getLightKey((i*2)+1));
+            }
+            return returnObj;
         }
-        return returnObj;
     }
     public void setBlocks(int[] blocks) {
         if (blockPalette.size() < 2) {
@@ -81,9 +104,12 @@ public class Chunk {
             }
             blockBytes = null;
             blockShorts = null;
-            int i = 0;
-            for (int block : blocks) {
-                blockBools.set(i++, block >= 0);
+            for (int i = 0; i < totalBlocks/32; i++) {
+                BitSet set = Utils.unpackBools(blocks[i]);
+                int offset = i*32;
+                for (int e = 0; e <= 31; e++) {
+                    blockBools.set(offset+e, set.get(e));
+                }
             }
         } else if (blockPalette.size() < 127) {
             blockBools = null;
@@ -91,7 +117,11 @@ public class Chunk {
             blockShorts = null;
             int i = 0;
             for (int block : blocks) {
-                blockBytes[i++] = (byte) (block);
+                Vector4i vec = Utils.unpackPacked4Ints(block);
+                blockBytes[i++] = (byte) (vec.x);
+                blockBytes[i++] = (byte) (vec.y);
+                blockBytes[i++] = (byte) (vec.z);
+                blockBytes[i++] = (byte) (vec.w);
             }
         } else {
             blockBools = null;
@@ -99,7 +129,9 @@ public class Chunk {
             blockShorts = new short[totalBlocks];
             int i = 0;
             for (int block : blocks) {
-                blockShorts[i++] = (short) (block);
+                Vector2i vec = Utils.unpackInt(block);
+                blockShorts[i++] = (short) (vec.x);
+                blockShorts[i++] = (short) (vec.y);
             }
         }
     }
@@ -111,11 +143,25 @@ public class Chunk {
         return returnObj;
     }
     public int[] getAllBlocksUncompressed() {
-        int[] returnObj = new int[totalBlocks];
-        for (int i = 0; i < totalBlocks; i++) {
-            returnObj[i] = getBlockKey(i);
+        if (blockBools != null) {
+            int[] returnObj = new int[totalBlocks/32];
+            for (int i = 0; i < totalBlocks/32; i++) {
+                returnObj[i] = Utils.packBools(blockBools.get(i*32, (i*32)+32));
+            }
+            return returnObj;
+        } else if (blockBytes != null) {
+            int[] returnObj = new int[totalBlocks/4];
+            for (int i = 0; i < totalBlocks/4; i++) {
+                returnObj[i] = Utils.pack4Ints(getBlockKey(i*4), getBlockKey((i*4)+1), getBlockKey((i*4)+2), getBlockKey((i*4)+3));
+            }
+            return returnObj;
+        } else {
+            int[] returnObj = new int[totalBlocks/2];
+            for (int i = 0; i < totalBlocks/2; i++) {
+                returnObj[i] = Utils.packInts(getBlockKey(i*2), getBlockKey((i*2)+1));
+            }
+            return returnObj;
         }
-        return returnObj;
     }
     public void setPalette(int[] palette) {
         for (int integer : palette) {

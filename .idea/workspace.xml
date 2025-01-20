@@ -9,12 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added saving and loading.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00048" summary="- Added WIP smooth lighting. &#10;- Temporarily disabled light fog. &#10;- Fixed sunlight. &#10;- Optimized world loading speed. &#10;- Increased minimum light. &#10;- Increasd blocklight fog. &#10;- Removed inverted sunlight.">
-      <option name="closed" value="true" />
-      <created>1732683022781</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1732683022781</updated>
     </task>
     <task id="LOCAL-00049" summary="- Re-enabled light fog. &#10;- Recreated sky. &#10;- Moved clouds. &#10;- Increased minimum light. &#10;- Tweaked render distance. &#10;- Got rid of the dynamic fps-based max light updates. &#10;- Vertical movement is now independent of camera rotation.">
       <option name="closed" value="true" />
@@ -591,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737248490233</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="- Vastly optimized world loading.">
+      <option name="closed" value="true" />
+      <created>1737340511321</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1737340511322</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed jar not being launchable. &#10;- Downgraded back to Java 21." />
     <MESSAGE value="- Fixed weird interaction with fog and transparent objects. &#10;- Added purple stained glass. &#10;- Added lime stained glass. &#10;- Added ability to cycle through selected block with the 'Q' and 'E' keys. &#10;- Added bubbles." />
     <MESSAGE value="- Added white noise." />
     <MESSAGE value="- Bubbles in stained-glass no longer move. &#10;- Improved bubbles to be more random." />
@@ -632,7 +630,8 @@
     <MESSAGE value="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision." />
     <MESSAGE value="- Palette compressed chunk data on the gpu. &#10;- Added leaf AO." />
     <MESSAGE value="- Added saving and loading." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added saving and loading." />
+    <MESSAGE value="- Vastly optimized world loading." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Vastly optimized world loading." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
