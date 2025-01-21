@@ -129,9 +129,31 @@ int getBlockData(int x, int y, int z) {
     int pointer = chunksData[condensedChunkPos*2];
     int paletteSize = chunksData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    int condensedShortLocalPos = int(((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y)/2);
-    int paletteKey = region1BlockData[pointer+paletteSize+condensedShortLocalPos];
-    return region1BlockData[pointer+(condensedLocalPos == condensedShortLocalPos*2 ? paletteKey >> 16 : paletteKey & 0xFFFF)];
+    int blocksPerInt = 2;
+    if (paletteSize < 2) {
+        blocksPerInt = 32;
+        int specificInt = (condensedLocalPos/blocksPerInt);
+        int values = region1BlockData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
+        return region1BlockData[pointer+((values >> whereInInt) & 0x2)];
+    } else if (paletteSize <= 3) {
+        blocksPerInt = 16;
+        int specificInt = (condensedLocalPos/blocksPerInt);
+        int values = region1BlockData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
+        return region1BlockData[pointer+((values >> (whereInInt*2)) & 0x3)];
+    } else if (paletteSize < 127) {
+        blocksPerInt = 4;
+        int specificInt = (condensedLocalPos/blocksPerInt);
+        int values = region1BlockData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
+        return region1BlockData[pointer+(whereInInt == 0 ? (0xFF & values >> 24) : (whereInInt == 1 ? (0xFF & values >> 16) : (whereInInt == 2 ? (0xFF & values >> 8) : (0xFF & values))))];
+    } else {
+        int specificInt = int(condensedLocalPos/blocksPerInt);
+        int values = region1BlockData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
+        return region1BlockData[pointer+(whereInInt == 0 ? (values >> 16) : (values & 0xFFFF))];
+    }
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -152,9 +174,32 @@ vec4 getLighting(int x, int y, int z, bool leafAO) {
     int pointer = chunksLightData[condensedChunkPos*2];
     int paletteSize = chunksLightData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    int condensedShortLocalPos = int(((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y)/2);
-    int paletteKey = region1LightingData[pointer+paletteSize+condensedShortLocalPos];
-    vec4 light = intToColor(region1LightingData[pointer+(condensedLocalPos == condensedShortLocalPos*2 ? paletteKey >> 16 : paletteKey & 0xFFFF)]);
+    vec4 light = vec4(0);
+    int lightsPerInt = 2;
+    if (paletteSize < 2) {
+        lightsPerInt = 32;
+        int specificInt = (condensedLocalPos/lightsPerInt);
+        int values = region1LightingData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*lightsPerInt);
+        light = intToColor(region1LightingData[pointer+((values >> whereInInt) & 0x2)]);
+    } else if (paletteSize <= 3) {
+        lightsPerInt = 16;
+        int specificInt = (condensedLocalPos/lightsPerInt);
+        int values = region1LightingData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*lightsPerInt);
+        light = intToColor(region1LightingData[pointer+((values >> (whereInInt*2)) & 0x3)]);
+    } else if (paletteSize < 127) {
+        lightsPerInt = 4;
+        int specificInt = (condensedLocalPos/lightsPerInt);
+        int values = region1LightingData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*lightsPerInt);
+        light = intToColor(region1LightingData[pointer+(whereInInt == 0 ? (0xFF & values >> 24) : (whereInInt == 1 ? (0xFF & values >> 16) : (whereInInt == 2 ? (0xFF & values >> 8) : (0xFF & values))))]);
+    } else {
+        int specificInt = int(condensedLocalPos/lightsPerInt);
+        int values = region1LightingData[pointer+paletteSize+specificInt];
+        int whereInInt = condensedLocalPos-(specificInt*lightsPerInt);
+        light = intToColor(region1LightingData[pointer+(whereInInt == 0 ? (values >> 16) : (values & 0xFFFF))]);
+    }
     if (block.x == 17) {
         light = light/2;
     }

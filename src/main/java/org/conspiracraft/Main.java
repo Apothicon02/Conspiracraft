@@ -124,9 +124,6 @@ public class Main {
                     }
                     if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
                         Renderer.worldChanged = true;
-                        for (Chunk chunk : World.region1Chunks) {
-                            chunk.cleanPalette();
-                        }
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                         if (Renderer.renderDistanceMul < 96) {
@@ -210,9 +207,9 @@ public class Main {
                     for (int y = 0; y < World.heightChunks; y++) {
                         Chunk chunk = World.region1Chunks[World.condenseChunkPos(x, y, z)];
                         byte[] palette = Utils.intArrayToByteArray(chunk.getPalette());
-                        byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocksUncompressed());
+                        byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocks());
                         byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
-                        byte[] lights = Utils.intArrayToByteArray(chunk.getAllLightsUncompressed());
+                        byte[] lights = Utils.intArrayToByteArray(chunk.getAllLights());
                         ByteBuffer buffer = ByteBuffer.allocate(palette.length+4+blocks.length+4+lightPalette.length+4+lights.length+4);
                         buffer.put(Utils.intArrayToByteArray(new int[]{palette.length/4}));
                         buffer.put(palette);

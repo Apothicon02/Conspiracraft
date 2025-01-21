@@ -76,6 +76,20 @@ public class Utils {
         }
         return set;
     }
+    public static int pack16Ints(int[] values) {
+        int packed = 0;
+        for (int i = 0; i < values.length; i++) {
+            packed |= (values[i] & 0x3) << (i * 2);
+        }
+        return packed;
+    }
+    public static int[] unpackPacked16Ints(int packed) {
+        int[] values = new int[16];
+        for (int i = 0; i < 16; i++) {
+            values[i] = (packed >> (i*2)) & 0x3;
+        }
+        return values;
+    }
     public static int pack4Ints(int one, int two, int three, int four) {
         return (one << 24) | (two << 16) | (three << 8) | four;
     }
