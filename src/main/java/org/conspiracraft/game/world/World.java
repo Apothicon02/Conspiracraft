@@ -22,7 +22,7 @@ import java.util.*;
 
 public class World {
     public static int seaLevel = 138;
-    public static int size = 2048;
+    public static int size = 1024;
     public static byte chunkSize = 16;
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;

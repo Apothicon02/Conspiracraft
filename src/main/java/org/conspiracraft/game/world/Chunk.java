@@ -222,15 +222,6 @@ public class Chunk {
             return blockBools.get(pos) ? 0 : -1;
         }
     }
-    public void setBlockKey(int pos, int key) {
-        if (blockShorts != null) {
-            blockShorts[pos] = (short) key;
-        } else if (blockBytes != null) {
-            blockBytes[pos] = (byte) key;
-        } else {
-            blockBools.set(pos, key > 0);
-        }
-    }
     public int getLightKey(int pos) {
         if (lightShorts != null) {
             return lightShorts[pos];
@@ -241,28 +232,14 @@ public class Chunk {
         }
     }
     public Block getBlock(int pos) {
-        int index; //get the blockPalette index from the blocks array
-        if (blockShorts != null) {
-            index = blockShorts[pos];
-        } else if (blockBytes != null) {
-            index = blockBytes[pos];
-        } else {
-            index = blockBools.get(pos) ? 0 : -1;
-        }
+        int index = getBlockKey(pos);
         Vector2i id;
         if (index >= 0) {
             id = blockPalette.get(index);
         } else {
             id = air;
         }
-        int lightIndex; //get the blockPalette index from the blocks array
-        if (lightShorts != null) {
-            lightIndex = lightShorts[pos];
-        } else if (lightBytes != null) {
-            lightIndex = lightBytes[pos];
-        } else {
-            lightIndex = lightBools.get(pos) ? 0 : -1;
-        }
+        int lightIndex = getLightKey(pos); //get the blockPalette index from the blocks array
         Vector4i light;
         if (lightIndex >= 0) {
             light = lightPalette.get(lightIndex);

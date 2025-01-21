@@ -309,7 +309,8 @@ public class Renderer {
                         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
                         int condensedChunkPos = World.condenseChunkPos(chunkX, chunkY, chunkZ);
                         int paletteSize = region1Chunks[condensedChunkPos].getLightPaletteSize();
-                        allocCreateInfo.size((paletteSize+2048)*4L);
+                        int[] compressedLights = region1Chunks[condensedChunkPos].getAllLights();
+                        allocCreateInfo.size((paletteSize+compressedLights.length)*4L);
 
                         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
@@ -320,7 +321,7 @@ public class Renderer {
                             chunkLightPointers[condensedChunkPos*2] = pointer/4;
                             chunkLightPointers[(condensedChunkPos*2)+1] = paletteSize;
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getLightPalette());
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllLights());
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), compressedLights);
                         } else {
                             // Allocation failed - no space for it could be found. Handle this error!
                         }
@@ -343,7 +344,8 @@ public class Renderer {
                     vmaVirtualFree(light.get(0), chunkLightAllocs[condensedChunkPos]);
                     VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
                     int paletteSize = region1Chunks[condensedChunkPos].getLightPaletteSize();
-                    allocCreateInfo.size((paletteSize+2048)*4L);
+                    int[] compressedLights = region1Chunks[condensedChunkPos].getAllLights();
+                    allocCreateInfo.size((paletteSize+compressedLights.length)*4L);
 
                     PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                     LongBuffer offset = BufferUtils.createLongBuffer(1);
@@ -354,7 +356,7 @@ public class Renderer {
                         chunkLightPointers[condensedChunkPos*2] = pointer/4;
                         chunkLightPointers[(condensedChunkPos*2)+1] = paletteSize;
                         glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, region1Chunks[condensedChunkPos].getLightPalette());
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), region1Chunks[condensedChunkPos].getAllLights());
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), compressedLights);
                     } else {
                         // Allocation failed - no space for it could be found. Handle this error!
                     }
