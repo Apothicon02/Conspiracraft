@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.lang.Math;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,27 +202,30 @@ public class Main {
             new File(path).mkdirs();
             for (int x = 0; x < World.sizeChunks; x++) {
                 for (int z = 0; z < World.sizeChunks; z++) {
-                    String chunkPath = path+x+"x"+z+"z.column";
-                    new File(chunkPath).createNewFile();
-                    FileOutputStream out = new FileOutputStream(chunkPath);
-                    for (int y = 0; y < World.heightChunks; y++) {
-                        Chunk chunk = World.region1Chunks[World.condenseChunkPos(x, y, z)];
-                        byte[] palette = Utils.intArrayToByteArray(chunk.getPalette());
-                        byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocks());
-                        byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
-                        byte[] lights = Utils.intArrayToByteArray(chunk.getAllLights());
-                        ByteBuffer buffer = ByteBuffer.allocate(palette.length+4+blocks.length+4+lightPalette.length+4+lights.length+4);
-                        buffer.put(Utils.intArrayToByteArray(new int[]{palette.length/4}));
-                        buffer.put(palette);
-                        buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length/4}));
-                        buffer.put(blocks);
-                        buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length/4}));
-                        buffer.put(lightPalette);
-                        buffer.put(Utils.intArrayToByteArray(new int[]{lights.length/4}));
-                        buffer.put(lights);
-                        out.write(buffer.array());
+                    int columnPos = World.condenseChunkPos(x, z);
+                    if (World.columnUpdates[columnPos]) {
+                        World.columnUpdates[columnPos] = false;
+                        String chunkPath = path + x + "x" + z + "z.column";
+                        FileOutputStream out = new FileOutputStream(chunkPath);
+                        for (int y = 0; y < World.heightChunks; y++) {
+                            Chunk chunk = World.region1Chunks[World.condenseChunkPos(x, y, z)];
+                            byte[] palette = Utils.intArrayToByteArray(chunk.getPalette());
+                            byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocks());
+                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+                            byte[] lights = Utils.intArrayToByteArray(chunk.getAllLights());
+                            ByteBuffer buffer = ByteBuffer.allocate(palette.length + 4 + blocks.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{palette.length / 4}));
+                            buffer.put(palette);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+                            buffer.put(blocks);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+                            buffer.put(lightPalette);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+                            buffer.put(lights);
+                            out.write(buffer.array());
+                        }
+                        out.close();
                     }
-                    out.close();
                 }
             }
             glfwSetWindowShouldClose(window.getWindowHandle(), true); // We will detect this in the rendering loop

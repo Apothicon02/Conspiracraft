@@ -22,7 +22,7 @@ import java.util.*;
 
 public class World {
     public static int seaLevel = 138;
-    public static int size = 1024;
+    public static int size = 2048;
     public static byte chunkSize = 16;
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;
@@ -30,6 +30,7 @@ public class World {
 
     public static Chunk[] region1Chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
+    public static boolean[] columnUpdates = new boolean[sizeChunks*sizeChunks];
 
     public static LinkedList<Vector3i> lightQueue = new LinkedList<>();
     public static LinkedList<Vector4i> blockQueue = new LinkedList<>();
@@ -285,12 +286,18 @@ public class World {
     public static int condenseChunkPos(int x, int y, int z) {
         return (((x*sizeChunks)+z)*heightChunks)+y;
     }
+    public static int condenseChunkPos(int x, int z) {
+        return (x*sizeChunks)+z;
+    }
 
     public static void queueCleaning(Vector3i pos) {
         Vector3i chunkPos = new Vector3i(pos.x/16, pos.y/16, pos.z/16);
         if (!cleaningQueue.contains(chunkPos)) {
             World.cleaningQueue.addLast(chunkPos);
         }
+    }
+    public static void queueColumnUpdate(Vector3i pos) {
+        columnUpdates[condenseChunkPos(pos.x/16, pos.z/16)] = true;
     }
 
     public static byte getCorners(int x, int y, int z) {

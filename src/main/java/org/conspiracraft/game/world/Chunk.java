@@ -50,12 +50,21 @@ public class Chunk {
             lightBytes = new byte[totalBlocks];
             lightShorts = null;
             int i = 0;
-            for (int light : lights) {
-                Vector4i vec = Utils.unpackPacked4Ints(light);
-                lightBytes[i++] = (byte) (vec.x);
-                lightBytes[i++] = (byte) (vec.y);
-                lightBytes[i++] = (byte) (vec.z);
-                lightBytes[i++] = (byte) (vec.w);
+            if (lightPalette.size() <= 3) {
+                for (int light : lights) {
+                    int[] values = Utils.unpackPacked16Ints(light);
+                    for (int value : values) {
+                        lightBytes[i++] = (byte) (value);
+                    }
+                }
+            } else {
+                for (int light : lights) {
+                    Vector4i vec = Utils.unpackPacked4Ints(light);
+                    lightBytes[i++] = (byte) (vec.x);
+                    lightBytes[i++] = (byte) (vec.y);
+                    lightBytes[i++] = (byte) (vec.z);
+                    lightBytes[i++] = (byte) (vec.w);
+                }
             }
         } else {
             lightBools = null;
@@ -119,8 +128,8 @@ public class Chunk {
             blockBools = null;
             blockBytes = new byte[totalBlocks];
             blockShorts = null;
+            int i = 0;
             if (blockPalette.size() <= 3) {
-                int i = 0;
                 for (int block : blocks) {
                     int[] values = Utils.unpackPacked16Ints(block);
                     for (int value : values) {
@@ -128,7 +137,6 @@ public class Chunk {
                     }
                 }
             } else {
-                int i = 0;
                 for (int block : blocks) {
                     Vector4i vec = Utils.unpackPacked4Ints(block);
                     blockBytes[i++] = (byte) (vec.x);
@@ -355,6 +363,7 @@ public class Chunk {
         if (World.worldGenerated) {
             World.queueCleaning(globalPos);
         }
+        World.queueColumnUpdate(globalPos);
     }
     public void cleanPalette() {
         if (!blockPalette.isEmpty()) {
