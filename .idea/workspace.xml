@@ -9,12 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed light data not actually being compressed on the gpu.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed world data not loading properly. &#10;- World saving is now nearly instant after the first time.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00052" summary="- Increased world size to 1024x256x1024. &#10;- Noise for worldgen is now pre-computed.">
-      <option name="closed" value="true" />
-      <created>1733007186227</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1733007186228</updated>
     </task>
     <task id="LOCAL-00053" summary="- Raised world height to Y320.">
       <option name="closed" value="true" />
@@ -591,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737438028401</updated>
     </task>
-    <option name="localTasksCounter" value="101" />
+    <task id="LOCAL-00101" summary="- Fixed world data not loading properly. &#10;- World saving is now nearly instant after the first time.">
+      <option name="closed" value="true" />
+      <created>1737486712631</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1737486712631</updated>
+    </task>
+    <option name="localTasksCounter" value="102" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added snow. &#10;- Converted arrays to buffers for chunk data." />
     <MESSAGE value="- Fixed random crash related to chunk data conversion. &#10;- Fixed light updates not working properly with overlapping light sources. &#10;- The block you are looking at is now highlighted. &#10;- F1 now toggles crosshair / block highlight visibility. &#10;- Can now cycle through block subtype ids with F3+Q / F3+E. &#10;- Added oak log block type. &#10;- Added oak planks block type." />
     <MESSAGE value="- Fixed crash." />
     <MESSAGE value="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners." />
@@ -632,7 +628,8 @@
     <MESSAGE value="- Compressed world save data." />
     <MESSAGE value="- Dramatically reduced vram and disk space consumption." />
     <MESSAGE value="- Fixed light data not actually being compressed on the gpu." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed light data not actually being compressed on the gpu." />
+    <MESSAGE value="- Fixed world data not loading properly. &#10;- World saving is now nearly instant after the first time." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed world data not loading properly. &#10;- World saving is now nearly instant after the first time." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

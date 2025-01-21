@@ -39,10 +39,10 @@ public class Chunk {
             lightBytes = null;
             lightShorts = null;
             for (int i = 0; i < totalBlocks/32; i++) {
-                BitSet set = Utils.unpackBools(lights[i]);
+                int bits = lights[i];
                 int offset = i*32;
                 for (int e = 0; e <= 31; e++) {
-                    lightBools.set(offset+e, set.get(e));
+                    lightBools.set(offset+e, (bits & (1 << e)) != 0);
                 }
             }
         } else if (lightPalette.size() < 127) {
@@ -118,10 +118,10 @@ public class Chunk {
             blockBytes = null;
             blockShorts = null;
             for (int i = 0; i < totalBlocks/32; i++) {
-                BitSet set = Utils.unpackBools(blocks[i]);
+                int bits = blocks[i];
                 int offset = i*32;
                 for (int e = 0; e <= 31; e++) {
-                    blockBools.set(offset+e, set.get(e));
+                    blockBools.set(offset+e, (bits & (1 << e)) != 0);
                 }
             }
         } else if (blockPalette.size() < 127) {
