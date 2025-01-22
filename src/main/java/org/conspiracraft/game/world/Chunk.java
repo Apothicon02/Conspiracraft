@@ -15,13 +15,11 @@ public class Chunk {
     public static final Vector2i air = new Vector2i(0, 0);
     public static final Vector4i fullSunLight = new Vector4i(0, 0, 0, 20);
     private byte[] corners = new byte[totalBlocks];
-    private BitSet blockBools = new BitSet(totalBlocks);
-    private byte[] blockBytes = null;
-    private short[] blockShorts = null;
+    int[] blockData = new int[totalBlocks/32];
     private BitSet lightBools = new BitSet(totalBlocks);
     private byte[] lightBytes = null;
     private short[] lightShorts = null;
-    private List<Vector2i> blockPalette = new ArrayList<>();
+    private List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0)));
     private List<Vector4i> lightPalette = new ArrayList<>();
 
     public Chunk() {
@@ -111,83 +109,10 @@ public class Chunk {
         }
     }
     public void setBlocks(int[] blocks) {
-        if (blockPalette.size() < 2) {
-            if (blockBools == null) {
-                blockBools = new BitSet(totalBlocks);
-            }
-            blockBytes = null;
-            blockShorts = null;
-            for (int i = 0; i < totalBlocks/32; i++) {
-                int bits = blocks[i];
-                int offset = i*32;
-                for (int e = 0; e <= 31; e++) {
-                    blockBools.set(offset+e, (bits & (1 << e)) != 0);
-                }
-            }
-        } else if (blockPalette.size() < 127) {
-            blockBools = null;
-            blockBytes = new byte[totalBlocks];
-            blockShorts = null;
-            int i = 0;
-            if (blockPalette.size() <= 3) {
-                for (int block : blocks) {
-                    int[] values = Utils.unpackPacked16Ints(block);
-                    for (int value : values) {
-                        blockBytes[i++] = (byte) (value);
-                    }
-                }
-            } else {
-                for (int block : blocks) {
-                    Vector4i vec = Utils.unpackPacked4Ints(block);
-                    blockBytes[i++] = (byte) (vec.x);
-                    blockBytes[i++] = (byte) (vec.y);
-                    blockBytes[i++] = (byte) (vec.z);
-                    blockBytes[i++] = (byte) (vec.w);
-                }
-            }
-        } else {
-            blockBools = null;
-            blockBytes = null;
-            blockShorts = new short[totalBlocks];
-            int i = 0;
-            for (int block : blocks) {
-                Vector2i vec = Utils.unpackInt(block);
-                blockShorts[i++] = (short) (vec.x);
-                blockShorts[i++] = (short) (vec.y);
-            }
-        }
+        blockData = blocks;
     }
     public int[] getAllBlocks() {
-        if (blockBools != null) {
-            int[] returnObj = new int[totalBlocks/32];
-            for (int i = 0; i < totalBlocks/32; i++) {
-                returnObj[i] = Utils.packBools(blockBools.get(i*32, (i*32)+32));
-            }
-            return returnObj;
-        } else if (blockBytes != null) {
-            if (blockPalette.size() <= 3) {
-                int[] returnObj = new int[totalBlocks/16];
-                for (int i = 0; i < totalBlocks/16; i++) {
-                    returnObj[i] = Utils.pack16Ints(new int[]{getBlockKey(i*16), getBlockKey((i*16)+1), getBlockKey((i*16)+2), getBlockKey((i*16)+3),
-                            getBlockKey((i*16)+4), getBlockKey((i*16)+5), getBlockKey((i*16)+6), getBlockKey((i*16)+7),
-                            getBlockKey((i*16)+8), getBlockKey((i*16)+9), getBlockKey((i*16)+10), getBlockKey((i*16)+11),
-                            getBlockKey((i*16)+12), getBlockKey((i*16)+13), getBlockKey((i*16)+14), getBlockKey((i*16)+15)});
-                }
-                return returnObj;
-            } else {
-                int[] returnObj = new int[totalBlocks / 4];
-                for (int i = 0; i < totalBlocks / 4; i++) {
-                    returnObj[i] = Utils.pack4Ints(getBlockKey(i * 4), getBlockKey((i * 4) + 1), getBlockKey((i * 4) + 2), getBlockKey((i * 4) + 3));
-                }
-                return returnObj;
-            }
-        } else {
-            int[] returnObj = new int[totalBlocks/2];
-            for (int i = 0; i < totalBlocks/2; i++) {
-                returnObj[i] = Utils.packInts(getBlockKey(i*2), getBlockKey((i*2)+1));
-            }
-            return returnObj;
-        }
+        return blockData;
     }
     public void setPalette(int[] palette) {
         for (int integer : palette) {
@@ -222,12 +147,65 @@ public class Chunk {
         return lightPalette.size();
     }
     public int getBlockKey(int pos) {
-        if (blockShorts != null) {
-            return blockShorts[pos];
-        } else if (blockBytes != null) {
-            return blockBytes[pos];
+        if (blockPalette.size() < 3) {
+            int intPos = pos/32;
+            BitSet bits = Utils.unpackBools(blockData[intPos]);
+            return bits.get(pos-(intPos*32)) ? 1 : 0;
+        } else if (blockPalette.size() < 128) {
+            if (blockPalette.size() <= 4) {
+                int intPos = pos/16;
+                int[] bits = Utils.unpackPacked16Ints(blockData[intPos]);
+                return bits[(pos-(intPos*16))];
+            } else {
+                int intPos = pos/4;
+                Vector4i bits = Utils.unpackPacked4Ints(blockData[intPos]);
+                int bit = pos-(intPos*4);
+                return bit == 0 ? bits.x : (bit == 1 ? bits.y : (bit == 2 ? bits.z : bits.w));
+            }
         } else {
-            return blockBools.get(pos) ? 0 : -1;
+            int intPos = pos/2;
+            Vector2i bits = Utils.unpackInt(blockData[intPos]);
+            int bit = pos-(intPos*2);
+            return bit == 0 ? bits.x : bits.y;
+        }
+    }
+    public void setBlockKey(int pos, int key) {
+        if (blockPalette.size() < 3) {
+            int intPos = pos/32;
+            BitSet bits = Utils.unpackBools(blockData[intPos]);
+            bits.set(pos-(intPos*32), key);
+            blockData[intPos] = Utils.packBools(bits);
+        } else if (blockPalette.size() < 128) {
+            if (blockPalette.size() <= 4) {
+                int intPos = pos/16;
+                int[] bits = Utils.unpackPacked16Ints(blockData[intPos]);
+                bits[(pos-(intPos*16))] = key;
+                blockData[intPos] = Utils.pack16Ints(bits);
+            } else {
+                int intPos = pos/4;
+                Vector4i bits = Utils.unpackPacked4Ints(blockData[intPos]);
+                int bit = pos-(intPos*4);
+                if (bit == 0) {
+                    bits.x = key;
+                } else if (bit == 1) {
+                    bits.y = key;
+                } else if (bit == 2) {
+                    bits.z = key;
+                } else {
+                    bits.w = key;
+                }
+                blockData[intPos] = Utils.pack4Ints(bits.x, bits.y, bits.z, bits.z);
+            }
+        } else {
+            int intPos = pos/2;
+            Vector2i bits = Utils.unpackInt(blockData[intPos]);
+            int bit = pos-(intPos*2);
+            if (bit == 0) {
+                bits.x = key;
+            } else {
+                bits.y = key;
+            }
+            blockData[intPos] = Utils.packInts(bits.x, bits.y);
         }
     }
     public int getLightKey(int pos) {
@@ -241,12 +219,7 @@ public class Chunk {
     }
     public Block getBlock(int pos) {
         int index = getBlockKey(pos);
-        Vector2i id;
-        if (index >= 0) {
-            id = blockPalette.get(index);
-        } else {
-            id = air;
-        }
+        Vector2i id = blockPalette.get(index);
         int lightIndex = getLightKey(pos); //get the blockPalette index from the blocks array
         Vector4i light;
         if (lightIndex >= 0) {
@@ -256,57 +229,114 @@ public class Chunk {
         }
         return new Block(id.x, id.y, (byte) light.x, (byte) light.y, (byte) light.z, (byte) light.w);
     }
+    public void setBlockPaletteId(int pos, int id) {
+        if (blockPalette.size() < 3) {
+            int intPos = pos/32;
+            BitSet bits = Utils.unpackBools(blockData[intPos]);
+            bits.set(pos-(intPos*32), id == 1);
+            blockData[intPos] = Utils.packBools(bits);
+        } else if (blockPalette.size() < 128) {
+            if (blockPalette.size() <= 4) {
+                int intPos = pos/16;
+                int[] bits = Utils.unpackPacked16Ints(blockData[intPos]);
+                bits[pos-(intPos*16)] = id;
+                blockData[intPos] = Utils.pack16Ints(bits);
+            } else {
+                int intPos = pos/4;
+                Vector4i bits = Utils.unpackPacked4Ints(blockData[intPos]);
+                int bit = pos-(intPos*4);
+                if (bit == 0) {
+                    bits.x = id;
+                } else if (bit == 1) {
+                    bits.y = id;
+                } else if (bit == 2) {
+                    bits.z = id;
+                } else {
+                    bits.w = id;
+                }
+                blockData[intPos] = Utils.pack4Ints(bits.x, bits.y, bits.z, bits.w);
+            }
+        } else {
+            int intPos = pos/2;
+            Vector2i bits = Utils.unpackInt(blockData[intPos]);
+            int bit = pos-(intPos*2);
+            if (bit == 0) {
+                bits.x = id;
+            } else {
+                bits.y = id;
+            }
+            blockData[intPos] = Utils.packInts(bits.x, bits.y);
+        }
+    }
     public void setBlock(int pos, Block block, Vector3i globalPos) {
         boolean wasInPalette = false;
         for (int i = 0; i < blockPalette.size(); i++) { //iterate through blockPalette until finding a matching block, and upon doing so set the blockPalette index for that block position to the index of the matching blockPalette entry
             if (block.idVec().equals(blockPalette.get(i))) {
-                if (blockShorts != null) {
-                    blockShorts[pos] = (short) i;
-                } else if (blockBytes != null) {
-                    blockBytes[pos] = (byte) i;
-                } else {
-                    blockBools.set(pos, true);
-                }
+                setBlockPaletteId(pos, i);
                 wasInPalette = true;
                 break;
             }
         }
         if (!wasInPalette) {
-            int size = blockPalette.size();
-            if (size == 127 && blockBytes != null) {
-                blockShorts = new short[totalBlocks];
-                Arrays.fill(blockShorts, (short) -1);
-                for (int i = 0; i < blockBytes.length; i++) {
-                    blockShorts[i] = blockBytes[i];
+            int oldSize = blockPalette.size();
+            //add to palette
+            blockPalette.addLast(block.idVec());
+            //update compressed data to be in proper format for the new palette size if necessary
+            if (oldSize == 2) {
+                int[] newBlocks = new int[totalBlocks/16];
+                int i = 0;
+                for (int packed : blockData) {
+                    BitSet oldBlocks = Utils.unpackBools(packed);
+                    for (int section = 0; section < 2; section++) {
+                        int[] sectionData = new int[16];
+                        int e = 0;
+                        for (int oldBlock = section*16; oldBlock < (section+1)*16; oldBlock++) {
+                            sectionData[e] = oldBlocks.get(oldBlock) ? 1 : 0;
+                            e++;
+                        }
+                        newBlocks[i] = Utils.pack16Ints(sectionData);
+                        i++;
+                    }
                 }
-                blockBytes = null;
-            } else if (size == 1 && blockBools != null) {
-                blockBytes = new byte[totalBlocks];
-                Arrays.fill(blockBytes, (byte) -1);
-                for (int i = 0; i < blockBools.length(); i++) {
-                    blockBytes[i] = (byte) (blockBools.get(i) ? 0 : -1);
+                blockData = newBlocks;
+            } else if (oldSize == 4) {
+                int[] newBlocks = new int[totalBlocks/4];
+                int i = 0;
+                for (int packed : blockData) {
+                    int[] oldBlocks = Utils.unpackPacked16Ints(packed);
+                    for (int section = 0; section < 4; section++) {
+                        int[] sectionData = new int[4];
+                        int e = 0;
+                        for (int oldBlock = section*4; oldBlock < (section+1)*4; oldBlock++) {
+                            sectionData[e] = oldBlocks[oldBlock];
+                            e++;
+                        }
+                        newBlocks[i] = Utils.pack4Ints(sectionData[0], sectionData[1], sectionData[2], sectionData[3]);
+                        i++;
+                    }
                 }
-                blockBools = null;
-            }
-
-            int index = blockPalette.size();
-            for (int i = 1; i < blockPalette.size(); i++) {
-                if (blockPalette.get(i) == null) {
-                    index = i;
-                    break;
+                blockData = newBlocks;
+            } else if (oldSize == 127) {
+                int[] newBlocks = new int[totalBlocks/2];
+                int i = 0;
+                for (int packed : blockData) {
+                    Vector4i oldVec = Utils.unpackPacked4Ints(packed);
+                    int[] oldBlocks = new int[]{oldVec.x, oldVec.y, oldVec.z, oldVec.w};
+                    for (int section = 0; section < 2; section++) {
+                        int[] sectionData = new int[2];
+                        int e = 0;
+                        for (int oldBlock = section*2; oldBlock < (section+1)*2; oldBlock++) {
+                            sectionData[e] = oldBlocks[oldBlock];
+                            e++;
+                        }
+                        newBlocks[i] = Utils.packInts(sectionData[0], sectionData[1]);
+                        i++;
+                    }
                 }
+                blockData = newBlocks;
             }
-            if (index == size) {
-                blockPalette.addLast(null);
-            }
-            blockPalette.set(index, block.idVec());
-            if (blockShorts != null) {
-                blockShorts[pos] = (short) index;
-            } else if (blockBytes != null) {
-                blockBytes[pos] = (byte) index;
-            } else {
-                blockBools.set(pos, true);
-            }
+            //finally, set the block
+            setBlockPaletteId(pos, blockPalette.size());
         }
         wasInPalette = false;
         for (int i = 0; i < lightPalette.size(); i++) { //iterate through blockPalette until finding a matching block, and upon doing so set the blockPalette index for that block position to the index of the matching blockPalette entry
@@ -367,104 +397,36 @@ public class Chunk {
     }
     public void cleanPalette() {
         if (!blockPalette.isEmpty()) {
-            int[] pointerUses = new int[blockPalette.size()+1];
-            if (blockShorts != null) {
-                for (short block : blockShorts) {
-                    if (block >= 0) {
-                        pointerUses[block] += 1;
-                    }
+            //count usages of each palette entry
+            int oldSize = blockPalette.size();
+            int[] pointerUses = new int[oldSize];
+            for (int pos = 0; pos < totalBlocks; pos++) {
+                pointerUses[getBlockKey(pos)]++;
+            }
+            //create new palette leaving out unused entries from the old palette
+            List<Vector2i> newPalette = new ArrayList<>();
+            int entryIndex = 0;
+            for (Vector2i entry : blockPalette) {
+                if (pointerUses[entryIndex] >= 0) {
+                    newPalette.addLast(entry);
                 }
-                List<Vector2i> newPalette = new ArrayList<>();
-                for (short entry = 0; entry < blockPalette.size(); entry++) {
-                    int pointer = pointerUses[entry];
-                    if (pointer >= 0) {
-                        newPalette.addLast(blockPalette.get(entry));
-                    }
-                }
-                if (newPalette.size() < 2) {
-                    blockBools = new BitSet(totalBlocks);
-                    for (int i = 0; i < totalBlocks; i++) {
-                        byte index = (byte) blockShorts[i];
-                        if (index >= 0) {
-                            Vector2i block = blockPalette.get(index);
-                            if (newPalette.contains(block)) {
-                                blockBools.set(i, true);
-                                break;
-                            }
-                        }
-                    }
-                    blockShorts = null;
-                } else if (newPalette.size() < 127) {
-                    blockBytes = new byte[totalBlocks];
-                    Arrays.fill(blockBytes, (byte) -1);
-                    for (int i = 0; i < totalBlocks; i++) {
-                        byte index = (byte) blockShorts[i];
-                        if (index >= 0) {
-                            Vector2i block = blockPalette.get(index);
-                            for (byte p = 0; p < newPalette.size(); p++) {
-                                if (newPalette.get(p).equals(block)) {
-                                    blockBytes[i] = p;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    blockShorts = null;
-                } else {
-                    for (int i = 0; i < totalBlocks; i++) {
-                        short index = blockShorts[i];
-                        if (index >= 0) {
-                            Vector2i block = blockPalette.get(index);
-                            for (short p = 0; p < newPalette.size(); p++) {
-                                if (newPalette.get(p).equals(block)) {
-                                    blockShorts[i] = p;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                entryIndex++;
+            }
+            int size = newPalette.size();
+            //update compression format for block data and clean palette indexes if new palette size is different enough
+            int oldBitsPerBlock = oldSize < 3 ? 1 : (oldSize < 128 ? (oldSize <= 4 ? 2 : 8) : 16);
+            int bitsPerBlock = size < 3 ? 1 : (size < 128 ? (size <= 4 ? 2 : 8) : 16);
+            if (oldBitsPerBlock != bitsPerBlock) {
+                int[] uncompressedBlocks = new int[totalBlocks];
+                for (int pos = 0; pos < totalBlocks; pos++) {
+                    uncompressedBlocks[pos] = getBlockKey(pos);
                 }
                 blockPalette = newPalette;
-            } else if (blockBytes != null) {
-                for (byte block : blockBytes) {
-                    if (block >= 0) {
-                        pointerUses[block] += 1;
-                    }
+                int pos = 0;
+                for (int block : uncompressedBlocks) {
+                    setBlockKey(pos, block);
+                    pos++;
                 }
-                List<Vector2i> newPalette = new ArrayList<>();
-                for (byte entry = 0; entry < blockPalette.size(); entry++) {
-                    int pointer = pointerUses[entry];
-                    if (pointer >= 0) {
-                        newPalette.addLast(blockPalette.get(entry));
-                    }
-                }
-                if (newPalette.size() < 2) {
-                    blockBools = new BitSet(totalBlocks);
-                    for (int i = 0; i < totalBlocks; i++) {
-                        byte index = blockBytes[i];
-                        if (index >= 0) {
-                            Vector2i block = blockPalette.get(index);
-                            if (newPalette.contains(block)) {
-                                blockBools.set(i, true);
-                                break;
-                            }
-                        }
-                    }
-                    blockBytes = null;
-                } else {
-                    for (int i = 0; i < totalBlocks; i++) {
-                        byte index = blockBytes[i];
-                        if (index >= 0) {
-                            Vector2i block = blockPalette.get(index);
-                            for (byte p = 0; p < newPalette.size(); p++) {
-                                if (newPalette.get(p).equals(block)) {
-                                    blockBytes[i] = p;
-                                }
-                            }
-                        }
-                    }
-                }
-                blockPalette = newPalette;
             }
         }
 

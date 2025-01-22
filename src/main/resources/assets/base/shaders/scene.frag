@@ -130,19 +130,19 @@ int getBlockData(int x, int y, int z) {
     int paletteSize = chunksData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int blocksPerInt = 2;
-    if (paletteSize < 2) {
+    if (paletteSize < 3) {
         blocksPerInt = 32;
         int specificInt = (condensedLocalPos/blocksPerInt);
         int values = region1BlockData[pointer+paletteSize+specificInt];
         int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
         return region1BlockData[pointer+((values >> whereInInt) & 0x2)];
-    } else if (paletteSize <= 3) {
+    } else if (paletteSize <= 4) {
         blocksPerInt = 16;
         int specificInt = (condensedLocalPos/blocksPerInt);
         int values = region1BlockData[pointer+paletteSize+specificInt];
         int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
         return region1BlockData[pointer+((values >> (whereInInt*2)) & 0x3)];
-    } else if (paletteSize < 127) {
+    } else if (paletteSize < 128) {
         blocksPerInt = 4;
         int specificInt = (condensedLocalPos/blocksPerInt);
         int values = region1BlockData[pointer+paletteSize+specificInt];
