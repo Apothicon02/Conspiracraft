@@ -3,7 +3,6 @@ package org.conspiracraft;
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.rendering.Renderer;
-import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
@@ -12,23 +11,16 @@ import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL40;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.Math;
-import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(World.size/2f, 320, World.size/2f));
+    public static Player player = new Player(new Vector3f(64, 310, 64));
     private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
@@ -40,10 +32,7 @@ public class Main {
 
     public void init(Window window) throws Exception {
         Noise.init();
-        World.init();
         GL.createCapabilities();
-//        GL40.glEnable(GL40.GL_CULL_FACE);
-//        GL40.glCullFace(GL40.GL_BACK);
     }
 
     boolean wasTDown = false;
@@ -57,7 +46,6 @@ public class Main {
     boolean isClosing = false;
 
     long lastBlockBroken = 0L;
-    Block selectedBlock = new Block(2, 0);
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
@@ -70,6 +58,8 @@ public class Main {
                 player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
                 player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
                 player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
+                player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
+                player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
 
                 if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis - player.lastJump > 200) { //only jump at most five times a second
                     player.jump = timeMillis;
@@ -79,52 +69,14 @@ public class Main {
                 Vector2f displVec = mouseInput.getDisplVec();
                 player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                         (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
-                if (timeMillis - lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
-                    boolean lmbDown = mouseInput.isLeftButtonPressed();
-                    boolean mmbDown = mouseInput.isMiddleButtonPressed();
-                    boolean rmbDown = mouseInput.isRightButtonPressed();
-                    if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
-                        if (pos != null) {
-                            if (mmbDown) {
-                                selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                            } else if (BlockTypes.blockTypeMap.get(selectedBlock.typeId()) != null) {
-                                lastBlockBroken = timeMillis;
-                                int blockTypeId = selectedBlock.typeId();
-                                int blockSubtypeId = selectedBlock.subtypeId();
-                                if (lmbDown) {
-                                    blockTypeId = 0;
-                                    blockSubtypeId = 0;
-                                }
-                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
-                            }
-                        }
-                    }
-                }
 
                 if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
                     Renderer.showUI = !Renderer.showUI;
                 }
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
-                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        int newSubId = selectedBlock.subtypeId() + 1;
-                        selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
-                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newSubId = selectedBlock.subtypeId() - 1;
-                        if (newSubId < 0) {
-                            newSubId = 0;
-                        }
-                        selectedBlock = new Block(selectedBlock.typeId(), newSubId, selectedBlock.r(), selectedBlock.g(), selectedBlock.b(), selectedBlock.s());
-                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.atlasChanged = true;
-                    }
-                    if (wasGDown && !window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS)) {
-                        World.regenerateWorld();
-                    }
-                    if (wasLDown && !window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS)) {
-                        Renderer.worldChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                         if (Renderer.renderDistanceMul < 96) {
@@ -137,29 +89,6 @@ public class Main {
                         }
                     }
                 } else {
-                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        int newId = selectedBlock.typeId() + 1;
-                        if (newId >= BlockTypes.blockTypeMap.size()) {
-                            newId = 0;
-                        }
-                        BlockType type = BlockTypes.blockTypeMap.get(newId);
-                        if (type instanceof LightBlockType lType) {
-                            selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
-                        } else {
-                            selectedBlock = new Block(newId, 0);
-                        }
-                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newId = selectedBlock.typeId() - 1;
-                        if (newId < 0) {
-                            newId = BlockTypes.blockTypeMap.size() - 1;
-                        }
-                        BlockType type = BlockTypes.blockTypeMap.get(newId);
-                        if (type instanceof LightBlockType lType) {
-                            selectedBlock = new Block(newId, 0, lType.r, lType.g, lType.b, (byte) 0);
-                        } else {
-                            selectedBlock = new Block(newId, 0);
-                        }
-                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         updateTime(100000L, 1);
                     }
@@ -202,26 +131,20 @@ public class Main {
             new File(path).mkdirs();
             for (int x = 0; x < World.sizeChunks; x++) {
                 for (int z = 0; z < World.sizeChunks; z++) {
-                    int columnPos = World.condenseChunkPos(x, z);
+                    int columnPos = Utils.condenseChunkPos(x, z);
                     if (World.columnUpdates[columnPos]) {
                         World.columnUpdates[columnPos] = false;
                         String chunkPath = path + x + "x" + z + "z.column";
                         FileOutputStream out = new FileOutputStream(chunkPath);
                         for (int y = 0; y < World.heightChunks; y++) {
-                            Chunk chunk = World.region1Chunks[World.condenseChunkPos(x, y, z)];
-                            byte[] palette = Utils.intArrayToByteArray(chunk.getPalette());
-                            byte[] blocks = Utils.intArrayToByteArray(chunk.getAllBlocks());
-                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
-                            byte[] lights = Utils.intArrayToByteArray(chunk.getAllLights());
-                            ByteBuffer buffer = ByteBuffer.allocate(palette.length + 4 + blocks.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                            Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+                            byte[] palette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+                            byte[] blocks = Utils.intArrayToByteArray(chunk.getBlockData());
+                            ByteBuffer buffer = ByteBuffer.allocate(palette.length + 4 + blocks.length + 4);
                             buffer.put(Utils.intArrayToByteArray(new int[]{palette.length / 4}));
                             buffer.put(palette);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
                             buffer.put(blocks);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
-                            buffer.put(lightPalette);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
-                            buffer.put(lights);
                             out.write(buffer.array());
                         }
                         out.close();
@@ -250,11 +173,11 @@ public class Main {
         Vector3f blockPos = null;
         for (int i = 0; i < range; i++) {
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-            Block block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
+            Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
-                int typeId = block.typeId();
+                int typeId = block.x();
                 if (countCollisionless || BlockTypes.blockTypeMap.get(typeId).isCollidable) {
-                    int subTypeId = block.subtypeId();
+                    int subTypeId = block.y();
                     if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
                         if (prevPos) {
                             return rayPos;

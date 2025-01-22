@@ -1,6 +1,8 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 
@@ -58,44 +60,6 @@ public class Utils {
         return buffer;
     }
 
-    public static int packBools(BitSet set) {
-        int value = 0;
-        for (int i = 0; i < set.length(); i++) {
-            if (set.get(i)) {
-                value |= (1 << i);
-            }
-        }
-        return value;
-    }
-    public static BitSet unpackBools(int packed) {
-        BitSet set = new BitSet(32);
-        for (int i = 0; i < 32; i++) {
-            if ((packed & (1 << i)) != 0) {
-                set.set(i);
-            }
-        }
-        return set;
-    }
-    public static int pack16Ints(int[] values) {
-        int packed = 0;
-        for (int i = 0; i < values.length; i++) {
-            packed |= (values[i] & 0x3) << (i * 2);
-        }
-        return packed;
-    }
-    public static int[] unpackPacked16Ints(int packed) {
-        int[] values = new int[16];
-        for (int i = 0; i < 16; i++) {
-            values[i] = (packed >> (i*2)) & 0x3;
-        }
-        return values;
-    }
-    public static int pack4Ints(int one, int two, int three, int four) {
-        return (one << 24) | (two << 16) | (three << 8) | four;
-    }
-    public static Vector4i unpackPacked4Ints(int packed) {
-        return new Vector4i(0xFF & packed >> 24, 0xFF & packed >> 16, 0xFF & packed >> 8, 0xFF & packed);
-    }
     public static int packInts(int first4, int last4) {
         return (first4 << 16) | last4;
     }
@@ -131,5 +95,33 @@ public class Utils {
 
     public static int colorToInt(Color color) {
         return color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
+    }
+
+    public static int condensePos(int x, int z) {
+        return (x * World.size) + z;
+    }
+    public static int condensePos(int x, int y, int z) {
+        return (((x*World.size)+z)*World.height)+y;
+    }
+    public static int condensePos(int x, int y, int z, int customSize) {
+        return (((x*customSize)+z)*World.height)+y;
+    }
+    public static int condensePos(Vector3i pos) {
+        return (((pos.x*World.size)+pos.z)*World.height)+pos.y;
+    }
+    public static int condenseLocalPos(int x, int y, int z) {
+        return (((x*World.chunkSize)+z)*World.chunkSize)+y;
+    }
+    public static int condenseLocalPos(Vector3i pos) {
+        return (((pos.x*World.chunkSize)+pos.z)*World.chunkSize)+pos.y;
+    }
+    public static int condenseChunkPos(Vector3i pos) {
+        return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
+    }
+    public static int condenseChunkPos(int x, int y, int z) {
+        return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
+    }
+    public static int condenseChunkPos(int x, int z) {
+        return (x*World.sizeChunks)+z;
     }
 }

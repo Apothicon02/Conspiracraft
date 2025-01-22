@@ -6,8 +6,6 @@ import java.util.Map;
 public class BlockTypes {
     public static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
-    private static int key = 0;
-
     public static BlockType AIR = create(new BlockType(true, false));
     public static BlockType WATER = create(new BlockType(true, false));
     public static BlockType GRASS = create(new BlockType(false));
@@ -28,8 +26,7 @@ public class BlockTypes {
     public static BlockType WILLOW_LEAVES = create(new BlockType(true, false));
 
     private static BlockType create(BlockType type) {
-        blockTypeMap.put(key, type);
-        key++;
+        blockTypeMap.put(blockTypeMap.size(), type);
         return type;
     }
 }

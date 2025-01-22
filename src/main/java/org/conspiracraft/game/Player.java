@@ -2,7 +2,6 @@ package org.conspiracraft.game;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
-import org.conspiracraft.game.blocks.Block;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.rendering.Renderer;
 import org.conspiracraft.game.world.World;
@@ -27,17 +26,20 @@ public class Player {
     public boolean backward = false;
     public boolean rightward = false;
     public boolean leftward = false;
+    public boolean upward = false;
+    public boolean downward = false;
+    public boolean flying = true;
 
     public Player(Vector3f newPos) {
         setPos(newPos);
     }
 
     public boolean solid(float x, float y, float z) {
-        Block block = World.getBlock(x, y, z);
+        Vector2i block = World.getBlock(x, y, z);
         if (block != null) {
-            int typeId = block.typeId();
+            int typeId = block.x;
             if (BlockTypes.blockTypeMap.get(typeId).isCollidable) {
-                if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.subtypeId() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
+                if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.y() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
                     return true;
                 }
             }
@@ -58,7 +60,7 @@ public class Player {
     }
 
     public void tick(long time) {
-        if (vel.y >= -1+grav) {
+        if (!flying && vel.y >= -1+grav) {
             vel.set(vel.x, vel.y-grav, vel.z);
         }
 
@@ -72,17 +74,23 @@ public class Player {
 
         Vector2f movement = new Vector2f(0f);
         if (forward || backward) {
-            Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, 0, speed*(sprint ? (backward ? 1 : 2) : 1)*(forward ? -1 : 1)).getTranslation(new Vector3f());
-            movement.add(pos.x-translatedPos.x, pos.z-translatedPos.z);
+            Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, 0, speed * (sprint ? (backward ? 1 : (flying ? 10 : 2)) : 1) * (forward ? -1 : 1)).getTranslation(new Vector3f());
+            movement.add(pos.x - translatedPos.x, pos.z - translatedPos.z);
         }
         if (rightward || leftward) {
-            Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(speed*(sprint ? 2 : 1)*(rightward ? -1 : 1), 0, 0).getTranslation(new Vector3f());
-            movement.add(pos.x-translatedPos.x, pos.z-translatedPos.z);
+            Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(speed * (sprint ? (flying ? 10 : 2) : 1) * (rightward ? -1 : 1), 0, 0).getTranslation(new Vector3f());
+            movement.add(pos.x - translatedPos.x, pos.z - translatedPos.z);
         }
 
-        float mX = vel.x+movement.x;
+        float mX = vel.x + movement.x;
         float mY = vel.y;
-        float mZ = vel.z+movement.y;
+        float mZ = vel.z + movement.y;
+        if (flying) {
+            if (upward || downward) {
+                Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? (-10 * (sprint ? 0f : 1f)) : -12 * (sprint ? 2 : 1)), 0).getTranslation(new Vector3f());
+                mY += (pos.y - translatedPos.y);
+            }
+        }
         Vector3f hitPos = pos;
         Vector3f destPos = new Vector3f(mX+pos.x, mY+pos.y, mZ+pos.z);
         Float maxX = null;
@@ -115,75 +123,6 @@ public class Player {
             }
         }
         setPos(hitPos);
-
-//        float x = vel.x+movement.x;
-//        float y = vel.y;
-//        float z = vel.z+movement.y;
-//        if (y < 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, (int) (y*-8)+8, false);
-//            float dist = y;
-//            if (offsetPos != null) {
-//                dist = (pos.y - offsetPos.y)*-1;
-//            }
-//            if (y < dist) {
-//                y = dist;
-//                vel.set(vel.x, 0, vel.z);
-//            }
-//        } else if (y > 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).translate(0, height, 0).rotate(new Quaternionf(0.7071068, 0, 0, -0.7071068)), true, (int) (y*8)+8, false);
-//            float dist = y;
-//            if (offsetPos != null) {
-//                dist = Math.abs((pos.y+height) - offsetPos.y);
-//            }
-//            if (y > dist) {
-//                y = dist;
-//                vel.set(vel.x, 0, vel.z);
-//            }
-//        }
-//        if (x < 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).translate(0, 0.3f, 0).rotate(new Quaternionf(0, 0.7071068, 0, 0.7071068)), true, (int) (x*-8)+8, false);
-//            float dist = x;
-//            if (offsetPos != null) {
-//                dist = (pos.x - offsetPos.x)*-1;
-//            }
-//            if (x < dist) {
-//                x = dist;
-//                vel.set(0, vel.y, vel.z);
-//            }
-//        } else if (x > 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).translate(0, 0.3f, 0).rotate(new Quaternionf(0, 0.7071068, 0, -0.7071068)), true, (int) (x*8)+8, false);
-//            float dist = x;
-//            if (offsetPos != null) {
-//                dist = Math.abs(pos.x - offsetPos.x);
-//            }
-//            if (x > dist) {
-//                x = dist;
-//                vel.set(0, vel.y, vel.z);
-//            }
-//        }
-//        if (z < 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).translate(0, 0.3f, 0).rotate(new Quaternionf(0, 1, 0, 0)), true, (int) (z*-8)+8, false);
-//            float dist = z;
-//            if (offsetPos != null) {
-//                dist = (pos.z - offsetPos.z)*-1;
-//            }
-//            if (z < dist) {
-//                z = dist;
-//                vel.set(vel.x, vel.y, 0);
-//            }
-//        } else if (z > 0) {
-//            Vector3f offsetPos = Main.raycast(new Matrix4f().setTranslation(pos).translate(0, 0.3f, 0).rotate(new Quaternionf(0, 0, 0, 1)), true, (int) (z*8)+8, false);
-//            float dist = z;
-//            if (offsetPos != null) {
-//                dist = Math.abs(pos.z - offsetPos.z);
-//            }
-//            if (z > dist) {
-//                z = dist;
-//                vel.set(vel.x, vel.y, 0);
-//            }
-//        }
-//
-//        move(x, y, z, false);
         decayVel(0.01f);
     }
 
