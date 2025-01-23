@@ -45,7 +45,11 @@ public class Chunk {
         int intPos = pos/32;
         int values = blockData[intPos];
         int whereInInt = pos-(intPos*32);
-        blockData[intPos] = values | (key << whereInInt);
+        if (key == 0) {
+            blockData[intPos] = values & (~(1 << whereInInt));
+        } else {
+            blockData[intPos] = values | (1 << whereInInt);
+        }
     }
     public int getBlockKey(int pos) {
         int intPos = pos/32;

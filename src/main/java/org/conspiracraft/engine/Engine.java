@@ -70,7 +70,7 @@ public class Engine {
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
                     fps = (int)(1000f/(now - initialTime));
-                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + fps + "fps");
+                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " + fps + "fps");
                     framesUntilUpdate = 40;
                 }
             }

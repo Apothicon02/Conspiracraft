@@ -1,6 +1,7 @@
 package org.conspiracraft.game.rendering;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.World;
@@ -32,6 +33,9 @@ public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
 
+    public static int coherentNoiseId;
+    public static int whiteNoiseId;
+
     public static int atlasSSBOId;
     public static int chunkBlocksSSBOId;
     public static int blocksSSBOId;
@@ -39,6 +43,11 @@ public class Renderer {
     public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
+    public static int timeOfDayUniform;
+    public static int timeUniform;
+    public static int selectedUniform;
+    public static int uiUniform;
+    public static int sunUniform;
 
     public static int renderDistanceMul = 20; //4
     public static float timeOfDay = 0.5f;
@@ -68,6 +77,22 @@ public class Renderer {
         scene.createFragmentShader(Utils.readFile("assets/base/shaders/scene.frag"));
         scene.link();
 
+        coherentNoiseId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.COHERERENT_NOISE));
+
+        whiteNoiseId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.WHITE_NOISE));
+
         atlasSSBOId = glGenBuffers();
         chunkBlocksSSBOId = glGenBuffers();
         blocksSSBOId = glGenBuffers();
@@ -75,6 +100,11 @@ public class Renderer {
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
         renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
+        timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
+        timeUniform = glGetUniformLocation(scene.programId, "time");
+        selectedUniform = glGetUniformLocation(scene.programId, "selected");
+        uiUniform = glGetUniformLocation(scene.programId, "ui");
+        sunUniform = glGetUniformLocation(scene.programId, "sun");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(Integer.MAX_VALUE);
@@ -97,7 +127,24 @@ public class Renderer {
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
         glUniform1i(renderDistanceUniform, 200+(100*renderDistanceMul));
+        glUniform1f(timeOfDayUniform, timeOfDay);
+        glUniform1d(timeUniform, time);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100, true);
+        if (selected == null) {
+            selected = new Vector3f(-1000, -1000, -1000);
+        }
+        glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
+        glUniform1i(uiUniform, showUI ? 1 : 0);
+        float halfSize = size/2f;
+        Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
+        sunPos.rotateY((float) time);
+        sunPos = new Vector3f(sunPos.x+halfSize, height, sunPos.z+halfSize);
+        glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
         if (atlasChanged) {
             atlasChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
@@ -204,8 +251,8 @@ public class Renderer {
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkPointers, GL_DYNAMIC_DRAW);
         } else {
-            for (int i : chunkPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, i, new int[]{chunkPointers[i], chunkPointers[i+1]});
+            for (int pos : chunkPointerChanges) {
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkPointers[pos], chunkPointers[pos+1]});
             }
             chunkPointerChanges.clear();
         }

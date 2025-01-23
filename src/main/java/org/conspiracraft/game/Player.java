@@ -64,7 +64,7 @@ public class Player {
             vel.set(vel.x, vel.y-grav, vel.z);
         }
 
-        if (time-jump < 100) { //prevent jumping when space bar was pressed longer than 0.1s ago
+        if (time-jump < 100 && !flying) { //prevent jumping when space bar was pressed longer than 0.1s ago or when flying
             if (Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, 2, false) != null) {
                 jump = 1000;
                 lastJump = time;

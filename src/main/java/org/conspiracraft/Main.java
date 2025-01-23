@@ -35,6 +35,7 @@ public class Main {
         GL.createCapabilities();
     }
 
+    boolean wasXDown = false;
     boolean wasTDown = false;
     boolean wasGDown = false;
     boolean wasLDown = false;
@@ -46,6 +47,7 @@ public class Main {
     boolean isClosing = false;
 
     long lastBlockBroken = 0L;
+    Vector2i selectedBlock = new Vector2i(15, 0);
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
@@ -69,12 +71,43 @@ public class Main {
                 Vector2f displVec = mouseInput.getDisplVec();
                 player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                         (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
+                if (timeMillis - lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
+                    boolean lmbDown = mouseInput.isLeftButtonPressed();
+                    boolean mmbDown = mouseInput.isMiddleButtonPressed();
+                    boolean rmbDown = mouseInput.isRightButtonPressed();
+                    if (lmbDown || mmbDown || rmbDown) {
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
+                        if (pos != null) {
+                            if (mmbDown) {
+                                selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                            } else if (BlockTypes.blockTypeMap.get(selectedBlock.x()) != null) {
+                                lastBlockBroken = timeMillis;
+                                int blockTypeId = selectedBlock.x();
+                                int blockSubtypeId = selectedBlock.y();
+                                if (lmbDown) {
+                                    blockTypeId = 0;
+                                    blockSubtypeId = 0;
+                                }
+                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                            }
+                        }
+                    }
+                }
 
                 if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
                     Renderer.showUI = !Renderer.showUI;
                 }
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                        selectedBlock.add(new Vector2i(0, 1));
+                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                        int newSubId = selectedBlock.y() - 1;
+                        if (newSubId < 0) {
+                            newSubId = 0;
+                        }
+                        selectedBlock = new Vector2i(selectedBlock.x, newSubId);
+                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.atlasChanged = true;
                     }
@@ -89,6 +122,22 @@ public class Main {
                         }
                     }
                 } else {
+                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                        int newId = selectedBlock.x() + 1;
+                        if (newId >= BlockTypes.blockTypeMap.size()) {
+                            newId = 0;
+                        }
+                        selectedBlock = new Vector2i(newId, selectedBlock.y);
+                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                        int newId = selectedBlock.x() - 1;
+                        if (newId < 0) {
+                            newId = BlockTypes.blockTypeMap.size() - 1;
+                        }
+                        selectedBlock = new Vector2i(newId, selectedBlock.y);
+                    }
+                    if (wasXDown && !window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS)) {
+                        player.flying = !player.flying;
+                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         updateTime(100000L, 1);
                     }
@@ -98,6 +147,7 @@ public class Main {
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
+                wasXDown = window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS);
                 wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);
                 wasLDown = window.isKeyPressed(GLFW_KEY_L, GLFW_PRESS);
                 wasUpDown = window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS);
