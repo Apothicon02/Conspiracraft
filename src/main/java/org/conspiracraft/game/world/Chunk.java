@@ -12,12 +12,16 @@ import static org.conspiracraft.game.world.World.chunkSize;
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     private int[] blockData = new int[totalBlocks/32];
-    private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0), new Vector2i(2, 0)));
+    private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0)));
 
     public void setBlockPalette(int[] data) {
         int i = 0;
         for (int integer : data) {
-            blockPalette.set(i++, Utils.unpackInt(integer));
+            if (i == 0) {
+                blockPalette.set(i++, Utils.unpackInt(integer));
+            } else {
+                blockPalette.add(i++, Utils.unpackInt(integer));
+            }
         }
     }
     public int[] getBlockPalette() {

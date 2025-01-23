@@ -60,6 +60,20 @@ ivec2 getBlock(int x, int y, int z) {
 ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
+bool isChunkAir(int x, int y, int z) {
+    if (x >= 0 && x < sizeChunks && y >= 0 && y < heightChunks && z >= 0 && z < sizeChunks) {
+        int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
+        int pointer = blockChunksData[condensedChunkPos*2];
+        int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
+        if (paletteSize == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return true;
+    }
+}
 
 vec3 stepMask(vec3 sideDist) {
     bvec3 mask;
@@ -126,7 +140,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
     vec3 sideDist = ((rayMapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
 
-    while (distance(rayMapPos, rayPos) < 3) {
+    while (distance(rayMapPos, rayPos) < 24) {
         if (rayMapPos.x >= 0 && rayMapPos.x < size && rayMapPos.y >= 0 && rayMapPos.y < height && rayMapPos.z >= 0 && rayMapPos.z < size) {
             //block start
             ivec2 blockInfo = getBlock(vec3(rayMapPos.x, rayMapPos.y, rayMapPos.z));
@@ -165,16 +179,14 @@ vec4 traceWorld(vec3 rayOg, vec3 dir) {
     ivec3 bDir = ivec3(dir.x < 0 ? -1 : (dir.x > 0 ? 1 : 0), dir.y < 0 ? -1 : (dir.y > 0 ? 1 : 0), dir.z < 0 ? -1 : (dir.z > 0 ? 1 : 0));
     float traveled = 0f;
     vec3 rayPos = rayOg;
-    vec3 prevRayPos;
-    while (distance(rayOg, rayPos) < renderDistance*10) {
+    while (distance(rayOg, rayPos) < renderDistance) {
         if (rayPos.x >= 0 && rayPos.x < size && rayPos.y >= 0 && rayPos.y < height && rayPos.z >= 0 && rayPos.z < size) {
-            prevRayPos = rayPos;
             rayPos = vec3(cam * vec4((dir * traveled), 1));
             bool nearVisibleBlock = false;
             for (int x = min(0, bDir.x); x <= max(0, bDir.x) && !nearVisibleBlock; x++) {
                 for (int z = min(0, bDir.y); z <= max(0, bDir.y) && !nearVisibleBlock; z++) {
                     for (int y = min(0, bDir.z); y <= max(0, bDir.z); y++) {
-                        if (getBlock(rayPos+vec3(x, y, z)).x > 0) {
+                        if (!isChunkAir(int(rayPos.x/16)+x, int(rayPos.y/16)+y, int(rayPos.z/16)+z)) {
                             nearVisibleBlock = true;
                             break;
                         }
@@ -183,18 +195,20 @@ vec4 traceWorld(vec3 rayOg, vec3 dir) {
             }
             if (nearVisibleBlock) {
                 mat4 offsetCam = cam;
+                vec3 prevRayPos = vec3(cam * vec4((dir * max(0, traveled-16)), 1));
                 offsetCam[3] = vec4(prevRayPos, 0);
                 vec4 color = dda(prevRayPos, vec3(offsetCam*vec4(dir, 0)));
                 if (color.a > 0) {
                     return color;
                 }
             }
-            traveled+=0.95f;
+            traveled+=16;
         } else {
             return vec4(0, 0, 1, 1);
         }
     }
     return vec4(0);
+
     //return dda(rayOg, vec3(cam*vec4(dir, 0)));
 }
 
@@ -206,6 +220,6 @@ void main()
     } else {
         vec3 camPos = vec3(cam[3]);
         vec3 dir = normalize(vec3(uv, 1));
-        fragColor = traceWorld(camPos, dir);
+        fragColor = traceWorld(camPos/16, dir);
     }
 }
