@@ -140,7 +140,7 @@ bool isChunkAir(int x, int y, int z) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
         int pointer = blockChunksData[condensedChunkPos*2];
         int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
-        if (paletteSize == 1 && getBlock((x*16)-3, (y*16)-3, (z*16)-3).x == 0) {
+        if (paletteSize == 1) {
             return true;
         } else {
             return false;

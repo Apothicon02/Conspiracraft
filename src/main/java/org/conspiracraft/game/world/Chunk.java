@@ -13,10 +13,10 @@ import static org.conspiracraft.game.world.World.chunkSize;
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0)));
-    private BitBuffer blockData = new BitBuffer(totalBlocks, 1);
+    private BitBuffer blockData = new BitBuffer(totalBlocks, 0);
 
     public int getNeededBitsPerValue() {
-        return Math.max(1, (int) Math.ceil(Math.log(blockPalette.size()) / Math.log(2)));
+        return (int) Math.ceil(Math.log(blockPalette.size()) / Math.log(2));
     }
     public void setBlockPalette(int[] data) {
         int i = 0;

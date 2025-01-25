@@ -189,7 +189,13 @@ public class Main {
                         for (int y = 0; y < World.heightChunks; y++) {
                             Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
                             byte[] palette = Utils.intArrayToByteArray(chunk.getBlockPalette());
-                            byte[] blocks = Utils.intArrayToByteArray(chunk.getBlockData());
+                            int[] blockData = chunk.getBlockData();
+                            byte[] blocks;
+                            if (blockData != null) {
+                                blocks = Utils.intArrayToByteArray(blockData);
+                            } else {
+                                blocks = new byte[]{};
+                            }
                             ByteBuffer buffer = ByteBuffer.allocate(palette.length + 4 + blocks.length + 4);
                             buffer.put(Utils.intArrayToByteArray(new int[]{palette.length / 4}));
                             buffer.put(palette);

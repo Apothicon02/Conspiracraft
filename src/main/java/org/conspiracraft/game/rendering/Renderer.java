@@ -180,7 +180,11 @@ public class Renderer {
                         int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
                         int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
                         int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
-                        allocCreateInfo.size((paletteSize+compressedBlocks.length)*4L);
+                        if (compressedBlocks == null) {
+                            allocCreateInfo.size((paletteSize) * 4L);
+                        } else {
+                            allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+                        }
 
                         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
@@ -192,7 +196,9 @@ public class Renderer {
                             chunkPointers[(condensedChunkPos*2)+1] = paletteSize;
                             chunkPointerChanges.addLast(condensedChunkPos*2);
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer+(paletteSize*4L), compressedBlocks);
+                            if (compressedBlocks != null) {
+                                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
+                            }
                         } else {
                             // Allocation failed - no space for it could be found. Handle this error!
                         }
@@ -226,7 +232,11 @@ public class Renderer {
                 VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
                 int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
                 int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
-                allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+                if (compressedBlocks == null) {
+                    allocCreateInfo.size((paletteSize) * 4L);
+                } else {
+                    allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+                }
 
                 PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
                 LongBuffer offset = BufferUtils.createLongBuffer(1);
@@ -238,7 +248,9 @@ public class Renderer {
                     chunkPointers[(condensedChunkPos * 2) + 1] = paletteSize;
                     chunkPointerChanges.addLast(condensedChunkPos*2);
                     glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
+                    if (compressedBlocks != null) {
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
+                    }
                 } else {
                     // Allocation failed - no space for it could be found. Handle this error!
                 }
