@@ -155,7 +155,7 @@ public class World {
                     int surface = height - 1;
                     boolean upmost = true;
                     for (int y = surface; y >= 0; y--) {
-                        double baseGradient = ConspiracraftMath.gradient(y, 157, 126, 2, -1);
+                        double baseGradient = ConspiracraftMath.gradient(y, 72, 54, 2, -1);
                         double baseDensity = baseCellularNoise + baseGradient;
                         if (baseDensity > 0) {
                             if (upmost && y >= seaLevel) {

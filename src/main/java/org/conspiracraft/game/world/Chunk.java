@@ -1,5 +1,6 @@
 package org.conspiracraft.game.world;
 
+import org.conspiracraft.engine.BitBuffer;
 import org.conspiracraft.engine.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -11,9 +12,12 @@ import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
-    private int[] blockData = new int[totalBlocks/32];
     private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0)));
+    private BitBuffer blockData = new BitBuffer(totalBlocks, 1);
 
+    public int getNeededBitsPerValue() {
+        return Math.max(1, (int) Math.ceil(Math.log(blockPalette.size()) / Math.log(2)));
+    }
     public void setBlockPalette(int[] data) {
         int i = 0;
         for (int integer : data) {
@@ -36,33 +40,23 @@ public class Chunk {
         return blockPalette.size();
     }
     public void setBlockData(int[] data) {
-        blockData = data;
+        blockData = new BitBuffer(totalBlocks, getNeededBitsPerValue());
+        blockData.setData(data);
     }
     public int[] getBlockData() {
-        return blockData;
+        return blockData.getData();
     }
     public void setBlockKey(int pos, int key) {
-        int intPos = pos/32;
-        int values = blockData[intPos];
-        int whereInInt = pos-(intPos*32);
-        if (key == 0) {
-            blockData[intPos] = values & (~(1 << whereInInt));
-        } else {
-            blockData[intPos] = values | (1 << whereInInt);
-        }
+        blockData.setValue(pos, key);
     }
     public int getBlockKey(int pos) {
-        int intPos = pos/32;
-        int values = blockData[intPos];
-        int whereInInt = pos-(intPos*32);
-        return (values >> whereInInt) & 1;
+        return blockData.getValue(pos);
     }
     public Vector2i getBlock(int pos) {
         int index = getBlockKey(pos);
         return blockPalette.get(index);
     }
     public void setBlock(int pos, Vector2i block, Vector3i globalPos) {
-        block = new Vector2i(block.x > 0 ? 2 : 0, 0);
         boolean wasInPalette = false;
         int key = -1;
         for (Vector2i paletteEntry : blockPalette) {
@@ -75,7 +69,15 @@ public class Chunk {
         }
         if (!wasInPalette) {
             blockPalette.addLast(block);
-            setBlockKey(pos, blockPalette.size());
+            int neededBitsPerValue = getNeededBitsPerValue();
+            if (neededBitsPerValue > blockData.bitsPerValue) {
+                BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
+                for (int i = 0; i < totalBlocks; i++) {
+                    newData.setValue(i, blockData.getValue(i));
+                }
+                blockData = newData;
+            }
+            setBlockKey(pos, blockPalette.size()-1);
         }
         World.queueColumnUpdate(globalPos);
     }

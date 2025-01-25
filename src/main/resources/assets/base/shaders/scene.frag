@@ -104,13 +104,13 @@ int getBlockData(int x, int y, int z) {
     int pointer = blockChunksData[condensedChunkPos*2];
     int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    int blocksPerInt = 2;
-
-    blocksPerInt = 32;
-    int specificInt = (condensedLocalPos/blocksPerInt);
-    int values = blocksData[pointer+paletteSize+specificInt];
-    int whereInInt = condensedLocalPos-(specificInt*blocksPerInt);
-    return blocksData[pointer+((values >> whereInInt) & 1)];
+    int bitsPerValue = max(1, int(ceil(log(paletteSize) / log(2))));
+    int valueMask = (1 << bitsPerValue) -1;
+    int valuesPerInt = 32/bitsPerValue;
+    int intIndex  = condensedLocalPos/valuesPerInt;
+    int bitIndex = (condensedLocalPos % valuesPerInt) * bitsPerValue;
+    int key = (blocksData[pointer+paletteSize+intIndex] >> bitIndex) & valueMask;
+    return blocksData[pointer+key];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -140,7 +140,7 @@ bool isChunkAir(int x, int y, int z) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
         int pointer = blockChunksData[condensedChunkPos*2];
         int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
-        if (paletteSize == 1) {
+        if (paletteSize == 1 && getBlock((x*16)-3, (y*16)-3, (z*16)-3).x == 0) {
             return true;
         } else {
             return false;
@@ -258,7 +258,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
     vec3 mask = stepMask(sideDist);
 
     while (distance(rayMapPos, rayPos) < 24) {
-        bool inBounds = rayMapPos.x >= 0 && rayMapPos.x < size && rayMapPos.y >= 0 && rayMapPos.y < height && rayMapPos.z >= 0 && rayMapPos.z < size;
+        bool inBounds = rayMapPos.x >= 0 && rayMapPos.x < size-1 && rayMapPos.y >= 0 && rayMapPos.y < height && rayMapPos.z >= 0 && rayMapPos.z < size-1;
 
         //block start
         ivec2 blockInfo = getBlock(vec3(rayMapPos.x, rayMapPos.y, rayMapPos.z));
@@ -325,7 +325,6 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
     return vec4(0);
 }
 
-
 vec4 traceWorld(vec3 rayOg, vec3 dir) {
     vec3 rayPos = rayOg;
     ivec3 bDir = ivec3(dir.x < 0 ? -1 : (dir.x > 0 ? 1 : 0), dir.y < 0 ? -1 : (dir.y > 0 ? 1 : 0), dir.z < 0 ? -1 : (dir.z > 0 ? 1 : 0));
@@ -372,47 +371,35 @@ void main()
     } else {
         vec3 camPos = vec3(cam[3]);
         vec3 dir = normalize(vec3(uv, 1));
-        fragColor = traceWorld(camPos/16, dir);
-        vec3 flattenedPos = rayMapPos;
-        if (flattenedPos.y < height/2) {
-            if (flattenedPos.y > 1) {
-                flattenedPos.y = height/2;
-            } else {
-                flattenedPos.y = -100000;
-            }
+        fragColor = traceWorld(camPos, dir);
+        if (hitPos == vec3(256)) {
+            hitPos = vec3(cam * vec4((dir * (renderDistance)), 1));
         }
-        float adjustedTime = min(1, abs(1-clamp((distance(flattenedPos, sun)+distance(flattenedPos.y, sun.y-(height/2)))/(size), 0, 1))*2);
-        vec3 sunBrightness = mix(vec3(1, 0.66, 0.05), vec3(1, 1, 0.98), adjustedTime)*adjustedTime;
 
+        //sky start
+        float adjustedTime = min(1, abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2);
+        float whiteness = gradient(hitPos.y, -48, 0, 0.f, 0.3f)+gradient(hitPos.y, 0, 372, -2.1f, 0.f)+gradient(hitPos.y, 372, 555, -0.2f, 0.f);
+        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*1.2;
+        vec3 sunBrightness = mix(vec3(1, 0.66, 0.05), vec3(1, 1, 0.98), adjustedTime)*adjustedTime;
         float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
         vec3 sunColor = (mix(vec3(0.66, 0.4, -0.25), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.66f;
-        float whiteness = gradient(rayMapPos.y, 0, 96, 0.f, -0.5f)+gradient(rayMapPos.y, 96, 152, 0.f, 0.3f)+gradient(rayMapPos.y, 152, 372, -2.1f, 0.f)+gradient(rayMapPos.y, 372, 555, -0.2f, 0.f);
-        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*1.2;
-        float atmosphere = unmixedFogColor.b*1.334;
-        vec3 blockLightBrightness = vec3(0);
         float sunLight = lighting.a*0.05f;
-        float fogNoise = 1.f;
-        if (hitPos == vec3(256)) {
-            hitPos = camPos+(dir*renderDistance);
+        //sky end
+
+        //selection start
+        if (ui && selected == ivec3(rayMapPos)) {
+            fragColor = vec4(mix(vec3(fragColor), vec3(0.7, 0.7, 1), 0.5f), 1);
         }
-        if (fragColor.a != 1) {
-            fragColor = vec4(unmixedFogColor, 1);
-            sunLight = 20*0.05f;
-        } else {
-            //selection start
-            if (ui && selected == ivec3(rayMapPos)) {
-                fragColor = vec4(mix(vec3(fragColor), vec3(0.7, 0.7, 1), 0.5f), 1);
-            }
-            //selection end
-            fogNoise += max(0, noise(vec2(hitPos.x, hitPos.z)));
-            blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f;
-        }
+        //selection end
+        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
+        vec3 blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f; //see about uncapping that
+
         fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
-        float distanceFogginess = clamp(((distance(camPos, hitPos)*fogNoise)/min(1000, renderDistance))*0.9375, 0, 1);
+        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
         fragColor = vec4(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), 1);//distant fog
         vec3 finalSunColor = rgb2hsv(vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunColor));
         finalSunColor = hsv2rgb(max(finalSunColor, vec3(finalSunColor.x, 1-max(sunColor.r, max(sunColor.g, sunColor.b)), finalSunColor.z)));
-        vec3 finalLightFog = (mix(vec3(lightFog)/20, finalSunColor, lightFog.a/11.67f)*atmosphere); //fog blending + sun distance fog
-        fragColor = vec4((vec3(fragColor)*max(blockLightBrightness, (sunBrightness*sunBrightness)))+finalLightFog, 1); //brightness, blocklight fog, sun
+        vec3 finalLightFog = (mix(vec3(lightFog)/20, finalSunColor, lightFog.a/11.67f)*mix(adjustedTime, 1.334f, mix(max(1, -0.5*(1-adjustedTime)), 1.334f, 3.334f))); //fog blending + sun distance fog
+        fragColor = vec4((vec3(fragColor)*max(blockLightBrightness, (sunBrightness*sunBrightness)*sunLight))+finalLightFog, 1); //brightness, blocklight fog, sun
     }
 }

@@ -9,13 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Big optimize.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Re-added most effects. &#10;- Re-added block placing &amp; breaking.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/BitBuffer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -200,14 +199,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00057" summary="- Increased cloud detail.">
-      <option name="closed" value="true" />
-      <created>1733410987670</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1733410987671</updated>
     </task>
     <task id="LOCAL-00058" summary="- Updated to java 23.">
       <option name="closed" value="true" />
@@ -593,7 +584,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737651860007</updated>
     </task>
-    <option name="localTasksCounter" value="106" />
+    <task id="LOCAL-00106" summary="- Re-added most effects. &#10;- Re-added block placing &amp; breaking.">
+      <option name="closed" value="true" />
+      <created>1737673092547</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1737673092547</updated>
+    </task>
+    <option name="localTasksCounter" value="107" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -609,7 +608,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- World now generates as a cylinder.&#10;- Fixed atmosphere issues." />
     <MESSAGE value="- Removed inverted heightmap." />
     <MESSAGE value="- Added a rasterized cube for the sun." />
     <MESSAGE value="- Started adding chunks to the GPU." />
@@ -634,7 +632,8 @@
     <MESSAGE value="- Began stuff." />
     <MESSAGE value="- Started rewrite." />
     <MESSAGE value="- Big optimize." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Big optimize." />
+    <MESSAGE value="- Re-added most effects. &#10;- Re-added block placing &amp; breaking." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Re-added most effects. &#10;- Re-added block placing &amp; breaking." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
