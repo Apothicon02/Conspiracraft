@@ -89,6 +89,7 @@ public class Main {
                                     blockSubtypeId = 0;
                                 }
                                 World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 100);
                             }
                         }
                     }

@@ -376,14 +376,15 @@ public class Renderer {
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
-        if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
-        } else {
-            for (int pos : chunkCornerPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos+1]});
-            }
-            chunkCornerPointerChanges.clear();
-        }
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
+//        if (worldChanged) {
+//            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
+//        } else {
+//            for (int pos : chunkCornerPointerChanges) {
+//                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos+1]});
+//            }
+//            chunkCornerPointerChanges.clear();
+//        }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Corners end
 

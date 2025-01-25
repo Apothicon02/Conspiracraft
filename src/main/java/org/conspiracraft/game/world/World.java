@@ -284,4 +284,13 @@ public class World {
             }
         }
     }
+
+    public static void setCorner(int x, int y, int z, int corner) {
+        if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
+            Vector2i existing = getBlock(x, y, z);
+            if (existing.x() != 0) {
+                cornerQueue.addLast(new Vector4i(x, y, z, corner));
+            }
+        }
+    }
 }

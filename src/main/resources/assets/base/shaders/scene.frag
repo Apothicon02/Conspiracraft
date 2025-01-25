@@ -102,8 +102,8 @@ int getCornerData(int x, int y, int z) {
     ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
     ivec3 localPos = ivec3(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize));
     int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-    int pointer = chunkBlocksData[condensedChunkPos*2];
-    int paletteSize = chunkBlocksData[(condensedChunkPos*2)+1];
+    int pointer = chunkCornersData[condensedChunkPos*2];
+    int paletteSize = chunkCornersData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int bitsPerValue = max(1, int(ceil(log(paletteSize) / log(2))));
     int valueMask = (1 << bitsPerValue) -1;
@@ -116,16 +116,16 @@ int getCornerData(int x, int y, int z) {
 
 bool[8] getCorners(int x, int y, int z) {
     int cornerData = getCornerData(x, y, z);
-    if (cornerData == 0) {
-        return bool[8](false, false, false, false, false, false, false, false);
-    } else {
-        return bool[8](true, true, true, true, false, false, false, false);
+    bool[8] data = bool[8](0);
+    for (int bit = 0; bit < 8; bit++) {
+        data[bit] = ((cornerData & (1 << (bit - 1))) >> (bit - 1)) == 0;
     }
+    return data;
 }
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
     bool[8] corners = getCorners(bX, bY, bZ);
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
-    if (!corners[cornerIndex]) {
+    if (corners[cornerIndex]) {
         return intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255;
     } else {
         return vec4(0, 0, 0, 0);
