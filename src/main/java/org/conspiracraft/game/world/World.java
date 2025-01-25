@@ -18,7 +18,7 @@ import static org.conspiracraft.engine.Utils.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 6144;
+    public static int size = 512;
     public static byte chunkSize = 16;
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;
@@ -31,6 +31,7 @@ public class World {
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static LinkedList<Vector4i> blockQueue = new LinkedList<>();
+    public static LinkedList<Vector4i> cornerQueue = new LinkedList<>();
     public static boolean[] columnUpdates = new boolean[sizeChunks*sizeChunks];
 
     public static void run() throws IOException {
@@ -118,9 +119,9 @@ public class World {
         for (int y = 0; y < World.heightChunks; y++) {
             int dataSize = data[dataIndex];
             dataIndex++;
-            int[] palette = new int[dataSize];
+            int[] blockPalette = new int[dataSize];
             for (int i = dataSize-1; i >= 0; i--) {
-                palette[i] = data[dataIndex];
+                blockPalette[i] = data[dataIndex];
                 dataIndex++;
             }
 
@@ -132,9 +133,27 @@ public class World {
                 dataIndex++;
             }
 
+            dataSize = data[dataIndex];
+            dataIndex++;
+            int[] cornerPalette = new int[dataSize];
+            for (int i = dataSize-1; i >= 0; i--) {
+                cornerPalette[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            dataSize = data[dataIndex];
+            dataIndex++;
+            int[] corners = new int[dataSize];
+            for (int i = dataSize-1; i >= 0; i--) {
+                corners[i] = data[dataIndex];
+                dataIndex++;
+            }
+
             Chunk chunk = new Chunk();
-            chunk.setBlockPalette(palette);
+            chunk.setBlockPalette(blockPalette);
             chunk.setBlockData(blocks);
+            chunk.setCornerPalette(cornerPalette);
+            chunk.setCornerData(corners);
             World.chunks[condenseChunkPos(x, y, z)] = chunk;
         }
     }

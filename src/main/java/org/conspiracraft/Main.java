@@ -188,7 +188,7 @@ public class Main {
                         FileOutputStream out = new FileOutputStream(chunkPath);
                         for (int y = 0; y < World.heightChunks; y++) {
                             Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
-                            byte[] palette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+                            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
                             int[] blockData = chunk.getBlockData();
                             byte[] blocks;
                             if (blockData != null) {
@@ -196,11 +196,24 @@ public class Main {
                             } else {
                                 blocks = new byte[]{};
                             }
-                            ByteBuffer buffer = ByteBuffer.allocate(palette.length + 4 + blocks.length + 4);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{palette.length / 4}));
-                            buffer.put(palette);
+
+                            byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
+                            int[] cornerData = chunk.getCornerData();
+                            byte[] corners;
+                            if (cornerData != null) {
+                                corners = Utils.intArrayToByteArray(cornerData);
+                            } else {
+                                corners = new byte[]{};
+                            }
+                            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+                            buffer.put(blockPalette);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
                             buffer.put(blocks);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
+                            buffer.put(cornerPalette);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
+                            buffer.put(corners);
                             out.write(buffer.array());
                         }
                         out.close();

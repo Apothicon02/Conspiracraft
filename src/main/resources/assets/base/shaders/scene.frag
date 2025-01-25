@@ -16,19 +16,27 @@ layout(std430, binding = 0) buffer atlasSSBO
 {
     int[] atlasData;
 };
-layout(std430, binding = 1) buffer blockChunksSSBO
+layout(std430, binding = 1) buffer chunkBlocksSSBO
 {
-    int[] blockChunksData;
+    int[] chunkBlocksData;
 };
 layout(std430, binding = 2) buffer blocksSSBO
 {
     int[] blocksData;
 };
+layout(std430, binding = 3) buffer chunkCornersSSBO
+{
+    int[] chunkCornersData;
+};
+layout(std430, binding = 4) buffer cornersSSBO
+{
+    int[] cornersData;
+};
 in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-int size = 6144;
+int size = 512;
 int height = 320;
 int chunkSize = 16;
 int sizeChunks = size/chunkSize;
@@ -90,8 +98,38 @@ vec4 intToColor(int color) {
     return vec4(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
 }
 
+int getCornerData(int x, int y, int z) {
+    ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
+    ivec3 localPos = ivec3(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize));
+    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    int pointer = chunkBlocksData[condensedChunkPos*2];
+    int paletteSize = chunkBlocksData[(condensedChunkPos*2)+1];
+    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    int bitsPerValue = max(1, int(ceil(log(paletteSize) / log(2))));
+    int valueMask = (1 << bitsPerValue) -1;
+    int valuesPerInt = 32/bitsPerValue;
+    int intIndex  = condensedLocalPos/valuesPerInt;
+    int bitIndex = (condensedLocalPos % valuesPerInt) * bitsPerValue;
+    int key = (cornersData[pointer+paletteSize+intIndex] >> bitIndex) & valueMask;
+    return cornersData[pointer+key];
+}
+
+bool[8] getCorners(int x, int y, int z) {
+    int cornerData = getCornerData(x, y, z);
+    if (cornerData == 0) {
+        return bool[8](false, false, false, false, false, false, false, false);
+    } else {
+        return bool[8](true, true, true, true, false, false, false, false);
+    }
+}
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
-    return intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255;
+    bool[8] corners = getCorners(bX, bY, bZ);
+    int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
+    if (!corners[cornerIndex]) {
+        return intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255;
+    } else {
+        return vec4(0, 0, 0, 0);
+    }
 }
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype) {
     return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype);
@@ -101,8 +139,8 @@ int getBlockData(int x, int y, int z) {
     ivec3 chunkPos = ivec3(x/chunkSize, y/chunkSize, z/chunkSize);
     ivec3 localPos = ivec3(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize));
     int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-    int pointer = blockChunksData[condensedChunkPos*2];
-    int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
+    int pointer = chunkBlocksData[condensedChunkPos*2];
+    int paletteSize = chunkBlocksData[(condensedChunkPos*2)+1];
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int bitsPerValue = max(1, int(ceil(log(paletteSize) / log(2))));
     int valueMask = (1 << bitsPerValue) -1;
@@ -138,8 +176,8 @@ vec4 getLighting(float x, float y, float z) {
 bool isChunkAir(int x, int y, int z) {
     if (x >= 0 && x < sizeChunks && y >= 0 && y < heightChunks && z >= 0 && z < sizeChunks) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
-        int pointer = blockChunksData[condensedChunkPos*2];
-        int paletteSize = blockChunksData[(condensedChunkPos*2)+1];
+        int pointer = chunkBlocksData[condensedChunkPos*2];
+        int paletteSize = chunkBlocksData[(condensedChunkPos*2)+1];
         if (paletteSize == 1) {
             return true;
         } else {
