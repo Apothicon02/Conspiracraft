@@ -39,8 +39,14 @@ public class Player {
         if (block != null) {
             int typeId = block.x;
             if (BlockTypes.blockTypeMap.get(typeId).isCollidable) {
-                if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.y() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
-                    return true;
+                int cornerData = World.getCorner((int) x, (int) y, (int) z);
+                int cornerIndex = (y < (int)(y)+0.5 ? 0 : 4) + (z < (int)(z)+0.5 ? 0 : 2) + (x < (int)(x)+0.5 ? 0 : 1);
+                int temp = cornerData;
+                temp &= (~(1 << (cornerIndex - 1)));
+                if (temp == cornerData) {
+                    if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.y() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
+                        return true;
+                    }
                 }
             }
         }

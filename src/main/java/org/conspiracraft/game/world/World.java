@@ -293,4 +293,18 @@ public class World {
             }
         }
     }
+
+    public static int getCorner(int x, int y, int z) {
+        if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
+            Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
+            int condensedChunkPos = condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z);
+            Chunk chunk = chunks[condensedChunkPos];
+            if (chunk == null) {
+                chunks[condensedChunkPos] = new Chunk();
+                chunk = chunks[condensedChunkPos];
+            }
+            return chunk.getCorner(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)));
+        }
+        return 0;
+    }
 }

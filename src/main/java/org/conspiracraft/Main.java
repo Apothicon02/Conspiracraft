@@ -84,12 +84,26 @@ public class Main {
                                 lastBlockBroken = timeMillis;
                                 int blockTypeId = selectedBlock.x();
                                 int blockSubtypeId = selectedBlock.y();
+                                int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
+                                int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
                                 if (lmbDown) {
-                                    blockTypeId = 0;
-                                    blockSubtypeId = 0;
+                                    cornerData |= (1 << (cornerIndex - 1));
+                                    World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
+                                    if (cornerData == -2147483521) {
+                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
+                                        blockTypeId = 0;
+                                        blockSubtypeId = 0;
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                    }
                                 }
-                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
-                                World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 100);
+                                if (rmbDown) {
+                                    if (cornerData != 0) {
+                                        cornerData &= (~(1 << (cornerIndex - 1)));
+                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
+                                    } else {
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                    }
+                                }
                             }
                         }
                     }
@@ -240,25 +254,28 @@ public class Main {
     }
 
     public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countCollisionless) { //prevPos is inverted
-        Vector3f blockPos = null;
+        Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
         for (int i = 0; i < range; i++) {
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
             Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
                 int typeId = block.x();
                 if (countCollisionless || BlockTypes.blockTypeMap.get(typeId).isCollidable) {
-                    int subTypeId = block.y();
-                    if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
-                        if (prevPos) {
-                            return rayPos;
-                        } else {
-                            return blockPos;
+                    int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
+                    int cornerIndex = (rayPos.y < (int)(rayPos.y)+0.5 ? 0 : 4) + (rayPos.z < (int)(rayPos.z)+0.5 ? 0 : 2) + (rayPos.x < (int)(rayPos.x)+0.5 ? 0 : 1);
+                    if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
+                        int subTypeId = block.y();
+                        if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
+                            if (prevPos) {
+                                return rayPos;
+                            } else {
+                                return prevRayPos;
+                            }
                         }
-                    } else {
-                        blockPos = new Vector3f((float) Math.floor(rayPos.x), (float) Math.floor(rayPos.y), (float) Math.floor(rayPos.z));
                     }
                 }
             }
+            prevRayPos = rayPos;
             ray.translate(0, 0, 0.1f);
         }
         return null;
