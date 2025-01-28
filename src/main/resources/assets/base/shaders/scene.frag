@@ -36,7 +36,7 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-int size = 512;
+int size = 2048;
 int height = 320;
 int chunkSize = 16;
 int sizeChunks = size/chunkSize;
@@ -158,9 +158,13 @@ ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
 
+bool isBlockSolid(ivec2 block) {
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17);
+}
+
 vec4 getLighting(int x, int y, int z) {
     ivec2 block = getBlock(x, y, z);
-    if (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17) { //return pure darkness if block isnt transparent.
+    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
         return vec4(0, 0, 0, 0);
     }
     vec4 light = vec4(0, 0, 0, 20);
@@ -199,6 +203,102 @@ vec3 stepMask(vec3 sideDist) {
     mask.z = true;
 
     return vec3(mask);
+}
+
+bool traceBlockMinimal(vec3 blockPos, vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype) {
+    rayPos = clamp(rayPos, vec3(0.0001), vec3(7.9999));
+    vec3 mapPos = floor(rayPos);
+    vec3 raySign = sign(rayDir);
+    vec3 deltaDist = 1.0/rayDir;
+    vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
+    vec3 mask = iMask;
+
+    while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
+        if (getVoxel(mapPos.x, mapPos.y, mapPos.z, blockPos.x, blockPos.y, blockPos.z, blockType, blockSubtype).a >= 1) {
+            return false;
+        }
+
+        mask = stepMask(sideDist);
+        mapPos += mask * raySign;
+        sideDist += mask * raySign * deltaDist;
+    }
+
+    return true;
+}
+
+bool sunDDA(vec3 rayPos, vec3 rayDir) {
+    vec3 sunRayMapPos = floor(rayPos);
+    vec3 raySign = sign(rayDir);
+    vec3 deltaDist = 1.0/rayDir;
+    vec3 sideDist = ((sunRayMapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
+    vec3 mask = stepMask(sideDist);
+
+    while (distance(rayPos, sunRayMapPos) < 24) {
+        mask = stepMask(sideDist);
+        sunRayMapPos += mask * raySign;
+        sideDist += mask * raySign * deltaDist;
+
+        bool inBounds = sunRayMapPos.x >= 0 && sunRayMapPos.x < size-1 && sunRayMapPos.y >= 0 && sunRayMapPos.y < height && sunRayMapPos.z >= 0 && sunRayMapPos.z < size-1;
+
+        if (inBounds) {
+            //block start
+            ivec2 blockInfo = getBlock(sunRayMapPos);
+
+            vec3 mini = ((sunRayMapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float d = max (mini.x, max (mini.y, mini.z));
+            vec3 intersect = rayPos + rayDir*d;
+            vec3 uv3d = intersect - sunRayMapPos;
+
+            if (sunRayMapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
+                uv3d = rayPos - sunRayMapPos;
+            }
+            //block end
+
+            if (blockInfo.x != 0 && blockInfo.x != 1) {
+                if (!traceBlockMinimal(sunRayMapPos, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y)) {
+                    return false;
+                }
+            }
+        } else {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+int shadowDist = 5;
+
+bool traceSun(vec3 rayOg, vec3 dir) {
+    vec3 rayPos = rayOg;
+    ivec3 bDir = ivec3(dir.x < 0 ? -1 : (dir.x > 0 ? 1 : 0), dir.y < 0 ? -1 : (dir.y > 0 ? 1 : 0), dir.z < 0 ? -1 : (dir.z > 0 ? 1 : 0));
+    float traveled = 0f;
+    while (traveled < renderDistance/shadowDist) {
+        rayPos = vec3(rayOg + (dir * traveled));
+        bool inBounds = rayPos.x >= 0 && rayPos.x < size && rayPos.y >= 0 && rayPos.y < height && rayPos.z >= 0 && rayPos.z < size;
+        bool nearVisibleBlock = false;
+        if (inBounds) {
+            for (int x = min(0, bDir.x); x <= max(0, bDir.x) && !nearVisibleBlock; x++) {
+                for (int z = min(0, bDir.y); z <= max(0, bDir.y) && !nearVisibleBlock; z++) {
+                    for (int y = min(0, bDir.z); y <= max(0, bDir.z); y++) {
+                        if (!isChunkAir(int(rayPos.x/16)+x, int(rayPos.y/16)+y, int(rayPos.z/16)+z)) {
+                            nearVisibleBlock = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
+        if (nearVisibleBlock) {
+            if (!sunDDA(vec3(rayOg + (dir * max(0, traveled-16))), dir)) {
+                return false;
+            }
+        }
+        traveled+=16;
+    }
+    return true;
 }
 
 vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype) {
@@ -299,7 +399,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
         bool inBounds = rayMapPos.x >= 0 && rayMapPos.x < size-1 && rayMapPos.y >= 0 && rayMapPos.y < height && rayMapPos.z >= 0 && rayMapPos.z < size-1;
 
         //block start
-        ivec2 blockInfo = getBlock(vec3(rayMapPos.x, rayMapPos.y, rayMapPos.z));
+        ivec2 blockInfo = getBlock(rayMapPos);
 
         vec3 mini = ((rayMapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
         float d = max (mini.x, max (mini.y, mini.z));
@@ -367,7 +467,7 @@ vec4 traceWorld(vec3 rayOg, vec3 dir) {
     vec3 rayPos = rayOg;
     ivec3 bDir = ivec3(dir.x < 0 ? -1 : (dir.x > 0 ? 1 : 0), dir.y < 0 ? -1 : (dir.y > 0 ? 1 : 0), dir.z < 0 ? -1 : (dir.z > 0 ? 1 : 0));
     float traveled = 0f;
-    while (distance(rayOg, rayPos) < renderDistance) {
+    while (traveled < renderDistance) {
         rayMapPos = rayPos;
         rayPos = vec3(cam * vec4((dir * traveled), 1));
         bool inBounds = rayPos.x >= 0 && rayPos.x < size && rayPos.y >= 0 && rayPos.y < height && rayPos.z >= 0 && rayPos.z < size;
@@ -421,8 +521,18 @@ void main()
         vec3 sunBrightness = mix(vec3(1, 0.66, 0.05), vec3(1, 1, 0.98), adjustedTime)*adjustedTime;
         float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
         vec3 sunColor = (mix(vec3(0.66, 0.4, -0.25), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.66f;
-        float sunLight = lighting.a*0.05f;
         //sky end
+
+        float sunLight = lighting.a*0.05f;
+        if (fragColor.a >= 1.f && sunLight > 0.f) {
+            float dist = distance(lightPos, camPos);
+            if (dist < renderDistance/shadowDist) {
+                if (!traceSun(lightPos, normalize(sun - lightPos))) {
+                    float factor = clamp(mix(1.5f, 1f, (dist/renderDistance)*shadowDist), 1.f, 1.5f);
+                    sunLight /= factor; //change 1.5 to subtly go between 1 and 1.5 based on distance
+                };
+            }
+        }
 
         //selection start
         if (ui && selected == ivec3(rayMapPos)) {

@@ -18,7 +18,7 @@ import static org.conspiracraft.engine.Utils.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 512;
+    public static int size = 2048;
     public static byte chunkSize = 16;
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;
