@@ -15,8 +15,6 @@ import java.util.BitSet;
 import java.util.List;
 
 public class Utils {
-    public static byte emptyByte = (byte)0;
-
     public static byte[] intArrayToByteArray(int[] intArr) {
         byte[] byteArr = new byte[intArr.length*4];
         int index = intArr.length;

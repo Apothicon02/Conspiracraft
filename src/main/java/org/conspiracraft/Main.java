@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(256, 310, 256));
+    public static Player player = new Player(new Vector3f(256, 100, 256));
     private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 

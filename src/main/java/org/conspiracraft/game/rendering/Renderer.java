@@ -48,7 +48,7 @@ public class Renderer {
     public static int uiUniform;
     public static int sunUniform;
 
-    public static int renderDistanceMul = 20; //4
+    public static int renderDistanceMul = 8; //4
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
     public static boolean atlasChanged = true;
@@ -203,7 +203,6 @@ public class Renderer {
                             int pointer = (int) offset.get(0);
                             chunkBlockPointers[condensedChunkPos*2] = pointer/4;
                             chunkBlockPointers[(condensedChunkPos*2)+1] = paletteSize;
-                            chunkBlockPointerChanges.addLast(condensedChunkPos*2);
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
                             if (compressedBlocks != null) {
                                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
@@ -310,7 +309,6 @@ public class Renderer {
                             int pointer = (int) offset.get(0);
                             chunkCornerPointers[condensedChunkPos*2] = pointer/4;
                             chunkCornerPointers[(condensedChunkPos*2)+1] = paletteSize;
-                            chunkCornerPointerChanges.addLast(condensedChunkPos*2);
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getCornerPalette());
                             if (compressedCorners != null) {
                                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
@@ -376,15 +374,14 @@ public class Renderer {
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
-//        if (worldChanged) {
-//            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
-//        } else {
-//            for (int pos : chunkCornerPointerChanges) {
-//                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos+1]});
-//            }
-//            chunkCornerPointerChanges.clear();
-//        }
+        if (worldChanged) {
+            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
+        } else {
+            for (int pos : chunkCornerPointerChanges) {
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos+1]});
+            }
+            chunkCornerPointerChanges.clear();
+        }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Corners end
 
