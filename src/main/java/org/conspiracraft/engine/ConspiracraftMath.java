@@ -20,4 +20,8 @@ public class ConspiracraftMath {
     public static double lerp(double invLerpValue, double toValue, double fromValue) {
         return toValue + invLerpValue * (fromValue - toValue);
     }
+
+    public static float mix(float min, float max, float factor) {
+        return min * (1 - factor) + max * factor;
+    }
 }

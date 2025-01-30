@@ -13,19 +13,51 @@ import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.Math;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(256, 100, 256));
+    public static Player player;
     private static final float MOUSE_SENSITIVITY = 0.01f;
     private static final float MOVEMENT_SPEED = 0.005f;
 
     public static void main(String[] args) throws Exception {
         Main main = new Main();
+        String playerPath = (World.worldPath + "/local.player");
+        if (Files.exists(Path.of(playerPath))) {
+            FileInputStream in = new FileInputStream(playerPath);
+            int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes()));
+            float[] camMatrix = new float[16];
+            int i = 0;
+            while (i < 16) {
+                camMatrix[i] = data[i]/1000f;
+                i++;
+            }
+            Quaternionf pitch = new Quaternionf(data[i++]/1000f, data[i++]/1000f, data[i++]/1000f, data[i++]/1000f);
+            Vector3f pos = new Vector3f(data[i++]/1000f, data[i++]/1000f, data[i++]/1000f);
+            Vector3f vel = new Vector3f(data[i++]/1000f, data[i++]/1000f, data[i++]/1000f);
+            player = new Player(pos);
+            player.vel = vel;
+            player.setCameraMatrix(camMatrix);
+            player.setCameraPitch(pitch);
+            player.flying = data[i++] != 0;
+        } else {
+            player = new Player(new Vector3f(256, 100, 256));
+        }
+        String globalPath = (World.worldPath + "/global.world");
+        if (Files.exists(Path.of(globalPath))) {
+            FileInputStream in = new FileInputStream(globalPath);
+            int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes()));
+            Renderer.time = data[0]/1000f;
+            timePassed = data[1]/1000f;
+            meridiem = data[2];
+        }
         Engine gameEng = new Engine("Conspiracraft", new Window.WindowOptions(), main);
         gameEng.start();
     }
@@ -171,7 +203,7 @@ public class Main {
         }
     }
 
-    byte meridiem = 1;
+    public static int meridiem = 1;
 
     public void updateTime(long diffTimeMillis, float mul) {
         Renderer.time += (diffTimeMillis/600000f)*mul;
@@ -187,6 +219,7 @@ public class Main {
     }
 
     public static boolean postWorldgenInitialization = false;
+    public static double interpolationTime = 0;
     public static double timePassed = 0;
     public static double tickTime = 50;
 
@@ -194,13 +227,28 @@ public class Main {
         if (isClosing) {
             String path = (World.worldPath+"/");
             new File(path).mkdirs();
+
+            String playerDataPath = path+"local.player";
+            FileOutputStream out = new FileOutputStream(playerDataPath);
+            byte[] playerData = Utils.intArrayToByteArray(player.getData());
+            out.write(playerData);
+            out.close();
+
+            String globalDataPath = path+"global.world";
+            out = new FileOutputStream(globalDataPath);
+            byte[] globalData = Utils.intArrayToByteArray(new int[]{(int)(Renderer.time*1000), (int)(timePassed*1000), meridiem});
+            out.write(globalData);
+            out.close();
+
+            String chunksPath = path + "chunks/";
+            new File(chunksPath).mkdirs();
             for (int x = 0; x < World.sizeChunks; x++) {
                 for (int z = 0; z < World.sizeChunks; z++) {
                     int columnPos = Utils.condenseChunkPos(x, z);
                     if (World.columnUpdates[columnPos]) {
                         World.columnUpdates[columnPos] = false;
-                        String chunkPath = path + x + "x" + z + "z.column";
-                        FileOutputStream out = new FileOutputStream(chunkPath);
+                        String chunkPath = chunksPath + x + "x" + z + "z.column";
+                        out = new FileOutputStream(chunkPath);
                         for (int y = 0; y < World.heightChunks; y++) {
                             Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
                             byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
@@ -249,6 +297,7 @@ public class Main {
                     player.tick(time);
                 }
                 timePassed += diffTimeMillis;
+                interpolationTime = timePassed/tickTime;
             }
         }
     }

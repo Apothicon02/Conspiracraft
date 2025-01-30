@@ -6,6 +6,12 @@ public class Camera {
     private final Matrix4f viewMatrix = new Matrix4f().setTranslation(new Vector3f(0, 1.625f, 0));
     public Quaternionf pitch = new Quaternionf();
 
+    public void setPitch(Quaternionf newPitch) {
+        pitch = newPitch;
+    }
+    public void setViewMatrix(float[] matrix) {
+        viewMatrix.set(matrix);
+    }
     public Matrix4f getViewMatrix() {
         return getViewMatrixWithoutPitch().rotate(pitch);
     }

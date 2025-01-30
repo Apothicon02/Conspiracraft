@@ -1,7 +1,9 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
@@ -15,6 +17,14 @@ import java.util.BitSet;
 import java.util.List;
 
 public class Utils {
+    public static int[] flipIntArray(int[] arr) {
+        int[] newArr = new int[arr.length];
+        int i = arr.length-1;
+        for (int integer : arr) {
+            newArr[i--] = integer;
+        }
+        return newArr;
+    }
     public static byte[] intArrayToByteArray(int[] intArr) {
         byte[] byteArr = new byte[intArr.length*4];
         int index = intArr.length;
@@ -56,6 +66,10 @@ public class Utils {
         }
         buffer.flip();
         return buffer;
+    }
+
+    public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
+        return new Vector3f(ConspiracraftMath.mix(old.x, current.x, (float) Main.interpolationTime), ConspiracraftMath.mix(old.y, current.y, (float) Main.interpolationTime), ConspiracraftMath.mix(old.z, current.z, (float) Main.interpolationTime));
     }
 
     public static int packInts(int first4, int last4) {

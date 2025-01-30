@@ -37,7 +37,7 @@ public class World {
     public static void run() throws IOException {
         if (Files.exists(worldPath)) {
             if (!worldGenerated) {
-                String path = (World.worldPath + "/");
+                String path = (World.worldPath + "/chunks/");
                 for (int x = 0; x < World.sizeChunks; x++) {
                     for (int z = 0; z < World.sizeChunks; z++) {
                         loadColumn(path, x, z);

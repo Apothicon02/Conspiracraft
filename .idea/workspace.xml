@@ -9,12 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ConspiracraftMath.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ConspiracraftMath.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,14 +200,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00062" summary="- Each column of blocks is now individually sent to the shader after world creation to reduce the initial memory consumption.">
-      <option name="closed" value="true" />
-      <created>1733459093023</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1733459093023</updated>
     </task>
     <task id="LOCAL-00063" summary="- Added (disabled) snow rendering.">
       <option name="closed" value="true" />
@@ -591,7 +585,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737858540847</updated>
     </task>
-    <option name="localTasksCounter" value="111" />
+    <task id="LOCAL-00111" summary="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows.">
+      <option name="closed" value="true" />
+      <created>1738189139790</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1738189139791</updated>
+    </task>
+    <option name="localTasksCounter" value="112" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +609,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes." />
     <MESSAGE value="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting." />
     <MESSAGE value="- Added a useful comment." />
     <MESSAGE value="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees." />
@@ -632,7 +633,8 @@
     <MESSAGE value="- Started adding corner system." />
     <MESSAGE value="- Fixed corner data not being read correctly." />
     <MESSAGE value="- Changed block breaking to break each corner at a time. &#10;- Collision now respects missing corners. &#10;- Textures are now fully filled." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Changed block breaking to break each corner at a time. &#10;- Collision now respects missing corners. &#10;- Textures are now fully filled." />
+    <MESSAGE value="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
