@@ -296,8 +296,8 @@ public class Main {
                     timePassed -= tickTime;
                     player.tick(time);
                 }
-                timePassed += diffTimeMillis;
                 interpolationTime = timePassed/tickTime;
+                timePassed += diffTimeMillis;
             }
         }
     }

@@ -19,8 +19,9 @@ public class Player {
     public Vector3f pos;
     public Vector3f oldPos;
     public Vector3f vel = new Vector3f(0f);
-    public float grav = 0.05f;
+    public float grav = 0.018f;
     public float speed = 0.15f;
+    public float jumpStrength = 0.25f;
     public long lastJump = 1000;
     public long jump = 0;
     public boolean sprint = false;
@@ -97,7 +98,7 @@ public class Player {
                 if (Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, 2, false) != null) {
                     jump = 1000;
                     lastJump = time;
-                    vel.set(vel.x, Math.max(vel.y, 0.4f), vel.z);
+                    vel.set(vel.x, Math.max(vel.y, jumpStrength), vel.z);
                 }
             }
 

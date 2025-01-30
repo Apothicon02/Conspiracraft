@@ -3,8 +3,8 @@ package org.conspiracraft.engine;
 public class BitBuffer {
     private int[] bits;
     public final int bitsPerValue;
-    private final int valueMask;
-    private final int valuesPerInt;
+    public final int valueMask;
+    public final int valuesPerInt;
 
     public BitBuffer(int numValues, int bitsPerValue) {
         this.bitsPerValue = bitsPerValue;

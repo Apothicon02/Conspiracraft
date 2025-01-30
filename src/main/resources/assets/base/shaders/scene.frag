@@ -18,7 +18,7 @@ layout(std430, binding = 0) buffer atlasSSBO
 };
 layout(std430, binding = 1) buffer chunkBlocksSSBO
 {
-    ivec2[] chunkBlocksData;
+    ivec4[] chunkBlocksData;
 };
 layout(std430, binding = 2) buffer blocksSSBO
 {
@@ -26,7 +26,7 @@ layout(std430, binding = 2) buffer blocksSSBO
 };
 layout(std430, binding = 3) buffer chunkCornersSSBO
 {
-    ivec2[] chunkCornersData;
+    ivec4[] chunkCornersData;
 };
 layout(std430, binding = 4) buffer cornersSSBO
 {
@@ -100,9 +100,7 @@ vec4 intToColor(int color) {
 }
 
 ivec3 prevCornerChunkPos = ivec3(-1);
-ivec2 cornerPointerAndPaletteSize = ivec2(-1);
-int cornerBitsPerValue = -1;
-int cornerValueMask = -1;
+ivec4 cornerPaletteInfo = ivec4(-1);
 int cornerValuesPerInt = -1;
 float logOf2 = log(2);
 int getCornerData(int x, int y, int z) {
@@ -110,17 +108,15 @@ int getCornerData(int x, int y, int z) {
     if (chunkPos != prevCornerChunkPos) {
         prevCornerChunkPos = chunkPos;
         int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        cornerPointerAndPaletteSize = chunkCornersData[condensedChunkPos];
-        cornerBitsPerValue = max(1, int(ceil(log(cornerPointerAndPaletteSize.y) / logOf2)));
-        cornerValueMask = (1 << cornerBitsPerValue) -1;
-        cornerValuesPerInt = 32/cornerBitsPerValue;
+        cornerPaletteInfo = chunkCornersData[condensedChunkPos];
+        cornerValuesPerInt = 32/cornerPaletteInfo.z;
     }
     ivec3 localPos  = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex  = condensedLocalPos/cornerValuesPerInt;
-    int bitIndex = (condensedLocalPos - intIndex * cornerValuesPerInt) * cornerBitsPerValue;
-    int key = (cornersData[cornerPointerAndPaletteSize.x+cornerPointerAndPaletteSize.y+intIndex] >> bitIndex) & cornerValueMask;
-    return cornersData[cornerPointerAndPaletteSize.x+key];
+    int bitIndex = (condensedLocalPos - intIndex * cornerValuesPerInt) * cornerPaletteInfo.z;
+    int key = (cornersData[cornerPaletteInfo.x+cornerPaletteInfo.y+intIndex] >> bitIndex) & cornerPaletteInfo.w;
+    return cornersData[cornerPaletteInfo.x+key];
 }
 
 bool[8] getCorners(int x, int y, int z) {
@@ -145,26 +141,22 @@ vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int block
 }
 
 ivec3 prevBlockChunkPos = ivec3(-1);
-ivec2 blockPointerAndPaletteSize = ivec2(-1);
-int blockBitsPerValue = -1;
-int blockValueMask = -1;
+ivec4 blockPaletteInfo = ivec4(-1);
 int blockValuesPerInt = -1;
 int getBlockData(int x, int y, int z) {
     ivec3 chunkPos = ivec3(x, y, z) >> 4;
     if (chunkPos != prevBlockChunkPos) {
         prevBlockChunkPos = chunkPos;
         int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        blockPointerAndPaletteSize = chunkBlocksData[condensedChunkPos];
-        blockBitsPerValue = max(1, int(ceil(log(blockPointerAndPaletteSize.y) / logOf2)));
-        blockValueMask = (1 << blockBitsPerValue) -1;
-        blockValuesPerInt = 32/blockBitsPerValue;
+        blockPaletteInfo = chunkBlocksData[condensedChunkPos];
+        blockValuesPerInt = 32/blockPaletteInfo.z;
     }
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex  = condensedLocalPos/blockValuesPerInt;
-    int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockBitsPerValue;
-    int key = (blocksData[blockPointerAndPaletteSize.x+blockPointerAndPaletteSize.y+intIndex] >> bitIndex) & blockValueMask;
-    return blocksData[blockPointerAndPaletteSize.x+key];
+    int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
+    int key = (blocksData[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+    return blocksData[blockPaletteInfo.x+key];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -495,13 +487,7 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
                 if (color.a >= 1) {
                     return color;
                 }
-            } else {
-                lighting = max(lighting, vec4(0, 0, 0, 20));
-                lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a == 20 ? lighting.a/2 : lighting.a/2.2));
             }
-        } else {
-            lighting = max(lighting, vec4(0, 0, 0, 20));
-            lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a == 20 ? lighting.a/2 : lighting.a/2.2));
         }
 
         mask = stepMask(sideDist);
@@ -519,26 +505,38 @@ void main()
     } else {
         vec3 dir = normalize(vec3(uv, 1));
         fragColor = traceWorld(camPos, vec3(cam*vec4(dir, 0)));
+        float whiteness = 0.f;
+        float brightMul = 1.f;
         if (hitPos == vec3(256)) {
             hitPos = vec3(cam * vec4((dir * (renderDistance)), 1));
+            lighting = max(lighting, vec4(0, 0, 0, 20));
+            lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/1));
+            whiteness = gradient(hitPos.y, -96, 372, -2.3f, 0.f);
+            brightMul = gradient(hitPos.y, 64, 372, 0.6f, 1.f);
+        } else {
+            whiteness = gradient(hitPos.y, 64, 372, -2.3f, 0.f);
         }
+        whiteness += gradient(hitPos.y, 64, 372, 0.6f, 0.f);
 
         //sky start
-        float adjustedTime = min(1, abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2);
-        float whiteness = gradient(hitPos.y, -48, 0, 0.f, 0.3f)+gradient(hitPos.y, 0, 372, -2.1f, 0.f)+gradient(hitPos.y, 372, 555, -0.2f, 0.f);
-        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*1.2;
-        vec3 sunBrightness = mix(vec3(1, 0.66, 0.05), vec3(1, 1, 0.98), adjustedTime)*adjustedTime;
+        float adjustedTime = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
+        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*(adjustedTime*1.5);
         float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
-        vec3 sunColor = (mix(vec3(0.66, 0.4, -0.25), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.66f;
+        vec3 sunColor = (mix(vec3(0.2, 0.4, 0), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.8f;
         //sky end
 
+        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
+        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
+        vec3 blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f; //see about uncapping that
+
         //sun shadows start
-        float sunLight = lighting.a*0.05f;
+        float sunLight = lighting.a*min(0.05f, adjustedTime*0.1f);
         if (fragColor.a >= 1.f && sunLight > 0.f) {
             if (!traceSun(lightPos, normalize(sun - lightPos))) {
-                sunLight /= 1.5f;
+                sunLight /= max(1, 2-distanceFogginess)*(1+(max(0, abs(1-adjustedTime)-0.9)*10));
             };
         }
+        blockLightBrightness += (distanceFogginess*min(1, adjustedTime+0.3));
         //sun shadows end
 
         //selection start
@@ -546,15 +544,12 @@ void main()
             fragColor = vec4(mix(vec3(fragColor), vec3(0.7, 0.7, 1), 0.5f), 1);
         }
         //selection end
-        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
-        vec3 blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f; //see about uncapping that
 
         fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
-        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
         fragColor = vec4(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), 1);//distant fog
         vec3 finalSunColor = rgb2hsv(vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunColor));
         finalSunColor = hsv2rgb(max(finalSunColor, vec3(finalSunColor.x, 1-max(sunColor.r, max(sunColor.g, sunColor.b)), finalSunColor.z)));
-        vec3 finalLightFog = (mix(vec3(lightFog)/20, finalSunColor, lightFog.a/11.67f)*mix(adjustedTime, 1.334f, mix(max(1, -0.5*(1-adjustedTime)), 1.334f, 3.334f))); //fog blending + sun distance fog
-        fragColor = vec4((vec3(fragColor)*max(blockLightBrightness, (sunBrightness*sunBrightness)*sunLight))+finalLightFog, 1); //brightness, blocklight fog, sun
+        vec3 finalLightFog = (mix(vec3(lightFog)/20, finalSunColor, lightFog.a/19f)*mix(adjustedTime, 1.334f, mix(max(1, -0.5*(1-adjustedTime)), 1.334f, 3.334f))); //fog blending + sun distance fog
+        fragColor = vec4(((vec3(fragColor)*max(blockLightBrightness, sunLight))+finalLightFog)*brightMul, 1); //brightness, blocklight fog, sun
     }
 }

@@ -22,6 +22,15 @@ public class Chunk {
     }
 
     //Blocks start
+    public int bitsPerBlock() {
+        return blockData.bitsPerValue;
+    }
+    public int blockValueMask() {
+        return blockData.valueMask;
+    }
+    public int blockValuesPerInt() {
+        return blockData.valuesPerInt;
+    }
     public void setBlockPalette(int[] data) {
         int i = 0;
         for (int integer : data) {
@@ -91,6 +100,15 @@ public class Chunk {
     //Blocks end
 
     //Corners start
+    public int bitsPerCorner() {
+        return cornerData.bitsPerValue;
+    }
+    public int cornerValueMask() {
+        return cornerData.valueMask;
+    }
+    public int cornerValuesPerInt() {
+        return cornerData.valuesPerInt;
+    }
     public void setCornerPalette(int[] data) {
         int i = 0;
         for (int integer : data) {
