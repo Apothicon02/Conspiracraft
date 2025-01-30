@@ -507,37 +507,36 @@ void main()
         fragColor = traceWorld(camPos, vec3(cam*vec4(dir, 0)));
         float whiteness = 0.f;
         float brightMul = 1.f;
-        if (hitPos == vec3(256)) {
+        float adjustedTime = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
+        bool isSky = hitPos == vec3(256);
+        if (isSky) {
             hitPos = vec3(cam * vec4((dir * (renderDistance)), 1));
+        }
+        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
+        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
+        float sunLight = lighting.a*min(0.05f, adjustedTime*0.1f);
+        if (isSky) {
             lighting = max(lighting, vec4(0, 0, 0, 20));
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/1));
             whiteness = gradient(hitPos.y, -96, 372, -2.3f, 0.f);
             brightMul = gradient(hitPos.y, 64, 372, 0.6f, 1.f);
         } else {
+            if (fragColor.a >= 1.f && sunLight > 0.f) {
+                if (lightPos == vec3(0)) {
+                    lightPos = hitPos;
+                }
+                if (!traceSun(lightPos, normalize(sun - lightPos))) {
+                    sunLight /= (max(1, 2-distanceFogginess)*(1+(max(0, abs(1-adjustedTime)-0.9)*10)))*0.72f;
+                };
+            }
             whiteness = gradient(hitPos.y, 64, 372, -2.3f, 0.f);
         }
         whiteness += gradient(hitPos.y, 64, 372, 0.6f, 0.f);
 
-        //sky start
-        float adjustedTime = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
         vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*(adjustedTime*1.5);
         float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
         vec3 sunColor = (mix(vec3(0.2, 0.4, 0), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.8f;
-        //sky end
-
-        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
-        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
-        vec3 blockLightBrightness = vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f; //see about uncapping that
-
-        //sun shadows start
-        float sunLight = lighting.a*min(0.05f, adjustedTime*0.1f);
-        if (fragColor.a >= 1.f && sunLight > 0.f) {
-            if (!traceSun(lightPos, normalize(sun - lightPos))) {
-                sunLight /= max(1, 2-distanceFogginess)*(1+(max(0, abs(1-adjustedTime)-0.9)*10));
-            };
-        }
-        blockLightBrightness += (distanceFogginess*min(1, adjustedTime+0.3));
-        //sun shadows end
+        vec3 blockLightBrightness = (vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f) + (distanceFogginess*min(1, adjustedTime+0.3)); //see about uncapping that
 
         //selection start
         if (ui && selected == ivec3(rayMapPos)) {
