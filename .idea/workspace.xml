@@ -9,8 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized shader. &#10;- Fixed interpolation.&#10;- Greatly improved visuals.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Brightened shadows.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -195,14 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00065" summary="- Optimized lighting more.">
-      <option name="closed" value="true" />
-      <created>1733541708696</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1733541708696</updated>
     </task>
     <task id="LOCAL-00066" summary="- Works.">
       <option name="closed" value="true" />
@@ -588,7 +581,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738262552203</updated>
     </task>
-    <option name="localTasksCounter" value="114" />
+    <task id="LOCAL-00114" summary="- Brightened shadows.">
+      <option name="closed" value="true" />
+      <created>1738277914480</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1738277914480</updated>
+    </task>
+    <option name="localTasksCounter" value="115" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +605,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees." />
     <MESSAGE value="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up." />
     <MESSAGE value="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture." />
     <MESSAGE value="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle." />
@@ -629,7 +629,8 @@
     <MESSAGE value="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows." />
     <MESSAGE value="- Added movement interpolation. &#10;- Player data now saves. &#10;- Time now saves." />
     <MESSAGE value="- Optimized shader. &#10;- Fixed interpolation.&#10;- Greatly improved visuals." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Optimized shader. &#10;- Fixed interpolation.&#10;- Greatly improved visuals." />
+    <MESSAGE value="- Brightened shadows." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Brightened shadows." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

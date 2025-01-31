@@ -87,7 +87,8 @@ public class Main {
                 isClosing = true;
             } else {
                 window.getMouseInput().input(window);
-                player.sprint = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
+                boolean isShiftDown = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
+                player.sprint = isShiftDown;
                 player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
                 player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
@@ -121,7 +122,7 @@ public class Main {
                                 if (lmbDown) {
                                     cornerData |= (1 << (cornerIndex - 1));
                                     World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
-                                    if (cornerData == -2147483521) {
+                                    if (cornerData == -2147483521 || !isShiftDown) {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                         blockTypeId = 0;
                                         blockSubtypeId = 0;
