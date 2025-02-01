@@ -48,6 +48,7 @@ vec3 lightPos = vec3(0);
 vec4 lighting = vec4(0);
 vec4 lightFog = vec4(0);
 vec3 hitPos = vec3(256);
+vec4 sunTint = vec4(1, 1, 1, 0);
 vec4 tint = vec4(1, 1, 1, 0);
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
@@ -221,11 +222,17 @@ bool traceBlockMinimal(vec3 blockPos, vec3 rayPos, vec3 rayDir, vec3 iMask, int 
     vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
 
+    vec4 prevVoxelColor = vec4(1, 1, 1, 0);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
-        if (getVoxel(mapPos.x, mapPos.y, mapPos.z, blockPos.x, blockPos.y, blockPos.z, blockType, blockSubtype).a >= 1) {
+        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, blockPos.x, blockPos.y, blockPos.z, blockType, blockSubtype);
+        if (voxelColor.a >= 1) {
             return false;
+        } else if (voxelColor.a > 0) {
+            sunTint = vec4(min(vec3(sunTint), vec3(prevVoxelColor)/0.5), max(0.5, max(sunTint.a, prevVoxelColor.a)));
+            sunTint = vec4(vec3(sunTint)*vec3(voxelColor), sunTint.a+(voxelColor.a/25));
         }
 
+        prevVoxelColor = voxelColor;
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
         sideDist += mask * raySign * deltaDist;
@@ -262,7 +269,7 @@ bool sunDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
         }
         //block end
 
-        if (blockInfo.x != 0 && blockInfo.x != 1) {
+        if (blockInfo.x != 0) {
             if (!traceBlockMinimal(realMapPos, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y)) {
                 return false;
             }
@@ -515,6 +522,9 @@ void main()
         float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
         float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
         float sunLight = lighting.a*min(0.05f, adjustedTime*0.1f);
+        float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
+        vec3 sunColor = (mix(vec3(0.2, 0.4, 0), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.8f;
+        fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
         if (isSky) {
             lighting = max(lighting, vec4(0, 0, 0, 20));
             lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/1));
@@ -527,15 +537,15 @@ void main()
                 }
                 if (!traceSun(lightPos, normalize(sun - lightPos))) {
                     sunLight /= (max(1, 2-distanceFogginess)*(1+(max(0, abs(1-adjustedTime)-0.9)*10)))*0.72f;
-                };
+                } else {
+                    fragColor = vec4(mix(vec3(fragColor), vec3(sunTint), min(0.9f, sunTint.a/4)), 1);//sun tint
+                }
             }
             whiteness = gradient(hitPos.y, 64, 372, -2.3f, 0.f);
         }
         whiteness += gradient(hitPos.y, 64, 372, 0.6f, 0.f);
 
         vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*(adjustedTime*1.5);
-        float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
-        vec3 sunColor = (mix(vec3(0.2, 0.4, 0), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.8f;
         vec3 blockLightBrightness = (vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f) + (distanceFogginess*min(1, adjustedTime+0.3)); //see about uncapping that
 
         //selection start
@@ -544,7 +554,6 @@ void main()
         }
         //selection end
 
-        fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
         fragColor = vec4(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), 1);//distant fog
         vec3 finalSunColor = rgb2hsv(vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunColor));
         finalSunColor = hsv2rgb(max(finalSunColor, vec3(finalSunColor.x, 1-max(sunColor.r, max(sunColor.g, sunColor.b)), finalSunColor.z)));
