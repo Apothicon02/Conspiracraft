@@ -71,6 +71,26 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
     return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
 }
 
+// Converts a color from linear light gamma to sRGB gamma
+vec4 fromLinear(vec4 linearRGB)
+{
+    bvec3 cutoff = lessThan(linearRGB.rgb, vec3(0.0031308));
+    vec3 higher = vec3(1.055)*pow(linearRGB.rgb, vec3(1.0/2.4)) - vec3(0.055);
+    vec3 lower = linearRGB.rgb * vec3(12.92);
+
+    return vec4(mix(higher, lower, cutoff), linearRGB.a);
+}
+
+// Converts a color from sRGB gamma to linear light gamma
+vec4 toLinear(vec4 sRGB)
+{
+    bvec3 cutoff = lessThan(sRGB.rgb, vec3(0.04045));
+    vec3 higher = pow((sRGB.rgb + vec3(0.055))/vec3(1.055), vec3(2.4));
+    vec3 lower = sRGB.rgb/vec3(12.92);
+
+    return vec4(mix(higher, lower, cutoff), sRGB.a);
+}
+
 vec3 rgb2hsv(vec3 c)
 {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -132,7 +152,7 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
     bool[8] corners = getCorners(bX, bY, bZ);
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
     if (corners[cornerIndex]) {
-        return intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255;
+        return fromLinear(intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255);
     } else {
         return vec4(0, 0, 0, 0);
     }
@@ -181,7 +201,7 @@ vec4 getLighting(int x, int y, int z) {
     if (block.x == 17) {
         light = light/2;
     }
-    return max(vec4(0.5, 0.5, 0.5, 0), light);
+    return fromLinear(max(vec4(0.5, 0.5, 0.5, 0), light));
 }
 vec4 getLighting(float x, float y, float z) {
     return getLighting(int(x), int(y), int(z));
@@ -471,6 +491,8 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
     return vec4(0);
 }
 
+int halfChunkSize = chunkSize/2;
+
 vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
@@ -494,6 +516,9 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
                 if (color.a >= 1) {
                     return color;
                 }
+            } else {
+                lighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize);
+                lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a == 20 ? lighting.a/2 : lighting.a/2.2));
             }
         }
 
@@ -512,41 +537,38 @@ void main()
     } else {
         vec3 dir = normalize(vec3(uv, 1));
         fragColor = traceWorld(camPos, vec3(cam*vec4(dir, 0)));
-        float whiteness = 0.f;
-        float brightMul = 1.f;
-        float adjustedTime = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, height, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
         bool isSky = hitPos == vec3(256);
         if (isSky) {
             hitPos = vec3(cam * vec4((dir * (renderDistance)), 1));
         }
-        float fogNoise = 1+max(0, noise(vec2(hitPos.x, hitPos.z)));
-        float distanceFogginess = clamp((distance(camPos, hitPos)*fogNoise)/renderDistance, 0, 1);
-        float sunLight = lighting.a*min(0.05f, adjustedTime*0.1f);
-        float blueness = min(0.1, max(0, adjustedTime-0.85))*10;
-        vec3 sunColor = (mix(vec3(0.2, 0.4, 0), vec3(1, mix(0.05, 0.2, blueness), mix(-0.9, 0.2, blueness)), adjustedTime)*adjustedTime)*1.8f;
+        float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
+        float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
+        float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2);
+        float fogNoise = max(0, noise(vec2(hitPos.x, hitPos.z))/2);
+        float distanceFogginess = clamp((distance(camPos, hitPos)/renderDistance)+fogNoise, 0, 1f);
+        float sunLight = (lighting.a/25)*mixedTime;
+        float whiteness = gradient(hitPos.y, 0, 372, -1.95f, 1f);
+        vec3 sunColor = mix(vec3(0.75, 0.33, 1), vec3(0.93, 0.95, 1), mixedTime);
         fragColor = vec4(mix(vec3(fragColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
         if (isSky) {
-            lighting = max(lighting, vec4(0, 0, 0, 20));
-            lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a/1));
-            whiteness = gradient(hitPos.y, -96, 372, -2.3f, 0.f);
-            brightMul = gradient(hitPos.y, 64, 372, 0.6f, 1.f);
+            fogNoise = 0f;
+            distanceFogginess = 1f;
         } else {
+            distanceFogginess = max(0, distanceFogginess-(fogNoise*1.5f));
             if (fragColor.a >= 1.f && sunLight > 0.f) {
                 if (lightPos == vec3(0)) {
                     lightPos = hitPos;
                 }
                 if (!traceSun(lightPos, normalize(sun - lightPos))) {
-                    sunLight /= (max(1, 2-distanceFogginess)*(1+(max(0, abs(1-adjustedTime)-0.9)*10)))*0.72f;
+                    sunLight /= (max(1, 2-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
                 } else {
                     fragColor = vec4(mix(vec3(fragColor), vec3(sunTint), min(0.9f, sunTint.a/4)), 1);//sun tint
                 }
             }
-            whiteness = gradient(hitPos.y, 64, 372, -2.3f, 0.f);
         }
-        whiteness += gradient(hitPos.y, 64, 372, 0.6f, 0.f);
 
-        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))))*(adjustedTime*1.5);
-        vec3 blockLightBrightness = (vec3(min(10, lighting.r), min(10, lighting.g), min(10, lighting.b))*0.1f) + (distanceFogginess*min(1, adjustedTime+0.3)); //see about uncapping that
+        vec3 unmixedFogColor = max(vec3(0), vec3(0.416+(0.3*whiteness), 0.495+(0.2*whiteness), 0.75+(min(0, whiteness+4.5))));
+        vec3 blockLightBrightness = vec3(lighting)/20;
 
         //selection start
         if (ui && selected == ivec3(rayMapPos)) {
@@ -555,9 +577,7 @@ void main()
         //selection end
 
         fragColor = vec4(mix(vec3(fragColor), unmixedFogColor, distanceFogginess), 1);//distant fog
-        vec3 finalSunColor = rgb2hsv(vec3(0.06, 0, 0.1)+min(vec3(0.33, 0.33, 0.3), sunColor));
-        finalSunColor = hsv2rgb(max(finalSunColor, vec3(finalSunColor.x, 1-max(sunColor.r, max(sunColor.g, sunColor.b)), finalSunColor.z)));
-        vec3 finalLightFog = (mix(vec3(lightFog)/20, finalSunColor, lightFog.a/19f)*mix(adjustedTime, 1.334f, mix(max(1, -0.5*(1-adjustedTime)), 1.334f, 3.334f))); //fog blending + sun distance fog
-        fragColor = vec4(((vec3(fragColor)*max(blockLightBrightness, sunLight))+finalLightFog)*brightMul, 1); //brightness, blocklight fog, sun
+        vec3 finalLightFog = mix(vec3(lightFog)/20, sunColor, lightFog.a/19f); //fog blending + sun distance fog
+        fragColor = toLinear(vec4((vec3(fragColor)*max(blockLightBrightness, sunLight))+finalLightFog, 1)); //brightness, blocklight fog, sun, linear conversion
     }
 }
