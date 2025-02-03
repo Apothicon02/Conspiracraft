@@ -187,6 +187,9 @@ ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
     return ivec2((blockData >> 16) & 0xFFFF, blockData & 0xFFFF);
 }
+ivec2 getBlock(float x, float y, float z) {
+    return getBlock(int(x), int(y), int(z));
+}
 ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
@@ -195,20 +198,61 @@ bool isBlockSolid(ivec2 block) {
     return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17);
 }
 
-vec4 getLighting(int x, int y, int z) {
-    ivec2 block = getBlock(x, y, z);
+vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool shiftedZ) {
+    int intX = int(x);
+    int intY = int(y);
+    int intZ = int(z);
+    ivec2 block = getBlock(intX, intY, intZ);
     //checking for solid blocks should be unncessary when lighting is re-added.
     if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
-        return vec4(0, 0, 0, 0);
+        bool[8] corners = getCorners(intX, intY, intZ);
+        float localX = (x-intX);
+        float localY = (y-intY);
+        float localZ = (z-intZ);
+        bool anyEmpty = false;
+        if (shiftedY) {
+            int ySide = (localY < 0.5f ? 0 : 4);
+            if (!corners[ySide + 0 + 0]) {
+                anyEmpty = true;
+            } else if (!corners[ySide + 2 + 0]) {
+                anyEmpty = true;
+            } else if (!corners[ySide + 0 + 1]) {
+                anyEmpty = true;
+            } else if (!corners[ySide + 2 + 1]) {
+                anyEmpty = true;
+            }
+        } else if (shiftedZ) {
+            int zSide = (localZ < 0.5f ? 0 : 2);
+            if (!corners[0 + zSide + 0]) {
+                anyEmpty = true;
+            } else if (!corners[4 + zSide + 0]) {
+                anyEmpty = true;
+            } else if (!corners[0 + zSide + 1]) {
+                anyEmpty = true;
+            } else if (!corners[4 + zSide + 1]) {
+                anyEmpty = true;
+            }
+        } else if (shiftedX) {
+            int xSide = (localX < 0.5f ? 0 : 1);
+            if (!corners[0 + 0 + xSide]) {
+                anyEmpty = true;
+            } else if (!corners[4 + 0 + xSide]) {
+                anyEmpty = true;
+            } else if (!corners[0 + 2 + xSide]) {
+                anyEmpty = true;
+            } else if (!corners[4 + 2 + xSide]) {
+                anyEmpty = true;
+            }
+        }
+        if (!anyEmpty) {
+            return vec4(0, 0, 0, 0);
+        }
     }
     vec4 light = vec4(0, 0, 0, 20);
     if (block.x == 17) {
         light = light/2;
     }
     return fromLinear(max(vec4(0.5, 0.5, 0.5, 0), light));
-}
-vec4 getLighting(float x, float y, float z) {
-    return getLighting(int(x), int(y), int(z));
 }
 
 bool isChunkAir(int x, int y, int z) {
@@ -304,6 +348,7 @@ bool sunDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
 }
 
 bool traceSun(vec3 ogRayPos, vec3 rayDir) {
+    return true;
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
     vec3 raySign = sign(rayDir);
@@ -475,14 +520,14 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
         //lighting start
         vec3 relativePos = lightPos-rayMapPos;
         vec3 centerPos = lightPos.x == 0 && lightPos.y == 0 && lightPos.z == 0 ? rayMapPos : lightPos;
-        vec4 centerLighting = getLighting(centerPos.x, centerPos.y, centerPos.z);
+        vec4 centerLighting = getLighting(centerPos.x, centerPos.y, centerPos.z, false, false, false);
         if (!(lightPos.x == 0 && lightPos.y == 0 && lightPos.z == 0)) {
             //smooth lighting start
-            vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z);
+            vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
             verticalLighting = mix(relativePos.y >= 0.5f ? centerLighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : centerLighting, relativePos.y);
-            vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f));
+            vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
             northSouthLighting = mix(relativePos.z >= 0.5f ? centerLighting : northSouthLighting, relativePos.z >= 0.5f ? northSouthLighting : centerLighting, relativePos.z);
-            vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z);
+            vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
             eastWestLighting = mix(relativePos.x >= 0.5f ? centerLighting : eastWestLighting, relativePos.x >= 0.5f ? eastWestLighting : centerLighting, relativePos.x);
             lighting = mix(mix(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25), 0.5), centerLighting, distance(rayPos, lightPos)/renderDistance);
             //smooth lighting end
@@ -542,7 +587,7 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
                     return color;
                 }
             } else {
-                lighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize);
+                lighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize, false, false, false);
                 lightFog = vec4(max(lightFog.r, lighting.r/2), max(lightFog.g, lighting.g/2), max(lightFog.b, lighting.b/2), max(lightFog.a, lighting.a == 20 ? lighting.a/2 : lighting.a/2.2));
             }
         }

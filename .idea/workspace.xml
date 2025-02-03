@@ -9,7 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -195,22 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00069" summary="- Re-added inverted sun lighting. &#10;- Fixed issues with sun lighting updates.&#10;- Optimized heightmap and lighting. &#10;- Increased range of sunlight values from 0-12 to 0-20.">
-      <option name="closed" value="true" />
-      <created>1733610703491</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1733610703492</updated>
-    </task>
-    <task id="LOCAL-00070" summary="- Temporarily made water white. &#10;- Added WIP smooth lighting. &#10;- Temporarily disabled light fog.">
-      <option name="closed" value="true" />
-      <created>1733625457082</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1733625457082</updated>
     </task>
     <task id="LOCAL-00071" summary="- Finished smooth lighting. &#10;- Added ambient occlusion. &#10;- Re-enabled light fog. &#10;- Restored water texture. &#10;- Reduced resolution of atlas to only what is needed to improve load times. &#10;- Removed old transparency rendering.">
       <option name="closed" value="true" />
@@ -588,7 +572,23 @@
       <option name="project" value="LOCAL" />
       <updated>1738426263015</updated>
     </task>
-    <option name="localTasksCounter" value="118" />
+    <task id="LOCAL-00118" summary="- Added reflections.">
+      <option name="closed" value="true" />
+      <created>1738468050722</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1738468050723</updated>
+    </task>
+    <task id="LOCAL-00119" summary="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation.">
+      <option name="closed" value="true" />
+      <created>1738549918878</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1738549918878</updated>
+    </task>
+    <option name="localTasksCounter" value="120" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,8 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Improved sunsets greatly." />
-    <MESSAGE value="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision." />
     <MESSAGE value="- Palette compressed chunk data on the gpu. &#10;- Added leaf AO." />
     <MESSAGE value="- Added saving and loading." />
     <MESSAGE value="- Vastly optimized world loading." />
@@ -629,7 +627,9 @@
     <MESSAGE value="- Holding shift is now required to remove only a corner of a block." />
     <MESSAGE value="- Added sunlight transparent block tinting." />
     <MESSAGE value="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky." />
+    <MESSAGE value="- Added reflections." />
+    <MESSAGE value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
