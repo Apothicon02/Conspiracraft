@@ -348,7 +348,6 @@ bool sunDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
 }
 
 bool traceSun(vec3 ogRayPos, vec3 rayDir) {
-    return true;
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
     vec3 raySign = sign(rayDir);
@@ -356,7 +355,7 @@ bool traceSun(vec3 ogRayPos, vec3 rayDir) {
     vec3 sideDist = ((rayMapChunkPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
 
-    while (distance(rayMapChunkPos, rayPos) < renderDistance/16) {
+    for (int i = 0; i < heightChunks; i++) {
         if (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1) {
             if (!isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z))) {
                 vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
@@ -398,7 +397,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
         if (voxelColor.a > 0.f) {
             if (reflectivity == 0.f) {
                 if (blockType == 1) { //water
-                    reflectivity = 0.275f;
+                    reflectivity = 0.5f;
                 } else if (blockType == 7) { //kyanite
                     reflectivity = 0.33f;
                 } else if (blockType >= 8 && blockType <= 10) { //stones
@@ -411,8 +410,8 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
             if (voxelColor.a < 1.f) {
                 if (hitPos == vec3(256)) {
-                    prevHitPos = prevRayMapPos+(mapPos/8.f);
-                    hitPos = rayMapPos+(mapPos/8.f);
+                    prevHitPos = prevRayMapPos+(rayPos/8.f);
+                    hitPos = rayMapPos+(rayPos/8.f);
                     hitNorm = vec3(mapPos - prevMapPos);
                 }
                 //bubbles start
@@ -433,8 +432,8 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
             if (voxelColor.a >= 1) {
                 if (hitPos == vec3(256)) {
-                    prevHitPos = prevRayMapPos+(mapPos/8.f);
-                    hitPos = rayMapPos+(mapPos/8.f);
+                    prevHitPos = prevRayMapPos+(rayPos/8.f);
+                    hitPos = rayMapPos+(rayPos/8.f);
                     hitNorm = vec3(mapPos - prevMapPos);
                 }
                 //face-based brightness start

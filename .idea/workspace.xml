@@ -9,7 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Shader now takes into account corners when calculating smooth lighting.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -195,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00071" summary="- Finished smooth lighting. &#10;- Added ambient occlusion. &#10;- Re-enabled light fog. &#10;- Restored water texture. &#10;- Reduced resolution of atlas to only what is needed to improve load times. &#10;- Removed old transparency rendering.">
-      <option name="closed" value="true" />
-      <created>1733695008867</created>
-      <option name="number" value="00071" />
-      <option name="presentableId" value="LOCAL-00071" />
-      <option name="project" value="LOCAL" />
-      <updated>1733695008868</updated>
     </task>
     <task id="LOCAL-00072" summary="- Fixed jar not being launchable. &#10;- Downgraded back to Java 21.">
       <option name="closed" value="true" />
@@ -588,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738549918878</updated>
     </task>
-    <option name="localTasksCounter" value="120" />
+    <task id="LOCAL-00120" summary="- Shader now takes into account corners when calculating smooth lighting.">
+      <option name="closed" value="true" />
+      <created>1738551953154</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1738551953154</updated>
+    </task>
+    <option name="localTasksCounter" value="121" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Palette compressed chunk data on the gpu. &#10;- Added leaf AO." />
     <MESSAGE value="- Added saving and loading." />
     <MESSAGE value="- Vastly optimized world loading." />
     <MESSAGE value="- Compressed world save data." />
@@ -629,7 +628,8 @@
     <MESSAGE value="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky." />
     <MESSAGE value="- Added reflections." />
     <MESSAGE value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
+    <MESSAGE value="- Shader now takes into account corners when calculating smooth lighting." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Shader now takes into account corners when calculating smooth lighting." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
