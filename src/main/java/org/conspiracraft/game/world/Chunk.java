@@ -4,6 +4,7 @@ import org.conspiracraft.engine.BitBuffer;
 import org.conspiracraft.engine.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,10 @@ import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
-    private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0, 0)));
+    private final List<Vector2i> blockPalette = new ArrayList<>(List.of(new Vector2i(0)));
     private BitBuffer blockData = new BitBuffer(totalBlocks, 0);
+    private final List<Vector4i> lightPalette = new ArrayList<>(List.of(new Vector4i(0, 0, 0, 20)));
+    private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
     private final List<Integer> cornerPalette = new ArrayList<>(List.of(0));
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
 
@@ -173,4 +176,82 @@ public class Chunk {
         World.queueColumnUpdate(globalPos);
     }
     //Corners end
+
+    //Lights start
+    public int bitsPerLight() {
+        return lightData.bitsPerValue;
+    }
+    public int lightValueMask() {
+        return lightData.valueMask;
+    }
+    public int lightValuesPerInt() {
+        return lightData.valuesPerInt;
+    }
+    public void setLightPalette(int[] data) {
+        int i = 0;
+        for (int integer : data) {
+            if (i == 0) {
+                lightPalette.set(i++, Utils.unpackColor(integer));
+            } else {
+                lightPalette.add(i++, Utils.unpackColor(integer));
+            }
+        }
+    }
+    public int[] getLightPalette() {
+        int[] returnObj = new int[lightPalette.size()];
+        int i = 0;
+        for (Vector4i light : lightPalette) {
+            returnObj[i++] = Utils.packColor(light);
+        }
+        return returnObj;
+    }
+    public int getLightPaletteSize() {
+        return lightPalette.size();
+    }
+    public void setLightData(int[] data) {
+        lightData = new BitBuffer(totalBlocks, getNeededBitsPerValue(lightPalette.size()));
+        lightData.setData(data);
+    }
+    public int[] getLightData() {
+        return lightData.getData();
+    }
+    public void setLightKey(int pos, int key) {
+        lightData.setValue(pos, key);
+    }
+    public int getLightKey(int pos) {
+        return lightData.getValue(pos);
+    }
+    public Vector4i getLight(int pos) {
+        int index = getLightKey(pos);
+        return lightPalette.get(index);
+    }
+    public void setLight(int pos, Vector4i light, Vector3i globalPos) {
+        boolean wasInPalette = false;
+        int key = -1;
+        for (Vector4i paletteEntry : lightPalette) {
+            key++;
+            if (paletteEntry.equals(light)) {
+                setLightKey(pos, key);
+                wasInPalette = true;
+                break;
+            }
+        }
+        if (!wasInPalette) {
+            lightPalette.addLast(light);
+            int neededBitsPerValue = getNeededBitsPerValue(lightPalette.size());
+            if (neededBitsPerValue > lightData.bitsPerValue) {
+                BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
+                for (int i = 0; i < totalBlocks; i++) {
+                    newData.setValue(i, lightData.getValue(i));
+                }
+                lightData = newData;
+            }
+            setLightKey(pos, lightPalette.size()-1);
+        }
+        World.queueColumnUpdate(globalPos);
+    }
+    public void setLight(int pos, int r, int g, int b, int s, Vector3i globalPos) {
+        setLight(pos, new Vector4i(r, g, b, s), globalPos);
+    }
+    //Lights end
 }

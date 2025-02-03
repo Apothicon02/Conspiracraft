@@ -58,6 +58,11 @@ public class Main {
             timePassed = data[1]/1000f;
             meridiem = data[2];
         }
+        String heightmapPath = (World.worldPath + "/global.heightmap");
+        if (Files.exists(Path.of(heightmapPath))) {
+            FileInputStream in = new FileInputStream(heightmapPath);
+            World.heightmap = Utils.intArrayToShortArray(Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes())));
+        }
         Engine gameEng = new Engine("Conspiracraft", new Window.WindowOptions(), main);
         gameEng.start();
     }
@@ -157,7 +162,7 @@ public class Main {
                         selectedBlock = new Vector2i(selectedBlock.x, newSubId);
                     }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                        Renderer.atlasChanged = true;
+                        Renderer.worldChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                         if (Renderer.renderDistanceMul < 96) {
@@ -241,6 +246,12 @@ public class Main {
             out.write(globalData);
             out.close();
 
+            String heightmapDataPath = path+"global.heightmap";
+            out = new FileOutputStream(heightmapDataPath);
+            byte[] heightmapData = Utils.intArrayToByteArray(Utils.shortArrayToIntArray(World.heightmap));
+            out.write(heightmapData);
+            out.close();
+
             String chunksPath = path + "chunks/";
             new File(chunksPath).mkdirs();
             for (int x = 0; x < World.sizeChunks; x++) {
@@ -269,7 +280,16 @@ public class Main {
                             } else {
                                 corners = new byte[]{};
                             }
-                            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4);
+
+                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+                            int[] lightData = chunk.getLightData();
+                            byte[] lights;
+                            if (lightData != null) {
+                                lights = Utils.intArrayToByteArray(lightData);
+                            } else {
+                                lights = new byte[]{};
+                            }
+                            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
                             buffer.put(blockPalette);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
@@ -278,6 +298,10 @@ public class Main {
                             buffer.put(cornerPalette);
                             buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
                             buffer.put(corners);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+                            buffer.put(lightPalette);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+                            buffer.put(lights);
                             out.write(buffer.array());
                         }
                         out.close();

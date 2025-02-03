@@ -38,6 +38,24 @@ public class Utils {
         }
         return byteArr;
     }
+    public static short[] intArrayToShortArray(int[] intArr) {
+        short[] shortArr = new short[intArr.length*2];
+        for (int i = 0; i < intArr.length; i++) {
+            Vector2i data = unpackInt(intArr[i]);
+            shortArr[(i*2)+1] = (short) data.x;
+            shortArr[i*2] = (short) data.y;
+        }
+        return shortArr;
+    }
+    public static int[] shortArrayToIntArray(short[] shortArr) {
+        int[] intArr = new int[shortArr.length/2];
+        int index = intArr.length;
+        for (int i = 0; i < intArr.length; i++) {
+            index--;
+            intArr[i] = packInts(shortArr[index*2], shortArr[(index*2)+1]);
+        }
+        return intArr;
+    }
     public static int[] byteArrayToIntArray(byte[] byteArr) {
         int[] intArr = new int[byteArr.length/4];
         for (int i = 0; i < intArr.length; i++) {
@@ -107,6 +125,12 @@ public class Utils {
 
     public static int colorToInt(Color color) {
         return color.getRed() << 16 | color.getGreen() << 8 | color.getBlue() | color.getAlpha() << 24;
+    }
+    public static int packColor(Vector4i color) {
+        return color.x() << 16 | color.y() << 8 | color.z() | color.w() << 24;
+    }
+    public static Vector4i unpackColor(int color) {
+        return new Vector4i(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
     }
 
     public static int condensePos(int x, int z) {
