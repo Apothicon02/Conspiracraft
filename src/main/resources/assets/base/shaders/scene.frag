@@ -276,7 +276,7 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
     }
     vec4 light = intToColor(getLightData(intX, intY, intZ));
     if (block.x == 17) {
-        light = light/1.25;
+        light = light/1.1;
     }
     return fromLinear(max(vec4(0.5, 0.5, 0.5, 0), light));
 }

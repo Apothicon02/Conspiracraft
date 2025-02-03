@@ -9,14 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/BlockHelper.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -201,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00073" summary="- Fixed weird interaction with fog and transparent objects. &#10;- Added purple stained glass. &#10;- Added lime stained glass. &#10;- Added ability to cycle through selected block with the 'Q' and 'E' keys. &#10;- Added bubbles.">
-      <option name="closed" value="true" />
-      <created>1733789274427</created>
-      <option name="number" value="00073" />
-      <option name="presentableId" value="LOCAL-00073" />
-      <option name="project" value="LOCAL" />
-      <updated>1733789274427</updated>
     </task>
     <task id="LOCAL-00074" summary="- Added white noise.">
       <option name="closed" value="true" />
@@ -594,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738555503434</updated>
     </task>
-    <option name="localTasksCounter" value="122" />
+    <task id="LOCAL-00122" summary="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting.">
+      <option name="closed" value="true" />
+      <created>1738610422552</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1738610422553</updated>
+    </task>
+    <option name="localTasksCounter" value="123" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Vastly optimized world loading." />
     <MESSAGE value="- Compressed world save data." />
     <MESSAGE value="- Dramatically reduced vram and disk space consumption." />
     <MESSAGE value="- Fixed light data not actually being compressed on the gpu." />
@@ -635,7 +628,8 @@
     <MESSAGE value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
     <MESSAGE value="- Shader now takes into account corners when calculating smooth lighting." />
     <MESSAGE value="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity." />
+    <MESSAGE value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
