@@ -593,10 +593,11 @@ void main()
             }
             float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
             float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
-            float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+gradient(hitPos.y, 0, 372, 0.3, 0f);
+            float timeBonus = gradient(hitPos.y, 0, 372, 0.3, 0f);
+            float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
             float fogNoise = max(0, noise(vec2(hitPos.x, hitPos.z))/2);
             float distanceFogginess = clamp((distance(camPos, hitPos)/renderDistance)+fogNoise, 0, 1f);
-            float sunLight = (lighting.a/25)*mixedTime;
+            float sunLight = (lighting.a/25)*(mixedTime-timeBonus);
             float whiteness = gradient(hitPos.y, 0, 372, -1.95f, 1.33f);
             vec3 sunColor = mix(mix(vec3(0.66, 0.33, 1), vec3(1.33, 0.33, 0.25), mixedTime*4), vec3(0.93, 0.95, 1), mixedTime);
             reflectedColor = vec4(mix(vec3(reflectedColor), vec3(tint)*0.5f, min(0.9f, tint.a)), 1);//transparency
@@ -626,10 +627,11 @@ void main()
         }
         float adjustedTime = clamp(abs(1-clamp((distance(finalHitPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
         float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.4)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
-        float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+gradient(finalHitPos.y, 0, 372, 0.3, 0f);
+        float timeBonus = gradient(finalHitPos.y, 0, 372, 0.3, 0f);
+        float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
         float fogNoise = max(0, noise(vec2(finalHitPos.x, finalHitPos.z))/2);
         float distanceFogginess = clamp((distance(camPos, finalHitPos)/renderDistance)+fogNoise, 0, 1f);
-        float sunLight = (finalLighting.a/25)*mixedTime;
+        float sunLight = (finalLighting.a/25)*(mixedTime-timeBonus);
         float whiteness = gradient(finalHitPos.y, 0, 372, -1.95f, 1.33f);
         vec3 sunColor = mix(mix(vec3(0.66, 0.33, 1), vec3(1.33, 0.33, 0.25), mixedTime*4), vec3(0.93, 0.95, 1), mixedTime);
         fragColor = vec4(mix(vec3(fragColor), vec3(finalTint)*0.5f, min(0.9f, finalTint.a)), 1);//transparency
