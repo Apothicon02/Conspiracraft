@@ -9,9 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Tweaked leaf lighting.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -195,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00074" summary="- Added white noise.">
-      <option name="closed" value="true" />
-      <created>1733789294073</created>
-      <option name="number" value="00074" />
-      <option name="presentableId" value="LOCAL-00074" />
-      <option name="project" value="LOCAL" />
-      <updated>1733789294073</updated>
     </task>
     <task id="LOCAL-00075" summary="- Bubbles in stained-glass no longer move. &#10;- Improved bubbles to be more random.">
       <option name="closed" value="true" />
@@ -588,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738610422553</updated>
     </task>
-    <option name="localTasksCounter" value="123" />
+    <task id="LOCAL-00123" summary="- Tweaked leaf lighting.">
+      <option name="closed" value="true" />
+      <created>1738623864964</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1738623864964</updated>
+    </task>
+    <option name="localTasksCounter" value="124" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Compressed world save data." />
     <MESSAGE value="- Dramatically reduced vram and disk space consumption." />
     <MESSAGE value="- Fixed light data not actually being compressed on the gpu." />
     <MESSAGE value="- Fixed world data not loading properly. &#10;- World saving is now nearly instant after the first time." />
@@ -629,7 +630,8 @@
     <MESSAGE value="- Shader now takes into account corners when calculating smooth lighting." />
     <MESSAGE value="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity." />
     <MESSAGE value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
+    <MESSAGE value="- Tweaked leaf lighting." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Tweaked leaf lighting." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
