@@ -65,8 +65,9 @@ public class World {
                             for (int z = 1; z < size - 1; z++) {
                                 for (int y = height - 1; y > 1; y--) {
                                     Vector2i block = getBlock(x, y, z);
+                                    int corners = getCorner(x, y, z);
                                     Vector4i light = getLight(x, y, z);
-                                    if (light.w() < 20 && BlockTypes.blockTypeMap.get(block.x()).isTransparent) {
+                                    if (light.w() < 20 && !isVerticallyBlockingLight(block.x, corners)) {
                                         //check if any neighbors are a higher brightness
                                         boolean shouldQ = false;
                                         if (getLight(x, y, z + 1).w() > light.w()) {
@@ -298,6 +299,158 @@ public class World {
         return getLight(new Vector3i((int) x, (int) y, (int) z));
     }
 
+    public static boolean canLightPassbetween(int blockType, int corners, Vector3i pos, Vector3i neighborPos) {
+        Vector3i subtractedPos = new Vector3i(pos.x-neighborPos.x, pos.y-neighborPos.y, pos.z-neighborPos.z);
+        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+            return true;
+        } else {
+            int blocked = 0;
+            if (subtractedPos.x != 0) {
+                for (int z = 0; z <= 2; z += 2) {
+                    for (int y = 0; y <= 4; y += 4) {
+                        blocked = 0;
+                        for (int x = 0; x <= 1; x++) {
+                            int cornerIndex = y + z + x;
+                            int temp = corners;
+                            temp &= (~(1 << (cornerIndex - 1)));
+                            if (temp == corners) {
+                                blocked++;
+                            }
+                        }
+                        if (blocked <= 0) {
+                            blocked = 0;
+                            int newCorners = getCorner(neighborPos.x, neighborPos.y, neighborPos.z);
+                            for (int x = 0; x <= 1; x ++) {
+                                int cornerIndex = y + z + x;
+                                int temp = newCorners;
+                                temp &= (~(1 << (cornerIndex - 1)));
+                                if (temp == corners) {
+                                    blocked++;
+                                }
+                            }
+                            if (blocked <= 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            } else if (subtractedPos.z != 0) {
+                for (int x = 0; x <= 1; x ++) {
+                    for (int y = 0; y <= 4; y += 4) {
+                        blocked = 0;
+                        for (int z = 0; z <= 2; z+=2) {
+                            int cornerIndex = y + z + x;
+                            int temp = corners;
+                            temp &= (~(1 << (cornerIndex - 1)));
+                            if (temp == corners) {
+                                blocked++;
+                            }
+                        }
+                        if (blocked <= 0) {
+                            blocked = 0;
+                            int newCorners = getCorner(neighborPos.x, neighborPos.y, neighborPos.z);
+                            for (int z = 0; z <= 2; z += 2) {
+                                int cornerIndex = y + z + x;
+                                int temp = newCorners;
+                                temp &= (~(1 << (cornerIndex - 1)));
+                                if (temp == corners) {
+                                    blocked++;
+                                }
+                            }
+                            if (blocked <= 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (int x = 0; x <= 1; x ++) {
+                    for (int z = 0; z <= 2; z += 2) {
+                        blocked = 0;
+                        for (int y = 0; y <= 4; y += 4) {
+                            int cornerIndex = y + z + x;
+                            int temp = corners;
+                            temp &= (~(1 << (cornerIndex - 1)));
+                            if (temp == corners) {
+                                blocked++;
+                            }
+                        }
+                        if (blocked <= 0) {
+                            blocked = 0;
+                            int newCorners = getCorner(neighborPos.x, neighborPos.y, neighborPos.z);
+                            for (int y = 0; y <= 4; y += 4) {
+                                int cornerIndex = y + z + x;
+                                int temp = newCorners;
+                                temp &= (~(1 << (cornerIndex - 1)));
+                                if (temp == corners) {
+                                    blocked++;
+                                }
+                            }
+                            if (blocked <= 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    }
+    public static boolean canLightPassbetween(int blockType, Vector3i pos, Vector3i neighborPos) {
+        return canLightPassbetween(blockType, getCorner(pos.x, pos.y, pos.z), pos, neighborPos);
+    }
+
+    public static boolean isSolid(int blockType, int corners) {
+        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+            return false;
+        } else {
+            int blocked = 0;
+            for (int x = 0; x <= 1; x++) {
+                for (int z = 0; z <= 2; z+=2) {
+                    for (int y = 0; y <= 4; y+=4) {
+                        int cornerIndex = y + z + x;
+                        int temp = corners;
+                        temp &= (~(1 << (cornerIndex - 1)));
+                        if (temp == corners) {
+                            blocked++;
+                        }
+                    }
+                }
+            }
+            if (blocked >= 8) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public static boolean isVerticallyBlockingLight(int blockType, int corners) {
+        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+            return false;
+        } else {
+            int blockedColumns = 0;
+            for (int x = 0; x <= 1; x++) {
+                for (int z = 0; z <= 2; z+=2) {
+                    for (int y = 0; y <= 4; y+=4) {
+                        int cornerIndex = y + z + x;
+                        int temp = corners;
+                        temp &= (~(1 << (cornerIndex - 1)));
+                        if (temp == corners) {
+                            blockedColumns++;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (blockedColumns >= 4) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public static void updateHeightmap(int x, int z, boolean update) {
         int pos = condensePos(x, z);
         boolean setHeightmap = false;
@@ -307,15 +460,21 @@ public class World {
                 break;
             } else {
                 Vector2i block = getBlock(x, scanY, z);
-                if (block.x != 0 && !setHeightmap) {
-                    setHeightmap = true;
-                    heightmap[pos] = (short) (scanY);
+                int corners = getCorner(x, scanY, z);
+                boolean blocking = isVerticallyBlockingLight(block.x, corners);
+                if (!setHeightmap) {
+                    if (blocking || block.x == 1) {
+                        setHeightmap = true;
+                        heightmap[pos] = (short) (scanY);
+                    }
                 }
-                if (!BlockTypes.blockTypeMap.get(block.x).isTransparent) {
+                if (blocking) {
                     if (update) {
                         for (int scanExtraY = scanY - 1; scanExtraY >= 0; scanExtraY--) {
                             Vector2i blockExtra = getBlock(x, scanExtraY, z);
-                            if (BlockTypes.blockTypeMap.get(blockExtra.x).isTransparent) {
+                            int cornersExtra = getCorner(x, scanExtraY, z);
+                            boolean blockingExtra = isVerticallyBlockingLight(blockExtra.x, cornersExtra);
+                            if (!blockingExtra) {
                                 Vector4i lightExtra = getLight(x, scanExtraY, z);
                                 Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
                                 chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
@@ -352,7 +511,7 @@ public class World {
             Vector2i neighbor = World.getBlock(neighborPos);
             if (neighbor != null) {
                 BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
-                if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
+                if (!isSolid(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                     Vector4i neighborLight = World.getLight(neighborPos);
                     if ((neighborLight.x() > 0 && neighborLight.x() < r) || (neighborLight.y() > 0 && neighborLight.y() < g) || (neighborLight.z() > 0 && neighborLight.z() < b) || (neighborLight.w() > 0 && neighborLight.w() < s)) {
                         Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
@@ -401,15 +560,6 @@ public class World {
             if (replace || (existing == null || existing.x() == 0)) {
                 if (instant) {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
-//                    byte r = 0;
-//                    byte g = 0;
-//                    byte b = 0;
-//                    if (BlockTypes.blockTypeMap.get(blockTypeId) instanceof LightBlockType lType) {
-//                        r = lType.r;
-//                        g = lType.g;
-//                        b = lType.b;
-//                        updateLight(new Vector3i(x, y, z));
-//                    }
                     chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
                 } else {
                     blockQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));

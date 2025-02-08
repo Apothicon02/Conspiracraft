@@ -4,7 +4,6 @@ import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -17,7 +16,8 @@ public class BlockHelper {
     private static final Vector4i[] neighborLights = new Vector4i[6];
     public static int updateLight(Vector3i pos, Vector2i block, Vector4i light, boolean clean) {
         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
-        if (blockType.isTransparent || blockType instanceof LightBlockType) {
+        int corners = getCorner(pos.x, pos.y, pos.z);
+        if (!isSolid(block.x, corners) || blockType instanceof LightBlockType) {
             int r = light.x();
             int g = light.y();
             int b = light.z();
@@ -35,7 +35,7 @@ public class BlockHelper {
                 Vector4i neighborLight = World.getLight(neighborPos);
                 if (neighbor != null) {
                     BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
-                    if (neighborBlockType.isTransparent || neighborBlockType instanceof LightBlockType) {
+                    if (!isSolid(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                         neighborPositions[i] = neighborPos;
                         neighborLights[i] = new Vector4i(neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
                         r = Math.max(r, neighborLight.x()-1);

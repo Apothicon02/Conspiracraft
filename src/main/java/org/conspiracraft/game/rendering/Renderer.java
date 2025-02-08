@@ -297,7 +297,7 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
         } else {
             for (int pos : chunkBlockPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1]});
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3]});
             }
             chunkBlockPointerChanges.clear();
         }
@@ -354,22 +354,24 @@ public class Renderer {
                 Vector4i cornerData = cornerQueue.getFirst();
                 cornerQueue.removeFirst();
                 Vector3i pos = new Vector3i(cornerData.x, cornerData.y, cornerData.z);
-//                Vector2i oldCorner = getCorner(pos);
-//                byte r = 0;
-//                byte g = 0;
-//                byte b = 0;
-//                if (CornerTypes.cornerTypeMap.get(Utils.unpackInt(cornerData.w()).x) instanceof LightCornerType lType) {
-//                    r = lType.r;
-//                    g = lType.g;
-//                    b = lType.b;
-//                    updateLight(pos);
-//                }
+                Vector4i oldLight = getLight(pos);
+                byte r = 0;
+                byte g = 0;
+                byte b = 0;
+                if (BlockTypes.blockTypeMap.get(getBlock(pos).x) instanceof LightBlockType lType) {
+                    r = lType.r;
+                    g = lType.g;
+                    b = lType.b;
+                    updateLight(pos);
+                }
                 Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
                 int condensedChunkPos = condenseChunkPos(chunkPos);
                 int localPos = condenseLocalPos(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
-                chunks[condensedChunkPos].setCorner(localPos, cornerData.w, pos);
-//                updateHeightmap(cornerData.x, cornerData.z, true);
-//                recalculateLight(pos, oldCorner.r(), oldCorner.g(), oldCorner.b(), oldCorner.s());
+                Chunk chunk = chunks[condensedChunkPos];
+                chunk.setCorner(localPos, cornerData.w, pos);
+                chunk.setLight(localPos, r, g, b, 0, pos);
+                updateHeightmap(pos.x, pos.z, true);
+                recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
 
                 vmaVirtualFree(corners.get(0), chunkCornerAllocs[condensedChunkPos]);
                 VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
@@ -507,11 +509,12 @@ public class Renderer {
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
         } else {
             for (int pos : chunkLightPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkLightPointers[pos], chunkLightPointers[pos+1]});
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkLightPointers[pos], chunkLightPointers[pos+1], chunkLightPointers[pos+2], chunkLightPointers[pos+3]});
             }
             chunkLightPointerChanges.clear();
         }
