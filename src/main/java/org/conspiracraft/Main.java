@@ -2,10 +2,9 @@ package org.conspiracraft;
 
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.Player;
+import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.rendering.Renderer;
-import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
@@ -29,6 +28,25 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Main main = new Main();
+        Engine gameEng = new Engine("Conspiracraft", new Window.WindowOptions(), main);
+        gameEng.start();
+    }
+
+    public void init(Window window) throws Exception {
+        Noise.init();
+        GL.createCapabilities();
+        AudioController.init();
+        AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
+        AudioController.loadSound("jump.wav");
+        AudioController.loadSound("grass_step1.wav");
+        AudioController.loadSound("grass_step2.wav");
+        AudioController.loadSound("grass_step3.wav");
+        AudioController.loadSound("dirt_step1.wav");
+        AudioController.loadSound("dirt_step2.wav");
+        AudioController.loadSound("dirt_step3.wav");
+        AudioController.loadSound("swim1.wav");
+        AudioController.loadSound("splash1.wav");
+        AudioController.loadRandomSound("Music/");
         String playerPath = (World.worldPath + "/local.player");
         if (Files.exists(Path.of(playerPath))) {
             FileInputStream in = new FileInputStream(playerPath);
@@ -63,13 +81,6 @@ public class Main {
             FileInputStream in = new FileInputStream(heightmapPath);
             World.heightmap = Utils.intArrayToShortArray(Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes())));
         }
-        Engine gameEng = new Engine("Conspiracraft", new Window.WindowOptions(), main);
-        gameEng.start();
-    }
-
-    public void init(Window window) throws Exception {
-        Noise.init();
-        GL.createCapabilities();
     }
 
     boolean wasXDown = false;
@@ -228,8 +239,10 @@ public class Main {
     public static double interpolationTime = 0;
     public static double timePassed = 0;
     public static double tickTime = 50;
+    public static long timeMS;
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
+        timeMS = time;
         if (isClosing) {
             String path = (World.worldPath+"/");
             new File(path).mkdirs();
@@ -319,7 +332,7 @@ public class Main {
                 updateTime(diffTimeMillis, 1);
                 while (timePassed >= tickTime) {
                     timePassed -= tickTime;
-                    player.tick(time);
+                    player.tick();
                 }
                 interpolationTime = timePassed/tickTime;
                 timePassed += diffTimeMillis;

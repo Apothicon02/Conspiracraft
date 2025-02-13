@@ -584,24 +584,24 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     if (isSky) {
         distanceFogginess = 1f;
     } else {
-        if (color.a >= 1.f && sunLight > 0.f) {
-            vec3 sunDir = normalize(sun - prevPos);
-            if (sunDir.x == 0) {
-                sunDir.x = 0.01f;
-            }
-            if (sunDir.y == 0) {
-                sunDir.y = 0.01f;
-            }
-            if (sunDir.z  == 0) {
-                sunDir.z = 0.01f;
-            }
-            clearVars(false);
-            if (traceWorld(prevPos, sunDir).a >= 1.f) {
-                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
-            }
-            tint = max(vec3(1), tint);
-            color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
-        }
+//        if (color.a >= 1.f && sunLight > 0.f) {
+//            vec3 sunDir = normalize(sun - prevPos);
+//            if (sunDir.x == 0) {
+//                sunDir.x = 0.01f;
+//            }
+//            if (sunDir.y == 0) {
+//                sunDir.y = 0.01f;
+//            }
+//            if (sunDir.z  == 0) {
+//                sunDir.z = 0.01f;
+//            }
+//            clearVars(false);
+//            if (traceWorld(prevPos, sunDir).a >= 1.f) {
+//                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
+//            }
+//            tint = max(vec3(1), tint);
+//            color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
+//        }
     }
     color = vec4(vec3(color)*min(vec3(1.15f), vec3(finalLighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1); //light
     //fog start

@@ -3,6 +3,8 @@ package org.conspiracraft.game;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
+import org.conspiracraft.game.audio.AudioController;
+import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.rendering.Renderer;
 import org.conspiracraft.game.world.World;
@@ -12,6 +14,12 @@ import java.lang.Math;
 
 public class Player {
     private final Camera camera = new Camera();
+    public final Source jumpSource;
+    public final Source passthroughSource;
+    public final Source stepSource;
+    public final Source swimSource;
+    public final Source splashSource;
+    public final Source musicSource;
     public static float eyeHeight = 1.625f;
     public static float height = eyeHeight+0.175f;
     public static float width = 0.4f;
@@ -34,8 +42,15 @@ public class Player {
     public boolean flying = true;
 
     public Player(Vector3f newPos) {
+        jumpSource = new Source(newPos, 1, 1);
+        passthroughSource = new Source(newPos, 1, 1);
+        stepSource = new Source(newPos, 0.25f, 0.66f); //make quieter for some reason gain aint workin on this sound
+        swimSource = new Source(newPos, 0.4f, 1);
+        splashSource = new Source(newPos, 1, 1);
+        musicSource = new Source(newPos, 0.15f, 1);
         setPos(newPos);
         oldPos = newPos;
+        musicSource.play(AudioController.buffers.get(9));
     }
 
     public int[] getData() {
@@ -88,21 +103,27 @@ public class Player {
         return false;
     }
 
-    public void tick(long time) {
+    public Vector2f movement = new Vector2f(0f);
+
+    public void tick() {
         if (!Renderer.worldChanged) {
-            if (!flying && vel.y >= -1+grav) {
+            movement = new Vector2f(0f);
+            boolean onGround = Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, 2, false) != null;
+            if (!flying && vel.y >= -1+grav && !onGround) {
                 vel.set(vel.x, vel.y-grav, vel.z);
             }
 
-            if (time-jump < 100 && !flying) { //prevent jumping when space bar was pressed longer than 0.1s ago or when flying
-                if (Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, 2, false) != null) {
+            if (Main.timeMS-jump < 100 && !flying) { //prevent jumping when space bar was pressed longer than 0.1s ago or when flying
+                if (onGround) {
                     jump = 1000;
-                    lastJump = time;
+                    lastJump = Main.timeMS;
                     vel.set(vel.x, Math.max(vel.y, jumpStrength), vel.z);
+                    jumpSource.setPos(pos);
+                    jumpSource.setVel(new Vector3f(vel.x+movement.x, Math.max(vel.y, jumpStrength), vel.z+movement.y));
+                    jumpSource.play(AudioController.buffers.get(0));
                 }
             }
 
-            Vector2f movement = new Vector2f(0f);
             if (forward || backward) {
                 Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, 0, speed * (sprint ? (backward ? 1 : (flying ? 10 : 2)) : 1) * (forward ? -1 : 1)).getTranslation(new Vector3f());
                 movement.add(pos.x - translatedPos.x, pos.z - translatedPos.z);
@@ -209,6 +230,42 @@ public class Player {
         oldPos = pos;
         pos = newPos;
         blockPos = new Vector3i((int)newPos.x, (int)newPos.y, (int)newPos.z);
+        AudioController.setListenerData(newPos, vel);
+        musicSource.setPos(newPos);
+        Vector3f combinedVel = new Vector3f(vel.x+movement.x, vel.y, vel.z+movement.y);
+        musicSource.setVel(combinedVel);
+        if (Math.abs(combinedVel.x) > 0.01 || Math.abs(combinedVel.y) > 0.01 || Math.abs(combinedVel.z) > 0.01) {
+            int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
+            if (block == 1) {
+                if (swimSource.soundPlaying == -1) {
+                    splashSource.play(AudioController.buffers.get(8));
+                }
+                swimSource.play(AudioController.buffers.get(7));
+            } else {
+                if (swimSource.soundPlaying != -1) {
+                    swimSource.stop();
+                    splashSource.play(AudioController.buffers.get(8));
+                }
+                if (block == 17 || block == 4 || block == 5) {
+                    passthroughSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
+                }
+            }
+            int blockOn = World.getBlock(newPos.x, newPos.y-0.1f, newPos.z).x;
+            if (blockOn == 2) {
+                stepSource.play(AudioController.buffers.get((int) (1+(Math.random()*2))));
+            } else if (blockOn == 3) {
+                stepSource.play(AudioController.buffers.get((int) (4+(Math.random()*2))));
+            }
+        }
+
+        splashSource.setPos(newPos);
+        splashSource.setVel(combinedVel);
+        swimSource.setPos(newPos);
+        swimSource.setVel(combinedVel);
+        passthroughSource.setPos(newPos);
+        passthroughSource.setVel(combinedVel);
+        stepSource.setPos(newPos);
+        stepSource.setVel(combinedVel);
     }
 
     public void move(float x, float y, float z, boolean countRotation) {
