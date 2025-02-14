@@ -470,7 +470,7 @@ public class Renderer {
             }
 
         } else {
-            for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), lightQueue.size()); i++) {
+            while (!lightQueue.isEmpty()) {
                 Vector3i lightData = lightQueue.getFirst();
                 lightQueue.removeFirst();
                 Vector3i chunkPos = new Vector3i(lightData.x / chunkSize, lightData.y / chunkSize, lightData.z / chunkSize);

@@ -33,7 +33,7 @@ public class BlockHelper {
                 Vector3i neighborPos = neighborBlocks[i];
                 Vector2i neighbor = World.getBlock(neighborPos);
                 Vector4i neighborLight = World.getLight(neighborPos);
-                if (neighbor != null) {
+                if (neighbor != null && neighborLight != null) {
                     BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
                     if (!isSolid(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                         neighborPositions[i] = neighborPos;
