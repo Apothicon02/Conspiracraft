@@ -86,6 +86,10 @@ public class Utils {
         return buffer;
     }
 
+    public static float furthestFromZero(float first, float second) {
+        return Math.abs(first) > Math.abs(second) ? first : second;
+    }
+
     public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
         return new Vector3f(ConspiracraftMath.mix(old.x, current.x, (float) Main.interpolationTime), ConspiracraftMath.mix(old.y, current.y, (float) Main.interpolationTime), ConspiracraftMath.mix(old.z, current.z, (float) Main.interpolationTime));
     }

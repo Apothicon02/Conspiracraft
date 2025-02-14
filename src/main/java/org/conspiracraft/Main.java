@@ -92,6 +92,7 @@ public class Main {
     boolean wasEDown = false;
     boolean wasQDown = false;
     boolean wasF1Down = false;
+    boolean wasF4Down = false;
     boolean isClosing = false;
 
     long lastBlockBroken = 0L;
@@ -161,6 +162,9 @@ public class Main {
                 if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
                     Renderer.showUI = !Renderer.showUI;
                 }
+                if (wasF4Down && !window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS)) {
+                    Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
+                }
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
@@ -208,6 +212,7 @@ public class Main {
                 }
 
                 wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);
+                wasF4Down = window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS);
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);

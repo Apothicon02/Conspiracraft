@@ -271,7 +271,7 @@ public class World {
             }
             return chunk.getBlock(condenseLocalPos(blockPos.x-(chunkPos.x*chunkSize), blockPos.y-(chunkPos.y*chunkSize), blockPos.z-(chunkPos.z*chunkSize)));
         }
-        return null;
+        return new Vector2i(0);
     }
     public static Vector2i getBlock(int x, int y, int z) {
         return getBlock(new Vector3i(x, y, z));

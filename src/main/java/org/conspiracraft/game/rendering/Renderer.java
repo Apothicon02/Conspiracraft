@@ -52,6 +52,7 @@ public class Renderer {
     public static int timeUniform;
     public static int selectedUniform;
     public static int uiUniform;
+    public static int shadowsEnabledUniform;
     public static int sunUniform;
 
     public static int renderDistanceMul = 8; //4
@@ -61,6 +62,7 @@ public class Renderer {
     public static boolean worldChanged = false;
     public static boolean[] collisionData = new boolean[9984*9984+9984];
     public static boolean showUI = true;
+    public static boolean shadowsEnabled = false;
 
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
@@ -119,6 +121,7 @@ public class Renderer {
         timeUniform = glGetUniformLocation(scene.programId, "time");
         selectedUniform = glGetUniformLocation(scene.programId, "selected");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
+        shadowsEnabledUniform = glGetUniformLocation(scene.programId, "shadowsEnabled");
         sunUniform = glGetUniformLocation(scene.programId, "sun");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
@@ -158,6 +161,7 @@ public class Renderer {
         }
         glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
         glUniform1i(uiUniform, showUI ? 1 : 0);
+        glUniform1i(shadowsEnabledUniform, shadowsEnabled ? 1 : 0);
         float halfSize = size/2f;
         Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
         sunPos.rotateY((float) time);

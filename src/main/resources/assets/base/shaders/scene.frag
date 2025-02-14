@@ -7,6 +7,7 @@ uniform float timeOfDay;
 uniform double time;
 uniform ivec3 selected;
 uniform bool ui;
+uniform bool shadowsEnabled;
 uniform vec3 sun;
 
 layout(binding = 0) uniform sampler2D coherent_noise;
@@ -272,7 +273,7 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
             }
         }
         if (!anyEmpty) {
-            return vec4(-2);
+            return vec4(0, 0, 0, -10);
         }
     }
     vec4 light = intToColor(getLightData(intX, intY, intZ));
@@ -323,13 +324,15 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
     vec3 prevRayPos = prevMapPos;
-
-    vec4 prevVoxelColor = vec4(1, 1, 1, 0);
+    vec3 prevRealPos = rayMapPos+(prevMapPos/8);
+    ivec2 prevBlock = getBlock(prevRealPos.x, prevRealPos.y, prevRealPos.z);
+    vec4 prevVoxelColor = getVoxel((prevRealPos.x-int(prevRealPos.x))*8, (prevRealPos.y-int(prevRealPos.y))*8, (prevRealPos.z-int(prevRealPos.z))*8, prevRealPos.x, prevRealPos.y, prevRealPos.z, prevBlock.x, prevBlock.y);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
-        prevPos = rayMapPos+(prevMapPos/8.f);
+        prevPos = rayMapPos+(prevMapPos/8);
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype);
         if (voxelColor.a > 0.f) {
-            if (reflectivity == 0.f) {
+            bool canHit = prevVoxelColor.a < voxelColor.a;
+            if (reflectivity == 0.f && canHit) {
                 if (blockType == 1) { //water
                     reflectivity = 0.5f;
                 } else if (blockType == 7) { //kyanite
@@ -343,10 +346,9 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                 }
             }
             if (voxelColor.a < 1.f) {
-                vec3 realPos = rayMapPos+(prevMapPos/8.f);
-                if (hitPos == vec3(256)) {
-                    prevHitPos = realPos;
-                    hitPos = rayMapPos+(mapPos/8.f);
+                if (hitPos == vec3(256) && canHit) {
+                    prevHitPos = prevPos;
+                    hitPos = rayMapPos+(mapPos/8);
                 }
                 //bubbles start
                 if (blockType == 1) {
@@ -372,8 +374,8 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
             if (voxelColor.a >= 1) {
                 if (hitPos == vec3(256)) {
-                    prevHitPos = rayMapPos+(prevMapPos/8.f);
-                    hitPos = rayMapPos+(mapPos/8.f);
+                    prevHitPos = prevPos;
+                    hitPos = rayMapPos+(mapPos/8);
                 }
                 //face-based brightness start
                 float brightness = 1.f;
@@ -583,25 +585,25 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
 
     if (isSky) {
         distanceFogginess = 1f;
-    } else {
-//        if (color.a >= 1.f && sunLight > 0.f) {
-//            vec3 sunDir = normalize(sun - prevPos);
-//            if (sunDir.x == 0) {
-//                sunDir.x = 0.01f;
-//            }
-//            if (sunDir.y == 0) {
-//                sunDir.y = 0.01f;
-//            }
-//            if (sunDir.z  == 0) {
-//                sunDir.z = 0.01f;
-//            }
-//            clearVars(false);
-//            if (traceWorld(prevPos, sunDir).a >= 1.f) {
-//                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
-//            }
-//            tint = max(vec3(1), tint);
-//            color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
-//        }
+    } else if (shadowsEnabled) {
+        if (color.a >= 1.f && sunLight > 0.f) {
+            vec3 sunDir = normalize(sun - prevPos);
+            if (sunDir.x == 0) {
+                sunDir.x = 0.01f;
+            }
+            if (sunDir.y == 0) {
+                sunDir.y = 0.01f;
+            }
+            if (sunDir.z  == 0) {
+                sunDir.z = 0.01f;
+            }
+            clearVars(false);
+            if (traceWorld(prevPos, sunDir).a >= 1.f) {
+                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
+            }
+            tint = max(vec3(1), tint);
+            color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
+        }
     }
     color = vec4(vec3(color)*min(vec3(1.15f), vec3(finalLighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1); //light
     //fog start

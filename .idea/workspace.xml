@@ -10,22 +10,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/SFX.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/WaveData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step3.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step3.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/jump.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/splash1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/swim1.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -102,32 +93,32 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\sounds" />
@@ -210,14 +201,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00078" summary="- Fixed crash.">
-      <option name="closed" value="true" />
-      <created>1734130711216</created>
-      <option name="number" value="00078" />
-      <option name="presentableId" value="LOCAL-00078" />
-      <option name="project" value="LOCAL" />
-      <updated>1734130711216</updated>
     </task>
     <task id="LOCAL-00079" summary="- Fixed bubbles reversing directions occasionally. &#10;- Added the sun. &#10;- Started adding block corners.">
       <option name="closed" value="true" />
@@ -603,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739242908194</updated>
     </task>
-    <option name="localTasksCounter" value="127" />
+    <task id="LOCAL-00127" summary="- Added ability to play sounds. &#10;- Added jumping sound. &#10;- Added walking sound. &#10;- Added swimming sound. &#10;- Added minecraft music. &#10;- Fixed gravity velocity building up when on a solid surface.">
+      <option name="closed" value="true" />
+      <created>1739415298391</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1739415298392</updated>
+    </task>
+    <option name="localTasksCounter" value="128" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -619,7 +610,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Slightly improved world load speed." />
     <MESSAGE value="- Began stuff." />
     <MESSAGE value="- Started rewrite." />
     <MESSAGE value="- Big optimize." />
@@ -644,7 +634,8 @@
     <MESSAGE value="- Improved lighting and fog. &#10;- Fixed shadows causing crashes." />
     <MESSAGE value="- Graphics are greatly improved. &#10;- Logs no longer have the corners cutout. &#10;- Fixed ambient occlusion being more intense the closer to 0,0." />
     <MESSAGE value="- Fixed light fog not showing in chunks only containing air. &#10;- Fixed reflections. &#10;- Fixed sunlight fog not being used. &#10;- Fixed variables not being reset before casting shadows.  &#10;- Smooth lighting now is only calculated when hitting a block. &#10;- Improved blocklight diminishment from sunlight." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed light fog not showing in chunks only containing air. &#10;- Fixed reflections. &#10;- Fixed sunlight fog not being used. &#10;- Fixed variables not being reset before casting shadows.  &#10;- Smooth lighting now is only calculated when hitting a block. &#10;- Improved blocklight diminishment from sunlight." />
+    <MESSAGE value="- Added ability to play sounds. &#10;- Added jumping sound. &#10;- Added walking sound. &#10;- Added swimming sound. &#10;- Added minecraft music. &#10;- Fixed gravity velocity building up when on a solid surface." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added ability to play sounds. &#10;- Added jumping sound. &#10;- Added walking sound. &#10;- Added swimming sound. &#10;- Added minecraft music. &#10;- Fixed gravity velocity building up when on a solid surface." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
