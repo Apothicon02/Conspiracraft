@@ -86,6 +86,10 @@ public class Utils {
         return buffer;
     }
 
+    public static float closestToZero(float first, float second) {
+        return Math.abs(first) < Math.abs(second) ? first : second;
+    }
+
     public static float furthestFromZero(float first, float second) {
         return Math.abs(first) > Math.abs(second) ? first : second;
     }

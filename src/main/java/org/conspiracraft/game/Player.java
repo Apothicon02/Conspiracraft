@@ -29,8 +29,9 @@ public class Player {
     public Vector3f oldPos;
     public Vector3f vel = new Vector3f(0f);
     public Vector3f movement = new Vector3f(0f);
+    public float bounciness = 0.66f;
     public float friction = 0.75f;
-    public float grav = 0.025f;
+    public float grav = 0.05f;
     public float speed = 0.15f;
     public float jumpStrength = 0.33f;
     public long lastJump = 1000;
@@ -76,7 +77,7 @@ public class Player {
         return data;
     }
 
-    public boolean solid(float x, float y, float z, boolean recordFriction) {
+    public boolean solid(float x, float y, float z, boolean recordFriction, boolean recordBounciness) {
         Vector2i block = World.getBlock(x, y, z);
         if (block != null) {
             int typeId = block.x;
@@ -98,6 +99,13 @@ public class Player {
                                 friction = Math.min(friction, 0.75f);
                             }
                         }
+                        if (recordBounciness) {
+                            if (typeId == 7) { //kyanite
+                                bounciness = Math.min(bounciness, -2f);
+                            } else if (typeId == 11 || typeId == 12 || typeId == 13) { //glass
+                                bounciness = Math.min(bounciness, -0.33f);
+                            }
+                        }
                         return true;
                     }
                 }
@@ -105,12 +113,12 @@ public class Player {
         }
         return false;
     }
-    public boolean solid(float x, float y, float z, float w, float h, boolean recordFriction) {
+    public boolean solid(float x, float y, float z, float w, float h, boolean recordFriction, boolean recordBounciness) {
         boolean returnValue = false;
         for (float newX = x-w; newX <= x+w; newX+=0.125f) {
             for (float newY = y; newY <= y+h; newY+=0.125f) {
                 for (float newZ = z-w; newZ <= z+w; newZ+=0.125f) {
-                    if (solid(newX, newY, newZ, recordFriction)) {
+                    if (solid(newX, newY, newZ, recordFriction, recordBounciness)) {
                         if (recordFriction) {
                             returnValue = true;
                         } else {
@@ -125,9 +133,8 @@ public class Player {
 
     public void tick() {
         if (!Renderer.worldChanged) {
-            Vector3f positionBelow = Main.raycast(new Matrix4f().setTranslation(pos).rotate(new Quaternionf(0.7071068, 0, 0, 0.7071068)), true, 2, false);
             friction = 1f;
-            boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true);
+            boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
             Vector2i blockIn = World.getBlock(blockPos.x, blockPos.y, blockPos.z);
             Vector2i blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
             float modifiedSpeed = speed;
@@ -177,7 +184,7 @@ public class Player {
             }
 
             if (Main.timeMS-jump < 100 && !flying) { //prevent jumping when space bar was pressed longer than 0.1s ago or when flying
-                if ((onGround || (blockIn.x == 1 && solid(pos.x, pos.y, pos.z, width*1.125f, height, false))) && blockBreathing.x != 1) {
+                if ((onGround || (blockIn.x == 1 && solid(pos.x, pos.y, pos.z, width*1.125f, height, false, false))) && blockBreathing.x != 1) {
                     jump = 1000;
                     lastJump = Main.timeMS;
                     vel.y = Math.max(vel.y, jumpStrength);
@@ -198,23 +205,32 @@ public class Player {
             float detail = 1+Math.max(Math.abs(mX*256f), Math.max(Math.abs(mY*256f), Math.abs(mZ*256f)));
             for (int i = 0; i <= detail; i++) {
                 Vector3f rayPos = new Vector3f(maxX != null ? maxX : pos.x+((destPos.x-pos.x)*(i/detail)), maxY != null ? maxY : pos.y+((destPos.y-pos.y)*(i/detail)), maxZ != null ? maxZ : pos.z+((destPos.z-pos.z)*(i/detail)));
-                if (solid(rayPos.x, rayPos.y, rayPos.z, width, height, false)) {
+                if (solid(rayPos.x, rayPos.y, rayPos.z, width, height, false, false)) {
                     if (maxX == null) {
-                        if (solid(rayPos.x, hitPos.y, hitPos.z, width, height, false)) {
+                        bounciness = 0.66f;
+                        if (solid(rayPos.x, hitPos.y, hitPos.z, width, height, false, !flying)) {
+                            bounciness = Math.max(bounciness, -0.66f);
                             maxX = hitPos.x;
-                            vel.x = 0;
+                            vel.x *= bounciness;
+                            movement.x *= bounciness;
                         }
                     }
                     if (maxY == null) {
-                        if (solid(hitPos.x, rayPos.y, hitPos.z, width, height, false)) {
+                        bounciness = 0.66f;
+                        if (solid(hitPos.x, rayPos.y, hitPos.z, width, height, false, !flying)) {
+                            bounciness = (upward && mY <= 0.f) ? bounciness : Math.max(bounciness, -0.66f); //dont limit bounciness if jumping and moving downwards
                             maxY = hitPos.y;
-                            vel.y = 0;
+                            vel.y *= bounciness;
+                            movement.y *= bounciness;
                         }
                     }
                     if (maxZ == null) {
-                        if (solid(hitPos.x, hitPos.y, rayPos.z, width, height, false)) {
+                        bounciness = 0.66f;
+                        if (solid(hitPos.x, hitPos.y, rayPos.z, width, height, false, !flying)) {
+                            bounciness = Math.max(bounciness, -0.66f);
                             maxZ = hitPos.z;
-                            vel.z = 0;
+                            vel.z *= bounciness;
+                            movement.z *= bounciness;
                         }
                     }
                     if (maxX != null && maxY != null && maxZ != null) {
