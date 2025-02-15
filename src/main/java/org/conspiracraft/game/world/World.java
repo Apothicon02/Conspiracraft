@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static org.conspiracraft.engine.Utils.*;
@@ -34,9 +35,9 @@ public class World {
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
-    public static LinkedList<Vector4i> blockQueue = new LinkedList<>();
-    public static LinkedList<Vector4i> cornerQueue = new LinkedList<>();
-    public static LinkedList<Vector3i> lightQueue = new LinkedList<>();
+    public static ArrayList<Vector4i> blockQueue = new ArrayList<>();
+    public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
+    public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
     public static boolean[] columnUpdates = new boolean[sizeChunks*sizeChunks];
 
     public static void run() throws IOException {

@@ -203,7 +203,7 @@ ivec2 getBlock(vec3 pos) {
 }
 
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18);
 }
 
 ivec3 prevLightChunkPos = ivec3(-1);
@@ -230,7 +230,8 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
     int intY = int(y);
     int intZ = int(z);
     ivec2 block = getBlock(intX, intY, intZ);
-    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
+    vec4 light = intToColor(getLightData(intX, intY, intZ));
+    if (isBlockSolid(block) || block.x == 17) { //return pure darkness if block isnt transparent.
         bool[8] corners = getCorners(intX, intY, intZ);
         float localX = (x-intX);
         float localY = (y-intY);
@@ -273,12 +274,8 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
             }
         }
         if (!anyEmpty) {
-            return vec4(0, 0, 0, -10);
+            return block.x == 17 ? light/1.5 : vec4(0, 0, 0, 0);
         }
-    }
-    vec4 light = intToColor(getLightData(intX, intY, intZ));
-    if (block.x == 17) {
-        light = light/1.5;
     }
     return fromLinear(light);
 }
@@ -577,8 +574,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     float fogNoise = max(0, noise(vec2(hitPos.x, hitPos.z)));
     float linearDistFog = (distance(camPos, prevPos)/renderDistance)*(1+fogNoise);
     float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
-    lighting = fromLinear(lighting*vec4(4, 4, 4, 1));
-    lightFog = fromLinear(lightFog*vec4(4, 4, 4, 1));
+    lighting = pow(lighting/20, vec4(2f))*vec4(100, 100, 100, 18.5);
+    lightFog = pow(lightFog/20, vec4(2f))*vec4(100, 100, 100, 18.5);
     float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
     float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);
     vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, 0.875f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;

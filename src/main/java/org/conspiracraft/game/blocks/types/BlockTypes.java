@@ -12,7 +12,7 @@ public class BlockTypes {
     public static BlockType DIRT = create(new BlockType(false));
     public static BlockType TALL_GRASS = create(new BlockType(true, false));
     public static BlockType ROSE = create(new BlockType(true, false));
-    public static BlockType TORCH = create(new LightBlockType(true, false, 20, 15, 10));
+    public static BlockType TORCH = create(new LightBlockType(true, false, 20, 15, 0));
     public static BlockType KYANITE = create(new LightBlockType(true, true, 0, 2, 6));
     public static BlockType WHITE_STONE = create(new BlockType(false));
     public static BlockType BLACK_STONE = create(new BlockType(false));
@@ -24,6 +24,7 @@ public class BlockTypes {
     public static BlockType WILLOW_PLANKS = create(new BlockType(false));
     public static BlockType WILLOW_LOG = create(new BlockType(false));
     public static BlockType WILLOW_LEAVES = create(new BlockType(true, false));
+    public static BlockType HYDRANGEA = create(new BlockType(true, false));
 
     private static BlockType create(BlockType type) {
         blockTypeMap.put(blockTypeMap.size(), type);

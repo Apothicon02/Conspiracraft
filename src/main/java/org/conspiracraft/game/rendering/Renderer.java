@@ -180,7 +180,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 144; x++) {
+            for (int x = 0; x < 152; x++) {
                 for (int y = 0; y < 256; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
