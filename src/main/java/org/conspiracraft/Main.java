@@ -90,6 +90,7 @@ public class Main {
     boolean wasUpDown = false;
     boolean wasDownDown = false;
     boolean wasEDown = false;
+    boolean wasWDown = false;
     boolean wasQDown = false;
     boolean wasF1Down = false;
     boolean wasF4Down = false;
@@ -176,6 +177,9 @@ public class Main {
                         }
                         selectedBlock = new Vector2i(selectedBlock.x, newSubId);
                     }
+                    if (wasWDown && !window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
+                        Renderer.snowing = !Renderer.snowing;
+                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.worldChanged = true;
                     }
@@ -215,6 +219,7 @@ public class Main {
                 wasF4Down = window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS);
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
+                wasWDown = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
                 wasXDown = window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS);
                 wasGDown = window.isKeyPressed(GLFW_KEY_G, GLFW_PRESS);

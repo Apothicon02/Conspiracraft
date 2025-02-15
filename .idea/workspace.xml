@@ -9,13 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Strengthened gravity. &#10;- Added bouncing.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,14 +197,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00082" summary="- Removed inverted heightmap.">
-      <option name="closed" value="true" />
-      <created>1734644502835</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
-      <option name="project" value="LOCAL" />
-      <updated>1734644502835</updated>
     </task>
     <task id="LOCAL-00083" summary="- Added a rasterized cube for the sun.">
       <option name="closed" value="true" />
@@ -592,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739572288082</updated>
     </task>
-    <option name="localTasksCounter" value="131" />
+    <task id="LOCAL-00131" summary="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures.">
+      <option name="closed" value="true" />
+      <created>1739584176381</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1739584176381</updated>
+    </task>
+    <option name="localTasksCounter" value="132" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -608,7 +606,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Re-added most effects. &#10;- Re-added block placing &amp; breaking." />
     <MESSAGE value="- So much stuff." />
     <MESSAGE value="- Started adding corner system." />
     <MESSAGE value="- Fixed corner data not being read correctly." />
@@ -633,7 +630,8 @@
     <MESSAGE value="- Drastically improved movement.&#10;- Added movement physics for moving in water. &#10;- Improved sounds. &#10;- Pressing F4 now toggles shadows. &#10;- Improved AO." />
     <MESSAGE value="- Fixed crash with light propogation. &#10;- Sunlight is now immune to normal-based brightness. &#10;- Fixed blocklight fog not existing. &#10;- Block lighting is now non-linear." />
     <MESSAGE value="- Strengthened gravity. &#10;- Added bouncing." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Strengthened gravity. &#10;- Added bouncing." />
+    <MESSAGE value="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
