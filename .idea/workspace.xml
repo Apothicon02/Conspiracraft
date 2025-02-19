@@ -9,7 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Updated snow.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Micro-optimized fragment shader.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -195,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00084" summary="- Started adding chunks to the GPU.">
-      <option name="closed" value="true" />
-      <created>1735418150005</created>
-      <option name="number" value="00084" />
-      <option name="presentableId" value="LOCAL-00084" />
-      <option name="project" value="LOCAL" />
-      <updated>1735418150005</updated>
     </task>
     <task id="LOCAL-00085" summary="- Got chunked voxel data working.">
       <option name="closed" value="true" />
@@ -588,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739638888844</updated>
     </task>
-    <option name="localTasksCounter" value="133" />
+    <task id="LOCAL-00133" summary="- Micro-optimized fragment shader.">
+      <option name="closed" value="true" />
+      <created>1739731219699</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1739731219699</updated>
+    </task>
+    <option name="localTasksCounter" value="134" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Started adding corner system." />
     <MESSAGE value="- Fixed corner data not being read correctly." />
     <MESSAGE value="- Changed block breaking to break each corner at a time. &#10;- Collision now respects missing corners. &#10;- Textures are now fully filled." />
     <MESSAGE value="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows." />
@@ -629,7 +628,8 @@
     <MESSAGE value="- Strengthened gravity. &#10;- Added bouncing." />
     <MESSAGE value="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures." />
     <MESSAGE value="- Updated snow." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Updated snow." />
+    <MESSAGE value="- Micro-optimized fragment shader." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Micro-optimized fragment shader." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

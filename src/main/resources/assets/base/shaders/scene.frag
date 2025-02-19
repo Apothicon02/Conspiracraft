@@ -480,7 +480,7 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
             float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
             float timeBonus = gradient(rayMapPos.y, 64, 372, 0.1, 0f);
             float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
-            float fogNoise = max(0, noise(vec2(rayMapPos.x, rayMapPos.z)));
+            float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
             float linearDistFog = (distance(camPos, rayMapPos)/renderDistance)*(1+fogNoise);
             float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
             float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
@@ -488,6 +488,8 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
             color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, whiteness, distanceFogginess);
             lightPos = prevPos;
         }
+        float lightNoise = max(0, noise((vec2(lightPos.x, lightPos.y)*64)+(float(time)*10000))+noise((vec2(lightPos.y, lightPos.z)*64)+(float(time)*10000))+noise((vec2(lightPos.z, lightPos.x)*64)+(float(time)*10000)));
+        float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)));
 
         //lighting start
         vec3 relativePos = lightPos-rayMapPos;
@@ -505,7 +507,8 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
         } else {
             lighting = centerLighting;
         }
-        lightFog = max(lightFog, lighting);
+        lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
+        lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, sunlightNoise));
         //lighting end
 
         //snow start
@@ -627,7 +630,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64, 372, 0.1, 0f);
     float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
-    float fogNoise = max(0, noise(vec2(hitPos.x, hitPos.z)));
+    float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
     float linearDistFog = (distance(camPos, prevPos)/renderDistance)*(1+fogNoise);
     float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
     lighting = pow(lighting/20, vec4(2f))*vec4(100, 100, 100, 18.5);
