@@ -334,7 +334,7 @@ vec3 stepMask(vec3 sideDist) {
 float normalBrightness = 1f;
 bool isSnowFlake = false;
 
-vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, float whiteness, float distanceFogginess) {
+vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float distanceFogginess) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -383,7 +383,6 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
                 vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), vec3(lighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1); //light
                 //fog start
-                vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
                 color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
                 //fog end
 
@@ -450,7 +449,9 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     return vec4(0.0);
 }
 
-vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
+float cloudiness = 1f;
+
+vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(15.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -461,51 +462,65 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask) {
 
     while (mapPos.x < 16.0 && mapPos.x >= 0.0 && mapPos.y < 16.0 && mapPos.y >= 0.0 && mapPos.z < 16.0 && mapPos.z >= 0.0) {
         //block start
-        ivec2 blockInfo = getBlock(rayMapPos);
+        ivec2 blockInfo = ivec2(0);
+        vec3 uv3d = vec3(0);
+        if (inBounds) {
+            blockInfo = getBlock(rayMapPos);
 
-        vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-        float d = max (mini.x, max (mini.y, mini.z));
-        vec3 intersect = rayPos + rayDir*d;
-        vec3 uv3d = intersect - mapPos;
+            vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float d = max (mini.x, max (mini.y, mini.z));
+            vec3 intersect = rayPos + rayDir*d;
+            uv3d = intersect - mapPos;
 
-        if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-            uv3d = rayPos - mapPos;
+            if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
+                uv3d = rayPos - mapPos;
+            }
         }
         //block end
 
         vec4 color = vec4(0);
         vec3 lightPos = rayMapPos;
+        float camDist = distance(camPos, rayMapPos)/renderDistance;
+        float cloudHeight = camDist*(height/1.5f);
+        float cloudNoise = max(0, noise(vec2(rayMapPos.x, rayMapPos.z)*((timeOfDay/2.5f)+0.5f))+1.5f)*0.8f;
+        float cloudThickness = abs(noise(vec2(rayMapPos.z, rayMapPos.x)*(timeOfDay+0.5f))*20);
+        cloudiness = max(cloudiness, min(2, (gradient(rayMapPos.y, 288-cloudThickness-cloudHeight, 304-(cloudThickness/2)-cloudHeight, 1, 0)+gradient(rayMapPos.y, 304-(cloudThickness/2)-cloudHeight, 320-cloudHeight, -1, 0))*cloudNoise)*gradient(rayMapPos.y, height/1.66, height, 2.5, 0.8));
+        float whiteness = gradient(rayMapPos.y, 64, 372, 0, 0.8);
+        vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness*cloudiness);
         if (blockInfo.x != 0.f) {
             float adjustedTime = clamp(abs(1-clamp((distance(rayMapPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
             float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
             float timeBonus = gradient(rayMapPos.y, 64, 372, 0.1, 0f);
             float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
             float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
-            float linearDistFog = (distance(camPos, rayMapPos)/renderDistance)*(1+fogNoise);
+            float linearDistFog = camDist*(1+fogNoise);
             float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
             float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
-            float whiteness = gradient(rayMapPos.y, 64, 372, 0, 0.8);
-            color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, whiteness, distanceFogginess);
+            color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, distanceFogginess);
             lightPos = prevPos;
         }
         float lightNoise = max(0, noise((vec2(lightPos.x, lightPos.y)*64)+(float(time)*10000))+noise((vec2(lightPos.y, lightPos.z)*64)+(float(time)*10000))+noise((vec2(lightPos.z, lightPos.x)*64)+(float(time)*10000)));
         float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)));
 
         //lighting start
-        vec3 relativePos = lightPos-rayMapPos;
-        vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
-        if (color.a >= 1.f) {
-            //smooth lighting start
-            vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
-            verticalLighting = mix(relativePos.y >= 0.5f ? centerLighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : centerLighting, relativePos.y);
-            vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
-            northSouthLighting = mix(relativePos.z >= 0.5f ? centerLighting : northSouthLighting, relativePos.z >= 0.5f ? northSouthLighting : centerLighting, relativePos.z);
-            vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
-            eastWestLighting = mix(relativePos.x >= 0.5f ? centerLighting : eastWestLighting, relativePos.x >= 0.5f ? eastWestLighting : centerLighting, relativePos.x);
-            lighting = mix(mix(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25), 0.5), centerLighting, 0.5);
-            //smooth lighting end
+        if (inBounds) {
+            vec3 relativePos = lightPos-rayMapPos;
+            vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
+            if (color.a >= 1.f) {
+                //smooth lighting start
+                vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
+                verticalLighting = mix(relativePos.y >= 0.5f ? centerLighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : centerLighting, relativePos.y);
+                vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
+                northSouthLighting = mix(relativePos.z >= 0.5f ? centerLighting : northSouthLighting, relativePos.z >= 0.5f ? northSouthLighting : centerLighting, relativePos.z);
+                vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
+                eastWestLighting = mix(relativePos.x >= 0.5f ? centerLighting : eastWestLighting, relativePos.x >= 0.5f ? eastWestLighting : centerLighting, relativePos.x);
+                lighting = mix(mix(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25), 0.5), centerLighting, 0.5);
+                //smooth lighting end
+            } else {
+                lighting = centerLighting;
+            }
         } else {
-            lighting = centerLighting;
+            lighting = fromLinear(vec4(0, 0, 0, 20));
         }
         lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
         lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, sunlightNoise));
@@ -549,49 +564,43 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
     vec3 mask = stepMask(sideDist);
 
     while (distance(rayMapChunkPos, rayPos) < renderDistance/16) {
-        if (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1) {
-            if (!isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z))) {
-                vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-                float d = max (mini.x, max (mini.y, mini.z));
-                vec3 intersect = rayPos + rayDir*d;
-                vec3 uv3d = intersect - rayMapChunkPos;
+        float camDist = distance(camPos, rayMapChunkPos*16)/renderDistance;
+        float cloudHeight = camDist*(height/1.5f);
+        bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
+        if ((rayMapChunkPos.y*16 >= 272-cloudHeight && rayMapChunkPos.y*16 <= 336-cloudHeight) || (!inBounds || !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)))) {
+            vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float d = max (mini.x, max (mini.y, mini.z));
+            vec3 intersect = rayPos + rayDir*d;
+            vec3 uv3d = intersect - rayMapChunkPos;
 
-                if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                    uv3d = rayPos - rayMapChunkPos;
-                }
-                vec4 color = dda(ivec3(rayMapChunkPos), uv3d * 16.0, rayDir, mask);
-                if (color.a >= 1) {
-                    return color;
-                }
-            } else {
-                lighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize, false, false, false);
-                lightFog = max(lightFog, lighting);
-
-                //snow start
-                if (snowing) {
-                    if (toLinear(vec4(lighting.a)).a >= 20) {
-                        float samp = whiteNoise((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*64)+((rayMapChunkPos.y)+(float(time)*7500)));
-                        float samp2 = noise(vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8);
-                        if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
-                            isSnowFlake = true;
-                            return vec4(1, 1, 1, 1);
-                        }
-                    }
-                }
-                //snow end
-
+            if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
+                uv3d = rayPos - rayMapChunkPos;
+            }
+            vec4 color = dda(ivec3(rayMapChunkPos), uv3d * 16.0, rayDir, mask, inBounds);
+            if (color.a >= 1) {
+                return color;
             }
         } else {
+            if (inBounds) {
+                lighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize, false, false, false);
+            } else {
+                lighting = fromLinear(vec4(0, 0, 0, 20));
+            }
+            lightFog = max(lightFog, lighting);
+
             //snow start
             if (snowing) {
-                float samp = whiteNoise((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*64)+((rayMapChunkPos.y)+(float(time)*7500)));
-                float samp2 = noise(vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8);
-                if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
-                    isSnowFlake = true;
-                    return vec4(1, 1, 1, 1);
+                if (toLinear(vec4(lighting.a)).a >= 20) {
+                    float samp = whiteNoise((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*64)+((rayMapChunkPos.y)+(float(time)*7500)));
+                    float samp2 = noise(vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8);
+                    if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
+                        isSnowFlake = true;
+                        return vec4(1, 1, 1, 1);
+                    }
                 }
             }
             //snow end
+
         }
 
         mask = stepMask(sideDist);
@@ -616,6 +625,7 @@ void clearVars(bool clearHit) {
     lightFog = vec4(0);
     tint = vec3(0);
     normalBrightness = 1f;
+    cloudiness = 1f;
 }
 
 vec4 raytrace(vec3 ogRayPos, vec3 dir) {
@@ -632,7 +642,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
     float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
     float linearDistFog = (distance(camPos, prevPos)/renderDistance)*(1+fogNoise);
-    float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
+    float distanceFogginess = clamp((exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f))*cloudiness, 0, 1f);
     lighting = pow(lighting/20, vec4(2f))*vec4(100, 100, 100, 18.5);
     lightFog = pow(lightFog/20, vec4(2f))*vec4(100, 100, 100, 18.5);
     float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
@@ -641,11 +651,14 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
 
     vec3 finalRayMapPos = rayMapPos;
     vec4 finalLighting = vec4(lighting.r*normalBrightness, lighting.g*normalBrightness, lighting.b*normalBrightness, lighting.a);
-    vec3 finalLightFog = max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a/20)*mixedTime))/4), ((sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*((lightFog.a/12)*mixedTime)));
+    float sunBrightness = (lightFog.a/12)*mixedTime;
+    vec3 finalLightFog = max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a/20)*mixedTime))/4), ((sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunBrightness));
     vec3 finalTint = max(vec3(1), tint);
 
+    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness*cloudiness);
     if (isSky) {
-        distanceFogginess = 1f;
+        distanceFogginess = max(1, cloudiness);
+        unmixedFogColor *= min(max(sunBrightness*2.5f, 0.5f), 1.2f-(cloudiness/5));
     } else if (shadowsEnabled) {
         if (color.a >= 1.f && sunLight > 0.f) {
             vec3 sunDir = normalize(sun - prevPos);
@@ -671,7 +684,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     if (isSnowFlake) {
         whiteness = max(whiteness+0.5f, 1);
     }
-    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
     color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
     color *= 1+(isSnowFlake ? vec4(vec3(max(finalLightFog.r, max(finalLightFog.g, finalLightFog.b))/1.5f), 0) : vec4(vec3(finalLightFog), 1));
     //fog end
