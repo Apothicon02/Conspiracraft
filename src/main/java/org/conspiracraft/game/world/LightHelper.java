@@ -10,7 +10,7 @@ import org.joml.Vector4i;
 
 import static org.conspiracraft.game.world.World.*;
 
-public class BlockHelper {
+public class LightHelper {
     private static final Vector3i[] neighborBlocks = new Vector3i[6];
     private static final Vector3i[] neighborPositions = new Vector3i[6];
     private static final Vector4i[] neighborLights = new Vector4i[6];

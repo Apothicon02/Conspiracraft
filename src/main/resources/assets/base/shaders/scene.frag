@@ -206,7 +206,9 @@ int getBlockData(int x, int y, int z) {
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
-    return ivec2((blockData >> 16) & 0xFFFF, blockData & 0xFFFF);
+    int type = (blockData >> 16) & 0xFFFF;
+
+    return ivec2(type, min(16, blockData & 0xFFFF));
 }
 ivec2 getBlock(float x, float y, float z) {
     return getBlock(int(x), int(y), int(z));
@@ -333,6 +335,7 @@ vec3 stepMask(vec3 sideDist) {
 
 float normalBrightness = 1f;
 bool isSnowFlake = false;
+bool wasEverTinted = false;
 
 vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float distanceFogginess) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
@@ -341,6 +344,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
 
+    bool wasTinted = false;
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
     prevPos = rayMapPos+(prevMapPos/8);
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
@@ -351,7 +355,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             bool canHit = prevVoxelColor.a < voxelColor.a;
             if (reflectivity == 0.f && canHit) {
                 if (blockType == 1) { //water
-                    reflectivity = 0.5f;
+                    reflectivity = 0.3f;
                 } else if (blockType == 7) { //kyanite
                     reflectivity = 0.33f;
                 } else if (blockType >= 8 && blockType <= 10) { //stones
@@ -381,12 +385,19 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                 }
                 //bubbles end
 
-                vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), vec3(lighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1); //light
+                vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), vec3(lighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1);//light
                 //fog start
                 color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
                 //fog end
-
                 tint += vec3(toLinear(color));
+                if (!wasTinted) {
+                    wasTinted = true;
+                    tint += vec3(toLinear(color))*2;
+                }
+                if (!wasEverTinted) {
+                    wasEverTinted = true;
+                    tint += vec3(toLinear(color))*2;
+                }
             }
             if (voxelColor.a >= 1) {
                 if (hitPos == vec3(256)) {
@@ -523,7 +534,7 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
             lighting = fromLinear(vec4(0, 0, 0, 20));
         }
         lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
-        lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, sunlightNoise));
+        lighting *= 1+(vec4(0.5, 0.5, 0.5, snowing ? 0.1 : -0.25f)*vec4(lightNoise, lightNoise, lightNoise, sunlightNoise));
         //lighting end
 
         //snow start
@@ -532,7 +543,7 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
                 float samp = whiteNoise((vec2(rayMapPos.x, rayMapPos.z)*64)+(rayMapPos.y+(float(time)*7500)));
                 float samp2 = noise(vec2(rayMapPos.x, rayMapPos.z)*8);
                 if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
-                    color = vec4(1, 1, 1, 1);
+                    color = vec4(1);
                     isSnowFlake = true;
                 }
             }
@@ -554,6 +565,7 @@ vec4 dda(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
 }
 
 int halfChunkSize = chunkSize/2;
+bool renderSky = true;
 
 vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
     vec3 rayPos = ogRayPos/16;
@@ -565,9 +577,9 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
 
     while (distance(rayMapChunkPos, rayPos) < renderDistance/16) {
         float camDist = distance(camPos, rayMapChunkPos*16)/renderDistance;
-        float cloudHeight = camDist*(height/1.5f);
+        float cloudHeight = renderSky ? camDist*(height/1.5f) : -100000;
         bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
-        if ((rayMapChunkPos.y*16 >= 272-cloudHeight && rayMapChunkPos.y*16 <= 336-cloudHeight) || (!inBounds || !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)))) {
+        if ((rayMapChunkPos.y*16 >= 280-cloudHeight && rayMapChunkPos.y*16 <= 328-cloudHeight) || (inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false)) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
             vec3 intersect = rayPos + rayDir*d;
@@ -595,7 +607,7 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
                     float samp2 = noise(vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8);
                     if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
                         isSnowFlake = true;
-                        return vec4(1, 1, 1, 1);
+                        return vec4(1);
                     }
                 }
             }
@@ -615,6 +627,7 @@ bool isSky = false;
 void clearVars(bool clearHit) {
     isSky = false;
     isSnowFlake = false;
+    wasEverTinted = false;
     if (clearHit) {
         prevHitPos = vec3(256);
         hitPos = vec3(256);
@@ -679,13 +692,14 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
             color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
         }
     }
-    color = vec4(vec3(color)*min(vec3(1.15f), vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight), 1); //light
+    vec3 finalLight = vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight;
+    color = vec4(vec3(color)*min(vec3(1.15f), finalLight), 1); //light
     //fog start
     if (isSnowFlake) {
         whiteness = max(whiteness+0.5f, 1);
     }
     color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
-    color *= 1+(isSnowFlake ? vec4(vec3(max(finalLightFog.r, max(finalLightFog.g, finalLightFog.b))/1.5f), 0) : vec4(vec3(finalLightFog), 1));
+    color *= 1+(isSnowFlake ? vec4(finalLight/5, 0) : vec4(vec3(finalLightFog), 1));
     //fog end
     //transparency start
     vec3 superFinalTint = vec3(finalTint)/(max(finalTint.r, max(finalTint.g, finalTint.b)));

@@ -127,7 +127,7 @@ public class Main {
                     boolean mmbDown = mouseInput.isMiddleButtonPressed();
                     boolean rmbDown = mouseInput.isRightButtonPressed();
                     if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, true);
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, mmbDown);
                         if (pos != null) {
                             if (mmbDown) {
                                 selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
@@ -144,7 +144,7 @@ public class Main {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                         blockTypeId = 0;
                                         blockSubtypeId = 0;
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, false);
                                     }
                                 }
                                 if (rmbDown) {
@@ -152,7 +152,7 @@ public class Main {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     } else {
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, false);
                                     }
                                 }
                             }
@@ -169,9 +169,9 @@ public class Main {
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        selectedBlock.add(new Vector2i(0, 1));
+                        selectedBlock.add(new Vector2i(0, isShiftDown ? 100 : 1));
                     } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newSubId = selectedBlock.y() - 1;
+                        int newSubId = selectedBlock.y() - (isShiftDown ? 100 : 1);
                         if (newSubId < 0) {
                             newSubId = 0;
                         }
@@ -350,18 +350,22 @@ public class Main {
         }
     }
 
-    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countCollisionless) { //prevPos is inverted
+    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids) { //prevPos is inverted
         Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
         for (int i = 0; i < range; i++) {
             Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
             Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
                 int typeId = block.x();
-                if (countCollisionless || BlockTypes.blockTypeMap.get(typeId).isCollidable) {
+                int subTypeId = block.y();
+                boolean isFluid = BlockTypes.blockTypeMap.get(typeId).isFluid;
+                if (countFluids || !isFluid) {
+                    if (isFluid) {
+                        subTypeId = Math.min(20, subTypeId);
+                    }
                     int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
-                    int cornerIndex = (rayPos.y < (int)(rayPos.y)+0.5 ? 0 : 4) + (rayPos.z < (int)(rayPos.z)+0.5 ? 0 : 2) + (rayPos.x < (int)(rayPos.x)+0.5 ? 0 : 1);
+                    int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
                     if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
-                        int subTypeId = block.y();
                         if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
                             if (prevPos) {
                                 return rayPos;

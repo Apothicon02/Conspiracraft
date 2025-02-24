@@ -4,8 +4,8 @@ import org.conspiracraft.Main;
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.game.world.BlockHelper;
 import org.conspiracraft.game.world.Chunk;
+import org.conspiracraft.game.world.FluidHelper;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.BufferUtils;
@@ -185,7 +185,7 @@ public class Renderer {
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
             for (int x = 0; x < 152; x++) {
-                for (int y = 0; y < 256; y++) {
+                for (int y = 0; y < 1088; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
                 }
@@ -242,59 +242,15 @@ public class Renderer {
             }
 
         } else {
-            for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), blockQueue.size()); i++) {
+            while (!blockQueue.isEmpty()) {
                 Vector4i blockData = blockQueue.getFirst();
                 blockQueue.removeFirst();
-                Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
-                Vector4i oldLight = getLight(pos);
-                byte r = 0;
-                byte g = 0;
-                byte b = 0;
-                if (BlockTypes.blockTypeMap.get(Utils.unpackInt(blockData.w()).x) instanceof LightBlockType lType) {
-                    r = lType.r;
-                    g = lType.g;
-                    b = lType.b;
-                    updateLight(pos);
-                }
-                Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
-                int condensedChunkPos = condenseChunkPos(chunkPos);
-                int localPos = condenseLocalPos(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
-                Chunk chunk = chunks[condensedChunkPos];
-                chunk.setBlock(localPos, Utils.unpackInt(blockData.w), pos);
-                chunk.setLight(localPos, r, g, b, 0, pos);
-                updateHeightmap(blockData.x, blockData.z, true);
-                recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
-
-                vmaVirtualFree(blocks.get(0), chunkBlockAllocs[condensedChunkPos]);
-                VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
-                int bitsPerValue = chunks[condensedChunkPos].bitsPerBlock();
-                int valueMask = chunks[condensedChunkPos].blockValueMask();
-                int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
-                if (compressedBlocks == null) {
-                    allocCreateInfo.size((paletteSize) * 4L);
-                } else {
-                    allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
-                }
-
-                PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                LongBuffer offset = BufferUtils.createLongBuffer(1);
-                long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
-                if (res == VK_SUCCESS) {
-                    chunkBlockAllocs[condensedChunkPos] = res;
-                    int pointer = (int) offset.get(0);
-                    chunkBlockPointers[condensedChunkPos * 4] = pointer / 4;
-                    chunkBlockPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-                    chunkBlockPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-                    chunkBlockPointers[(condensedChunkPos * 4) + 3] = valueMask;
-                    chunkBlockPointerChanges.addLast(condensedChunkPos*4);
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
-                    if (compressedBlocks != null) {
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
-                    }
-                } else {
-                    // Allocation failed - no space for it could be found. Handle this error!
-                }
+                updateBlock(blockData, chunkBlockPointerChanges);
+            }
+            for (int i = 0; i < Math.min(150, liquidQueue.size()); i++) {
+                Vector4i blockData = liquidQueue.getFirst();
+                liquidQueue.removeFirst();
+                updateBlock(blockData, chunkBlockPointerChanges);
             }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -358,7 +314,7 @@ public class Renderer {
             }
 
         } else {
-            for (int i = 0; i < Math.min(Math.min(Engine.fps, 100), cornerQueue.size()); i++) {
+            while (!cornerQueue.isEmpty()) {
                 Vector4i cornerData = cornerQueue.getFirst();
                 cornerQueue.removeFirst();
                 Vector3i pos = new Vector3i(cornerData.x, cornerData.y, cornerData.z);
@@ -536,6 +492,61 @@ public class Renderer {
 
         scene.unbind();
         worldChanged = false;
+    }
+
+    public static void updateBlock(Vector4i blockData, LinkedList<Integer> chunkBlockPointerChanges) {
+        Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
+        Vector4i oldLight = getLight(pos);
+        byte r = 0;
+        byte g = 0;
+        byte b = 0;
+        Vector2i blockId = Utils.unpackInt(blockData.w());
+        if (BlockTypes.blockTypeMap.get(blockId.x) instanceof LightBlockType lType) {
+            r = lType.r;
+            g = lType.g;
+            b = lType.b;
+            updateLight(pos);
+        }
+        Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
+        int condensedChunkPos = condenseChunkPos(chunkPos);
+        int localPos = condenseLocalPos(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
+        Chunk chunk = chunks[condensedChunkPos];
+        Vector2i newBlockId = FluidHelper.updateFluid(pos, blockId);
+        chunk.setBlock(localPos, newBlockId, pos);
+        chunk.setLight(localPos, r, g, b, 0, pos);
+        updateHeightmap(blockData.x, blockData.z, true);
+        recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
+
+        vmaVirtualFree(blocks.get(0), chunkBlockAllocs[condensedChunkPos]);
+        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
+        int bitsPerValue = chunks[condensedChunkPos].bitsPerBlock();
+        int valueMask = chunks[condensedChunkPos].blockValueMask();
+        int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
+        if (compressedBlocks == null) {
+            allocCreateInfo.size((paletteSize) * 4L);
+        } else {
+            allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+        }
+
+        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+        LongBuffer offset = BufferUtils.createLongBuffer(1);
+        long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
+        if (res == VK_SUCCESS) {
+            chunkBlockAllocs[condensedChunkPos] = res;
+            int pointer = (int) offset.get(0);
+            chunkBlockPointers[condensedChunkPos * 4] = pointer / 4;
+            chunkBlockPointers[(condensedChunkPos * 4) + 1] = paletteSize;
+            chunkBlockPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
+            chunkBlockPointers[(condensedChunkPos * 4) + 3] = valueMask;
+            chunkBlockPointerChanges.addLast(condensedChunkPos*4);
+            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
+            if (compressedBlocks != null) {
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
+            }
+        } else {
+            // Allocation failed - no space for it could be found. Handle this error!
+        }
     }
 
     public void cleanup() {

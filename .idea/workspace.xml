@@ -9,9 +9,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized clouds. &#10;- Block and corner queues no longer have a limit.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/BlockHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,32 +96,32 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Run.executor": "Run",
+    "Gradle.Build Conspiracraft.executor": "Run",
+    "Gradle.Build Terraflat.executor": "Run",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
+    "Gradle.build.executor": "Run",
+    "JAR Application.VisualVMLauncher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "ShowUsagesActions.previewPropertyKey": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.keymap"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\sounds" />
@@ -132,11 +141,11 @@
       <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.game.world" />
       <recent name="org.conspiracraft.game.types" />
       <recent name="org.conspiracraft.game.blocks.types" />
       <recent name="org.terraflat.game" />
       <recent name="org.apothicon.engine" />
-      <recent name="org.apothicon.core.grids" />
     </key>
   </component>
   <component name="RunManager" selected="Application.Run">
@@ -195,14 +204,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00086" summary="- Split light and blocks into their own data within chunks. &#10;- Block (and light) palette compression can now go as low as bits instead of only as low as bytes.">
-      <option name="closed" value="true" />
-      <created>1735506918998</created>
-      <option name="number" value="00086" />
-      <option name="presentableId" value="LOCAL-00086" />
-      <option name="project" value="LOCAL" />
-      <updated>1735506918998</updated>
     </task>
     <task id="LOCAL-00087" summary="- Light data is now chunked on the gpu too. &#10;- Fixed darkness not existing. &#10;- Improved lighting.">
       <option name="closed" value="true" />
@@ -588,7 +589,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739983548850</updated>
     </task>
-    <option name="localTasksCounter" value="135" />
+    <task id="LOCAL-00135" summary="- Added clouds.">
+      <option name="closed" value="true" />
+      <created>1740264363702</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1740264363703</updated>
+    </task>
+    <option name="localTasksCounter" value="136" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +613,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Changed block breaking to break each corner at a time. &#10;- Collision now respects missing corners. &#10;- Textures are now fully filled." />
     <MESSAGE value="- Chunk tracing now uses DDA. &#10;- Updated the disabled snow effects.&#10;- Corner data now only uploads changes instead of all corner data in the entire world. &#10;- Reduced minor unnecessary data gpu uploads. &#10;- Minor shader optimizations. &#10;- Improved shadow distance. &#10;- Optimized shadows." />
     <MESSAGE value="- Added movement interpolation. &#10;- Player data now saves. &#10;- Time now saves." />
     <MESSAGE value="- Optimized shader. &#10;- Fixed interpolation.&#10;- Greatly improved visuals." />
@@ -629,7 +637,8 @@
     <MESSAGE value="- Updated snow." />
     <MESSAGE value="- Micro-optimized fragment shader." />
     <MESSAGE value="- Added noise to lighting." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added noise to lighting." />
+    <MESSAGE value="- Added clouds." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added clouds." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

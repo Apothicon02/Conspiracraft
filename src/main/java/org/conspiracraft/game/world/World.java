@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import static org.conspiracraft.engine.Utils.*;
 
@@ -35,6 +34,7 @@ public class World {
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static short[] heightmap = new short[size*size];
+    public static ArrayList<Vector4i> liquidQueue = new ArrayList<>();
     public static ArrayList<Vector4i> blockQueue = new ArrayList<>();
     public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
@@ -85,7 +85,7 @@ public class World {
                                             shouldQ = true;
                                         }
                                         if (shouldQ) {
-                                            BlockHelper.updateLight(new Vector3i(x, y, z), block, light, false);
+                                            LightHelper.updateLight(new Vector3i(x, y, z), block, light, false);
                                         }
                                     }
                                 }
@@ -190,7 +190,7 @@ public class World {
             for (int z = 0; z < size; z++) {
                 if (z == 0 || z == size-1 || x == 0 || x == size-1) {
                     for (int y = height-1; y >= 0; y--) {
-                        setBlock(x, y, z, 12, 0, false, true);
+                        setBlock(x, y, z, 12, 0, false, true, false);
                     }
                 } else {
                     float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
@@ -204,20 +204,20 @@ public class World {
                         double baseDensity = baseCellularNoise + baseGradient;
                         if (baseDensity > 0) {
                             if (upmost && y >= seaLevel) {
-                                setBlock(x, y, z, 2, 0, false, true);
+                                setBlock(x, y, z, 2, 0, false, true, false);
                                 double torchChance = Math.random();
                                 if (torchChance > 0.99995d) {
                                     if (torchChance > 0.99997d) {
-                                        setBlock(x, y, z, 7, 0, true, true);
-                                        setBlock(x, y + 1, z, 7, 0, true, true);
-                                        setBlock(x, y + 2, z, 7, 0, false, true);
+                                        setBlock(x, y, z, 7, 0, true, true, false);
+                                        setBlock(x, y + 1, z, 7, 0, true, true, false);
+                                        setBlock(x, y + 2, z, 7, 0, false, true, false);
                                     } else {
-                                        setBlock(x, y + 1, z, 14, 0, false, true);
+                                        setBlock(x, y + 1, z, 14, 0, false, true, false);
                                     }
                                 } else if (torchChance < exponentialFoliageNoise * 0.015f) { //tree 0.015
                                     int maxHeight = (int) (Math.random() * 4) + 8;
                                     for (int i = 0; i < maxHeight; i++) {
-                                        setBlock(x, y + i, z, 16, 0, true, true);
+                                        setBlock(x, y + i, z, 16, 0, true, true, false);
                                     }
                                     int radius = (int) (maxHeight + (torchChance * 100));
                                     for (int lX = x - radius; lX <= x + radius; lX++) {
@@ -228,29 +228,29 @@ public class World {
                                                 int zDist = lZ - z;
                                                 int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                                                 if (dist <= radius * 3) {
-                                                    setBlock(lX, lY, lZ, 17, 0, false, true);
+                                                    setBlock(lX, lY, lZ, 17, 0, false, true, false);
                                                 }
                                             }
                                         }
                                     }
                                 } else {
-                                    setBlock(x, y + 1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int) (Math.random() * 3), false, true);
+                                    setBlock(x, y + 1, z, 4 + (Math.random() > 0.98f ? 1 : 0), (int) (Math.random() * 3), false, true, false);
                                 }
                                 surface = y;
                                 upmost = false;
                             } else {
-                                setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true);
+                                setBlock(x, y, z, y > surface - 3 ? 3 : 10, 0, false, true, false);
                             }
                         } else {
                             if (y <= seaLevel) {
-                                setBlock(x, y, z, 1, 0, false, true);
+                                setBlock(x, y, z, 1, 0, false, true, false);
                             } else {
-                                setBlock(x, y, z, 0, 0, false, true);
+                                setBlock(x, y, z, 0, 0, false, true, false);
                             }
                         }
                     }
                     for (int y = height - 1; y > surface; y--) {
-                        setBlock(x, y, z, 0, 0, false, true);
+                        setBlock(x, y, z, 0, 0, false, true, false);
                     }
                 }
             }
@@ -549,13 +549,13 @@ public class World {
     public static int updateLight(Vector3i pos) {
         Vector2i block = getBlock(pos);
         if (block != null) {
-            return BlockHelper.updateLight(pos, block, getLight(pos));
+            return LightHelper.updateLight(pos, block, getLight(pos));
         } else {
             return 0;
         }
     }
 
-    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant) {
+    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean instant, boolean priority) {
         if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
             Vector2i existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.x() == 0)) {
@@ -563,13 +563,37 @@ public class World {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
                     chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
                 } else {
-                    blockQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                    if (priority) {
+                        blockQueue.addFirst(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                    } else {
+                        blockQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                    }
                 }
                 Vector2i aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
                     int aboveBlockId = aboveBlock.x();
                     if (aboveBlockId == 4 || aboveBlockId == 5) {
-                        setBlock(x, y + 1, z, 0, 0, true, instant);
+                        setBlock(x, y + 1, z, 0, 0, true, instant, priority);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void setLiquid(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority) {
+        if (x > 0 && x < size && z > 0 && z < size && y > 0 && y < height) {
+            Vector2i existing = getBlock(x, y, z);
+            if (replace || (existing == null || existing.x() == 0)) {
+                if (priority) {
+                    liquidQueue.addFirst(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                } else {
+                    liquidQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                }
+                Vector2i aboveBlock = getBlock(x, y+1, z);
+                if (aboveBlock != null) {
+                    int aboveBlockId = aboveBlock.x();
+                    if (aboveBlockId == 4 || aboveBlockId == 5) {
+                        setBlock(x, y + 1, z, 0, 0, true, false, priority);
                     }
                 }
             }
