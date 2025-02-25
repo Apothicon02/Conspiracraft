@@ -9,6 +9,8 @@ import org.joml.Vector4i;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.conspiracraft.engine.Utils.condenseLocalPos;
+import static org.conspiracraft.engine.Utils.condenseSubchunkPos;
 import static org.conspiracraft.game.world.World.chunkSize;
 
 public class Chunk {
@@ -19,6 +21,7 @@ public class Chunk {
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
     private final List<Integer> cornerPalette = new ArrayList<>(List.of(0));
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
+    private BitBuffer subChunks = new BitBuffer(8, 1);
 
     public int getNeededBitsPerValue(int uniqueValues) {
         return (int) Math.ceil(Math.log(uniqueValues) / Math.log(2));
@@ -62,8 +65,17 @@ public class Chunk {
     public int[] getBlockData() {
         return blockData.getData();
     }
-    public void setBlockKey(int pos, int key) {
-        blockData.setValue(pos, key);
+    public void setSubChunks(int[] subChunksData) {
+        subChunks.setData(subChunksData);
+    }
+    public int[] getSubChunks() {
+        return subChunks.getData();
+    }
+    public void setBlockKey(Vector3i pos, int key) {
+        if (blockPalette.get(key).x != 0) {
+            subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        }
+        blockData.setValue(condenseLocalPos(pos), key);
     }
     public int getBlockKey(int pos) {
         return blockData.getValue(pos);
@@ -72,7 +84,7 @@ public class Chunk {
         int index = getBlockKey(pos);
         return blockPalette.get(index);
     }
-    public void setBlock(int pos, Vector2i block, Vector3i globalPos) {
+    public void setBlock(Vector3i pos, Vector2i block, Vector3i globalPos) {
         boolean wasInPalette = false;
         int key = -1;
         for (Vector2i paletteEntry : blockPalette) {
@@ -97,7 +109,7 @@ public class Chunk {
         }
         World.queueColumnUpdate(globalPos);
     }
-    public void setBlock(int pos, int type, int subType, Vector3i globalPos) {
+    public void setBlock(Vector3i pos, int type, int subType, Vector3i globalPos) {
         setBlock(pos, new Vector2i(type, subType), globalPos);
     }
     //Blocks end

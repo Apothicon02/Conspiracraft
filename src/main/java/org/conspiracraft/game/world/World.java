@@ -23,6 +23,7 @@ public class World {
     public static int seaLevel = 63;
     public static int size = 2048;
     public static byte chunkSize = 16;
+    public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size/chunkSize;
     public static short height = 320;
     public static int heightChunks = height/chunkSize;
@@ -127,6 +128,14 @@ public class World {
         for (int y = 0; y < World.heightChunks; y++) {
             int dataSize = data[dataIndex];
             dataIndex++;
+            int[] subChunks = new int[dataSize];
+            for (int i = dataSize-1; i >= 0; i--) {
+                subChunks[i] = data[dataIndex];
+                dataIndex++;
+            }
+
+            dataSize = data[dataIndex];
+            dataIndex++;
             int[] blockPalette = new int[dataSize];
             for (int i = dataSize-1; i >= 0; i--) {
                 blockPalette[i] = data[dataIndex];
@@ -174,6 +183,7 @@ public class World {
             }
 
             Chunk chunk = new Chunk();
+            chunk.setSubChunks(subChunks);
             chunk.setBlockPalette(blockPalette);
             chunk.setBlockData(blocks);
             chunk.setCornerPalette(cornerPalette);
@@ -243,7 +253,7 @@ public class World {
                             }
                         } else {
                             if (y <= seaLevel) {
-                                setBlock(x, y, z, 1, 0, false, true, false);
+                                setBlock(x, y, z, 1, 20, false, true, false);
                             } else {
                                 setBlock(x, y, z, 0, 0, false, true, false);
                             }
@@ -561,7 +571,7 @@ public class World {
             if (replace || (existing == null || existing.x() == 0)) {
                 if (instant) {
                     Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
-                    chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(condenseLocalPos(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+                    chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setBlock(new Vector3i(x-(chunkPos.x*chunkSize), y-(chunkPos.y*chunkSize), z-(chunkPos.z*chunkSize)), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
                 } else {
                     if (priority) {
                         blockQueue.addFirst(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));

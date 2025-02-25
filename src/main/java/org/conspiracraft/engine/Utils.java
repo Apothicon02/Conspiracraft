@@ -153,6 +153,12 @@ public class Utils {
     public static int condensePos(Vector3i pos) {
         return (((pos.x*World.size)+pos.z)*World.height)+pos.y;
     }
+    public static int condenseSubchunkPos(Vector3i pos) {
+        return (((pos.x*2)+pos.z)*2)+pos.y;
+    }
+    public static int condenseSubchunkPos(int x, int y, int z) {
+        return (((x*2)+z)*2)+y;
+    }
     public static int condenseLocalPos(int x, int y, int z) {
         return (((x*World.chunkSize)+z)*World.chunkSize)+y;
     }

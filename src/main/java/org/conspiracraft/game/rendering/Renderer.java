@@ -67,7 +67,7 @@ public class Renderer {
     public static boolean snowing = false;
 
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
+    public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
     public static long[] chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
     public static PointerBuffer corners = BufferUtils.createPointerBuffer(1);
     public static int[] chunkCornerPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
@@ -202,7 +202,7 @@ public class Renderer {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
-            chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
+            chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
             chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
 
             for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
@@ -226,10 +226,11 @@ public class Renderer {
                         if (res == VK_SUCCESS) {
                             chunkBlockAllocs[condensedChunkPos] = res;
                             int pointer = (int) offset.get(0);
-                            chunkBlockPointers[condensedChunkPos*4] = pointer/4;
-                            chunkBlockPointers[(condensedChunkPos*4)+1] = paletteSize;
-                            chunkBlockPointers[(condensedChunkPos*4)+2] = bitsPerValue;
-                            chunkBlockPointers[(condensedChunkPos*4)+3] = valueMask;
+                            chunkBlockPointers[condensedChunkPos*5] = pointer/4;
+                            chunkBlockPointers[(condensedChunkPos*5)+1] = paletteSize;
+                            chunkBlockPointers[(condensedChunkPos*5)+2] = bitsPerValue;
+                            chunkBlockPointers[(condensedChunkPos*5)+3] = valueMask;
+                            chunkBlockPointers[(condensedChunkPos*5)+4] = chunks[condensedChunkPos].getSubChunks()[0];
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
                             if (compressedBlocks != null) {
                                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
@@ -261,7 +262,7 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
         } else {
             for (int pos : chunkBlockPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3]});
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3], chunkBlockPointers[pos+4]});
             }
             chunkBlockPointerChanges.clear();
         }
@@ -509,11 +510,11 @@ public class Renderer {
         }
         Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
         int condensedChunkPos = condenseChunkPos(chunkPos);
-        int localPos = condenseLocalPos(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
+        Vector3i localPos = new Vector3i(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
         Chunk chunk = chunks[condensedChunkPos];
         Vector2i newBlockId = FluidHelper.updateFluid(pos, blockId);
         chunk.setBlock(localPos, newBlockId, pos);
-        chunk.setLight(localPos, r, g, b, 0, pos);
+        chunk.setLight(condenseLocalPos(localPos), r, g, b, 0, pos);
         updateHeightmap(blockData.x, blockData.z, true);
         recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
 
@@ -535,11 +536,12 @@ public class Renderer {
         if (res == VK_SUCCESS) {
             chunkBlockAllocs[condensedChunkPos] = res;
             int pointer = (int) offset.get(0);
-            chunkBlockPointers[condensedChunkPos * 4] = pointer / 4;
-            chunkBlockPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-            chunkBlockPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-            chunkBlockPointers[(condensedChunkPos * 4) + 3] = valueMask;
-            chunkBlockPointerChanges.addLast(condensedChunkPos*4);
+            chunkBlockPointers[condensedChunkPos * 5] = pointer / 4;
+            chunkBlockPointers[(condensedChunkPos * 5) + 1] = paletteSize;
+            chunkBlockPointers[(condensedChunkPos * 5) + 2] = bitsPerValue;
+            chunkBlockPointers[(condensedChunkPos * 5) + 3] = valueMask;
+            chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+            chunkBlockPointerChanges.addLast(condensedChunkPos*5);
             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
             if (compressedBlocks != null) {
                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);

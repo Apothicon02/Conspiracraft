@@ -286,6 +286,8 @@ public class Main {
                         out = new FileOutputStream(chunkPath);
                         for (int y = 0; y < World.heightChunks; y++) {
                             Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+                            byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
+
                             byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
                             int[] blockData = chunk.getBlockData();
                             byte[] blocks;
@@ -312,7 +314,9 @@ public class Main {
                             } else {
                                 lights = new byte[]{};
                             }
-                            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                            ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                            buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
+                            buffer.put(subChunks);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
                             buffer.put(blockPalette);
                             buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));

@@ -9,8 +9,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,32 +92,32 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/sounds&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\sounds" />
@@ -195,14 +200,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00088" summary="- Added a useful comment.">
-      <option name="closed" value="true" />
-      <created>1735510391521</created>
-      <option name="number" value="00088" />
-      <option name="presentableId" value="LOCAL-00088" />
-      <option name="project" value="LOCAL" />
-      <updated>1735510391521</updated>
     </task>
     <task id="LOCAL-00089" summary="- Drastically increased chunk update speed.&#10;- Sunlight now generates properly under overhangs such as tree branches during worldgen. &#10;- Sunlight is no longer infinite when traveling through non-air transparent blocks such as leaves. &#10;- Increased block light strength. &#10;- Removed teal torches. &#10;- Added kyanite. &#10;- Added porecaps. &#10;- Added leaves. &#10;- Added trees.">
       <option name="closed" value="true" />
@@ -588,7 +585,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740436228251</updated>
     </task>
-    <option name="localTasksCounter" value="137" />
+    <task id="LOCAL-00137" summary="- Fixed sky fog not matching world fog.">
+      <option name="closed" value="true" />
+      <created>1740442783338</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1740442783338</updated>
+    </task>
+    <option name="localTasksCounter" value="138" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +609,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added movement interpolation. &#10;- Player data now saves. &#10;- Time now saves." />
     <MESSAGE value="- Optimized shader. &#10;- Fixed interpolation.&#10;- Greatly improved visuals." />
     <MESSAGE value="- Brightened shadows." />
     <MESSAGE value="- Holding shift is now required to remove only a corner of a block." />
@@ -629,7 +633,8 @@
     <MESSAGE value="- Added noise to lighting." />
     <MESSAGE value="- Added clouds." />
     <MESSAGE value="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges." />
+    <MESSAGE value="- Fixed sky fog not matching world fog." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed sky fog not matching world fog." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
