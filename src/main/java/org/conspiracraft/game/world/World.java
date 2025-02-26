@@ -312,7 +312,7 @@ public class World {
 
     public static boolean canLightPassbetween(int blockType, int corners, Vector3i pos, Vector3i neighborPos) {
         Vector3i subtractedPos = new Vector3i(pos.x-neighborPos.x, pos.y-neighborPos.y, pos.z-neighborPos.z);
-        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
             return true;
         } else {
             int blocked = 0;
@@ -412,7 +412,7 @@ public class World {
     }
 
     public static boolean isSolid(int blockType, int corners) {
-        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+        if (!BlockTypes.blockTypeMap.get(blockType).isSolid) {
             return false;
         } else {
             int blocked = 0;
@@ -437,7 +437,7 @@ public class World {
     }
 
     public static boolean isVerticallyBlockingLight(int blockType, int corners) {
-        if (BlockTypes.blockTypeMap.get(blockType).isTransparent) {
+        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
             return false;
         } else {
             int blockedColumns = 0;
@@ -473,27 +473,25 @@ public class World {
                 Vector2i block = getBlock(x, scanY, z);
                 int corners = getCorner(x, scanY, z);
                 boolean blocking = isVerticallyBlockingLight(block.x, corners);
-                if (!setHeightmap) {
-                    if (blocking || block.x == 1) {
-                        setHeightmap = true;
-                        heightmap[pos] = (short) (scanY);
-                    }
+                if (!setHeightmap && (blocking || block.x == 1)) {
+                    setHeightmap = true;
+                    heightmap[pos] = (short) (scanY);
                 }
                 if (blocking) {
-                    if (update) {
-                        for (int scanExtraY = scanY - 1; scanExtraY >= 0; scanExtraY--) {
-                            Vector2i blockExtra = getBlock(x, scanExtraY, z);
-                            int cornersExtra = getCorner(x, scanExtraY, z);
-                            boolean blockingExtra = isVerticallyBlockingLight(blockExtra.x, cornersExtra);
-                            if (!blockingExtra) {
-                                Vector4i lightExtra = getLight(x, scanExtraY, z);
-                                Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
-                                chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
-                                        new Vector4i(lightExtra.x(), lightExtra.y(), lightExtra.z(), (byte) 0), new Vector3i(x, scanExtraY, z));
+                    for (int scanExtraY = scanY - 1; scanExtraY >= 0; scanExtraY--) {
+                        Vector2i blockExtra = getBlock(x, scanExtraY, z);
+                        int cornersExtra = getCorner(x, scanExtraY, z);
+                        boolean blockingExtra = update && isVerticallyBlockingLight(blockExtra.x, cornersExtra);
+                        if (!blockingExtra) {
+                            Vector4i lightExtra = getLight(x, scanExtraY, z);
+                            Vector3i chunkPos = new Vector3i(x / chunkSize, scanExtraY / chunkSize, z / chunkSize);
+                            chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(condenseLocalPos(x - (chunkPos.x * chunkSize), scanExtraY - (chunkPos.y * chunkSize), z - (chunkPos.z * chunkSize)),
+                                    new Vector4i(lightExtra.x(), lightExtra.y(), lightExtra.z(), (byte) 0), new Vector3i(x, scanExtraY, z));
+                            if (update) {
                                 recalculateLight(new Vector3i(x, scanExtraY, z), lightExtra.x(), lightExtra.y(), lightExtra.z(), lightExtra.w());
-                            } else {
-                                break;
                             }
+                        } else {
+                            break;
                         }
                     }
                     break;

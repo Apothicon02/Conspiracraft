@@ -5,26 +5,32 @@ public class LightBlockType extends BlockType {
     public byte g;
     public byte b;
 
-    public LightBlockType(boolean transparent, boolean collidable, boolean fluidReplacable, boolean fluid, int red, int green, int blue) {
-        super(transparent, collidable, fluidReplacable, fluid);
+    public LightBlockType(boolean solid, boolean canBlockLight, boolean collidable, boolean fluidReplacable, boolean fluid, int red, int green, int blue) {
+        super(solid, canBlockLight, collidable, fluidReplacable, fluid);
         r = (byte) red;
         g = (byte) green;
         b = (byte) blue;
     }
-    public LightBlockType(boolean transparent, boolean collidable, boolean fluidReplacable, int red, int green, int blue) {
-        super(transparent, collidable, fluidReplacable);
+    public LightBlockType(boolean solid, boolean canBlockLight, boolean collidable, boolean fluidReplacable, int red, int green, int blue) {
+        super(solid, canBlockLight, collidable, fluidReplacable);
         r = (byte) red;
         g = (byte) green;
         b = (byte) blue;
     }
-    public LightBlockType(boolean transparent, boolean collidable, int red, int green, int blue) {
-        super(transparent, collidable);
+    public LightBlockType(boolean solid, boolean canBlockLight, boolean collidable, int red, int green, int blue) {
+        super(solid, canBlockLight, collidable);
         r = (byte) red;
         g = (byte) green;
         b = (byte) blue;
     }
-    public LightBlockType(boolean transparent, int red, int green, int blue) {
-        super(transparent);
+    public LightBlockType(boolean solid, boolean canBlockLight, int red, int green, int blue) {
+        super(solid, canBlockLight);
+        r = (byte) red;
+        g = (byte) green;
+        b = (byte) blue;
+    }
+    public LightBlockType(boolean solid, int red, int green, int blue) {
+        super(solid);
         r = (byte) red;
         g = (byte) green;
         b = (byte) blue;

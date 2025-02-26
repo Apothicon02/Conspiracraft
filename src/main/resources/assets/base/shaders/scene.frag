@@ -521,9 +521,13 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
                 float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)));
 
                 //lighting start
+                bool isDirectSunlight = false;
                 if (inBounds) {
                     vec3 relativePos = lightPos-rayMapPos;
                     vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
+                    if (centerLighting.a >= 20) {
+                        isDirectSunlight = true;
+                    }
                     if (color.a >= 1.f) {
                         //smooth lighting start
                         vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
@@ -555,7 +559,7 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
                 } else {
                     lighting = fromLinear(vec4(0, 0, 0, 20));
                 }
-                lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
+                lightFog = max(lightFog, (lighting*vec4(1, 1, 1, isDirectSunlight ? 1f : 0.33f))*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
                 lighting *= 1+(vec4(0.5, 0.5, 0.5, snowing ? 0.1 : -0.25f)*vec4(lightNoise, lightNoise, lightNoise, sunlightNoise));
                 //lighting end
 
@@ -657,12 +661,18 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
                 return color;
             }
         } else {
+            bool isDirectSunlight = false;
             if (inBounds) {
-                lighting = fromLinear(getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize, false, false, false));
+                vec4 centerLighting = getLighting((rayMapChunkPos.x*chunkSize)+halfChunkSize, (rayMapChunkPos.y*chunkSize)+halfChunkSize, (rayMapChunkPos.z*chunkSize)+halfChunkSize, false, false, false);
+                if (centerLighting.a >= 20) {
+                    isDirectSunlight = true;
+                }
+                lighting = fromLinear(centerLighting);
             } else {
+                isDirectSunlight = true;
                 lighting = fromLinear(vec4(0, 0, 0, 20));
             }
-            lightFog = max(lightFog, lighting);
+            lightFog = max(lightFog, lighting*vec4(1, 1, 1, isDirectSunlight ? 1f : 0.33f));
 
             //snow start
             if (snowing) {
