@@ -46,12 +46,12 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-int size = 2048;
+int size = 8192;
 int height = 320;
 int chunkSize = 16;
 int halfChunkSize = chunkSize/2;
-int sizeChunks = size/chunkSize;
-int heightChunks = height/chunkSize;
+int sizeChunks = size>> 4;
+int heightChunks = height>> 4;
 
 vec3 camPos = vec3(cam[3]);
 vec3 prevRayMapPos = vec3(0);

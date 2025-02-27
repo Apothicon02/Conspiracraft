@@ -144,7 +144,7 @@ public class Main {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                         blockTypeId = 0;
                                         blockSubtypeId = 0;
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, false);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
                                     }
                                 }
                                 if (rmbDown) {
@@ -152,7 +152,7 @@ public class Main {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     } else {
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, false);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
                                     }
                                 }
                             }
@@ -184,7 +184,7 @@ public class Main {
                         Renderer.worldChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                        if (Renderer.renderDistanceMul < 96) {
+                        if (Renderer.renderDistanceMul < 200) {
                             Renderer.renderDistanceMul++;
                         }
                     }

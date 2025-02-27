@@ -33,6 +33,7 @@ dependencies {
 
     implementation("org.tinylog:tinylog-api-kotlin:2.7.0")
     implementation("org.tinylog:tinylog-impl:2.7.0")
+    implementation("fastutil:fastutil:5.0.9")
     implementation("org.lwjgl", "lwjgl")
     implementation("org.lwjgl", "lwjgl-assimp")
     implementation("org.lwjgl", "lwjgl-bgfx")

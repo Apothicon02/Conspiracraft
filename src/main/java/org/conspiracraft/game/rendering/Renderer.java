@@ -329,11 +329,12 @@ public class Renderer {
                     b = lType.b;
                     updateLight(pos);
                 }
-                Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
+                Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
                 int condensedChunkPos = condenseChunkPos(chunkPos);
-                int localPos = condenseLocalPos(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
+                Vector3i localPos = new Vector3i(pos.x & 15, pos.y & 15, pos.z & 15);
+                int condensedLocalPos = condenseLocalPos(localPos);
                 Chunk chunk = chunks[condensedChunkPos];
-                chunk.setCorner(localPos, cornerData.w, pos);
+                chunk.setCorner(condensedLocalPos, cornerData.w, pos);
                 chunk.setLight(localPos, r, g, b, 0, pos);
                 updateHeightmap(pos.x, pos.z, true);
                 recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
@@ -431,10 +432,12 @@ public class Renderer {
             }
 
         } else {
+            long startTime = System.currentTimeMillis();
+            boolean wasEmpty = lightQueue.isEmpty();
             while (!lightQueue.isEmpty()) {
                 Vector3i lightData = lightQueue.getFirst();
                 lightQueue.removeFirst();
-                Vector3i chunkPos = new Vector3i(lightData.x / chunkSize, lightData.y / chunkSize, lightData.z / chunkSize);
+                Vector3i chunkPos = new Vector3i(lightData.x >> 4, lightData.y >> 4, lightData.z >> 4);
                 int condensedChunkPos = condenseChunkPos(chunkPos);
                 updateLight(lightData);
 
@@ -469,12 +472,14 @@ public class Renderer {
                     // Allocation failed - no space for it could be found. Handle this error!
                 }
             }
+            if (!wasEmpty) {
+                System.out.print(System.currentTimeMillis()-startTime + "ms \n");
+            }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
         } else {
@@ -506,17 +511,16 @@ public class Renderer {
             r = lType.r;
             g = lType.g;
             b = lType.b;
-            updateLight(pos);
         }
-        Vector3i chunkPos = new Vector3i(pos.x / chunkSize, pos.y / chunkSize, pos.z / chunkSize);
+        Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
         int condensedChunkPos = condenseChunkPos(chunkPos);
-        Vector3i localPos = new Vector3i(pos.x - (chunkPos.x * chunkSize), pos.y - (chunkPos.y * chunkSize), pos.z - (chunkPos.z * chunkSize));
+        Vector3i localPos = new Vector3i(pos.x & 15, pos.y & 15, pos.z & 15);
         Chunk chunk = chunks[condensedChunkPos];
         Vector2i newBlockId = FluidHelper.updateFluid(pos, blockId);
-        chunk.setBlock(localPos, newBlockId, pos);
-        chunk.setLight(condenseLocalPos(localPos), r, g, b, 0, pos);
+        chunk.setBlock(localPos, newBlockId.x, newBlockId.y, pos);
+        chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
         updateHeightmap(blockData.x, blockData.z, true);
-        recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
+        recalculateLight(pos, Math.max(oldLight.x, r), Math.max(oldLight.y, g), Math.max(oldLight.z, b), oldLight.w);
 
         vmaVirtualFree(blocks.get(0), chunkBlockAllocs[condensedChunkPos]);
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
