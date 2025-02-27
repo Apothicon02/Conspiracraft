@@ -411,8 +411,8 @@ public class World {
         return canLightPassbetween(blockType, getCorner(pos.x, pos.y, pos.z), pos, neighborPos);
     }
 
-    public static boolean isSolid(int blockType, int corners) {
-        if (!BlockTypes.blockTypeMap.get(blockType).isSolid) {
+    public static boolean blocksLight(int blockType, int corners) {
+        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
             return false;
         } else {
             int blocked = 0;
@@ -520,10 +520,10 @@ public class World {
             Vector2i neighbor = World.getBlock(neighborPos);
             if (neighbor != null) {
                 BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
-                if (!isSolid(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
+                if (!blocksLight(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                     Vector4i neighborLight = World.getLight(neighborPos);
                     if ((neighborLight.x() > 0 && neighborLight.x() < r) || (neighborLight.y() > 0 && neighborLight.y() < g) || (neighborLight.z() > 0 && neighborLight.z() < b) || (neighborLight.w() > 0 && neighborLight.w() < s)) {
-                        Vector3i chunkPos = new Vector3i(neighborPos.x/16, neighborPos.y/16, neighborPos.z/16);
+                        Vector3i chunkPos = new Vector3i(neighborPos.x/chunkSize, neighborPos.y/chunkSize, neighborPos.z/chunkSize);
                         byte nr = 0;
                         byte ng = 0;
                         byte nb = 0;
@@ -532,7 +532,7 @@ public class World {
                             ng = lBlock.g;
                             nb = lBlock.b;
                         }
-                        chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(condenseLocalPos(neighborPos.x-(chunkPos.x*16), neighborPos.y-(chunkPos.y*16), neighborPos.z-(chunkPos.z*16)),
+                        chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(condenseLocalPos(neighborPos.x-(chunkPos.x*chunkSize), neighborPos.y-(chunkPos.y*chunkSize), neighborPos.z-(chunkPos.z*chunkSize)),
                                 new Vector4i(nr, ng, nb, (byte) (neighborLight.w() == 20 ? 20 : 0)), pos);
                         recalculateLight(neighborPos, neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
                     }

@@ -17,7 +17,7 @@ public class LightHelper {
     public static int updateLight(Vector3i pos, Vector2i block, Vector4i light, boolean clean) {
         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
         int corners = getCorner(pos.x, pos.y, pos.z);
-        if (!isSolid(block.x, corners) || blockType instanceof LightBlockType) {
+        if (!blocksLight(block.x, corners) || blockType instanceof LightBlockType) {
             int r = light.x();
             int g = light.y();
             int b = light.z();
@@ -35,7 +35,7 @@ public class LightHelper {
                 Vector4i neighborLight = World.getLight(neighborPos);
                 if (neighbor != null && neighborLight != null) {
                     BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
-                    if (!isSolid(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
+                    if (!blocksLight(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                         neighborPositions[i] = neighborPos;
                         neighborLights[i] = new Vector4i(neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
                         r = Math.max(r, neighborLight.x()-1);

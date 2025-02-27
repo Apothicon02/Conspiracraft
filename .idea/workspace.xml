@@ -9,11 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -199,14 +198,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00090" summary="- Made godrays more visible. &#10;- Fixed the bottom of the world being lit  up.">
-      <option name="closed" value="true" />
-      <created>1735618241355</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
-      <option name="project" value="LOCAL" />
-      <updated>1735618241356</updated>
     </task>
     <task id="LOCAL-00091" summary="- Made godrays a little less visible. &#10;- Optimized queues dramatically. &#10;- Torches no longer generate naturally. &#10;- Updated leaves texture.">
       <option name="closed" value="true" />
@@ -592,7 +583,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740504757080</updated>
     </task>
-    <option name="localTasksCounter" value="139" />
+    <task id="LOCAL-00139" summary="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays.">
+      <option name="closed" value="true" />
+      <created>1740528663413</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1740528663413</updated>
+    </task>
+    <option name="localTasksCounter" value="140" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -608,7 +607,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Brightened shadows." />
     <MESSAGE value="- Holding shift is now required to remove only a corner of a block." />
     <MESSAGE value="- Added sunlight transparent block tinting." />
     <MESSAGE value="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky." />
@@ -633,7 +631,8 @@
     <MESSAGE value="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges." />
     <MESSAGE value="- Fixed sky fog not matching world fog." />
     <MESSAGE value="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting." />
+    <MESSAGE value="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -646,6 +645,11 @@
           <properties class="java.lang.OutOfMemoryError" package="java.lang" />
           <option name="timeStamp" value="35" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java</url>
+          <line>511</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

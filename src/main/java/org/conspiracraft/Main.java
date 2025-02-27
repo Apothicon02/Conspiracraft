@@ -79,7 +79,7 @@ public class Main {
         String heightmapPath = (World.worldPath + "/global.heightmap");
         if (Files.exists(Path.of(heightmapPath))) {
             FileInputStream in = new FileInputStream(heightmapPath);
-            World.heightmap = Utils.intArrayToShortArray(Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes())));
+            World.heightmap = Utils.intArrayToShortArray(Utils.byteArrayToIntArray(in.readAllBytes()));
         }
     }
 
