@@ -73,36 +73,24 @@ public class World {
 //                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
 //                            System.out.print("Heightmap is " + (progress + "% generated. \n"));
 //                        }
-//                        for (int x = 1; x < size - 1; x++) {
-//                            for (int z = 1; z < size - 1; z++) {
-//                                for (int y = height - 1; y > 1; y--) {
-//                                    Vector2i block = getBlockWorldgen(x, y, z);
-//                                    Vector4i light = getLightWorldgen(x, y, z);
-//                                    if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
-//                                        //check if any neighbors are a higher brightness
-//                                        boolean shouldQ = false;
-//                                        if (getLightWorldgen(x, y, z + 1).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        } else if (getLightWorldgen(x + 1, y, z).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        } else if (getLightWorldgen(x, y, z - 1).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        } else if (getLightWorldgen(x - 1, y, z).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        } else if (getLightWorldgen(x, y + 1, z).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        } else if (getLightWorldgen(x, y - 1, z).w() > light.w()) {
-//                                            shouldQ = true;
-//                                        }
-//                                        if (shouldQ) {
-//                                            LightHelper.updateLight(new Vector3i(x, y, z), block, light);
-//                                        }
-//                                    }
-//                                }
-//                            }
+                        for (int x = 1; x < size - 1; x++) {
+//                            long time = System.currentTimeMillis();
+                            for (int z = 1; z < size - 1; z++) {
+                                for (int y = height - 1; y > 1; y--) {
+                                    Vector2i block = getBlockWorldgen(x, y, z);
+                                    Vector4i light = getLightWorldgen(x, y, z);
+                                    if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
+                                        //check if any neighbors are a higher brightness
+                                        if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
+                                                getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
+                                            LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                                        }
+                                    }
+                                }
+                            }
 //                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
-//                            System.out.print("Sunlight is " + (progress + "% filled. \n"));
-//                        }
+//                            System.out.print("Sunlight is " + (progress + "% filled. \nSlice took " + (System.currentTimeMillis()-time) + "ms to fill. \n"));
+                        }
                         cleanPalettes = true;
                         currentChunk = -1;
                     } else {
@@ -205,7 +193,7 @@ public class World {
         }
     }
 
-    public static int maxWorldgenHeight = 72;
+    public static int maxWorldgenHeight = 256;
 
     public static void generateWorld() {
 //        long time = System.currentTimeMillis();
@@ -214,12 +202,15 @@ public class World {
             for (int z = 0; z < size; z++) {
                 float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
                 float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
+                float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
                 float foliageNoise = (basePerlinNoise + 0.5f);
                 float exponentialFoliageNoise = foliageNoise * foliageNoise;
-                int surface = maxWorldgenHeight;
+                float valley = (noodleNoise > 0.67 ? 184 : (184*Math.min(1, Math.abs(noodleNoise)+0.33f)));
+                int surface = (int) (maxWorldgenHeight-(valley-(Math.max(0, noodleNoise*320)*Math.abs(basePerlinNoise))));
+                int initialSurface = surface;
                 boolean upmost = true;
                 for (int y = surface; y >= 0; y--) {
-                    double baseGradient = ConspiracraftMath.gradient(y, maxWorldgenHeight, 54, 2, -1);
+                    double baseGradient = ConspiracraftMath.gradient(y, initialSurface, 48, 2, -1);
                     double baseDensity = baseCellularNoise + baseGradient;
                     if (baseDensity > 0) {
                         if (upmost && y >= seaLevel) {
@@ -245,7 +236,8 @@ public class World {
                                             int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                                             if (dist <= radius * 3 && inBounds(lX, lY, lZ)) {
                                                 setBlockWorldgen(lX, lY, lZ, 17, 0);
-                                                heightmap[condensePos(lX, lZ)] = (short) lY;
+                                                int condensedPos = condensePos(lX, lZ);
+                                                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
                                                 for (int extraY = lY; extraY >= seaLevel; extraY--) {
                                                     setLightWorldgen(lX, extraY, lZ, new Vector4i(0, 0, 0, 0));
                                                 }
@@ -549,6 +541,18 @@ public class World {
         }
     }
 
+    public static void queueLightUpdateWorldgen(Vector3i pos) {
+        for (Vector3i nPos : new Vector3i[]{
+                new Vector3i(pos.x, pos.y, pos.z+1), new Vector3i(pos.x, pos.y, pos.z-1),
+                new Vector3i(pos.x+1, pos.y, pos.z), new Vector3i(pos.x-1, pos.y, pos.z)
+        }) {
+            Vector4i nLight = getLightWorldgen(nPos.x, nPos.y, nPos.z);
+            if (nLight.w > 0) {
+                lightQueue.addLast(pos);
+                break;
+            }
+        }
+    }
     public static void queueLightUpdate(Vector3i pos) {
         boolean exists = lightQueue.contains(pos);
         if (!exists) {

@@ -9,12 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/noodle_noise.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Noise.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
@@ -201,22 +200,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00092" summary="- Players now tick 20 times a second. &#10;- Added player velocity. &#10;- Started adding player collision. &#10;- Converted player movement to be physically-based instead of a free-cam. &#10;- Made godrays more subtle.">
-      <option name="closed" value="true" />
-      <created>1735869891253</created>
-      <option name="number" value="00092" />
-      <option name="presentableId" value="LOCAL-00092" />
-      <option name="project" value="LOCAL" />
-      <updated>1735869891255</updated>
-    </task>
-    <task id="LOCAL-00093" summary="- Improved sunsets greatly.">
-      <option name="closed" value="true" />
-      <created>1735881131918</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
-      <option name="project" value="LOCAL" />
-      <updated>1735881131918</updated>
     </task>
     <task id="LOCAL-00094" summary="- Improved sunsets greatly. &#10;- Leaves no longer have collision.&#10;- Improved player collision.">
       <option name="closed" value="true" />
@@ -594,7 +577,23 @@
       <option name="project" value="LOCAL" />
       <updated>1740623491988</updated>
     </task>
-    <option name="localTasksCounter" value="141" />
+    <task id="LOCAL-00141" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
+      <option name="closed" value="true" />
+      <created>1740699991690</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1740699991690</updated>
+    </task>
+    <task id="LOCAL-00142" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
+      <option name="closed" value="true" />
+      <created>1740700036312</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1740700036312</updated>
+    </task>
+    <option name="localTasksCounter" value="143" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,7 +609,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added sunlight transparent block tinting." />
     <MESSAGE value="- Improved transparent object color mixing. &#10;- Re-added sunsets. &#10;- Night lighting is much better. &#10;- Fixed discrepancy between fog and sky." />
     <MESSAGE value="- Added reflections." />
     <MESSAGE value="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation." />
@@ -635,7 +633,8 @@
     <MESSAGE value="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting." />
     <MESSAGE value="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays." />
     <MESSAGE value="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game." />
+    <MESSAGE value="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

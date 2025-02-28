@@ -66,7 +66,7 @@ public class Main {
             player.setCameraPitch(pitch);
             player.flying = data[i++] != 0;
         } else {
-            player = new Player(new Vector3f(256, 100, 256));
+            player = new Player(new Vector3f(512, 256, 512));
         }
         String globalPath = (World.worldPath + "/global.world");
         if (Files.exists(Path.of(globalPath))) {

@@ -356,19 +356,19 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype);
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
-//            if (reflectivity == 0.f && canHit) {
-//                if (blockType == 1) { //water
-//                    reflectivity = 0.3f;
-//                } else if (blockType == 7) { //kyanite
-//                    reflectivity = 0.33f;
-//                } else if (blockType >= 8 && blockType <= 10) { //stones
-//                    reflectivity = 0.05f;
-//                } else if (blockType >= 11 && blockType <= 13) { //glass
-//                    reflectivity = 0.25f;
-//                } else if (blockType == 15) { //planks
-//                    reflectivity = 0.08f;
-//                }
-//            }
+            if (reflectivity == 0.f && canHit) {
+                if (blockType == 1) { //water
+                    reflectivity = 0.3f;
+                } else if (blockType == 7) { //kyanite
+                    reflectivity = 0.33f;
+                } else if (blockType >= 8 && blockType <= 10) { //stones
+                    reflectivity = 0.05f;
+                } else if (blockType >= 11 && blockType <= 13) { //glass
+                    reflectivity = 0.25f;
+                } else if (blockType == 15) { //planks
+                    reflectivity = 0.08f;
+                }
+            }
             if (voxelColor.a < 1.f) {
                 if (hitPos == vec3(256) && canHit) {
                     prevHitPos = prevPos;

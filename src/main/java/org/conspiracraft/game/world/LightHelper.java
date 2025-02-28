@@ -13,7 +13,7 @@ import static org.conspiracraft.game.world.World.*;
 public class LightHelper {
     private static final Vector3i[] neighborPositions = new Vector3i[6];
     private static final Vector4i[] neighborLights = new Vector4i[6];
-    public static int updateLight(Vector3i pos, Vector2i block, Vector4i light, boolean clean) {
+    public static int updateLight(Vector3i pos, Vector2i block, Vector4i light, boolean immediate) {
         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
         int corners = getCorner(pos.x, pos.y, pos.z);
         if (!blocksLight(block.x, corners) || blockType instanceof LightBlockType) {
@@ -51,10 +51,10 @@ public class LightHelper {
             for (Vector3i neighborPos : neighborPositions) {
                 if (neighborPos != null) {
                     if (isDarker(r, g, b, s, neighborLights[e])) {
-                        if (clean) {
+                        if (!immediate) {
                             World.queueLightUpdate(neighborPos);
                         } else {
-                            updateLight(neighborPos, World.getBlock(neighborPos), neighborLights[e], false);
+                            updateLight(neighborPos, World.getBlock(neighborPos), neighborLights[e], true);
                         }
                     }
                 }
@@ -65,7 +65,7 @@ public class LightHelper {
         return 0;
     }
     public static int updateLight(Vector3i pos, Vector2i block, Vector4i light) {
-        return updateLight(pos, block, light, true);
+        return updateLight(pos, block, light, false);
     }
     public static boolean isDarker(int r, int g, int b, int s, Vector4i darker) {
         return r-1 > darker.x() || g-1 > darker.y() || b-1 > darker.z() || s-1 > darker.w();
