@@ -14,10 +14,13 @@ import org.lwjgl.opengl.GL;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -47,7 +50,18 @@ public class Main {
         AudioController.loadSound("swim1.wav");
         AudioController.loadSound("splash1.wav");
         AudioController.loadRandomSound("Music/");
-        String playerPath = (World.worldPath + "/local.player");
+        Path deletePath = Paths.get(System.getenv("APPDATA") + "/Conspiracraft/delete");
+        if (Files.exists(deletePath)) {
+            Files.walk(deletePath).sorted(Comparator.reverseOrder()).forEach((path -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        }
+
+        String playerPath = (World.worldPath + "/player.data");
         if (Files.exists(Path.of(playerPath))) {
             FileInputStream in = new FileInputStream(playerPath);
             int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes()));
@@ -68,7 +82,7 @@ public class Main {
         } else {
             player = new Player(new Vector3f(512, 256, 512));
         }
-        String globalPath = (World.worldPath + "/global.world");
+        String globalPath = (World.worldPath + "/world.data");
         if (Files.exists(Path.of(globalPath))) {
             FileInputStream in = new FileInputStream(globalPath);
             int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes()));
@@ -76,7 +90,7 @@ public class Main {
             timePassed = data[1]/1000f;
             meridiem = data[2];
         }
-        String heightmapPath = (World.worldPath + "/global.heightmap");
+        String heightmapPath = (World.worldPath + "/heightmap.data");
         if (Files.exists(Path.of(heightmapPath))) {
             FileInputStream in = new FileInputStream(heightmapPath);
             World.heightmap = Utils.intArrayToShortArray(Utils.byteArrayToIntArray(in.readAllBytes()));
@@ -107,6 +121,7 @@ public class Main {
                 window.getMouseInput().input(window);
                 boolean isShiftDown = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
                 player.sprint = isShiftDown;
+                player.superSprint = window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS);
                 player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
                 player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
@@ -257,84 +272,199 @@ public class Main {
             String path = (World.worldPath+"/");
             new File(path).mkdirs();
 
-            String playerDataPath = path+"local.player";
+            String playerDataPath = path+"player.data";
             FileOutputStream out = new FileOutputStream(playerDataPath);
             byte[] playerData = Utils.intArrayToByteArray(player.getData());
             out.write(playerData);
             out.close();
 
-            String globalDataPath = path+"global.world";
+            String globalDataPath = path+"world.data";
             out = new FileOutputStream(globalDataPath);
             byte[] globalData = Utils.intArrayToByteArray(new int[]{(int)(Renderer.time*1000), (int)(timePassed*1000), meridiem});
             out.write(globalData);
             out.close();
 
-            String heightmapDataPath = path+"global.heightmap";
+            String heightmapDataPath = path+"heightmap.data";
             out = new FileOutputStream(heightmapDataPath);
             byte[] heightmapData = Utils.intArrayToByteArray(Utils.shortArrayToIntArray(World.heightmap));
             out.write(heightmapData);
             out.close();
 
-            String chunksPath = path + "chunks/";
-            new File(chunksPath).mkdirs();
+            String chunksPath = path + "chunks.data";
+            out = new FileOutputStream(chunksPath);
             for (int x = 0; x < World.sizeChunks; x++) {
                 for (int z = 0; z < World.sizeChunks; z++) {
-                    int columnPos = Utils.condenseChunkPos(x, z);
-                    if (World.columnUpdates[columnPos]) {
-                        World.columnUpdates[columnPos] = false;
-                        String chunkPath = chunksPath + x + "x" + z + "z.column";
-                        out = new FileOutputStream(chunkPath);
-                        for (int y = 0; y < World.heightChunks; y++) {
-                            Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
-                            byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
+                    for (int y = 0; y < World.heightChunks; y++) {
+                        Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+                        byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
 
-                            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
-                            int[] blockData = chunk.getBlockData();
-                            byte[] blocks;
-                            if (blockData != null) {
-                                blocks = Utils.intArrayToByteArray(blockData);
-                            } else {
-                                blocks = new byte[]{};
-                            }
-
-                            byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
-                            int[] cornerData = chunk.getCornerData();
-                            byte[] corners;
-                            if (cornerData != null) {
-                                corners = Utils.intArrayToByteArray(cornerData);
-                            } else {
-                                corners = new byte[]{};
-                            }
-
-                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
-                            int[] lightData = chunk.getLightData();
-                            byte[] lights;
-                            if (lightData != null) {
-                                lights = Utils.intArrayToByteArray(lightData);
-                            } else {
-                                lights = new byte[]{};
-                            }
-                            ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
-                            buffer.put(subChunks);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
-                            buffer.put(blockPalette);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
-                            buffer.put(blocks);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
-                            buffer.put(cornerPalette);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
-                            buffer.put(corners);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
-                            buffer.put(lightPalette);
-                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
-                            buffer.put(lights);
-                            out.write(buffer.array());
+                        byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+                        int[] blockData = chunk.getBlockData();
+                        byte[] blocks;
+                        if (blockData != null) {
+                            blocks = Utils.intArrayToByteArray(blockData);
+                        } else {
+                            blocks = new byte[]{};
                         }
-                        out.close();
+
+                        byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
+                        int[] cornerData = chunk.getCornerData();
+                        byte[] corners;
+                        if (cornerData != null) {
+                            corners = Utils.intArrayToByteArray(cornerData);
+                        } else {
+                            corners = new byte[]{};
+                        }
+
+                        byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+                        int[] lightData = chunk.getLightData();
+                        byte[] lights;
+                        if (lightData != null) {
+                            lights = Utils.intArrayToByteArray(lightData);
+                        } else {
+                            lights = new byte[]{};
+                        }
+                        ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
+                        buffer.put(subChunks);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+                        buffer.put(blockPalette);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+                        buffer.put(blocks);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
+                        buffer.put(cornerPalette);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
+                        buffer.put(corners);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+                        buffer.put(lightPalette);
+                        buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+                        buffer.put(lights);
+                        out.write(buffer.array());
                     }
                 }
             }
+            out.close();
+
+//            String chunksPath = path + "chunks/";
+//            new File(chunksPath).mkdirs();
+//            for (int x = 0; x < World.sizeChunks; x++) {
+//                if (World.sliceUpdates[x]) {
+//                    World.sliceUpdates[x] = false;
+//                    String chunkPath = chunksPath + x+".slice";
+//                    out = new FileOutputStream(chunkPath);
+//                    for (int z = 0; z < World.sizeChunks; z++) {
+//                        for (int y = 0; y < World.heightChunks; y++) {
+//                            Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+//                            byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
+//
+//                            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+//                            int[] blockData = chunk.getBlockData();
+//                            byte[] blocks;
+//                            if (blockData != null) {
+//                                blocks = Utils.intArrayToByteArray(blockData);
+//                            } else {
+//                                blocks = new byte[]{};
+//                            }
+//
+//                            byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
+//                            int[] cornerData = chunk.getCornerData();
+//                            byte[] corners;
+//                            if (cornerData != null) {
+//                                corners = Utils.intArrayToByteArray(cornerData);
+//                            } else {
+//                                corners = new byte[]{};
+//                            }
+//
+//                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+//                            int[] lightData = chunk.getLightData();
+//                            byte[] lights;
+//                            if (lightData != null) {
+//                                lights = Utils.intArrayToByteArray(lightData);
+//                            } else {
+//                                lights = new byte[]{};
+//                            }
+//                            ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
+//                            buffer.put(subChunks);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+//                            buffer.put(blockPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+//                            buffer.put(blocks);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
+//                            buffer.put(cornerPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
+//                            buffer.put(corners);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+//                            buffer.put(lightPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+//                            buffer.put(lights);
+//                            out.write(buffer.array());
+//                        }
+//                    }
+//                    out.close();
+//                }
+//            }
+
+//            String chunksPath = path + "chunks/";
+//            new File(chunksPath).mkdirs();
+//            for (int x = 0; x < World.sizeChunks; x++) {
+//                for (int z = 0; z < World.sizeChunks; z++) {
+//                    int columnPos = Utils.condenseChunkPos(x, z);
+//                    if (World.columnUpdates[columnPos]) {
+//                        World.columnUpdates[columnPos] = false;
+//                        String chunkPath = chunksPath + x + "x" + z + "z.column";
+//                        out = new FileOutputStream(chunkPath);
+//                        for (int y = 0; y < World.heightChunks; y++) {
+//                            Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+//                            byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
+//
+//                            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+//                            int[] blockData = chunk.getBlockData();
+//                            byte[] blocks;
+//                            if (blockData != null) {
+//                                blocks = Utils.intArrayToByteArray(blockData);
+//                            } else {
+//                                blocks = new byte[]{};
+//                            }
+//
+//                            byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
+//                            int[] cornerData = chunk.getCornerData();
+//                            byte[] corners;
+//                            if (cornerData != null) {
+//                                corners = Utils.intArrayToByteArray(cornerData);
+//                            } else {
+//                                corners = new byte[]{};
+//                            }
+//
+//                            byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+//                            int[] lightData = chunk.getLightData();
+//                            byte[] lights;
+//                            if (lightData != null) {
+//                                lights = Utils.intArrayToByteArray(lightData);
+//                            } else {
+//                                lights = new byte[]{};
+//                            }
+//                            ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
+//                            buffer.put(subChunks);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+//                            buffer.put(blockPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+//                            buffer.put(blocks);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
+//                            buffer.put(cornerPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
+//                            buffer.put(corners);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+//                            buffer.put(lightPalette);
+//                            buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+//                            buffer.put(lights);
+//                            out.write(buffer.array());
+//                        }
+//                        out.close();
+//                    }
+//                }
+//            }
             glfwSetWindowShouldClose(window.getWindowHandle(), true); // We will detect this in the rendering loop
         } else {
             World.run();

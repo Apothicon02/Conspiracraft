@@ -37,6 +37,7 @@ public class Player {
     public long lastJump = 1000;
     public long jump = 0;
     public boolean sprint = false;
+    public boolean superSprint = false;
     public boolean forward = false;
     public boolean backward = false;
     public boolean rightward = false;
@@ -160,16 +161,16 @@ public class Player {
             Vector3f newMovement = new Vector3f(0f);
             boolean canMove = (flying || onGround || blockIn.x == 1);
             if (forward || backward) {
-                Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, 0, (modifiedSpeed * (canMove ? 1 : 0.1f)) * (sprint ? (backward ? 1 : (flying ? 10 : 2)) : 1) * (forward ? -1 : 1)).getTranslation(new Vector3f());
+                Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, 0, (modifiedSpeed * (canMove ? 1 : 0.1f)) * (sprint || superSprint ? (backward ? (superSprint && sprint ? 100 : (superSprint ? 10 : 1)) : (flying ? (superSprint ? 100 : 10) : 2)) : 1) * (forward ? -1 : 1)).getTranslation(new Vector3f());
                 newMovement.add(pos.x - translatedPos.x,0, pos.z - translatedPos.z);
             }
             if (rightward || leftward) {
-                Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate((modifiedSpeed * (canMove ? 1 : 0.1f)) * (sprint ? (flying ? 10 : 2) : 1) * (rightward ? -1 : 1), 0, 0).getTranslation(new Vector3f());
+                Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate((modifiedSpeed * (canMove ? 1 : 0.1f)) * (sprint || superSprint ? (flying ? (superSprint ? 100 : 10) : 2) : 1) * (rightward ? -1 : 1), 0, 0).getTranslation(new Vector3f());
                 newMovement.add(pos.x - translatedPos.x, 0, pos.z - translatedPos.z);
             }
             if (upward || downward) {
                 if (flying) {
-                    Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? (-10 * (sprint ? 0f : 1f)) : -12 * (sprint ? 2 : 1)), 0).getTranslation(new Vector3f());
+                    Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? (-10 * (sprint || superSprint ? (superSprint ? -5 : 0) : 1f)) : -12 * (sprint || superSprint ? (superSprint ? 20 : 2) : 1)), 0).getTranslation(new Vector3f());
                     newMovement.add(0, pos.y - translatedPos.y, 0);
                 } else if (blockIn.x == 1 && blockBreathing.x == 1) {
                     Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? -10 : -12), 0).getTranslation(new Vector3f());

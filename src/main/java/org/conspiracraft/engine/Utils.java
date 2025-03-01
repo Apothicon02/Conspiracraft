@@ -86,6 +86,10 @@ public class Utils {
         return buffer;
     }
 
+    public static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
     public static float closestToZero(float first, float second) {
         return Math.abs(first) < Math.abs(second) ? first : second;
     }

@@ -21,37 +21,40 @@ import static org.conspiracraft.engine.Utils.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 8192;
+    public static int size = 6976; //6976
+    public static int halfSize = size/2;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size / chunkSize;
     public static short height = 320;
     public static int heightChunks = height / chunkSize;
     public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
+    public static boolean quarterWorld = false;
 
     public static boolean cleanPalettes = false;
-    public static boolean worldGenerated = false;
     public static boolean createdChunks = false;
+    public static boolean worldGenerated = false;
+    public static boolean terrainGenerated = false;
+    public static boolean surfaceGenerated = false;
     public static int currentChunk = -1;
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
+    public static short[] surfaceHeightmap = new short[size*size];
     public static short[] heightmap = new short[size*size];
     public static ArrayList<Vector4i> liquidQueue = new ArrayList<>();
     public static ArrayList<Vector4i> blockQueue = new ArrayList<>();
     public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
-    public static boolean[] columnUpdates = new boolean[sizeChunks*sizeChunks];
+    public static boolean[] sliceUpdates = new boolean[sizeChunks];
 
     public static void run() throws IOException {
         if (Files.exists(worldPath)) {
             if (!worldGenerated) {
-                String path = (World.worldPath + "/chunks/");
-                for (int x = 0; x < World.sizeChunks; x++) {
-                    for (int z = 0; z < World.sizeChunks; z++) {
-                        loadColumn(path, x, z);
-                    }
-                }
+                String path = (World.worldPath + "/chunks.data");
+                loadWorld(path);
                 createdChunks = true;
+                terrainGenerated = true;
+                surfaceGenerated = true;
                 worldGenerated = true;
                 Renderer.worldChanged = true;
             }
@@ -65,7 +68,7 @@ public class World {
                 }
                 currentChunk++;
                 if (!cleanPalettes) {
-                    if (currentChunk == sizeChunks) {
+                    if (terrainGenerated && surfaceGenerated) {
 //                        for (int x = 0; x < size; x++) {
 //                            for (int z = 0; z < size; z++) {
 //                                updateHeightmap(x, z, true);
@@ -76,14 +79,16 @@ public class World {
                         for (int x = 1; x < size - 1; x++) {
 //                            long time = System.currentTimeMillis();
                             for (int z = 1; z < size - 1; z++) {
-                                for (int y = height - 1; y > 1; y--) {
-                                    Vector2i block = getBlockWorldgen(x, y, z);
-                                    Vector4i light = getLightWorldgen(x, y, z);
-                                    if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
-                                        //check if any neighbors are a higher brightness
-                                        if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
-                                                getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
-                                            LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                                    for (int y = height - 1; y > 1; y--) {
+                                        Vector2i block = getBlockWorldgen(x, y, z);
+                                        Vector4i light = getLightWorldgen(x, y, z);
+                                        if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
+                                            //check if any neighbors are a higher brightness
+                                            if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
+                                                    getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
+                                                LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                                            }
                                         }
                                     }
                                 }
@@ -93,8 +98,24 @@ public class World {
                         }
                         cleanPalettes = true;
                         currentChunk = -1;
-                    } else {
-                        generateWorld();
+                    } else if (!terrainGenerated) {
+                        if (currentChunk == sizeChunks) {
+                            int i = 0;
+                            for (short y : heightmap) {
+                                surfaceHeightmap[i++] = y;
+                            }
+                            currentChunk = -1;
+                            terrainGenerated = true;
+                        } else {
+                            generateTerrain();
+                        }
+                    } else if (!surfaceGenerated) {
+                        if (currentChunk == sizeChunks) {
+                            surfaceHeightmap = null;
+                            surfaceGenerated = true;
+                        } else {
+                            generateSurface();
+                        }
                     }
                 } else {
                     if (currentChunk == sizeChunks) {
@@ -117,104 +138,169 @@ public class World {
 //        }
     }
 
-    public static void loadColumn(String path, int x, int z) throws IOException {
-        String chunkPath = path+x+"x"+z+"z.column";
-        FileInputStream in = new FileInputStream(chunkPath);
+    public static void loadWorld(String path) throws IOException {
+        FileInputStream in = new FileInputStream(path);
 
         int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
         int dataIndex = 0;
 
-        for (int y = 0; y < World.heightChunks; y++) {
-            int dataSize = data[dataIndex];
-            dataIndex++;
-            int[] subChunks = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                subChunks[i] = data[dataIndex];
-                dataIndex++;
-            }
+        for (int x = 0; x < World.sizeChunks; x++) {
+            for (int z = 0; z < World.sizeChunks; z++) {
+                for (int y = 0; y < World.heightChunks; y++) {
+                    int dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] subChunks = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        subChunks[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] blockPalette = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                blockPalette[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] blockPalette = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        blockPalette[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] blocks = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                blocks[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] blocks = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        blocks[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] cornerPalette = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                cornerPalette[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] cornerPalette = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        cornerPalette[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] corners = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                corners[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] corners = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        corners[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] lightPalette = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                lightPalette[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] lightPalette = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        lightPalette[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            dataSize = data[dataIndex];
-            dataIndex++;
-            int[] lights = new int[dataSize];
-            for (int i = dataSize-1; i >= 0; i--) {
-                lights[i] = data[dataIndex];
-                dataIndex++;
-            }
+                    dataSize = data[dataIndex];
+                    dataIndex++;
+                    int[] lights = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        lights[i] = data[dataIndex];
+                        dataIndex++;
+                    }
 
-            Chunk chunk = new Chunk();
-            chunk.setSubChunks(subChunks);
-            chunk.setBlockPalette(blockPalette);
-            chunk.setBlockData(blocks);
-            chunk.setCornerPalette(cornerPalette);
-            chunk.setCornerData(corners);
-            chunk.setLightPalette(lightPalette);
-            chunk.setLightData(lights);
-            World.chunks[condenseChunkPos(x, y, z)] = chunk;
+                    Chunk chunk = new Chunk();
+                    chunk.setSubChunks(subChunks);
+                    chunk.setBlockPalette(blockPalette);
+                    chunk.setBlockData(blocks);
+                    chunk.setCornerPalette(cornerPalette);
+                    chunk.setCornerData(corners);
+                    chunk.setLightPalette(lightPalette);
+                    chunk.setLightData(lights);
+                    World.chunks[condenseChunkPos(x, y, z)] = chunk;
+                }
+            }
         }
     }
 
     public static int maxWorldgenHeight = 256;
 
-    public static void generateWorld() {
+    public static void generateTerrain() {
 //        long time = System.currentTimeMillis();
         int startX = currentChunk*chunkSize;
         for (int x = startX; x < startX+chunkSize; x++) {
             for (int z = 0; z < size; z++) {
-                float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
-                float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
-                float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
-                float foliageNoise = (basePerlinNoise + 0.5f);
-                float exponentialFoliageNoise = foliageNoise * foliageNoise;
-                float valley = (noodleNoise > 0.67 ? 184 : (184*Math.min(1, Math.abs(noodleNoise)+0.33f)));
-                int surface = (int) (maxWorldgenHeight-(valley-(Math.max(0, noodleNoise*320)*Math.abs(basePerlinNoise))));
-                int initialSurface = surface;
-                boolean upmost = true;
-                for (int y = surface; y >= 0; y--) {
-                    double baseGradient = ConspiracraftMath.gradient(y, initialSurface, 48, 2, -1);
-                    double baseDensity = baseCellularNoise + baseGradient;
-                    if (baseDensity > 0) {
-                        if (upmost && y >= seaLevel) {
+                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                    float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
+                    float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
+                    float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
+
+                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
+                    double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
+                    int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
+                    for (int y = surface; y >= 0; y--) {
+                        double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
+                        double baseDensity = baseCellularNoise + baseGradient;
+                        if (baseDensity > 0) {
+                            heightmap[condensePos(x, z)] = (short) y;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+//        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of terrain. \n");
+//        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
+//        System.out.print("World is " + (progress + "% generated. \n"));
+    }
+
+    public static void generateSurface() {
+//        long time = System.currentTimeMillis();
+        int startX = currentChunk*chunkSize;
+        for (int x = startX; x < startX+chunkSize; x++) {
+            for (int z = 0; z < size; z++) {
+                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                    int y = surfaceHeightmap[condensePos(x, z)];
+                    if (y < seaLevel) {
+                        for (int newY = seaLevel; newY > y; newY--) {
+                            setBlockWorldgen(x, newY, z, 1, 20);
+                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
+                            if (newY == seaLevel) {
+                                heightmap[condensePos(x, z)] = (short) y;
+                            }
+                        }
+                        for (int newY = y; newY > y-3; newY--) {
+                            setBlockWorldgen(x, newY, z, 3, 0);
+                        }
+                        for (int newY = y-3; newY >= 0; newY--) {
+                            setBlockWorldgen(x, newY, z, 10, 0);
+                        }
+                    } else {
+                        int maxSteepness = 0;
+                        int minNeighborY = height - 1;
+                        for (int pos : new int[]{condensePos(Math.min(size - 1, x + 3), z), condensePos(Math.max(0, x - 3), z), condensePos(x, Math.min(size - 1, z + 3)), condensePos(x, Math.max(0, z - 3)),
+                                condensePos(Math.max(0, x - 3), Math.max(0, z - 3)), condensePos(Math.min(size - 1, x + 3), Math.max(0, z - 3)), condensePos(Math.max(0, x - 3), Math.min(size - 1, z + 3)), condensePos(Math.min(size - 1, x + 3), Math.min(size - 1, z + 3))}) {
+                            int nY = surfaceHeightmap[pos];
+                            minNeighborY = Math.min(minNeighborY, nY);
+                            int steepness = Math.abs(y - nY);
+                            maxSteepness = Math.max(maxSteepness, steepness);
+                        }
+                        boolean flat = maxSteepness < 3;
+//                    if (flat) {
+//                        maxSteepness = 0;
+//                        for (int pos : new int[]{condensePos(Math.min(size-1, x+5), z), condensePos(Math.max(0, x-5), z), condensePos(x, Math.min(size-1, z+5)), condensePos(x, Math.max(0, z-5))}) {
+//                            int nY = surfaceHeightmap[pos];
+//                            int steepness = Math.abs(y-nY);
+//                            maxSteepness = Math.max(maxSteepness, steepness);
+//                        }
+//                        flat = maxSteepness < 5;
+//                    }
+
+                        if (flat) {
                             setBlockWorldgen(x, y, z, 2, 0);
+                            setBlockWorldgen(x, y - 1, z, 3, 0);
+                            setBlockWorldgen(x, y - 2, z, 3, 0);
+                            setBlockWorldgen(x, y - 3, z, 3, 0);
+                            for (int newY = y - 4; newY >= 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 10, 0);
+                            }
+                            float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
+                            float foliageNoise = (basePerlinNoise + 0.5f);
+                            float exponentialFoliageNoise = foliageNoise * foliageNoise;
                             double torchChance = Math.random();
                             if (torchChance > 0.99995d) {
                                 if (torchChance > 0.99997d) {
@@ -252,32 +338,22 @@ public class World {
                                 double flowerChance = Math.random();
                                 setBlockWorldgen(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
                             }
-                            surface = y;
-                            upmost = false;
                         } else {
-                            setBlockWorldgen(x, y, z, y > surface - 3 ? 3 : 10, 0);
-                        }
-                    } else {
-                        if (y <= seaLevel) {
-                            setBlockWorldgen(x, y, z, 1, 20);
-                            if (y == seaLevel) {
-                                heightmap[condensePos(x, z)] = (short) y;
-                                for (int extraY = y; extraY >= seaLevel - 3; extraY--) {
-                                    setLightWorldgen(x, extraY, z, new Vector4i(0, 0, 0, 0));
-                                }
+                            for (int newY = y; newY >= 0; newY--) {
+                                setBlockWorldgen(x, newY, z, newY >= minNeighborY ? 8 : 10, 0);
                             }
                         }
                     }
                 }
             }
         }
-//        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice. \n");
+//        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of surface. \n");
 //        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
 //        System.out.print("World is " + (progress + "% generated. \n"));
     }
 
     public static void queueColumnUpdate(Vector3i pos) {
-        columnUpdates[condenseChunkPos(pos.x/16, pos.z/16)] = true;
+        sliceUpdates[pos.x/16] = true;
     }
 
     public static Vector2i getBlockWorldgen(int x, int y, int z) {

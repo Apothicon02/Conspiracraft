@@ -46,7 +46,7 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-int size = 8192;
+int size = 6976; //6976
 int height = 320;
 int chunkSize = 16;
 int halfChunkSize = chunkSize/2;
