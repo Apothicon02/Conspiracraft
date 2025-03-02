@@ -47,7 +47,7 @@ in vec4 gl_FragCoord;
 out vec4 fragColor;
 
 int size = 6976; //6976
-int height = 320;
+int height = 432;
 int chunkSize = 16;
 int halfChunkSize = chunkSize/2;
 int sizeChunks = size>> 4;
@@ -361,8 +361,6 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                     reflectivity = 0.3f;
                 } else if (blockType == 7) { //kyanite
                     reflectivity = 0.33f;
-                } else if (blockType >= 8 && blockType <= 10) { //stones
-                    reflectivity = 0.05f;
                 } else if (blockType >= 11 && blockType <= 13) { //glass
                     reflectivity = 0.25f;
                 } else if (blockType == 15) { //planks

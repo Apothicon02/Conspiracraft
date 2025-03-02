@@ -26,10 +26,11 @@ public class World {
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size / chunkSize;
-    public static short height = 320;
+    public static short height = 432;
     public static int heightChunks = height / chunkSize;
     public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
-    public static boolean quarterWorld = false;
+    public static boolean quarterWorld = true;
+    public static boolean doLight = false;
 
     public static boolean cleanPalettes = false;
     public static boolean createdChunks = false;
@@ -76,25 +77,27 @@ public class World {
 //                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
 //                            System.out.print("Heightmap is " + (progress + "% generated. \n"));
 //                        }
-                        for (int x = 1; x < size - 1; x++) {
-//                            long time = System.currentTimeMillis();
-                            for (int z = 1; z < size - 1; z++) {
-                                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                                    for (int y = height - 1; y > 1; y--) {
-                                        Vector2i block = getBlockWorldgen(x, y, z);
-                                        Vector4i light = getLightWorldgen(x, y, z);
-                                        if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
-                                            //check if any neighbors are a higher brightness
-                                            if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
-                                                    getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
-                                                LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                        if (doLight) {
+                            for (int x = 1; x < size - 1; x++) {
+        //                            long time = System.currentTimeMillis();
+                                for (int z = 1; z < size - 1; z++) {
+                                    if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                                        for (int y = height - 1; y > 1; y--) {
+                                            Vector2i block = getBlockWorldgen(x, y, z);
+                                            Vector4i light = getLightWorldgen(x, y, z);
+                                            if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
+                                                //check if any neighbors are a higher brightness
+                                                if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
+                                                        getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
+                                                    LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                                                }
                                             }
                                         }
                                     }
                                 }
+        //                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
+        //                            System.out.print("Sunlight is " + (progress + "% filled. \nSlice took " + (System.currentTimeMillis()-time) + "ms to fill. \n"));
                             }
-//                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
-//                            System.out.print("Sunlight is " + (progress + "% filled. \nSlice took " + (System.currentTimeMillis()-time) + "ms to fill. \n"));
                         }
                         cleanPalettes = true;
                         currentChunk = -1;
@@ -228,14 +231,18 @@ public class World {
                     float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
                     float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
                     float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
+                    int miniX = x*8;
+                    int miniZ = z*8;
+                    float miniCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(miniX - (((int) (miniX / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), miniZ - (((int) (miniZ / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
 
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
+                    int volcanoElevation = (int) ((((Math.min(0.25, centDist)-0.25)*-2200)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/12)));
                     int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
-                    for (int y = surface; y >= 0; y--) {
+                    for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
                         double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
                         double baseDensity = baseCellularNoise + baseGradient;
-                        if (baseDensity > 0) {
+                        if (baseDensity > 0 || volcanoElevation >= y) {
                             heightmap[condensePos(x, z)] = (short) y;
                             break;
                         }
@@ -254,8 +261,18 @@ public class World {
         for (int x = startX; x < startX+chunkSize; x++) {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                    int lavaX = x*3;
+                    int lavaZ = z*3;
+                    float lavaNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((lavaX - (((int) (lavaX / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (lavaZ - (((int) (lavaZ / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
                     int y = surfaceHeightmap[condensePos(x, z)];
-                    if (y < seaLevel) {
+                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
+                    if (centDist < 0.05f && y < 375) {
+                        heightmap[condensePos(x, z)] = (short) 375;
+                        for (int newY = 375; newY > 0; newY--) {
+                            setBlockWorldgen(x, newY, z, 19, 0);
+                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
+                        }
+                    } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
                             setBlockWorldgen(x, newY, z, 1, 20);
                             setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
@@ -339,8 +356,14 @@ public class World {
                                 setBlockWorldgen(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
                             }
                         } else {
+                            int lavaAir = (int)(Math.abs(lavaNoise)*320);
                             for (int newY = y; newY >= 0; newY--) {
-                                setBlockWorldgen(x, newY, z, newY >= minNeighborY ? 8 : 10, 0);
+                                int volcanoElevation = (int) ((Math.min(0.25, centDist)-0.25)*-2200);
+                                if (newY <= volcanoElevation) {
+                                    setBlockWorldgen(x, newY, z, lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y-lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9, 0);
+                                } else {
+                                    setBlockWorldgen(x, newY, z, newY >= minNeighborY ? 8 : 10, 0);
+                                }
                             }
                         }
                     }

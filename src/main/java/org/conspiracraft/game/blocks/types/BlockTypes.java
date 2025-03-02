@@ -25,6 +25,7 @@ public class BlockTypes {
     public static BlockType WILLOW_LOG = create(new BlockType());
     public static BlockType WILLOW_LEAVES = create(new BlockType(false, true, false));
     public static BlockType HYDRANGEA = create(new BlockType(false, false, false, true));
+    public static BlockType MAGMA = create(new LightBlockType(8, 3, 0));
 
     private static BlockType create(BlockType type) {
         blockTypeMap.put(blockTypeMap.size(), type);
