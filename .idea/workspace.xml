@@ -9,10 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Updated README.md" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -195,14 +192,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00098" summary="- Compressed world save data.">
-      <option name="closed" value="true" />
-      <created>1737408592305</created>
-      <option name="number" value="00098" />
-      <option name="presentableId" value="LOCAL-00098" />
-      <option name="project" value="LOCAL" />
-      <updated>1737408592305</updated>
     </task>
     <task id="LOCAL-00099" summary="- Dramatically reduced vram and disk space consumption.">
       <option name="closed" value="true" />
@@ -588,7 +577,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740942159943</updated>
     </task>
-    <option name="localTasksCounter" value="147" />
+    <task id="LOCAL-00147" summary="- Updated README.md">
+      <option name="closed" value="true" />
+      <created>1740954139413</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1740954139413</updated>
+    </task>
+    <option name="localTasksCounter" value="148" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -604,7 +601,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity." />
     <MESSAGE value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
     <MESSAGE value="- Tweaked leaf lighting." />
     <MESSAGE value="- Improved lighting and fog. &#10;- Fixed shadows causing crashes." />
@@ -629,7 +625,8 @@
     <MESSAGE value="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast." />
     <MESSAGE value="- Added the volcano. &#10;- Added magma." />
     <MESSAGE value="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes." />
+    <MESSAGE value="- Updated README.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Updated README.md" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -11,6 +11,7 @@
 
 # Important Information
 - This is just a technical demo at the moment, do not expect gameplay yet. 
+- Only Nvidia GPUs and Windows is supported right now. 
 - To access save data, press WIN+R, paste this without the quotes "%appdata%/conspiracraft", and hit enter. 
 
 # Keybinds 
