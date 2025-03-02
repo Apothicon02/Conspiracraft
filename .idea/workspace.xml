@@ -9,12 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added the volcano. &#10;- Added magma.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +139,7 @@
       <recent name="org.apothicon.engine" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run">
+  <component name="RunManager" selected="Gradle.build">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -198,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00097" summary="- Vastly optimized world loading.">
-      <option name="closed" value="true" />
-      <created>1737340511321</created>
-      <option name="number" value="00097" />
-      <option name="presentableId" value="LOCAL-00097" />
-      <option name="project" value="LOCAL" />
-      <updated>1737340511322</updated>
     </task>
     <task id="LOCAL-00098" summary="- Compressed world save data.">
       <option name="closed" value="true" />
@@ -591,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740880972106</updated>
     </task>
-    <option name="localTasksCounter" value="146" />
+    <task id="LOCAL-00146" summary="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes.">
+      <option name="closed" value="true" />
+      <created>1740942159943</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1740942159943</updated>
+    </task>
+    <option name="localTasksCounter" value="147" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -607,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Shader now takes into account corners when calculating smooth lighting." />
     <MESSAGE value="- Reduced shadow ray max distance. &#10;- Fixed reflections being imperfect. &#10;- Increased water reflectivity." />
     <MESSAGE value="- Re-added block lighting. &#10;- Improved fog. &#10;- Improved lighting." />
     <MESSAGE value="- Tweaked leaf lighting." />
@@ -632,7 +628,8 @@
     <MESSAGE value="- Added mountains. &#10;- Fixed sunlight worldgen. &#10;- Re-enabled reflections." />
     <MESSAGE value="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast." />
     <MESSAGE value="- Added the volcano. &#10;- Added magma." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added the volcano. &#10;- Added magma." />
+    <MESSAGE value="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
