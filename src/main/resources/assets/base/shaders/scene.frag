@@ -168,17 +168,17 @@ bool[8] getCorners(int x, int y, int z) {
     }
     return data;
 }
-vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
+vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
     bool[8] corners = getCorners(bX, bY, bZ);
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
     if (corners[cornerIndex]) {
-        return fromLinear(intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255);
+        return fromLinear(intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
     } else {
         return vec4(0, 0, 0, 0);
     }
 }
-vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype) {
-    return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype);
+vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype, float fire) {
+    return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype, fire);
 }
 
 ivec3 prevBlockChunkPos = ivec3(-1);
@@ -351,9 +351,10 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
     prevPos = rayMapPos+(prevMapPos/8);
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
-    vec4 prevVoxelColor = getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y);
+    float fire = blockType == 19 ? 1 : (blockType == 9 ? 0.05f : 0f);
+    vec4 prevVoxelColor = getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
-        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype);
+        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
             if (reflectivity == 0.f && canHit) {
@@ -436,7 +437,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                             aboveBlockType = aboveBlocKInfo.x;
                             aboveBlockSubtype = aboveBlocKInfo.y;
                         }
-                        vec4 aboveColorData = getVoxel(mapPos.x, float(aboveY), mapPos.z, rayMapPos.x, aboveRayMapPosY, rayMapPos.z, aboveBlockType, aboveBlockSubtype);
+                        vec4 aboveColorData = getVoxel(mapPos.x, float(aboveY), mapPos.z, rayMapPos.x, aboveRayMapPosY, rayMapPos.z, aboveBlockType, aboveBlockSubtype, 0);
                         if (aboveColorData.a <= 0 || aboveBlockType == 4 || aboveBlockType == 5 || aboveBlockType == 18) {
                             voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0)*1.33f, 0.9f);
                             normalBrightness = 1f;
@@ -475,7 +476,7 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
 
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         if (cloud) {
-            cloudiness = max(cloudiness, rayMapPos.y < 350 ? gradient(rayMapPos.y, 240, 256, 1f, 1.5f) : gradient(rayMapPos.y, 448, 464, 1f, 1.5f));
+            cloudiness = max(cloudiness, rayMapPos.y < 350 ? gradient(rayMapPos.y, 272, 288, 1f, 1.5f) : gradient(rayMapPos.y, 432, 448, 1f, 1.5f));
         } else {
             //block start
             ivec2 blockInfo = ivec2(0);
@@ -637,9 +638,9 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
 
     while (distance(rayMapChunkPos, rayPos) < renderDistance/16) {
         bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
-        bool isAddedLayer = rayMapChunkPos.y == heightChunks+8;
+        bool isAddedLayer = rayMapChunkPos.y == heightChunks;
         float samp = noise((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8) + (isAddedLayer ? 512 : 0));
-        cloud = (rayMapChunkPos.y == heightChunks-5 || isAddedLayer) && (samp > 0.0f && samp < 0.05f);
+        cloud = (rayMapChunkPos.y == heightChunks-10 || isAddedLayer) && (samp > 0.0f && samp < 0.05f);
         if (cloud || (inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false)) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));

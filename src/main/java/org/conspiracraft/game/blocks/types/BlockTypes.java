@@ -15,7 +15,7 @@ public class BlockTypes {
     public static BlockType TORCH = create(new LightBlockType(false, false, false, true, 20, 15, 0));
     public static BlockType KYANITE = create(new LightBlockType(0, 2, 6));
     public static BlockType WHITE_STONE = create(new BlockType());
-    public static BlockType BLACK_STONE = create(new BlockType());
+    public static BlockType IGNEOUS = create(new BlockType());
     public static BlockType STONE = create(new BlockType());
     public static BlockType PURPLE_STAINED_GLASS = create(new BlockType(true, false));
     public static BlockType LIME_STAINED_GLASS = create(new BlockType(true, false));
