@@ -7,6 +7,8 @@ import org.lwjgl.system.MemoryUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,27 +37,29 @@ public class AudioController {
         AL10.alListener3f(AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
     }
 
-    public static int loadSound(String file) {
+    public static void loadSound(String file) {
         int buffer = AL10.alGenBuffers();
         WaveData waveFile = WaveData.create(file);
         buffers.add(new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate));
         AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
         waveFile.dispose();
-        return buffer;
     }
 
     public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
 
-    public static int loadRandomSound(String path) throws FileNotFoundException {
+    public static void loadRandomSound(String path) throws FileNotFoundException {
         String folder = resourcesPath+path;
-        int buffer = AL10.alGenBuffers();
-        List<String> allSounds = new ArrayList<>(Arrays.asList(new File(folder).list()));
-        String name = allSounds.get((int) (Math.random()*(allSounds.size()-1)));
-        WaveData waveFile = WaveData.createFromAppdata(folder+name);
-        buffers.add(new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) /waveFile.sampleRate));
-        AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
-        waveFile.dispose();
-        return buffer;
+        if (Files.exists(Path.of(folder))) {
+            int buffer = AL10.alGenBuffers();
+            List<String> allSounds = new ArrayList<>(Arrays.asList(new File(folder).list()));
+            String name = allSounds.get((int) (Math.random() * (allSounds.size() - 1)));
+            WaveData waveFile = WaveData.createFromAppdata(folder + name);
+            buffers.add(new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate));
+            AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
+            waveFile.dispose();
+        } else {
+            loadSound("grass_step1.wav");
+        }
     }
 
     public static void cleanup() {
