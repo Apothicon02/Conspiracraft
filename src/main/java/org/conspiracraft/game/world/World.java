@@ -1,8 +1,6 @@
 package org.conspiracraft.game.world;
 
-import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.engine.Utils;
-import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
@@ -18,10 +16,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 import static org.conspiracraft.engine.Utils.*;
+import static org.conspiracraft.game.world.WorldGen.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 6976; //6976
+    public static int size = 6976/4; //6976
     public static int halfSize = size/2;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
@@ -220,169 +219,10 @@ public class World {
         }
     }
 
-    public static int maxWorldgenHeight = 256;
-
-    public static void generateTerrain() {
-//        long time = System.currentTimeMillis();
-        int startX = currentChunk*chunkSize;
-        for (int x = startX; x < startX+chunkSize; x++) {
-            for (int z = 0; z < size; z++) {
-                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
-                    float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
-                    float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
-                    int miniX = x*8;
-                    int miniZ = z*8;
-                    float miniCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(miniX - (((int) (miniX / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), miniZ - (((int) (miniZ / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
-
-                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
-                    double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
-                    int volcanoElevation = (int) ((((Math.min(0.25, centDist)-0.25)*-2000)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/12)));
-                    int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
-                    for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
-                        double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
-                        double baseDensity = baseCellularNoise + baseGradient;
-                        if (baseDensity > 0 || volcanoElevation >= y) {
-                            heightmap[condensePos(x, z)] = (short) y;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-//        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of terrain. \n");
-//        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
-//        System.out.print("World is " + (progress + "% generated. \n"));
-    }
-
-    public static void generateSurface() {
-//        long time = System.currentTimeMillis();
-        int startX = currentChunk*chunkSize;
-        for (int x = startX; x < startX+chunkSize; x++) {
-            for (int z = 0; z < size; z++) {
-                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    int lavaX = x*3;
-                    int lavaZ = z*3;
-                    float lavaNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((lavaX - (((int) (lavaX / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (lavaZ - (((int) (lavaZ / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
-                    int y = surfaceHeightmap[condensePos(x, z)];
-                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
-                    int lavaLevel = (int) (350-(lavaNoise*5));
-                    if (centDist < 0.05f && y < lavaLevel) {
-                        heightmap[condensePos(x, z)] = (short) lavaLevel;
-                        for (int newY = lavaLevel; newY > 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 19, 0);
-                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
-                        }
-                    } else if (y < seaLevel) {
-                        for (int newY = seaLevel; newY > y; newY--) {
-                            setBlockWorldgen(x, newY, z, 1, 20);
-                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
-                            if (newY == seaLevel) {
-                                heightmap[condensePos(x, z)] = (short) y;
-                            }
-                        }
-                        for (int newY = y; newY > y-3; newY--) {
-                            setBlockWorldgen(x, newY, z, 3, 0);
-                        }
-                        for (int newY = y-3; newY >= 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 10, 0);
-                        }
-                    } else {
-                        int maxSteepness = 0;
-                        int minNeighborY = height - 1;
-                        for (int pos : new int[]{condensePos(Math.min(size - 1, x + 3), z), condensePos(Math.max(0, x - 3), z), condensePos(x, Math.min(size - 1, z + 3)), condensePos(x, Math.max(0, z - 3)),
-                                condensePos(Math.max(0, x - 3), Math.max(0, z - 3)), condensePos(Math.min(size - 1, x + 3), Math.max(0, z - 3)), condensePos(Math.max(0, x - 3), Math.min(size - 1, z + 3)), condensePos(Math.min(size - 1, x + 3), Math.min(size - 1, z + 3))}) {
-                            int nY = surfaceHeightmap[pos];
-                            minNeighborY = Math.min(minNeighborY, nY);
-                            int steepness = Math.abs(y - nY);
-                            maxSteepness = Math.max(maxSteepness, steepness);
-                        }
-                        boolean flat = maxSteepness < 3;
-//                    if (flat) {
-//                        maxSteepness = 0;
-//                        for (int pos : new int[]{condensePos(Math.min(size-1, x+5), z), condensePos(Math.max(0, x-5), z), condensePos(x, Math.min(size-1, z+5)), condensePos(x, Math.max(0, z-5))}) {
-//                            int nY = surfaceHeightmap[pos];
-//                            int steepness = Math.abs(y-nY);
-//                            maxSteepness = Math.max(maxSteepness, steepness);
-//                        }
-//                        flat = maxSteepness < 5;
-//                    }
-
-                        int volcanoElevation = (int) ((Math.min(0.25, centDist)-0.25)*-2000);
-                        if (flat) {
-                            setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
-                            setBlockWorldgen(x, y - 1, z, 3, 0);
-                            setBlockWorldgen(x, y - 2, z, 3, 0);
-                            setBlockWorldgen(x, y - 3, z, 3, 0);
-                            for (int newY = y - 4; newY >= 0; newY--) {
-                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
-                            }
-                            float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
-                            float foliageNoise = (basePerlinNoise + 0.5f);
-                            float exponentialFoliageNoise = foliageNoise * foliageNoise;
-                            double torchChance = Math.random();
-                            if (torchChance > 0.99995d) {
-                                if (torchChance > 0.99997d) {
-                                    setBlockWorldgen(x, y, z, 7, 0);
-                                    setBlockWorldgen(x, y + 1, z, 7, 0);
-                                    setBlockWorldgen(x, y + 2, z, 7, 0);
-                                } else {
-                                    setBlockWorldgen(x, y + 1, z, 14, 0);
-                                }
-                            } else if (torchChance < exponentialFoliageNoise * 0.015f) { //tree 0.015
-                                int maxHeight = (int) (Math.random() * 4) + 8;
-                                int radius = (int) (maxHeight + (torchChance * 100));
-                                for (int lX = x - radius; lX <= x + radius; lX++) {
-                                    for (int lZ = z - radius; lZ <= z + radius; lZ++) {
-                                        for (int lY = y + maxHeight - radius; lY <= y + maxHeight + radius; lY++) {
-                                            int xDist = lX - x;
-                                            int yDist = lY - (y + maxHeight);
-                                            int zDist = lZ - z;
-                                            int dist = xDist * xDist + zDist * zDist + yDist * yDist;
-                                            if (dist <= radius * 3 && inBounds(lX, lY, lZ)) {
-                                                setBlockWorldgen(lX, lY, lZ, 17, 0);
-                                                int condensedPos = condensePos(lX, lZ);
-                                                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
-                                                for (int extraY = lY; extraY >= seaLevel; extraY--) {
-                                                    setLightWorldgen(lX, extraY, lZ, new Vector4i(0, 0, 0, 0));
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                for (int i = 0; i < maxHeight; i++) {
-                                    setBlockWorldgen(x, y + i, z, 16, 0);
-                                }
-                            } else {
-                                double flowerChance = Math.random();
-                                setBlockWorldgen(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
-                            }
-                        } else {
-                            int lavaAir = (int)(Math.abs(lavaNoise)*200);
-                            for (int newY = y; newY >= 0; newY--) {
-                                if (newY <= volcanoElevation) {
-                                    setBlockWorldgen(x, newY, z, lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y-lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9, 0);
-                                } else {
-                                    setBlockWorldgen(x, newY, z, newY >= minNeighborY ? 8 : 10, 0);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-//        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of surface. \n");
-//        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
-//        System.out.print("World is " + (progress + "% generated. \n"));
-    }
-
     public static void queueColumnUpdate(Vector3i pos) {
         sliceUpdates[pos.x/16] = true;
     }
 
-    public static Vector2i getBlockWorldgen(int x, int y, int z) {
-        return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlock(condenseLocalPos(x & 15, y & 15, z & 15));
-    }
     public static Vector2i getBlock(Vector3i blockPos) {
         if (blockPos.x >= 0 && blockPos.x < size && blockPos.z >= 0 && blockPos.z < size && blockPos.y >= 0 && blockPos.y < height) {
             return chunks[condenseChunkPos(blockPos.x >> 4, blockPos.y >> 4, blockPos.z >> 4)].getBlock(condenseLocalPos(blockPos.x & 15, blockPos.y & 15, blockPos.z & 15));
@@ -395,9 +235,7 @@ public class World {
     public static Vector2i getBlock(float x, float y, float z) {
         return getBlock(new Vector3i((int) x, (int) y, (int) z));
     }
-    public static Vector4i getLightWorldgen(int x, int y, int z) {
-        return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getLight(condenseLocalPos(x & 15, y & 15, z & 15));
-    }
+
     public static Vector4i getLight(Vector3i blockPos) {
         if (blockPos.x >= 0 && blockPos.x < size && blockPos.z >= 0 && blockPos.z < size && blockPos.y >= 0 && blockPos.y < height) {
             return chunks[condenseChunkPos(blockPos.x >> 4, blockPos.y >> 4, blockPos.z >> 4)].getLight(condenseLocalPos(blockPos.x & 15, blockPos.y & 15, blockPos.z & 15));
@@ -641,18 +479,6 @@ public class World {
         }
     }
 
-    public static void queueLightUpdateWorldgen(Vector3i pos) {
-        for (Vector3i nPos : new Vector3i[]{
-                new Vector3i(pos.x, pos.y, pos.z+1), new Vector3i(pos.x, pos.y, pos.z-1),
-                new Vector3i(pos.x+1, pos.y, pos.z), new Vector3i(pos.x-1, pos.y, pos.z)
-        }) {
-            Vector4i nLight = getLightWorldgen(nPos.x, nPos.y, nPos.z);
-            if (nLight.w > 0) {
-                lightQueue.addLast(pos);
-                break;
-            }
-        }
-    }
     public static void queueLightUpdate(Vector3i pos) {
         boolean exists = lightQueue.contains(pos);
         if (!exists) {
@@ -678,12 +504,6 @@ public class World {
         return (x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height);
     }
 
-    public static void setLightWorldgen(int x, int y, int z, Vector4i light) {
-        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setLight(new Vector3i(x & 15, y & 15, z & 15), light, new Vector3i(x, y, z));
-    }
-    public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
-        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
-    }
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority) {
         if (inBounds(x, y, z)) {
             Vector2i existing = getBlock(x, y, z);
