@@ -10,9 +10,11 @@ uniform bool ui;
 uniform bool shadowsEnabled;
 uniform bool snowing;
 uniform vec3 sun;
+uniform bool cloudsEnabled;
 
 layout(binding = 0) uniform sampler2D coherent_noise;
 layout(binding = 1) uniform sampler2D white_noise;
+layout(binding = 2) uniform sampler2D cloud_noise;
 
 layout(std430, binding = 0) buffer atlasSSBO
 {
@@ -124,10 +126,13 @@ vec3 hsv2rgb(vec3 c)
 }
 
 float noise(vec2 coords) {
-    return (texture(coherent_noise, coords/1024).r)-0.5;
+    return (texture(coherent_noise, coords/1024).r)-0.5f;
 }
 float whiteNoise(vec2 coords) {
-    return (texture(white_noise, coords/1024).r)-0.5;
+    return (texture(white_noise, coords/1024).r)-0.5f;
+}
+float cloudNoise(vec2 coords) {
+    return (texture(cloud_noise, coords/2048).r)-0.5f;
 }
 
 vec4 intToColor(int color) {
@@ -338,6 +343,7 @@ float normalBrightness = 1f;
 bool isSnowFlake = false;
 bool wasEverTinted = false;
 bool cloud = false;
+float cloudiness = 1f;
 ivec3 normal = ivec3(0);
 
 vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float distanceFogginess) {
@@ -462,9 +468,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     return vec4(0.0);
 }
 
-float cloudiness = 1f;
-
-vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
+vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -476,8 +480,14 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
 
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         if (cloud) {
-            cloudiness = max(cloudiness, rayMapPos.y < 350 ? gradient(rayMapPos.y, 272, 288, 1f, 1.5f) : gradient(rayMapPos.y, 432, 448, 1f, 1.5f));
-        } else {
+            float cloudSamp = cloudNoise((vec2(rayMapPos.x, rayMapPos.z) + (rayMapPos.y >= 350 ? 512 : 0)) + vec2(time*(2500.f+(timeOfDay*2500.f))));
+            if (cloudSamp > 0.0f && cloudSamp < 0.05f) {
+                cloudiness = max(cloudiness, rayMapPos.y < 350 ?
+                mix(gradient(rayMapPos.y, 272, 288, 1f, 1.5f), gradient(rayMapPos.y, 288, 272, 1f, 1.5f), clamp((camPos.y-272)/16, 0.f, 1.f)) :
+                mix(gradient(rayMapPos.y, 432, 448, 1f, 1.5f), gradient(rayMapPos.y, 448, 432, 1f, 1.5f), clamp((camPos.y-432)/16, 0.f, 1.f)));
+            }
+        }
+        if (checkBlocks) {
             //block start
             ivec2 blockInfo = ivec2(0);
             vec3 uv3d = vec3(0);
@@ -586,7 +596,7 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
     return vec4(0);
 }
 
-vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds) {
+vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(1.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -599,7 +609,8 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
     while (mapPos.x < 2.0 && mapPos.x >= 0.0 && mapPos.y < 2.0 && mapPos.y >= 0.0 && mapPos.z < 2.0 && mapPos.z >= 0.0) {
         ivec3 localPos = ivec3(realPos.x, realPos.y, realPos.z) & ivec3(15);
         int subChunkPos = ((((localPos.x >= halfChunkSize ? 1 : 0)*2)+(localPos.z >= halfChunkSize ? 1 : 0))*2)+(localPos.y >= halfChunkSize ? 1 : 0);
-        if (cloud || ((subChunks >> (subChunkPos % 32)) & 1) > 0) {
+        bool checkBlocks = checkSubChunks ? (((subChunks >> (subChunkPos % 32)) & 1) > 0) : false;
+        if (cloud || checkBlocks) {
             vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
             vec3 intersect = rayPos + rayDir*d;
@@ -609,7 +620,7 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
                 uv3d = rayPos - mapPos;
             }
 
-            vec4 color = dda(chunkPos, ivec3(mapPos), uv3d * 8.0, rayDir, mask, inBounds);
+            vec4 color = dda(chunkPos, ivec3(mapPos), uv3d * 8.0, rayDir, mask, inBounds, checkBlocks);
 
             if (color.a >= 1) {
                 return color;
@@ -639,9 +650,10 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
     while (distance(rayMapChunkPos, rayPos) < renderDistance/16) {
         bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
         bool isAddedLayer = rayMapChunkPos.y == heightChunks;
-        float samp = noise((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*8) + (isAddedLayer ? 512 : 0));
-        cloud = (rayMapChunkPos.y == heightChunks-10 || isAddedLayer) && (samp > 0.0f && samp < 0.05f);
-        if (cloud || (inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false)) {
+        float cloudSamp = cloudNoise(((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*16) + (isAddedLayer ? 512 : 0)) + vec2(time*(2500.f+(timeOfDay*2500.f))));
+        cloud = cloudsEnabled ? ((rayMapChunkPos.y == heightChunks-10 || isAddedLayer) && (cloudSamp > -0.25f && cloudSamp < 0.3f)) : false;
+        bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
+        if (cloud || checkSubChunks) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
             vec3 intersect = rayPos + rayDir*d;
@@ -650,7 +662,7 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
             if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
                 uv3d = rayPos - rayMapChunkPos;
             }
-            vec4 color = subChunkDDA(ivec3(rayMapChunkPos), uv3d * 2.0, rayDir, mask, inBounds);
+            vec4 color = subChunkDDA(ivec3(rayMapChunkPos), uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
             if (color.a >= 1) {
                 return color;
             }

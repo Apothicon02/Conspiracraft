@@ -36,6 +36,7 @@ public class Renderer {
 
     public static int coherentNoiseId;
     public static int whiteNoiseId;
+    public static int cloudNoiseId;
 
     public static int atlasSSBOId;
     public static int chunkBlocksSSBOId;
@@ -55,6 +56,7 @@ public class Renderer {
     public static int shadowsEnabledUniform;
     public static int snowingUniform;
     public static int sunUniform;
+    public static int cloudsEnabledUniform;
 
     public static int renderDistanceMul = 8; //4
     public static float timeOfDay = 0.5f;
@@ -64,6 +66,7 @@ public class Renderer {
     public static boolean[] collisionData = new boolean[9984*9984+9984];
     public static boolean showUI = true;
     public static boolean shadowsEnabled = false;
+    public static boolean cloudsEnabled = true;
     public static boolean snowing = false;
 
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
@@ -108,6 +111,14 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.WHITE_NOISE));
 
+        cloudNoiseId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.CLOUD_NOISE));
+
         atlasSSBOId = glGenBuffers();
         chunkBlocksSSBOId = glGenBuffers();
         blocksSSBOId = glGenBuffers();
@@ -126,6 +137,7 @@ public class Renderer {
         shadowsEnabledUniform = glGetUniformLocation(scene.programId, "shadowsEnabled");
         snowingUniform = glGetUniformLocation(scene.programId, "snowing");
         sunUniform = glGetUniformLocation(scene.programId, "sun");
+        cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(Integer.MAX_VALUE);
@@ -171,11 +183,14 @@ public class Renderer {
         sunPos.rotateY((float) time);
         sunPos = new Vector3f(sunPos.x+halfSize, height, sunPos.z+halfSize);
         glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
+        glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
         if (atlasChanged) {
             atlasChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
