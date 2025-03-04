@@ -20,7 +20,7 @@ import static org.conspiracraft.game.world.WorldGen.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 6976/4; //6976
+    public static int size = 6976; //6976
     public static int halfSize = size/2;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
@@ -375,30 +375,39 @@ public class World {
         }
     }
 
-    public static boolean isVerticallyBlockingLight(int blockType, int corners) {
-        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
+    public static boolean isBlockingHeightmap(Vector2i blockType, int corners) {
+        BlockType type = BlockTypes.blockTypeMap.get(blockType.x);
+        boolean obstructsHieghtmap = type.obstructingHeightmap(blockType);
+        if (!type.blocksLight && !obstructsHieghtmap) {
             return false;
-        } else {
-            int blockedColumns = 0;
-            for (int x = 0; x <= 1; x++) {
-                for (int z = 0; z <= 2; z+=2) {
-                    for (int y = 0; y <= 4; y+=4) {
-                        int cornerIndex = y + z + x;
-                        int temp = corners;
-                        temp &= (~(1 << (cornerIndex - 1)));
-                        if (temp == corners) {
-                            blockedColumns++;
-                            break;
-                        }
-                    }
-                }
-            }
+        } else if (corners != 0) {
+            int blockedColumns = getBlockedColumns(corners);
             if (blockedColumns >= 4) {
                 return true;
             } else {
                 return false;
             }
+        } else {
+            return true;
         }
+    }
+
+    private static int getBlockedColumns(int corners) {
+        int blockedColumns = 0;
+        for (int x = 0; x <= 1; x++) {
+            for (int z = 0; z <= 2; z+=2) {
+                for (int y = 0; y <= 4; y+=4) {
+                    int cornerIndex = y + z + x;
+                    int temp = corners;
+                    temp &= (~(1 << (cornerIndex - 1)));
+                    if (temp == corners) {
+                        blockedColumns++;
+                        break;
+                    }
+                }
+            }
+        }
+        return blockedColumns;
     }
 
     public static void updateHeightmap(int x, int z, boolean update) {
@@ -411,8 +420,8 @@ public class World {
             } else {
                 Vector2i block = getBlock(x, scanY, z);
                 int corners = getCorner(x, scanY, z);
-                boolean blocking = isVerticallyBlockingLight(block.x, corners);
-                if (!setHeightmap && (blocking || block.x == 1)) {
+                boolean blocking = isBlockingHeightmap(block, corners);
+                if (!setHeightmap && blocking) {
                     setHeightmap = true;
                     heightmap[pos] = (short) (scanY);
                 }
@@ -420,7 +429,7 @@ public class World {
                     for (int scanExtraY = scanY - 1; scanExtraY >= 0; scanExtraY--) {
                         Vector2i blockExtra = getBlock(x, scanExtraY, z);
                         int cornersExtra = getCorner(x, scanExtraY, z);
-                        boolean blockingExtra = update && isVerticallyBlockingLight(blockExtra.x, cornersExtra);
+                        boolean blockingExtra = update && isBlockingHeightmap(blockExtra, cornersExtra);
                         if (!blockingExtra) {
                             Vector4i lightExtra = getLight(x, scanExtraY, z);
                             chunks[condenseChunkPos(x >> 4, scanExtraY >> 4, z >> 4)].setLight(new Vector3i(x & 15, scanExtraY & 15, z & 15),

@@ -7,9 +7,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.conspiracraft.engine.Utils.condenseLocalPos;
 import static org.conspiracraft.engine.Utils.condenseSubchunkPos;
 import static org.conspiracraft.game.world.World.chunkSize;
@@ -232,7 +229,11 @@ public class Chunk {
     public int[] getLightData() {
         return lightData.getData();
     }
+    public static Vector4i fullSunlight = new Vector4i(0, 0, 0, 20);
     public void setLightKey(Vector3i pos, int key) {
+        if (!Utils.unpackColor(lightPalette.get(key)).equals(fullSunlight)) {
+            subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        }
         lightData.setValue(Utils.condenseLocalPos(pos), key);
     }
     public int getLightKey(int pos) {

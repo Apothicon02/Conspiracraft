@@ -5,6 +5,12 @@ public class LightBlockType extends BlockType {
     public byte g;
     public byte b;
 
+    public LightBlockType(boolean solid, boolean canBlockLight, boolean collidable, boolean fluidReplacable, boolean fluid, boolean obstructHeightmap, int red, int green, int blue) {
+        super(solid, canBlockLight, collidable, fluidReplacable, fluid, obstructHeightmap);
+        r = (byte) red;
+        g = (byte) green;
+        b = (byte) blue;
+    }
     public LightBlockType(boolean solid, boolean canBlockLight, boolean collidable, boolean fluidReplacable, boolean fluid, int red, int green, int blue) {
         super(solid, canBlockLight, collidable, fluidReplacable, fluid);
         r = (byte) red;

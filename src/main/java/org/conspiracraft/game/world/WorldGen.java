@@ -2,13 +2,17 @@ package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.world.trees.JungleTree;
+import org.conspiracraft.game.world.trees.OakTree;
 import org.conspiracraft.game.world.trees.canopies.BlobCanopy;
+import org.conspiracraft.game.world.trees.canopies.JungleCanopy;
 import org.conspiracraft.game.world.trees.trunks.StraightTrunk;
+import org.conspiracraft.game.world.trees.trunks.TwistingTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.engine.Utils.condenseLocalPos;
@@ -22,6 +26,11 @@ public class WorldGen {
     }
     public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+    }
+    public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
+        if (World.inBounds(x, y, z)) {
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+        }
     }
     public static Vector4i getLightWorldgen(int x, int y, int z) {
         return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getLight(condenseLocalPos(x & 15, y & 15, z & 15));
@@ -136,6 +145,8 @@ public class WorldGen {
                             float foliageNoise = (basePerlinNoise + 0.5f);
                             float exponentialFoliageNoise = foliageNoise * foliageNoise;
                             double northEastDist = distance(x, z, size, size)/size;
+                            double ogDist = distance(x, z, 0, 0)/size;
+                            double jungleness = (((Math.min(0.25f, exponentialFoliageNoise*2))-(ogDist > 0.75 ? (ogDist*2) : (ogDist/2))) * 0.015f);
                             double torchChance = Math.random();
                             if (torchChance > 0.99995d) {
                                 if (torchChance > 0.99997d) {
@@ -147,13 +158,30 @@ public class WorldGen {
                                 }
                             } else if (torchChance < ((exponentialFoliageNoise-(northEastDist > 0.75 ? (northEastDist*2) : (northEastDist/2))) * 0.015f)) { // oak tree
                                 int maxHeight = (int) (Math.random() * 4) + 8;
-                                List<Vector3i> canopies = StraightTrunk.generateTrunk(x, y, z, maxHeight, 16, 0);
-                                for (Vector3i canopyPos : canopies) {
-                                    BlobCanopy.generateCanopy(canopyPos.x, canopyPos.y, canopyPos.z, 17, 0, (int) (maxHeight + (torchChance * 100)));
+                                OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (torchChance * 100)), 16, 0, 17, 0);
+                            } else if (torchChance < jungleness) { // jungle tree
+                                JungleTree.generate(x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (torchChance+0.5f)), 20, 0, 21, 0, torchChance < 0.25f);
+                            } else if (torchChance < jungleness*5) {
+                                if (torchChance > jungleness*2) {
+                                    int maxHeight = (int) (Math.random() + 1);
+                                    OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                } else {
+                                    int maxHeight = (int) (Math.random() * 4) + 8;
+                                    OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (torchChance * 100))-2, 16, 0, 17, 0);
                                 }
-                            } else {
+                            } else if (getBlockWorldgen(x, y+1, z).x <= 1) { //only replace air and water
                                 double flowerChance = Math.random();
-                                setBlockWorldgen(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
+                                if (jungleness > 0.0f) {
+                                    setBlockWorldgen(x, y + 1, z, 21, 0);
+                                    setBlockWorldgen(x, y + 2, z, 21, (int)Math.abs(lavaNoise*5)+2);
+                                    int condensedPos = condensePos(x, z);
+                                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], y+1);
+                                    for (int extraY = y+1; extraY >= seaLevel; extraY--) {
+                                        setLightWorldgen(x, extraY, z, new Vector4i(0, 0, 0, 0));
+                                    }
+                                } else {
+                                    setBlockWorldgen(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
+                                }
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);

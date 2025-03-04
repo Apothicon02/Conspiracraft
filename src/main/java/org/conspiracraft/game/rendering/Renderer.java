@@ -199,7 +199,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 160; x++) {
+            for (int x = 0; x < 176; x++) {
                 for (int y = 0; y < 1088; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -447,8 +447,8 @@ public class Renderer {
             }
 
         } else {
-            long startTime = System.currentTimeMillis();
-            boolean wasEmpty = lightQueue.isEmpty();
+//            long startTime = System.currentTimeMillis();
+//            boolean wasEmpty = lightQueue.isEmpty();
             while (!lightQueue.isEmpty()) {
                 Vector3i lightData = lightQueue.getFirst();
                 lightQueue.removeFirst();
@@ -487,9 +487,9 @@ public class Renderer {
                     // Allocation failed - no space for it could be found. Handle this error!
                 }
             }
-            if (!wasEmpty) {
-                System.out.print(System.currentTimeMillis()-startTime + "ms \n");
-            }
+//            if (!wasEmpty) {
+//                System.out.print(System.currentTimeMillis()-startTime + "ms \n");
+//            }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
