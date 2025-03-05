@@ -76,10 +76,18 @@ public class Chunk {
         return subChunks.getData();
     }
     public void setBlockKey(Vector3i pos, int key) {
+        int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
+        if (neededBitsPerValue != blockData.bitsPerValue) {
+            BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
+            for (int i = 0; i < totalBlocks; i++) {
+                newData.setValue(i, blockData.getValue(i));
+            }
+            blockData = newData;
+        }
+        blockData.setValue(condenseLocalPos(pos), key);
         if (blockPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
         }
-        blockData.setValue(condenseLocalPos(pos), key);
     }
     public int getBlockKey(int pos) {
         return blockData.getValue(pos);
@@ -102,14 +110,6 @@ public class Chunk {
         }
         if (!wasInPalette) {
             blockPalette.addLast(block);
-            int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
-            if (neededBitsPerValue > blockData.bitsPerValue) {
-                BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
-                for (int i = 0; i < totalBlocks; i++) {
-                    newData.setValue(i, blockData.getValue(i));
-                }
-                blockData = newData;
-            }
             setBlockKey(pos, blockPalette.size()-1);
         }
         World.queueColumnUpdate(globalPos);
@@ -155,6 +155,14 @@ public class Chunk {
         return cornerData.getData();
     }
     public void setCornerKey(int pos, int key) {
+        int neededBitsPerValue = getNeededBitsPerValue(cornerPalette.size());
+        if (neededBitsPerValue != cornerData.bitsPerValue) {
+            BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
+            for (int i = 0; i < totalBlocks; i++) {
+                newData.setValue(i, cornerData.getValue(i));
+            }
+            cornerData = newData;
+        }
         cornerData.setValue(pos, key);
     }
     public int getCornerKey(int pos) {
@@ -177,14 +185,6 @@ public class Chunk {
         }
         if (!wasInPalette) {
             cornerPalette.addLast(corner);
-            int neededBitsPerValue = getNeededBitsPerValue(cornerPalette.size());
-            if (neededBitsPerValue > cornerData.bitsPerValue) {
-                BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
-                for (int i = 0; i < totalBlocks; i++) {
-                    newData.setValue(i, cornerData.getValue(i));
-                }
-                cornerData = newData;
-            }
             setCornerKey(pos, cornerPalette.size()-1);
         }
         World.queueColumnUpdate(globalPos);
@@ -231,10 +231,18 @@ public class Chunk {
     }
     public static Vector4i fullSunlight = new Vector4i(0, 0, 0, 20);
     public void setLightKey(Vector3i pos, int key) {
+        int neededBitsPerValue = getNeededBitsPerValue(lightPalette.size());
+        if (neededBitsPerValue != lightData.bitsPerValue) {
+            BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
+            for (int i = 0; i < totalBlocks; i++) {
+                newData.setValue(i, lightData.getValue(i));
+            }
+            lightData = newData;
+        }
+        lightData.setValue(Utils.condenseLocalPos(pos), key);
         if (!Utils.unpackColor(lightPalette.get(key)).equals(fullSunlight)) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
         }
-        lightData.setValue(Utils.condenseLocalPos(pos), key);
     }
     public int getLightKey(int pos) {
         return lightData.getValue(pos);
@@ -257,14 +265,6 @@ public class Chunk {
         }
         if (!wasInPalette) {
             lightPalette.addLast(light);
-            int neededBitsPerValue = getNeededBitsPerValue(lightPalette.size());
-            if (neededBitsPerValue > lightData.bitsPerValue) {
-                BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
-                for (int i = 0; i < totalBlocks; i++) {
-                    newData.setValue(i, lightData.getValue(i));
-                }
-                lightData = newData;
-            }
             setLightKey(pos, lightPalette.size()-1);
         }
         World.queueColumnUpdate(globalPos);

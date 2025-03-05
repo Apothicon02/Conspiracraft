@@ -610,7 +610,7 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
         ivec3 localPos = ivec3(realPos.x, realPos.y, realPos.z) & ivec3(15);
         int subChunkPos = ((((localPos.x >= halfChunkSize ? 1 : 0)*2)+(localPos.z >= halfChunkSize ? 1 : 0))*2)+(localPos.y >= halfChunkSize ? 1 : 0);
         bool checkBlocks = checkSubChunks ? (((subChunks >> (subChunkPos % 32)) & 1) > 0) : false;
-        if (cloud || checkBlocks) {
+        if ((cloud && cloudiness < 1.5f) || checkBlocks) {
             vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
             vec3 intersect = rayPos + rayDir*d;
@@ -653,7 +653,7 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
         float cloudSamp = cloudNoise(((vec2(rayMapChunkPos.x, rayMapChunkPos.z)*16) + (isAddedLayer ? 512 : 0)) + vec2(time*(2500.f+(timeOfDay*2500.f))));
         cloud = cloudsEnabled ? ((rayMapChunkPos.y == heightChunks-10 || isAddedLayer) && (cloudSamp > -0.25f && cloudSamp < 0.3f)) : false;
         bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
-        if (cloud || checkSubChunks) {
+        if ((cloud && cloudiness < 1.5f) || checkSubChunks) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
             vec3 intersect = rayPos + rayDir*d;
