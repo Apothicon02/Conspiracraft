@@ -48,7 +48,7 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-int size = 6976; //6976
+int size = 6976/4; //6976
 int height = 432;
 int chunkSize = 16;
 int halfChunkSize = chunkSize/2;
@@ -257,8 +257,11 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
     int intY = int(y);
     int intZ = int(z);
     ivec2 block = getBlock(intX, intY, intZ);
+    if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
+        return vec4(0, 0, 0, 0);
+    }
     vec4 light = intToColor(getLightData(intX, intY, intZ));
-    if (isBlockSolid(block) || block.x == 17 || block.x == 21) { //return pure darkness if block isnt transparent.
+    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
         bool[8] corners = getCorners(intX, intY, intZ);
         float localX = (x-intX);
         float localY = (y-intY);
@@ -301,7 +304,7 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
             }
         }
         if (!anyEmpty) {
-            return block.x == 17 || block.x == 21 ? (block.y == 0 ? light/1.5f : light) : vec4(0, 0, 0, 0);
+            return vec4(0, 0, 0, 0);
         }
     }
     return light;
@@ -520,10 +523,13 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
                 float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
                 float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
                 color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, distanceFogginess);
+                if ((blockInfo.x == 17 || blockInfo.x == 21) && color.a >= 1) {
+                    color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, noise(vec2(rayMapPos.x, rayMapPos.z)*10), 0)), 1);
+                }
                 lightPos = prevPos;
             }
             float lightNoise = max(0, noise((vec2(lightPos.x, lightPos.y)*64)+(float(time)*10000))+noise((vec2(lightPos.y, lightPos.z)*64)+(float(time)*10000))+noise((vec2(lightPos.z, lightPos.x)*64)+(float(time)*10000)));
-            float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)));
+            float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)) * ((blockInfo.x == 17 || blockInfo.x == 21) ? 2 : 1));
 
             //lighting start
             bool isDirectSunlight = false;

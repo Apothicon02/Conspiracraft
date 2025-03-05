@@ -147,9 +147,14 @@ public class Player {
             } else if (blockIn.x == 4 || blockIn.x == 5) { //grass
                 friction *= 0.9f;
                 modifiedSpeed *= 0.9f;
-            } else if (blockIn.x == 17) { //leaves
-                friction *= 0.5f;
-                modifiedSpeed *= 0.5f;
+            } else if (blockIn.x == 17 || blockIn.x == 21) { //leaves
+                if (blockIn.y == 0) {
+                    friction *= 0.5f;
+                    modifiedSpeed *= 0.5f;
+                } else {
+                    friction *= 0.9f;
+                    modifiedSpeed *= 0.9f;
+                }
             }
             friction = Math.min(0.99f, friction); //1-airFriction=maxFriction
             if (flying) {

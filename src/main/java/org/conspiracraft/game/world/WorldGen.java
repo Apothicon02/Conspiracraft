@@ -171,9 +171,19 @@ public class WorldGen {
                                 }
                             } else if (getBlockWorldgen(x, y+1, z).x <= 1) { //only replace air and water
                                 double flowerChance = Math.random();
-                                if (jungleness > 0.0f) {
+                                boolean isShaded = getLightWorldgen(x, y+1, z).w < 20;
+                                if (jungleness > 0.0f && isShaded) {
                                     setBlockWorldgen(x, y + 1, z, 21, 0);
-                                    setBlockWorldgen(x, y + 2, z, 21, (int)Math.abs(lavaNoise*5)+2);
+                                    if (getBlockWorldgen(x, y+2, z).x <= 1) { //only replace air and water
+                                        setBlockWorldgen(x, y + 2, z, 21, (int) Math.abs(lavaNoise * 5) + 2);
+                                    }
+                                    int condensedPos = condensePos(x, z);
+                                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], y+1);
+                                    for (int extraY = y+1; extraY >= seaLevel; extraY--) {
+                                        setLightWorldgen(x, extraY, z, new Vector4i(0, 0, 0, 0));
+                                    }
+                                } else if (isShaded) {
+                                    setBlockWorldgen(x, y + 1, z, 17, (int) Math.abs(lavaNoise * 6) + 1);
                                     int condensedPos = condensePos(x, z);
                                     heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], y+1);
                                     for (int extraY = y+1; extraY >= seaLevel; extraY--) {

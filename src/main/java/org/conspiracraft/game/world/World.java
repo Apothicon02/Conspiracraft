@@ -20,7 +20,7 @@ import static org.conspiracraft.game.world.WorldGen.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 6976; //6976
+    public static int size = 6976/4; //6976
     public static int halfSize = size/2;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
