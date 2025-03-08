@@ -36,6 +36,7 @@ public class World {
     public static boolean worldGenerated = false;
     public static boolean terrainGenerated = false;
     public static boolean surfaceGenerated = false;
+    public static boolean featuresGenerated = false;
     public static int currentChunk = -1;
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
@@ -55,6 +56,7 @@ public class World {
                 createdChunks = true;
                 terrainGenerated = true;
                 surfaceGenerated = true;
+                featuresGenerated = true;
                 worldGenerated = true;
                 Renderer.worldChanged = true;
             }
@@ -68,7 +70,7 @@ public class World {
                 }
                 currentChunk++;
                 if (!cleanPalettes) {
-                    if (terrainGenerated && surfaceGenerated) {
+                    if (terrainGenerated && surfaceGenerated && featuresGenerated) {
 //                        for (int x = 0; x < size; x++) {
 //                            for (int z = 0; z < size; z++) {
 //                                updateHeightmap(x, z, true);
@@ -84,11 +86,16 @@ public class World {
                                         for (int y = height - 1; y > 1; y--) {
                                             Vector2i block = getBlockWorldgen(x, y, z);
                                             Vector4i light = getLightWorldgen(x, y, z);
-                                            if (light.w() < 20 && !BlockTypes.blockTypeMap.get(block.x).blocksLight) {
-                                                //check if any neighbors are a higher brightness
-                                                if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
-                                                        getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
-                                                    LightHelper.updateLight(new Vector3i(x, y, z), block, light, true);
+                                            BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
+                                            if (blockType instanceof LightBlockType) {
+                                                LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+                                            } else {
+                                                if (light.w() < 20 && !blockType.blocksLight) {
+                                                    //check if any neighbors are a higher brightness
+                                                    if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
+                                                            getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
+                                                        LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+                                                    }
                                                 }
                                             }
                                         }
@@ -113,10 +120,17 @@ public class World {
                         }
                     } else if (!surfaceGenerated) {
                         if (currentChunk == sizeChunks) {
-                            surfaceHeightmap = null;
+                            currentChunk = -1;
                             surfaceGenerated = true;
                         } else {
                             generateSurface();
+                        }
+                    } else if (!featuresGenerated) {
+                        if (currentChunk == sizeChunks) {
+                            surfaceHeightmap = null;
+                            featuresGenerated = true;
+                        } else {
+                            generateFeatures();
                         }
                     }
                 } else {
@@ -468,21 +482,23 @@ public class World {
                 BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
                 if (!blocksLight(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || neighborBlockType instanceof LightBlockType) {
                     Vector4i neighborLight = World.getLight(neighborPos);
-                    if ((neighborLight.x() > 0 && neighborLight.x() < r) || (neighborLight.y() > 0 && neighborLight.y() < g) || (neighborLight.z() > 0 && neighborLight.z() < b) || (neighborLight.w() > 0 && neighborLight.w() < s)) {
-                        Vector3i chunkPos = new Vector3i(neighborPos.x>> 4, neighborPos.y>> 4, neighborPos.z>> 4);
-                        byte nr = 0;
-                        byte ng = 0;
-                        byte nb = 0;
-                        if (neighborBlockType instanceof LightBlockType lBlock) {
-                            nr = lBlock.r;
-                            ng = lBlock.g;
-                            nb = lBlock.b;
+                    if (neighborLight != null) {
+                        if ((neighborLight.x() > 0 && neighborLight.x() < r) || (neighborLight.y() > 0 && neighborLight.y() < g) || (neighborLight.z() > 0 && neighborLight.z() < b) || (neighborLight.w() > 0 && neighborLight.w() < s)) {
+                            Vector3i chunkPos = new Vector3i(neighborPos.x>> 4, neighborPos.y>> 4, neighborPos.z>> 4);
+                            byte nr = 0;
+                            byte ng = 0;
+                            byte nb = 0;
+                            if (neighborBlockType instanceof LightBlockType lBlock) {
+                                nr = lBlock.r;
+                                ng = lBlock.g;
+                                nb = lBlock.b;
+                            }
+                            chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(new Vector3i(neighborPos.x-(chunkPos.x*chunkSize), neighborPos.y-(chunkPos.y*chunkSize), neighborPos.z-(chunkPos.z*chunkSize)),
+                                    new Vector4i(nr, ng, nb, (byte) (neighborLight.w() == 20 ? 20 : 0)), pos);
+                            recalculateLight(neighborPos, neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
                         }
-                        chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(new Vector3i(neighborPos.x-(chunkPos.x*chunkSize), neighborPos.y-(chunkPos.y*chunkSize), neighborPos.z-(chunkPos.z*chunkSize)),
-                                new Vector4i(nr, ng, nb, (byte) (neighborLight.w() == 20 ? 20 : 0)), pos);
-                        recalculateLight(neighborPos, neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
+                        queueLightUpdatePriority(pos);
                     }
-                    queueLightUpdatePriority(pos);
                 }
             }
         }

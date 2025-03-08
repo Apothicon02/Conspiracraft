@@ -52,6 +52,7 @@ int size = 6976/4; //6976
 int height = 432;
 int chunkSize = 16;
 int halfChunkSize = chunkSize/2;
+int quarterChunkSize = chunkSize/4;
 int sizeChunks = size>> 4;
 int heightChunks = height>> 4;
 
@@ -348,8 +349,9 @@ bool wasEverTinted = false;
 bool cloud = false;
 float cloudiness = 1f;
 ivec3 normal = ivec3(0);
+float distanceFogginess = 0f;
 
-vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float distanceFogginess) {
+vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -518,11 +520,11 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
             float timeBonus = gradient(rayMapPos.y, 64, 372, 0.1, 0f);
             float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
             if (blockInfo.x != 0.f) {
-                float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
-                float linearDistFog = camDist*(1+fogNoise);
-                float distanceFogginess = clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f);
+                float fogNoise = (max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
+                float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
+                distanceFogginess = max(distanceFogginess, clamp(exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f), 0, 1f));
                 float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
-                color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, distanceFogginess);
+                color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor);
                 if ((blockInfo.x == 17 || blockInfo.x == 21) && color.a >= 1) {
                     color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, noise(vec2(rayMapPos.x, rayMapPos.z)*10), 0)), 1);
                 }
@@ -631,6 +633,32 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
             if (color.a >= 1) {
                 return color;
             }
+        } else {
+            bool isDirectSunlight = false;
+            if (inBounds) {
+                vec4 centerLighting = getLighting(realPos.x+quarterChunkSize, realPos.y+quarterChunkSize, realPos.z+quarterChunkSize, false, false, false);
+                if (centerLighting.a >= 20) {
+                    isDirectSunlight = true;
+                }
+                lighting = fromLinear(centerLighting);
+            } else {
+                isDirectSunlight = true;
+                lighting = fromLinear(vec4(0, 0, 0, 20));
+            }
+            lightFog = max(lightFog, lighting*vec4(1, 1, 1, isDirectSunlight ? 1f : 0.33f));
+
+            //snow start
+            if (snowing) {
+                if (toLinear(vec4(lighting.a)).a >= 20) {
+                    float samp = whiteNoise((vec2(mapPos.x, mapPos.z)*32)+((mapPos.y)+(float(time)*7500)));
+                    float samp2 = noise(vec2(mapPos.x, mapPos.z)*4);
+                    if (samp > 0 && samp < 0.002 && samp2 > 0.0f && samp2 < 0.05f) {
+                        isSnowFlake = true;
+                        return vec4(1);
+                    }
+                }
+            }
+            //snow end
         }
 
         mask = stepMask(sideDist);
@@ -747,9 +775,10 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64, 372, 0.1, 0f);
     float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
-    float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))));
-    float linearDistFog = (distance(camPos, prevPos)/renderDistance)*(1+fogNoise);
-    float distanceFogginess = (exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f));
+    float fogNoise = (max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
+    float fogDist = distance(camPos, prevPos)/renderDistance;
+    float linearDistFog = fogDist+(fogNoise/2)+((fogNoise/2)*fogDist);
+    distanceFogginess = max(distanceFogginess, exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f));
     if (isSky) {
         distanceFogginess = 1;
     }

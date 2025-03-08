@@ -3,13 +3,14 @@ package org.conspiracraft.game.world;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.engine.BitBuffer;
 import org.conspiracraft.engine.Utils;
+import org.conspiracraft.game.rendering.Renderer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import static org.conspiracraft.engine.Utils.condenseLocalPos;
 import static org.conspiracraft.engine.Utils.condenseSubchunkPos;
-import static org.conspiracraft.game.world.World.chunkSize;
+import static org.conspiracraft.game.world.World.*;
 
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
@@ -154,7 +155,7 @@ public class Chunk {
     public int[] getCornerData() {
         return cornerData.getData();
     }
-    public void setCornerKey(int pos, int key) {
+    public void setCornerKey(Vector3i pos, int key) {
         int neededBitsPerValue = getNeededBitsPerValue(cornerPalette.size());
         if (neededBitsPerValue != cornerData.bitsPerValue) {
             BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
@@ -163,7 +164,10 @@ public class Chunk {
             }
             cornerData = newData;
         }
-        cornerData.setValue(pos, key);
+        cornerData.setValue(condenseLocalPos(pos), key);
+        if (cornerPalette.get(key) != 0) {
+            subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        }
     }
     public int getCornerKey(int pos) {
         return cornerData.getValue(pos);
@@ -172,7 +176,7 @@ public class Chunk {
         int index = getCornerKey(pos);
         return cornerPalette.get(index);
     }
-    public void setCorner(int pos, int corner, Vector3i globalPos) {
+    public void setCorner(Vector3i pos, int corner, Vector3i globalPos) {
         boolean wasInPalette = false;
         int key = -1;
         for (int paletteEntry : cornerPalette) {

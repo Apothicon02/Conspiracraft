@@ -28,6 +28,6 @@
 - F4: Toggle shadows (very demanding) 
 - F3 + W: Toggle snow 
 - F3 + C: Toggle clouds
-- F3 + T: Reloads GPU data (may not work)
+- F3 + T: Reloads GPU data
 - F3 + Up: Increase render distance
 - F3 + Down: Decrease render distance
