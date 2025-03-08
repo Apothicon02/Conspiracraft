@@ -2,7 +2,7 @@
     "rdocCaptureSettings": 1,
     "settings": {
         "autoStart": false,
-        "commandLine": "-jar C:\\Users\\Tyler\\Documents\\Github\\Conspiracraft\\build\\libs\\Conspiracraft-0.1-SNAPSHOT-standalone.jar",
+        "commandLine": "-jar C:\\Users\\Tyler\\Documents\\Github\\Conspiracraft\\build\\libs\\Conspiracraft-0.2-SNAPSHOT-standalone.jar",
         "environment": [
         ],
         "executable": "C:\\Program Files\\Java\\jdk-21\\bin\\java.exe",

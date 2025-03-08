@@ -9,17 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/renderdoc/renderdoc.cap" beforeDir="false" afterPath="$PROJECT_DIR$/renderdoc/renderdoc.cap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/Canopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/Canopy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -148,7 +145,7 @@
       <recent name="org.conspiracraft.game.world" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run">
+  <component name="RunManager" selected="Gradle.build">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -204,14 +201,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00106" summary="- Re-added most effects. &#10;- Re-added block placing &amp; breaking.">
-      <option name="closed" value="true" />
-      <created>1737673092547</created>
-      <option name="number" value="00106" />
-      <option name="presentableId" value="LOCAL-00106" />
-      <option name="project" value="LOCAL" />
-      <updated>1737673092547</updated>
     </task>
     <task id="LOCAL-00107" summary="- So much stuff.">
       <option name="closed" value="true" />
@@ -597,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741198852814</updated>
     </task>
-    <option name="localTasksCounter" value="155" />
+    <task id="LOCAL-00155" summary="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme.">
+      <option name="closed" value="true" />
+      <created>1741400774106</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1741400774106</updated>
+    </task>
+    <option name="localTasksCounter" value="156" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -613,7 +610,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Drastically improved movement.&#10;- Added movement physics for moving in water. &#10;- Improved sounds. &#10;- Pressing F4 now toggles shadows. &#10;- Improved AO." />
     <MESSAGE value="- Fixed crash with light propogation. &#10;- Sunlight is now immune to normal-based brightness. &#10;- Fixed blocklight fog not existing. &#10;- Block lighting is now non-linear." />
     <MESSAGE value="- Strengthened gravity. &#10;- Added bouncing." />
     <MESSAGE value="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures." />
@@ -638,7 +634,8 @@
     <MESSAGE value="- Added jungle biome.  &#10;- Added jungle logs. &#10;- Added jungle leaves. &#10;- Fixed subchunks not accounting for light. &#10;- Disabled debug prints." />
     <MESSAGE value="- Rays now cancel if cloudiness reaches max value. &#10;- Palette compression can now revert bitPerValue increases." />
     <MESSAGE value="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles." />
+    <MESSAGE value="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

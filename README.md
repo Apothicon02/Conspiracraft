@@ -1,11 +1,11 @@
 # Conspiracraft
 
-![](https://preview.redd.it/bwlzxfx6rbme1.png?width=1080&crop=smart&auto=webp&s=8fd393552c0074f7f520cba822585deaaa2e41bd)
+![](https://media.discordapp.net/attachments/1197642849844482209/1348013759758860378/image.png?ex=67cdeb25&is=67cc99a5&hm=ed6ddb81afc6df0a62251464d6c50bcc27c6496fb040f8d3f23f7030d724df09&=&format=webp&quality=lossless&width=1545&height=813)
 
 # Getting Started
 - Do not run the jar directly. 
 - Open a cmd prompt in the folder of the jar. 
-- Paste this without the quotes: "java -jar Conspiracraft-0.1-SNAPSHOT-standalone.jar"
+- Paste this without the quotes: "java -jar Conspiracraft-0.2-SNAPSHOT-standalone.jar"
 - Hit enter. 
 - Wait several minutes for the world to generate. 
 

@@ -3,6 +3,7 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.game.Noise;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.world.shapes.Blob;
 import org.conspiracraft.game.world.trees.JungleTree;
 import org.conspiracraft.game.world.trees.OakTree;
 import org.joml.Vector2i;
@@ -150,7 +151,7 @@ public class WorldGen {
 //                                        queueLightUpdate(new Vector3i(x, newY, z));
 //                                    }
                                 } else {
-                                    setBlockWorldgen(x, newY, z, newY >= minNeighborY ? 8 : 10, 0);
+                                    setBlockWorldgen(x, newY, z, 10, 0);
                                 }
                             }
                         }
@@ -175,37 +176,63 @@ public class WorldGen {
                         float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
                         float foliageNoise = (basePerlinNoise + 0.5f);
                         float exponentialFoliageNoise = foliageNoise * foliageNoise;
-                        double northEastDist = distance(x, z, size, size) / size;
+                        double southWestDist = distance(x, z, 0, 0) / size;
                         double centDist = distance(x, z, size/2, size/2) / size;
-                        double jungleness = (((Math.min(0.4f, exponentialFoliageNoise * 2)+0.1f) - (centDist > 0.75 ? (centDist * 2) : (centDist / 2))) * 0.015f);
-                        double torchChance = Math.random();
-                        if (torchChance > 0.99995d) {
-                            if (torchChance > 0.99997d) {
+                        double forestness = (Math.max(0.34, (1.5f-southWestDist)*0.34f)-0.4)/3;
+                        double jungleness = Math.min(0.03f, Math.max(0.7, (1.5f-centDist)*0.7f)-0.8)/9;
+                        double plainness = 0.01d-Math.max(0, Math.max(forestness, jungleness));
+                        double randomNumber = Math.random();
+                        boolean setAnything = false;
+                        if (randomNumber > 0.99995d) {
+                            if (randomNumber > 0.99997d) {
                                 setBlockWorldgen(x, y, z, 7, 0);
                                 setBlockWorldgen(x, y + 1, z, 7, 0);
                                 setBlockWorldgen(x, y + 2, z, 7, 0);
                             } else {
                                 setBlockWorldgen(x, y + 1, z, 14, 0);
                             }
-//                            if (doLight && (!quarterWorld || (x < (size/2)-20 && y < (size/2)-20))) {
-//                                queueLightUpdate(new Vector3i(x, y + 1, z));
-//                            }
-                        } else if (blockOn.x == 2 && torchChance < ((exponentialFoliageNoise - (northEastDist > 0.75 ? (northEastDist * 2) : (northEastDist / 2))) * 0.015f)) { // oak tree
-                            int maxHeight = (int) (Math.random() * 4) + 8;
-                            OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (torchChance * 100)), 16, 0, 17, 0);
-                        } else if (blockOn.x == 2 && torchChance < jungleness) { // jungle tree
-                            JungleTree.generate(x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (torchChance + 0.5f)), 20, 0, 21, 0, torchChance < 0.25f);
-                        } else if (torchChance < jungleness * 5) {
-                            if ((blockOn.x == 2 || blockOn.x == 3) && torchChance > jungleness * 2) {
-                                int maxHeight = (int) (Math.random() + 1);
-                                OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
-                            } else if (blockOn.x == 2) {
+                            setAnything = true;
+                        } else if (blockOn.x == 2 || blockOn.x == 3) {
+                             if (blockOn.x == 2 && randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) { //jungle
+                                JungleTree.generate(x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
+                                setAnything = true;
+                            } else if (randomNumber < jungleness*0.2) {
+                                if (randomNumber > jungleness*0.05) {
+                                    int maxHeight = (int) (Math.random() + 1);
+                                    OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                    setAnything = true;
+                                } else if (blockOn.x == 2) {
+                                    int maxHeight = (int) (Math.random() * 4) + 8;
+                                    OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)) - 2, 16, 0, 17, 0);
+                                    setAnything = true;
+                                }
+                            } else if (blockOn.x == 2  && randomNumber < forestness*exponentialFoliageNoise) { //forest
                                 int maxHeight = (int) (Math.random() * 4) + 8;
-                                OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (torchChance * 100)) - 2, 16, 0, 17, 0);
+                                OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                                setAnything = true;
+                            } else if (blockOn.x == 2 && randomNumber < forestness/2) {
+                                 int maxHeight = (int) (Math.random() + 1);
+                                 OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                 setAnything = true;
+                             } else if (blockOn.x == 2 && randomNumber*20 < plainness) { //plains
+                                 int maxHeight = (int) (Math.random() + 1);
+                                 OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                 setAnything = true;
+                             } else if (blockOn.x == 2 && randomNumber*18 < plainness) {
+                                 int maxHeight = (int) (Math.random() * 4) + 8;
+                                 OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                                 setAnything = true;
+                             }
+                        }
+                        if (!setAnything) {
+                            if (getBlockWorldgen(x, y + 1, z).x <= 1) { //only replace air and water
+                                if (blockOn.x == 2) {
+                                    double flowerChance = Math.random();
+                                    setBlockWorldgenNoReplace(x, y + 1, z, 4 + (flowerChance > 0.95f ? (flowerChance > 0.97f ? 14 : 1) : 0), (int) (Math.random() * 3));
+                                } else if (blockOn.x == 10 && randomNumber < 0.08f) {
+                                    Blob.generate(x, y, z, 8, 0, (int) (2 + ((Math.random() + 1)*3)));
+                                }
                             }
-                        } else if (blockOn.x == 2 && getBlockWorldgen(x, y + 1, z).x <= 1) { //only replace air and water
-                            double flowerChance = Math.random();
-                            setBlockWorldgenNoReplace(x, y + 1, z, 4 + (flowerChance > 0.98f ? (flowerChance > 0.99f ? 14 : 1) : 0), (int) (Math.random() * 3));
                         }
                     }
                 }
