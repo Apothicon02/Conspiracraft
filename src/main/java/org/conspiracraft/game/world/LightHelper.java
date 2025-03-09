@@ -47,7 +47,7 @@ public class LightHelper {
                 Vector4i nLight = getLight(neighborPos);
                 if (nLight != null) {
                     if (isDarker(r, g, b, s, nLight)) {
-                        if (stack < 1000000) {
+                        if (stack < 10000) {
                             updateLight(neighborPos, World.getBlock(neighborPos), nLight, stack);
                         }
                     }

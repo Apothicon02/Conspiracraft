@@ -3,7 +3,6 @@ package org.conspiracraft.game.world;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.engine.BitBuffer;
 import org.conspiracraft.engine.Utils;
-import org.conspiracraft.game.rendering.Renderer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;

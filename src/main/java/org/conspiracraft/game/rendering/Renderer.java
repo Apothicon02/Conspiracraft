@@ -1,7 +1,7 @@
 package org.conspiracraft.game.rendering;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.Chunk;
@@ -101,7 +101,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.COHERERENT_NOISE));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 2048, 2048, 0, GL_RED, GL_UNSIGNED_BYTE, Utils.imageToGrayscaleBuffer(Noises.COHERERENT_NOISE.image));
 
         whiteNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
@@ -109,7 +109,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.WHITE_NOISE));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0, GL_RED, GL_UNSIGNED_BYTE, Utils.imageToGrayscaleBuffer(Noises.WHITE_NOISE.image));
 
         cloudNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
@@ -117,7 +117,9 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(Noise.CLOUD_NOISE));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 2048, 2048, 0, GL_RED, GL_UNSIGNED_BYTE, Utils.imageToGrayscaleBuffer(Noises.CLOUD_NOISE.image));
+
+        Noises.clearImages();
 
         atlasSSBOId = glGenBuffers();
         chunkBlocksSSBOId = glGenBuffers();

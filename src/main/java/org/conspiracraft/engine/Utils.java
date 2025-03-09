@@ -10,6 +10,7 @@ import org.lwjgl.BufferUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
@@ -75,12 +76,24 @@ public class Utils {
 
     public static ByteBuffer imageToBuffer(BufferedImage image) {
         int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(pixels.length * 4);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(pixels.length * 4);
         for (int pixel : pixels) {
             buffer.put((byte) ((pixel >> 16) & 0xFF));
             buffer.put((byte) ((pixel >> 8) & 0xFF));
             buffer.put((byte) (pixel & 0xFF));
             buffer.put((byte) ((pixel >> 24) & 0xFF));
+        }
+        buffer.flip();
+        return buffer;
+    }
+
+    public static ByteBuffer imageToGrayscaleBuffer(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(pixels.length);
+        for (int pixel : pixels) {
+            buffer.put((byte) (pixel & 0xff));
         }
         buffer.flip();
         return buffer;

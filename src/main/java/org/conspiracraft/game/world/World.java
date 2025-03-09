@@ -47,6 +47,7 @@ public class World {
     public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
     public static boolean[] sliceUpdates = new boolean[sizeChunks];
+    public static long stageTime = 0;
 
     public static void run() throws IOException {
         if (Files.exists(worldPath)) {
@@ -79,36 +80,25 @@ public class World {
 //                            System.out.print("Heightmap is " + (progress + "% generated. \n"));
 //                        }
                         if (doLight) {
-                            for (int x = 1; x < size - 1; x++) {
-        //                            long time = System.currentTimeMillis();
-                                for (int z = 1; z < size - 1; z++) {
-                                    if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                                        for (int y = height - 1; y > 1; y--) {
-                                            Vector2i block = getBlockWorldgen(x, y, z);
-                                            Vector4i light = getLightWorldgen(x, y, z);
-                                            BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
-                                            if (blockType instanceof LightBlockType) {
-                                                LightHelper.updateLight(new Vector3i(x, y, z), block, light);
-                                            } else {
-                                                if (light.w() < 20 && !blockType.blocksLight) {
-                                                    //check if any neighbors are a higher brightness
-                                                    if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
-                                                            getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
-                                                        LightHelper.updateLight(new Vector3i(x, y, z), block, light);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-        //                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
-        //                            System.out.print("Sunlight is " + (progress + "% filled. \nSlice took " + (System.currentTimeMillis()-time) + "ms to fill. \n"));
+                            if (stageTime == 0) {
+                                stageTime = System.currentTimeMillis() / 1000;
+                            }
+                            if (currentChunk == sizeChunks) {
+                                System.out.print("Light filling took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                                stageTime = 0;
+                                cleanPalettes = true;
+                                currentChunk = -1;
+                            } else {
+                                fillLight();
                             }
                         }
-                        cleanPalettes = true;
-                        currentChunk = -1;
                     } else if (!terrainGenerated) {
+                        if (stageTime == 0) {
+                            stageTime = System.currentTimeMillis()/1000;
+                        }
                         if (currentChunk == sizeChunks) {
+                            System.out.print("Terrain generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            stageTime = 0;
                             int i = 0;
                             for (short y : heightmap) {
                                 surfaceHeightmap[i++] = y;
@@ -119,14 +109,25 @@ public class World {
                             generateTerrain();
                         }
                     } else if (!surfaceGenerated) {
+                        if (stageTime == 0) {
+                            stageTime = System.currentTimeMillis()/1000;
+                        }
                         if (currentChunk == sizeChunks) {
+                            System.out.print("Surface generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            stageTime = 0;
                             currentChunk = -1;
                             surfaceGenerated = true;
                         } else {
                             generateSurface();
                         }
                     } else if (!featuresGenerated) {
+                        if (stageTime == 0) {
+                            stageTime = System.currentTimeMillis()/1000;
+                        }
                         if (currentChunk == sizeChunks) {
+                            System.out.print("Feature generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            stageTime = 0;
+                            currentChunk = -1;
                             surfaceHeightmap = null;
                             featuresGenerated = true;
                         } else {

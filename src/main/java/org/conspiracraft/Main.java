@@ -1,6 +1,6 @@
 package org.conspiracraft;
 
-import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.rendering.Renderer;
@@ -36,7 +36,7 @@ public class Main {
     }
 
     public void init(Window window) throws Exception {
-        Noise.init();
+        Noises.init();
         GL.createCapabilities();
         AudioController.init();
         AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));

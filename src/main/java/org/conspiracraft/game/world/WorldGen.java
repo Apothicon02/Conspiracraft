@@ -1,7 +1,9 @@
 package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.ConspiracraftMath;
-import org.conspiracraft.game.Noise;
+import org.conspiracraft.game.blocks.types.BlockType;
+import org.conspiracraft.game.blocks.types.LightBlockType;
+import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.shapes.Blob;
 import org.conspiracraft.game.world.trees.JungleTree;
@@ -50,12 +52,12 @@ public class WorldGen {
         for (int x = startX; x < startX+chunkSize; x++) {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    float baseCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(x - (((int) (x / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), z - (((int) (z / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
-                    float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
-                    float noodleNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((x - (((int) (x / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (z - (((int) (z / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
+                    float baseCellularNoise = Noises.CELLULAR_NOISE.sample(x, z);
+                    float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
+                    float noodleNoise = Noises.NOODLE_NOISE.sample(x, z);
                     int miniX = x*8;
                     int miniZ = z*8;
-                    float miniCellularNoise = (Noise.blue(Noise.CELLULAR_NOISE.getRGB(miniX - (((int) (miniX / Noise.CELLULAR_NOISE.getWidth())) * Noise.CELLULAR_NOISE.getWidth()), miniZ - (((int) (miniZ / Noise.CELLULAR_NOISE.getHeight())) * Noise.CELLULAR_NOISE.getHeight()))) / 128) - 1;
+                    float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
 
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
@@ -86,7 +88,7 @@ public class WorldGen {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
                     int lavaX = x*3;
                     int lavaZ = z*3;
-                    float lavaNoise = (Noise.blue(Noise.NOODLE_NOISE.getRGB((lavaX - (((int) (lavaX / Noise.NOODLE_NOISE.getWidth())) * Noise.NOODLE_NOISE.getWidth())), (lavaZ - (((int) (lavaZ / Noise.NOODLE_NOISE.getHeight())) * Noise.NOODLE_NOISE.getHeight())))) / 128) - 1;
+                    float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
                     int y = surfaceHeightmap[condensePos(x, z)];
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
@@ -95,17 +97,11 @@ public class WorldGen {
                         heightmap[condensePos(x, z)] = (short) lavaLevel;
                         for (int newY = lavaLevel; newY > 0; newY--) {
                             setBlockWorldgen(x, newY, z, 19, 0);
-//                            if (doLight && (!quarterWorld || (x < (size/2)-20 && y < (size/2)-20))) {
-//                                queueLightUpdate(new Vector3i(x, newY, z));
-//                            }
                         }
                     } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
                         heightmap[condensePos(x, z)] = (short) (lavaLevel-100);
                         for (int newY = lavaLevel-100; newY > 0; newY--) {
                             setBlockWorldgen(x, newY, z, 19, 0);
-//                            if (doLight && (!quarterWorld || (x < (size/2)-20 && y < (size/2)-20))) {
-//                                queueLightUpdate(new Vector3i(x, newY, z));
-//                            }
                         }
                     } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
@@ -147,9 +143,6 @@ public class WorldGen {
                                 if (newY <= volcanoElevation) {
                                     int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y-lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
                                     setBlockWorldgen(x, newY, z, blockTypeId, 0);
-//                                    if (doLight && blockTypeId == 19 && (!quarterWorld || (x < (size/2)-20 && y < (size/2)-20))) {
-//                                        queueLightUpdate(new Vector3i(x, newY, z));
-//                                    }
                                 } else {
                                     setBlockWorldgen(x, newY, z, 10, 0);
                                 }
@@ -173,7 +166,7 @@ public class WorldGen {
                     int y = surfaceHeightmap[condensePos(x, z)];
                     if (y >= seaLevel) {
                         Vector2i blockOn = getBlockWorldgen(x, y, z);
-                        float basePerlinNoise = (Noise.blue(Noise.COHERERENT_NOISE.getRGB(x - (((int) (x / Noise.COHERERENT_NOISE.getWidth())) * Noise.COHERERENT_NOISE.getWidth()), z - (((int) (z / Noise.COHERERENT_NOISE.getHeight())) * Noise.COHERERENT_NOISE.getHeight()))) / 128) - 1;
+                        float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                         float foliageNoise = (basePerlinNoise + 0.5f);
                         float exponentialFoliageNoise = foliageNoise * foliageNoise;
                         double southWestDist = distance(x, z, 0, 0) / size;
@@ -241,5 +234,34 @@ public class WorldGen {
 //        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of features. \n");
 //        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
 //        System.out.print("World is " + (progress + "% generated. \n"));
+    }
+
+    public static void fillLight() {
+        int startX = currentChunk*chunkSize;
+        for (int x = Math.max(1, startX); x < Math.min(size - 1, startX+chunkSize); x++) {
+//            long time = System.currentTimeMillis();
+            for (int z = 1; z < size - 1; z++) {
+                if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                    for (int y = height - 1; y > 1; y--) {
+                        Vector2i block = getBlockWorldgen(x, y, z);
+                        Vector4i light = getLightWorldgen(x, y, z);
+                        BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
+                        if (blockType instanceof LightBlockType) {
+                            LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+                        } else {
+                            if (light.w() < 20 && !blockType.blocksLight) {
+                                //check if any neighbors are a higher brightness
+                                if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
+                                        getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {
+                                    LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+//            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
+//            System.out.print("Sunlight is " + (progress + "% filled. \nSlice took " + (System.currentTimeMillis()-time) + "ms to fill. \n"));
+        }
     }
 }
