@@ -62,42 +62,36 @@ public class World {
                 Renderer.worldChanged = true;
             }
         } else {
-            if (!worldGenerated) {
-                if (!createdChunks) {
-                    createdChunks = true;
-                    for (int i = 0; i < chunks.length; i++) {
-                        chunks[i] = new Chunk();
-                    }
+            if (!worldGenerated && !createdChunks) {
+                createdChunks = true;
+                for (int i = 0; i < chunks.length; i++) {
+                    chunks[i] = new Chunk();
                 }
-                currentChunk++;
-                if (!cleanPalettes) {
-                    if (terrainGenerated && surfaceGenerated && featuresGenerated) {
-//                        for (int x = 0; x < size; x++) {
-//                            for (int z = 0; z < size; z++) {
-//                                updateHeightmap(x, z, true);
-//                            }
-//                            String progress = String.valueOf(((float) x / size)*100).substring(0, 3);
-//                            System.out.print("Heightmap is " + (progress + "% generated. \n"));
-//                        }
-                        if (doLight) {
-                            if (stageTime == 0) {
-                                stageTime = System.currentTimeMillis() / 1000;
-                            }
-                            if (currentChunk == sizeChunks) {
-                                System.out.print("Light filling took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
-                                stageTime = 0;
-                                cleanPalettes = true;
-                                currentChunk = -1;
-                            } else {
-                                fillLight();
-                            }
-                        }
-                    } else if (!terrainGenerated) {
+            }
+            currentChunk++;
+            if (!cleanPalettes) {
+                if (terrainGenerated && surfaceGenerated && featuresGenerated) {
+                    if (doLight) {
                         if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis()/1000;
+                            stageTime = System.currentTimeMillis() / 1000;
                         }
                         if (currentChunk == sizeChunks) {
-                            System.out.print("Terrain generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            System.out.print("Light filling took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            stageTime = 0;
+                            cleanPalettes = true;
+                            currentChunk = -1;
+                            Renderer.worldChanged = true;
+                        } else {
+                            fillLight();
+                        }
+                    }
+                } else if (!worldGenerated) {
+                    if (!terrainGenerated) {
+                        if (stageTime == 0) {
+                            stageTime = System.currentTimeMillis() / 1000;
+                        }
+                        if (currentChunk == sizeChunks) {
+                            System.out.print("Terrain generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             int i = 0;
                             for (short y : heightmap) {
@@ -110,42 +104,40 @@ public class World {
                         }
                     } else if (!surfaceGenerated) {
                         if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis()/1000;
+                            stageTime = System.currentTimeMillis() / 1000;
                         }
                         if (currentChunk == sizeChunks) {
-                            System.out.print("Surface generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            System.out.print("Surface generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             currentChunk = -1;
                             surfaceGenerated = true;
+                            Renderer.worldChanged = true;
                         } else {
                             generateSurface();
                         }
                     } else if (!featuresGenerated) {
                         if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis()/1000;
+                            stageTime = System.currentTimeMillis() / 1000;
                         }
                         if (currentChunk == sizeChunks) {
-                            System.out.print("Feature generation took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             currentChunk = -1;
                             surfaceHeightmap = null;
                             featuresGenerated = true;
+                            worldGenerated = true;
+                            Renderer.worldChanged = true;
                         } else {
                             generateFeatures();
                         }
                     }
-                } else {
-                    if (currentChunk == sizeChunks) {
-                        worldGenerated = true;
-                        Renderer.worldChanged = true;
-                    } else {
+                }
+            } else {
 //                    for (int z = 0; z < sizeChunks; z++) {
 //                        for (int y = 0; y < heightChunks; y++) {
 //                            chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
 //                        }
 //                    }
-                    }
-                }
             }
         }
 //        if (cleaningQueue.size() > 3) {

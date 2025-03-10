@@ -265,7 +265,7 @@ public class Main {
         Renderer.timeOfDay = time;
     }
 
-    public static boolean postWorldgenInitialization = false;
+    public static boolean renderingEnabled = false;
     public static double interpolationTime = 0;
     public static double timePassed = 0;
     public static double tickTime = 50;
@@ -472,20 +472,18 @@ public class Main {
 //            }
             glfwSetWindowShouldClose(window.getWindowHandle(), true); // We will detect this in the rendering loop
         } else {
-            World.run();
-            if (World.worldGenerated) {
-                if (!postWorldgenInitialization) {
-                    postWorldgenInitialization = true;
-                    Renderer.init(window);
-                }
-                updateTime(diffTimeMillis, 1);
-                while (timePassed >= tickTime) {
-                    timePassed -= tickTime;
-                    player.tick();
-                }
-                interpolationTime = timePassed/tickTime;
-                timePassed += diffTimeMillis;
+            if (!renderingEnabled) {
+                renderingEnabled = true;
+                Renderer.init(window);
             }
+            World.run();
+            updateTime(diffTimeMillis, 1);
+            while (timePassed >= tickTime) {
+                timePassed -= tickTime;
+                player.tick();
+            }
+            interpolationTime = timePassed/tickTime;
+            timePassed += diffTimeMillis;
         }
     }
 
