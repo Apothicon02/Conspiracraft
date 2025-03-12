@@ -112,7 +112,6 @@ public class Chunk {
             blockPalette.addLast(block);
             setBlockKey(pos, blockPalette.size()-1);
         }
-        World.queueColumnUpdate(globalPos);
     }
     //Blocks end
 
@@ -190,7 +189,6 @@ public class Chunk {
             cornerPalette.addLast(corner);
             setCornerKey(pos, cornerPalette.size()-1);
         }
-        World.queueColumnUpdate(globalPos);
     }
     //Corners end
 
@@ -270,7 +268,6 @@ public class Chunk {
             lightPalette.addLast(light);
             setLightKey(pos, lightPalette.size()-1);
         }
-        World.queueColumnUpdate(globalPos);
     }
     public void setLight(Vector3i pos, int r, int g, int b, int s, Vector3i globalPos) {
         setLight(pos, new Vector4i(r, g, b, s), globalPos);

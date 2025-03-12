@@ -46,7 +46,6 @@ public class World {
     public static ArrayList<Vector4i> blockQueue = new ArrayList<>();
     public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
-    public static boolean[] sliceUpdates = new boolean[sizeChunks];
     public static long stageTime = 0;
 
     public static void run() throws IOException {
@@ -224,10 +223,6 @@ public class World {
                 }
             }
         }
-    }
-
-    public static void queueColumnUpdate(Vector3i pos) {
-        sliceUpdates[pos.x/16] = true;
     }
 
     public static Vector2i getBlock(Vector3i blockPos) {

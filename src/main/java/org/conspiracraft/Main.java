@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
+import static org.conspiracraft.game.Player.selectedBlock;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
@@ -79,6 +80,9 @@ public class Main {
             player.setCameraMatrix(camMatrix);
             player.setCameraPitch(pitch);
             player.flying = data[i++] != 0;
+            selectedBlock.x = data[i++];
+            selectedBlock.y = data[i++];
+            selectedBlock.z = data[i++];
         } else {
             player = new Player(new Vector3f(512, 256, 512));
         }
@@ -112,7 +116,6 @@ public class Main {
     boolean isClosing = false;
 
     long lastBlockBroken = 0L;
-    Vector2i selectedBlock = new Vector2i(15, 0);
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
@@ -146,29 +149,36 @@ public class Main {
                         Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, mmbDown);
                         if (pos != null) {
                             if (mmbDown) {
-                                selectedBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                                selectedBlock = new Vector3i(World.getBlock((int) pos.x, (int) pos.y, (int) pos.z), 16);
                             } else if (BlockTypes.blockTypeMap.get(selectedBlock.x()) != null) {
                                 lastBlockBroken = timeMillis;
                                 int blockTypeId = selectedBlock.x();
                                 int blockSubtypeId = selectedBlock.y();
+                                int amount = selectedBlock.z();
                                 int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
                                 int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
                                 if (lmbDown) {
                                     cornerData |= (1 << (cornerIndex - 1));
-                                    World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     if (cornerData == -2147483521 || !isShiftDown) {
-                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                        blockTypeId = 0;
-                                        blockSubtypeId = 0;
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                        Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
+                                        if (amount == 0 || (blockTypeId == blockBreaking.x && amount < 16)) {
+                                            selectedBlock = new Vector3i(blockBreaking, amount+1);
+                                            World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
+                                            blockTypeId = 0;
+                                            blockSubtypeId = 0;
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                        }
+                                    } else {
+                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     }
                                 }
                                 if (rmbDown) {
                                     if (cornerData != 0) {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
-                                    } else {
+                                    } else if (amount > 0) {
                                         World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                        selectedBlock.z--;
                                     }
                                 }
                             }
@@ -188,13 +198,13 @@ public class Main {
                         Renderer.cloudsEnabled = !Renderer.cloudsEnabled;
                     }
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        selectedBlock.add(new Vector2i(0, isShiftDown ? 100 : 1));
+                        selectedBlock.add(new Vector3i(0, isShiftDown ? 100 : 1, selectedBlock.z()));
                     } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
                         int newSubId = selectedBlock.y() - (isShiftDown ? 100 : 1);
                         if (newSubId < 0) {
                             newSubId = 0;
                         }
-                        selectedBlock = new Vector2i(selectedBlock.x, newSubId);
+                        selectedBlock = new Vector3i(selectedBlock.x, newSubId, selectedBlock.z());
                     }
                     if (wasWDown && !window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
                         Renderer.snowing = !Renderer.snowing;
@@ -218,13 +228,13 @@ public class Main {
                         if (newId >= BlockTypes.blockTypeMap.size()) {
                             newId = 0;
                         }
-                        selectedBlock = new Vector2i(newId, selectedBlock.y);
+                        selectedBlock = new Vector3i(newId, selectedBlock.y, selectedBlock.z());
                     } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
                         int newId = selectedBlock.x() - 1;
                         if (newId < 0) {
                             newId = BlockTypes.blockTypeMap.size() - 1;
                         }
-                        selectedBlock = new Vector2i(newId, selectedBlock.y);
+                        selectedBlock = new Vector3i(newId, selectedBlock.y, selectedBlock.z());
                     }
                     if (wasXDown && !window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS)) {
                         player.flying = !player.flying;

@@ -25,6 +25,7 @@ import java.nio.LongBuffer;
 import java.util.LinkedList;
 
 import static org.conspiracraft.engine.Utils.*;
+import static org.conspiracraft.game.Player.selectedBlock;
 import static org.conspiracraft.game.world.World.*;
 import static org.lwjgl.opengl.GL43C.*;
 import static org.lwjgl.util.vma.Vma.*;
@@ -57,6 +58,7 @@ public class Renderer {
     public static int snowingUniform;
     public static int sunUniform;
     public static int cloudsEnabledUniform;
+    public static int handUniform;
 
     public static int renderDistanceMul = 8; //4
     public static float timeOfDay = 0.5f;
@@ -140,6 +142,7 @@ public class Renderer {
         snowingUniform = glGetUniformLocation(scene.programId, "snowing");
         sunUniform = glGetUniformLocation(scene.programId, "sun");
         cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
+        handUniform = glGetUniformLocation(scene.programId, "hand");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(Integer.MAX_VALUE);
@@ -186,6 +189,7 @@ public class Renderer {
         sunPos = new Vector3f(sunPos.x+halfSize, height, sunPos.z+halfSize);
         glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
         glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
+        glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
