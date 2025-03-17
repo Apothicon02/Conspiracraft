@@ -31,3 +31,6 @@
 - F3 + T: Reloads GPU data
 - F3 + Up: Increase render distance
 - F3 + Down: Decrease render distance
+
+# Credits 
+Sound effects are sourced from [ZapSplat](https://www.zapsplat.com/)

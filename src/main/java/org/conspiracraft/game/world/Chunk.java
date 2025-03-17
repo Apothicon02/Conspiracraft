@@ -13,11 +13,11 @@ import static org.conspiracraft.game.world.World.*;
 
 public class Chunk {
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
-    private final IntArrayList blockPalette = new IntArrayList();
+    public final IntArrayList blockPalette = new IntArrayList();
     private BitBuffer blockData = new BitBuffer(totalBlocks, 0);
-    private final IntArrayList lightPalette = new IntArrayList();
+    public final IntArrayList lightPalette = new IntArrayList();
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
-    private final IntArrayList cornerPalette = new IntArrayList();
+    public final IntArrayList cornerPalette = new IntArrayList();
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
     private BitBuffer subChunks = new BitBuffer(8, 1);
 

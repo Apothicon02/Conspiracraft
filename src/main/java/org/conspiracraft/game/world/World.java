@@ -516,6 +516,9 @@ public class World {
     public static boolean inBounds(int x, int y, int z) {
         return (x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height);
     }
+    public static boolean inBoundsChunk(int x, int y, int z) {
+        return (x >= 0 && x < sizeChunks && z >= 0 && z < sizeChunks && y >= 0 && y < heightChunks);
+    }
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority) {
         if (inBounds(x, y, z)) {

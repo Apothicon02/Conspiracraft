@@ -1,6 +1,8 @@
 package org.conspiracraft.game.rendering;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.game.audio.AudioController;
+import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
@@ -495,11 +497,16 @@ public class Renderer {
                 Vector4i blockData = blockQueue.getFirst();
                 blockQueue.removeFirst();
                 updateBlock(blockData, chunkBlockPointerChanges);
+                Source placeSource = new Source(new Vector3f(blockData.x, blockData.y, blockData.z), 1, 1, 0, 0);
+                placeSource.play(AudioController.buffers.get((int) ((java.lang.Math.random()*2)+1)));
             }
             for (int i = 0; i < Math.min(150, liquidQueue.size()); i++) {
                 Vector4i blockData = liquidQueue.getFirst();
                 liquidQueue.removeFirst();
                 updateBlock(blockData, chunkBlockPointerChanges);
+                if (Math.abs(blockData.x - Main.player.pos.x) + Math.abs(blockData.y - Main.player.pos.y) + Math.abs(blockData.z - Main.player.pos.z) < 32) {
+                    Main.player.waterFlow = (float) Math.max(Main.player.waterFlow, Math.min(0, Utils.distance(blockData.x, blockData.y, blockData.z, Main.player.pos.x, Main.player.pos.y, Main.player.pos.z)-16)*-1);
+                }
             }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

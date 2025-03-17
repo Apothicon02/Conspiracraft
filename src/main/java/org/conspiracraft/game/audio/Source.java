@@ -6,13 +6,14 @@ import org.lwjgl.openal.AL10;
 public class Source {
     private int sourceID;
     public int soundPlaying = -1;
-    float baseGain;
-    float basePitch;
+    public float baseGain;
+    public float basePitch;
     float threshold = 0;
 
-    public Source(Vector3f pos, float gain, float pitch, float threshold) {
+    public Source(Vector3f pos, float gain, float pitch, float threshold, int loop) {
         this.threshold = threshold;
         sourceID = AL10.alGenSources();
+        AL10.alSourcei(sourceID, AL10.AL_LOOPING, loop);
         AL10.alSourcef(sourceID, AL10.AL_GAIN, gain);
         AL10.alSourcef(sourceID, AL10.AL_PITCH, pitch);
         baseGain = gain;
@@ -35,22 +36,30 @@ public class Source {
         AL10.alSourceStop(sourceID);
     }
 
+    public void setGain(float newGain, float speed) {
+        baseGain = newGain;
+        if (baseGain < 0) {
+            AL10.alSourcef(sourceID, AL10.AL_GAIN, speed*Math.abs(baseGain));
+        } else {
+            AL10.alSourcef(sourceID, AL10.AL_GAIN, (baseGain / 2) + (speed * (baseGain / 2)));
+        }
+    }
+    public void setPitch(float newPitch, float speed) {
+        basePitch = newPitch;
+        if (basePitch < 0) {
+            AL10.alSourcef(sourceID, AL10.AL_PITCH, speed*Math.abs(basePitch));
+        } else {
+            AL10.alSourcef(sourceID, AL10.AL_PITCH, basePitch+(speed/10));
+        }
+    }
     public void setPos(Vector3f pos) {
         AL10.alSource3f(sourceID, AL10.AL_POSITION, pos.x, pos.y, pos.z);
     }
     public void setVel(Vector3f vel) {
         AL10.alSource3f(sourceID, AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
         float speed = Math.max(threshold, Math.max(Math.abs(vel.x), Math.max(Math.abs(vel.y), Math.abs(vel.z))))-threshold;
-        if (baseGain < 0) {
-            AL10.alSourcef(sourceID, AL10.AL_GAIN, speed*Math.abs(baseGain));
-        } else {
-            AL10.alSourcef(sourceID, AL10.AL_GAIN, (baseGain / 2) + (speed * (baseGain / 2)));
-        }
-        if (basePitch < 0) {
-            AL10.alSourcef(sourceID, AL10.AL_PITCH, speed*Math.abs(basePitch));
-        } else {
-            AL10.alSourcef(sourceID, AL10.AL_PITCH, basePitch+(speed/10));
-        }
+        setGain(baseGain, speed);
+        setPitch(basePitch, speed);
     }
 
     public void delete() {

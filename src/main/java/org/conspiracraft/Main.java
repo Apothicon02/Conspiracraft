@@ -1,5 +1,6 @@
 package org.conspiracraft;
 
+import org.conspiracraft.game.interactions.Handcrafting;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.audio.AudioController;
@@ -9,6 +10,7 @@ import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL;
 
 import java.io.File;
@@ -50,6 +52,10 @@ public class Main {
         AudioController.loadSound("dirt_step3.wav");
         AudioController.loadSound("swim1.wav");
         AudioController.loadSound("splash1.wav");
+        AudioController.loadSound("flow.wav");
+        AudioController.loadSound("wind.wav");
+        AudioController.loadSound("buzz.wav");
+        AudioController.loadSound("chirp_1.wav");
         AudioController.loadRandomSound("Music/");
         Path deletePath = Paths.get(System.getenv("APPDATA") + "/Conspiracraft/delete");
         if (Files.exists(deletePath)) {
@@ -149,7 +155,10 @@ public class Main {
                         Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, mmbDown);
                         if (pos != null) {
                             if (mmbDown) {
-                                selectedBlock = new Vector3i(World.getBlock((int) pos.x, (int) pos.y, (int) pos.z), 16);
+                                Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
+                                if (block != null) {
+                                    selectedBlock = Handcrafting.interact(selectedBlock, block);
+                                }
                             } else if (BlockTypes.blockTypeMap.get(selectedBlock.x()) != null) {
                                 lastBlockBroken = timeMillis;
                                 int blockTypeId = selectedBlock.x();

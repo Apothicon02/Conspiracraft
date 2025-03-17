@@ -1,10 +1,12 @@
 package org.conspiracraft.game;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.audio.Source;
+import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.rendering.Renderer;
 import org.conspiracraft.game.world.World;
@@ -20,6 +22,9 @@ public class Player {
     public final Source swimSource;
     public final Source splashSource;
     public final Source submergeSource;
+    public final Source waterFlowingSource;
+    public final Source windSource;
+    public float waterFlow = 0f;
     public final Source musicSource;
     public static float eyeHeight = 1.625f;
     public static float height = eyeHeight+0.175f;
@@ -48,16 +53,18 @@ public class Player {
     public static Vector3i selectedBlock = new Vector3i(0);
 
     public Player(Vector3f newPos) {
-        jumpSource = new Source(newPos, 1, 1, 0);
-        passthroughSource = new Source(newPos, 1, 1, 0);
-        stepSource = new Source(newPos, -0.25f, 0.66f, 0); //make quieter for some reason gain aint workin on this sound
-        swimSource = new Source(newPos, -1, 1, 0);
-        splashSource = new Source(newPos, 1, 1, 0);
-        submergeSource = new Source(newPos, 1, 1, 0);
-        musicSource = new Source(newPos, 0.15f, 1, 0.25f);
+        jumpSource = new Source(newPos, 1, 1, 0, 0);
+        passthroughSource = new Source(newPos, 1, 1, 0, 0);
+        stepSource = new Source(newPos, -0.25f, 0.66f, 0, 0); //make quieter for some reason gain aint workin on this sound
+        swimSource = new Source(newPos, -1, 1, 0, 0);
+        splashSource = new Source(newPos, 1, 1, 0, 0);
+        submergeSource = new Source(newPos, 1, 1, 0, 0);
+        waterFlowingSource = new Source(newPos, 0, 1, 0, 1);
+        windSource = new Source(newPos, 0, 1, 0, 1);
+        musicSource = new Source(newPos, 0.15f, 1, 0.25f, 0);
         setPos(newPos);
         oldPos = newPos;
-        musicSource.play(AudioController.buffers.get(9));
+        musicSource.play(AudioController.buffers.get(13));
     }
 
     public int[] getData() {
@@ -142,6 +149,12 @@ public class Player {
             boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
             Vector2i blockIn = World.getBlock(blockPos.x, blockPos.y, blockPos.z);
             Vector2i blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
+            if (blockIn.x == 0 && onGround && sprint) {
+                Vector2i blocKBelow = World.getBlock(blockPos.x, blockPos.y-1, blockPos.z);
+                if (blocKBelow.x == BlockTypes.getId(BlockTypes.GRASS)) {
+                    World.setBlock(blockPos.x, blockPos.y-1, blockPos.z, BlockTypes.getId(BlockTypes.DIRT), 0, true, false);
+                }
+            }
             float modifiedSpeed = speed;
             float modifiedGrav = grav;
             if (blockIn.x == 1) { //water
@@ -274,48 +287,108 @@ public class Player {
         return camMatrix.setTranslation(pos.x+camOffset.x, pos.y+camOffset.y, pos.z+camOffset.z);
     }
 
+    boolean updatedWater = false;
+    int ambientWater = 0;
+    int ambientWind = 0;
+    public void playBlocksAmbientSound(int block, int sunLight) {
+        Vector2i unpackedBlock = Utils.unpackInt(block);
+        if (unpackedBlock.x == 1 && !updatedWater) {
+            updatedWater = true;
+            ambientWater = Math.min(333, ambientWater+33);
+        }
+
+        if (Math.random() <= 0.0003d) {
+            if (Tags.leaves.tagged.contains(unpackedBlock.x)) {
+                Source source = new Source(pos, 0.5f*sunLight, 1, 1, 0);
+                source.play(AudioController.buffers.get(12));
+            }
+        } else if (Math.random() <= 0.0003d) {
+            if (Tags.flowers.tagged.contains(unpackedBlock.x)) {
+                Source source = new Source(pos, 1, 1, 1, 0);
+                source.play(AudioController.buffers.get(11));
+            }
+        }
+    }
+
+    public long timeSinceAmibentSoundAttempt = 0;
+
     public void setPos(Vector3f newPos) {
         oldPos = pos;
         pos = newPos;
-        blockPos = new Vector3i((int)newPos.x, (int)newPos.y, (int)newPos.z);
-        AudioController.setListenerData(newPos, vel);
-        musicSource.setPos(newPos);
-        Vector3f combinedVel = new Vector3f(vel.x+movement.x, vel.y+movement.y, vel.z+movement.z);
-        musicSource.setVel(combinedVel);
-        if (Math.abs(combinedVel.x) > 0.01 || Math.abs(combinedVel.y) > 0.01 || Math.abs(combinedVel.z) > 0.01) {
-            int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
-            if (block == 1) {
-                if (swimSource.soundPlaying == -1) {
-                    submergeSource.play(AudioController.buffers.get(8));
+        blockPos = new Vector3i((int) newPos.x, (int) newPos.y, (int) newPos.z);
+        if (World.worldGenerated) {
+            AudioController.setListenerData(newPos, vel);
+            musicSource.setPos(newPos);
+            Vector3f combinedVel = new Vector3f(vel.x + movement.x, vel.y + movement.y, vel.z + movement.z);
+            musicSource.setVel(combinedVel);
+            if (Math.abs(combinedVel.x) > 0.01 || Math.abs(combinedVel.y) > 0.01 || Math.abs(combinedVel.z) > 0.01) {
+                int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
+                if (block == 1) {
+                    if (swimSource.soundPlaying == -1) {
+                        submergeSource.play(AudioController.buffers.get(8));
+                    }
+                    swimSource.play(AudioController.buffers.get(7));
+                } else {
+                    if (swimSource.soundPlaying != -1) {
+                        swimSource.stop();
+                        splashSource.play(AudioController.buffers.get(8));
+                    }
+                    if (block == 17 || block == 4 || block == 5) {
+                        passthroughSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
+                    }
                 }
-                swimSource.play(AudioController.buffers.get(7));
-            } else {
-                if (swimSource.soundPlaying != -1) {
-                    swimSource.stop();
-                    splashSource.play(AudioController.buffers.get(8));
-                }
-                if (block == 17 || block == 4 || block == 5) {
-                    passthroughSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
+                int blockOn = World.getBlock(newPos.x, newPos.y - 0.1f, newPos.z).x;
+                if (blockOn == 2) {
+                    stepSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
+                } else if (blockOn == 3) {
+                    stepSource.play(AudioController.buffers.get((int) (4 + (Math.random() * 2))));
                 }
             }
-            int blockOn = World.getBlock(newPos.x, newPos.y-0.1f, newPos.z).x;
-            if (blockOn == 2) {
-                stepSource.play(AudioController.buffers.get((int) (1+(Math.random()*2))));
-            } else if (blockOn == 3) {
-                stepSource.play(AudioController.buffers.get((int) (4+(Math.random()*2))));
-            }
-        }
 
-        splashSource.setPos(newPos);
-        splashSource.setVel(combinedVel);
-        submergeSource.setPos(newPos);
-        submergeSource.setVel(combinedVel);
-        swimSource.setPos(newPos);
-        swimSource.setVel(combinedVel);
-        passthroughSource.setPos(newPos);
-        passthroughSource.setVel(combinedVel);
-        stepSource.setPos(newPos);
-        stepSource.setVel(combinedVel);
+            long currentTime = System.currentTimeMillis();
+            if (currentTime-timeSinceAmibentSoundAttempt >= 1000) {
+                timeSinceAmibentSoundAttempt = currentTime;
+                if (World.inBounds(blockPos.x, blockPos.y, blockPos.z)) {
+                    updatedWater = false;
+                    int sunLight = World.getLight(blockPos).w;
+                    for (int x = -1; x <= 1; x++) {
+                        for (int y = -1; y <= 1; y++) {
+                            for (int z = -1; z <= 1; z++) {
+                                Vector3i chunkPos = new Vector3i((blockPos.x / 16) + x, (blockPos.y / 16) + y, (blockPos.z / 16) + z);
+                                if (World.inBoundsChunk(chunkPos.x, chunkPos.y, chunkPos.z)) {
+                                    for (int block : World.chunks[Utils.condenseChunkPos(chunkPos)].blockPalette.toArray(new int[0])) {
+                                        playBlocksAmbientSound(block, sunLight);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (waterFlowingSource.soundPlaying == -1) {
+                        waterFlowingSource.play(AudioController.buffers.get((9)));
+                    }
+                    waterFlowingSource.setGain(Math.clamp(Math.max(ambientWater / 333f, waterFlow / 16), 0, 1), 0);
+                    if (windSource.soundPlaying == -1) {
+                        windSource.play(AudioController.buffers.get((10)));
+                    }
+                    ambientWind = Math.min(333, ambientWind + sunLight);
+                    windSource.setGain(Math.clamp(ambientWind / 333f, 0, 1), 0);
+                }
+            }
+            ambientWind = Math.max(0, ambientWind-1);
+            ambientWater = Math.max(0, ambientWater-1);
+            waterFlow = Math.max(0, waterFlow-1);
+
+            splashSource.setPos(newPos);
+            splashSource.setVel(combinedVel);
+            submergeSource.setPos(newPos);
+            submergeSource.setVel(combinedVel);
+            swimSource.setPos(newPos);
+            swimSource.setVel(combinedVel);
+            passthroughSource.setPos(newPos);
+            passthroughSource.setVel(combinedVel);
+            stepSource.setPos(newPos);
+            stepSource.setVel(combinedVel);
+        }
     }
 
     public void move(float x, float y, float z, boolean countRotation) {
