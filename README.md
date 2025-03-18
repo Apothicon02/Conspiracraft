@@ -1,6 +1,6 @@
 # Conspiracraft
 
-![](https://media.discordapp.net/attachments/1197642849844482209/1348013759758860378/image.png?ex=67cdeb25&is=67cc99a5&hm=ed6ddb81afc6df0a62251464d6c50bcc27c6496fb040f8d3f23f7030d724df09&=&format=webp&quality=lossless&width=1545&height=813)
+![](https://media.discordapp.net/attachments/851241723634909185/1348013172308705352/image.png?ex=67da70d9&is=67d91f59&hm=54c35ee3a9f9fd67d20d7818477741d568a4d82f2673877663dcf783765a8e86&=&format=webp&quality=lossless&width=1545&height=813)
 
 # Getting Started
 - Do not run the jar directly. 
