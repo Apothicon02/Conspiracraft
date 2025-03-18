@@ -473,15 +473,14 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     return vec4(0.0);
 }
 
-vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
+vec4 dda(int condensedChunkPos, vec3 offset, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
     vec3 sideDist = ((mapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
-    rayMapPos = (chunkPos*16)+(subChunkPos*8)+mapPos;
+    rayMapPos = offset+mapPos;
     prevRayMapPos = rayMapPos;
-    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
 
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         if (cloud) {
@@ -600,21 +599,20 @@ vec4 dda(ivec3 chunkPos, ivec3 subChunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
         prevRayMapPos = rayMapPos;
-        rayMapPos = (chunkPos*16)+(subChunkPos*8)+mapPos;
+        rayMapPos = offset+mapPos;
         sideDist += mask * raySign * deltaDist;
     }
 
     return vec4(0);
 }
 
-vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
+vec4 subChunkDDA(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(1.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
     vec3 sideDist = ((mapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
-    vec3 realPos = (chunkPos*16)+(mapPos*8);
-    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    vec3 realPos = offset+(mapPos*8);
     int subChunks = chunkBlocksData[(condensedChunkPos*5)+4];
 
     while (mapPos.x < 2.0 && mapPos.x >= 0.0 && mapPos.y < 2.0 && mapPos.y >= 0.0 && mapPos.z < 2.0 && mapPos.z >= 0.0) {
@@ -631,7 +629,7 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
                 uv3d = rayPos - mapPos;
             }
 
-            vec4 color = dda(chunkPos, ivec3(mapPos), uv3d * 8.0, rayDir, mask, inBounds, checkBlocks);
+            vec4 color = dda(condensedChunkPos, offset+(mapPos*8), ivec3(mapPos), uv3d * 8.0, rayDir, mask, inBounds, checkBlocks);
 
             if (color.a >= 1) {
                 return color;
@@ -666,7 +664,7 @@ vec4 subChunkDDA(ivec3 chunkPos, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBo
 
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
-        realPos = (chunkPos*16)+(mapPos*8);
+        realPos = offset+(mapPos*8);
         sideDist += mask * raySign * deltaDist;
     }
 
@@ -697,7 +695,8 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
             if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
                 uv3d = rayPos - rayMapChunkPos;
             }
-            vec4 color = subChunkDDA(ivec3(rayMapChunkPos), uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
+            ivec3 chunkPos = ivec3(rayMapChunkPos);
+            vec4 color = subChunkDDA((((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
             if (color.a >= 1) {
                 return color;
             }
