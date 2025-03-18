@@ -8,7 +8,7 @@ public class Engine {
 
     public static final int TARGET_UPS = 30;
     private final Main main;
-    private final Window window;
+    public final Window window;
     private boolean running;
     private int targetFps;
     private int targetUps;

@@ -48,6 +48,7 @@ public class Renderer {
     public static int cornersSSBOId;
     public static int chunkLightsSSBOId;
     public static int lightsSSBOId;
+    public static int imageSSBOId;
 
     public static int resUniform;
     public static int camUniform;
@@ -132,6 +133,7 @@ public class Renderer {
         cornersSSBOId = glGenBuffers();
         chunkLightsSSBOId = glGenBuffers();
         lightsSSBOId = glGenBuffers();
+        imageSSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -216,6 +218,12 @@ public class Renderer {
 
             IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, imageSSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, imageSSBOId);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, new int[window.getHeight()*window.getWidth()], GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 
