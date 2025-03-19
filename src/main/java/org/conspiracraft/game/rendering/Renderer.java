@@ -75,7 +75,7 @@ public class Renderer {
     public static boolean snowing = false;
 
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
+    public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*7];
     public static long[] chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
     public static PointerBuffer corners = BufferUtils.createPointerBuffer(1);
     public static int[] chunkCornerPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
@@ -325,8 +325,11 @@ public class Renderer {
                     if (compressedCorners != null) {
                         glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
                     }
-                    chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-                    chunkBlockPointerChanges.addLast(condensedChunkPos*5);
+                    chunkBlockPointers[(condensedChunkPos*7) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                    int[] bricks = chunks[condensedChunkPos].getBricks();
+                    chunkBlockPointers[(condensedChunkPos*7) + 5] = bricks[0];
+                    chunkBlockPointers[(condensedChunkPos*7) + 6] = bricks[1];
+                    chunkBlockPointerChanges.addLast(condensedChunkPos*7);
                 } else {
                     // Allocation failed - no space for it could be found. Handle this error!
                 }
@@ -430,8 +433,11 @@ public class Renderer {
                     if (compressedLights != null) {
                         glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedLights);
                     }
-                    chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-                    chunkBlockPointerChanges.addLast(condensedChunkPos*5);
+                    chunkBlockPointers[(condensedChunkPos*7) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                    int[] bricks = chunks[condensedChunkPos].getBricks();
+                    chunkBlockPointers[(condensedChunkPos*7) + 5] = bricks[0];
+                    chunkBlockPointers[(condensedChunkPos*7) + 6] = bricks[1];
+                    chunkBlockPointerChanges.addLast(condensedChunkPos*7);
                 } else {
                     // Allocation failed - no space for it could be found. Handle this error!
                 }
@@ -460,7 +466,7 @@ public class Renderer {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
-            chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
+            chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*7];
             chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
 
             for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
@@ -484,11 +490,14 @@ public class Renderer {
                         if (res == VK_SUCCESS) {
                             chunkBlockAllocs[condensedChunkPos] = res;
                             int pointer = (int) offset.get(0);
-                            chunkBlockPointers[condensedChunkPos*5] = pointer/4;
-                            chunkBlockPointers[(condensedChunkPos*5)+1] = paletteSize;
-                            chunkBlockPointers[(condensedChunkPos*5)+2] = bitsPerValue;
-                            chunkBlockPointers[(condensedChunkPos*5)+3] = valueMask;
-                            chunkBlockPointers[(condensedChunkPos*5)+4] = chunks[condensedChunkPos].getSubChunks()[0];
+                            chunkBlockPointers[condensedChunkPos*7] = pointer/4;
+                            chunkBlockPointers[(condensedChunkPos*7)+1] = paletteSize;
+                            chunkBlockPointers[(condensedChunkPos*7)+2] = bitsPerValue;
+                            chunkBlockPointers[(condensedChunkPos*7)+3] = valueMask;
+                            chunkBlockPointers[(condensedChunkPos*7) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                            int[] bricks = chunks[condensedChunkPos].getBricks();
+                            chunkBlockPointers[(condensedChunkPos*7) + 5] = bricks[0];
+                            chunkBlockPointers[(condensedChunkPos*7) + 6] = bricks[1];
                             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
                             if (compressedBlocks != null) {
                                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
@@ -525,7 +534,7 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
         } else {
             for (int pos : chunkBlockPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3], chunkBlockPointers[pos+4]});
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3], chunkBlockPointers[pos+4], chunkBlockPointers[pos+5], chunkBlockPointers[pos+6]});
             }
             chunkBlockPointerChanges.clear();
         }
@@ -581,12 +590,15 @@ public class Renderer {
         if (res == VK_SUCCESS) {
             chunkBlockAllocs[condensedChunkPos] = res;
             int pointer = (int) offset.get(0);
-            chunkBlockPointers[condensedChunkPos * 5] = pointer / 4;
-            chunkBlockPointers[(condensedChunkPos * 5) + 1] = paletteSize;
-            chunkBlockPointers[(condensedChunkPos * 5) + 2] = bitsPerValue;
-            chunkBlockPointers[(condensedChunkPos * 5) + 3] = valueMask;
-            chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-            chunkBlockPointerChanges.addLast(condensedChunkPos*5);
+            chunkBlockPointers[condensedChunkPos*7] = pointer / 4;
+            chunkBlockPointers[(condensedChunkPos*7) + 1] = paletteSize;
+            chunkBlockPointers[(condensedChunkPos*7) + 2] = bitsPerValue;
+            chunkBlockPointers[(condensedChunkPos*7) + 3] = valueMask;
+            chunkBlockPointers[(condensedChunkPos*7) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+            int[] bricks = chunks[condensedChunkPos].getBricks();
+            chunkBlockPointers[(condensedChunkPos*7) + 5] = bricks[0];
+            chunkBlockPointers[(condensedChunkPos*7) + 6] = bricks[1];
+            chunkBlockPointerChanges.addLast(condensedChunkPos*7);
             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
             if (compressedBlocks != null) {
                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);

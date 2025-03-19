@@ -24,6 +24,7 @@ public class World {
     public static int halfSize = size/2;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
+    public static byte brickSize = (byte) (chunkSize/4);
     public static int sizeChunks = size / chunkSize;
     public static short height = 432;
     public static int heightChunks = height / chunkSize;
@@ -157,6 +158,14 @@ public class World {
                 for (int y = 0; y < World.heightChunks; y++) {
                     int dataSize = data[dataIndex];
                     dataIndex++;
+                    int[] bricks = new int[dataSize];
+                    for (int i = dataSize - 1; i >= 0; i--) {
+                        bricks[i] = data[dataIndex];
+                        dataIndex++;
+                    }
+
+                    dataSize = data[dataIndex];
+                    dataIndex++;
                     int[] subChunks = new int[dataSize];
                     for (int i = dataSize - 1; i >= 0; i--) {
                         subChunks[i] = data[dataIndex];
@@ -212,6 +221,7 @@ public class World {
                     }
 
                     Chunk chunk = new Chunk();
+                    chunk.setBricks(bricks);
                     chunk.setSubChunks(subChunks);
                     chunk.setBlockPalette(blockPalette);
                     chunk.setBlockData(blocks);

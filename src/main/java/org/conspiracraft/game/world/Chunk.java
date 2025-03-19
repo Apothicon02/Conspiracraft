@@ -7,8 +7,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
-import static org.conspiracraft.engine.Utils.condenseLocalPos;
-import static org.conspiracraft.engine.Utils.condenseSubchunkPos;
+import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.world.World.*;
 
 public class Chunk {
@@ -20,6 +19,7 @@ public class Chunk {
     public final IntArrayList cornerPalette = new IntArrayList();
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
     private BitBuffer subChunks = new BitBuffer(8, 1);
+    private BitBuffer bricks = new BitBuffer(64, 1);
 
     public Chunk() {
         blockPalette.add(0);
@@ -75,6 +75,12 @@ public class Chunk {
     public int[] getSubChunks() {
         return subChunks.getData();
     }
+    public void setBricks(int[] subChunksData) {
+        bricks.setData(subChunksData);
+    }
+    public int[] getBricks() {
+        return bricks.getData();
+    }
     public void setBlockKey(Vector3i pos, int key) {
         int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
         if (neededBitsPerValue != blockData.bitsPerValue) {
@@ -87,6 +93,7 @@ public class Chunk {
         blockData.setValue(condenseLocalPos(pos), key);
         if (blockPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+            bricks.setValue(condenseBrickPos(pos.x/brickSize, pos.y/brickSize, pos.z/brickSize), 1);
         }
     }
     public int getBlockKey(int pos) {
@@ -165,6 +172,7 @@ public class Chunk {
         cornerData.setValue(condenseLocalPos(pos), key);
         if (cornerPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+            bricks.setValue(condenseBrickPos(pos.x/brickSize, pos.y/brickSize, pos.z/brickSize), 1);
         }
     }
     public int getCornerKey(int pos) {
@@ -243,6 +251,7 @@ public class Chunk {
         lightData.setValue(Utils.condenseLocalPos(pos), key);
         if (!Utils.unpackColor(lightPalette.get(key)).equals(fullSunlight)) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+            bricks.setValue(condenseBrickPos(pos.x/brickSize, pos.y/brickSize, pos.z/brickSize), 1);
         }
     }
     public int getLightKey(int pos) {
