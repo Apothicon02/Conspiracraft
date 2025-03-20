@@ -56,6 +56,7 @@ public class Main {
         AudioController.loadSound("wind.wav");
         AudioController.loadSound("buzz.wav");
         AudioController.loadSound("chirp_1.wav");
+        AudioController.loadSound("magma.wav");
         AudioController.loadRandomSound("Music/");
         Path deletePath = Paths.get(System.getenv("APPDATA") + "/Conspiracraft/delete");
         if (Files.exists(deletePath)) {

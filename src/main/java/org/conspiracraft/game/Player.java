@@ -23,6 +23,7 @@ public class Player {
     public final Source splashSource;
     public final Source submergeSource;
     public final Source waterFlowingSource;
+    public final Source magmaSource;
     public final Source windSource;
     public float waterFlow = 0f;
     public final Source musicSource;
@@ -61,10 +62,11 @@ public class Player {
         submergeSource = new Source(newPos, 1, 1, 0, 0);
         waterFlowingSource = new Source(newPos, 0, 1, 0, 1);
         windSource = new Source(newPos, 0, 1, 0, 1);
+        magmaSource = new Source(newPos, 0, 1, 0, 1);
         musicSource = new Source(newPos, 0.15f, 1, 0.25f, 0);
         setPos(newPos);
         oldPos = newPos;
-        musicSource.play(AudioController.buffers.get(13));
+        musicSource.play(AudioController.buffers.get(14));
     }
 
     public int[] getData() {
@@ -289,28 +291,34 @@ public class Player {
 
     boolean updatedWater = false;
     int ambientWater = 0;
+    boolean updatedMagma = false;
+    int ambientMagma = 0;
     int ambientWind = 0;
     public void playBlocksAmbientSound(int block, int sunLight) {
         Vector2i unpackedBlock = Utils.unpackInt(block);
         if (unpackedBlock.x == 1 && !updatedWater) {
             updatedWater = true;
             ambientWater = Math.min(333, ambientWater+33);
+        } else if (unpackedBlock.x == 19 && !updatedMagma) {
+            updatedMagma = true;
+            ambientMagma = Math.min(333, ambientMagma+33);
         }
 
         if (Math.random() <= 0.0003d) {
             if (Tags.leaves.tagged.contains(unpackedBlock.x)) {
-                Source source = new Source(pos, 0.5f*sunLight, 1, 1, 0);
+                Source source = new Source(pos, 0.01f*sunLight, 1, 1, 0);
                 source.play(AudioController.buffers.get(12));
             }
         } else if (Math.random() <= 0.0003d) {
             if (Tags.flowers.tagged.contains(unpackedBlock.x)) {
-                Source source = new Source(pos, 1, 1, 1, 0);
+                Source source = new Source(pos, 0.5f, 1, 1, 0);
                 source.play(AudioController.buffers.get(11));
             }
         }
     }
 
     public long timeSinceAmibentSoundAttempt = 0;
+    public float windGain = 0f;
 
     public void setPos(Vector3f newPos) {
         oldPos = pos;
@@ -348,6 +356,9 @@ public class Player {
             long currentTime = System.currentTimeMillis();
             if (currentTime-timeSinceAmibentSoundAttempt >= 1000) {
                 timeSinceAmibentSoundAttempt = currentTime;
+                if (windSource.soundPlaying == -1) {
+                    windSource.play(AudioController.buffers.get((10)));
+                }
                 if (World.inBounds(blockPos.x, blockPos.y, blockPos.z)) {
                     updatedWater = false;
                     int sunLight = World.getLight(blockPos).w;
@@ -364,16 +375,19 @@ public class Player {
                         }
                     }
                     if (waterFlowingSource.soundPlaying == -1) {
-                        waterFlowingSource.play(AudioController.buffers.get((9)));
+                        waterFlowingSource.play(AudioController.buffers.get(9));
                     }
-                    waterFlowingSource.setGain(Math.clamp(Math.max(ambientWater / 333f, waterFlow / 16), 0, 1), 0);
-                    if (windSource.soundPlaying == -1) {
-                        windSource.play(AudioController.buffers.get((10)));
+                    waterFlowingSource.setGain(Math.clamp(Math.max(ambientWater / 666f, waterFlow / 16), 0, 1), 0);
+                    if (magmaSource.soundPlaying == -1) {
+                        magmaSource.play(AudioController.buffers.get(13));
                     }
+                    magmaSource.setGain(Math.clamp(ambientMagma / 333f, 0, 1), 0);
                     ambientWind = Math.min(333, ambientWind + sunLight);
-                    windSource.setGain(Math.clamp(ambientWind / 333f, 0, 1), 0);
+                    windGain = ambientWind/333f;
                 }
             }
+            float velocity = (Math.max(Math.abs(vel.x+movement.x), Math.max(Math.abs(vel.y+movement.y), Math.abs(vel.z+movement.z))));
+            windSource.setGain(Math.clamp(windGain+(Math.max(0.05f, velocity/10)-0.05f), 0, 1), 0);
             ambientWind = Math.max(0, ambientWind-1);
             ambientWater = Math.max(0, ambientWater-1);
             waterFlow = Math.max(0, waterFlow-1);

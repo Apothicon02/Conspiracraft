@@ -43,10 +43,10 @@ public class Window {
             this.width = opts.width;
             this.height = opts.height;
         } else {
-            glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
             GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            width = vidMode.width();
-            height = vidMode.height();
+            width = 1920;
+            height = 1080;
         }
 
         windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);

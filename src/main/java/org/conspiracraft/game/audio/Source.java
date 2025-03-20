@@ -37,6 +37,7 @@ public class Source {
     }
 
     public void setGain(float newGain, float speed) {
+        speed = Math.max(1, speed);
         baseGain = newGain;
         if (baseGain < 0) {
             AL10.alSourcef(sourceID, AL10.AL_GAIN, speed*Math.abs(baseGain));
@@ -45,6 +46,7 @@ public class Source {
         }
     }
     public void setPitch(float newPitch, float speed) {
+        speed = Math.max(1, speed);
         basePitch = newPitch;
         if (basePitch < 0) {
             AL10.alSourcef(sourceID, AL10.AL_PITCH, speed*Math.abs(basePitch));
@@ -58,6 +60,7 @@ public class Source {
     public void setVel(Vector3f vel) {
         AL10.alSource3f(sourceID, AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
         float speed = Math.max(threshold, Math.max(Math.abs(vel.x), Math.max(Math.abs(vel.y), Math.abs(vel.z))))-threshold;
+        speed = Math.max(1, speed);
         setGain(baseGain, speed);
         setPitch(basePitch, speed);
     }
