@@ -42,7 +42,7 @@ public class Main {
         Noises.init();
         GL.createCapabilities();
         AudioController.init();
-        AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
+        AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new float[6]);
         AudioController.loadSound("jump.wav");
         AudioController.loadSound("grass_step1.wav");
         AudioController.loadSound("grass_step2.wav");
@@ -321,7 +321,6 @@ public class Main {
                 for (int z = 0; z < World.sizeChunks; z++) {
                     for (int y = 0; y < World.heightChunks; y++) {
                         Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
-                        byte[] bricks = Utils.intArrayToByteArray(chunk.getBricks());
                         byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
 
                         byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
@@ -350,9 +349,7 @@ public class Main {
                         } else {
                             lights = new byte[]{};
                         }
-                        ByteBuffer buffer = ByteBuffer.allocate(bricks.length + 4 + subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
-                        buffer.put(Utils.intArrayToByteArray(new int[]{bricks.length / 4}));
-                        buffer.put(bricks);
+                        ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
                         buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
                         buffer.put(subChunks);
                         buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));

@@ -9,13 +9,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/magma.wav" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/rendering/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,14 +203,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00115" summary="- Holding shift is now required to remove only a corner of a block.">
-      <option name="closed" value="true" />
-      <created>1738349786333</created>
-      <option name="number" value="00115" />
-      <option name="presentableId" value="LOCAL-00115" />
-      <option name="project" value="LOCAL" />
-      <updated>1738349786333</updated>
     </task>
     <task id="LOCAL-00116" summary="- Added sunlight transparent block tinting.">
       <option name="closed" value="true" />
@@ -592,7 +588,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742415858728</updated>
     </task>
-    <option name="localTasksCounter" value="164" />
+    <task id="LOCAL-00164" summary="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move.">
+      <option name="closed" value="true" />
+      <created>1742505815277</created>
+      <option name="number" value="00164" />
+      <option name="presentableId" value="LOCAL-00164" />
+      <option name="project" value="LOCAL" />
+      <updated>1742505815277</updated>
+    </task>
+    <option name="localTasksCounter" value="165" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -608,7 +612,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed sky fog not matching world fog." />
     <MESSAGE value="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting." />
     <MESSAGE value="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays." />
     <MESSAGE value="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game." />
@@ -633,7 +636,8 @@
     <MESSAGE value="- Removed hand rendering. &#10;- Updated README." />
     <MESSAGE value="- Cleaned up fragment shader." />
     <MESSAGE value="- Added brick dda." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added brick dda." />
+    <MESSAGE value="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -646,11 +650,6 @@
           <properties class="java.lang.OutOfMemoryError" package="java.lang" />
           <option name="timeStamp" value="35" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java</url>
-          <line>303</line>
-          <option name="timeStamp" value="51" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

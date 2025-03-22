@@ -125,6 +125,7 @@ public class Window {
         this.width = width;
         this.height = height;
         try {
+            glViewport(0, 0, width, height);
             resizeFunc.call();
         } catch (Exception excp) {
             Logger.error("Error calling resize callback", excp);

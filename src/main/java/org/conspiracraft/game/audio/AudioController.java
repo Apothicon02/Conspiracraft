@@ -32,9 +32,10 @@ public class AudioController {
         alCapabilities = AL.createCapabilities(alcCapabilities);
     }
 
-    public static void setListenerData(Vector3f pos, Vector3f vel) {
+    public static void setListenerData(Vector3f pos, Vector3f vel, float[] orientation) {
         AL10.alListener3f(AL10.AL_POSITION, pos.x, pos.y, pos.z);
         AL10.alListener3f(AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
+        AL10.alListenerfv(AL10.AL_ORIENTATION, orientation);
     }
 
     public static void loadSound(String file) {

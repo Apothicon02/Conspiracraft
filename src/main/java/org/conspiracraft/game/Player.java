@@ -325,7 +325,7 @@ public class Player {
         pos = newPos;
         blockPos = new Vector3i((int) newPos.x, (int) newPos.y, (int) newPos.z);
         if (World.worldGenerated) {
-            AudioController.setListenerData(newPos, vel);
+            AudioController.setListenerData(newPos, vel, camera.getViewMatrix().get(new float[16]));
             musicSource.setPos(newPos);
             Vector3f combinedVel = new Vector3f(vel.x + movement.x, vel.y + movement.y, vel.z + movement.z);
             musicSource.setVel(combinedVel);
