@@ -353,8 +353,10 @@ bool wasEverTinted = false;
 float cloudiness = 1f;
 ivec3 normal = ivec3(0);
 float distanceFogginess = 0f;
+bool firstVoxel = true;
+vec3 ogRayPos = vec3(0);
 
-vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor) {
+vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 intersect, vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float mixedTime) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -363,10 +365,30 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
 
     bool wasTinted = false;
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
-    prevPos = rayMapPos+(prevMapPos/8);
+
+    vec3 innerMini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
+    vec3 hitNormal = -mask * raySign;
+    float rayLength = 0f;
+    float voxelDist = max(innerMini.x, max (innerMini.y, innerMini.z));
+    if (voxelDist > 0.0f) {
+        rayLength += voxelDist/8;
+    }
+    if (blockDist > 0.0f) {
+        rayLength += blockDist;
+    }
+    if (subChunkDist > 0.0f) {
+        rayLength += (subChunkDist*8);
+    }
+    if (chunkDist > 0.0f) {
+        rayLength += (chunkDist*16);
+    }
+    vec3 realPos = (ogRayPos + rayDir * rayLength);
+    prevPos = realPos + (hitNormal * 0.001);
+
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
     float fire = blockType == 19 ? 1 : (blockType == 9 ? 0.05f : 0f);
-    vec4 prevVoxelColor = getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
+    vec4 prevVoxelColor = firstVoxel ? vec4(0) : getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
+    firstVoxel = false;
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
@@ -382,10 +404,11 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                     reflectivity = 0.08f;
                 }
             }
+            normal = ivec3(mapPos - prevMapPos);
             if (voxelColor.a < 1.f) {
                 if (hitPos == vec3(256) && canHit) {
                     prevHitPos = prevPos;
-                    hitPos = rayMapPos+(mapPos/8);
+                    hitPos = realPos;
                 }
                 //bubbles start
                 if (blockType == 1) {
@@ -401,27 +424,19 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
                 }
                 //bubbles end
 
-                vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), vec3(lighting*((0.7f-min(0.7f, sunLight))/1.428f))+sunLight), 1);//light
+                vec3 finalLight = vec3(lighting*((0.7-min(0.7, (lighting.a/20)*mixedTime))/4))+sunLight;
+                vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), finalLight), 1);//light
                 //fog start
                 color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
                 //fog end
                 tint += vec3(toLinear(color));
-                if (!wasTinted) {
-                    wasTinted = true;
-                    tint += vec3(toLinear(color))*2;
-                }
-                if (!wasEverTinted) {
-                    wasEverTinted = true;
-                    tint += vec3(toLinear(color))*2;
-                }
             }
             if (voxelColor.a >= 1) {
                 if (hitPos == vec3(256)) {
                     prevHitPos = prevPos;
-                    hitPos = rayMapPos+(mapPos/8);
+                    hitPos = realPos;
                 }
                 //face-based brightness start
-                normal = ivec3(mapPos - prevMapPos);
                 if (normal.y == 1) { //down
                     normalBrightness = 0.7f;
                 } else if (normal.y == -1) { //up
@@ -465,7 +480,24 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
             }
         }
 
-        prevPos = rayMapPos+(mapPos/8);
+        innerMini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
+        hitNormal = -mask * raySign;
+        rayLength = 0f;
+        voxelDist = max(innerMini.x, max (innerMini.y, innerMini.z));
+        if (voxelDist > 0.0f) {
+            rayLength += voxelDist/8;
+        }
+        if (blockDist > 0.0f) {
+            rayLength += blockDist;
+        }
+        if (subChunkDist > 0.0f) {
+            rayLength += (subChunkDist*8);
+        }
+        if (chunkDist > 0.0f) {
+            rayLength += (chunkDist*16);
+        }
+        realPos = (ogRayPos + rayDir * rayLength);
+        prevPos = realPos + (hitNormal * 0.001);
         prevVoxelColor = voxelColor;
         prevMapPos = mapPos;
         mask = stepMask(sideDist);
@@ -476,7 +508,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSu
     return vec4(0.0);
 }
 
-vec4 dda(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
+vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -490,12 +522,13 @@ vec4 dda(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMas
             //block start
             ivec2 blockInfo = ivec2(0);
             vec3 uv3d = vec3(0);
+            vec3 intersect = vec3(0);
+            vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float blocKDist = max(mini.x, max(mini.y, mini.z));
             if (inBounds) {
                 blockInfo = getBlock(rayMapPos);
 
-                vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-                float d = max (mini.x, max (mini.y, mini.z));
-                vec3 intersect = rayPos + rayDir*d;
+                intersect = rayPos + rayDir*blocKDist;
                 uv3d = intersect - mapPos;
 
                 if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
@@ -521,7 +554,7 @@ vec4 dda(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMas
                 float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
                 distanceFogginess = max(distanceFogginess, clamp((exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f))-0.1f, 0, 1f));
                 float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
-                color = traceBlock(uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor);
+                color = traceBlock(chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
                 if ((blockInfo.x == 17 || blockInfo.x == 21) && color.a >= 1) {
                     color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, noise(vec2(rayMapPos.x, rayMapPos.z)*10), 0)), 1);
                 }
@@ -592,7 +625,7 @@ vec4 dda(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMas
     return vec4(0);
 }
 
-vec4 subChunkDDA(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
+vec4 subChunkDDA(float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(1.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -610,15 +643,15 @@ vec4 subChunkDDA(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, v
         }
         if (checkBlocks) {
             vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-            float d = max (mini.x, max (mini.y, mini.z));
-            vec3 intersect = rayPos + rayDir*d;
+            float subChunkDist = max(mini.x, max(mini.y, mini.z));
+            vec3 intersect = rayPos + rayDir*subChunkDist;
             vec3 uv3d = intersect - mapPos;
 
             if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
                 uv3d = rayPos - mapPos;
             }
 
-            vec4 color = dda(condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true);
+            vec4 color = dda(chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true);
 
             if (color.a >= 1) {
                 return color;
@@ -647,7 +680,8 @@ vec4 subChunkDDA(int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, v
     return vec4(0);
 }
 
-vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
+vec4 traceWorld(vec3 ogPos, vec3 rayDir) {
+    ogRayPos = ogPos;
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
     vec3 prevRayMapPos = rayMapChunkPos;
@@ -661,15 +695,15 @@ vec4 traceWorld(vec3 ogRayPos, vec3 rayDir) {
         bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
         if (checkSubChunks) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-            float d = max (mini.x, max (mini.y, mini.z));
-            vec3 intersect = rayPos + rayDir*d;
+            float chunkDist = max(mini.x, max(mini.y, mini.z));
+            vec3 intersect = rayPos + rayDir*chunkDist;
             vec3 uv3d = intersect - rayMapChunkPos;
 
             if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
                 uv3d = rayPos - rayMapChunkPos;
             }
             ivec3 chunkPos = ivec3(rayMapChunkPos);
-            vec4 color = subChunkDDA((((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
+            vec4 color = subChunkDDA(chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
             if (color.a >= 1) {
                 return color;
             }
@@ -705,6 +739,7 @@ vec3 prevReflectPos = vec3(0);
 vec3 reflectPos = vec3(0);
 
 void clearVars(bool clearHit, bool clearTint) {
+    firstVoxel = true;
     wasEverTinted = false;
     if (clearHit) {
         prevHitPos = vec3(256);
@@ -762,10 +797,11 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
 
     cloudiness = max(cloudiness, prevCloudiness);
     prevCloudiness = cloudiness;
-    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), max(whiteness, (cloudiness-1)*1.5f));
+    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), max(whiteness, (cloudiness-1)*1.5f))*min(1, (isSky ? 0.33f : 0.05f)+sunLight);
     if (!isSky && !isSnowFlake && shadowsEnabled) {
         if (color.a >= 1.f && sunLight > 0.f) {
-            vec3 sunDir = normalize(sun - prevPos);
+            vec3 shadowPos = prevPos;
+            vec3 sunDir = normalize(sun - shadowPos);
             if (sunDir.x == 0) {
                 sunDir.x = 0.00001f;
             }
@@ -775,8 +811,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
             if (sunDir.z  == 0) {
                 sunDir.z = 0.00001f;
             }
-            clearVars(false, true);
-            if (traceWorld(prevPos, sunDir).a >= 1.f) {
+            clearVars(true, true);
+            if (traceWorld(shadowPos, sunDir).a >= 1.f) {
                 sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
             }
             tint = max(vec3(1), tint);
