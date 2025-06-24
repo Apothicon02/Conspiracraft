@@ -1,6 +1,5 @@
 package org.conspiracraft.game;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
@@ -27,9 +26,10 @@ public class Player {
     public final Source windSource;
     public float waterFlow = 0f;
     public final Source musicSource;
-    public static float eyeHeight = 1.625f;
-    public static float height = eyeHeight+0.175f;
-    public static float width = 0.4f;
+    public static float scale = 1f;
+    public static float eyeHeight = 1.625f*scale;
+    public static float height = eyeHeight+(0.175f*scale);
+    public static float width = 0.4f*scale;
     public Vector3i blockPos;
     public Vector3f pos;
     public Vector3f oldPos;
@@ -38,8 +38,8 @@ public class Player {
     public float bounciness = 0.66f;
     public float friction = 0.75f;
     public float grav = 0.05f;
-    public float speed = 0.15f;
-    public float jumpStrength = 0.33f;
+    public float speed = Math.max(0.15f, 0.15f*scale);
+    public float jumpStrength = Math.max(0.33f, 0.33f*scale);
     public long lastJump = 1000;
     public long jump = 0;
     public boolean sprint = false;
@@ -271,6 +271,7 @@ public class Player {
 
     public void setCameraMatrix(float[] matrix) {
         camera.setViewMatrix(matrix);
+        camera.move(0, eyeHeight - camera.getViewMatrix().getTranslation(new Vector3f()).y(), 0, false);
     }
     public void setCameraPitch(Quaternionf pitch) {
         camera.setPitch(pitch);

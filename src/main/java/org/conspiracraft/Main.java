@@ -252,6 +252,18 @@ public class Main {
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         updateTime(100000L, 1);
                     }
+                    if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
+                        selectedBlock.z++;
+                        if (selectedBlock.z > 16) {
+                            selectedBlock.z = 16;
+                        }
+                    }
+                    if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
+                        selectedBlock.z--;
+                        if (selectedBlock.z < 0) {
+                            selectedBlock.z = 0;
+                        }
+                    }
                 }
 
                 wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);

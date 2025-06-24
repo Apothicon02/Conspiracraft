@@ -532,7 +532,7 @@ public class World {
                 Vector2i aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
                     int aboveBlockId = aboveBlock.x();
-                    if (aboveBlockId == 4 || aboveBlockId == 5) {
+                    if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport) {
                         setBlock(x, y + 1, z, 0, 0, true, priority);
                     }
                 }
