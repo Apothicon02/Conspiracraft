@@ -366,10 +366,10 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
     bool wasTinted = false;
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
-    vec3 innerMini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
+    vec3 mini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
     vec3 hitNormal = -mask * raySign;
     float rayLength = 0f;
-    float voxelDist = max(innerMini.x, max (innerMini.y, innerMini.z));
+    float voxelDist = max(mini.x, max (mini.y, mini.z));
     if (voxelDist > 0.0f) {
         rayLength += voxelDist/8;
     }
@@ -383,7 +383,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
         rayLength += (chunkDist*16);
     }
     vec3 realPos = (ogRayPos + rayDir * rayLength);
-    prevPos = realPos + (hitNormal * 0.001);
+    prevPos = realPos + (hitNormal * 0.001f);
 
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
     float fire = blockType == 19 ? 1 : (blockType == 9 ? 0.05f : 0f);
@@ -394,14 +394,16 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
             if (reflectivity == 0.f && canHit) {
-                if (blockType == 1) { //water
-                    reflectivity = 0.3f;
-                } else if (blockType == 7) { //kyanite
-                    reflectivity = 0.33f;
-                } else if (blockType >= 11 && blockType <= 13) { //glass
-                    reflectivity = 0.25f;
-                } else if (blockType == 15) { //planks
-                    reflectivity = 0.08f;
+                if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
+                    if (blockType == 1) { //water
+                        reflectivity = 0.3f;
+                    } else if (blockType == 7) { //kyanite
+                        reflectivity = 0.33f;
+                    } else if (blockType >= 11 && blockType <= 13) { //glass
+                        reflectivity = 0.25f;
+                    } else if (blockType == 15) { //planks
+                        reflectivity = 0.08f;
+                    }
                 }
             }
             normal = ivec3(mapPos - prevMapPos);
@@ -480,10 +482,13 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
             }
         }
 
-        innerMini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
+        mask = stepMask(sideDist);
+        mapPos += mask * raySign;
+        prevMapPos = mapPos;
+        mini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
         hitNormal = -mask * raySign;
         rayLength = 0f;
-        voxelDist = max(innerMini.x, max (innerMini.y, innerMini.z));
+        voxelDist = max(mini.x, max (mini.y, mini.z));
         if (voxelDist > 0.0f) {
             rayLength += voxelDist/8;
         }
@@ -497,18 +502,15 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
             rayLength += (chunkDist*16);
         }
         realPos = (ogRayPos + rayDir * rayLength);
-        prevPos = realPos + (hitNormal * 0.001);
+        prevPos = realPos + (hitNormal * 0.001f);
         prevVoxelColor = voxelColor;
-        prevMapPos = mapPos;
-        mask = stepMask(sideDist);
-        mapPos += mask * raySign;
         sideDist += mask * raySign * deltaDist;
     }
 
     return vec4(0.0);
 }
 
-vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
+vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -516,6 +518,10 @@ vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset
     vec3 mask = iMask;
     rayMapPos = offset+mapPos;
     prevRayMapPos = rayMapPos;
+
+    if (distance(rayMapPos, ogRayPos) > (isShadow ? 1000 : renderDistance)) {
+        return vec4(-1);
+    }
 
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         if (checkBlocks) {
@@ -568,6 +574,7 @@ vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset
 
                 vec3 relativePos = lightPos-rayMapPos;
                 vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
+//                lighting = centerLighting;
                 //smooth lighting start
                 vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
                 verticalLighting = mix(relativePos.y >= 0.5f ? centerLighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : centerLighting, relativePos.y);
@@ -612,6 +619,8 @@ vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset
 
             if (color.a >= 1) {
                 return color;
+            } else if (color.a <= -1) {
+                return vec4(-1);
             }
         }
 
@@ -625,7 +634,7 @@ vec4 dda(float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset
     return vec4(0);
 }
 
-vec4 subChunkDDA(float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
+vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(1.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -633,6 +642,10 @@ vec4 subChunkDDA(float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPo
     vec3 mask = iMask;
     vec3 realPos = offset+(mapPos*8);
     int subChunks = chunkBlocksData[(condensedChunkPos*5)+4];
+
+    if (distance(realPos, ogRayPos) > (isShadow ? 1000 : renderDistance)) {
+        return vec4(-1);
+    }
 
     while (mapPos.x < 2.0 && mapPos.x >= 0.0 && mapPos.y < 2.0 && mapPos.y >= 0.0 && mapPos.z < 2.0 && mapPos.z >= 0.0) {
         bool checkBlocks = false;
@@ -651,10 +664,12 @@ vec4 subChunkDDA(float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPo
                 uv3d = rayPos - mapPos;
             }
 
-            vec4 color = dda(chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true);
+            vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true);
 
             if (color.a >= 1) {
                 return color;
+            } else if (color.a <= -1) {
+                return vec4(-1);
             }
         } else {
             //snow start
@@ -680,7 +695,7 @@ vec4 subChunkDDA(float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPo
     return vec4(0);
 }
 
-vec4 traceWorld(vec3 ogPos, vec3 rayDir) {
+vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
     ogRayPos = ogPos;
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
@@ -690,7 +705,7 @@ vec4 traceWorld(vec3 ogPos, vec3 rayDir) {
     vec3 sideDist = ((rayMapChunkPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
 
-    while (distance(rayMapChunkPos, rayPos) <  renderDistance/16) {
+    while (distance(rayMapChunkPos, rayPos) < (isShadow ? 1000 : renderDistance)/chunkSize) {
         bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
         bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
         if (checkSubChunks) {
@@ -703,9 +718,13 @@ vec4 traceWorld(vec3 ogPos, vec3 rayDir) {
                 uv3d = rayPos - rayMapChunkPos;
             }
             ivec3 chunkPos = ivec3(rayMapChunkPos);
-            vec4 color = subChunkDDA(chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
+            vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
             if (color.a >= 1) {
                 return color;
+            } else if (color.a <= -1) {
+                prevHitPos = rayMapChunkPos*16;
+                hitPos = rayMapChunkPos*16;
+                return vec4(0);
             }
         } else {
             //snow start
@@ -763,7 +782,7 @@ vec4 prevSuperFinalTint = vec4(1);
 
 vec4 raytrace(vec3 ogRayPos, vec3 dir) {
     clearVars(true, false);
-    vec4 color = traceWorld(ogRayPos, dir);
+    vec4 color = traceWorld(false, ogRayPos, dir);
     prevReflectPos = prevHitPos;
     reflectPos = hitPos;
     isSky = color.a < 1.f;
@@ -812,8 +831,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir) {
                 sunDir.z = 0.00001f;
             }
             clearVars(true, true);
-            if (traceWorld(shadowPos, sunDir).a >= 1.f) {
-                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*0.72f;
+            if (traceWorld(true, shadowPos, sunDir).a >= 1.f) {
+                sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*1;
             }
             tint = max(vec3(1), tint);
             color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint

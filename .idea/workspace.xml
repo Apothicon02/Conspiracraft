@@ -9,15 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,14 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00118" summary="- Added reflections.">
-      <option name="closed" value="true" />
-      <created>1738468050722</created>
-      <option name="number" value="00118" />
-      <option name="presentableId" value="LOCAL-00118" />
-      <option name="project" value="LOCAL" />
-      <updated>1738468050723</updated>
     </task>
     <task id="LOCAL-00119" summary="- Increased wood saturation. &#10;- Fixed sunlight being extra bright at low elevation.">
       <option name="closed" value="true" />
@@ -594,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743035790583</updated>
     </task>
-    <option name="localTasksCounter" value="167" />
+    <task id="LOCAL-00167" summary="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack.">
+      <option name="closed" value="true" />
+      <created>1750776145104</created>
+      <option name="number" value="00167" />
+      <option name="presentableId" value="LOCAL-00167" />
+      <option name="project" value="LOCAL" />
+      <updated>1750776145104</updated>
+    </task>
+    <option name="localTasksCounter" value="168" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,7 +604,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game." />
     <MESSAGE value="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps." />
     <MESSAGE value="- Added mountains. &#10;- Fixed sunlight worldgen. &#10;- Re-enabled reflections." />
     <MESSAGE value="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast." />
@@ -635,7 +628,8 @@
     <MESSAGE value="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move." />
     <MESSAGE value="- Nearly quadrupled performance. &#10;- Removed light fog.&#10;- Sounds now support directionality. &#10;- Fixed window resizing. &#10;- Removed bricks." />
     <MESSAGE value="- Improved reflection accuracy. &#10;- Improved transparency fog brightness accuracy. &#10;- Partially fixed shadows." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Improved reflection accuracy. &#10;- Improved transparency fog brightness accuracy. &#10;- Partially fixed shadows." />
+    <MESSAGE value="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
