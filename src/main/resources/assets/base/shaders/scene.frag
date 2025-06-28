@@ -604,6 +604,10 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                     color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, noise(vec2(rayMapPos.x, rayMapPos.z)*10), 0)), 1);
                 }
                 lightPos = prevPos;
+            } else if (max(abs(rayMapPos.x-sun.x), max(abs(rayMapPos.y-sun.y), abs(rayMapPos.z-sun.z))) < 16) {
+                lighting = fromLinear(vec4(0, 0, 0, 20));
+                lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0))));
+                return vec4(1, 1, 0, 1);
             }
 
             //lighting start
@@ -710,7 +714,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
                 int subChunkPos = ((((localPos.x >= subChunkSize  ? 1 : 0)*2)+(localPos.z >= subChunkSize  ? 1 : 0))*2)+(localPos.y >= subChunkSize  ? 1 : 0);
                 checkBlocks = (((subChunks >> (subChunkPos % 32)) & 1) > 0);
             }
-            if (checkBlocks) {
+            if (checkBlocks || distance(realPos, sun) < 48) {
                 vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
                 float subChunkDist = max(mini.x, max(mini.y, mini.z));
                 vec3 intersect = rayPos + rayDir*subChunkDist;
@@ -781,7 +785,7 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
         } else {
             bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
             bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
-            if (checkSubChunks) {
+            if (checkSubChunks || distance(rayMapChunkPos*16, sun) < 48) {
                 vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
                 float chunkDist = max(mini.x, max(mini.y, mini.z));
                 vec3 intersect = rayPos + rayDir*chunkDist;
