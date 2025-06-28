@@ -61,6 +61,7 @@ int quarterChunkSize = chunkSize/4;
 int sizeChunks = size>> 4;
 int heightChunks = height>> 4;
 
+vec3 uvDir = vec3(0);
 vec3 camPos = vec3(cam[3]);
 vec3 prevRayMapPos = vec3(0);
 vec3 rayMapPos = vec3(0);
@@ -73,6 +74,7 @@ vec3 tint = vec3(0);
 float reflectivity = 0.f;
 bool renderingHand = true;
 bool hitSun = false;
+float cloudSpeed = 1000f;
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
@@ -364,7 +366,6 @@ vec3 stepMask(vec3 sideDist) {
 float normalBrightness = 1f;
 bool isSnowFlake = false;
 bool wasEverTinted = false;
-float cloudiness = 1f;
 ivec3 normal = ivec3(0);
 float distanceFogginess = 0f;
 bool firstVoxel = true;
@@ -524,7 +525,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
     return vec4(0.0);
 }
 
-vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
+vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks, bool couldBeSun) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -591,7 +592,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
             vec3 lightPos = rayMapPos;
             float camDist = distance(camPos, rayMapPos)/renderDistance;
             float whiteness = gradient(rayMapPos.y, 64, 372, 0, 0.8);
-            vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness*cloudiness);
+            vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
             if (blockInfo.x != 0.f) {
                 float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77);
                 if (blockInfo.x != 1.f) {
@@ -605,7 +606,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                     color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, noise(vec2(rayMapPos.x, rayMapPos.z)*10), 0)), 1);
                 }
                 lightPos = prevPos;
-            } else if (!isShadow && max(abs(rayMapPos.x-sun.x), max(abs(rayMapPos.y-sun.y), abs(rayMapPos.z-sun.z))) < 48) {
+            } else if (couldBeSun && max(abs(rayMapPos.x-sun.x), max(abs(rayMapPos.y-sun.y), abs(rayMapPos.z-sun.z))) < 48) {
                 hitSun = true;
                 lighting = fromLinear(vec4(0, 0, 0, 20));
                 lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0))));
@@ -679,7 +680,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
     return vec4(0);
 }
 
-vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks) {
+vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkSubChunks, bool couldBeSun) {
     vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(1.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
@@ -704,7 +705,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
                 uv3d = rayPos - mapPos;
             }
 
-            vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, true, true);
+            vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, true, true, false);
 
             if (color.a >= 1) {
                 return color;
@@ -716,7 +717,11 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
                 int subChunkPos = ((((localPos.x >= subChunkSize  ? 1 : 0)*2)+(localPos.z >= subChunkSize  ? 1 : 0))*2)+(localPos.y >= subChunkSize  ? 1 : 0);
                 checkBlocks = (((subChunks >> (subChunkPos % 32)) & 1) > 0);
             }
-            if (checkBlocks || (!isShadow && distance(realPos, sun) < 96)) {
+            bool couldStillBeSun = false;
+            if (couldBeSun) {
+                couldStillBeSun = distance(realPos, sun) < 96;;
+            }
+            if (checkBlocks || couldBeSun) {
                 vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
                 float subChunkDist = max(mini.x, max(mini.y, mini.z));
                 vec3 intersect = rayPos + rayDir*subChunkDist;
@@ -726,7 +731,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
                     uv3d = rayPos - mapPos;
                 }
 
-                vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true);
+                vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, inBounds, true, couldBeSun);
 
                 if (color.a >= 1) {
                     return color;
@@ -780,14 +785,15 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
                 uv3d = rayPos - rayMapChunkPos;
             }
             ivec3 chunkPos = ivec3(rayMapChunkPos);
-            vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, true, true);
+            vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, true, true, false);
             if (color.a >= 1) {
                 return color;
             }
         } else {
             bool inBounds = (rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks-1 && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks-1 && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks-1);
             bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
-            if (checkSubChunks || (!isShadow && distance(rayMapChunkPos*16, sun) < 96)) {
+            bool couldBeSun = (!isShadow && distance(rayMapChunkPos*16, sun) < 96);
+            if (checkSubChunks || couldBeSun) {
                 vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
                 float chunkDist = max(mini.x, max(mini.y, mini.z));
                 vec3 intersect = rayPos + rayDir*chunkDist;
@@ -797,7 +803,7 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
                     uv3d = rayPos - rayMapChunkPos;
                 }
                 ivec3 chunkPos = ivec3(rayMapChunkPos);
-                vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
+                vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y, chunkPos*16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks, couldBeSun);
                 if (color.a >= 1) {
                     return color;
                 } else if (color.a <= -1) {
@@ -853,10 +859,8 @@ void clearVars(bool clearHit, bool clearTint) {
     }
     normal = ivec3(0);
     normalBrightness = 1f;
-    cloudiness = 1f;
 }
 
-float prevCloudiness = 0;
 vec4 prevFog = vec4(1);
 vec4 prevSuperFinalTint = vec4(1);
 
@@ -884,7 +888,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     if (isSky) {
         distanceFogginess = 1;
     }
-    distanceFogginess = clamp(distanceFogginess*cloudiness, 0, 1f);
+    distanceFogginess = clamp(distanceFogginess, 0, 1f);
     if (renderingHand) {
         lighting = fromLinear(getLighting(camPos.x, camPos.y, camPos.z, true, true, true));
         lightFog = max(lightFog, lighting*(1-vec4(0.5, 0.5, 0.5, 0)));
@@ -901,9 +905,14 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 finalLightFog = max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a/20)*mixedTime))/4), ((sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunBrightness));
     vec3 finalTint = max(vec3(1), tint);
 
-    cloudiness = max(cloudiness, prevCloudiness);
-    prevCloudiness = cloudiness;
-    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), max(whiteness, (cloudiness-1)*1.5f))*min(1, (isSky ? 0.33f : 0.05f)+sunLight);
+
+    vec3 cloudPos = (vec3(cam * vec4(uvDir * 500f, 1))-camPos);
+    if (isSnowFlake) {
+        whiteness = max(whiteness+0.5f, 1);
+    } else if (isSky) {
+        whiteness = whiteness+max(0, noise((vec2(cloudPos.x, cloudPos.y))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.y, cloudPos.z))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)));
+    }
+    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, (isSky ? 0.33f : 0.05f)+sunLight);
     if (!isSky && !isSnowFlake && checkShadow && shadowsEnabled && !hitSun) {
         if (color.a >= 1.f && sunLight > 0.f) {
             vec3 shadowPos = prevPos;
@@ -928,9 +937,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 finalLight = vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight;
     color = vec4(vec3(color)*min(vec3(1.15f), finalLight), color.a);//light
     //fog start
-    if (isSnowFlake) {
-        whiteness = max(whiteness+0.5f, 1);
-    }
     color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), color.a);
     vec4 fog = 1+(isSnowFlake ? vec4(finalLight/5, 0) : vec4(vec3(finalLightFog), 1));
     color *= fog;
@@ -960,13 +966,12 @@ void main()
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
         ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y*res.y);
-        vec3 uvDir = normalize(vec3(uv, 1));
+        uvDir = normalize(vec3(uv, 1));
         vec3 ogDir = vec3(cam*vec4(uvDir, 0));
         vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
         shift = 0;
         renderingHand = false;
         if (handColor.a < 1) {
-            prevCloudiness = 0;
             prevFog = vec4(1);
             prevSuperFinalTint = vec4(1);
             distanceFogginess = 0;
