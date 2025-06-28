@@ -9,9 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,15 +101,18 @@
     &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
     &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft/game/world/trees/canopies&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -176,16 +178,6 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <list>
-      <item itemvalue="Application.Run" />
-      <item itemvalue="Gradle.build" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Gradle.build" />
-        <item itemvalue="Application.Run" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -195,14 +187,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00123" summary="- Tweaked leaf lighting.">
-      <option name="closed" value="true" />
-      <created>1738623864964</created>
-      <option name="number" value="00123" />
-      <option name="presentableId" value="LOCAL-00123" />
-      <option name="project" value="LOCAL" />
-      <updated>1738623864964</updated>
+      <workItem from="1751127809201" duration="48000" />
     </task>
     <task id="LOCAL-00124" summary="- Improved lighting and fog. &#10;- Fixed shadows causing crashes.">
       <option name="closed" value="true" />
@@ -588,9 +573,21 @@
       <option name="project" value="LOCAL" />
       <updated>1751083426511</updated>
     </task>
-    <option name="localTasksCounter" value="172" />
+    <task id="LOCAL-00172" summary="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code.">
+      <option name="closed" value="true" />
+      <created>1751127398086</created>
+      <option name="number" value="00172" />
+      <option name="presentableId" value="LOCAL-00172" />
+      <option name="project" value="LOCAL" />
+      <updated>1751127398086</updated>
+    </task>
+    <option name="localTasksCounter" value="173" />
     <servers />
   </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -604,7 +601,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes." />
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="- Updated README.md" />
     <MESSAGE value="- Fixed crash when music folder doesnt exist." />
     <MESSAGE value="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class." />
@@ -629,18 +626,23 @@
     <MESSAGE value="- Re-enabled hand rendering. &#10;- Doubled light intensity of blocklight." />
     <MESSAGE value="- The sun is now rendered." />
     <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
+    <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <breakpoint type="java-exception">
-          <properties class="java.lang.IndexOutOfBoundsException" package="java.lang" />
-          <option name="timeStamp" value="34" />
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="36" />
         </breakpoint>
-        <breakpoint type="java-exception">
-          <properties class="java.lang.OutOfMemoryError" package="java.lang" />
-          <option name="timeStamp" value="35" />
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="37" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="38" />
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
