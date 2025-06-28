@@ -11,6 +11,6 @@ import java.util.Map;
 
 public class Recipes {
     public static Map<Pair<Tag, Integer>, Pair<Vector2i, Integer>> recipes = new HashMap<>(Map.of(
-            new Pair<>(Tags.rocks, BlockTypes.getId(BlockTypes.WILLOW_LOG)), new Pair<>(new Vector2i(BlockTypes.getId(BlockTypes.WILLOW_PLANKS), 0), 4)
+            new Pair<>(Tags.rocks, BlockTypes.getId(BlockTypes.WILLOW_LOG)), new Pair<>(new Vector2i(BlockTypes.getId(BlockTypes.WILLOW_PLANKS), 0), 1)
     ));
 }
