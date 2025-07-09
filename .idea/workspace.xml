@@ -11,6 +11,10 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +95,7 @@
     &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
@@ -186,14 +190,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00126" summary="- Fixed light fog not showing in chunks only containing air. &#10;- Fixed reflections. &#10;- Fixed sunlight fog not being used. &#10;- Fixed variables not being reset before casting shadows.  &#10;- Smooth lighting now is only calculated when hitting a block. &#10;- Improved blocklight diminishment from sunlight.">
-      <option name="closed" value="true" />
-      <created>1739242908194</created>
-      <option name="number" value="00126" />
-      <option name="presentableId" value="LOCAL-00126" />
-      <option name="project" value="LOCAL" />
-      <updated>1739242908194</updated>
     </task>
     <task id="LOCAL-00127" summary="- Added ability to play sounds. &#10;- Added jumping sound. &#10;- Added walking sound. &#10;- Added swimming sound. &#10;- Added minecraft music. &#10;- Fixed gravity velocity building up when on a solid surface.">
       <option name="closed" value="true" />
@@ -579,7 +575,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751128310674</updated>
     </task>
-    <option name="localTasksCounter" value="175" />
+    <task id="LOCAL-00175" summary="- Fixed clouds toggle not doing anything.">
+      <option name="closed" value="true" />
+      <created>1752078997965</created>
+      <option name="number" value="00175" />
+      <option name="presentableId" value="LOCAL-00175" />
+      <option name="project" value="LOCAL" />
+      <updated>1752078997965</updated>
+    </task>
+    <option name="localTasksCounter" value="176" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -600,7 +604,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class." />
     <MESSAGE value="- Fixed clouds preventing block rendering in their chunks. &#10;- Added cloud movement. &#10;- Clouds can now be toggled with F3+C. &#10;- Cloud shading now changes based on camera altitude." />
     <MESSAGE value="- Added jungle biome.  &#10;- Added jungle logs. &#10;- Added jungle leaves. &#10;- Fixed subchunks not accounting for light. &#10;- Disabled debug prints." />
     <MESSAGE value="- Rays now cancel if cloudiness reaches max value. &#10;- Palette compression can now revert bitPerValue increases." />
@@ -625,6 +628,7 @@
     <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
     <MESSAGE value="- Logs now make 4 planks instead of 1." />
     <MESSAGE value="- Revert last change." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Revert last change." />
+    <MESSAGE value="- Fixed clouds toggle not doing anything." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed clouds toggle not doing anything." />
   </component>
 </project>

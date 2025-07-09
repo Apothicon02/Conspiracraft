@@ -17,6 +17,7 @@ import static org.conspiracraft.engine.Utils.condenseLocalPos;
 import static org.conspiracraft.game.world.World.*;
 
 public class WorldGen {
+    public static final boolean isEarth = true;
     public static int maxWorldgenHeight = 256;
 
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
@@ -53,23 +54,34 @@ public class WorldGen {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
                     float baseCellularNoise = Noises.CELLULAR_NOISE.sample(x, z);
-                    float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
-                    float noodleNoise = Noises.NOODLE_NOISE.sample(x, z);
-                    int miniX = x*8;
-                    int miniZ = z*8;
-                    float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
+                    if (isEarth) {
+                        float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
+                        float noodleNoise = Noises.NOODLE_NOISE.sample(x, z);
+                        int miniX = x * 8;
+                        int miniZ = z * 8;
+                        float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
 
-                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
-                    double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
-                    double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
-                    int volcanoElevation = (int) (Math.max(((Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400)+((Math.min(-0.95, secondaryVolcanoDist-1)+0.95)*10000), ((Math.min(0.25, centDist)-0.25)*-2000)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/4)));
-                    int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
-                    for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
-                        double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
-                        double baseDensity = baseCellularNoise + baseGradient;
-                        if (baseDensity > 0 || volcanoElevation >= y) {
-                            heightmap[condensePos(x, z)] = (short) y;
-                            break;
+                        double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
+                        double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize * 1.25f, halfSize * 1.25f) / halfSize) * 1.66f);
+                        double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
+                        int volcanoElevation = (int) (Math.max(((Math.min(0.25, secondaryVolcanoDist) - 0.25) * -1400) + ((Math.min(-0.95, secondaryVolcanoDist - 1) + 0.95) * 10000), ((Math.min(0.25, centDist) - 0.25) * -2000) + ((Math.min(-0.95, centDist - 1) + 0.95) * 10000)) * (1 - Math.abs((miniCellularNoise * miniCellularNoise) / 4)));
+                        int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
+                        for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
+                            double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
+                            double baseDensity = baseCellularNoise + baseGradient;
+                            if (baseDensity > 0 || volcanoElevation >= y) {
+                                heightmap[condensePos(x, z)] = (short) y;
+                                break;
+                            }
+                        }
+                    } else {
+                        for (int y = maxWorldgenHeight; y >= 0; y--) {
+                            double baseGradient = ConspiracraftMath.gradient(y, 172, 48, 2, -1);
+                            double baseDensity = baseCellularNoise + baseGradient;
+                            if (baseDensity > 0) {
+                                heightmap[condensePos(x, z)] = (short) y;
+                                break;
+                            }
                         }
                     }
                 }
@@ -86,36 +98,69 @@ public class WorldGen {
         for (int x = startX; x < startX+chunkSize; x++) {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    int lavaX = x*3;
-                    int lavaZ = z*3;
-                    float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
                     int y = surfaceHeightmap[condensePos(x, z)];
-                    double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
-                    double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
-                    int lavaLevel = (int) (293-(lavaNoise*5));
-                    if (centDist < 0.05f && y < lavaLevel) {
-                        heightmap[condensePos(x, z)] = (short) lavaLevel;
-                        for (int newY = lavaLevel; newY > 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 19, 0);
-                        }
-                    } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
-                        heightmap[condensePos(x, z)] = (short) (lavaLevel-100);
-                        for (int newY = lavaLevel-100; newY > 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 19, 0);
-                        }
-                    } else if (y < seaLevel) {
-                        for (int newY = seaLevel; newY > y; newY--) {
-                            setBlockWorldgen(x, newY, z, 1, 20);
-                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
-                            if (newY == seaLevel) {
-                                heightmap[condensePos(x, z)] = (short) y;
+                    if (isEarth) {
+                        int lavaX = x * 3;
+                        int lavaZ = z * 3;
+                        float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
+                        double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
+                        double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize * 1.25f, halfSize * 1.25f) / halfSize) * 1.66f);
+                        int lavaLevel = (int) (293 - (lavaNoise * 5));
+                        if (centDist < 0.05f && y < lavaLevel) {
+                            heightmap[condensePos(x, z)] = (short) lavaLevel;
+                            for (int newY = lavaLevel; newY > 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 19, 0);
                             }
-                        }
-                        for (int newY = y; newY > y-3; newY--) {
-                            setBlockWorldgen(x, newY, z, 3, 0);
-                        }
-                        for (int newY = y-3; newY >= 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 10, 0);
+                        } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel - 100) {
+                            heightmap[condensePos(x, z)] = (short) (lavaLevel - 100);
+                            for (int newY = lavaLevel - 100; newY > 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 19, 0);
+                            }
+                        } else if (y < seaLevel) {
+                            for (int newY = seaLevel; newY > y; newY--) {
+                                setBlockWorldgen(x, newY, z, 1, 20);
+                                setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
+                                if (newY == seaLevel) {
+                                    heightmap[condensePos(x, z)] = (short) y;
+                                }
+                            }
+                            for (int newY = y; newY > y - 3; newY--) {
+                                setBlockWorldgen(x, newY, z, 3, 0);
+                            }
+                            for (int newY = y - 3; newY >= 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 10, 0);
+                            }
+                        } else {
+                            int maxSteepness = 0;
+                            int minNeighborY = height - 1;
+                            for (int pos : new int[]{condensePos(Math.min(size - 1, x + 3), z), condensePos(Math.max(0, x - 3), z), condensePos(x, Math.min(size - 1, z + 3)), condensePos(x, Math.max(0, z - 3)),
+                                    condensePos(Math.max(0, x - 3), Math.max(0, z - 3)), condensePos(Math.min(size - 1, x + 3), Math.max(0, z - 3)), condensePos(Math.max(0, x - 3), Math.min(size - 1, z + 3)), condensePos(Math.min(size - 1, x + 3), Math.min(size - 1, z + 3))}) {
+                                int nY = surfaceHeightmap[pos];
+                                minNeighborY = Math.min(minNeighborY, nY);
+                                int steepness = Math.abs(y - nY);
+                                maxSteepness = Math.max(maxSteepness, steepness);
+                            }
+                            boolean flat = maxSteepness < 3;
+                            int volcanoElevation = (int) Math.max((Math.min(0.25, centDist) - 0.25) * -2000, (Math.min(0.25, secondaryVolcanoDist) - 0.25) * -1400);
+                            if (flat) {
+                                setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
+                                setBlockWorldgen(x, y - 1, z, 3, 0);
+                                setBlockWorldgen(x, y - 2, z, 3, 0);
+                                setBlockWorldgen(x, y - 3, z, 3, 0);
+                                for (int newY = y - 4; newY >= 0; newY--) {
+                                    setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
+                                }
+                            } else {
+                                int lavaAir = (int) (Math.abs(lavaNoise) * 200);
+                                for (int newY = y; newY >= 0; newY--) {
+                                    if (newY <= volcanoElevation) {
+                                        int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y - lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
+                                        setBlockWorldgen(x, newY, z, blockTypeId, 0);
+                                    } else {
+                                        setBlockWorldgen(x, newY, z, 10, 0);
+                                    }
+                                }
+                            }
                         }
                     } else {
                         int maxSteepness = 0;
@@ -128,24 +173,14 @@ public class WorldGen {
                             maxSteepness = Math.max(maxSteepness, steepness);
                         }
                         boolean flat = maxSteepness < 3;
-                        int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
                         if (flat) {
-                            setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
-                            setBlockWorldgen(x, y - 1, z, 3, 0);
-                            setBlockWorldgen(x, y - 2, z, 3, 0);
-                            setBlockWorldgen(x, y - 3, z, 3, 0);
-                            for (int newY = y - 4; newY >= 0; newY--) {
-                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
+                            setBlockWorldgen(x, y, z, 8, 0);
+                            for (int newY = y - 1; newY >= 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 10, 0);
                             }
                         } else {
-                            int lavaAir = (int)(Math.abs(lavaNoise)*200);
                             for (int newY = y; newY >= 0; newY--) {
-                                if (newY <= volcanoElevation) {
-                                    int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y-lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
-                                    setBlockWorldgen(x, newY, z, blockTypeId, 0);
-                                } else {
-                                    setBlockWorldgen(x, newY, z, 10, 0);
-                                }
+                                setBlockWorldgen(x, newY, z, 10, 0);
                             }
                         }
                     }
@@ -164,7 +199,7 @@ public class WorldGen {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
                     int y = surfaceHeightmap[condensePos(x, z)];
-                    if (y >= seaLevel) {
+                    if (y >= seaLevel || !isEarth) {
                         Vector2i blockOn = getBlockWorldgen(x, y, z);
                         float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                         float foliageNoise = (basePerlinNoise + 0.5f);

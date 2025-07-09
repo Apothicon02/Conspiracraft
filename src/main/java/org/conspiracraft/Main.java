@@ -10,7 +10,6 @@ import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.conspiracraft.engine.*;
-import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL;
 
 import java.io.File;
@@ -25,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 
 import static org.conspiracraft.game.Player.selectedBlock;
+import static org.conspiracraft.game.world.World.worldGenerated;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
@@ -512,7 +512,10 @@ public class Main {
             updateTime(diffTimeMillis, 1);
             while (timePassed >= tickTime) {
                 timePassed -= tickTime;
-                player.tick();
+                if (worldGenerated) {
+                    player.tick();
+                    World.tick();
+                }
             }
             interpolationTime = timePassed/tickTime;
             timePassed += diffTimeMillis;

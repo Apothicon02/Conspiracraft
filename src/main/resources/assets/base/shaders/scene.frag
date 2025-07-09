@@ -53,8 +53,9 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
+bool hasAtmosphere = true;
 int size = 2048; //6976
-int height = 432;
+int height = 432; //432
 int chunkSize = 16;
 int subChunkSize = chunkSize/2;
 int quarterChunkSize = chunkSize/4;
@@ -880,7 +881,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
     float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64, 372, 0.1, 0f);
-    float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
+    float mixedTime = hasAtmosphere ? (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus : adjustedTime+timeBonus;
     float fogNoise = (max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
     float fogDist = distance(camPos, prevPos)/renderDistance;
     float linearDistFog = fogDist+(fogNoise/2)+((fogNoise/2)*fogDist);
@@ -909,7 +910,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 cloudPos = (vec3(cam * vec4(uvDir * 500f, 1))-camPos);
     if (isSnowFlake) {
         whiteness = max(whiteness+0.5f, 1);
-    } else if (isSky && cloudsEnabled) {
+    } else if (isSky && cloudsEnabled && hasAtmosphere) {
         whiteness = whiteness+max(0, noise((vec2(cloudPos.x, cloudPos.y))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.y, cloudPos.z))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)));
     }
     vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, (isSky ? 0.33f : 0.05f)+sunLight);
@@ -937,12 +938,13 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 finalLight = vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight;
     color = vec4(vec3(color)*min(vec3(1.15f), finalLight), color.a);//light
     //fog start
-    color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), color.a);
-    vec4 fog = 1+(isSnowFlake ? vec4(finalLight/5, 0) : vec4(vec3(finalLightFog), 1));
-    color *= fog;
-    color *= prevFog;
-    prevFog = fog;
-
+    if (hasAtmosphere) {
+        color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), color.a);
+        vec4 fog = 1+(isSnowFlake ? vec4(finalLight/5, 0) : vec4(vec3(finalLightFog), 1));
+        color *= fog;
+        color *= prevFog;
+        prevFog = fog;
+    }
     //fog end
     //transparency start
     vec4 superFinalTint = fromLinear(vec4(vec3(finalTint)/(max(finalTint.r, max(finalTint.g, finalTint.b))), 1));
