@@ -9,7 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,9 +71,6 @@
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4f.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4fc.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Quaternionf.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -93,7 +90,8 @@
     &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Debug&quot;,
     &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
@@ -188,22 +186,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00124" summary="- Improved lighting and fog. &#10;- Fixed shadows causing crashes.">
-      <option name="closed" value="true" />
-      <created>1738702609627</created>
-      <option name="number" value="00124" />
-      <option name="presentableId" value="LOCAL-00124" />
-      <option name="project" value="LOCAL" />
-      <updated>1738702609627</updated>
-    </task>
-    <task id="LOCAL-00125" summary="- Graphics are greatly improved. &#10;- Logs no longer have the corners cutout. &#10;- Fixed ambient occlusion being more intense the closer to 0,0.">
-      <option name="closed" value="true" />
-      <created>1739053716966</created>
-      <option name="number" value="00125" />
-      <option name="presentableId" value="LOCAL-00125" />
-      <option name="project" value="LOCAL" />
-      <updated>1739053716966</updated>
     </task>
     <task id="LOCAL-00126" summary="- Fixed light fog not showing in chunks only containing air. &#10;- Fixed reflections. &#10;- Fixed sunlight fog not being used. &#10;- Fixed variables not being reset before casting shadows.  &#10;- Smooth lighting now is only calculated when hitting a block. &#10;- Improved blocklight diminishment from sunlight.">
       <option name="closed" value="true" />
@@ -581,7 +563,23 @@
       <option name="project" value="LOCAL" />
       <updated>1751127398086</updated>
     </task>
-    <option name="localTasksCounter" value="173" />
+    <task id="LOCAL-00173" summary="- Logs now make 4 planks instead of 1.">
+      <option name="closed" value="true" />
+      <created>1751128275970</created>
+      <option name="number" value="00173" />
+      <option name="presentableId" value="LOCAL-00173" />
+      <option name="project" value="LOCAL" />
+      <updated>1751128275970</updated>
+    </task>
+    <task id="LOCAL-00174" summary="- Revert last change.">
+      <option name="closed" value="true" />
+      <created>1751128310674</created>
+      <option name="number" value="00174" />
+      <option name="presentableId" value="LOCAL-00174" />
+      <option name="project" value="LOCAL" />
+      <updated>1751128310674</updated>
+    </task>
+    <option name="localTasksCounter" value="175" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -602,8 +600,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Updated README.md" />
-    <MESSAGE value="- Fixed crash when music folder doesnt exist." />
     <MESSAGE value="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class." />
     <MESSAGE value="- Fixed clouds preventing block rendering in their chunks. &#10;- Added cloud movement. &#10;- Clouds can now be toggled with F3+C. &#10;- Cloud shading now changes based on camera altitude." />
     <MESSAGE value="- Added jungle biome.  &#10;- Added jungle logs. &#10;- Added jungle leaves. &#10;- Fixed subchunks not accounting for light. &#10;- Disabled debug prints." />
@@ -627,24 +623,8 @@
     <MESSAGE value="- The sun is now rendered." />
     <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
     <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
-          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
-          <option name="timeStamp" value="36" />
-        </breakpoint>
-        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
-          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
-          <option name="timeStamp" value="37" />
-        </breakpoint>
-        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
-          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
-          <option name="timeStamp" value="38" />
-        </breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="- Logs now make 4 planks instead of 1." />
+    <MESSAGE value="- Revert last change." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Revert last change." />
   </component>
 </project>

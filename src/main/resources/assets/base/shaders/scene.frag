@@ -909,7 +909,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 cloudPos = (vec3(cam * vec4(uvDir * 500f, 1))-camPos);
     if (isSnowFlake) {
         whiteness = max(whiteness+0.5f, 1);
-    } else if (isSky) {
+    } else if (isSky && cloudsEnabled) {
         whiteness = whiteness+max(0, noise((vec2(cloudPos.x, cloudPos.y))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.y, cloudPos.z))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)));
     }
     vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, (isSky ? 0.33f : 0.05f)+sunLight);
