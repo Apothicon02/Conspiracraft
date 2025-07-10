@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 
 import static org.conspiracraft.game.Player.selectedBlock;
-import static org.conspiracraft.game.world.World.worldGenerated;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
@@ -301,6 +300,7 @@ public class Main {
     public static double interpolationTime = 0;
     public static double timePassed = 0;
     public static double tickTime = 50;
+    public static double worldTickStage = 0d;
     public static long timeMS;
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
@@ -512,10 +512,7 @@ public class Main {
             updateTime(diffTimeMillis, 1);
             while (timePassed >= tickTime) {
                 timePassed -= tickTime;
-                if (worldGenerated) {
-                    player.tick();
-                    World.tick();
-                }
+                player.tick();
             }
             interpolationTime = timePassed/tickTime;
             timePassed += diffTimeMillis;

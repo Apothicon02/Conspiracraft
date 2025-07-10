@@ -25,7 +25,7 @@ public class World {
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size / chunkSize;
-    public static short height = 432; //432
+    public static short height = 432;
     public static int heightChunks = height / chunkSize;
     public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
     public static boolean quarterWorld = false;
@@ -47,33 +47,6 @@ public class World {
     public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
     public static long stageTime = 0;
-
-    public static int tickRegionY = 4;
-    public static int tickRegionX = 0;
-    public static int tickRegionZ = 0;
-    public static int tickRegionSize = size/16;
-    public static int tickRegionHeight = height/tickRegionY;
-    public static void tick() {
-        for (int y = (tickRegionY * tickRegionHeight) + tickRegionHeight; y >= tickRegionY * tickRegionHeight; y--) {
-            for (int x = tickRegionX * tickRegionSize; x < (tickRegionX * tickRegionSize) + tickRegionSize; x++) {
-                for (int z = tickRegionZ * tickRegionSize; z < (tickRegionZ * tickRegionSize) + tickRegionSize; z++) {
-                    World.getBlock(x, y, z);
-                }
-            }
-        }
-        tickRegionY--;
-        if (tickRegionY < 0) {
-            tickRegionY = height/tickRegionHeight;
-            tickRegionX++;
-            if (tickRegionX > size / tickRegionSize) {
-                tickRegionX = 0;
-                tickRegionZ++;
-                if (tickRegionZ > size / tickRegionSize) {
-                    tickRegionZ = 0;
-                }
-            }
-        }
-    }
 
     public static void run() throws IOException {
         if (Files.exists(worldPath)) {
