@@ -21,33 +21,9 @@ layout(std430, binding = 0) buffer atlasSSBO
 {
     int[] atlasData;
 };
-layout(std430, binding = 1) buffer chunkBlocksSSBO
+layout(std430, binding = 1) buffer worldSSBO
 {
     int[] chunkBlocksData;
-};
-layout(std430, binding = 2) buffer blocksSSBO
-{
-    int[] blocksData;
-};
-layout(std430, binding = 3) buffer chunkCornersSSBO
-{
-    ivec4[] chunkCornersData;
-};
-layout(std430, binding = 4) buffer cornersSSBO
-{
-    int[] cornersData;
-};
-layout(std430, binding = 5) buffer chunkLightsSSBO
-{
-    ivec4[] chunkLightsData;
-};
-layout(std430, binding = 6) buffer lightsSSBO
-{
-    int[] lightsData;
-};
-layout(std430, binding = 7) buffer imageSSBO
-{
-    int[] imageData;
 };
 in vec4 gl_FragCoord;
 
@@ -55,7 +31,7 @@ out vec4 fragColor;
 
 bool hasAtmosphere = true;
 int size = 2048; //6976
-int height = 432; //432
+int height = 16; //432
 int chunkSize = 16;
 int subChunkSize = chunkSize/2;
 int quarterChunkSize = chunkSize/4;
@@ -149,40 +125,7 @@ vec4 intToColor(int color) {
     return vec4(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
 }
 
-ivec3 prevCornerChunkPos = ivec3(-1);
-ivec4 cornerPaletteInfo = ivec4(-1);
-int cornerValuesPerInt = -1;
 float logOf2 = log(2);
-int getCornerData(int x, int y, int z) {
-    ivec3 chunkPos = ivec3(x, y, z) >> 4;
-    ivec3 localPos  = ivec3(x, y, z) & ivec3(15);
-    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    if (chunkPos != prevCornerChunkPos) {
-        ivec3 prevCornerChunkPos = chunkPos;
-        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        ivec4 cornerPaletteInfo = chunkCornersData[condensedChunkPos];
-        int cornerValuesPerInt = 32/cornerPaletteInfo.z;
-
-        int intIndex  = condensedLocalPos/cornerValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * cornerValuesPerInt) * cornerPaletteInfo.z;
-        int key = (cornersData[cornerPaletteInfo.x+cornerPaletteInfo.y+intIndex] >> bitIndex) & cornerPaletteInfo.w;
-        return cornersData[cornerPaletteInfo.x+key];
-    } else {
-        int intIndex  = condensedLocalPos/cornerValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * cornerValuesPerInt) * cornerPaletteInfo.z;
-        int key = (cornersData[cornerPaletteInfo.x+cornerPaletteInfo.y+intIndex] >> bitIndex) & cornerPaletteInfo.w;
-        return cornersData[cornerPaletteInfo.x+key];
-    }
-}
-
-bool[8] getCorners(int x, int y, int z) {
-    int cornerData = getCornerData(x, y, z);
-    bool[8] data = bool[8](0);
-    for (int bit = 0; bit < 8; bit++) {
-        data[bit] = ((cornerData & (1 << (bit - 1))) >> (bit - 1)) == 0;
-    }
-    return data;
-}
 int shift = 0;
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
     if (shift == 1) {
@@ -196,13 +139,7 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
             return vec4(0);
         }
     }
-    bool[8] corners = getCorners(bX, bY, bZ);
-    int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
-    if (corners[cornerIndex]) {
-        return fromLinear(intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
-    } else {
-        return vec4(0, 0, 0, 0);
-    }
+    return fromLinear(intToColor(atlasData[(9984*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
 }
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype, float fire) {
     return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype, fire);
@@ -284,50 +221,7 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
     }
     vec4 light = intToColor(getLightData(intX, intY, intZ));
     if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
-        bool[8] corners = getCorners(intX, intY, intZ);
-        float localX = (x-intX);
-        float localY = (y-intY);
-        float localZ = (z-intZ);
-        bool anyEmpty = false;
-        if (shiftedY) {
-            int ySide = (localY < 0.5f ? 0 : 4);
-            if (!corners[ySide + 0 + 0]) {
-                anyEmpty = true;
-            } else if (!corners[ySide + 2 + 0]) {
-                anyEmpty = true;
-            } else if (!corners[ySide + 0 + 1]) {
-                anyEmpty = true;
-            } else if (!corners[ySide + 2 + 1]) {
-                anyEmpty = true;
-            }
-        }
-        if (shiftedZ) {
-            int zSide = (localZ < 0.5f ? 0 : 2);
-            if (!corners[0 + zSide + 0]) {
-                anyEmpty = true;
-            } else if (!corners[4 + zSide + 0]) {
-                anyEmpty = true;
-            } else if (!corners[0 + zSide + 1]) {
-                anyEmpty = true;
-            } else if (!corners[4 + zSide + 1]) {
-                anyEmpty = true;
-            }
-        }
-        if (shiftedX) {
-            int xSide = (localX < 0.5f ? 0 : 1);
-            if (!corners[0 + 0 + xSide]) {
-                anyEmpty = true;
-            } else if (!corners[4 + 0 + xSide]) {
-                anyEmpty = true;
-            } else if (!corners[0 + 2 + xSide]) {
-                anyEmpty = true;
-            } else if (!corners[4 + 2 + xSide]) {
-                anyEmpty = true;
-            }
-        }
-        if (!anyEmpty) {
-            return vec4(0, 0, 0, 0);
-        }
+        return vec4(0, 0, 0, 0);
     }
     return light;
 }
@@ -617,7 +511,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
             //lighting start
             if (inBounds && color.a >= 1.f) {
                 float lightNoise = max(0, noise((vec2(lightPos.x, lightPos.y)*64)+(float(time)*10000))+noise((vec2(lightPos.y, lightPos.z)*64)+(float(time)*10000))+noise((vec2(lightPos.z, lightPos.x)*64)+(float(time)*10000)));
-                float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)) * ((blockInfo.x == 17 || blockInfo.x == 21) ? 2 : 1));
+                float sunlightNoise = hasAtmosphere ? max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)) * ((blockInfo.x == 17 || blockInfo.x == 21) ? 2 : 1)) : 0.25f;
 
                 vec3 relativePos = lightPos-rayMapPos;
                 vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);

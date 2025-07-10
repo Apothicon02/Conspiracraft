@@ -2,7 +2,6 @@ package org.conspiracraft.engine;
 
 import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
-import org.conspiracraft.game.rendering.Renderer;
 
 public class Engine {
 
@@ -62,15 +61,13 @@ public class Engine {
             }
 
             if (targetFps <= 0 || deltaFps >= 1) {
-                if (Main.renderingEnabled) {
-                    Renderer.render(window);
-                }
+                Renderer.render(window);
                 deltaFps--;
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
                     fps = (int)(1000f/(now - initialTime));
-                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " + fps + "fps");
+                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + fps + "fps");
                     framesUntilUpdate = 40;
                 }
             }
