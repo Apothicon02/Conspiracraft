@@ -23,15 +23,15 @@ layout(std430, binding = 0) buffer atlasSSBO
 };
 layout(std430, binding = 1) buffer worldSSBO
 {
-    int[] chunkBlocksData;
+    int[] worldData;
 };
 in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
 bool hasAtmosphere = true;
-int size = 2048; //6976
-int height = 16; //432
+int size = 512; //6976
+int height = 32; //432
 int chunkSize = 16;
 int subChunkSize = chunkSize/2;
 int quarterChunkSize = chunkSize/4;
@@ -149,31 +149,38 @@ ivec3 prevBlockChunkPos = ivec3(-1);
 ivec4 blockPaletteInfo = ivec4(-1);
 int blockValuesPerInt = -1;
 int getBlockData(int x, int y, int z) {
-    ivec3 chunkPos = ivec3(x, y, z) >> 4;
-    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
-    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    if (chunkPos != prevBlockChunkPos) {
-        ivec3 prevBlockChunkPos = chunkPos;
-        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        ivec4 blockPaletteInfo = ivec4(chunkBlocksData[condensedChunkPos*5], chunkBlocksData[(condensedChunkPos*5)+1], chunkBlocksData[(condensedChunkPos*5)+2], chunkBlocksData[(condensedChunkPos*5)+3]);
-        int blockValuesPerInt = 32/blockPaletteInfo.z;
-
-        int intIndex  = condensedLocalPos/blockValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
-        int key = (blocksData[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
-        return blocksData[blockPaletteInfo.x+key];
-    } else {
-        int intIndex  = condensedLocalPos/blockValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
-        int key = (blocksData[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
-        return blocksData[blockPaletteInfo.x+key];
-    }
+//    ivec3 chunkPos = ivec3(x, y, z) >> 4;
+//    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
+//    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+//    if (chunkPos != prevBlockChunkPos) {
+//        ivec3 prevBlockChunkPos = chunkPos;
+//        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+//        ivec4 blockPaletteInfo = ivec4(chunkBlocksData[condensedChunkPos*5], chunkBlocksData[(condensedChunkPos*5)+1], chunkBlocksData[(condensedChunkPos*5)+2], chunkBlocksData[(condensedChunkPos*5)+3]);
+//        int blockValuesPerInt = 32/blockPaletteInfo.z;
+//
+//        int intIndex  = condensedLocalPos/blockValuesPerInt;
+//        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
+//        int key = (blocksData[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+//        return blocksData[blockPaletteInfo.x+key];
+//    } else {
+//        int intIndex  = condensedLocalPos/blockValuesPerInt;
+//        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
+//        int key = (blocksData[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+//        return blocksData[blockPaletteInfo.x+key];
+//    }
+    return 0;
 }
 ivec2 getBlock(int x, int y, int z) {
-    int blockData = getBlockData(x, y, z);
-    int type = (blockData >> 16) & 0xFFFF;
+    if (y < 6) {//((x & 1) == 0 && (y & 1) == 0) || ((x & 1) != 0 && (y & 1) != 0)) {
+        return ivec2(10, 0);
+    } else {
+        return ivec2(0, 0);
+    }
 
-    return ivec2(type, min(16, blockData & 0xFFFF));
+//    int blockData = getBlockData(x, y, z);
+//    int type = (blockData >> 16) & 0xFFFF;
+//
+//    return ivec2(type, min(16, blockData & 0xFFFF));
 }
 ivec2 getBlock(float x, float y, float z) {
     return getBlock(int(x), int(y), int(z));
@@ -190,48 +197,50 @@ ivec3 prevLightChunkPos = ivec3(-1);
 ivec4 lightPaletteInfo = ivec4(-1);
 int lightValuesPerInt = -1;
 int getLightData(int x, int y, int z) {
-    ivec3 chunkPos = ivec3(x, y, z) >> 4;
-    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
-    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    if (chunkPos != prevLightChunkPos) {
-        ivec3 prevLightChunkPos = chunkPos;
-        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        ivec4 lightPaletteInfo = chunkLightsData[condensedChunkPos];
-        int lightValuesPerInt = 32/lightPaletteInfo.z;
-
-        int intIndex  = condensedLocalPos/lightValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
-        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
-        return lightsData[lightPaletteInfo.x+key];
-    } else {
-        int intIndex  = condensedLocalPos/lightValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
-        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
-        return lightsData[lightPaletteInfo.x+key];
-    }
+//    ivec3 chunkPos = ivec3(x, y, z) >> 4;
+//    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
+//    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+//    if (chunkPos != prevLightChunkPos) {
+//        ivec3 prevLightChunkPos = chunkPos;
+//        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+//        ivec4 lightPaletteInfo = chunkLightsData[condensedChunkPos];
+//        int lightValuesPerInt = 32/lightPaletteInfo.z;
+//
+//        int intIndex  = condensedLocalPos/lightValuesPerInt;
+//        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
+//        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
+//        return lightsData[lightPaletteInfo.x+key];
+//    } else {
+//        int intIndex  = condensedLocalPos/lightValuesPerInt;
+//        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
+//        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
+//        return lightsData[lightPaletteInfo.x+key];
+//    }
+    return 0;
 }
 
 vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool shiftedZ) {
-    int intX = int(x);
-    int intY = int(y);
-    int intZ = int(z);
-    ivec2 block = getBlock(intX, intY, intZ);
-    if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
-        return vec4(0, 0, 0, 0);
-    }
-    vec4 light = intToColor(getLightData(intX, intY, intZ));
-    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
-        return vec4(0, 0, 0, 0);
-    }
-    return light;
+//    int intX = int(x);
+//    int intY = int(y);
+//    int intZ = int(z);
+//    ivec2 block = getBlock(intX, intY, intZ);
+//    if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
+//        return vec4(0, 0, 0, 0);
+//    }
+//    vec4 light = intToColor(getLightData(intX, intY, intZ));
+//    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
+//        return vec4(0, 0, 0, 0);
+//    }
+//    return light;
+    return vec4(0, 0, 0, 15);
 }
 
 bool isChunkAir(int x, int y, int z) {
     if (x >= 0 && x < sizeChunks && y >= 0 && y < heightChunks && z >= 0 && z < sizeChunks) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
-        int paletteSize = chunkBlocksData[(condensedChunkPos*5)+1];
+        int paletteSize = 1;//chunkBlocksData[(condensedChunkPos*5)+1];
         if (paletteSize == 1) {
-            int lightPaletteSize = chunkLightsData[condensedChunkPos].y;
+            int lightPaletteSize = 1;//chunkLightsData[condensedChunkPos].y;
             if (lightPaletteSize == 1) {
                 return true;
             } else {
@@ -582,7 +591,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
     vec3 sideDist = ((mapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
     vec3 realPos = offset+(mapPos*8);
-    int subChunks = chunkBlocksData[(condensedChunkPos*5)+4];
+    int subChunks = 0;//chunkBlocksData[(condensedChunkPos*5)+4];
 
     if (distance(realPos, ogRayPos) > (isShadow ? 1000 : renderDistance)) {
         return vec4(-1);

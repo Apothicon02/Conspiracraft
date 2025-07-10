@@ -5,4 +5,8 @@ public class ConspiraMath {
     public static long compressCell(int voxel, int element, int temperature, int pressure, int r, int g, int b, int s) {
         return voxel+element;
     }
+
+    public static float mix(float min, float max, float factor) {
+        return min * (1 - factor) + max * factor;
+    }
 }

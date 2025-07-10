@@ -1,5 +1,7 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.Main;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,7 +18,9 @@ public class Renderer {
     public static int atlasSSBOId;
 
     public static int resUniform;
+    public static int camUniform;
     public static boolean atlasChanged = true;
+    public static boolean worldChanged = false;
 
     public static void init(Window window) throws Exception {
         sceneVaoId = glGenVertexArrays();
@@ -45,6 +49,12 @@ public class Renderer {
         scene.bind();
 
         glUniform2f(resUniform, window.getWidth(), window.getHeight());
+        Matrix4f camMatrix = Main.player.getCameraMatrix();
+        glUniformMatrix4fv(camUniform, true, new float[]{
+                camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
+                camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
+                camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
+                camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
 
         if (atlasChanged) {
             atlasChanged = false;
@@ -65,6 +75,14 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
+
+        glBindVertexArray(sceneVaoId);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray(0);
+
+        scene.unbind();
+        worldChanged = false;
     }
 
     public void cleanup() {

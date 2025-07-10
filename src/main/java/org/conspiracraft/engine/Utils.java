@@ -1,6 +1,9 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.Main;
+import org.conspiracraft.game.ConspiraMath;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -8,6 +11,14 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 public class Utils {
+
+    public static float furthestFromZero(float first, float second) {
+        return Math.abs(first) > Math.abs(second) ? first : second;
+    }
+
+    public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
+        return new Vector3f(ConspiraMath.mix(old.x, current.x, (float) Main.interpolationTime), ConspiraMath.mix(old.y, current.y, (float) Main.interpolationTime), ConspiraMath.mix(old.z, current.z, (float) Main.interpolationTime));
+    }
 
     public static String readFile(String filePath) {
         List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
