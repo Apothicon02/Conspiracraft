@@ -74,7 +74,7 @@ public class Chunk {
     public int[] getSubChunks() {
         return subChunks.getData();
     }
-    public void setBlockKey(Vector3i pos, int key) {
+    public void setBlockKey(Vector3i pos, int key, Vector3i globalPos) {
         int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
         if (neededBitsPerValue != blockData.bitsPerValue) {
             BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
@@ -86,6 +86,26 @@ public class Chunk {
         blockData.setValue(condenseLocalPos(pos), key);
         if (blockPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        } else {
+            boolean isEmpty = true;
+            for (int x = 0; x < chunkSize && isEmpty; x++) {
+                for (int z = 0; z < chunkSize && isEmpty; z++) {
+                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                        if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (isEmpty) {
+                blockPalette.clear();
+                blockPalette.add(0);
+                int condensedChunkPos = Utils.condenseChunkPos(globalPos.x / chunkSize, globalPos.y / chunkSize, globalPos.z / chunkSize);
+                int chunkDataIndex = condensedChunkPos / 32;
+                int bit = (condensedChunkPos - (chunkDataIndex * 32)) - 1;
+                World.chunkEmptiness[chunkDataIndex] &= ~(1 << bit);
+            }
         }
     }
     public int getBlockKey(int pos) {
@@ -102,14 +122,18 @@ public class Chunk {
         for (int paletteEntry : blockPalette) {
             key++;
             if (paletteEntry == block) {
-                setBlockKey(pos, key);
+                setBlockKey(pos, key, globalPos);
                 wasInPalette = true;
                 break;
             }
         }
         if (!wasInPalette) {
+            int condensedChunkPos = Utils.condenseChunkPos(globalPos.x/chunkSize, globalPos.y/chunkSize, globalPos.z/chunkSize);
+            int chunkDataIndex = condensedChunkPos/32;
+            int bit = (condensedChunkPos-(chunkDataIndex*32)) - 1;
+            World.chunkEmptiness[chunkDataIndex] |= 1 << bit;
             blockPalette.addLast(block);
-            setBlockKey(pos, blockPalette.size()-1);
+            setBlockKey(pos, blockPalette.size()-1, globalPos);
         }
     }
     //Blocks end

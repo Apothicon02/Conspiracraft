@@ -1,10 +1,11 @@
 package org.conspiracraft;
 
+import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.interactions.Handcrafting;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.audio.AudioController;
-import org.conspiracraft.game.rendering.Renderer;
+import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.Chunk;
 import org.conspiracraft.game.world.World;
@@ -99,6 +100,11 @@ public class Main {
             Renderer.time = data[0]/1000f;
             timePassed = data[1]/1000f;
             meridiem = data[2];
+        }
+        String chunkEmptinessPath = (World.worldPath + "/chunk_emptiness.data");
+        if (Files.exists(Path.of(chunkEmptinessPath))) {
+            FileInputStream in = new FileInputStream(chunkEmptinessPath);
+            World.chunkEmptiness = Utils.flipIntArray(Utils.byteArrayToIntArray(in.readAllBytes()));
         }
         String heightmapPath = (World.worldPath + "/heightmap.data");
         if (Files.exists(Path.of(heightmapPath))) {
@@ -321,6 +327,12 @@ public class Main {
             out.write(globalData);
             out.close();
 
+            String chunkEmptinessDataPath = path+"chunk_emptiness.data";
+            out = new FileOutputStream(chunkEmptinessDataPath);
+            byte[] chunkEpmtinessData = Utils.intArrayToByteArray(World.chunkEmptiness);
+            out.write(chunkEpmtinessData);
+            out.close();
+
             String heightmapDataPath = path+"heightmap.data";
             out = new FileOutputStream(heightmapDataPath);
             byte[] heightmapData = Utils.intArrayToByteArray(Utils.shortArrayToIntArray(World.heightmap));
@@ -510,11 +522,13 @@ public class Main {
             }
             World.run();
             updateTime(diffTimeMillis, 1);
+            interpolationTime = timePassed/tickTime;
             while (timePassed >= tickTime) {
                 timePassed -= tickTime;
+                interpolationTime = timePassed/tickTime;
                 player.tick();
+                ScheduledTicker.tick();
             }
-            interpolationTime = timePassed/tickTime;
             timePassed += diffTimeMillis;
         }
     }

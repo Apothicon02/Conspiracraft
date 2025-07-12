@@ -2,7 +2,7 @@ package org.conspiracraft.engine;
 
 import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
-import org.conspiracraft.game.rendering.Renderer;
+import org.conspiracraft.game.Renderer;
 
 public class Engine {
 

@@ -49,6 +49,10 @@ layout(std430, binding = 7) buffer imageSSBO
 {
     int[] imageData;
 };
+layout(std430, binding = 8) buffer chunkEmptySSBO
+{
+    int[] chunkEmptyData;
+};
 in vec4 gl_FragCoord;
 
 out vec4 fragColor;
@@ -334,16 +338,13 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
 bool isChunkAir(int x, int y, int z) {
     if (x >= 0 && x < sizeChunks && y >= 0 && y < heightChunks && z >= 0 && z < sizeChunks) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
-        int paletteSize = chunkBlocksData[(condensedChunkPos*5)+1];
-        if (paletteSize == 1) {
-            int lightPaletteSize = chunkLightsData[condensedChunkPos].y;
-            if (lightPaletteSize == 1) {
-                return true;
-            } else {
-                return false;
-            }
+        int chunkDataIndex = condensedChunkPos/32;
+        int chunkData = chunkEmptyData[chunkDataIndex];
+        if (chunkData != 0) {
+            int bit = condensedChunkPos-(chunkDataIndex*32);
+            return ((chunkData & (1 << (bit - 1))) >> (bit - 1)) == 0;
         } else {
-            return false;
+            return true;
         }
     } else {
         return true;
@@ -962,7 +963,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
 void main()
 {
     vec2 uv = (vec2(gl_FragCoord)*2. - res.xy) / res.y;
-    if (ui && uv.x >= -0.004 && uv.x <= 0.004 && uv.y >= -0.004385 && uv.y <= 0.004385) {
+    if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
         ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y*res.y);

@@ -7,7 +7,6 @@ import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.conspiracraft.game.rendering.Renderer;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
 

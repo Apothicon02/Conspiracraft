@@ -4,7 +4,7 @@ import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
-import org.conspiracraft.game.rendering.Renderer;
+import org.conspiracraft.game.Renderer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -40,6 +40,7 @@ public class World {
     public static int currentChunk = -1;
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
+    public static int[] chunkEmptiness = new int[(sizeChunks*sizeChunks*heightChunks)/32];
     public static short[] surfaceHeightmap = new short[size*size];
     public static short[] heightmap = new short[size*size];
     public static ArrayList<Vector4i> liquidQueue = new ArrayList<>();

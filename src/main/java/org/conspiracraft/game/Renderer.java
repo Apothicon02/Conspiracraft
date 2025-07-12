@@ -1,4 +1,4 @@
-package org.conspiracraft.game.rendering;
+package org.conspiracraft.game;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.game.audio.AudioController;
@@ -49,6 +49,7 @@ public class Renderer {
     public static int chunkLightsSSBOId;
     public static int lightsSSBOId;
     public static int imageSSBOId;
+    public static int chunkEmptySSBOId;
 
     public static int resUniform;
     public static int camUniform;
@@ -134,6 +135,7 @@ public class Renderer {
         chunkLightsSSBOId = glGenBuffers();
         lightsSSBOId = glGenBuffers();
         imageSSBOId = glGenBuffers();
+        chunkEmptySSBOId = glGenBuffers();
 
         resUniform = glGetUniformLocation(scene.programId, "res");
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -528,6 +530,15 @@ public class Renderer {
                 glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos*4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos+1], chunkBlockPointers[pos+2], chunkBlockPointers[pos+3], chunkBlockPointers[pos+4], chunkBlockPointers[pos+5], chunkBlockPointers[pos+6]});
             }
             chunkBlockPointerChanges.clear();
+        }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, chunkEmptySSBOId);
+        if (worldChanged) {
+            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
+        } else {
+            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Blocks end

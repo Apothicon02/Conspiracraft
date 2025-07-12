@@ -1,6 +1,6 @@
 package org.conspiracraft.game.noise;
 
-import org.conspiracraft.game.rendering.Renderer;
+import org.conspiracraft.game.Renderer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
