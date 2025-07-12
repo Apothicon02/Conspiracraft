@@ -40,6 +40,7 @@ public class World {
     public static int currentChunk = -1;
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
+    public static boolean chunkEmptinessChanged = false;
     public static int[] chunkEmptiness = new int[(sizeChunks*sizeChunks*heightChunks)/32];
     public static short[] surfaceHeightmap = new short[size*size];
     public static short[] heightmap = new short[size*size];

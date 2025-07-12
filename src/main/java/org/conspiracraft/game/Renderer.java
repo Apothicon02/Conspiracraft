@@ -538,7 +538,10 @@ public class Renderer {
         if (worldChanged) {
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
         } else {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
+            if (chunkEmptinessChanged) {
+                chunkEmptinessChanged = false;
+                glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
+            }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Blocks end

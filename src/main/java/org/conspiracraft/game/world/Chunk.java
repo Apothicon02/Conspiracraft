@@ -104,7 +104,11 @@ public class Chunk {
                 int condensedChunkPos = Utils.condenseChunkPos(globalPos.x / chunkSize, globalPos.y / chunkSize, globalPos.z / chunkSize);
                 int chunkDataIndex = condensedChunkPos / 32;
                 int bit = (condensedChunkPos - (chunkDataIndex * 32)) - 1;
+                int prev = World.chunkEmptiness[chunkDataIndex];
                 World.chunkEmptiness[chunkDataIndex] &= ~(1 << bit);
+                if (prev != World.chunkEmptiness[chunkDataIndex]) {
+                    chunkEmptinessChanged = true;
+                }
             }
         }
     }
@@ -131,7 +135,11 @@ public class Chunk {
             int condensedChunkPos = Utils.condenseChunkPos(globalPos.x/chunkSize, globalPos.y/chunkSize, globalPos.z/chunkSize);
             int chunkDataIndex = condensedChunkPos/32;
             int bit = (condensedChunkPos-(chunkDataIndex*32)) - 1;
+            int prev = World.chunkEmptiness[chunkDataIndex];
             World.chunkEmptiness[chunkDataIndex] |= 1 << bit;
+            if (prev != World.chunkEmptiness[chunkDataIndex]) {
+                chunkEmptinessChanged = true;
+            }
             blockPalette.addLast(block);
             setBlockKey(pos, blockPalette.size()-1, globalPos);
         }
@@ -188,6 +196,22 @@ public class Chunk {
         cornerData.setValue(condenseLocalPos(pos), key);
         if (cornerPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        } else {
+            boolean isEmpty = true;
+            for (int x = 0; x < chunkSize && isEmpty; x++) {
+                for (int z = 0; z < chunkSize && isEmpty; z++) {
+                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                        if (cornerPalette.get(getCornerKey(condenseLocalPos(x, y, z))) != 0) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (isEmpty) {
+                cornerPalette.clear();
+                cornerPalette.add(0);
+            }
         }
     }
     public int getCornerKey(int pos) {
@@ -266,6 +290,22 @@ public class Chunk {
         lightData.setValue(Utils.condenseLocalPos(pos), key);
         if (!Utils.unpackColor(lightPalette.get(key)).equals(fullSunlight)) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        } else {
+            boolean isEmpty = true;
+            for (int x = 0; x < chunkSize && isEmpty; x++) {
+                for (int z = 0; z < chunkSize && isEmpty; z++) {
+                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                        if (lightPalette.get(getLightKey(condenseLocalPos(x, y, z))) != 0) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (isEmpty) {
+                lightPalette.clear();
+                lightPalette.add(0);
+            }
         }
     }
     public int getLightKey(int pos) {
