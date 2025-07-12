@@ -11,9 +11,11 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/ScheduledTicker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/ScheduledTicker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +96,7 @@
     "Gradle.Build Terraflat.executor": "Run",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "Gradle.Terraflat [build].executor": "Run",
@@ -195,14 +197,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00129" summary="- Fixed crash with light propogation. &#10;- Sunlight is now immune to normal-based brightness. &#10;- Fixed blocklight fog not existing. &#10;- Block lighting is now non-linear.">
-      <option name="closed" value="true" />
-      <created>1739560735409</created>
-      <option name="number" value="00129" />
-      <option name="presentableId" value="LOCAL-00129" />
-      <option name="project" value="LOCAL" />
-      <updated>1739560735410</updated>
     </task>
     <task id="LOCAL-00130" summary="- Strengthened gravity. &#10;- Added bouncing.">
       <option name="closed" value="true" />
@@ -588,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752355926449</updated>
     </task>
-    <option name="localTasksCounter" value="178" />
+    <task id="LOCAL-00178" summary="- Light and corner palettes can now be re-compressed. &#10;- Optimized chunk emptiness data uploading.">
+      <option name="closed" value="true" />
+      <created>1752356586405</created>
+      <option name="number" value="00178" />
+      <option name="presentableId" value="LOCAL-00178" />
+      <option name="project" value="LOCAL" />
+      <updated>1752356586405</updated>
+    </task>
+    <option name="localTasksCounter" value="179" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -609,7 +611,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles." />
     <MESSAGE value="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme." />
     <MESSAGE value="- Added plains biome. &#10;- Improved jungle and forest biomes. &#10;- Added rocks." />
     <MESSAGE value="- Greatly optimized worldgen." />
@@ -634,7 +635,8 @@
     <MESSAGE value="- Atmosphere can now be toggled. &#10;- Added luna terrain generator." />
     <MESSAGE value="- Optimized rendering slightly." />
     <MESSAGE value="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed." />
+    <MESSAGE value="- Light and corner palettes can now be re-compressed. &#10;- Optimized chunk emptiness data uploading." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Light and corner palettes can now be re-compressed. &#10;- Optimized chunk emptiness data uploading." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -643,6 +645,36 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java</url>
           <line>109</line>
           <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java</url>
+          <line>85</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java</url>
+          <line>83</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java</url>
+          <line>12</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java</url>
+          <line>194</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java</url>
+          <line>21</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/ScheduledTicker.java</url>
+          <line>15</line>
+          <option name="timeStamp" value="33" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

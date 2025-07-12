@@ -192,8 +192,12 @@ public class Main {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     } else if (amount > 0) {
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
-                                        selectedBlock.z--;
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : blockSubtypeId, true, false);
+                                        selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : 1;
+                                        if (selectedBlock.z <= 0) {
+                                            selectedBlock.x = 0;
+                                            selectedBlock.y = 0;
+                                        }
                                     }
                                 }
                             }
@@ -213,9 +217,9 @@ public class Main {
                         Renderer.cloudsEnabled = !Renderer.cloudsEnabled;
                     }
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        selectedBlock.add(new Vector3i(0, isShiftDown ? 100 : 1, selectedBlock.z()));
+                        selectedBlock.add(new Vector3i(0, isShiftDown ? 10 : 1, 0));
                     } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newSubId = selectedBlock.y() - (isShiftDown ? 100 : 1);
+                        int newSubId = selectedBlock.y() - (isShiftDown ? 10 : 1);
                         if (newSubId < 0) {
                             newSubId = 0;
                         }
@@ -306,8 +310,8 @@ public class Main {
     public static double interpolationTime = 0;
     public static double timePassed = 0;
     public static double tickTime = 50;
-    public static double worldTickStage = 0d;
     public static long timeMS;
+    public static long currentTick = 0;
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
         timeMS = time;
@@ -524,6 +528,7 @@ public class Main {
             updateTime(diffTimeMillis, 1);
             interpolationTime = timePassed/tickTime;
             while (timePassed >= tickTime) {
+                currentTick++;
                 timePassed -= tickTime;
                 interpolationTime = timePassed/tickTime;
                 player.tick();

@@ -412,7 +412,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
             if (reflectivity == 0.f && canHit) {
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
                     if (blockType == 1) { //water
-                        reflectivity = 0.3f;
+                        //reflectivity = 0.3f;
                     } else if (blockType == 7) { //kyanite
                         reflectivity = 0.33f;
                     } else if (blockType >= 11 && blockType <= 13) { //glass

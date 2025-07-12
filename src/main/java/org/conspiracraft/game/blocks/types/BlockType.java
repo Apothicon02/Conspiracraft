@@ -1,6 +1,9 @@
 package org.conspiracraft.game.blocks.types;
 
+import org.conspiracraft.game.world.FluidHelper;
+import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 
 public class BlockType {
     public boolean isSolid = true;
@@ -13,6 +16,10 @@ public class BlockType {
 
     public boolean obstructingHeightmap(Vector2i block) {
         return obstructsHeightmap;
+    }
+
+    public void tick(Vector3i pos) {
+        FluidHelper.updateFluid(pos, World.getBlock(pos));
     }
 
     public BlockType(boolean solid, boolean canBlockLight, boolean collidable, boolean fluidReplacable, boolean fluid, boolean obstructHeightmap, boolean needSupport) {

@@ -1,5 +1,7 @@
 package org.conspiracraft.game.world;
 
+import org.conspiracraft.Main;
+import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Vector2i;
@@ -13,6 +15,7 @@ public class FluidHelper {
         neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z-1);
         neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
         BlockType type = BlockTypes.blockTypeMap.get(fluid.x);
+        boolean scheduleTick = false;
         if (type.isFluid) { //only flow out if it's a fluid
             Vector3i belowPos = new Vector3i(pos.x, pos.y - 1, pos.z);
             Vector2i belowFluid = new Vector2i(World.getBlock(belowPos));
@@ -27,6 +30,7 @@ public class FluidHelper {
                         type = BlockTypes.AIR;
                     }
                     World.setLiquid(belowPos.x, belowPos.y, belowPos.z, belowFluid.x, belowFluid.y, true, false);
+                    scheduleTick = true;
                 }
             }
         }
@@ -43,6 +47,7 @@ public class FluidHelper {
                     aboveFluid = new Vector2i(0);
                 }
                 World.setLiquid(abovePos.x, abovePos.y, abovePos.z, aboveFluid.x, aboveFluid.y, true, false);
+                scheduleTick = true;
             }
         }
 
@@ -59,6 +64,7 @@ public class FluidHelper {
                         nFluid = new Vector2i(0);
                     }
                     World.setLiquid(nPos.x, nPos.y, nPos.z, nFluid.x, nFluid.y, true, false);
+                    scheduleTick = true;
                 }
             } else if ((nType.isFluidReplaceable || (nFluid.x == fluid.x && nFluid.y < fluid.y)) && type.isFluid) { //flow out
                 int splitValue = (int)((fluid.y-nFluid.y)/2f);
@@ -70,8 +76,14 @@ public class FluidHelper {
                         type = BlockTypes.AIR;
                     }
                     World.setLiquid(nPos.x, nPos.y, nPos.z, nFluid.x, nFluid.y, true, false);
+                    scheduleTick = true;
                 }
             }
+        }
+        if (scheduleTick) {
+            ScheduledTicker.schedule.put(Main.currentTick+1, pos);
+        } else {
+            scheduleTick = false;
         }
 
 //        for (Vector3i nPos : neighborPositions) {
