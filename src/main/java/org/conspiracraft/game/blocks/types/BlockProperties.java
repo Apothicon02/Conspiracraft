@@ -28,7 +28,7 @@ public class BlockProperties implements Cloneable {
         this.isFluid = isFluid;
         return this;
     }
-    public boolean obstructsHeightmap = true;
+    protected boolean obstructsHeightmap = true;
     public BlockProperties obstructsHeightmap(boolean obstructsHeightmap) {
         this.obstructsHeightmap = obstructsHeightmap;
         return this;

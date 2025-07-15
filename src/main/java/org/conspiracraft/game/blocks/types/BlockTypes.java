@@ -22,7 +22,7 @@ public class BlockTypes {
     }
 
     public static BlockType AIR = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false)));
-    public static BlockType WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true)
+    public static BlockType WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false)
             .blockSFX(new int[]{8}, 1f, 1.25f)));
     public static BlockType GRASS = create(new BlockType(new BlockProperties()));
     public static BlockType DIRT = create(new BlockType(new BlockProperties()));

@@ -20,6 +20,54 @@ public class FluidHelper {
         boolean scheduleTick = false;
         int maxChange = 0;
 
+        if (type.blockProperties.isFluid) {
+            Vector3i bPos = new Vector3i(pos.x, pos.y-1, pos.z);
+            Vector2i bFluid = World.getBlock(bPos);
+            BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
+            boolean fluidReplacable = bType.blockProperties.isFluidReplaceable;
+            int room = fluidReplacable ? 15 : 15-bFluid.y;
+            if ((bType.blockProperties.isFluid && bFluid.x == fluid.x && room > 0) || fluidReplacable) {
+                bFluid.x = fluid.x;
+                int flow = Math.min(room, fluid.y);
+                if (fluidReplacable) {
+                    bFluid.y = flow;
+                } else {
+                    bFluid.y += flow;
+                }
+                fluid.y -= flow;
+                if (fluid.y < 1) {
+                    fluid.x = 0;
+                }
+
+                maxChange = flow;
+                scheduleTick = true;
+                World.setBlock(bPos.x, bPos.y, bPos.z, bFluid.x, bFluid.y, true, false, 4, true);
+            }
+        }
+
+        Vector3i aPos = new Vector3i(pos.x, pos.y+1, pos.z);
+        Vector2i aFluid = World.getBlock(aPos);
+        BlockType aType = BlockTypes.blockTypeMap.get(aFluid.x);
+        boolean fluidReplacable = type.blockProperties.isFluidReplaceable;
+        int room = fluidReplacable ? 15 : 15-fluid.y;
+        if ((aType.blockProperties.isFluid && (aFluid.x == fluid.x || type.blockProperties.isFluidReplaceable) && room > 0)) {
+            fluid.x = aFluid.x;
+            int flow = Math.min(room, aFluid.y);
+            if (fluidReplacable) {
+                fluid.y = flow;
+            } else {
+                fluid.y += flow;
+            }
+            aFluid.y -= flow;
+            if (aFluid.y < 1) {
+                aFluid.x = 0;
+            }
+
+            maxChange = flow;
+            scheduleTick = true;
+            World.setBlock(aPos.x, aPos.y, aPos.z, aFluid.x, aFluid.y, true, false, 4, true);
+        }
+
         for (Vector3i nPos : neighborPositions) {
             Vector2i nFluid = World.getBlock(nPos);
             BlockType nType = BlockTypes.blockTypeMap.get(nFluid.x);

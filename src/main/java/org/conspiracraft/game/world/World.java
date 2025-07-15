@@ -635,20 +635,35 @@ public class World {
                 byte g = 0;
                 byte b = 0;
                 BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
+                boolean lightChanged = false;
                 if (blockType instanceof LightBlockType lType) {
+                    lightChanged = true;
                     r = lType.lightBlockProperties().r;
                     g = lType.lightBlockProperties().g;
                     b = lType.lightBlockProperties().b;
                 }
                 Vector3i localPos = new Vector3i(x & 15, y & 15, z & 15);
                 Chunk chunk = chunks[condensedChunkPos];
+                Vector2i oldBlock = chunk.getBlock(Utils.condenseLocalPos(localPos));
+                BlockType oldBlockType = BlockTypes.blockTypeMap.get(oldBlock.x);
                 chunk.setBlock(localPos, blockTypeId, blockSubtypeId, pos);
                 if (tickDelay > 0) {
                     ScheduledTicker.scheduleTick(Main.currentTick+tickDelay, pos);
                 }
-                chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
-                updateHeightmap(x, z, true);
-                recalculateLight(pos, org.joml.Math.max(oldLight.x, r), org.joml.Math.max(oldLight.y, g), org.joml.Math.max(oldLight.z, b), oldLight.w);
+                if (!lightChanged) {
+                    lightChanged = blockType.blockProperties.blocksLight != oldBlockType.blockProperties.blocksLight;
+                }
+                if (lightChanged) {
+                    chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
+                }
+
+                if (blockType.obstructingHeightmap(new Vector2i(blockTypeId, blockSubtypeId)) != oldBlockType.obstructingHeightmap(oldBlock)) {
+                    updateHeightmap(x, z, true);
+                }
+
+                if (lightChanged) {
+                    recalculateLight(pos, org.joml.Math.max(oldLight.x, r), org.joml.Math.max(oldLight.y, g), org.joml.Math.max(oldLight.z, b), oldLight.w);
+                }
 
                 BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, silent);
             }
