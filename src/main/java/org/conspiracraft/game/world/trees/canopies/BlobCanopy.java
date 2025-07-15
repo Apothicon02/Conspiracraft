@@ -25,7 +25,7 @@ public class BlobCanopy extends Canopy {
                             for (int extraY = lY; extraY >= surfaceY; extraY--) {
                                 setLightWorldgen(lX, extraY, lZ, new Vector4i(0, 0, 0, 0));
                                 if (extraY == surfaceY) {
-                                    if (BlockTypes.blockTypeMap.get(getBlockWorldgen(lX, extraY, lZ).x).isSolid) {
+                                    if (BlockTypes.blockTypeMap.get(getBlockWorldgen(lX, extraY, lZ).x).blockProperties.isSolid) {
                                         setBlockWorldgenNoReplaceSolids(lX, extraY + 1, lZ, blockType, (int) Math.abs(Math.random() * 6) + 1);
                                     }
                                 }

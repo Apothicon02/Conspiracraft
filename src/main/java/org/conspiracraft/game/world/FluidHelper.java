@@ -24,8 +24,8 @@ public class FluidHelper {
             Vector2i nFluid = World.getBlock(nPos);
             BlockType nType = BlockTypes.blockTypeMap.get(nFluid.x);
             boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y;
-            boolean isMainFluid = areBothFluid ? true : (nType.isFluidReplaceable && type.isFluid);
-            boolean isNFluid = areBothFluid ? true : (type.isFluidReplaceable && nType.isFluid);
+            boolean isMainFluid = areBothFluid ? true : (nType.blockProperties.isFluidReplaceable && type.blockProperties.isFluid);
+            boolean isNFluid = areBothFluid ? true : (type.blockProperties.isFluidReplaceable && nType.blockProperties.isFluid);
             if (isMainFluid || isNFluid) {
                 int newLevel = areBothFluid ? (fluid.y + nFluid.y) : (isMainFluid ? (fluid.y) : (nFluid.y));
                 if (newLevel > 1) {

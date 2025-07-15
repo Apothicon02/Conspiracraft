@@ -17,9 +17,9 @@ public class LightHelper {
         int corners = getCorner(pos.x, pos.y, pos.z);
         boolean isLight = blockType instanceof LightBlockType;
         if (!blocksLight(block.x, corners) || isLight) {
-            int r = Math.max(light.x(), isLight ? ((LightBlockType) blockType).r : 0);
-            int g = Math.max(light.y(), isLight ? ((LightBlockType) blockType).g : 0);
-            int b = Math.max(light.z(), isLight ? ((LightBlockType) blockType).b : 0);
+            int r = Math.max(light.x(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
+            int g = Math.max(light.y(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
+            int b = Math.max(light.z(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
             int s = (pos.y > World.heightmap[Utils.condensePos(pos.x, pos.z)] ? 20 : light.w);
             for (Vector3i neighborPos : new Vector3i[]{
                     new Vector3i(pos.x, pos.y, pos.z+1), new Vector3i(pos.x+1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z-1),
@@ -31,9 +31,9 @@ public class LightHelper {
                     BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
                     boolean isNLight = neighborBlockType instanceof LightBlockType;
                     if (!blocksLight(neighbor.x, getCorner(neighborPos.x, neighborPos.y, neighborPos.z)) || isNLight) {
-                        r = Math.max(r, Math.max(neighborLight.x(), isNLight ? ((LightBlockType) neighborBlockType).r : 0)-1);
-                        g = Math.max(g, Math.max(neighborLight.y(), isNLight ? ((LightBlockType) neighborBlockType).g : 0)-1);
-                        b = Math.max(b, Math.max(neighborLight.z(), isNLight ? ((LightBlockType) neighborBlockType).b : 0)-1);
+                        r = Math.max(r, Math.max(neighborLight.x(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0)-1);
+                        g = Math.max(g, Math.max(neighborLight.y(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().g : 0)-1);
+                        b = Math.max(b, Math.max(neighborLight.z(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().b : 0)-1);
                         s = Math.max(s, neighborLight.w()-1);
                     }
                 }

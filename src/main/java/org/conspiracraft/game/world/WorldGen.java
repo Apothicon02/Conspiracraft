@@ -36,7 +36,7 @@ public class WorldGen {
         }
     }
     public static void setBlockWorldgenNoReplaceSolids(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
-        if (!BlockTypes.blockTypeMap.get(getBlockWorldgen(x, y, z).x).isSolid) {
+        if (!BlockTypes.blockTypeMap.get(getBlockWorldgen(x, y, z).x).blockProperties.isSolid) {
             chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
         }
     }
@@ -105,7 +105,7 @@ public class WorldGen {
                         }
                     } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
-                            setBlockWorldgen(x, newY, z, 1, 20);
+                            setBlockWorldgen(x, newY, z, 1, 15);
                             setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
                             if (newY == seaLevel) {
                                 heightmap[condensePos(x, z)] = (short) y;
@@ -249,7 +249,7 @@ public class WorldGen {
                         if (blockType instanceof LightBlockType) {
                             LightHelper.updateLight(new Vector3i(x, y, z), block, light);
                         } else {
-                            if (light.w() < 20 && !blockType.blocksLight) {
+                            if (light.w() < 20 && !blockType.blockProperties.blocksLight) {
                                 //check if any neighbors are a higher brightness
                                 if (getLightWorldgen(x, y, z + 1).w() > light.w() || getLightWorldgen(x + 1, y, z).w() > light.w() || getLightWorldgen(x, y, z - 1).w() > light.w() ||
                                         getLightWorldgen(x - 1, y, z).w() > light.w() || getLightWorldgen(x, y + 1, z).w() > light.w() || getLightWorldgen(x, y - 1, z).w() > light.w()) {

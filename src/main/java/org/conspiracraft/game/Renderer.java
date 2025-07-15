@@ -181,7 +181,7 @@ public class Renderer {
         glUniform1i(renderDistanceUniform, 200+(100*renderDistanceMul));
         glUniform1f(timeOfDayUniform, timeOfDay);
         glUniform1d(timeUniform, time);
-        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, 100, true);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, true, Main.reachAccuracy);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }
@@ -211,7 +211,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 176; x++) {
+            for (int x = 0; x < 184; x++) {
                 for (int y = 0; y < 1024; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;

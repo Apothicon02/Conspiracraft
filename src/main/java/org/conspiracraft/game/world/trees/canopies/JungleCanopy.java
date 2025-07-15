@@ -33,7 +33,7 @@ public class JungleCanopy extends Canopy {
                     for (int extraY = y-1; extraY >= seaLevel; extraY--) {
                         setLightWorldgen(newX, extraY, newZ, new Vector4i(0, 0, 0, 0));
                         if (extraY == surfaceY) {
-                            if (BlockTypes.blockTypeMap.get(getBlockWorldgen(newX, extraY, newZ).x).isSolid) {
+                            if (BlockTypes.blockTypeMap.get(getBlockWorldgen(newX, extraY, newZ).x).blockProperties.isSolid) {
                                 setBlockWorldgen(newX, extraY + 1, newZ, blockType, 0);
                                 setBlockWorldgen(newX, extraY + 2, newZ, blockType, (int) Math.abs(Math.random() * 6) + 1);
                             }
@@ -62,7 +62,7 @@ public class JungleCanopy extends Canopy {
                     for (int extraY = y; extraY >= seaLevel; extraY--) {
                         setLightWorldgen(newX, extraY, newZ, new Vector4i(0, 0, 0, 0));
                         if (extraY == surfaceY) {
-                            if (BlockTypes.blockTypeMap.get(getBlockWorldgen(newX, extraY, newZ).x).isSolid) {
+                            if (BlockTypes.blockTypeMap.get(getBlockWorldgen(newX, extraY, newZ).x).blockProperties.isSolid) {
                                 setBlockWorldgenNoReplaceSolids(newX, extraY + 1, newZ, blockType, 0);
                                 setBlockWorldgenNoReplaceSolids(newX, extraY + 2, newZ, blockType, (int) Math.abs(Math.random() * 6) + 1);
                             }

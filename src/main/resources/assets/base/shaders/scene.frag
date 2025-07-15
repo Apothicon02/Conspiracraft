@@ -249,7 +249,7 @@ ivec2 getBlock(vec3 pos) {
 }
 
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);
 }
 
 ivec3 prevLightChunkPos = ivec3(-1);
@@ -409,15 +409,15 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
-            if (reflectivity == 0.f && canHit && !renderingHand) {
+            if (reflectivity == 0.f && canHit) {
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
-                    if (blockType == 1) { //water
+                    if (blockType == 1 && blockSubtype > 0) { //water
                         reflectivity = 0.3f;
                     } else if (blockType == 7) { //kyanite
                         reflectivity = 0.33f;
                     } else if (blockType >= 11 && blockType <= 13) { //glass
                         reflectivity = 0.25f;
-                    } else if (blockType == 15) { //planks
+                    } else if (blockType == 15 || (blockType == 1 && blockSubtype == 0) || blockType == 22) { //planks & steel
                         reflectivity = 0.08f;
                     }
                 }
@@ -952,6 +952,10 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     prevSuperFinalTint = superFinalTint;
     //transparency end
 
+    if (renderingHand) {
+        color = vec4(mix(vec3(color), unmixedFogColor/4.f, reflectivity), color.a);
+    }
+
     //selection start
     if (ui && !renderingHand && selected == ivec3(finalRayMapPos)) {
         color = vec4(mix(vec3(color), vec3(0.7, 0.7, 1), 0.5f), color.a);
@@ -982,9 +986,9 @@ void main()
         }
 
         //reflections start
-        if (!isSky && !isSnowFlake && reflectivity > 0.f) {
+        if (!isSky && !isSnowFlake && reflectivity > 0.f && handColor.a < 1) {
             vec3 reflectDir = reflect(ogDir, normalize(reflectPos-prevReflectPos));
-            fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, false), reflectivity);
+            fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity);
         }
         //reflections end
 

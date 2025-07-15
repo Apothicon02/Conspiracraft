@@ -94,7 +94,7 @@ public class Player {
         Vector2i block = World.getBlock(x, y, z);
         if (block != null) {
             int typeId = block.x;
-            if (BlockTypes.blockTypeMap.get(typeId).isCollidable) {
+            if (BlockTypes.blockTypeMap.get(typeId).blockProperties.isCollidable) {
                 int cornerData = World.getCorner((int) x, (int) y, (int) z);
                 int cornerIndex = (y < (int)(y)+0.5 ? 0 : 4) + (z < (int)(z)+0.5 ? 0 : 2) + (x < (int)(x)+0.5 ? 0 : 1);
                 int temp = cornerData;
@@ -108,7 +108,7 @@ public class Player {
                                 friction = Math.min(friction, 0.85f);
                             } else if (typeId == 15 || typeId == 16) { //wood
                                 friction = Math.min(friction, 0.5f);
-                            } else if (BlockTypes.blockTypeMap.get(typeId).isCollidable) {
+                            } else if (BlockTypes.blockTypeMap.get(typeId).blockProperties.isCollidable) {
                                 friction = Math.min(friction, 0.75f);
                             }
                         }

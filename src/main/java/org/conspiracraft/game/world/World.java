@@ -346,7 +346,7 @@ public class World {
 
     public static boolean canLightPassbetween(int blockType, int corners, Vector3i pos, Vector3i neighborPos) {
         Vector3i subtractedPos = new Vector3i(pos.x-neighborPos.x, pos.y-neighborPos.y, pos.z-neighborPos.z);
-        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
+        if (!BlockTypes.blockTypeMap.get(blockType).blockProperties.blocksLight) {
             return true;
         } else {
             int blocked = 0;
@@ -446,7 +446,7 @@ public class World {
     }
 
     public static boolean blocksLight(int blockType, int corners) {
-        if (!BlockTypes.blockTypeMap.get(blockType).blocksLight) {
+        if (!BlockTypes.blockTypeMap.get(blockType).blockProperties.blocksLight) {
             return false;
         } else {
             int blocked = 0;
@@ -473,7 +473,7 @@ public class World {
     public static boolean isBlockingHeightmap(Vector2i blockType, int corners) {
         BlockType type = BlockTypes.blockTypeMap.get(blockType.x);
         boolean obstructsHieghtmap = type.obstructingHeightmap(blockType);
-        if (!type.blocksLight && !obstructsHieghtmap) {
+        if (!type.blockProperties.blocksLight && !obstructsHieghtmap) {
             return false;
         } else if (corners != 0) {
             int blockedColumns = getBlockedColumns(corners);
@@ -570,9 +570,9 @@ public class World {
                             byte ng = 0;
                             byte nb = 0;
                             if (neighborBlockType instanceof LightBlockType lBlock) {
-                                nr = lBlock.r;
-                                ng = lBlock.g;
-                                nb = lBlock.b;
+                                nr = lBlock.lightBlockProperties().r;
+                                ng = lBlock.lightBlockProperties().g;
+                                nb = lBlock.lightBlockProperties().b;
                             }
                             chunks[condenseChunkPos(chunkPos.x, chunkPos.y, chunkPos.z)].setLight(new Vector3i(neighborPos.x-(chunkPos.x*chunkSize), neighborPos.y-(chunkPos.y*chunkSize), neighborPos.z-(chunkPos.z*chunkSize)),
                                     new Vector4i(nr, ng, nb, (byte) (neighborLight.w() == 20 ? 20 : 0)), pos);
@@ -636,9 +636,9 @@ public class World {
                 byte b = 0;
                 BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
                 if (blockType instanceof LightBlockType lType) {
-                    r = lType.r;
-                    g = lType.g;
-                    b = lType.b;
+                    r = lType.lightBlockProperties().r;
+                    g = lType.lightBlockProperties().g;
+                    b = lType.lightBlockProperties().b;
                 }
                 Vector3i localPos = new Vector3i(x & 15, y & 15, z & 15);
                 Chunk chunk = chunks[condensedChunkPos];
@@ -663,9 +663,9 @@ public class World {
             byte g = 0;
             byte b = 0;
             if (BlockTypes.blockTypeMap.get(getBlock(pos).x) instanceof LightBlockType lType) {
-                r = lType.r;
-                g = lType.g;
-                b = lType.b;
+                r = lType.lightBlockProperties().r;
+                g = lType.lightBlockProperties().g;
+                b = lType.lightBlockProperties().b;
                 updateLight(pos);
             }
             Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);

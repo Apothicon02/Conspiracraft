@@ -1,6 +1,8 @@
 package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
+import org.conspiracraft.game.blocks.types.BlockProperties;
+import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.interactions.Handcrafting;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
@@ -127,7 +129,9 @@ public class Main {
     boolean wasF4Down = false;
     boolean isClosing = false;
 
-    long lastBlockBroken = 0L;
+    public static long lastBlockBroken = 0L;
+    public static int reach = 50;
+    public static float reachAccuracy = 200;
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
@@ -158,12 +162,19 @@ public class Main {
                     boolean mmbDown = mouseInput.isMiddleButtonPressed();
                     boolean rmbDown = mouseInput.isRightButtonPressed();
                     if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, 100, mmbDown);
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, mmbDown, reachAccuracy);
                         if (pos != null) {
                             if (mmbDown) {
-                                Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
-                                if (block != null) {
-                                    selectedBlock = Handcrafting.interact(selectedBlock, block);
+                                if (isShiftDown) {
+                                    Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
+                                    if (block != null) {
+                                        selectedBlock = Handcrafting.interact(selectedBlock, block);
+                                    }
+                                } else {
+                                    Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
+                                    if (block != null) {
+                                        selectedBlock = new Vector3i(block.x, BlockTypes.blockTypeMap.get(block.x).blockProperties.isFluid ? 0 : block.y, 15);
+                                    }
                                 }
                             } else if (BlockTypes.blockTypeMap.get(selectedBlock.x()) != null) {
                                 lastBlockBroken = timeMillis;
@@ -176,8 +187,8 @@ public class Main {
                                     cornerData |= (1 << (cornerIndex - 1));
                                     if (cornerData == -2147483521 || !isShiftDown) {
                                         Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
-                                        if (amount == 0 || (blockTypeId == blockBreaking.x && amount < 16)) {
-                                            selectedBlock = new Vector3i(blockBreaking, amount+1);
+                                        if (amount == 0 || (blockTypeId == blockBreaking.x && amount < 15)) {
+                                            selectedBlock = new Vector3i(blockBreaking.x, BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid ? 0 : blockBreaking.y, amount+1);
                                             World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                             blockTypeId = 0;
                                             blockSubtypeId = 0;
@@ -186,18 +197,35 @@ public class Main {
                                     } else {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     }
-                                }
-                                if (rmbDown) {
+                                } else if (rmbDown) {
                                     if (cornerData != 0) {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     } else if (amount > 0) {
                                         Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : blockSubtypeId, true, false, 1, false);
-                                        selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? (amount-oldBlock.y) : 1;
-                                        if (!BlockTypes.blockTypeMap.get(selectedBlock.x).isFluid && selectedBlock.z <= 0) {
-                                            selectedBlock.x = 0;
-                                            selectedBlock.y = 0;
+                                        BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
+                                        if (oldType.isFluidReplaceable) {
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? amount : blockSubtypeId, true, false, 1, false);
+                                            selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? (amount - oldBlock.y) : 1;
+                                            boolean isFluid = BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid;
+                                            if (selectedBlock.z <= 0) {
+                                                if (isFluid) {
+                                                    selectedBlock.x = 22;
+                                                    selectedBlock.y = 0;
+                                                    selectedBlock.z = 1;
+                                                } else {
+                                                    selectedBlock.x = 0;
+                                                    selectedBlock.y = 0;
+                                                }
+                                            }
+                                        } else if (BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid && oldBlock.x == selectedBlock.x) {
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, Math.min(15, oldBlock.y()+amount), true, false, 1, false);
+                                            selectedBlock.z -= (amount - oldBlock.y);
+                                            if (selectedBlock.z <= 0) {
+                                                selectedBlock.x = 22;
+                                                selectedBlock.y = 0;
+                                                selectedBlock.z = 1;
+                                            }
                                         }
                                     }
                                 }
@@ -271,7 +299,7 @@ public class Main {
                                 selectedBlock.z = 16;
                             }
                         }
-                        if (BlockTypes.blockTypeMap.get(selectedBlock.x).isFluid && selectedBlock.z > 15) {
+                        if (BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid && selectedBlock.z > 15) {
                             selectedBlock.z = 15;
                         }
                     }
@@ -346,34 +374,37 @@ public class Main {
         }
     }
 
-    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids) { //prevPos is inverted
+    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids, float accuracy) { //prevPos is inverted
         Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-        for (int i = 0; i < range; i++) {
-            Vector3f rayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
+        Vector3f rayPos = new Vector3f(0);
+        for (int i = 0; i < range*accuracy; i++) {
+            rayPos.set(ray.m30(), ray.m31(), ray.m32());
             Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
                 int typeId = block.x();
-                int subTypeId = block.y();
-                boolean isFluid = BlockTypes.blockTypeMap.get(typeId).isFluid;
-                if (countFluids || !isFluid) {
-                    if (isFluid) {
-                        subTypeId = Math.min(20, subTypeId);
-                    }
-                    int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
-                    int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
-                    if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
-                        if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
-                            if (prevPos) {
-                                return rayPos;
-                            } else {
-                                return prevRayPos;
+                if (typeId != 0) {
+                    int subTypeId = block.y();
+                    boolean isFluid = BlockTypes.blockTypeMap.get(typeId).blockProperties.isFluid;
+                    if (countFluids || !isFluid) {
+                        if (isFluid) {
+                            subTypeId = Math.min(20, subTypeId);
+                        }
+                        int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
+                        int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
+                        if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
+                            if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
+                                if (prevPos) {
+                                    return rayPos;
+                                } else {
+                                    return prevRayPos;
+                                }
                             }
                         }
                     }
                 }
             }
-            prevRayPos = rayPos;
-            ray.translate(0, 0, 0.1f);
+            prevRayPos.set(rayPos);
+            ray.translate(0, 0, 0.1f/accuracy);
         }
         return null;
     }
