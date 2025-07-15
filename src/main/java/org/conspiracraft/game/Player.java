@@ -153,7 +153,7 @@ public class Player {
             if (blockIn.x == 0 && onGround && sprint) {
                 Vector2i blocKBelow = World.getBlock(blockPos.x, blockPos.y-1, blockPos.z);
                 if (blocKBelow.x == BlockTypes.getId(BlockTypes.GRASS)) {
-                    World.setBlock(blockPos.x, blockPos.y-1, blockPos.z, BlockTypes.getId(BlockTypes.DIRT), 0, true, false);
+                    World.setBlock(blockPos.x, blockPos.y-1, blockPos.z, BlockTypes.getId(BlockTypes.DIRT), 0, true, false, true);
                 }
             }
             float modifiedSpeed = speed;

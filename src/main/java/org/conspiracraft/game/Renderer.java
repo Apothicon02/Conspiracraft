@@ -3,11 +3,11 @@ package org.conspiracraft.game;
 import org.conspiracraft.Main;
 import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.audio.Source;
+import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.Chunk;
-import org.conspiracraft.game.world.FluidHelper;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.BufferUtils;
@@ -212,7 +212,7 @@ public class Renderer {
             int size = 9984*9984+9984;
             int[] atlasData = new int[size];
             for (int x = 0; x < 176; x++) {
-                for (int y = 0; y < 1088; y++) {
+                for (int y = 0; y < 1024; y++) {
                     atlasData[(9984*x)+y] = Utils.colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(9984*x)+y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
                 }
@@ -277,28 +277,9 @@ public class Renderer {
             }
 
         } else {
-            while (!cornerQueue.isEmpty()) {
-                Vector4i cornerData = cornerQueue.getFirst();
-                cornerQueue.removeFirst();
-                Vector3i pos = new Vector3i(cornerData.x, cornerData.y, cornerData.z);
-                Vector4i oldLight = getLight(pos);
-                byte r = 0;
-                byte g = 0;
-                byte b = 0;
-                if (BlockTypes.blockTypeMap.get(getBlock(pos).x) instanceof LightBlockType lType) {
-                    r = lType.r;
-                    g = lType.g;
-                    b = lType.b;
-                    updateLight(pos);
-                }
-                Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
-                int condensedChunkPos = condenseChunkPos(chunkPos);
-                Vector3i localPos = new Vector3i(pos.x & 15, pos.y & 15, pos.z & 15);
-                Chunk chunk = chunks[condensedChunkPos];
-                chunk.setCorner(localPos, cornerData.w, pos);
-                chunk.setLight(localPos, r, g, b, 0, pos);
-                updateHeightmap(pos.x, pos.z, true);
-                recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
+            while (!chunkCornerQueue.isEmpty()) {
+                int condensedChunkPos = chunkCornerQueue.getFirst();
+                chunkCornerQueue.removeFirst();
 
                 vmaVirtualFree(corners.get(0), chunkCornerAllocs[condensedChunkPos]);
                 VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
@@ -397,12 +378,9 @@ public class Renderer {
         } else {
 //            long startTime = System.currentTimeMillis();
 //            boolean wasEmpty = lightQueue.isEmpty();
-            while (!lightQueue.isEmpty()) {
-                Vector3i lightData = lightQueue.getFirst();
-                lightQueue.removeFirst();
-                Vector3i chunkPos = new Vector3i(lightData.x >> 4, lightData.y >> 4, lightData.z >> 4);
-                int condensedChunkPos = condenseChunkPos(chunkPos);
-                updateLight(lightData);
+            while (!chunkLightQueue.isEmpty()) {
+                int condensedChunkPos = chunkLightQueue.getFirst();
+                chunkLightQueue.removeFirst();
 
                 vmaVirtualFree(lights.get(0), chunkLightAllocs[condensedChunkPos]);
                 VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
@@ -503,20 +481,10 @@ public class Renderer {
             }
 
         } else {
-            while (!blockQueue.isEmpty()) {
-                Vector4i blockData = blockQueue.getFirst();
-                blockQueue.removeFirst();
-                updateBlock(blockData, chunkBlockPointerChanges);
-                Source placeSource = new Source(new Vector3f(blockData.x, blockData.y, blockData.z), 1, 1, 0, 0);
-                placeSource.play(AudioController.buffers.get((int) ((java.lang.Math.random()*2)+1)));
-            }
-            for (int i = 0; i < Math.min(150, liquidQueue.size()); i++) {
-                Vector4i blockData = liquidQueue.getFirst();
-                liquidQueue.removeFirst();
-                updateBlock(blockData, chunkBlockPointerChanges);
-                if (Math.abs(blockData.x - Main.player.pos.x) + Math.abs(blockData.y - Main.player.pos.y) + Math.abs(blockData.z - Main.player.pos.z) < 32) {
-                    Main.player.waterFlow = (float) Math.max(Main.player.waterFlow, Math.min(0, Utils.distance(blockData.x, blockData.y, blockData.z, Main.player.pos.x, Main.player.pos.y, Main.player.pos.z)-16)*-1);
-                }
+            while (!chunkBlockQueue.isEmpty()) {
+                int condensedChunkPos = chunkBlockQueue.getFirst();
+                chunkBlockQueue.removeFirst();
+                updateBlock(condensedChunkPos, chunkBlockPointerChanges);
             }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -555,28 +523,7 @@ public class Renderer {
         worldChanged = false;
     }
 
-    public static void updateBlock(Vector4i blockData, LinkedList<Integer> chunkBlockPointerChanges) {
-        Vector3i pos = new Vector3i(blockData.x, blockData.y, blockData.z);
-        Vector4i oldLight = getLight(pos);
-        byte r = 0;
-        byte g = 0;
-        byte b = 0;
-        Vector2i blockId = Utils.unpackInt(blockData.w());
-        if (BlockTypes.blockTypeMap.get(blockId.x) instanceof LightBlockType lType) {
-            r = lType.r;
-            g = lType.g;
-            b = lType.b;
-        }
-        Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
-        int condensedChunkPos = condenseChunkPos(chunkPos);
-        Vector3i localPos = new Vector3i(pos.x & 15, pos.y & 15, pos.z & 15);
-        Chunk chunk = chunks[condensedChunkPos];
-        Vector2i newBlockId = FluidHelper.updateFluid(pos, blockId);
-        chunk.setBlock(localPos, newBlockId.x, newBlockId.y, pos);
-        chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
-        updateHeightmap(blockData.x, blockData.z, true);
-        recalculateLight(pos, Math.max(oldLight.x, r), Math.max(oldLight.y, g), Math.max(oldLight.z, b), oldLight.w);
-
+    public static void updateBlock(int condensedChunkPos, LinkedList<Integer> chunkBlockPointerChanges) {
         vmaVirtualFree(blocks.get(0), chunkBlockAllocs[condensedChunkPos]);
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
         int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();

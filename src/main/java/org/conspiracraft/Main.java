@@ -181,7 +181,7 @@ public class Main {
                                             World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                             blockTypeId = 0;
                                             blockSubtypeId = 0;
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false);
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, true);
                                         }
                                     } else {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
@@ -192,9 +192,10 @@ public class Main {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     } else if (amount > 0) {
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : blockSubtypeId, true, false);
-                                        selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : 1;
-                                        if (selectedBlock.z <= 0) {
+                                        Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? amount : blockSubtypeId, true, false, true);
+                                        selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).isFluid ? (amount-oldBlock.y) : 1;
+                                        if (!BlockTypes.blockTypeMap.get(selectedBlock.x).isFluid && selectedBlock.z <= 0) {
                                             selectedBlock.x = 0;
                                             selectedBlock.y = 0;
                                         }
@@ -262,9 +263,16 @@ public class Main {
                         updateTime(100000L, 1);
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                        selectedBlock.z++;
-                        if (selectedBlock.z > 16) {
+                        if (isShiftDown) {
                             selectedBlock.z = 16;
+                        } else {
+                            selectedBlock.z++;
+                            if (selectedBlock.z > 16) {
+                                selectedBlock.z = 16;
+                            }
+                        }
+                        if (BlockTypes.blockTypeMap.get(selectedBlock.x).isFluid && selectedBlock.z > 15) {
+                            selectedBlock.z = 15;
                         }
                     }
                     if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
@@ -531,6 +539,7 @@ public class Main {
                 currentTick++;
                 timePassed -= tickTime;
                 interpolationTime = timePassed/tickTime;
+                World.tick();
                 player.tick();
                 ScheduledTicker.tick();
             }

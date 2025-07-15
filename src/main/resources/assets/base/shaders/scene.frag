@@ -78,7 +78,7 @@ vec3 tint = vec3(0);
 float reflectivity = 0.f;
 bool renderingHand = true;
 bool hitSun = false;
-float cloudSpeed = 1000f;
+float cloudSpeed = 1000.f;
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
@@ -364,11 +364,11 @@ vec3 stepMask(vec3 sideDist) {
     return vec3(mask);
 }
 
-float normalBrightness = 1f;
+float normalBrightness = 1.f;
 bool isSnowFlake = false;
 bool wasEverTinted = false;
 ivec3 normal = ivec3(0);
-float distanceFogginess = 0f;
+float distanceFogginess = 0.f;
 bool firstVoxel = true;
 vec3 ogRayPos = vec3(0);
 
@@ -384,7 +384,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
 
     vec3 mini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
     vec3 hitNormal = -mask * raySign;
-    float rayLength = 0f;
+    float rayLength = 0.f;
     float voxelDist = max(mini.x, max (mini.y, mini.z));
     if (voxelDist > 0.0f) {
         rayLength += voxelDist/8;
@@ -402,17 +402,17 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
     prevPos = realPos + (hitNormal * 0.001f);
 
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
-    float fire = blockType == 19 ? 1 : (blockType == 9 ? 0.05f : 0f);
+    float fire = blockType == 19 ? 1.f : (blockType == 9 ? 0.05f : 0.f);
     vec4 prevVoxelColor = firstVoxel ? vec4(0) : getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
     firstVoxel = false;
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
-            if (reflectivity == 0.f && canHit) {
+            if (reflectivity == 0.f && canHit && !renderingHand) {
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
                     if (blockType == 1) { //water
-                        //reflectivity = 0.3f;
+                        reflectivity = 0.3f;
                     } else if (blockType == 7) { //kyanite
                         reflectivity = 0.33f;
                     } else if (blockType >= 11 && blockType <= 13) { //glass
@@ -487,7 +487,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
                         vec4 aboveColorData = getVoxel(mapPos.x, float(aboveY), mapPos.z, rayMapPos.x, aboveRayMapPosY, rayMapPos.z, aboveBlockType, aboveBlockSubtype, 0);
                         if (aboveColorData.a <= 0 || aboveBlockType == 4 || aboveBlockType == 5 || aboveBlockType == 18) {
                             voxelColor = mix(voxelColor, vec4(1-(abs(noise(vec2(int(mapPos.x)*64, int(mapPos.z)*64)))*0.66f))-vec4(0.14, 0.15, -0.05, 0)*1.33f, 0.9f);
-                            normalBrightness = 1f;
+                            normalBrightness = 1.f;
                             isSnowFlake = true;
                         }
                     }
@@ -503,7 +503,7 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
         prevMapPos = mapPos;
         mini = ((mapPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
         hitNormal = -mask * raySign;
-        rayLength = 0f;
+        rayLength = 0.f;
         voxelDist = max(mini.x, max (mini.y, mini.z));
         if (voxelDist > 0.0f) {
             rayLength += voxelDist/8;
@@ -542,7 +542,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
     while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
         float adjustedTime = clamp(abs(1-clamp((distance(rayMapPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
         float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
-        float timeBonus = gradient(rayMapPos.y, 64, 372, 0.1, 0f);
+        float timeBonus = gradient(rayMapPos.y, 64.f, 372.f, 0.1f, 0.f);
         float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
         if (renderingHand) {
             vec3 handPos = vec3(-1, -2, 1);
@@ -597,10 +597,10 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
             if (blockInfo.x != 0.f) {
                 float fogNoise = max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77);
                 if (blockInfo.x != 1.f) {
-                    fogNoise+=gradient(hitPos.y, 63, 96, 0, 1f);
+                    fogNoise+=gradient(hitPos.y, 63.f, 96.f, 0.f, 1.f);
                 }
                 float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
-                distanceFogginess = max(distanceFogginess, clamp((exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f))-0.1f, 0, 1f));
+                distanceFogginess = max(distanceFogginess, clamp((exp2(linearDistFog-0.75f)+min(0.f, linearDistFog-0.25f))-0.1f, 0.f, 1.f));
                 float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
                 color = traceBlock(chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
                 if ((blockInfo.x == 17 || blockInfo.x == 21) && color.a >= 1) {
@@ -859,7 +859,7 @@ void clearVars(bool clearHit, bool clearTint) {
         tint = vec3(0);
     }
     normal = ivec3(0);
-    normalBrightness = 1f;
+    normalBrightness = 1.f;
 }
 
 vec4 prevFog = vec4(1);
@@ -880,7 +880,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     }
     float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
     float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
-    float timeBonus = gradient(hitPos.y, 64, 372, 0.1, 0f);
+    float timeBonus = gradient(hitPos.y, 64.f, 372.f, 0.1f, 0.f);
     float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
     float fogNoise = (max(0, noise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
     float fogDist = distance(camPos, prevPos)/renderDistance;
@@ -889,13 +889,13 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     if (isSky) {
         distanceFogginess = 1;
     }
-    distanceFogginess = clamp(distanceFogginess, 0, 1f);
+    distanceFogginess = clamp(distanceFogginess, 0.f, 1.f);
     if (renderingHand) {
         lighting = fromLinear(getLighting(camPos.x, camPos.y, camPos.z, true, true, true));
         lightFog = max(lightFog, lighting*(1-vec4(0.5, 0.5, 0.5, 0)));
     }
-    lighting = pow(lighting/20, vec4(2f))*vec4(200, 200, 200, 18.5);
-    lightFog = pow(lightFog/20, vec4(2f))*vec4(200, 200, 200, 18.5);
+    lighting = pow(lighting/20, vec4(2.f))*vec4(200, 200, 200, 18.5f);
+    lightFog = pow(lightFog/20, vec4(2.f))*vec4(200, 200, 200, 18.5f);
     float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
     float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);
     vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, 0.875f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
@@ -907,9 +907,9 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 finalTint = max(vec3(1), tint);
 
 
-    vec3 cloudPos = (vec3(cam * vec4(uvDir * 500f, 1))-camPos);
+    vec3 cloudPos = (vec3(cam * vec4(uvDir * 500.f, 1.f))-camPos);
     if (isSnowFlake) {
-        whiteness = max(whiteness+0.5f, 1);
+        whiteness = max(whiteness+0.5f, 1.f);
     } else if (isSky && cloudsEnabled) {
         whiteness = whiteness+max(0, noise((vec2(cloudPos.x, cloudPos.y))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.y, cloudPos.z))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)));
     }

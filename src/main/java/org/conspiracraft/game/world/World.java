@@ -1,11 +1,16 @@
 package org.conspiracraft.game.world;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.engine.Utils;
+import org.conspiracraft.game.ScheduledTicker;
+import org.conspiracraft.game.audio.AudioController;
+import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.Renderer;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
@@ -44,11 +49,23 @@ public class World {
     public static int[] chunkEmptiness = new int[(sizeChunks*sizeChunks*heightChunks)/32];
     public static short[] surfaceHeightmap = new short[size*size];
     public static short[] heightmap = new short[size*size];
-    public static ArrayList<Vector4i> liquidQueue = new ArrayList<>();
-    public static ArrayList<Vector4i> blockQueue = new ArrayList<>();
-    public static ArrayList<Vector4i> cornerQueue = new ArrayList<>();
+    public static ArrayList<Integer> chunkBlockQueue = new ArrayList<>();
+    public static ArrayList<Integer> chunkCornerQueue = new ArrayList<>();
+    public static ArrayList<Integer> chunkLightQueue = new ArrayList<>();
     public static ArrayList<Vector3i> lightQueue = new ArrayList<>();
     public static long stageTime = 0;
+
+    public static void tick() {
+        iterateLightQueue();
+    }
+
+    public static void iterateLightQueue() {
+        while (!lightQueue.isEmpty()) {
+            Vector3i pos = lightQueue.getFirst();
+            lightQueue.removeFirst();
+            updateLight(pos);
+        }
+    }
 
     public static void run() throws IOException {
         if (Files.exists(worldPath)) {
@@ -487,31 +504,36 @@ public class World {
                                     new Vector4i(nr, ng, nb, (byte) (neighborLight.w() == 20 ? 20 : 0)), pos);
                             recalculateLight(neighborPos, neighborLight.x(), neighborLight.y(), neighborLight.z(), neighborLight.w());
                         }
-                        queueLightUpdatePriority(pos);
+                        queueLightUpdate(pos);
                     }
                 }
             }
         }
     }
 
+
     public static void queueLightUpdate(Vector3i pos) {
         boolean exists = lightQueue.contains(pos);
         if (!exists) {
-            lightQueue.addLast(pos);
+            lightQueue.add(pos);
         }
     }
-    public static void queueLightUpdatePriority(Vector3i pos) {
-        boolean exists = lightQueue.contains(pos);
-        if (!exists) {
-            lightQueue.addFirst(pos);
+    public static void updateLight(Vector3i pos) {
+        Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                for (int y = -1; y <= 1; y++) {
+                    int condensedChunkPos = Utils.condenseChunkPos(chunkPos.x+x, chunkPos.y+y, chunkPos.z+z);
+                    boolean exists = chunkLightQueue.contains(condensedChunkPos);
+                    if (!exists) {
+                        chunkLightQueue.addFirst(condensedChunkPos);
+                    }
+                }
+            }
         }
-    }
-    public static int updateLight(Vector3i pos) {
         Vector2i block = getBlock(pos);
         if (block != null) {
-            return LightHelper.updateLight(pos, block, getLight(pos));
-        } else {
-            return 0;
+            LightHelper.updateLight(pos, block, getLight(pos));
         }
     }
 
@@ -522,40 +544,46 @@ public class World {
         return (x >= 0 && x < sizeChunks && z >= 0 && z < sizeChunks && y >= 0 && y < heightChunks);
     }
 
-    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority) {
+    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority, boolean tick) {
         if (inBounds(x, y, z)) {
             Vector2i existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.x() == 0)) {
+                Vector3i pos = new Vector3i(x, y, z);
+                Vector3i chunkPos = new Vector3i(x >> 4, y >> 4, z >> 4);
+                int condensedChunkPos = condenseChunkPos(chunkPos);
                 if (priority) {
-                    blockQueue.addFirst(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                    chunkBlockQueue.addFirst(condensedChunkPos);
                 } else {
-                    blockQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
+                    chunkBlockQueue.addLast(condensedChunkPos);
                 }
+                Vector4i oldLight = getLight(pos);
+                byte r = 0;
+                byte g = 0;
+                byte b = 0;
+                BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
+                if (blockType instanceof LightBlockType lType) {
+                    r = lType.r;
+                    g = lType.g;
+                    b = lType.b;
+                }
+                Vector3i localPos = new Vector3i(x & 15, y & 15, z & 15);
+                Chunk chunk = chunks[condensedChunkPos];
+                chunk.setBlock(localPos, blockTypeId, blockSubtypeId, pos);
+                if (tick) {
+                    ScheduledTicker.scheduleTick(Main.currentTick+1, pos);
+                }
+                chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
+                updateHeightmap(x, z, true);
+                recalculateLight(pos, org.joml.Math.max(oldLight.x, r), org.joml.Math.max(oldLight.y, g), org.joml.Math.max(oldLight.z, b), oldLight.w);
+
+                Source placeSource = new Source(new Vector3f(x, y, z), 1, 1, 0, 0);
+                placeSource.play(AudioController.buffers.get((int) ((java.lang.Math.random()*2)+1)));
+
                 Vector2i aboveBlock = getBlock(x, y+1, z);
                 if (aboveBlock != null) {
                     int aboveBlockId = aboveBlock.x();
                     if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport) {
-                        setBlock(x, y + 1, z, 0, 0, true, priority);
-                    }
-                }
-            }
-        }
-    }
-
-    public static void setLiquid(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority) {
-        if (inBounds(x, y, z)) {
-            Vector2i existing = getBlock(x, y, z);
-            if (replace || (existing == null || existing.x() == 0)) {
-                if (priority) {
-                    liquidQueue.addFirst(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
-                } else {
-                    liquidQueue.addLast(new Vector4i(x, y, z, Utils.packInts(blockTypeId, blockSubtypeId)));
-                }
-                Vector2i aboveBlock = getBlock(x, y+1, z);
-                if (aboveBlock != null) {
-                    int aboveBlockId = aboveBlock.x();
-                    if (aboveBlockId == 4 || aboveBlockId == 5) {
-                        setBlock(x, y + 1, z, 0, 0, true, priority);
+                        setBlock(x, y + 1, z, 0, 0, true, priority, tick);
                     }
                 }
             }
@@ -564,9 +592,29 @@ public class World {
 
     public static void setCorner(int x, int y, int z, int corner) {
         if (inBounds(x, y, z)) {
+            Vector3i pos = new Vector3i(x, y, z);
+            Vector4i oldLight = getLight(pos);
+            byte r = 0;
+            byte g = 0;
+            byte b = 0;
+            if (BlockTypes.blockTypeMap.get(getBlock(pos).x) instanceof LightBlockType lType) {
+                r = lType.r;
+                g = lType.g;
+                b = lType.b;
+                updateLight(pos);
+            }
+            Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);
+            int condensedChunkPos = condenseChunkPos(chunkPos);
+            Vector3i localPos = new Vector3i(pos.x & 15, pos.y & 15, pos.z & 15);
+            Chunk chunk = chunks[condensedChunkPos];
+            chunk.setCorner(localPos, corner, pos);
+            chunk.setLight(localPos, r, g, b, 0, pos);
+            updateHeightmap(pos.x, pos.z, true);
+            recalculateLight(pos, oldLight.x, oldLight.y, oldLight.z, oldLight.w);
+
             Vector2i existing = getBlock(x, y, z);
             if (existing.x() != 0) {
-                cornerQueue.addLast(new Vector4i(x, y, z, corner));
+                chunkCornerQueue.addLast(condenseChunkPos(chunkPos));
             }
         }
     }

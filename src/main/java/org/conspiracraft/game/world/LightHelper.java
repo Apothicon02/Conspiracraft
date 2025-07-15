@@ -11,7 +11,7 @@ import org.joml.Vector4i;
 import static org.conspiracraft.game.world.World.*;
 
 public class LightHelper {
-    public static int updateLight(Vector3i pos, Vector2i block, Vector4i light, int stack) {
+    public static void updateLight(Vector3i pos, Vector2i block, Vector4i light, int stack) {
         stack++;
         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
         int corners = getCorner(pos.x, pos.y, pos.z);
@@ -53,12 +53,10 @@ public class LightHelper {
                     }
                 }
             }
-            return r << 16 | g << 8 | b | s << 24;
         }
-        return 0;
     }
-    public static int updateLight(Vector3i pos, Vector2i block, Vector4i light) {
-        return updateLight(pos, block, light, 0);
+    public static void updateLight(Vector3i pos, Vector2i block, Vector4i light) {
+        updateLight(pos, block, light, 0);
     }
     public static boolean isDarker(int r, int g, int b, int s, Vector4i darker) {
         return r-2 > darker.x() || g-2 > darker.y() || b-2 > darker.z() || s-2 > darker.w();
