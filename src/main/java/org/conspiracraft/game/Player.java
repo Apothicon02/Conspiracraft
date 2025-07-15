@@ -153,7 +153,7 @@ public class Player {
             if (blockIn.x == 0 && onGround && sprint) {
                 Vector2i blocKBelow = World.getBlock(blockPos.x, blockPos.y-1, blockPos.z);
                 if (blocKBelow.x == BlockTypes.getId(BlockTypes.GRASS)) {
-                    World.setBlock(blockPos.x, blockPos.y-1, blockPos.z, BlockTypes.getId(BlockTypes.DIRT), 0, true, false, true);
+                    World.setBlock(blockPos.x, blockPos.y-1, blockPos.z, BlockTypes.getId(BlockTypes.DIRT), 0, true, false, 1, false);
                 }
             }
             float modifiedSpeed = speed;
@@ -304,12 +304,12 @@ public class Player {
             ambientMagma = Math.min(333, ambientMagma+33);
         }
 
-        if (Math.random() <= 0.0003d) {
+        if (Math.random() <= 0.0002d) {
             if (Tags.leaves.tagged.contains(unpackedBlock.x)) {
                 Source source = new Source(pos, 0.01f*sunLight, 1, 1, 0);
                 source.play(AudioController.buffers.get(12));
             }
-        } else if (Math.random() <= 0.0003d) {
+        } else if (Math.random() <= 0.0001d) {
             if (Tags.flowers.tagged.contains(unpackedBlock.x)) {
                 Source source = new Source(pos, 0.5f, 1, 1, 0);
                 source.play(AudioController.buffers.get(11));
@@ -377,7 +377,7 @@ public class Player {
                     if (waterFlowingSource.soundPlaying == -1) {
                         waterFlowingSource.play(AudioController.buffers.get(9));
                     }
-                    waterFlowingSource.setGain(Math.clamp(Math.max(ambientWater / 666f, waterFlow / 16), 0, 1), 0);
+                    waterFlowingSource.setGain(Math.clamp(ambientWater / 10000f, 0, 1), 0);
                     if (magmaSource.soundPlaying == -1) {
                         magmaSource.play(AudioController.buffers.get(13));
                     }

@@ -22,7 +22,8 @@ public class BlockTypes {
     }
 
     public static BlockType AIR = create(new BlockType(false, false, false, true, false, false));
-    public static BlockType WATER = create(new BlockType(false, false, false, false, true, true));
+    public static BlockType WATER = create(new BlockType(false, false, false, false, true, true)
+            .blockSFX(new int[]{8}, 1f, 1.25f));
     public static BlockType GRASS = create(new BlockType());
     public static BlockType DIRT = create(new BlockType());
     public static BlockType TALL_GRASS = create(new BlockType(false, false, false, true, false, true, true));

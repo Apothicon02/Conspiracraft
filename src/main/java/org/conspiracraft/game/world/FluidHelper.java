@@ -18,6 +18,7 @@ public class FluidHelper {
         neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
         BlockType type = BlockTypes.blockTypeMap.get(fluid.x);
         boolean scheduleTick = false;
+        int maxChange = 0;
 
         for (Vector3i nPos : neighborPositions) {
             Vector2i nFluid = World.getBlock(nPos);
@@ -26,29 +27,37 @@ public class FluidHelper {
             boolean isMainFluid = areBothFluid ? true : (nType.isFluidReplaceable && type.isFluid);
             boolean isNFluid = areBothFluid ? true : (type.isFluidReplaceable && nType.isFluid);
             if (isMainFluid || isNFluid) {
-                int difference = (int)(Math.floor((nType.isFluidReplaceable ? fluid.y : nFluid.y-fluid.y)/2.f));
-                if (Math.abs(difference) > 0) {
-                    scheduleTick = true;
+                int newLevel = areBothFluid ? (fluid.y + nFluid.y) : (isMainFluid ? (fluid.y) : (nFluid.y));
+                if (newLevel > 1) {
+                    int prevFluidLevel = fluid.y;
+                    int prevNFluidLevel = nFluid.y;
                     if (!areBothFluid) {
                         if (isMainFluid) {
+                            prevNFluidLevel = 0;
                             nFluid.x = fluid.x;
                         } else {
+                            prevFluidLevel = 0;
                             fluid.x = nFluid.x;
                         }
                     }
-                    fluid.y -= difference;
-                    nFluid.y += difference;
+                    fluid.y = newLevel/2;
+                    nFluid.y = newLevel/2;
 
-                    World.setBlock(nPos.x, nPos.y, nPos.z, nFluid.x, nFluid.y, true, false, true); //unnecessary
+                    if (newLevel % 2 != 0) { //if odd, neighbor gets extra fluid.
+                        nFluid.y++;
+                    }
+
+                    if (prevFluidLevel != fluid.y || prevNFluidLevel != nFluid.y) { //only update if something changed.
+                        maxChange = Math.max(maxChange, Math.max(Math.abs(prevFluidLevel-fluid.y), Math.abs(prevNFluidLevel-nFluid.y)));
+                        scheduleTick = true;
+                        World.setBlock(nPos.x, nPos.y, nPos.z, nFluid.x, nFluid.y, true, false, 4, true);
+                    }
                 }
             }
         }
 
         if (scheduleTick) {
-            World.setBlock(pos.x, pos.y, pos.z, fluid.x, fluid.y, true, false, true); //maybe
-            if (org.joml.Math.abs(pos.x - Main.player.pos.x) + org.joml.Math.abs(pos.y - Main.player.pos.y) + org.joml.Math.abs(pos.z - Main.player.pos.z) < 32) {
-                Main.player.waterFlow = (float) org.joml.Math.max(Main.player.waterFlow, Math.min(0, Utils.distance(pos.x, pos.y, pos.z, Main.player.pos.x, Main.player.pos.y, Main.player.pos.z)-16)*-1);
-            }
+            World.setBlock(pos.x, pos.y, pos.z, fluid.x, fluid.y, true, false, 4, maxChange < 2);
         }
     }
 }

@@ -14,8 +14,11 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -150,21 +153,92 @@ public class World {
                         }
                     }
                 }
-            } else {
-//                    for (int z = 0; z < sizeChunks; z++) {
-//                        for (int y = 0; y < heightChunks; y++) {
-//                            chunks[condenseChunkPos(currentChunk, y, z)].cleanPalette();
-//                        }
-//                    }
             }
         }
-//        if (cleaningQueue.size() > 3) {
-//            Vector3i blockData = cleaningQueue.getFirst();
-//            cleaningQueue.removeFirst();
-//            region1Chunks[condenseChunkPos(blockData.x, blockData.y, blockData.z)].cleanPalette();
-//        }
     }
 
+    public static void saveWorld(String path) throws IOException {
+        new File(path).mkdirs();
+
+        String playerDataPath = path+"player.data";
+        FileOutputStream out = new FileOutputStream(playerDataPath);
+        byte[] playerData = Utils.intArrayToByteArray(Main.player.getData());
+        out.write(playerData);
+        out.close();
+
+        String globalDataPath = path+"world.data";
+        out = new FileOutputStream(globalDataPath);
+        byte[] globalData = Utils.intArrayToByteArray(new int[]{(int)(Renderer.time*1000), (int)(Main.timePassed*1000), Main.meridiem});
+        out.write(globalData);
+        out.close();
+
+        String chunkEmptinessDataPath = path+"chunk_emptiness.data";
+        out = new FileOutputStream(chunkEmptinessDataPath);
+        byte[] chunkEpmtinessData = Utils.intArrayToByteArray(World.chunkEmptiness);
+        out.write(chunkEpmtinessData);
+        out.close();
+
+        String heightmapDataPath = path+"heightmap.data";
+        out = new FileOutputStream(heightmapDataPath);
+        byte[] heightmapData = Utils.intArrayToByteArray(Utils.shortArrayToIntArray(World.heightmap));
+        out.write(heightmapData);
+        out.close();
+
+        String chunksPath = path + "chunks.data";
+        out = new FileOutputStream(chunksPath);
+        for (int x = 0; x < World.sizeChunks; x++) {
+            for (int z = 0; z < World.sizeChunks; z++) {
+                for (int y = 0; y < World.heightChunks; y++) {
+                    Chunk chunk = World.chunks[Utils.condenseChunkPos(x, y, z)];
+                    byte[] subChunks = Utils.intArrayToByteArray(chunk.getSubChunks());
+
+                    byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+                    int[] blockData = chunk.getBlockData();
+                    byte[] blocks;
+                    if (blockData != null) {
+                        blocks = Utils.intArrayToByteArray(blockData);
+                    } else {
+                        blocks = new byte[]{};
+                    }
+
+                    byte[] cornerPalette = Utils.intArrayToByteArray(chunk.getCornerPalette());
+                    int[] cornerData = chunk.getCornerData();
+                    byte[] corners;
+                    if (cornerData != null) {
+                        corners = Utils.intArrayToByteArray(cornerData);
+                    } else {
+                        corners = new byte[]{};
+                    }
+
+                    byte[] lightPalette = Utils.intArrayToByteArray(chunk.getLightPalette());
+                    int[] lightData = chunk.getLightData();
+                    byte[] lights;
+                    if (lightData != null) {
+                        lights = Utils.intArrayToByteArray(lightData);
+                    } else {
+                        lights = new byte[]{};
+                    }
+                    ByteBuffer buffer = ByteBuffer.allocate(subChunks.length + 4 + blockPalette.length + 4 + blocks.length + 4 + cornerPalette.length + 4 + corners.length + 4 + lightPalette.length + 4 + lights.length + 4);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{subChunks.length / 4}));
+                    buffer.put(subChunks);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+                    buffer.put(blockPalette);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+                    buffer.put(blocks);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{cornerPalette.length / 4}));
+                    buffer.put(cornerPalette);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{corners.length / 4}));
+                    buffer.put(corners);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{lightPalette.length / 4}));
+                    buffer.put(lightPalette);
+                    buffer.put(Utils.intArrayToByteArray(new int[]{lights.length / 4}));
+                    buffer.put(lights);
+                    out.write(buffer.array());
+                }
+            }
+        }
+        out.close();
+    }
     public static void loadWorld(String path) throws IOException {
         FileInputStream in = new FileInputStream(path);
 
@@ -544,7 +618,7 @@ public class World {
         return (x >= 0 && x < sizeChunks && z >= 0 && z < sizeChunks && y >= 0 && y < heightChunks);
     }
 
-    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority, boolean tick) {
+    public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority, int tickDelay, boolean silent) {
         if (inBounds(x, y, z)) {
             Vector2i existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.x() == 0)) {
@@ -569,23 +643,14 @@ public class World {
                 Vector3i localPos = new Vector3i(x & 15, y & 15, z & 15);
                 Chunk chunk = chunks[condensedChunkPos];
                 chunk.setBlock(localPos, blockTypeId, blockSubtypeId, pos);
-                if (tick) {
-                    ScheduledTicker.scheduleTick(Main.currentTick+1, pos);
+                if (tickDelay > 0) {
+                    ScheduledTicker.scheduleTick(Main.currentTick+tickDelay, pos);
                 }
                 chunk.setLight(new Vector3i(localPos), r, g, b, 0, pos);
                 updateHeightmap(x, z, true);
                 recalculateLight(pos, org.joml.Math.max(oldLight.x, r), org.joml.Math.max(oldLight.y, g), org.joml.Math.max(oldLight.z, b), oldLight.w);
 
-                Source placeSource = new Source(new Vector3f(x, y, z), 1, 1, 0, 0);
-                placeSource.play(AudioController.buffers.get((int) ((java.lang.Math.random()*2)+1)));
-
-                Vector2i aboveBlock = getBlock(x, y+1, z);
-                if (aboveBlock != null) {
-                    int aboveBlockId = aboveBlock.x();
-                    if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport) {
-                        setBlock(x, y + 1, z, 0, 0, true, priority, tick);
-                    }
-                }
+                BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, silent);
             }
         }
     }

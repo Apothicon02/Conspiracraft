@@ -22,11 +22,8 @@ public class ScheduledTicker {
         for (long scheduledTick = lastTick+1; scheduledTick <= Main.currentTick; scheduledTick++) {
             ArrayList<Vector3i> positions = schedule.get(scheduledTick);
             if (positions != null) {
-                long finalScheduledTick = scheduledTick;
                 positions.forEach((pos) -> {
-                    if (Main.currentTick > finalScheduledTick) {
-                        BlockTypes.blockTypeMap.get(World.getBlock(pos).x).tick(pos);
-                    }
+                    BlockTypes.blockTypeMap.get(World.getBlock(pos).x).tick(pos);
                 });
             }
             schedule.remove(scheduledTick);
