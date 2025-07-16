@@ -11,6 +11,10 @@ import static org.conspiracraft.game.world.World.setBlock;
 public class BlockType {
     public BlockProperties blockProperties;
 
+    public boolean needsSupport(Vector2i block) {
+        return blockProperties.needsSupport;
+    }
+
     public boolean obstructingHeightmap(Vector2i block) {
         return blockProperties.obstructsHeightmap;
     }
@@ -28,11 +32,13 @@ public class BlockType {
             blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
         }
 
-        Vector2i aboveBlock = getBlock(new Vector3i(pos.x, pos.y+1, pos.z));
-        if (aboveBlock != null) {
-            int aboveBlockId = aboveBlock.x();
-            if (BlockTypes.blockTypeMap.get(aboveBlockId).blockProperties.needsSupport) {
-                setBlock(pos.x, pos.y+1, pos.z, 0, 0, true, true, 1, false);
+        if (!blockProperties.isSolid) {
+            Vector2i aboveBlock = getBlock(new Vector3i(pos.x, pos.y + 1, pos.z));
+            if (aboveBlock != null) {
+                int aboveBlockId = aboveBlock.x();
+                if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport(aboveBlock)) {
+                    setBlock(pos.x, pos.y + 1, pos.z, 0, 0, true, true, 1, false);
+                }
             }
         }
     }

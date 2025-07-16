@@ -33,7 +33,7 @@ public class BlockProperties implements Cloneable {
         this.obstructsHeightmap = obstructsHeightmap;
         return this;
     }
-    public boolean needsSupport = false;
+    protected boolean needsSupport = false;
     public BlockProperties needsSupport(boolean needsSupport) {
         this.needsSupport = needsSupport;
         return this;

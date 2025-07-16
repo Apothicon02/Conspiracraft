@@ -400,7 +400,6 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
     }
     vec3 realPos = (ogRayPos + rayDir * rayLength);
     prevPos = realPos + (hitNormal * 0.001f);
-
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
     float fire = blockType == 19 ? 1.f : (blockType == 9 ? 0.05f : 0.f);
     vec4 prevVoxelColor = firstVoxel ? vec4(0) : getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
@@ -409,10 +408,11 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
             bool canHit = prevVoxelColor.a < voxelColor.a;
+            float shouldReflect = 0.f;
             if (reflectivity == 0.f && canHit) {
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
-                    if (blockType == 1 && blockSubtype > 0) { //water
-                        reflectivity = 0.3f;
+                    if (blockType == 1 && blockSubtype > 0 && prevBlock.x == 0) { //water
+                        shouldReflect = 0.3f;
                     } else if (blockType == 7) { //kyanite
                         reflectivity = 0.33f;
                     } else if (blockType >= 11 && blockType <= 13) { //glass
@@ -424,15 +424,17 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
             }
             normal = ivec3(mapPos - prevMapPos);
             if (voxelColor.a < 1.f) {
-                if (hitPos == vec3(256) && canHit) {
-                    prevHitPos = renderingHand ? (camPos+(prevMapPos/8)) : prevPos;
-                    hitPos = renderingHand ? (camPos+(mapPos/8)) : realPos;
-                }
                 //bubbles start
-                if (blockType == 1) {
-                    float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(((renderingHand ? 3 : rayMapPos.y)*8)+mapPos.y+(float(time)*10000)))+(vec2((renderingHand ? 3 : rayMapPos.x), (renderingHand ? 3 : rayMapPos.z))*8));
-                    if (samp > 0 && samp < 0.002) {
-                        voxelColor = fromLinear(vec4(1, 1, 1, 1));
+                bool underwater = false;
+                if (blockType == 1 && !renderingHand) {
+                    if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x == 0) {
+                        float samp = noise((vec2(rayMapPos.x + (mapPos.x / 8), rayMapPos.z + (mapPos.z / 8)) + (float(time) * 100)) * 64);
+                        if (samp > -0.1 && samp < 0.1) {
+                            voxelColor = fromLinear(vec4(0.9f, 1, 1, 1));
+                            shouldReflect = 0.08f;
+                        }
+                    } else {
+                        underwater = true;
                     }
                 } else {
                     float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+((renderingHand ? 3 : rayMapPos.y)*8)+mapPos.y)+(vec2((renderingHand ? 3 : rayMapPos.x), (renderingHand ? 3 : rayMapPos.z))*8));
@@ -441,13 +443,28 @@ vec4 traceBlock(float chunkDist, float subChunkDist, float blockDist, vec3 inter
                     }
                 }
                 //bubbles end
+                if (reflectivity == 0.f) {
+                    reflectivity = shouldReflect;
+                }
 
-                vec3 finalLight = vec3(lighting*((0.7-min(0.7, (lighting.a/20)*mixedTime))/4))+sunLight;
-                vec4 color = vec4(vec3(voxelColor)*min(vec3(1.15f), finalLight), 1);//light
-                //fog start
-                color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
-                //fog end
-                tint += vec3(toLinear(color));
+                if (!underwater) {
+                    if (hitPos == vec3(256) && canHit) {
+                        prevHitPos = renderingHand ? (camPos+(prevMapPos/8)) : prevPos;
+                        hitPos = renderingHand ? (camPos+(mapPos/8)) : realPos;
+                    }
+                    vec3 finalLight = vec3(lighting * ((0.7 - min(0.7, (lighting.a / 20) * mixedTime)) / 4)) + sunLight;
+                    vec4 color = vec4(vec3(voxelColor) * min(vec3(1.15f), finalLight), 1);//light
+                    //fog start
+                    color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), 1);
+                    //fog end
+                    tint += vec3(toLinear(color));
+                }
+
+                if (underwater) {
+                    if (getBlock(realPos.x, int(realPos.y) + 1, realPos.z).x != 0) {
+                        return vec4(0);
+                    }
+                }
             }
             if (voxelColor.a >= 1) {
                 if (hitPos == vec3(256)) {
@@ -928,9 +945,12 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
                 sunDir.z = 0.00001f;
             }
             clearVars(true, true);
+            float oldReflectivity = reflectivity;
+            reflectivity = 0.f;
             if (traceWorld(true, shadowPos, sunDir).a >= 1.f) {
                 sunLight /= (max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10)))*1;
             }
+            reflectivity = oldReflectivity;
             tint = max(vec3(1), tint);
             color = color*fromLinear(vec4(vec3(tint)/max(tint.r, max(tint.g, tint.b)), 1));//sun tint
         }
@@ -938,6 +958,9 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec3 finalLight = vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight;
     color = vec4(vec3(color)*min(vec3(1.15f), finalLight), color.a);//light
     //fog start
+    if (getBlock(camPos).x == 1) {
+        unmixedFogColor += (vec3(-0.5f, -0.5f, 0.5f)*min(1, distanceFogginess*10));
+    }
     color = vec4(mix(vec3(color), unmixedFogColor, distanceFogginess), color.a);
     vec4 fog = 1+(isSnowFlake ? vec4(finalLight/5, 0) : vec4(vec3(finalLightFog), 1));
     color *= fog;

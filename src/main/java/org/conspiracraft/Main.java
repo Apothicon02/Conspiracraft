@@ -204,10 +204,14 @@ public class Main {
                                     } else if (amount > 0) {
                                         Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
                                         BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
+                                        BlockProperties selectedProperties = BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties;
                                         if (oldType.isFluidReplaceable) {
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? amount : blockSubtypeId, true, false, 1, false);
-                                            selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? (amount - oldBlock.y) : 1;
                                             boolean isFluid = BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid;
+                                            if (!(isFluid && isShiftDown)) {
+                                                selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? (amount - oldBlock.y) : 1;
+                                            }
+
                                             if (selectedBlock.z <= 0) {
                                                 if (isFluid) {
                                                     selectedBlock.x = 22;
@@ -218,13 +222,21 @@ public class Main {
                                                     selectedBlock.y = 0;
                                                 }
                                             }
-                                        } else if (BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid && oldBlock.x == selectedBlock.x) {
+                                        } else if (selectedProperties.isFluid && oldBlock.x == selectedBlock.x) {
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, Math.min(15, oldBlock.y()+amount), true, false, 1, false);
                                             selectedBlock.z -= (amount - oldBlock.y);
                                             if (selectedBlock.z <= 0) {
                                                 selectedBlock.x = 22;
                                                 selectedBlock.y = 0;
                                                 selectedBlock.z = 1;
+                                            }
+                                        } else if (!selectedProperties.isFluidReplaceable && oldType.isFluid) {
+                                            //displace all fluid to first of 6 neighbors, if impossible then block will not be placed.
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
+                                            selectedBlock.z--;
+                                            if (selectedBlock.z <= 0) {
+                                                selectedBlock.x = 0;
+                                                selectedBlock.y = 0;
                                             }
                                         }
                                     }
