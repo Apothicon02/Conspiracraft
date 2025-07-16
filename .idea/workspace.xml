@@ -11,10 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LeafBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LeafBlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -198,14 +194,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00135" summary="- Added clouds.">
-      <option name="closed" value="true" />
-      <created>1740264363702</created>
-      <option name="number" value="00135" />
-      <option name="presentableId" value="LOCAL-00135" />
-      <option name="project" value="LOCAL" />
-      <updated>1740264363703</updated>
     </task>
     <task id="LOCAL-00136" summary="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges.">
       <option name="closed" value="true" />
@@ -591,7 +579,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752623720248</updated>
     </task>
-    <option name="localTasksCounter" value="184" />
+    <task id="LOCAL-00184" summary="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics.">
+      <option name="closed" value="true" />
+      <created>1752631437883</created>
+      <option name="number" value="00184" />
+      <option name="presentableId" value="LOCAL-00184" />
+      <option name="project" value="LOCAL" />
+      <updated>1752631437883</updated>
+    </task>
+    <option name="localTasksCounter" value="185" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -612,7 +608,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Updated README. &#10;- Added water flowing sounds. &#10;- Added block placement sound. &#10;- Added ambient water sounds. &#10;- Added ambient wind sounds. &#10;- Added ambient bee sound. &#10;- Added ambient bird sound." />
     <MESSAGE value="- Removed hand rendering. &#10;- Updated README." />
     <MESSAGE value="- Cleaned up fragment shader." />
     <MESSAGE value="- Added brick dda." />
@@ -637,6 +632,7 @@
     <MESSAGE value="- Sound rework. &#10;- Fluid flow now works horizontally." />
     <MESSAGE value="- Added block properties. &#10;- Added buckets." />
     <MESSAGE value="- Finished fluid implementation." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Finished fluid implementation." />
+    <MESSAGE value="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics." />
   </component>
 </project>

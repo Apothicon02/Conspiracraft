@@ -59,6 +59,7 @@ public class Renderer {
     public static int selectedUniform;
     public static int uiUniform;
     public static int shadowsEnabledUniform;
+    public static int raytracedCausticsUniform;
     public static int snowingUniform;
     public static int sunUniform;
     public static int cloudsEnabledUniform;
@@ -72,6 +73,7 @@ public class Renderer {
     public static boolean[] collisionData = new boolean[9984*9984+9984];
     public static boolean showUI = true;
     public static boolean shadowsEnabled = false;
+    public static boolean raytracedCaustics = true;
     public static boolean cloudsEnabled = true;
     public static boolean snowing = false;
 
@@ -145,6 +147,7 @@ public class Renderer {
         selectedUniform = glGetUniformLocation(scene.programId, "selected");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
         shadowsEnabledUniform = glGetUniformLocation(scene.programId, "shadowsEnabled");
+        raytracedCausticsUniform = glGetUniformLocation(scene.programId, "raytracedCaustics");
         snowingUniform = glGetUniformLocation(scene.programId, "snowing");
         sunUniform = glGetUniformLocation(scene.programId, "sun");
         cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
@@ -188,6 +191,7 @@ public class Renderer {
         glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
         glUniform1i(uiUniform, showUI ? 1 : 0);
         glUniform1i(shadowsEnabledUniform, shadowsEnabled ? 1 : 0);
+        glUniform1i(raytracedCausticsUniform, raytracedCaustics ? 1 : 0);
         glUniform1i(snowingUniform, snowing ? 1 : 0);
         float halfSize = size/2f;
         Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
