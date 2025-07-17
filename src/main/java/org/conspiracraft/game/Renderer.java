@@ -1,15 +1,9 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.game.audio.AudioController;
-import org.conspiracraft.game.audio.Source;
-import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.noise.Noises;
-import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.world.Chunk;
 import org.joml.*;
-import org.joml.Math;
 import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.*;
 import org.conspiracraft.engine.Window;
@@ -21,6 +15,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.Math;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -35,8 +30,10 @@ import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 public class Renderer {
     public static ShaderProgram scene;
+    public static ComputeProgram sceneCompute;
     public static int sceneVaoId;
 
+    public static int sceneImageId;
     public static int coherentNoiseId;
     public static int whiteNoiseId;
     public static int cloudNoiseId;
@@ -98,10 +95,19 @@ public class Renderer {
         glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
-        scene = new ShaderProgram();
-        scene.createVertexShader(Utils.readFile("assets/base/shaders/scene.vert"));
-        scene.createFragmentShader(Utils.readFile("assets/base/shaders/scene.frag"));
-        scene.link();
+        sceneCompute = new ComputeProgram();
+        sceneCompute.createComputeShader(Utils.readFile("assets/base/shaders/scene.comp"));
+        sceneCompute.link();
+
+
+        sceneImageId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, sceneImageId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         coherentNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
@@ -139,19 +145,25 @@ public class Renderer {
         imageSSBOId = glGenBuffers();
         chunkEmptySSBOId = glGenBuffers();
 
+        camUniform = glGetUniformLocation(sceneCompute.programId, "cam");
+        renderDistanceUniform = glGetUniformLocation(sceneCompute.programId, "renderDistance");
+        timeOfDayUniform = glGetUniformLocation(sceneCompute.programId, "timeOfDay");
+        timeUniform = glGetUniformLocation(sceneCompute.programId, "time");
+        selectedUniform = glGetUniformLocation(sceneCompute.programId, "selected");
+        shadowsEnabledUniform = glGetUniformLocation(sceneCompute.programId, "shadowsEnabled");
+        raytracedCausticsUniform = glGetUniformLocation(sceneCompute.programId, "raytracedCaustics");
+        snowingUniform = glGetUniformLocation(sceneCompute.programId, "snowing");
+        sunUniform = glGetUniformLocation(sceneCompute.programId, "sun");
+        cloudsEnabledUniform = glGetUniformLocation(sceneCompute.programId, "cloudsEnabled");
+        handUniform = glGetUniformLocation(sceneCompute.programId, "hand");
+
+        scene = new ShaderProgram();
+        scene.createVertexShader(Utils.readFile("assets/base/shaders/scene.vert"));
+        scene.createFragmentShader(Utils.readFile("assets/base/shaders/scene.frag"));
+        scene.link();
+
         resUniform = glGetUniformLocation(scene.programId, "res");
-        camUniform = glGetUniformLocation(scene.programId, "cam");
-        renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
-        timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
-        timeUniform = glGetUniformLocation(scene.programId, "time");
-        selectedUniform = glGetUniformLocation(scene.programId, "selected");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
-        shadowsEnabledUniform = glGetUniformLocation(scene.programId, "shadowsEnabled");
-        raytracedCausticsUniform = glGetUniformLocation(scene.programId, "raytracedCaustics");
-        snowingUniform = glGetUniformLocation(scene.programId, "snowing");
-        sunUniform = glGetUniformLocation(scene.programId, "sun");
-        cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
-        handUniform = glGetUniformLocation(scene.programId, "hand");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(Integer.MAX_VALUE);
@@ -172,9 +184,7 @@ public class Renderer {
     public static void render(Window window) throws IOException {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        scene.bind();
 
-        glUniform2f(resUniform, window.getWidth(), window.getHeight());
         Matrix4f camMatrix = Main.player.getCameraMatrix();
         glUniformMatrix4fv(camUniform, true, new float[]{
                 camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
@@ -189,7 +199,6 @@ public class Renderer {
             selected = new Vector3f(-1000, -1000, -1000);
         }
         glUniform3i(selectedUniform, (int) selected.x, (int) selected.y, (int) selected.z);
-        glUniform1i(uiUniform, showUI ? 1 : 0);
         glUniform1i(shadowsEnabledUniform, shadowsEnabled ? 1 : 0);
         glUniform1i(raytracedCausticsUniform, raytracedCaustics ? 1 : 0);
         glUniform1i(snowingUniform, snowing ? 1 : 0);
@@ -201,12 +210,6 @@ public class Renderer {
         glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
         glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
         if (atlasChanged) {
             atlasChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
@@ -518,6 +521,25 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Blocks end
 
+        sceneCompute.bind();
+        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        glDispatchCompute(Math.ceilDiv(window.getWidth(), 8), Math.ceilDiv(window.getHeight(), 4), 1);
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+        scene.bind();
+
+        glUniform2f(resUniform, window.getWidth(), window.getHeight());
+        glUniform1i(uiUniform, showUI ? 1 : 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sceneImageId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
+
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -563,6 +585,7 @@ public class Renderer {
 
     public void cleanup() {
         glDeleteVertexArrays(sceneVaoId);
+        sceneCompute.cleanup();
         scene.cleanup();
     }
 }
