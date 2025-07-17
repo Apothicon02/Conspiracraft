@@ -65,7 +65,7 @@ public class Renderer {
     public static int cloudsEnabledUniform;
     public static int handUniform;
 
-    public static int renderDistanceMul = 8; //4
+    public static int renderDistanceMul = 4; //4
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
     public static boolean atlasChanged = true;
@@ -196,7 +196,7 @@ public class Renderer {
         float halfSize = size/2f;
         Vector3f sunPos = new Vector3f(size/4f, 0, size/4f);
         sunPos.rotateY((float) time);
-        sunPos = new Vector3f(sunPos.x+halfSize, height, sunPos.z+halfSize);
+        sunPos = new Vector3f(sunPos.x+halfSize, height+64, sunPos.z+halfSize);
         glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
         glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
         glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
