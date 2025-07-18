@@ -14,6 +14,6 @@ void main()
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9f, 0.9f, 1, 1);
     } else {
-        fragColor = texture(scene_image, uv);
+        fragColor = texture(scene_image, vec2(gl_FragCoord.xy/res));
     }
 }

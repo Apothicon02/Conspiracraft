@@ -12,6 +12,7 @@
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/oldscene.frag" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
@@ -196,14 +197,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00140" summary="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game.">
-      <option name="closed" value="true" />
-      <created>1740623491988</created>
-      <option name="number" value="00140" />
-      <option name="presentableId" value="LOCAL-00140" />
-      <option name="project" value="LOCAL" />
-      <updated>1740623491988</updated>
     </task>
     <task id="LOCAL-00141" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
       <option name="closed" value="true" />
@@ -589,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752797958206</updated>
     </task>
-    <option name="localTasksCounter" value="189" />
+    <task id="LOCAL-00189" summary="- Went back to using an image.">
+      <option name="closed" value="true" />
+      <created>1752846735774</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1752846735775</updated>
+    </task>
+    <option name="localTasksCounter" value="190" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -610,7 +611,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Nearly quadrupled performance. &#10;- Removed light fog.&#10;- Sounds now support directionality. &#10;- Fixed window resizing. &#10;- Removed bricks." />
     <MESSAGE value="- Improved reflection accuracy. &#10;- Improved transparency fog brightness accuracy. &#10;- Partially fixed shadows." />
     <MESSAGE value="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack." />
     <MESSAGE value="- Fixed precision issue. &#10;- Increased sun shadow contrast." />
@@ -635,6 +635,7 @@
     <MESSAGE value="- Clouds now get shorter at lower elevations. &#10;- Added world border effect. &#10;- Sun is now round and renders from infinite distance. &#10;- Added luna." />
     <MESSAGE value="- Organized block types class. &#10;- Started compute shader." />
     <MESSAGE value="- Progress on compute shader." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Progress on compute shader." />
+    <MESSAGE value="- Went back to using an image." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Went back to using an image." />
   </component>
 </project>

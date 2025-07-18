@@ -24,7 +24,7 @@ import java.util.LinkedList;
 import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.Player.selectedBlock;
 import static org.conspiracraft.game.world.World.*;
-import static org.lwjgl.opengl.GL43C.*;
+import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.util.vma.Vma.*;
 import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
@@ -106,7 +106,8 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window.getWidth(), window.getHeight(), 0, GL_RGBA32F, GL_UNSIGNED_BYTE, Utils.imageToGrayscaleBuffer(Noises.COHERERENT_NOISE.image));
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
         glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         coherentNoiseId = glGenTextures();
@@ -185,6 +186,8 @@ public class Renderer {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        sceneCompute.bind();
+
         Matrix4f camMatrix = Main.player.getCameraMatrix();
         glUniformMatrix4fv(camUniform, true, new float[]{
                 camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
@@ -243,7 +246,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
         if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
+            glNamedBufferData(GL_SHADER_STORAGE_BUFFER, Integer.MAX_VALUE, GL_DYNAMIC_DRAW);
             chunkCornerPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
             chunkCornerAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
 
@@ -521,10 +524,13 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Blocks end
 
-        sceneCompute.bind();
+        glBindTextureUnit(1, coherentNoiseId);
+        glBindTextureUnit(2, whiteNoiseId);
+        glBindTextureUnit(3, cloudNoiseId);
 
-        glDispatchCompute(Math.ceilDiv(window.getWidth(), 8), Math.ceilDiv(window.getHeight(), 4), 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        glDispatchCompute(Math.ceilDiv(window.getWidth(), 16), Math.ceilDiv(window.getHeight(), 8), 1);
+        glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
         sceneCompute.unbind();
         scene.bind();
@@ -532,14 +538,7 @@ public class Renderer {
         glUniform2f(resUniform, window.getWidth(), window.getHeight());
         glUniform1i(uiUniform, showUI ? 1 : 0);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, sceneImageId);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, whiteNoiseId);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
+        glBindTextureUnit(0, sceneImageId);
 
         glBindVertexArray(sceneVaoId);
         glEnableVertexAttribArray(0);
