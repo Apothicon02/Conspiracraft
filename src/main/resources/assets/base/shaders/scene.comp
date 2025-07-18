@@ -1,6 +1,6 @@
 #version 430 core
 
-layout(local_size_x = 16, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 uniform mat4 cam;
 uniform int renderDistance;
@@ -573,7 +573,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
         sideDist += mask * raySign * deltaDist;
     }
 
-    return vec4(0.0);
+    return vec4(0);
 }
 
 vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkPos, vec3 offset, vec3 rayPos, vec3 rayDir, vec3 iMask, bool inBounds, bool checkBlocks) {
@@ -1052,7 +1052,12 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     return color;
 }
 
+#extension GL_ARB_gpu_shader_int64 : enable
+#extension GL_ARB_shader_clock : require
+
 void main() {
+    uint64_t startTime = clockARB();
+
     ivec2 res = imageSize(scene_image);
     ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
     bool xOdd = bool(pixel.x % 2 == 1);
@@ -1086,5 +1091,5 @@ void main() {
     }
     //reflections end
 
-    imageStore(scene_image, pixel, toLinear(color));
+    imageStore(scene_image, pixel, mix(toLinear(color), vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f));
 }

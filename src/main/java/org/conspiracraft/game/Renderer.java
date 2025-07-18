@@ -529,7 +529,7 @@ public class Renderer {
         glBindTextureUnit(3, cloudNoiseId);
 
         glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        glDispatchCompute(Math.ceilDiv(window.getWidth(), 16), Math.ceilDiv(window.getHeight(), 8), 1);
+        glDispatchCompute(Math.ceilDiv(window.getWidth(), 8), Math.ceilDiv(window.getHeight(), 8), 1);
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
         sceneCompute.unbind();
