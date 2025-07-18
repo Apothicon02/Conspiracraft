@@ -6,10 +6,7 @@ in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
-layout(std430, binding = 7) buffer imageSSBO
-{
-    vec3[] imageData;
-};
+layout(binding = 0) uniform sampler2D scene_image;
 
 void main()
 {
@@ -17,7 +14,6 @@ void main()
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9f, 0.9f, 1, 1);
     } else {
-        ivec2 pixelPos = ivec2(gl_FragCoord.xy*res.xy);
-        fragColor = vec4(imageData[int(pixelPos.x*res.y)+pixelPos.y], 1);
+        fragColor = texture(scene_image, uv);
     }
 }
