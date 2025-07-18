@@ -100,7 +100,7 @@ public class Player {
                 int temp = cornerData;
                 temp &= (~(1 << (cornerIndex - 1)));
                 if (temp == cornerData) {
-                    if (Renderer.collisionData[(9984 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.y() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
+                    if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((x - Math.floor(x)) * 8))) + (block.y() * 64) + ((Math.abs(((int) ((y - Math.floor(y)) * 8)) - 8) - 1) * 8) + (int) ((z - Math.floor(z)) * 8)]) {
                         if (recordFriction) {
                             if (typeId == 7) { //kyanite
                                 friction = Math.min(friction, 0.95f);

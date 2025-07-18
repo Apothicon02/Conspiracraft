@@ -127,7 +127,7 @@ public class Main {
     boolean wasQDown = false;
     boolean wasF1Down = false;
     boolean wasF4Down = false;
-    boolean isClosing = false;
+    public static boolean isClosing = false;
 
     public static long lastBlockBroken = 0L;
     public static int reach = 50;

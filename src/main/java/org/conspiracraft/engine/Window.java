@@ -1,6 +1,5 @@
 package org.conspiracraft.engine;
 
-import org.conspiracraft.Main;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
 import org.tinylog.Logger;
@@ -9,7 +8,7 @@ import java.util.concurrent.Callable;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -32,6 +31,7 @@ public class Window {
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
         if (opts.compatibleProfile) {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
         } else {
