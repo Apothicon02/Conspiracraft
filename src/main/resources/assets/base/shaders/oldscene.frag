@@ -1058,7 +1058,6 @@ void main()
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
-        ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y*res.y);
         checkerOn = checker(ivec2(gl_FragCoord.xy));
         uvDir = normalize(vec3(uv, 1));
         vec3 ogDir = vec3(cam*vec4(uvDir, 0));

@@ -10,12 +10,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ComputeProgram.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/oldscene.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/oldscene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/oldscene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -199,14 +197,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00138" summary="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting.">
-      <option name="closed" value="true" />
-      <created>1740504757080</created>
-      <option name="number" value="00138" />
-      <option name="presentableId" value="LOCAL-00138" />
-      <option name="project" value="LOCAL" />
-      <updated>1740504757080</updated>
     </task>
     <task id="LOCAL-00139" summary="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays.">
       <option name="closed" value="true" />
@@ -592,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752716552329</updated>
     </task>
-    <option name="localTasksCounter" value="187" />
+    <task id="LOCAL-00187" summary="- Organized block types class. &#10;- Started compute shader.">
+      <option name="closed" value="true" />
+      <created>1752781213331</created>
+      <option name="number" value="00187" />
+      <option name="presentableId" value="LOCAL-00187" />
+      <option name="project" value="LOCAL" />
+      <updated>1752781213331</updated>
+    </task>
+    <option name="localTasksCounter" value="188" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,7 +611,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Added brick dda." />
     <MESSAGE value="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move." />
     <MESSAGE value="- Nearly quadrupled performance. &#10;- Removed light fog.&#10;- Sounds now support directionality. &#10;- Fixed window resizing. &#10;- Removed bricks." />
     <MESSAGE value="- Improved reflection accuracy. &#10;- Improved transparency fog brightness accuracy. &#10;- Partially fixed shadows." />
@@ -638,6 +635,7 @@
     <MESSAGE value="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics." />
     <MESSAGE value="- Fixed shader isues that might prevent running on igpus. &#10;- Improved caustics.&#10;- Greatly optimized shadows in transparent environments. &#10;- Greatly optimized deep water rendering." />
     <MESSAGE value="- Clouds now get shorter at lower elevations. &#10;- Added world border effect. &#10;- Sun is now round and renders from infinite distance. &#10;- Added luna." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Clouds now get shorter at lower elevations. &#10;- Added world border effect. &#10;- Sun is now round and renders from infinite distance. &#10;- Added luna." />
+    <MESSAGE value="- Organized block types class. &#10;- Started compute shader." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Organized block types class. &#10;- Started compute shader." />
   </component>
 </project>
