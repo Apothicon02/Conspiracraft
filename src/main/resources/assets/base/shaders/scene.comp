@@ -15,6 +15,7 @@ uniform vec3 sun;
 uniform bool cloudsEnabled;
 uniform ivec3 hand;
 
+layout(binding = 0, rgba32f) uniform writeonly image2D scene_image;
 layout(binding = 1) uniform sampler2D coherent_noise;
 layout(binding = 2) uniform sampler2D white_noise;
 layout(binding = 3) uniform sampler2D cloud_noise;
@@ -55,8 +56,6 @@ layout(std430, binding = 8) buffer chunkEmptySSBO
 {
     int[] chunkEmptyData;
 };
-
-layout(binding = 0, rgba32f) uniform image2D scene_image;
 
 int size = 2048; //6976
 int height = 432;
