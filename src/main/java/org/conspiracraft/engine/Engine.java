@@ -4,6 +4,9 @@ import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
 import org.conspiracraft.game.Renderer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Engine {
 
     public static final int TARGET_UPS = 30;
@@ -34,6 +37,9 @@ public class Engine {
         //resize stuff
     }
 
+    public List<Long> frameTimes = new ArrayList<>(List.of());
+    public List<Integer> framesPerSeconds = new ArrayList<>(List.of());
+
     private void run() throws Exception {
         long initialTime = System.currentTimeMillis();
         float timeU = 1000.0f / targetUps;
@@ -49,13 +55,22 @@ public class Engine {
             long now = System.currentTimeMillis();
             deltaUpdate += (now - initialTime) / timeU;
             deltaFps += (now - initialTime) / timeR;
+            long diffTimeMillis = now - updateTime;
+            frameTimes.addLast(diffTimeMillis);
+            if (frameTimes.size() > 60) {
+                frameTimes.removeFirst();
+            }
+            fps = (int)(1000f/(now - initialTime));
+            framesPerSeconds.addLast(fps);
+            if (framesPerSeconds.size() > 60) {
+                framesPerSeconds.removeFirst();
+            }
 
             if (targetFps <= 0 || deltaFps >= 1) {
                 main.input(window, now,  now - initialTime);
             }
 
             if (deltaUpdate >= 1) {
-                long diffTimeMillis = now - updateTime;
                 main.update(window, diffTimeMillis, now);
                 updateTime = now;
                 deltaUpdate--;
@@ -69,8 +84,10 @@ public class Engine {
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
-                    fps = (int)(1000f/(now - initialTime));
-                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " + Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " + fps + "fps");
+                    GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " +
+                            Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " +
+                            ((int)ConspiracraftMath.averageInts(framesPerSeconds)) + "fps " +
+                            String.format("%.1f", ConspiracraftMath.averageLongs(frameTimes)) + "ms");
                     framesUntilUpdate = 40;
                 }
             }
