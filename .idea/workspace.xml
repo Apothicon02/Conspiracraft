@@ -11,9 +11,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ShaderProgram.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ShaderProgram.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.comp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -196,14 +194,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00144" summary="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast.">
-      <option name="closed" value="true" />
-      <created>1740795424961</created>
-      <option name="number" value="00144" />
-      <option name="presentableId" value="LOCAL-00144" />
-      <option name="project" value="LOCAL" />
-      <updated>1740795424962</updated>
     </task>
     <task id="LOCAL-00145" summary="- Added the volcano. &#10;- Added magma.">
       <option name="closed" value="true" />
@@ -589,7 +579,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752947740403</updated>
     </task>
-    <option name="localTasksCounter" value="193" />
+    <task id="LOCAL-00193" summary="- Greatly organized rendering class.">
+      <option name="closed" value="true" />
+      <created>1752953413210</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
+      <option name="project" value="LOCAL" />
+      <updated>1752953413210</updated>
+    </task>
+    <option name="localTasksCounter" value="194" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -610,7 +608,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed precision issue. &#10;- Increased sun shadow contrast." />
     <MESSAGE value="- Re-enabled hand rendering. &#10;- Doubled light intensity of blocklight." />
     <MESSAGE value="- The sun is now rendered." />
     <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
@@ -635,6 +632,18 @@
     <MESSAGE value="- Fixed image not being write only." />
     <MESSAGE value="- Improved cloud noise." />
     <MESSAGE value="- Removed bare trace." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Removed bare trace." />
+    <MESSAGE value="- Greatly organized rendering class." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Greatly organized rendering class." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
+          <line>79</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

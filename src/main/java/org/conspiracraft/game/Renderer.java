@@ -119,7 +119,6 @@ public class Renderer {
 
         Noises.clearImages();
     }
-
     public static void generateVao() {
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
@@ -131,7 +130,6 @@ public class Renderer {
         glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
-
     public static void createBuffers() {
         atlasSSBOId = glCreateBuffers();
         chunkBlocksSSBOId = glCreateBuffers();
@@ -142,7 +140,6 @@ public class Renderer {
         lightsSSBOId = glCreateBuffers();
         chunkEmptySSBOId = glCreateBuffers();
     }
-
     public static void createVMA() {
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(defaultSSBOSize);
@@ -195,7 +192,10 @@ public class Renderer {
         glUniform1i(program.uniforms.get("ui"), showUI ? 1 : 0);
     }
 
-    public static void updateBuffers() throws IOException {
+    public static LinkedList<Integer> chunkBlockPointerChanges = new LinkedList<>();
+    public static LinkedList<Integer> chunkCornerPointerChanges = new LinkedList<>();
+    public static LinkedList<Integer> chunkLightPointerChanges = new LinkedList<>();
+    public static void updateAtlasBuffer() throws IOException {
         if (atlasChanged) {
             atlasChanged = false;
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
@@ -215,11 +215,8 @@ public class Renderer {
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
-
-        LinkedList<Integer> chunkBlockPointerChanges = new LinkedList<>();
-
-        //Corners start
-        LinkedList<Integer> chunkCornerPointerChanges = new LinkedList<>();
+    }
+    public static void updateCornerBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
         if (worldChanged) {
@@ -320,10 +317,8 @@ public class Renderer {
             chunkCornerPointerChanges.clear();
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        //Corners end
-
-        //Lights start
-        LinkedList<Integer> chunkLightPointerChanges = new LinkedList<>();
+    }
+    public static void updateLightBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
         if (worldChanged) {
@@ -431,8 +426,8 @@ public class Renderer {
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Lights end
-
-        //Blocks start
+    }
+    public static void updateBlockBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
         if (worldChanged) {
@@ -512,7 +507,17 @@ public class Renderer {
             }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        //Blocks end
+    }
+
+    public static void updateBuffers() throws IOException {
+        chunkBlockPointerChanges.clear();
+        chunkCornerPointerChanges.clear();
+        chunkLightPointerChanges.clear();
+
+        updateAtlasBuffer();
+        updateCornerBuffers();
+        updateLightBuffers();
+        updateBlockBuffers();
     }
 
     public static void bindTextures() {
