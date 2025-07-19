@@ -13,7 +13,7 @@ uniform vec3 sun;
 uniform bool cloudsEnabled;
 uniform ivec3 hand;
 
-layout(binding = 0, rgba32f) uniform image2D scene_image;
+layout(binding = 0, rgba32f) uniform writeonly image2D scene_image;
 layout(binding = 1) uniform sampler2D coherent_noise;
 layout(binding = 2) uniform sampler2D white_noise;
 layout(binding = 3) uniform sampler2D cloud_noise;
