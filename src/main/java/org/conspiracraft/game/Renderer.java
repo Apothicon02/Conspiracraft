@@ -60,7 +60,6 @@ public class Renderer {
     public static int sunUniform;
     public static int cloudsEnabledUniform;
     public static int handUniform;
-    public static int bareTraceUniform;
 
     public static int resFinalUniform;
 
@@ -174,7 +173,6 @@ public class Renderer {
         handUniform = glGetUniformLocation(scene.programId, "hand");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
         resUniform = glGetUniformLocation(scene.programId, "res");
-        bareTraceUniform = glGetUniformLocation(scene.programId, "bareTrace");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(defaultSSBOSize);
@@ -233,7 +231,6 @@ public class Renderer {
             glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
             glUniform1i(uiUniform, showUI ? 1 : 0);
             glUniform2i(resUniform, lowRes.x, lowRes.y);
-            glUniform1i(bareTraceUniform, 1);
 
             if (atlasChanged) {
                 atlasChanged = false;
@@ -561,13 +558,7 @@ public class Renderer {
             glBindVertexArray(sceneVaoId);
             glEnableVertexAttribArray(0);
             glDrawArrays(GL_TRIANGLES, 0, 3);
-
-            glUniform1i(bareTraceUniform, 1);
-            glUniform2i(resUniform, window.getWidth(), window.getHeight());
-
-            glDrawArrays(GL_TRIANGLES, 0, 3);
             glDisableVertexAttribArray(0);
-
             scene.unbind();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
