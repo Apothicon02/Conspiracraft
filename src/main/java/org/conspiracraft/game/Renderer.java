@@ -32,7 +32,6 @@ public class Renderer {
     public static int sceneVaoId;
     public static int sceneFboId;
     public static ShaderProgram finalScene;
-    public static int finalSceneVaoId;
 
     public static int sceneImageId;
     public static int coherentNoiseId;
@@ -46,7 +45,6 @@ public class Renderer {
     public static int cornersSSBOId;
     public static int chunkLightsSSBOId;
     public static int lightsSSBOId;
-    public static int imageSSBOId;
     public static int chunkEmptySSBOId;
 
     public static int camUniform;
@@ -70,7 +68,7 @@ public class Renderer {
     public static boolean worldChanged = false;
     public static boolean[] collisionData = new boolean[(1024*1024)+1024];
     public static boolean showUI = true;
-    public static boolean shadowsEnabled = false;
+    public static boolean shadowsEnabled = true;
     public static boolean raytracedCaustics = true;
     public static boolean cloudsEnabled = true;
     public static boolean snowing = false;
@@ -120,8 +118,8 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth()/2, window.getHeight()/2);
-        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneImageId, 0);
 
         coherentNoiseId = glGenTextures();
@@ -157,7 +155,6 @@ public class Renderer {
         cornersSSBOId = glCreateBuffers();
         chunkLightsSSBOId = glCreateBuffers();
         lightsSSBOId = glCreateBuffers();
-        imageSSBOId = glCreateBuffers();
         chunkEmptySSBOId = glCreateBuffers();
 
         camUniform = glGetUniformLocation(scene.programId, "cam");
@@ -192,12 +189,6 @@ public class Renderer {
         finalScene.createVertexShader(readFile("assets/base/shaders/scene.vert"));
         finalScene.createFragmentShader(readFile("assets/base/shaders/final_scene.frag"));
         finalScene.link();
-
-        finalSceneVaoId = glGenVertexArrays();
-        glBindVertexArray(finalSceneVaoId);
-        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
         resUniform = glGetUniformLocation(finalScene.programId, "res");
     }
@@ -253,12 +244,6 @@ public class Renderer {
 
                 IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
                 glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_DRAW);
-                glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-
-                glBindBuffer(GL_SHADER_STORAGE_BUFFER, imageSSBOId);
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, imageSSBOId);
-                glBufferData(GL_SHADER_STORAGE_BUFFER, new int[window.getHeight() * window.getWidth()], GL_STATIC_DRAW);
                 glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
             }
 
@@ -548,7 +533,7 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, chunkEmptySSBOId);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, chunkEmptySSBOId);
             if (worldChanged) {
                 glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
             } else {
@@ -576,10 +561,10 @@ public class Renderer {
             glUniform2i(resUniform, window.getWidth(), window.getHeight());
             glBindTextureUnit(0, sceneImageId);
 
-            glBindVertexArray(finalSceneVaoId);
-            glEnableVertexAttribArray(1);
+            glBindVertexArray(sceneVaoId);
+            glEnableVertexAttribArray(0);
             glDrawArrays(GL_TRIANGLES, 0, 3);
-            glDisableVertexAttribArray(1);
+            glDisableVertexAttribArray(0);
             finalScene.unbind();
 
             worldChanged = false;
@@ -623,7 +608,6 @@ public class Renderer {
 
     public void cleanup() {
         glDeleteVertexArrays(sceneVaoId);
-        glDeleteVertexArrays(finalSceneVaoId);
         glDeleteFramebuffers(sceneFboId);
         scene.cleanup();
         finalScene.cleanup();
