@@ -2,15 +2,28 @@ package org.conspiracraft.engine;
 
 import org.lwjgl.opengl.GL40;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.conspiracraft.engine.Utils.readFile;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+
 public class ShaderProgram {
     public final int programId;
     private int vertexShaderId;
     private int fragmentShaderId;
+    public HashMap<String, Integer> uniforms = new HashMap<>(Map.of());
 
-    public ShaderProgram() throws Exception {
+    public ShaderProgram(String vertPath, String fragPath, String[] uniformArray) throws Exception {
         programId = GL40.glCreateProgram();
         if (programId == 0) {
             throw new Exception("Could not create Shader");
+        }
+        createVertexShader(readFile(vertPath));
+        createFragmentShader(readFile(fragPath));
+        link();
+        for (String name : uniformArray) {
+            uniforms.put(name, glGetUniformLocation(programId, name));
         }
     }
 
