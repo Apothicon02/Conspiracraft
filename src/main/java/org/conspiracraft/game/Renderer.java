@@ -60,6 +60,9 @@ public class Renderer {
     public static int sunUniform;
     public static int cloudsEnabledUniform;
     public static int handUniform;
+    public static int bareTraceUniform;
+
+    public static int resFinalUniform;
 
     public static int renderDistanceMul = 3; //4
     public static float timeOfDay = 0.5f;
@@ -72,6 +75,7 @@ public class Renderer {
     public static boolean raytracedCaustics = true;
     public static boolean cloudsEnabled = true;
     public static boolean snowing = false;
+    public static Vector2i lowRes = new Vector2i(1280, 720);
 
     public static int defaultSSBOSize = (int) (0.2f*1000000000)*((size/2048)^2);
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
@@ -118,8 +122,8 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
-        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, lowRes.x, lowRes.y);
+        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneImageId, 0);
 
         coherentNoiseId = glGenTextures();
@@ -140,8 +144,8 @@ public class Renderer {
 
         cloudNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, cloudNoiseId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 2048, 2048, 0, GL_RED, GL_UNSIGNED_BYTE, imageToGrayscaleBuffer(Noises.CLOUD_NOISE.image));
@@ -169,6 +173,8 @@ public class Renderer {
         cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
         handUniform = glGetUniformLocation(scene.programId, "hand");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
+        resUniform = glGetUniformLocation(scene.programId, "res");
+        bareTraceUniform = glGetUniformLocation(scene.programId, "bareTrace");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(defaultSSBOSize);
@@ -190,7 +196,7 @@ public class Renderer {
         finalScene.createFragmentShader(readFile("assets/base/shaders/final_scene.frag"));
         finalScene.link();
 
-        resUniform = glGetUniformLocation(finalScene.programId, "res");
+        resFinalUniform = glGetUniformLocation(finalScene.programId, "res");
     }
 
     public static void render(Window window) throws IOException {
@@ -226,6 +232,8 @@ public class Renderer {
             glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
             glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
             glUniform1i(uiUniform, showUI ? 1 : 0);
+            glUniform2i(resUniform, lowRes.x, lowRes.y);
+            glUniform1i(bareTraceUniform, 1);
 
             if (atlasChanged) {
                 atlasChanged = false;
@@ -553,12 +561,18 @@ public class Renderer {
             glBindVertexArray(sceneVaoId);
             glEnableVertexAttribArray(0);
             glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            glUniform1i(bareTraceUniform, 1);
+            glUniform2i(resUniform, window.getWidth(), window.getHeight());
+
+            glDrawArrays(GL_TRIANGLES, 0, 3);
             glDisableVertexAttribArray(0);
+
             scene.unbind();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             finalScene.bind();
-            glUniform2i(resUniform, window.getWidth(), window.getHeight());
+            glUniform2i(resFinalUniform, window.getWidth(), window.getHeight());
             glBindTextureUnit(0, sceneImageId);
 
             glBindVertexArray(sceneVaoId);

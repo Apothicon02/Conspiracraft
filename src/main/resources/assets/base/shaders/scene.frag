@@ -1,4 +1,4 @@
-#version 430 core
+#version 460
 
 uniform mat4 cam;
 uniform int renderDistance;
@@ -12,8 +12,8 @@ uniform bool snowing;
 uniform vec3 sun;
 uniform bool cloudsEnabled;
 uniform ivec3 hand;
+uniform ivec2 res;
 
-layout(binding = 0, rgba32f) uniform writeonly image2D scene_image;
 layout(binding = 1) uniform sampler2D coherent_noise;
 layout(binding = 2) uniform sampler2D white_noise;
 layout(binding = 3) uniform sampler2D cloud_noise;
@@ -141,7 +141,7 @@ float whiteNoise(vec2 coords) {
     return (texture(white_noise, coords/1024).r)-0.5f;
 }
 float cloudNoise(vec2 coords) {
-    return (texture(cloud_noise, coords/2048).r)-0.5f;
+    return (texture(cloud_noise, coords/1024).r)-0.5f;
 }
 
 vec4 intToColor(int color) {
@@ -283,50 +283,50 @@ vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool s
     }
     vec4 light = intToColor(getLightData(intX, intY, intZ));
     if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
-                               bool[8] corners = getCorners(intX, intY, intZ);
-                               float localX = (x-intX);
-                               float localY = (y-intY);
-                               float localZ = (z-intZ);
-                               bool anyEmpty = false;
-                               if (shiftedY) {
-                                   int ySide = (localY < 0.5f ? 0 : 4);
-                                   if (!corners[ySide + 0 + 0]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[ySide + 2 + 0]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[ySide + 0 + 1]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[ySide + 2 + 1]) {
-                                       anyEmpty = true;
-                                   }
-                               }
-                               if (shiftedZ) {
-                                   int zSide = (localZ < 0.5f ? 0 : 2);
-                                   if (!corners[0 + zSide + 0]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[4 + zSide + 0]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[0 + zSide + 1]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[4 + zSide + 1]) {
-                                       anyEmpty = true;
-                                   }
-                               }
-                               if (shiftedX) {
-                                   int xSide = (localX < 0.5f ? 0 : 1);
-                                   if (!corners[0 + 0 + xSide]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[4 + 0 + xSide]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[0 + 2 + xSide]) {
-                                       anyEmpty = true;
-                                   } else if (!corners[4 + 2 + xSide]) {
-                                       anyEmpty = true;
-                                   }
-                               }
-                               if (!anyEmpty) {
-                                   return vec4(0, 0, 0, 0);
-                               }
+       bool[8] corners = getCorners(intX, intY, intZ);
+       float localX = (x-intX);
+       float localY = (y-intY);
+       float localZ = (z-intZ);
+       bool anyEmpty = false;
+       if (shiftedY) {
+           int ySide = (localY < 0.5f ? 0 : 4);
+           if (!corners[ySide + 0 + 0]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 2 + 0]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 0 + 1]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 2 + 1]) {
+               anyEmpty = true;
+           }
+       }
+       if (shiftedZ) {
+           int zSide = (localZ < 0.5f ? 0 : 2);
+           if (!corners[0 + zSide + 0]) {
+               anyEmpty = true;
+           } else if (!corners[4 + zSide + 0]) {
+               anyEmpty = true;
+           } else if (!corners[0 + zSide + 1]) {
+               anyEmpty = true;
+           } else if (!corners[4 + zSide + 1]) {
+               anyEmpty = true;
+           }
+       }
+       if (shiftedX) {
+           int xSide = (localX < 0.5f ? 0 : 1);
+           if (!corners[0 + 0 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[4 + 0 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[0 + 2 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[4 + 2 + xSide]) {
+               anyEmpty = true;
+           }
+       }
+       if (!anyEmpty) {
+           return vec4(0, 0, 0, 0);
+       }
     }
     return light;
 }
@@ -370,7 +370,6 @@ bool checker(ivec2 pixel)
     return false;
 }
 
-bool checkerOn = false;
 float normalBrightness = 1.f;
 bool isSnowFlake = false;
 bool wasEverTinted = false;
@@ -442,17 +441,15 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
             if (voxelColor.a < 1.f) {
                 //bubbles start
                 if (isShadow && !raytracedCaustics) { //add check to not return early for semi-transparent blocks that contain solid voxels.
-                                                      return vec4(0);
+                    return vec4(0);
                 }
                 bool underwater = false;
                 if (blockType == 1 && !renderingHand) {
                     if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x == 0) { //change to allow non-full water blocks to have caustics.
-                                                                                  if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
-                                                                                      if (checkerOn) {
-                                                                                          voxelColor = fromLinear(vec4(0.9f, 1, 1, 1));
-                                                                                      }
-                                                                                      shouldReflect = -0.01f;
-                                                                                  }
+                      if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
+                          voxelColor = fromLinear(vec4(0.9f, 1, 1, 1));
+                          shouldReflect = 0.05f;
+                      }
                     } else {
                         underwater = true;
                     }
@@ -493,17 +490,17 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 }
                 //face-based brightness start
                 if (normal.y == 1) { //down
-                                     normalBrightness = 0.7f;
+                    normalBrightness = 0.7f;
                 } else if (normal.y == -1) { //up
-                                             normalBrightness = 1.f;
+                    normalBrightness = 1.f;
                 } else if (normal.z == 1) { //south
-                                            normalBrightness = 0.85f;
+                    normalBrightness = 0.85f;
                 } else if (normal.z == -1) { //north
-                                             normalBrightness = 0.85f;
+                    normalBrightness = 0.85f;
                 } else if (normal.x == 1) { //west
-                                            normalBrightness = 0.75f;
+                    normalBrightness = 0.75f;
                 } else if (normal.x == -1) { //east
-                                             normalBrightness = 0.95f;
+                    normalBrightness = 0.95f;
                 }
                 //face-based brightness end
 
@@ -600,7 +597,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 float blockDist = max(mini.x, max(mini.y, mini.z));
 
                 if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                               uv3d = rayPos - mapPos;
+                   uv3d = rayPos - mapPos;
                 }
 
                 if (blockInfo.x != 0.f) {
@@ -979,7 +976,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     if (isSnowFlake) {
         whiteness = max(whiteness+0.5f, 1.f);
     } else if ((isSky || borders > 0.f) && cloudsEnabled) {
-        whiteness = whiteness+((sqrt(max(0, noise((vec2(cloudPos.x, cloudPos.y*1.5f))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.y*1.5f, cloudPos.z))+(float(time)*cloudSpeed))+noise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)))*gradient(hitPos.y, 0, 372, 1.5f, 0))*gradient(hitPos.y, 0, 372, 1, 0)) * (isSky ? 1.f : pow(borders, 32)));
+        whiteness = whiteness+((sqrt(max(0, cloudNoise((vec2(cloudPos.x, cloudPos.y*2.5f))+(float(time)*cloudSpeed))+cloudNoise((vec2(cloudPos.y*2.5f, cloudPos.z))+(float(time)*cloudSpeed))+cloudNoise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)))*gradient(hitPos.y, 0, 372, 1.5f, 0))*gradient(hitPos.y, 0, 372, 1, 0)) * (isSky ? 1.f : pow(borders, 32)));
     }
     vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, 0.05f+sunLight);
 
@@ -1047,17 +1044,13 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     return color;
 }
 
-#extension GL_ARB_gpu_shader_int64 : enable
-#extension GL_ARB_shader_clock : require
+//#extension GL_ARB_gpu_shader_int64 : enable
+//#extension GL_ARB_shader_clock : require
 
 void main() {
-    uint64_t startTime = clockARB();
-
-    ivec2 res = imageSize(scene_image);
-    ivec2 pixel = ivec2(gl_FragCoord.xy);
-
-    checkerOn = checker(pixel);
-    vec2 uv = (vec2(pixel)*2. - res.xy) / res.y;
+    //uint64_t startTime = clockARB();
+    vec2 uv = (vec2(gl_FragCoord)*2. - res.xy) / res.y;
+    ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y*res.y);
     uvDir = normalize(vec3(uv, 1));
     vec3 ogDir = vec3(cam * vec4(uvDir, 0));
     vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
@@ -1081,5 +1074,4 @@ void main() {
 
     fragColor = toLinear(fragColor);
     //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
-    //imageStore(scene_image, pixel, fragColor);
 }
