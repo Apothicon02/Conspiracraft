@@ -9,5 +9,6 @@ layout(binding = 0) uniform sampler2D scene_image;
 
 void main()
 {
-    fragColor = texture(scene_image, ivec2(gl_FragCoord.xy/res));
+//    fragColor = texture(scene_image, ivec2(gl_FragCoord.xy/res));
+    fragColor = vec4(1);
 }

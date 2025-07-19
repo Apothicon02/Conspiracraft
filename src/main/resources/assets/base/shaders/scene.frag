@@ -1084,5 +1084,6 @@ void main() {
     //reflections end
 
     fragColor = toLinear(fragColor);
-    //imageStore(scene_image, pixel, mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f));
+    //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
+    //imageStore(scene_image, pixel, fragColor);
 }

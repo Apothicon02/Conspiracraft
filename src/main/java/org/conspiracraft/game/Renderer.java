@@ -8,8 +8,6 @@ import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.*;
 import org.conspiracraft.engine.Window;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.opengl.GLDebugMessageCallback;
-import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
 import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 
@@ -17,7 +15,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.lang.Math;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -33,6 +30,7 @@ import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
+    public static int sceneFboId;
     public static ShaderProgram finalScene;
     public static int finalSceneVaoId;
 
@@ -98,6 +96,9 @@ public class Renderer {
             }
         }, 0);
 
+        sceneFboId = glGenFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, sceneFboId);
+
         scene = new ShaderProgram();
         scene.createVertexShader(readFile("assets/base/shaders/scene.vert"));
         scene.createFragmentShader(readFile("assets/base/shaders/scene.frag"));
@@ -121,6 +122,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth()/2, window.getHeight()/2);
         glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneImageId, 0);
 
         coherentNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
@@ -202,10 +204,10 @@ public class Renderer {
 
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
+            glBindFramebuffer(GL_FRAMEBUFFER, sceneFboId);
             glClearColor(0, 0, 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            //switch to half res framebuffer
             scene.bind();
 
             Matrix4f camMatrix = Main.player.getCameraMatrix();
@@ -569,17 +571,16 @@ public class Renderer {
             glDisableVertexAttribArray(0);
             scene.unbind();
 
-            //switch back to full res framebuffer
-//            finalScene.bind();
-//            glUniform2i(resUniform, window.getWidth(), window.getHeight());
-//            glBindTextureUnit(0, sceneImageId);
-//
-//            glBindVertexArray(finalSceneVaoId);
-//            glEnableVertexAttribArray(0);
-//            glDrawArrays(GL_TRIANGLES, 0, 3);
-//            glDisableVertexAttribArray(0);
-//            finalScene.unbind();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            finalScene.bind();
+            glUniform2i(resUniform, window.getWidth(), window.getHeight());
+            glBindTextureUnit(0, sceneImageId);
 
+            glBindVertexArray(finalSceneVaoId);
+            glEnableVertexAttribArray(1);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDisableVertexAttribArray(1);
+            finalScene.unbind();
 
             worldChanged = false;
         }
@@ -623,6 +624,7 @@ public class Renderer {
     public void cleanup() {
         glDeleteVertexArrays(sceneVaoId);
         glDeleteVertexArrays(finalSceneVaoId);
+        glDeleteFramebuffers(sceneFboId);
         scene.cleanup();
         finalScene.cleanup();
     }
