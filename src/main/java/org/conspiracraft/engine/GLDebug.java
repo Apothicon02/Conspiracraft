@@ -51,6 +51,6 @@ public class GLDebug {
             case GL_DEBUG_SEVERITY_NOTIFICATION -> "Notification";
             default -> "Unknown";
         };
-        return  "Source: " + sourceTxt + ", Type: " + typeTxt + ", Id: " + id + ", Severity: " + severityTxt + ": " + MemoryUtil.memUTF8(message, length);
+        return  "Source: " + sourceTxt + ", Type: " + typeTxt + ", Id: " + id + ", Severity: " + severityTxt + ", " + MemoryUtil.memUTF8(message, length);
     }
 }

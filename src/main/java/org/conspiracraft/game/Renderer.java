@@ -32,8 +32,9 @@ import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 public class Renderer {
     public static ShaderProgram scene;
-    public static ComputeProgram sceneCompute;
     public static int sceneVaoId;
+    public static ShaderProgram finalScene;
+    public static int finalSceneVaoId;
 
     public static int sceneImageId;
     public static int coherentNoiseId;
@@ -50,13 +51,13 @@ public class Renderer {
     public static int imageSSBOId;
     public static int chunkEmptySSBOId;
 
-    public static int resUniform;
     public static int camUniform;
     public static int renderDistanceUniform;
     public static int timeOfDayUniform;
     public static int timeUniform;
     public static int selectedUniform;
     public static int uiUniform;
+    public static int resUniform;
     public static int shadowsEnabledUniform;
     public static int raytracedCausticsUniform;
     public static int snowingUniform;
@@ -64,7 +65,7 @@ public class Renderer {
     public static int cloudsEnabledUniform;
     public static int handUniform;
 
-    public static int renderDistanceMul = 4; //4
+    public static int renderDistanceMul = 3; //4
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
     public static boolean atlasChanged = true;
@@ -96,6 +97,12 @@ public class Renderer {
                 System.out.println(msg);
             }
         }, 0);
+
+        scene = new ShaderProgram();
+        scene.createVertexShader(readFile("assets/base/shaders/scene.vert"));
+        scene.createFragmentShader(readFile("assets/base/shaders/scene.frag"));
+        scene.link();
+
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
         FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(117);
@@ -106,18 +113,13 @@ public class Renderer {
         glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
-        sceneCompute = new ComputeProgram();
-        sceneCompute.createComputeShader(readFile("assets/base/shaders/scene.comp"));
-        sceneCompute.link();
-
-
         sceneImageId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, sceneImageId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth()/2, window.getHeight()/2);
         glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         coherentNoiseId = glGenTextures();
@@ -156,24 +158,17 @@ public class Renderer {
         imageSSBOId = glCreateBuffers();
         chunkEmptySSBOId = glCreateBuffers();
 
-        camUniform = glGetUniformLocation(sceneCompute.programId, "cam");
-        renderDistanceUniform = glGetUniformLocation(sceneCompute.programId, "renderDistance");
-        timeOfDayUniform = glGetUniformLocation(sceneCompute.programId, "timeOfDay");
-        timeUniform = glGetUniformLocation(sceneCompute.programId, "time");
-        selectedUniform = glGetUniformLocation(sceneCompute.programId, "selected");
-        shadowsEnabledUniform = glGetUniformLocation(sceneCompute.programId, "shadowsEnabled");
-        raytracedCausticsUniform = glGetUniformLocation(sceneCompute.programId, "raytracedCaustics");
-        snowingUniform = glGetUniformLocation(sceneCompute.programId, "snowing");
-        sunUniform = glGetUniformLocation(sceneCompute.programId, "sun");
-        cloudsEnabledUniform = glGetUniformLocation(sceneCompute.programId, "cloudsEnabled");
-        handUniform = glGetUniformLocation(sceneCompute.programId, "hand");
-
-        scene = new ShaderProgram();
-        scene.createVertexShader(readFile("assets/base/shaders/scene.vert"));
-        scene.createFragmentShader(readFile("assets/base/shaders/scene.frag"));
-        scene.link();
-
-        resUniform = glGetUniformLocation(scene.programId, "res");
+        camUniform = glGetUniformLocation(scene.programId, "cam");
+        renderDistanceUniform = glGetUniformLocation(scene.programId, "renderDistance");
+        timeOfDayUniform = glGetUniformLocation(scene.programId, "timeOfDay");
+        timeUniform = glGetUniformLocation(scene.programId, "time");
+        selectedUniform = glGetUniformLocation(scene.programId, "selected");
+        shadowsEnabledUniform = glGetUniformLocation(scene.programId, "shadowsEnabled");
+        raytracedCausticsUniform = glGetUniformLocation(scene.programId, "raytracedCaustics");
+        snowingUniform = glGetUniformLocation(scene.programId, "snowing");
+        sunUniform = glGetUniformLocation(scene.programId, "sun");
+        cloudsEnabledUniform = glGetUniformLocation(scene.programId, "cloudsEnabled");
+        handUniform = glGetUniformLocation(scene.programId, "hand");
         uiUniform = glGetUniformLocation(scene.programId, "ui");
 
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
@@ -190,6 +185,19 @@ public class Renderer {
         if (result != VK_SUCCESS) {
             int nothing = 0;
         }
+
+        finalScene = new ShaderProgram();
+        finalScene.createVertexShader(readFile("assets/base/shaders/scene.vert"));
+        finalScene.createFragmentShader(readFile("assets/base/shaders/final_scene.frag"));
+        finalScene.link();
+
+        finalSceneVaoId = glGenVertexArrays();
+        glBindVertexArray(finalSceneVaoId);
+        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        resUniform = glGetUniformLocation(finalScene.programId, "res");
     }
 
     public static void render(Window window) throws IOException {
@@ -197,7 +205,8 @@ public class Renderer {
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            sceneCompute.bind();
+            //switch to half res framebuffer
+            scene.bind();
 
             Matrix4f camMatrix = Main.player.getCameraMatrix();
             glUniformMatrix4fv(camUniform, true, new float[]{
@@ -223,6 +232,7 @@ public class Renderer {
             glUniform3f(sunUniform, sunPos.x, sunPos.y, sunPos.z);
             glUniform1i(cloudsEnabledUniform, cloudsEnabled ? 1 : 0);
             glUniform3i(handUniform, selectedBlock.x, selectedBlock.y, selectedBlock.z);
+            glUniform1i(uiUniform, showUI ? 1 : 0);
 
             if (atlasChanged) {
                 atlasChanged = false;
@@ -548,28 +558,29 @@ public class Renderer {
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
             //Blocks end
 
+            glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glBindTextureUnit(1, coherentNoiseId);
             glBindTextureUnit(2, whiteNoiseId);
             glBindTextureUnit(3, cloudNoiseId);
-
-            glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-            glDispatchCompute(Math.ceilDiv(window.getWidth(), 8), Math.ceilDiv(window.getHeight(), 8), 1);
-            glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
-
-            sceneCompute.unbind();
-            scene.bind();
-
-            glUniform2f(resUniform, window.getWidth(), window.getHeight());
-            glUniform1i(uiUniform, showUI ? 1 : 0);
-
-            glBindTextureUnit(0, sceneImageId);
 
             glBindVertexArray(sceneVaoId);
             glEnableVertexAttribArray(0);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glDisableVertexAttribArray(0);
-
             scene.unbind();
+
+            //switch back to full res framebuffer
+//            finalScene.bind();
+//            glUniform2i(resUniform, window.getWidth(), window.getHeight());
+//            glBindTextureUnit(0, sceneImageId);
+//
+//            glBindVertexArray(finalSceneVaoId);
+//            glEnableVertexAttribArray(0);
+//            glDrawArrays(GL_TRIANGLES, 0, 3);
+//            glDisableVertexAttribArray(0);
+//            finalScene.unbind();
+
+
             worldChanged = false;
         }
     }
@@ -611,7 +622,8 @@ public class Renderer {
 
     public void cleanup() {
         glDeleteVertexArrays(sceneVaoId);
-        sceneCompute.cleanup();
+        glDeleteVertexArrays(finalSceneVaoId);
         scene.cleanup();
+        finalScene.cleanup();
     }
 }
