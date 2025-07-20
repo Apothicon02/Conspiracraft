@@ -1,5 +1,6 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.game.Renderer;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
 import org.tinylog.Logger;
@@ -127,6 +128,7 @@ public class Window {
         try {
             glViewport(0, 0, width, height);
             resizeFunc.call();
+            Renderer.resized = true;
         } catch (Exception excp) {
             Logger.error("Error calling resize callback", excp);
         }

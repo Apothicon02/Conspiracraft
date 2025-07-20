@@ -31,9 +31,13 @@ public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
     public static int sceneFboId;
+    public static ShaderProgram blurScene;
     public static ShaderProgram finalScene;
 
     public static int sceneImageId;
+    public static int sceneLightingId;
+    public static int sceneLightingHalfBlurredId;
+    public static int sceneLightingBlurredId;
     public static int coherentNoiseId;
     public static int whiteNoiseId;
     public static int cloudNoiseId;
@@ -58,8 +62,9 @@ public class Renderer {
     public static boolean raytracedCaustics = true;
     public static boolean cloudsEnabled = true;
     public static boolean snowing = false;
-    public static Vector2i lowRes = new Vector2i(1280, 720);
+    public static Vector2i lowRes = new Vector2i(852, 480);
 
+    public static boolean resized = false;
     public static int defaultSSBOSize = (int) (0.2f*1000000000)*((size/2048)^2);
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
@@ -82,7 +87,9 @@ public class Renderer {
         }, 0);
     }
 
-    public static void generateTextures() {
+    public static void generateTextures(Window window) {
+        lowRes.x = window.getWidth()/2;
+        lowRes.y = window.getHeight()/2;
         sceneImageId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, sceneImageId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -92,6 +99,33 @@ public class Renderer {
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, lowRes.x, lowRes.y);
         glBindImageTexture(0, sceneImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneImageId, 0);
+
+        sceneLightingId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, sceneLightingId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, lowRes.x, lowRes.y);
+        glBindImageTexture(0, sceneLightingId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+
+        sceneLightingHalfBlurredId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, sceneLightingHalfBlurredId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindImageTexture(0, sceneLightingHalfBlurredId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+
+        sceneLightingBlurredId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, sceneLightingBlurredId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindImageTexture(0, sceneLightingBlurredId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
 
         coherentNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
@@ -116,8 +150,6 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 2048, 2048, 0, GL_RED, GL_UNSIGNED_BYTE, imageToGrayscaleBuffer(Noises.CLOUD_NOISE.image));
-
-        Noises.clearImages();
     }
     public static void generateVao() {
         sceneVaoId = glGenVertexArrays();
@@ -156,10 +188,11 @@ public class Renderer {
         scene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/scene.frag",
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "snowing", "sun", "cloudsEnabled", "hand", "ui", "res"});
         generateVao();
-        generateTextures();
+        generateTextures(window);
         createBuffers();
         createVMA();
-
+        blurScene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/blur_scene.frag",
+                new String[]{"dir", "lowRes", "res"});
         finalScene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/final_scene.frag",
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "snowing", "sun", "cloudsEnabled", "hand", "ui", "res"});
     }
@@ -521,10 +554,9 @@ public class Renderer {
     }
 
     public static void bindTextures() {
-        glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        glBindTextureUnit(1, coherentNoiseId);
-        glBindTextureUnit(2, whiteNoiseId);
-        glBindTextureUnit(3, cloudNoiseId);
+        glBindTextureUnit(3, coherentNoiseId);
+        glBindTextureUnit(4, whiteNoiseId);
+        glBindTextureUnit(5, cloudNoiseId);
     }
 
     public static void draw() {
@@ -542,18 +574,39 @@ public class Renderer {
 
             scene.bind();
 
+            if (resized) {
+                generateTextures(window);
+                resized = false;
+            }
             updateUniforms(scene);
             glUniform2i(scene.uniforms.get("res"), lowRes.x, lowRes.y);
             updateBuffers();
+            glBindImageTexture(0, sceneImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+            glBindImageTexture(1, sceneLightingId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
             bindTextures();
             draw();
             scene.unbind();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            blurScene.bind();
+            glUniform2f(blurScene.uniforms.get("dir"), 1f, 0f);
+            glUniform2i(blurScene.uniforms.get("lowRes"), lowRes.x, lowRes.y);
+            glUniform2i(blurScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+            glBindTextureUnit(1, sceneLightingId);
+            glBindImageTexture(2, sceneLightingHalfBlurredId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+            draw();
+            glUniform2f(blurScene.uniforms.get("dir"), 0f, 1f);
+            glBindTextureUnit(1, sceneLightingHalfBlurredId);
+            glBindImageTexture(2, sceneLightingBlurredId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+            draw();
+            blurScene.unbind();
+
             finalScene.bind();
             updateUniforms(finalScene);
             glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
             glBindTextureUnit(0, sceneImageId);
+            glBindTextureUnit(2, sceneLightingBlurredId);
+            bindTextures();
 
             draw();
             finalScene.unbind();
