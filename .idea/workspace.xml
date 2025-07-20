@@ -195,14 +195,6 @@
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00147" summary="- Updated README.md">
-      <option name="closed" value="true" />
-      <created>1740954139413</created>
-      <option name="number" value="00147" />
-      <option name="presentableId" value="LOCAL-00147" />
-      <option name="project" value="LOCAL" />
-      <updated>1740954139413</updated>
-    </task>
     <task id="LOCAL-00148" summary="- Updated README.md">
       <option name="closed" value="true" />
       <created>1740954241670</created>
@@ -587,7 +579,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752957753345</updated>
     </task>
-    <option name="localTasksCounter" value="196" />
+    <task id="LOCAL-00196" summary="- Improved cloud shadows. &#10;- Fixed sun shadows shading block light.">
+      <option name="closed" value="true" />
+      <created>1752962913528</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
+      <option name="project" value="LOCAL" />
+      <updated>1752962913528</updated>
+    </task>
+    <option name="localTasksCounter" value="197" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -599,7 +599,13 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="false" />
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -608,7 +614,6 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
     <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
     <MESSAGE value="- Logs now make 4 planks instead of 1." />
     <MESSAGE value="- Revert last change." />
@@ -633,7 +638,8 @@
     <MESSAGE value="- Greatly organized rendering class." />
     <MESSAGE value="- Optimized renderer class more." />
     <MESSAGE value="- FPS display is now averaged.&#10;- Added frametime display." />
-    <option name="LAST_COMMIT_MESSAGE" value="- FPS display is now averaged.&#10;- Added frametime display." />
+    <MESSAGE value="- Improved cloud shadows. &#10;- Fixed sun shadows shading block light." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved cloud shadows. &#10;- Fixed sun shadows shading block light." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
