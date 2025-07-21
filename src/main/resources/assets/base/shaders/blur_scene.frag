@@ -5,7 +5,7 @@ uniform ivec2 lowRes;
 uniform ivec2 res;
 
 layout(binding = 1) uniform sampler2D scene_lighting;
-layout(binding = 2, rgba32f) uniform image2D scene_lighting_blurred;
+layout(binding = 2, rgba32f) uniform writeonly image2D scene_lighting_blurred;
 
 in vec4 gl_FragCoord;
 
@@ -67,19 +67,44 @@ const float WEIGHTS[25] = float[25](
 0.01837418050306995
 );
 
+const int SAMPLE_COUNT_AO = 5;
+
+const float OFFSETS_AO[5] = float[5](
+-3.4458098836553415,
+-1.4767017588568079,
+0.492228282731395,
+2.4612181104350137,
+4
+);
+
+const float WEIGHTS_AO[5] = float[5](
+0.1835121872508657,
+0.2492203893736597,
+0.26495143816720684,
+0.2205044383606221,
+0.08181154684764567
+);
+
+
 void main() {
     //uint64_t startTime = clockARB();
 
     vec2 texCoord = gl_FragCoord.xy/res;
 
-    vec4 result = vec4(0.0);
+    vec3 result = vec3(0.0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = dir * OFFSETS[i] / res;
         float weight = WEIGHTS[i];
-        result += texture(scene_lighting, texCoord + offset) * weight;
+        result += texture(scene_lighting, texCoord + offset).rgb * weight;
+    }
+    float AO = 0.0f;
+    for (int i = 0; i < SAMPLE_COUNT_AO; ++i) {
+        vec2 offset = dir * OFFSETS_AO[i] / res;
+        float weight = WEIGHTS_AO[i];
+        AO += texture(scene_lighting, texCoord + offset).a * weight;
     }
 
-    imageStore(scene_lighting_blurred, ivec2(gl_FragCoord.xy), result);
+    imageStore(scene_lighting_blurred, ivec2(gl_FragCoord.xy), vec4(result, AO));
 
     //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
 }

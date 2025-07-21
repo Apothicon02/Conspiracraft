@@ -15,7 +15,6 @@ public class Engine {
     private boolean running;
     private int targetFps;
     private int targetUps;
-    public static int fps;
 
     public Engine(String windowTitle, Window.WindowOptions opts, Main main) throws Exception {
         window = new Window(windowTitle, opts, () -> {
@@ -38,10 +37,11 @@ public class Engine {
     }
 
     public List<Long> frameTimes = new ArrayList<>(List.of());
-    public List<Integer> framesPerSeconds = new ArrayList<>(List.of());
+    public List<Long> framesPerSeconds = new ArrayList<>(List.of());
 
     private void run() throws Exception {
         long initialTime = System.currentTimeMillis();
+        long initialNanoTime = System.nanoTime();
         float timeU = 1000.0f / targetUps;
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
         float deltaUpdate = 0;
@@ -55,22 +55,13 @@ public class Engine {
             long now = System.currentTimeMillis();
             deltaUpdate += (now - initialTime) / timeU;
             deltaFps += (now - initialTime) / timeR;
-            long diffTimeMillis = now - updateTime;
-            frameTimes.addLast(diffTimeMillis);
-            if (frameTimes.size() > 60) {
-                frameTimes.removeFirst();
-            }
-            fps = (int)(1000f/(now - initialTime));
-            framesPerSeconds.addLast(fps);
-            if (framesPerSeconds.size() > 60) {
-                framesPerSeconds.removeFirst();
-            }
 
             if (targetFps <= 0 || deltaFps >= 1) {
                 main.input(window, now,  now - initialTime);
             }
 
             if (deltaUpdate >= 1) {
+                long diffTimeMillis = now - updateTime;
                 main.update(window, diffTimeMillis, now);
                 updateTime = now;
                 deltaUpdate--;
@@ -86,12 +77,24 @@ public class Engine {
                 if (framesUntilUpdate <= 0) {
                     GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " +
                             Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " +
-                            ((int)ConspiracraftMath.averageInts(framesPerSeconds)) + "fps " +
-                            String.format("%.1f", ConspiracraftMath.averageLongs(frameTimes)) + "ms");
+                            (long)(1000000000d/ConspiracraftMath.averageLongs(framesPerSeconds)) + "fps " +
+                            String.format("%.1f", 1000d/(1000000000d/ConspiracraftMath.averageLongs(frameTimes))) + "ms");
                     framesUntilUpdate = 40;
                 }
             }
-            initialTime = now;
+            if (Main.renderingEnabled) {
+                long diffTimeNanos = (System.nanoTime() - initialNanoTime);
+                frameTimes.addLast(diffTimeNanos);
+                if (frameTimes.size() > 60) {
+                    frameTimes.removeFirst();
+                }
+                framesPerSeconds.addLast(diffTimeNanos);
+                if (framesPerSeconds.size() > 60) {
+                    framesPerSeconds.removeFirst();
+                }
+            }
+            initialTime = System.currentTimeMillis();
+            initialNanoTime = System.nanoTime();
         }
 
         cleanup();
