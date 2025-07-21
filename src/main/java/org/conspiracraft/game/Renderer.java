@@ -615,10 +615,12 @@ public class Renderer {
             glUniform2f(blurScene.uniforms.get("dir"), 1f, 0f);
             glUniform2i(blurScene.uniforms.get("lowRes"), lowRes.x, lowRes.y);
             glUniform2i(blurScene.uniforms.get("res"), mediumRes.x, mediumRes.y);
+            glBindTextureUnit(0, sceneImageId);
             glBindTextureUnit(1, sceneLightingId);
             glBindImageTexture(2, sceneLightingHalfBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
             draw();
             glUniform2f(blurScene.uniforms.get("dir"), 0f, 1f);
+            glBindTextureUnit(0, sceneImageId);
             glBindTextureUnit(1, sceneLightingHalfBlurredId);
             glBindImageTexture(2, sceneLightingBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
             draw();

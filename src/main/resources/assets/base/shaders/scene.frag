@@ -623,11 +623,11 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 vec3 relativePos = lightPos-rayMapPos;
                 lighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
                 //smooth lighting start
-                vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.1f : -0.1f), lightPos.z, false, true, false);
+                vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
                 verticalLighting = mix(relativePos.y >= 0.5f ? lighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : lighting, relativePos.y);
-                vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.1f : -0.1f), false, false, true);
+                vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
                 northSouthLighting = mix(relativePos.z >= 0.5f ? lighting : northSouthLighting, relativePos.z >= 0.5f ? northSouthLighting : lighting, relativePos.z);
-                vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.1f : -0.1f), lightPos.y, lightPos.z, true, false, false);
+                vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
                 eastWestLighting = mix(relativePos.x >= 0.5f ? lighting : eastWestLighting, relativePos.x >= 0.5f ? eastWestLighting : lighting, relativePos.x);
                 lighting = mix(min(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25)), lighting, 0.8);
                 //smooth lighting end

@@ -252,6 +252,90 @@ bool isBlockSolid(ivec2 block) {
     return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);
 }
 
+
+ivec3 prevLightChunkPos = ivec3(-1);
+ivec4 lightPaletteInfo = ivec4(-1);
+int lightValuesPerInt = -1;
+int getLightData(int x, int y, int z) {
+    ivec3 chunkPos = ivec3(x, y, z) >> 4;
+    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
+    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    if (chunkPos != prevLightChunkPos) {
+        ivec3 prevLightChunkPos = chunkPos;
+        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+        ivec4 lightPaletteInfo = ivec4(chunkLightsData[condensedChunkPos]);
+        int lightValuesPerInt = 32/lightPaletteInfo.z;
+
+        int intIndex  = condensedLocalPos/lightValuesPerInt;
+        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
+        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
+        return lightsData[lightPaletteInfo.x+key];
+    } else {
+        int intIndex  = condensedLocalPos/lightValuesPerInt;
+        int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightPaletteInfo.z;
+        int key = (lightsData[lightPaletteInfo.x+lightPaletteInfo.y+intIndex] >> bitIndex) & lightPaletteInfo.w;
+        return lightsData[lightPaletteInfo.x+key];
+    }
+}
+
+vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool shiftedZ) {
+    int intX = int(x);
+    int intY = int(y);
+    int intZ = int(z);
+    ivec2 block = getBlock(intX, intY, intZ);
+    if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
+        return vec4(0, 0, 0, 0);
+    }
+    vec4 light = intToColor(getLightData(intX, intY, intZ));
+    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
+        bool[8] corners = getCorners(intX, intY, intZ);
+        float localX = (x-intX);
+        float localY = (y-intY);
+        float localZ = (z-intZ);
+        bool anyEmpty = false;
+        if (shiftedY) {
+           int ySide = (localY < 0.5f ? 0 : 4);
+           if (!corners[ySide + 0 + 0]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 2 + 0]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 0 + 1]) {
+               anyEmpty = true;
+           } else if (!corners[ySide + 2 + 1]) {
+               anyEmpty = true;
+           }
+        }
+        if (shiftedZ) {
+           int zSide = (localZ < 0.5f ? 0 : 2);
+           if (!corners[0 + zSide + 0]) {
+               anyEmpty = true;
+           } else if (!corners[4 + zSide + 0]) {
+               anyEmpty = true;
+           } else if (!corners[0 + zSide + 1]) {
+               anyEmpty = true;
+           } else if (!corners[4 + zSide + 1]) {
+               anyEmpty = true;
+           }
+        }
+        if (shiftedX) {
+           int xSide = (localX < 0.5f ? 0 : 1);
+           if (!corners[0 + 0 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[4 + 0 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[0 + 2 + xSide]) {
+               anyEmpty = true;
+           } else if (!corners[4 + 2 + xSide]) {
+               anyEmpty = true;
+           }
+        }
+        if (!anyEmpty) {
+           return vec4(0, 0, 0, 0);
+        }
+    }
+    return light;
+}
+
 bool isChunkAir(int x, int y, int z) {
     if (x >= 0 && x < sizeChunks && y >= 0 && y < heightChunks && z >= 0 && z < sizeChunks) {
         int condensedChunkPos = (((x*sizeChunks)+z)*heightChunks)+y;
@@ -410,8 +494,8 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     hitPos = renderingHand ? (camPos+(mapPos/8)) : realPos;
                 }
                 //face-based brightness start
-//                vec3 sunDir = normalize(sun - prevMapPos);
-//                voxelColor *= 1-max(0.f, dot(sunDir, normal)*0.2f);
+                vec3 sunDir = normalize(sun - prevMapPos);
+                voxelColor *= (1-max(0.f, dot(sunDir, normal)*0.2f))*(lowResLighting.a/20);
                 normalBrightness = 1.f;
                 if (normal.y == 1) { //down
                     normalBrightness = 0.7f;
@@ -824,6 +908,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec4 color = traceWorld(false, ogRayPos, dir);
     if (renderingHand) {
         prevPos = prevHitPos;
+        lighting = vec4(0);//getLighting(camPos.x, camPos.y, camPos.z, true, true, true);
+        lightFog = lighting*(1-vec4(0.5, 0.5, 0.5, 0));
     }
     prevReflectPos = prevHitPos;
     reflectPos = hitPos;
@@ -865,7 +951,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     float sunBrightness = (lightFog.a/12)*mixedTime;
     vec3 finalLightFog = max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a/20)*mixedTime))/4), ((sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunBrightness));
     vec3 finalTint = max(vec3(1), tint);
-
 
     vec3 cloudPos = (vec3(cam * vec4(uvDir * 500.f, 1.f))-camPos);
     if (isSnowFlake) {
