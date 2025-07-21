@@ -37,16 +37,18 @@ public class Engine {
     }
 
     public List<Long> frameTimes = new ArrayList<>(List.of());
-    public List<Long> framesPerSeconds = new ArrayList<>(List.of());
 
     private void run() throws Exception {
-        long initialTime = System.currentTimeMillis();
         long initialNanoTime = System.nanoTime();
+        long initialTime = System.currentTimeMillis();
         float timeU = 1000.0f / targetUps;
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
         float deltaUpdate = 0;
         float deltaFps = 0;
         int framesUntilUpdate = 0;
+        while (frameTimes.size() < 60) {
+            frameTimes.add(15000000L);
+        }
 
         long updateTime = initialTime;
         while (running && !window.windowShouldClose()) {
@@ -75,10 +77,11 @@ public class Engine {
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
+                    double avgMS = 1000000000d/ConspiracraftMath.averageLongs(frameTimes);
                     GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " +
                             Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " +
-                            (long)(1000000000d/ConspiracraftMath.averageLongs(framesPerSeconds)) + "fps " +
-                            String.format("%.1f", 1000d/(1000000000d/ConspiracraftMath.averageLongs(frameTimes))) + "ms");
+                            (long)(avgMS) + "fps " +
+                            String.format("%.1f", 1000d/(avgMS)) + "ms");
                     framesUntilUpdate = 40;
                 }
             }
@@ -88,12 +91,8 @@ public class Engine {
                 if (frameTimes.size() > 60) {
                     frameTimes.removeFirst();
                 }
-                framesPerSeconds.addLast(diffTimeNanos);
-                if (framesPerSeconds.size() > 60) {
-                    framesPerSeconds.removeFirst();
-                }
             }
-            initialTime = System.currentTimeMillis();
+            initialTime = now;
             initialNanoTime = System.nanoTime();
         }
 
