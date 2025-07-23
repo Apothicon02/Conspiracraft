@@ -63,3 +63,13 @@ vec3 hsv2rgb(vec3 c)
 vec4 intToColor(int color) {
     return vec4(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
 }
+
+bool checkerOn = false;
+bool checker(ivec2 pixel) {
+    bool xOdd = bool(pixel.x % 2 == 1);
+    bool yOdd = bool(pixel.y % 2 == 1);
+    if ((xOdd && yOdd) || (!xOdd && !yOdd)) { //both even or both odd
+        return true;
+    }
+    return false;
+}
