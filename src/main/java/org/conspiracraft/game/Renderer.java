@@ -206,17 +206,17 @@ public class Renderer {
         glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
         mediumFboId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
-        scene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/scene.frag",
+        scene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "snowing", "sun", "cloudsEnabled", "hand", "ui", "res"});
         generateVao();
         generateTextures(window);
         createBuffers();
         createVMA();
-        blurScene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/blur_scene.frag",
+        blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
                 new String[]{"dir", "lowRes", "res"});
-        unscaledScene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/unscaled_scene.frag",
+        unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "snowing", "sun", "cloudsEnabled", "hand", "ui", "res"});
-        finalScene = new ShaderProgram("assets/base/shaders/scene.vert", "assets/base/shaders/final_scene.frag",
+        finalScene = new ShaderProgram("scene.vert", new String[]{"final_scene.frag"},
                 new String[]{"res"});
     }
 

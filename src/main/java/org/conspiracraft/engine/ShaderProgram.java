@@ -14,13 +14,17 @@ public class ShaderProgram {
     private int fragmentShaderId;
     public HashMap<String, Integer> uniforms = new HashMap<>(Map.of());
 
-    public ShaderProgram(String vertPath, String fragPath, String[] uniformArray) throws Exception {
+    public ShaderProgram(String vertPath, String[] fragPaths, String[] uniformArray) throws Exception {
         programId = GL40.glCreateProgram();
         if (programId == 0) {
             throw new Exception("Could not create Shader");
         }
-        createVertexShader(readFile(vertPath));
-        createFragmentShader(readFile(fragPath));
+        createVertexShader("#version 460 \n" + readFile("assets/base/shaders/"+vertPath));
+        String fragment = "#version 460 \n";
+        for (String str : fragPaths) {
+            fragment += readFile("assets/base/shaders/"+str);
+        }
+        createFragmentShader(fragment);
         link();
         for (String name : uniformArray) {
             uniforms.put(name, glGetUniformLocation(programId, name));

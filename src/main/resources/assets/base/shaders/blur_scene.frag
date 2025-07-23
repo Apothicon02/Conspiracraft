@@ -1,5 +1,3 @@
-#version 460
-
 uniform vec2 dir;
 uniform ivec2 lowRes;
 uniform ivec2 res;

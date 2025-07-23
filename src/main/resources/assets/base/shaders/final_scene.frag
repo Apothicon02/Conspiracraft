@@ -1,5 +1,3 @@
-#version 460
-
 uniform ivec2 res;
 
 layout(binding = 6) uniform sampler2D scene_image;
