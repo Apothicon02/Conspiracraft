@@ -595,7 +595,7 @@ public class Renderer {
                 generateTextures(window);
                 resized = false;
             }
-            glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
+//            glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -610,7 +610,7 @@ public class Renderer {
 //            draw();
 //            scene.unbind();
 //
-            glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
+//            glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
 //            blurScene.bind();
 //            glUniform2f(blurScene.uniforms.get("dir"), 1f, 0f);
 //            glUniform2i(blurScene.uniforms.get("lowRes"), lowRes.x, lowRes.y);
@@ -625,24 +625,24 @@ public class Renderer {
 //            glBindImageTexture(2, sceneLightingBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 //            draw();
 //            blurScene.unbind();
-
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             unscaledScene.bind();
             updateUniforms(unscaledScene);
-            glUniform2i(unscaledScene.uniforms.get("res"), mediumRes.x, mediumRes.y);
-            glBindTextureUnit(0, sceneImageId);
-            glBindTextureUnit(2, sceneLightingBlurredId);
+            glUniform2i(unscaledScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+//            glBindTextureUnit(0, sceneImageId);
+//            glBindTextureUnit(2, sceneLightingBlurredId);
             bindTextures();
-            glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+//            glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
             draw();
             unscaledScene.unbind();
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            finalScene.bind();
-            glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
-            glBindTextureUnit(6, sceneUnscaledImageId);
-            draw();
-            finalScene.unbind();
+//            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//            finalScene.bind();
+//            glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+//            glBindTextureUnit(6, sceneUnscaledImageId);
+//            draw();
+//            finalScene.unbind();
 
             worldChanged = false;
         }

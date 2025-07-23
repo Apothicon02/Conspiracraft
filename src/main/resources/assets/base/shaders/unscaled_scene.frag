@@ -291,16 +291,6 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 lighting = mix(mix(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25), 0.5), centerLighting, 0.5);
                 //smooth lighting end
                 //fake shadows start
-                vec4 offsetLighting = getLighting(lightPos.x-normal.x, lightPos.y-normal.y, lightPos.z-normal.z, true, true, true);
-                if (offsetLighting.r < centerLighting.r) {
-                    lighting.r *= 0.8;
-                }
-                if (offsetLighting.g < centerLighting.g) {
-                    lighting.g *= 0.8;
-                }
-                if (offsetLighting.b < centerLighting.b) {
-                    lighting.b *= 0.8;
-                }
                 vec3 dir = normalize(lightPos - sun);
                 lighting.a *= 1+(((dot(normal, dir)-1)/4)*(min(0.75, abs(1-mixedTime))+0.25));
                 //fake shadows end
@@ -674,30 +664,35 @@ void main() {
     //fragColor = lowResColor;
     //fragColor = vec4((vec3(lowResLighting.a/20)*(0.8f+lowResLighting.rgb/10)), 1);
 
-    vec2 uv = (vec2(gl_FragCoord) * 2. - res.xy) / res.y;
-    uvDir = normalize(vec3(uv, 1));
-    ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y * res.y);
-    vec3 ogDir = vec3(cam * vec4(uvDir, 0));
-    vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
-    shift = 0;
-    renderingHand = false;
-    if (handColor.a < 1) {
-        prevFog = vec4(1);
-        prevSuperFinalTint = vec4(1);
-        distanceFogginess = 0;
-        checkerOn = checker(ivec2(gl_FragCoord.xy));
-        vec3 skipPos = camPos + (ogDir * (lowResColor.a * renderDistance));
-        fragColor = raytrace(camPos, ogDir, true);
-        //reflections start
-        if (!isSky && !isSnowFlake && reflectivity > 0.f) {
-            vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
-            fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * (max(reflectivity * 0.5f, dot(normalize(ogDir), normalize(reflectDir)))));
-        }
-        //reflections end
+    vec2 uv = (vec2(gl_FragCoord)*2. - res.xy) / res.y;
+    if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
+        fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
-        fragColor = handColor;
-    }
+        vec2 uv = (vec2(gl_FragCoord) * 2. - res.xy) / res.y;
+        uvDir = normalize(vec3(uv, 1));
+        ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y * res.y);
+        vec3 ogDir = vec3(cam * vec4(uvDir, 0));
+        vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
+        shift = 0;
+        renderingHand = false;
+        if (handColor.a < 1) {
+            prevFog = vec4(1);
+            prevSuperFinalTint = vec4(1);
+            distanceFogginess = 0;
+            checkerOn = checker(ivec2(gl_FragCoord.xy));
+            vec3 skipPos = camPos + (ogDir * (lowResColor.a * renderDistance));
+            fragColor = raytrace(camPos, ogDir, true);
+            //reflections start
+            if (!isSky && !isSnowFlake && reflectivity > 0.f) {
+                vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
+                fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * (max(reflectivity * 0.5f, dot(normalize(ogDir), normalize(reflectDir)))));
+            }
+            //reflections end
+        } else {
+            fragColor = handColor;
+        }
 
-    fragColor = toLinear(fragColor);
+        fragColor = toLinear(fragColor);
+    }
     //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
 }
