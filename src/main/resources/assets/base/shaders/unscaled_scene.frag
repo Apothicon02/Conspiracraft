@@ -67,7 +67,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x != 1) { //change to allow non-full water blocks to have caustics.
                       if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
                           if (checkerOn) {
-                              voxelColor = fromLinear(vec4(0.9f, 1, 1, 1));
+                              voxelColor = fromLinear(vec4(1, 1, 1, 1));
                           }
                           shouldReflect = -0.01f;
                       }
@@ -654,7 +654,7 @@ void main() {
             //reflections start
             if (!isSky && !isSnowFlake && reflectivity > 0.f) {
                 vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
-                fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * (max(reflectivity * 0.5f, dot(normalize(ogDir), normalize(reflectDir)))));
+                fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * dot(normalize(ogDir), normalize(reflectDir)));
             }
             //reflections end
         } else {
