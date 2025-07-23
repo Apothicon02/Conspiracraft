@@ -219,7 +219,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 float blockDist = max(mini.x, max(mini.y, mini.z));
 
                 if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                               uv3d = rayPos - mapPos;
+                    uv3d = rayPos - mapPos;
                 }
 
                 if (blockInfo.x != 0.f) {
@@ -279,14 +279,14 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 float sunlightNoise = max(0, noise((vec2(lightPos.x, lightPos.z)*16)+(float(time)*20000)) * ((blockInfo.x == 17 || blockInfo.x == 21) ? 2 : 1));
 
                 vec3 relativePos = lightPos-rayMapPos; //smooth position here maybe
-                vec4 centerLighting = getLighting(lightPos.x, lightPos.y, lightPos.z, true, true, true);
+                vec4 centerLighting = getLighting(blockInfo, lightPos.x, lightPos.y, lightPos.z, true, true, true);
                 //                lighting = centerLighting;
                 //smooth lighting start
-                vec4 verticalLighting = getLighting(lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
+                vec4 verticalLighting = getLighting(blockInfo, lightPos.x, lightPos.y+(relativePos.y >= 0.5f ? 0.5f : -0.5f), lightPos.z, false, true, false);
                 verticalLighting = mix(relativePos.y >= 0.5f ? centerLighting : verticalLighting, relativePos.y >= 0.5f ? verticalLighting : centerLighting, relativePos.y);
-                vec4 northSouthLighting = getLighting(lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
+                vec4 northSouthLighting = getLighting(blockInfo, lightPos.x, lightPos.y, lightPos.z+(relativePos.z >= 0.5f ? 0.5f : -0.5f), false, false, true);
                 northSouthLighting = mix(relativePos.z >= 0.5f ? centerLighting : northSouthLighting, relativePos.z >= 0.5f ? northSouthLighting : centerLighting, relativePos.z);
-                vec4 eastWestLighting = getLighting(lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
+                vec4 eastWestLighting = getLighting(blockInfo, lightPos.x+(relativePos.x >= 0.5f ? 0.5f : -0.5f), lightPos.y, lightPos.z, true, false, false);
                 eastWestLighting = mix(relativePos.x >= 0.5f ? centerLighting : eastWestLighting, relativePos.x >= 0.5f ? eastWestLighting : centerLighting, relativePos.x);
                 lighting = mix(mix(mix(eastWestLighting, verticalLighting, 0.25), mix(northSouthLighting, verticalLighting, 0.25), 0.5), centerLighting, 0.5);
                 //smooth lighting end
@@ -547,7 +547,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     isSky = renderingHand ? false : color.a < 1.f;
     float borders = max(gradient(hitPos.x, 0, 128, 0, 1), max(gradient(hitPos.z, 0, 128, 0, 1), max(gradient(hitPos.x, size, size-128, 0, 1), gradient(hitPos.z, size, size-128, 0, 1))));
     if (isSky) {
-        lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), getLighting(hitPos.x, hitPos.y, hitPos.z, false, false, false), borders) : vec4(0, 0, 0, 20));
+        lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), getLighting(ivec2(0), hitPos.x, hitPos.y, hitPos.z, false, false, false), borders) : vec4(0, 0, 0, 20));
         lightFog = lighting;
     }
     float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
@@ -563,7 +563,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     }
     distanceFogginess = clamp(distanceFogginess, 0.f, 1.f);
     if (renderingHand) {
-        lighting = fromLinear(getLighting(camPos.x, camPos.y, camPos.z, true, true, true));
+        lighting = fromLinear(getLighting(ivec2(0), camPos.x, camPos.y, camPos.z, true, true, true));
         lightFog = max(lightFog, lighting*(1-vec4(0.5, 0.5, 0.5, 0)));
     } else {
         distanceFogginess = max(distanceFogginess, borders);

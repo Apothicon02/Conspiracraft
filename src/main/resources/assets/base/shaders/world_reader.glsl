@@ -218,62 +218,62 @@ int getLightData(int x, int y, int z) {
     }
 }
 
-vec4 getLighting(float x, float y, float z, bool shiftedX, bool shiftedY, bool shiftedZ) {
+vec4 getLighting(ivec2 block, float x, float y, float z, bool shiftedX, bool shiftedY, bool shiftedZ) {
     int intX = int(x);
     int intY = int(y);
     int intZ = int(z);
-    ivec2 block = getBlock(intX, intY, intZ);
-    if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
+    if (shiftedX || shiftedY || shiftedZ) {
+        block = getBlock(intX, intY, intZ);
+        if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
+           bool[8] corners = getCorners(intX, intY, intZ);
+           float localX = (x-intX);
+           float localY = (y-intY);
+           float localZ = (z-intZ);
+           bool anyEmpty = false;
+           if (shiftedY) {
+               int ySide = (localY < 0.5f ? 0 : 4);
+               if (!corners[ySide + 0 + 0]) {
+                   anyEmpty = true;
+               } else if (!corners[ySide + 2 + 0]) {
+                   anyEmpty = true;
+               } else if (!corners[ySide + 0 + 1]) {
+                   anyEmpty = true;
+               } else if (!corners[ySide + 2 + 1]) {
+                   anyEmpty = true;
+               }
+           }
+           if (!anyEmpty && shiftedZ) {
+               int zSide = (localZ < 0.5f ? 0 : 2);
+               if (!corners[0 + zSide + 0]) {
+                   anyEmpty = true;
+               } else if (!corners[4 + zSide + 0]) {
+                   anyEmpty = true;
+               } else if (!corners[0 + zSide + 1]) {
+                   anyEmpty = true;
+               } else if (!corners[4 + zSide + 1]) {
+                   anyEmpty = true;
+               }
+           }
+           if (!anyEmpty && shiftedX) {
+               int xSide = (localX < 0.5f ? 0 : 1);
+               if (!corners[0 + 0 + xSide]) {
+                   anyEmpty = true;
+               } else if (!corners[4 + 0 + xSide]) {
+                   anyEmpty = true;
+               } else if (!corners[0 + 2 + xSide]) {
+                   anyEmpty = true;
+               } else if (!corners[4 + 2 + xSide]) {
+                   anyEmpty = true;
+               }
+           }
+           if (!anyEmpty) {
+               return vec4(0, 0, 0, 0);
+           }
+        }
+    } else if (!(shiftedX && shiftedY && shiftedZ) && (block.x == 17 || block.x == 21) && block.y == 0) {
         return vec4(0, 0, 0, 0);
     }
-    vec4 light = intToColor(getLightData(intX, intY, intZ));
-    if (isBlockSolid(block)) { //return pure darkness if block isnt transparent.
-       bool[8] corners = getCorners(intX, intY, intZ);
-       float localX = (x-intX);
-       float localY = (y-intY);
-       float localZ = (z-intZ);
-       bool anyEmpty = false;
-       if (shiftedY) {
-           int ySide = (localY < 0.5f ? 0 : 4);
-           if (!corners[ySide + 0 + 0]) {
-               anyEmpty = true;
-           } else if (!corners[ySide + 2 + 0]) {
-               anyEmpty = true;
-           } else if (!corners[ySide + 0 + 1]) {
-               anyEmpty = true;
-           } else if (!corners[ySide + 2 + 1]) {
-               anyEmpty = true;
-           }
-       }
-       if (shiftedZ) {
-           int zSide = (localZ < 0.5f ? 0 : 2);
-           if (!corners[0 + zSide + 0]) {
-               anyEmpty = true;
-           } else if (!corners[4 + zSide + 0]) {
-               anyEmpty = true;
-           } else if (!corners[0 + zSide + 1]) {
-               anyEmpty = true;
-           } else if (!corners[4 + zSide + 1]) {
-               anyEmpty = true;
-           }
-       }
-       if (shiftedX) {
-           int xSide = (localX < 0.5f ? 0 : 1);
-           if (!corners[0 + 0 + xSide]) {
-               anyEmpty = true;
-           } else if (!corners[4 + 0 + xSide]) {
-               anyEmpty = true;
-           } else if (!corners[0 + 2 + xSide]) {
-               anyEmpty = true;
-           } else if (!corners[4 + 2 + xSide]) {
-               anyEmpty = true;
-           }
-       }
-       if (!anyEmpty) {
-           return vec4(0, 0, 0, 0);
-       }
-    }
-    return light;
+    return intToColor(getLightData(intX, intY, intZ));
 }
 
 bool isChunkAir(int x, int y, int z) {
