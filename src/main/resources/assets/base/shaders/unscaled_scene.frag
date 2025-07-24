@@ -1,9 +1,10 @@
 layout(binding = 0) uniform sampler2D scene_image;
 layout(binding = 2) uniform sampler2D scene_lighting_blurred;
+layout(binding = 6, rgba32f) uniform image2D scene_unscaled_image;
 
 in vec4 gl_FragCoord;
-vec4 lowResColor = vec4(texture(scene_image, vec2(gl_FragCoord.xy/res)));
-vec4 lowResLighting = vec4(texture(scene_lighting_blurred, vec2(gl_FragCoord.xy/res)));
+vec4 lowResColor = vec4(0);
+vec4 lowResLighting = vec4(0);
 
 out vec4 fragColor;
 
@@ -630,16 +631,21 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
 
 void main() {
     //uint64_t startTime = clockARB();
+
+    checkerOn = checker(ivec2(gl_FragCoord.xy));
+    vec2 pos = gl_FragCoord.xy + (checkerOn ? ivec2(res.x/2, 0) : ivec2(0));
+    lowResColor = vec4(texture(scene_image, vec2(pos.xy/res)));
     //fragColor = lowResColor;
+    lowResLighting = vec4(texture(scene_lighting_blurred, vec2(pos.xy/res)));
     //fragColor = vec4((vec3(lowResLighting.a/20)*(0.8f+lowResLighting.rgb/10)), 1);
 
-    vec2 uv = (vec2(gl_FragCoord)*2. - res.xy) / res.y;
+    vec2 uv = (pos*2. - res.xy) / res.y;
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
-        vec2 uv = (vec2(gl_FragCoord) * 2. - res.xy) / res.y;
+        vec2 uv = (pos*2. - res.xy) / res.y;
         uvDir = normalize(vec3(uv, 1));
-        ivec2 pixel = ivec2(gl_FragCoord.x, gl_FragCoord.y * res.y);
+        ivec2 pixel = ivec2(pos.x, pos.y * res.y);
         vec3 ogDir = vec3(cam * vec4(uvDir, 0));
         vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
         shift = 0;
@@ -648,7 +654,6 @@ void main() {
             prevFog = vec4(1);
             prevSuperFinalTint = vec4(1);
             distanceFogginess = 0;
-            checkerOn = checker(ivec2(gl_FragCoord.xy));
             vec3 skipPos = camPos + (ogDir * (lowResColor.a * renderDistance));
             fragColor = raytrace(camPos, ogDir, true);
             //reflections start
@@ -663,5 +668,7 @@ void main() {
 
         fragColor = toLinear(fragColor);
     }
+    imageStore(scene_unscaled_image, ivec2(pos.xy), vec4(fragColor.rgb, 1));
+    fragColor = vec4(0);
     //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
 }

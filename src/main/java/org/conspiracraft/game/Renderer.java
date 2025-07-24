@@ -30,6 +30,7 @@ import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
+    public static int sceneHalfVaoId;
     public static int lowFboId;
     public static int mediumFboId;
     public static ShaderProgram blurScene;
@@ -92,10 +93,10 @@ public class Renderer {
     }
 
     public static void generateTextures(Window window) {
-        lowRes.x = window.getWidth()/2;
-        lowRes.y = window.getHeight()/2;
-        mediumRes.x = (int)(window.getWidth()*0.75);
-        mediumRes.y = (int)(window.getHeight()*0.75);
+        mediumRes.x = window.getWidth()/2;
+        mediumRes.y = window.getHeight()/2;
+        lowRes.x = mediumRes.x/2;
+        lowRes.y = mediumRes.y/2;
 
         sceneImageId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, sceneImageId);
@@ -165,20 +166,28 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, mediumRes.x, mediumRes.y);
-        glBindImageTexture(0, sceneUnscaledImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneUnscaledImageId, 0);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindImageTexture(0, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
     }
     public static void generateVao() {
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
-        FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(117);
-        verticesBuffer.put(new float[]{
-                -1, -1, 0, 3, -1, 0, -1, 3, 0
-        }).flip();
         glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, new float[]{
+                -1, -1, 0,
+                3, -1, 0,
+                -1, 3, 0
+        }, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        sceneHalfVaoId = glGenVertexArrays();
+        glBindVertexArray(sceneHalfVaoId);
+        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
+        glBufferData(GL_ARRAY_BUFFER, new float[]{
+                0, -3, 0,
+                -3, 0, 0,
+                0, 3, 0
+        }, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
     public static void createBuffers() {
@@ -216,7 +225,7 @@ public class Renderer {
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "snowing", "sun", "cloudsEnabled", "hand", "ui", "res"});
-        finalScene = new ShaderProgram("scene.vert", new String[]{"final_scene.frag"},
+        finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
                 new String[]{"res"});
     }
 
@@ -588,6 +597,12 @@ public class Renderer {
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableVertexAttribArray(0);
     }
+    public static void drawHalf() {
+        glBindVertexArray(sceneHalfVaoId);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray(0);
+    }
 
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
@@ -632,17 +647,15 @@ public class Renderer {
 //            glBindTextureUnit(0, sceneImageId);
 //            glBindTextureUnit(2, sceneLightingBlurredId);
             bindTextures();
-//            glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
 
-            draw();
+            drawHalf();
             unscaledScene.unbind();
 
-//            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//            finalScene.bind();
-//            glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
-//            glBindTextureUnit(6, sceneUnscaledImageId);
-//            draw();
-//            finalScene.unbind();
+            finalScene.bind();
+            glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+            draw();
+            finalScene.unbind();
 
             worldChanged = false;
         }

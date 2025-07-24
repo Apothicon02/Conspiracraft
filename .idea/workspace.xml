@@ -10,8 +10,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid3144.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -142,7 +144,7 @@
       <recent name="org.conspiracraft.game.world" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.build">
+  <component name="RunManager" selected="Application.Run">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -195,30 +197,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00155" summary="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme.">
-      <option name="closed" value="true" />
-      <created>1741400774106</created>
-      <option name="number" value="00155" />
-      <option name="presentableId" value="LOCAL-00155" />
-      <option name="project" value="LOCAL" />
-      <updated>1741400774106</updated>
-    </task>
-    <task id="LOCAL-00156" summary="- Added plains biome. &#10;- Improved jungle and forest biomes. &#10;- Added rocks.">
-      <option name="closed" value="true" />
-      <created>1741464103164</created>
-      <option name="number" value="00156" />
-      <option name="presentableId" value="LOCAL-00156" />
-      <option name="project" value="LOCAL" />
-      <updated>1741464103165</updated>
-    </task>
-    <task id="LOCAL-00157" summary="- Greatly optimized worldgen.">
-      <option name="closed" value="true" />
-      <created>1741552822503</created>
-      <option name="number" value="00157" />
-      <option name="presentableId" value="LOCAL-00157" />
-      <option name="project" value="LOCAL" />
-      <updated>1741552822503</updated>
     </task>
     <task id="LOCAL-00158" summary="- Rendering is now enabled before the world is generated.">
       <option name="closed" value="true" />
@@ -588,7 +566,31 @@
       <option name="project" value="LOCAL" />
       <updated>1753237489942</updated>
     </task>
-    <option name="localTasksCounter" value="204" />
+    <task id="LOCAL-00204" summary="- Slightly improved lighting data retrieval.">
+      <option name="closed" value="true" />
+      <created>1753289144087</created>
+      <option name="number" value="00204" />
+      <option name="presentableId" value="LOCAL-00204" />
+      <option name="project" value="LOCAL" />
+      <updated>1753289144087</updated>
+    </task>
+    <task id="LOCAL-00205" summary="- Fixed transparency.">
+      <option name="closed" value="true" />
+      <created>1753298922599</created>
+      <option name="number" value="00205" />
+      <option name="presentableId" value="LOCAL-00205" />
+      <option name="project" value="LOCAL" />
+      <updated>1753298922599</updated>
+    </task>
+    <task id="LOCAL-00206" summary="- Saturated atlas.">
+      <option name="closed" value="true" />
+      <created>1753311102234</created>
+      <option name="number" value="00206" />
+      <option name="presentableId" value="LOCAL-00206" />
+      <option name="project" value="LOCAL" />
+      <updated>1753311102234</updated>
+    </task>
+    <option name="localTasksCounter" value="207" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -617,9 +619,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Light and corner palettes can now be re-compressed. &#10;- Optimized chunk emptiness data uploading." />
-    <MESSAGE value="- Added scheduled ticking." />
-    <MESSAGE value="- World updates are no longer done in the renderer. &#10;- Started liquid rework." />
     <MESSAGE value="- Sound rework. &#10;- Fluid flow now works horizontally." />
     <MESSAGE value="- Added block properties. &#10;- Added buckets." />
     <MESSAGE value="- Finished fluid implementation." />
@@ -642,14 +641,17 @@
     <MESSAGE value="- Improved ambient occlusion." />
     <MESSAGE value="- Organized shaders." />
     <MESSAGE value="- Disabled low-res passes." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Disabled low-res passes." />
+    <MESSAGE value="- Slightly improved lighting data retrieval." />
+    <MESSAGE value="- Fixed transparency." />
+    <MESSAGE value="- Saturated atlas." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Saturated atlas." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>88</line>
+          <line>89</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
