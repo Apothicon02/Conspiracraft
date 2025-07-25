@@ -67,9 +67,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 if (blockType == 1 && !renderingHand) {
                     if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x != 1) { //change to allow non-full water blocks to have caustics.
                       if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
-                          if (checkerOn) {
-                              voxelColor = fromLinear(vec4(1, 1, 1, 1));
-                          }
+                          voxelColor = fromLinear(vec4(2, 2, 2, 1));
                           shouldReflect = -0.01f;
                       }
                     } else {
@@ -196,7 +194,24 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                     } else {
                         shift = 2;
                     }
-                    vec4 color = traceBlock(isShadow, chunkDist, subChunkDist, blockDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, 1, vec3(0), mixedTime);
+
+                    float camDist = 0;
+                    float whiteness = gradient(camPos.y, 64, 372, 0, 0.8);
+                    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
+                    float fogNoise = max(0, cloudNoise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77);
+                    if (blockInfo.x != 1.f) {
+                        fogNoise+=gradient(hitPos.y, 63.f, 96.f, 0.f, 1.f);
+                    }
+                    float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
+                    distanceFogginess = max(distanceFogginess, clamp((exp2(linearDistFog-0.75f)+min(0.f, linearDistFog-0.25f))-0.1f, 0.f, 1.f));
+                    float sunLight = (lighting.a/16)*(mixedTime-timeBonus);
+                    vec4 color = traceBlock(isShadow, chunkDist, subChunkDist, blockDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
+                    if ((blockInfo.x == 17 || blockInfo.x == 21) && color.a >= 1) {
+                        color = vec4(hsv2rgb(rgb2hsv(vec3(color))-vec3(0, cloudNoise(vec2(camPos.x, camPos.z)*10), 0)), 1);
+                    }
+                    //lighting start
+                    lighting = fromLinear(getLighting(camPos.x, camPos.y, camPos.z));
+                    lightFog = max(lightFog, lighting*vec4(0.5, 0.5, 0.5, 1));
                     if (color.a >= 1.f) {
                         return color;
                     }
@@ -240,12 +255,9 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 //lighting start
                 float lightNoise = max(0, cloudNoise((vec2(prevPos.x, prevPos.y)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.y, prevPos.z)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.z, prevPos.x)*64)+(float(time)*10000)));
 
-                vec3 relativePos = prevPos-rayMapPos; //smooth position here maybe
-                lighting = getLighting(prevPos.x, prevPos.y, prevPos.z);
-                lighting = fromLinear(lighting);
+                lighting = fromLinear(getLighting(prevPos.x, prevPos.y, prevPos.z));
                 lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
                 lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, 1));
-                //lighting end
             }
 
             if (color.a >= 1) {
@@ -332,6 +344,15 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
 }
 
 vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
+    if (rayDir.x == 0) {
+        rayDir.x = 0.00001f;
+    }
+    if (rayDir.y == 0) {
+        rayDir.y = 0.00001f;
+    }
+    if (rayDir.z  == 0) {
+        rayDir.z = 0.00001f;
+    }
     ogRayPos = ogPos;
     vec3 rayPos = ogRayPos/16;
     vec3 rayMapChunkPos = floor(rayPos);
@@ -371,7 +392,7 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
                 vec3 uv3d = intersect - rayMapChunkPos;
 
                 if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                                       uv3d = rayPos - rayMapChunkPos;
+                    uv3d = rayPos - rayMapChunkPos;
                 }
                 ivec3 chunkPos = ivec3(rayMapChunkPos);
                 vec4 color = subChunkDDA(isShadow, chunkDist, (((chunkPos.x * sizeChunks) + chunkPos.z) * heightChunks) + chunkPos.y, chunkPos * 16, uv3d * 2.0, rayDir, mask, inBounds, checkSubChunks);
@@ -397,25 +418,10 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
     vec3 uv3d = intersect - rayMapChunkPos;
 
     if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                           uv3d = rayPos - rayMapChunkPos;
+        uv3d = rayPos - rayMapChunkPos;
     }
     prevHitPos = (rayMapChunkPos+uv3d)*16;
     hitPos = prevHitPos;
-    if (!renderingHand && !isShadow) {
-        float sunDir = dot(normalize(sun - camPos), rayDir);
-        if (sunDir > 0.85f && sunDir < 1.15f) {
-            lighting = fromLinear(vec4(0, 0, 0, 20));
-            lightFog = max(lightFog, lighting);
-            fragColor = vec4(1, 1, 0, 1);
-        }
-        vec3 lunaPos = (((sun-vec3(size/2, 0, size/2))*vec3(-1, 1, -1))+vec3(size/2, 0, size/2));
-        float lunaDir = dot(normalize(lunaPos - camPos), rayDir);
-        if (lunaDir > 0.85f && lunaDir < 1.15) {
-            lighting = fromLinear(vec4(5, 5, 5, 0));
-            lightFog = max(lightFog, lighting);
-            fragColor = vec4(0.95f, 0.95f, 1, 1);
-        }
-    }
     return vec4(0);
 }
 
@@ -449,13 +455,27 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     vec4 color = traceWorld(false, ogRayPos, dir);
     if (renderingHand) {
         prevPos = prevHitPos;
+    } else if (color.a < 1) {
+        float sunDir = dot(normalize(sun - camPos), dir);
+        if (sunDir > 0.85f && sunDir < 1.15f) {
+            lighting = fromLinear(vec4(0, 0, 0, 20));
+            lightFog = max(lightFog, lighting);
+            color = vec4(1, 1, 0, 1);
+        }
+        vec3 lunaPos = (((sun-vec3(size/2, 0, size/2))*vec3(-1, 1, -1))+vec3(size/2, 0, size/2));
+        float lunaDir = dot(normalize(lunaPos - camPos), dir);
+        if (lunaDir > 0.85f && lunaDir < 1.15) {
+            lighting = fromLinear(vec4(5, 5, 5, 0));
+            lightFog = max(lightFog, lighting);
+            color = vec4(0.95f, 0.95f, 1, 1);
+        }
     }
     prevReflectPos = prevHitPos;
     reflectPos = hitPos;
     isSky = renderingHand ? false : color.a < 1.f;
     float borders = max(gradient(hitPos.x, 0, 128, 0, 1), max(gradient(hitPos.z, 0, 128, 0, 1), max(gradient(hitPos.x, size, size-128, 0, 1), gradient(hitPos.z, size, size-128, 0, 1))));
     if (isSky) {
-        lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), getLighting(hitPos.x, hitPos.y, hitPos.z), borders) : vec4(0, 0, 0, 20));
+        lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), fromLinear(getLighting(hitPos.x, hitPos.y, hitPos.z)), borders) : vec4(0, 0, 0, 20));
         lightFog = lighting;
     }
     float adjustedTime = clamp(abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
@@ -470,15 +490,10 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
         distanceFogginess = 1;
     }
     distanceFogginess = clamp(distanceFogginess, 0.f, 1.f);
-    if (renderingHand) {
-        lighting = fromLinear(getLighting(camPos.x, camPos.y, camPos.z));
-        lightFog = max(lightFog, lighting*(1-vec4(0.5, 0.5, 0.5, 0)));
-    } else {
-        distanceFogginess = max(distanceFogginess, borders);
-        float factor = pow(distanceFogginess, 4);
-        lighting = mix(lighting, vec4(0, 0, 0, 20), factor);
-        lightFog = mix(lightFog, vec4(0, 0, 0, 20), factor);
-    }
+    distanceFogginess = max(distanceFogginess, borders);
+    float factor = pow(distanceFogginess, 4);
+    lighting = mix(lighting, vec4(0, 0, 0, 20), factor);
+    lightFog = mix(lightFog, vec4(0, 0, 0, 20), factor);
     lighting = pow(lighting/20, vec4(2.f))*vec4(200, 200, 200, 32.5f);
     lightFog = pow(lightFog/20, vec4(2.f))*vec4(200, 200, 200, 32.5f);
     float sunLight = (lighting.a/20)*(mixedTime-timeBonus);
@@ -504,28 +519,27 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     }
     if (!isSky && checkShadow && shadowsEnabled && !hitSun) {
         if (color.a >= 1.f && sunLight > 0.f) {
-            vec3 shadowPos = prevPos;
+            vec3 shadowPos = (renderingHand ? camPos : prevPos);
             vec3 sunDir = normalize(sun - shadowPos);
-            if (sunDir.x == 0) {
-                sunDir.x = 0.00001f;
-            }
-            if (sunDir.y == 0) {
-                sunDir.y = 0.00001f;
-            }
-            if (sunDir.z  == 0) {
-                sunDir.z = 0.00001f;
-            }
             clearVars(true, true);
+            bool wasRenderingHand = renderingHand;
+            if (wasRenderingHand) {
+                shift = 0;
+                renderingHand = false;
+            }
             float oldReflectivity = reflectivity;
             reflectivity = 0.f;
             float factor = max(1, 2.5-distanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10));;
             if (traceWorld(true, shadowPos, sunDir).a >= 1.f) {
                 sunLight /= factor;
+                finalLighting.a /= factor;
+            } else {
+                tint = max(vec3(1), tint*2);
+                float tintFactor = max(tint.r, max(tint.g, tint.b));
+                color = mix(color, fromLinear(vec4((vec3(tint)/tintFactor)-1, 1)), ((tintFactor-1)/20)*(mixedTime-timeBonus));//sun tint
             }
             reflectivity = oldReflectivity;
-            tint = max(vec3(1), tint*2);
-            float tintFactor = max(tint.r, max(tint.g, tint.b));
-            color = mix(color, fromLinear(vec4((vec3(tint)/tintFactor)-1, 1)), (tintFactor-1)/20);//sun tint
+            renderingHand = wasRenderingHand;
         }
     }
     vec3 finalLight = (vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+sunLight)*finalNormalBrightness;
@@ -547,10 +561,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     color *= prevSuperFinalTint;
     prevSuperFinalTint = superFinalTint;
     //transparency end
-
-    if (renderingHand) {
-        color = vec4(mix(vec3(color), unmixedFogColor/4.f, reflectivity), color.a);
-    }
 
     //selection start
     if (ui && !renderingHand && selected == ivec3(finalRayMapPos)) {
@@ -584,21 +594,21 @@ void main() {
         vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
         shift = 0;
         renderingHand = false;
+        prevFog = vec4(1);
+        prevSuperFinalTint = vec4(1);
+        distanceFogginess = 0;
         if (handColor.a < 1) {
-            prevFog = vec4(1);
-            prevSuperFinalTint = vec4(1);
-            distanceFogginess = 0;
             vec3 skipPos = camPos + (ogDir * (lowResColor.a * renderDistance));
             fragColor = raytrace(camPos, ogDir, true);
-            //reflections start
-            if (!isSky && reflectivity > 0.f) {
-                vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
-                fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * dot(normalize(ogDir), normalize(reflectDir)));
-            }
-            //reflections end
         } else {
             fragColor = handColor;
         }
+        //reflections start
+        if (!isSky && reflectivity > 0.f) {
+            vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
+            fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * dot(normalize(ogDir), normalize(reflectDir)));
+        }
+        //reflections end
 
         fragColor = toLinear(fragColor);
     }

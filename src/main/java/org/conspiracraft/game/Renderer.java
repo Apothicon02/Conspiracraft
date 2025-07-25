@@ -65,8 +65,7 @@ public class Renderer {
     public static boolean shadowsEnabled = true;
     public static boolean raytracedCaustics = true;
     public static boolean cloudsEnabled = true;
-    public static Vector2i lowRes = new Vector2i(852, 480);
-    public static Vector2i mediumRes = new Vector2i(1440, 810);
+    public static Vector2i lowRes = new Vector2i(960, 540);
 
     public static boolean resized = false;
     public static int defaultSSBOSize = (int) (0.2f*1000000000)*((size/2048)^2);
@@ -92,10 +91,8 @@ public class Renderer {
     }
 
     public static void generateTextures(Window window) {
-        mediumRes.x = window.getWidth()/2;
-        mediumRes.y = window.getHeight()/2;
-        lowRes.x = mediumRes.x/2;
-        lowRes.y = mediumRes.y/2;
+        lowRes.x = window.getWidth()/2;
+        lowRes.y = window.getHeight()/2;
 
         sceneImageId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, sceneImageId);
@@ -123,7 +120,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, mediumRes.x,mediumRes.y);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
         glBindImageTexture(0, sceneLightingHalfBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         sceneLightingBlurredId = glGenTextures();
@@ -132,7 +129,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, mediumRes.x, mediumRes.y);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
         glBindImageTexture(0, sceneLightingBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         coherentNoiseId = glGenTextures();
