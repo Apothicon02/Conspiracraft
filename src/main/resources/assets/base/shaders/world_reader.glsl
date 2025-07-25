@@ -184,7 +184,7 @@ ivec2 getBlock(vec3 pos) {
 }
 
 bool castsShadow(int x) {
-    return (x != 4 && x != 5 && x != 18);
+    return true;//(x != 4 && x != 5 && x != 18);
 }
 bool isBlockSolid(ivec2 block) {
     return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);

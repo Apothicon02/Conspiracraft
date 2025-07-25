@@ -266,9 +266,6 @@ public class Main {
                         }
                         selectedBlock = new Vector3i(selectedBlock.x, newSubId, selectedBlock.z());
                     }
-                    if (wasWDown && !window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS)) {
-                        Renderer.snowing = !Renderer.snowing;
-                    }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.worldChanged = true;
                     }
