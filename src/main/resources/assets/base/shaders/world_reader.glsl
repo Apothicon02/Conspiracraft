@@ -14,13 +14,11 @@ uniform ivec3 selected;
 uniform bool ui;
 uniform bool shadowsEnabled;
 uniform bool raytracedCaustics;
-uniform bool snowing;
 uniform vec3 sun;
 uniform bool cloudsEnabled;
 uniform ivec3 hand;
 uniform ivec2 res;
 
-bool isSnowFlake = false;
 vec3 normal = vec3(0);
 float distanceFogginess = 0.f;
 bool firstVoxel = true;

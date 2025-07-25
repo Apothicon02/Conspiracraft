@@ -10,11 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid3144.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +52,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="f659037301139746b97caf7cacd5fc4b4884dcf9" />
+        <entry key="$PROJECT_DIR$" value="568c69ed8cabe066ae083ad9cad4fb95d5ccd620" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -87,44 +83,43 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.preview.features.used&quot;: &quot;true&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Run.executor": "Run",
+    "Gradle.Build Conspiracraft.executor": "Run",
+    "Gradle.Build Terraflat.executor": "Run",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
+    "Gradle.build.executor": "Run",
+    "JAR Application.VisualVMLauncher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "ShowUsagesActions.previewPropertyKey": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft/game/world/trees/canopies",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\game\world\trees\canopies" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\sounds" />
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\blocks" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\models\voxels" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\resources\assets" />
@@ -185,6 +180,8 @@
       <list>
         <item itemvalue="Gradle.build" />
         <item itemvalue="Application.Run" />
+        <item itemvalue="Gradle.build" />
+        <item itemvalue="Application.Run" />
       </list>
     </recent_temporary>
   </component>
@@ -197,6 +194,238 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
+    </task>
+    <task id="LOCAL-00129" summary="- Fixed crash with light propogation. &#10;- Sunlight is now immune to normal-based brightness. &#10;- Fixed blocklight fog not existing. &#10;- Block lighting is now non-linear.">
+      <option name="closed" value="true" />
+      <created>1739560735409</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1739560735410</updated>
+    </task>
+    <task id="LOCAL-00130" summary="- Strengthened gravity. &#10;- Added bouncing.">
+      <option name="closed" value="true" />
+      <created>1739572288082</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1739572288082</updated>
+    </task>
+    <task id="LOCAL-00131" summary="- Added hydrangea flowers. &#10;- Improved rose textures. &#10;- Improved leaf shading. &#10;- Improved lighting dramatically. &#10;- Improved ambient occlusion. &#10;- Optimized light spreading hugely.&#10;- Improved leaf textures.">
+      <option name="closed" value="true" />
+      <created>1739584176381</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1739584176381</updated>
+    </task>
+    <task id="LOCAL-00132" summary="- Updated snow.">
+      <option name="closed" value="true" />
+      <created>1739638888843</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1739638888844</updated>
+    </task>
+    <task id="LOCAL-00133" summary="- Micro-optimized fragment shader.">
+      <option name="closed" value="true" />
+      <created>1739731219699</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1739731219699</updated>
+    </task>
+    <task id="LOCAL-00134" summary="- Added noise to lighting.">
+      <option name="closed" value="true" />
+      <created>1739983548850</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1739983548850</updated>
+    </task>
+    <task id="LOCAL-00135" summary="- Added clouds.">
+      <option name="closed" value="true" />
+      <created>1740264363702</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1740264363703</updated>
+    </task>
+    <task id="LOCAL-00136" summary="- Added water physics. &#10;- Optimized clouds. &#10;- Block and corner queues no longer have a limit.&#10;- Fixed snow. &#10;- Transparent blocks now look less weird on the edges.">
+      <option name="closed" value="true" />
+      <created>1740436228251</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1740436228251</updated>
+    </task>
+    <task id="LOCAL-00137" summary="- Fixed sky fog not matching world fog.">
+      <option name="closed" value="true" />
+      <created>1740442783338</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1740442783338</updated>
+    </task>
+    <task id="LOCAL-00138" summary="- Fixed worldgen not generating water correctly. &#10;- Added sub-chunks.&#10;- Added normalized lighting.">
+      <option name="closed" value="true" />
+      <created>1740504757080</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1740504757080</updated>
+    </task>
+    <task id="LOCAL-00139" summary="- Fixed leaves not being counted in the heightmap. &#10;- Re-added godrays.">
+      <option name="closed" value="true" />
+      <created>1740528663413</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1740528663413</updated>
+    </task>
+    <task id="LOCAL-00140" summary="- Fixed heightmap data being flipped when loaded from disk. &#10;- Fixed shadows crashing the game.">
+      <option name="closed" value="true" />
+      <created>1740623491988</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1740623491988</updated>
+    </task>
+    <task id="LOCAL-00141" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
+      <option name="closed" value="true" />
+      <created>1740699991690</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1740699991690</updated>
+    </task>
+    <task id="LOCAL-00142" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
+      <option name="closed" value="true" />
+      <created>1740700036312</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1740700036312</updated>
+    </task>
+    <task id="LOCAL-00143" summary="- Added mountains. &#10;- Fixed sunlight worldgen. &#10;- Re-enabled reflections.">
+      <option name="closed" value="true" />
+      <created>1740722478704</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1740722478704</updated>
+    </task>
+    <task id="LOCAL-00144" summary="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast.">
+      <option name="closed" value="true" />
+      <created>1740795424961</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1740795424962</updated>
+    </task>
+    <task id="LOCAL-00145" summary="- Added the volcano. &#10;- Added magma.">
+      <option name="closed" value="true" />
+      <created>1740880972106</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1740880972106</updated>
+    </task>
+    <task id="LOCAL-00146" summary="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes.">
+      <option name="closed" value="true" />
+      <created>1740942159943</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1740942159943</updated>
+    </task>
+    <task id="LOCAL-00147" summary="- Updated README.md">
+      <option name="closed" value="true" />
+      <created>1740954139413</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1740954139413</updated>
+    </task>
+    <task id="LOCAL-00148" summary="- Updated README.md">
+      <option name="closed" value="true" />
+      <created>1740954241670</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1740954241670</updated>
+    </task>
+    <task id="LOCAL-00149" summary="- Fixed crash when music folder doesnt exist.">
+      <option name="closed" value="true" />
+      <created>1740958579831</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1740958579831</updated>
+    </task>
+    <task id="LOCAL-00150" summary="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class.">
+      <option name="closed" value="true" />
+      <created>1741017672832</created>
+      <option name="number" value="00150" />
+      <option name="presentableId" value="LOCAL-00150" />
+      <option name="project" value="LOCAL" />
+      <updated>1741017672833</updated>
+    </task>
+    <task id="LOCAL-00151" summary="- Fixed clouds preventing block rendering in their chunks. &#10;- Added cloud movement. &#10;- Clouds can now be toggled with F3+C. &#10;- Cloud shading now changes based on camera altitude.">
+      <option name="closed" value="true" />
+      <created>1741110483660</created>
+      <option name="number" value="00151" />
+      <option name="presentableId" value="LOCAL-00151" />
+      <option name="project" value="LOCAL" />
+      <updated>1741110483661</updated>
+    </task>
+    <task id="LOCAL-00152" summary="- Added jungle biome.  &#10;- Added jungle logs. &#10;- Added jungle leaves. &#10;- Fixed subchunks not accounting for light. &#10;- Disabled debug prints.">
+      <option name="closed" value="true" />
+      <created>1741131660023</created>
+      <option name="number" value="00152" />
+      <option name="presentableId" value="LOCAL-00152" />
+      <option name="project" value="LOCAL" />
+      <updated>1741131660023</updated>
+    </task>
+    <task id="LOCAL-00153" summary="- Rays now cancel if cloudiness reaches max value. &#10;- Palette compression can now revert bitPerValue increases.">
+      <option name="closed" value="true" />
+      <created>1741135117260</created>
+      <option name="number" value="00153" />
+      <option name="presentableId" value="LOCAL-00153" />
+      <option name="project" value="LOCAL" />
+      <updated>1741135117260</updated>
+    </task>
+    <task id="LOCAL-00154" summary="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles.">
+      <option name="closed" value="true" />
+      <created>1741198852814</created>
+      <option name="number" value="00154" />
+      <option name="presentableId" value="LOCAL-00154" />
+      <option name="project" value="LOCAL" />
+      <updated>1741198852814</updated>
+    </task>
+    <task id="LOCAL-00155" summary="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme.">
+      <option name="closed" value="true" />
+      <created>1741400774106</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1741400774106</updated>
+    </task>
+    <task id="LOCAL-00156" summary="- Added plains biome. &#10;- Improved jungle and forest biomes. &#10;- Added rocks.">
+      <option name="closed" value="true" />
+      <created>1741464103164</created>
+      <option name="number" value="00156" />
+      <option name="presentableId" value="LOCAL-00156" />
+      <option name="project" value="LOCAL" />
+      <updated>1741464103165</updated>
+    </task>
+    <task id="LOCAL-00157" summary="- Greatly optimized worldgen.">
+      <option name="closed" value="true" />
+      <created>1741552822503</created>
+      <option name="number" value="00157" />
+      <option name="presentableId" value="LOCAL-00157" />
+      <option name="project" value="LOCAL" />
+      <updated>1741552822503</updated>
     </task>
     <task id="LOCAL-00158" summary="- Rendering is now enabled before the world is generated.">
       <option name="closed" value="true" />
@@ -358,239 +587,7 @@
       <option name="project" value="LOCAL" />
       <updated>1752355926449</updated>
     </task>
-    <task id="LOCAL-00178" summary="- Light and corner palettes can now be re-compressed. &#10;- Optimized chunk emptiness data uploading.">
-      <option name="closed" value="true" />
-      <created>1752356586405</created>
-      <option name="number" value="00178" />
-      <option name="presentableId" value="LOCAL-00178" />
-      <option name="project" value="LOCAL" />
-      <updated>1752356586405</updated>
-    </task>
-    <task id="LOCAL-00179" summary="- Added scheduled ticking.">
-      <option name="closed" value="true" />
-      <created>1752360825156</created>
-      <option name="number" value="00179" />
-      <option name="presentableId" value="LOCAL-00179" />
-      <option name="project" value="LOCAL" />
-      <updated>1752360825156</updated>
-    </task>
-    <task id="LOCAL-00180" summary="- World updates are no longer done in the renderer. &#10;- Started liquid rework.">
-      <option name="closed" value="true" />
-      <created>1752593180965</created>
-      <option name="number" value="00180" />
-      <option name="presentableId" value="LOCAL-00180" />
-      <option name="project" value="LOCAL" />
-      <updated>1752593180966</updated>
-    </task>
-    <task id="LOCAL-00181" summary="- Sound rework. &#10;- Fluid flow now works horizontally.">
-      <option name="closed" value="true" />
-      <created>1752599419190</created>
-      <option name="number" value="00181" />
-      <option name="presentableId" value="LOCAL-00181" />
-      <option name="project" value="LOCAL" />
-      <updated>1752599419190</updated>
-    </task>
-    <task id="LOCAL-00182" summary="- Added block properties. &#10;- Added buckets.">
-      <option name="closed" value="true" />
-      <created>1752611960178</created>
-      <option name="number" value="00182" />
-      <option name="presentableId" value="LOCAL-00182" />
-      <option name="project" value="LOCAL" />
-      <updated>1752611960178</updated>
-    </task>
-    <task id="LOCAL-00183" summary="- Finished fluid implementation.">
-      <option name="closed" value="true" />
-      <created>1752623720248</created>
-      <option name="number" value="00183" />
-      <option name="presentableId" value="LOCAL-00183" />
-      <option name="project" value="LOCAL" />
-      <updated>1752623720248</updated>
-    </task>
-    <task id="LOCAL-00184" summary="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics.">
-      <option name="closed" value="true" />
-      <created>1752631437883</created>
-      <option name="number" value="00184" />
-      <option name="presentableId" value="LOCAL-00184" />
-      <option name="project" value="LOCAL" />
-      <updated>1752631437883</updated>
-    </task>
-    <task id="LOCAL-00185" summary="- Fixed opengl error.">
-      <option name="closed" value="true" />
-      <created>1752879287778</created>
-      <option name="number" value="00185" />
-      <option name="presentableId" value="LOCAL-00185" />
-      <option name="project" value="LOCAL" />
-      <updated>1752879287778</updated>
-    </task>
-    <task id="LOCAL-00186" summary="- Went back to rendering in a fragment shader.">
-      <option name="closed" value="true" />
-      <created>1752886689808</created>
-      <option name="number" value="00186" />
-      <option name="presentableId" value="LOCAL-00186" />
-      <option name="project" value="LOCAL" />
-      <updated>1752886689808</updated>
-    </task>
-    <task id="LOCAL-00187" summary="- Stuff">
-      <option name="closed" value="true" />
-      <created>1752893162909</created>
-      <option name="number" value="00187" />
-      <option name="presentableId" value="LOCAL-00187" />
-      <option name="project" value="LOCAL" />
-      <updated>1752893162909</updated>
-    </task>
-    <task id="LOCAL-00188" summary="- Removed unused ssbo. &#10;- Fixed rendering.">
-      <option name="closed" value="true" />
-      <created>1752940884456</created>
-      <option name="number" value="00188" />
-      <option name="presentableId" value="LOCAL-00188" />
-      <option name="project" value="LOCAL" />
-      <updated>1752940884456</updated>
-    </task>
-    <task id="LOCAL-00189" summary="- Fixed image not being write only.">
-      <option name="closed" value="true" />
-      <created>1752940936688</created>
-      <option name="number" value="00189" />
-      <option name="presentableId" value="LOCAL-00189" />
-      <option name="project" value="LOCAL" />
-      <updated>1752940936688</updated>
-    </task>
-    <task id="LOCAL-00190" summary="- Improved cloud noise.">
-      <option name="closed" value="true" />
-      <created>1752947641038</created>
-      <option name="number" value="00190" />
-      <option name="presentableId" value="LOCAL-00190" />
-      <option name="project" value="LOCAL" />
-      <updated>1752947641038</updated>
-    </task>
-    <task id="LOCAL-00191" summary="- Removed bare trace.">
-      <option name="closed" value="true" />
-      <created>1752947728682</created>
-      <option name="number" value="00191" />
-      <option name="presentableId" value="LOCAL-00191" />
-      <option name="project" value="LOCAL" />
-      <updated>1752947728682</updated>
-    </task>
-    <task id="LOCAL-00192" summary="- Removed bare trace.">
-      <option name="closed" value="true" />
-      <created>1752947740403</created>
-      <option name="number" value="00192" />
-      <option name="presentableId" value="LOCAL-00192" />
-      <option name="project" value="LOCAL" />
-      <updated>1752947740403</updated>
-    </task>
-    <task id="LOCAL-00193" summary="- Greatly organized rendering class.">
-      <option name="closed" value="true" />
-      <created>1752953413210</created>
-      <option name="number" value="00193" />
-      <option name="presentableId" value="LOCAL-00193" />
-      <option name="project" value="LOCAL" />
-      <updated>1752953413210</updated>
-    </task>
-    <task id="LOCAL-00194" summary="- Optimized renderer class more.">
-      <option name="closed" value="true" />
-      <created>1752954625346</created>
-      <option name="number" value="00194" />
-      <option name="presentableId" value="LOCAL-00194" />
-      <option name="project" value="LOCAL" />
-      <updated>1752954625346</updated>
-    </task>
-    <task id="LOCAL-00195" summary="- FPS display is now averaged.&#10;- Added frametime display.">
-      <option name="closed" value="true" />
-      <created>1752957753345</created>
-      <option name="number" value="00195" />
-      <option name="presentableId" value="LOCAL-00195" />
-      <option name="project" value="LOCAL" />
-      <updated>1752957753345</updated>
-    </task>
-    <task id="LOCAL-00196" summary="- Improved cloud shadows. &#10;- Fixed sun shadows shading block light.">
-      <option name="closed" value="true" />
-      <created>1752962913528</created>
-      <option name="number" value="00196" />
-      <option name="presentableId" value="LOCAL-00196" />
-      <option name="project" value="LOCAL" />
-      <updated>1752962913528</updated>
-    </task>
-    <task id="LOCAL-00197" summary="- Improved visuals of light noise. &#10;- Removed fake shadows. &#10;- Weakened block light. &#10;- Improved block normal shading. &#10;- Fixed shadows.">
-      <option name="closed" value="true" />
-      <created>1752971132181</created>
-      <option name="number" value="00197" />
-      <option name="presentableId" value="LOCAL-00197" />
-      <option name="project" value="LOCAL" />
-      <updated>1752971132181</updated>
-    </task>
-    <task id="LOCAL-00198" summary="- Added upscaled lighting. &#10;- Removed sunlight noise. &#10;- Added bloom. &#10;- Removed main uspcaling.">
-      <option name="closed" value="true" />
-      <created>1753050754144</created>
-      <option name="number" value="00198" />
-      <option name="presentableId" value="LOCAL-00198" />
-      <option name="project" value="LOCAL" />
-      <updated>1753050754145</updated>
-    </task>
-    <task id="LOCAL-00199" summary="- Re-added upscaling. &#10;- Greatly improved ambient occlusion. &#10;- Fixed performance metrics still being inaccurate.">
-      <option name="closed" value="true" />
-      <created>1753127761197</created>
-      <option name="number" value="00199" />
-      <option name="presentableId" value="LOCAL-00199" />
-      <option name="project" value="LOCAL" />
-      <updated>1753127761197</updated>
-    </task>
-    <task id="LOCAL-00200" summary="- Fixed input delay.">
-      <option name="closed" value="true" />
-      <created>1753132590494</created>
-      <option name="number" value="00200" />
-      <option name="presentableId" value="LOCAL-00200" />
-      <option name="project" value="LOCAL" />
-      <updated>1753132590494</updated>
-    </task>
-    <task id="LOCAL-00201" summary="- Improved ambient occlusion.">
-      <option name="closed" value="true" />
-      <created>1753141236484</created>
-      <option name="number" value="00201" />
-      <option name="presentableId" value="LOCAL-00201" />
-      <option name="project" value="LOCAL" />
-      <updated>1753141236485</updated>
-    </task>
-    <task id="LOCAL-00202" summary="- Organized shaders.">
-      <option name="closed" value="true" />
-      <created>1753235304545</created>
-      <option name="number" value="00202" />
-      <option name="presentableId" value="LOCAL-00202" />
-      <option name="project" value="LOCAL" />
-      <updated>1753235304545</updated>
-    </task>
-    <task id="LOCAL-00203" summary="- Disabled low-res passes.">
-      <option name="closed" value="true" />
-      <created>1753237489942</created>
-      <option name="number" value="00203" />
-      <option name="presentableId" value="LOCAL-00203" />
-      <option name="project" value="LOCAL" />
-      <updated>1753237489942</updated>
-    </task>
-    <task id="LOCAL-00204" summary="- Slightly improved lighting data retrieval.">
-      <option name="closed" value="true" />
-      <created>1753289144087</created>
-      <option name="number" value="00204" />
-      <option name="presentableId" value="LOCAL-00204" />
-      <option name="project" value="LOCAL" />
-      <updated>1753289144087</updated>
-    </task>
-    <task id="LOCAL-00205" summary="- Fixed transparency.">
-      <option name="closed" value="true" />
-      <created>1753298922599</created>
-      <option name="number" value="00205" />
-      <option name="presentableId" value="LOCAL-00205" />
-      <option name="project" value="LOCAL" />
-      <updated>1753298922599</updated>
-    </task>
-    <task id="LOCAL-00206" summary="- Saturated atlas.">
-      <option name="closed" value="true" />
-      <created>1753311102234</created>
-      <option name="number" value="00206" />
-      <option name="presentableId" value="LOCAL-00206" />
-      <option name="project" value="LOCAL" />
-      <updated>1753311102234</updated>
-    </task>
-    <option name="localTasksCounter" value="207" />
+    <option name="localTasksCounter" value="178" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -602,49 +599,41 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="CUSTOM_BOOLEAN_PROPERTIES">
-                <map>
-                  <entry key="Show.Git.Branches" value="false" />
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Sound rework. &#10;- Fluid flow now works horizontally." />
-    <MESSAGE value="- Added block properties. &#10;- Added buckets." />
-    <MESSAGE value="- Finished fluid implementation." />
-    <MESSAGE value="- Fixed leaf piles not requiring support.&#10;- Fixed shadows being reflective. &#10;- Optimized weter rendering greatly.&#10;- Replaced water bubbles with caustics." />
-    <MESSAGE value="- Fixed opengl error." />
-    <MESSAGE value="- Went back to rendering in a fragment shader." />
-    <MESSAGE value="- Stuff" />
-    <MESSAGE value="- Removed unused ssbo. &#10;- Fixed rendering." />
-    <MESSAGE value="- Fixed image not being write only." />
-    <MESSAGE value="- Improved cloud noise." />
-    <MESSAGE value="- Removed bare trace." />
-    <MESSAGE value="- Greatly organized rendering class." />
-    <MESSAGE value="- Optimized renderer class more." />
-    <MESSAGE value="- FPS display is now averaged.&#10;- Added frametime display." />
-    <MESSAGE value="- Improved cloud shadows. &#10;- Fixed sun shadows shading block light." />
-    <MESSAGE value="- Improved visuals of light noise. &#10;- Removed fake shadows. &#10;- Weakened block light. &#10;- Improved block normal shading. &#10;- Fixed shadows." />
-    <MESSAGE value="- Added upscaled lighting. &#10;- Removed sunlight noise. &#10;- Added bloom. &#10;- Removed main uspcaling." />
-    <MESSAGE value="- Re-added upscaling. &#10;- Greatly improved ambient occlusion. &#10;- Fixed performance metrics still being inaccurate." />
-    <MESSAGE value="- Fixed input delay." />
-    <MESSAGE value="- Improved ambient occlusion." />
-    <MESSAGE value="- Organized shaders." />
-    <MESSAGE value="- Disabled low-res passes." />
-    <MESSAGE value="- Slightly improved lighting data retrieval." />
-    <MESSAGE value="- Fixed transparency." />
-    <MESSAGE value="- Saturated atlas." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Saturated atlas." />
+    <MESSAGE value="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles." />
+    <MESSAGE value="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme." />
+    <MESSAGE value="- Added plains biome. &#10;- Improved jungle and forest biomes. &#10;- Added rocks." />
+    <MESSAGE value="- Greatly optimized worldgen." />
+    <MESSAGE value="- Rendering is now enabled before the world is generated." />
+    <MESSAGE value="- Blocks in-hand are no longer infinite. &#10;- Currently held block is now rendered. &#10;- Reduced distance fogginess. &#10;- Removed old unnecessary code. &#10;- Selected block now saves." />
+    <MESSAGE value="- Updated README. &#10;- Added water flowing sounds. &#10;- Added block placement sound. &#10;- Added ambient water sounds. &#10;- Added ambient wind sounds. &#10;- Added ambient bee sound. &#10;- Added ambient bird sound." />
+    <MESSAGE value="- Removed hand rendering. &#10;- Updated README." />
+    <MESSAGE value="- Cleaned up fragment shader." />
+    <MESSAGE value="- Added brick dda." />
+    <MESSAGE value="- Game now opens at 1080p by default. &#10;- Reduced volume of birds, ambient water, and bees. &#10;- Added magma sound effect. &#10;- Wind sound effect now gets louder the faster you move." />
+    <MESSAGE value="- Nearly quadrupled performance. &#10;- Removed light fog.&#10;- Sounds now support directionality. &#10;- Fixed window resizing. &#10;- Removed bricks." />
+    <MESSAGE value="- Improved reflection accuracy. &#10;- Improved transparency fog brightness accuracy. &#10;- Partially fixed shadows." />
+    <MESSAGE value="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack." />
+    <MESSAGE value="- Fixed precision issue. &#10;- Increased sun shadow contrast." />
+    <MESSAGE value="- Re-enabled hand rendering. &#10;- Doubled light intensity of blocklight." />
+    <MESSAGE value="- The sun is now rendered." />
+    <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
+    <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
+    <MESSAGE value="- Logs now make 4 planks instead of 1." />
+    <MESSAGE value="- Revert last change." />
+    <MESSAGE value="- Fixed clouds toggle not doing anything." />
+    <MESSAGE value="- Atmosphere can now be toggled. &#10;- Added luna terrain generator." />
+    <MESSAGE value="- Optimized rendering slightly." />
+    <MESSAGE value="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
