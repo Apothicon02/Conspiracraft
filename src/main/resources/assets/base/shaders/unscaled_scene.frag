@@ -47,9 +47,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
                     if (blockType == 1 && blockSubtype > 0 && prevBlock.x == 0) { //water
                         shouldReflect = 0.6f;
-                    } else if (blockType == 7) { //kyanite
-                        reflectivity = 0.66f;
-                    } else if (blockType >= 11 && blockType <= 13) { //glass
+                    } else if (blockType == 7 || (blockType >= 11 && blockType <= 13)) { //glass & kyanite
                         reflectivity = 0.5f;
                     } else if (blockType == 15 || (blockType == 1 && blockSubtype == 0) || blockType == 22) { //planks & steel
                         reflectivity = 0.16f;
@@ -453,9 +451,12 @@ vec4 prevSuperFinalTint = vec4(1);
 vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     clearVars(true, false);
     vec4 color = traceWorld(false, ogRayPos, dir);
+    isSky = renderingHand ? false : color.a < 1.f;
     if (renderingHand) {
-        prevPos = prevHitPos;
-    } else if (color.a < 1) {
+        prevPos = camPos;
+        hitPos = camPos-vec3(0, 0.05f, 0);
+        prevHitPos = camPos;
+    } else if (isSky) {
         float sunDir = dot(normalize(sun - camPos), dir);
         if (sunDir > 0.85f && sunDir < 1.15f) {
             lighting = fromLinear(vec4(0, 0, 0, 20));
@@ -472,7 +473,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     }
     prevReflectPos = prevHitPos;
     reflectPos = hitPos;
-    isSky = renderingHand ? false : color.a < 1.f;
     float borders = max(gradient(hitPos.x, 0, 128, 0, 1), max(gradient(hitPos.z, 0, 128, 0, 1), max(gradient(hitPos.x, size, size-128, 0, 1), gradient(hitPos.z, size, size-128, 0, 1))));
     if (isSky) {
         lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), fromLinear(getLighting(hitPos.x, hitPos.y, hitPos.z)), borders) : vec4(0, 0, 0, 20));
@@ -482,9 +482,9 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64.f, 372.f, 0.1f, 0.f);
     float mixedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
-    float fogNoise = (max(0, cloudNoise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
-    float fogDist = distance(camPos, prevPos)/renderDistance;
-    float linearDistFog = fogDist+(fogNoise/2)+((fogNoise/2)*fogDist);
+    //float fogNoise = (max(0, cloudNoise((vec2(hitPos.x, hitPos.z))+(floor(hitPos.y/16)+(float(time)*7500))))*gradient(hitPos.y, 63, 96, 0, 0.77))+gradient(hitPos.y, 63, 96, 0, 0.33f);
+    //float fogDist = distance(camPos, prevPos)/renderDistance;
+    //float linearDistFog = fogDist+(fogNoise/2)+((fogNoise/2)*fogDist);
     //distanceFogginess = max(distanceFogginess, exp2(linearDistFog-0.75f)+min(0, linearDistFog-0.25f));
     if (isSky) {
         distanceFogginess = 1;
@@ -519,7 +519,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     }
     if (!isSky && checkShadow && shadowsEnabled && !hitSun) {
         if (color.a >= 1.f && sunLight > 0.f) {
-            vec3 shadowPos = (renderingHand ? camPos : prevPos);
+            vec3 shadowPos = prevPos;
             vec3 sunDir = normalize(sun - shadowPos);
             clearVars(true, true);
             bool wasRenderingHand = renderingHand;
@@ -604,9 +604,14 @@ void main() {
             fragColor = handColor;
         }
         //reflections start
-        if (!isSky && reflectivity > 0.f) {
+        int i = 0;
+        while (!isSky && reflectivity > 0.f && i < 2) {
+            i++;
             vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
-            fragColor = mix(fragColor, raytrace(reflectPos, reflectDir, false), reflectivity * dot(normalize(ogDir), normalize(reflectDir)));
+            float oldReflectivity = reflectivity;
+            reflectivity = 0.f;
+            fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f), oldReflectivity * dot(abs(normalize(ogDir)), abs(normalize(reflectDir))));
+            ogDir = reflectDir;
         }
         //reflections end
 

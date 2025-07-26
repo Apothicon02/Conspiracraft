@@ -63,7 +63,7 @@ public class Renderer {
     public static boolean[] collisionData = new boolean[(1024*1024)+1024];
     public static boolean showUI = true;
     public static boolean shadowsEnabled = true;
-    public static boolean raytracedCaustics = true;
+    public static boolean reflectionShadows = false;
     public static boolean cloudsEnabled = true;
     public static Vector2i lowRes = new Vector2i(960, 540);
 
@@ -212,7 +212,7 @@ public class Renderer {
         mediumFboId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
         scene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "sun", "cloudsEnabled", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
         generateVao();
         generateTextures(window);
         createBuffers();
@@ -220,7 +220,7 @@ public class Renderer {
         blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "raytracedCaustics", "sun", "cloudsEnabled", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
         finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
                 new String[]{"res"});
     }
@@ -241,7 +241,7 @@ public class Renderer {
         }
         glUniform3i(program.uniforms.get("selected"), (int) selected.x, (int) selected.y, (int) selected.z);
         glUniform1i(program.uniforms.get("shadowsEnabled"), shadowsEnabled ? 1 : 0);
-        glUniform1i(program.uniforms.get("raytracedCaustics"), raytracedCaustics ? 1 : 0);
+        glUniform1i(program.uniforms.get("reflectionShadows"), reflectionShadows ? 1 : 0);
         float halfSize = size / 2f;
         Vector3f sunPos = new Vector3f(size / 4f, 0, size / 4f);
         sunPos.rotateY((float) time);

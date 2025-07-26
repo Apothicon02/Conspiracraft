@@ -13,7 +13,7 @@ uniform double time;
 uniform ivec3 selected;
 uniform bool ui;
 uniform bool shadowsEnabled;
-uniform bool raytracedCaustics;
+uniform bool reflectionShadows;
 uniform vec3 sun;
 uniform bool cloudsEnabled;
 uniform ivec3 hand;
