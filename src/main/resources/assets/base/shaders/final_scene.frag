@@ -7,6 +7,7 @@ out vec4 fragColor;
 
 void main() {
     ivec2 pos = ivec2(gl_FragCoord.xy);
+//    fragColor = vec4(imageLoad(scene_unscaled_image, pos));
     bool checkerOn = checker(pos);
     bool firstHalf = bool(pos.x < res.x/2);
     if ((firstHalf && !checkerOn) || (!firstHalf && checkerOn)) {

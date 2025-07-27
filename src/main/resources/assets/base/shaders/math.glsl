@@ -1,3 +1,6 @@
+//#extension GL_ARB_gpu_shader_int64 : enable
+//#extension GL_ARB_shader_clock : require
+
 float curve(float value, float peak, float range) {
     return abs(range-min(abs(value-peak), range))*(1/range);
 }

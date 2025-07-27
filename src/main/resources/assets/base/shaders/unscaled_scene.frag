@@ -38,7 +38,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
     float fire = blockType == 19 ? 1.f : (blockType == 9 ? 0.05f : 0.f);
     vec4 prevVoxelColor = firstVoxel ? vec4(0) : getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
     firstVoxel = false;
-    while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
+    for (int i = 0; mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
         if (voxelColor.a > 0.f) {
             bool canHit = bool(prevVoxelColor.a < voxelColor.a);
@@ -167,7 +167,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         return vec4(-1);
     }
 
-    while (mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0) {
+    for (int i = 0; mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0; i++) {
         float adjustedTime = clamp(abs(1-clamp((distance(rayMapPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 1.f);
         float adjustedTimeCam = clamp(abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.33)/(size/1.5), 0, 1))*2, 0.05f, 0.9f);
         float timeBonus = gradient(rayMapPos.y, 64.f, 372.f, 0.1f, 0.f);
@@ -288,7 +288,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
         return vec4(-1);
     }
 
-    while (mapPos.x < 2.0 && mapPos.x >= 0.0 && mapPos.y < 2.0 && mapPos.y >= 0.0 && mapPos.z < 2.0 && mapPos.z >= 0.0) {
+    for (int i = 0; mapPos.x < 2.0 && mapPos.x >= 0.0 && mapPos.y < 2.0 && mapPos.y >= 0.0 && mapPos.z < 2.0 && mapPos.z >= 0.0; i++) {
         if (renderingHand) {
             vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
@@ -360,7 +360,7 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir) {
     vec3 sideDist = ((rayMapChunkPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
 
-    while (distance(rayMapChunkPos, rayPos) < (renderingHand ? 16 : ((isShadow ? 1000 : renderDistance)/chunkSize))) {
+    for (int i = 0; distance(rayMapChunkPos, rayPos) < (renderingHand ? 16 : ((isShadow ? 1000 : renderDistance)/chunkSize)); i++) {
         if (renderingHand) {
             vec3 mini = ((rayMapChunkPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float d = max (mini.x, max (mini.y, mini.z));
@@ -475,6 +475,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     reflectPos = hitPos;
     float borders = max(gradient(hitPos.x, 0, 128, 0, 1), max(gradient(hitPos.z, 0, 128, 0, 1), max(gradient(hitPos.x, size, size-128, 0, 1), gradient(hitPos.z, size, size-128, 0, 1))));
     if (isSky) {
+        reflectivity = 0;
         lighting = fromLinear(borders > 0.f ? mix(vec4(0, 0, 0, 20), fromLinear(getLighting(hitPos.x, hitPos.y, hitPos.z)), borders) : vec4(0, 0, 0, 20));
         lightFog = lighting;
     }
@@ -570,17 +571,15 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow) {
     return color;
 }
 
-//#extension GL_ARB_gpu_shader_int64 : enable
-//#extension GL_ARB_shader_clock : require
-
 void main() {
-    //uint64_t startTime = clockARB();
+//    uint64_t startTime = clockARB();
 
     checkerOn = checker(ivec2(gl_FragCoord.xy));
     vec2 pos = gl_FragCoord.xy + (checkerOn ? ivec2(res.x/2, 0) : ivec2(0));
-    lowResColor = vec4(texture(scene_image, vec2(pos.xy/res)));
+    vec2 relativePos = pos/res;
+//    lowResColor = vec4(texture(scene_image, vec2(pos.xy/res)));
     //fragColor = lowResColor;
-    lowResLighting = vec4(texture(scene_lighting_blurred, vec2(pos.xy/res)));
+//    lowResLighting = vec4(texture(scene_lighting_blurred, vec2(pos.xy/res)));
     //fragColor = vec4((vec3(lowResLighting.a/20)*(0.8f+lowResLighting.rgb/10)), 1);
 
     vec2 uv = (pos*2. - res.xy) / res.y;
@@ -591,7 +590,7 @@ void main() {
         uvDir = normalize(vec3(uv, 1));
         ivec2 pixel = ivec2(pos.x, pos.y * res.y);
         vec3 ogDir = vec3(cam * vec4(uvDir, 0));
-        vec4 handColor = raytrace(vec3(0, 0, 0), uvDir, true);
+        vec4 handColor = relativePos.x >= 0.35f && relativePos.x <= 0.65f && relativePos.y < 0.25f ? raytrace(vec3(0, 0, 0), uvDir, true) : vec4(0);
         shift = 0;
         renderingHand = false;
         prevFog = vec4(1);
@@ -604,20 +603,24 @@ void main() {
             fragColor = handColor;
         }
         //reflections start
-        int i = 0;
-        while (!isSky && reflectivity > 0.f && i < 2) {
-            i++;
-            vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
-            float oldReflectivity = reflectivity;
-            reflectivity = 0.f;
-            fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f), oldReflectivity * dot(abs(normalize(ogDir)), abs(normalize(reflectDir))));
-            ogDir = reflectDir;
+        if (reflectivity > 0.f) {
+            for (int i = 0; i < 2; i++) {
+                vec3 reflectDir = reflect(ogDir, normalize(reflectPos - prevReflectPos));
+                float oldReflectivity = reflectivity;
+                reflectivity = 0.f;
+                fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f), oldReflectivity * dot(abs(normalize(ogDir)), abs(normalize(reflectDir))));
+                if (reflectivity > 0.f) {
+                    ogDir = reflectDir;
+                } else {
+                    break;
+                }
+            }
         }
         //reflections end
 
         fragColor = toLinear(fragColor);
     }
+    //fragColor = vec4(float(clockARB() - startTime) * 0.0000005);
     imageStore(scene_unscaled_image, ivec2(pos.xy), vec4(fragColor.rgb, 1));
     fragColor = vec4(0);
-    //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
 }
