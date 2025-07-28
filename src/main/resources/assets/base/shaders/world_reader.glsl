@@ -188,7 +188,10 @@ bool castsShadow(int x) {
     return true;//(x != 4 && x != 5 && x != 18);
 }
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 8 && block.x != 9 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);
+}
+bool hasAO(ivec2 block) {
+    return (isBlockSolid(block) ? true : ((block.x == 17 || block.x == 21) && block.y == 0));
 }
 bool isBlockLight(ivec2 block) {
     return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
@@ -311,15 +314,15 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 tint += vec3(toLinear(voxelColor)) * (tint == vec3(0) ? 2 : 1);
                 //bubbles start
                 if (isShadow) { //add check to not return early for semi-transparent blocks that contain solid voxels.
-                                return vec4(0);
+                    return vec4(0);
                 }
                 bool underwater = false;
                 if (blockType == 1 && !renderingHand) {
                     if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x != 1) { //change to allow non-full water blocks to have caustics.
-                                                                                  if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
-                                                                                      voxelColor = fromLinear(vec4(2, 2, 2, 1));
-                                                                                      shouldReflect = -0.01f;
-                                                                                  }
+                      if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
+                          voxelColor = fromLinear(vec4(2, 2, 2, 1));
+                          shouldReflect = -0.01f;
+                      }
                     } else {
                         underwater = true;
                     }
@@ -354,19 +357,45 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 }
                 //face-based brightness start
                 if (normal.y >0) { //down
-                                   normalBrightness = 0.7f;
+                    normalBrightness = 0.7f;
                 } else if (normal.y <0) { //up
-                                          normalBrightness = 1.f;
+                    normalBrightness = 1.f;
                 } else if (normal.z >0) { //south
-                                          normalBrightness = 0.85f;
+                    normalBrightness = 0.85f;
                 } else if (normal.z <0) { //north
-                                          normalBrightness = 0.85f;
+                    normalBrightness = 0.85f;
                 } else if (normal.x >0) { //west
-                                          normalBrightness = 0.75f;
+                    normalBrightness = 0.75f;
                 } else if (normal.x <0) { //east
-                                          normalBrightness = 0.95f;
+                    normalBrightness = 0.95f;
                 }
                 //face-based brightness end
+
+//                if (!renderingHand) {
+//                    float occlusion = 1.5f;
+//                    if (ceil(prevPos.x)-prevPos.x < 0.5f) {
+//                        if (hasAO(getBlock(ceil(prevPos.x), prevPos.y, prevPos.z))) {
+//                            occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.x) - prevPos.x)));
+//                        }
+//                    } else if (hasAO(getBlock(floor(prevPos.x) - 0.1f, prevPos.y, prevPos.z))) {
+//                        occlusion -= abs(0.5f-min(0.5f, (prevPos.x - floor(prevPos.x))));
+//                    }
+//                    if (ceil(prevPos.y)-prevPos.y < 0.5f) {
+//                        if (hasAO(getBlock(prevPos.x, ceil(prevPos.y), prevPos.z))) {
+//                            occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.y) - prevPos.y)));
+//                        }
+//                    } else if (hasAO(getBlock(prevPos.x, floor(prevPos.y) - 0.1f, prevPos.z))) {
+//                        occlusion -= abs(0.5f-min(0.5f, (prevPos.y - floor(prevPos.y))));
+//                    }
+//                    if (ceil(prevPos.z)-prevPos.z < 0.5f) {
+//                        if (hasAO(getBlock(prevPos.x, prevPos.y, ceil(prevPos.z)))) {
+//                            occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.z) - prevPos.z)));
+//                        }
+//                    } else if (hasAO(getBlock(prevPos.x, prevPos.y, floor(prevPos.z) - 0.1f))) {
+//                        occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
+//                    }
+//                    normalBrightness *= clamp(occlusion, 0.25f, 1.f);
+//                }
 
                 if (prevBlock.x == 1 && prevBlock.y > 0) {
                     if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8))) {
@@ -435,7 +464,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 float blockDist = max(mini.x, max(mini.y, mini.z));
 
                 if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                               uv3d = rayPos - mapPos;
+                   uv3d = rayPos - mapPos;
                 }
 
                 if (blockInfo.x != 0.f) {
@@ -481,7 +510,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
                 uv3d = intersect - mapPos;
 
                 if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                               uv3d = rayPos - mapPos;
+                    uv3d = rayPos - mapPos;
                 }
             }
             //block end
@@ -549,7 +578,7 @@ vec4 subChunkDDA(bool isShadow, float chunkDist, int condensedChunkPos, vec3 off
             float subChunkDist = max(mini.x, max(mini.y, mini.z));
 
             if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                           uv3d = rayPos - mapPos;
+                uv3d = rayPos - mapPos;
             }
 
             vec4 color = dda(isShadow, chunkDist, subChunkDist, condensedChunkPos, realPos, uv3d * 8.0, rayDir, mask, true, true, maxDistance);
@@ -668,7 +697,7 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir, float maxDistance) {
     vec3 uv3d = intersect - rayMapChunkPos;
 
     if (rayMapChunkPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
-                                           uv3d = rayPos - rayMapChunkPos;
+        uv3d = rayPos - rayMapChunkPos;
     }
     prevHitPos = (rayMapChunkPos+uv3d)*16;
     hitPos = prevHitPos;

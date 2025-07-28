@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Engine {
 
-    public static final int TARGET_UPS = 30;
+    public static final int TARGET_UPS = 75;
     private final Main main;
     public final Window window;
     private boolean running;
