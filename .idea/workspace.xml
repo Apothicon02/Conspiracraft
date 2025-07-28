@@ -11,9 +11,10 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +143,7 @@
       <recent name="org.conspiracraft.game.world" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run">
+  <component name="RunManager" selected="Gradle.build">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -197,14 +198,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00133" summary="- Micro-optimized fragment shader.">
-      <option name="closed" value="true" />
-      <created>1739731219699</created>
-      <option name="number" value="00133" />
-      <option name="presentableId" value="LOCAL-00133" />
-      <option name="project" value="LOCAL" />
-      <updated>1739731219699</updated>
     </task>
     <task id="LOCAL-00134" summary="- Added noise to lighting.">
       <option name="closed" value="true" />
@@ -590,7 +583,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753567643393</updated>
     </task>
-    <option name="localTasksCounter" value="182" />
+    <task id="LOCAL-00182" summary="- Greatly optimized hand rendering. &#10;- Greatly optimized reflections.">
+      <option name="closed" value="true" />
+      <created>1753647475614</created>
+      <option name="number" value="00182" />
+      <option name="presentableId" value="LOCAL-00182" />
+      <option name="project" value="LOCAL" />
+      <updated>1753647475614</updated>
+    </task>
+    <option name="localTasksCounter" value="183" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,7 +614,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Rendering is now enabled before the world is generated." />
     <MESSAGE value="- Blocks in-hand are no longer infinite. &#10;- Currently held block is now rendered. &#10;- Reduced distance fogginess. &#10;- Removed old unnecessary code. &#10;- Selected block now saves." />
     <MESSAGE value="- Updated README. &#10;- Added water flowing sounds. &#10;- Added block placement sound. &#10;- Added ambient water sounds. &#10;- Added ambient wind sounds. &#10;- Added ambient bee sound. &#10;- Added ambient bird sound." />
     <MESSAGE value="- Removed hand rendering. &#10;- Updated README." />
@@ -638,7 +638,8 @@
     <MESSAGE value="- Re-added noise shader changes." />
     <MESSAGE value="- Greatly improved grass textures. &#10;- Fixed hand rendering. &#10;- Fixed sunlight tinting not being affected by sun intensity or actual line of sight to sun. &#10;- Added shadow support to hand rendering. &#10;- Made kyanite transparent." />
     <MESSAGE value="- Fixed reflections. &#10;- Added bounces to reflections." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed reflections. &#10;- Added bounces to reflections." />
+    <MESSAGE value="- Greatly optimized hand rendering. &#10;- Greatly optimized reflections." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Greatly optimized hand rendering. &#10;- Greatly optimized reflections." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

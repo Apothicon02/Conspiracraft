@@ -1,18 +1,33 @@
-uniform ivec2 res;
-
-layout(binding = 6, rgba32f) uniform image2D scene_unscaled_image;
+layout(binding = 6, rgba32f) uniform image3D scene_unscaled_image;
 in vec4 gl_FragCoord;
 
 out vec4 fragColor;
 
 void main() {
-    ivec2 pos = ivec2(gl_FragCoord.xy);
-//    fragColor = vec4(imageLoad(scene_unscaled_image, pos));
-    bool checkerOn = checker(pos);
-    bool firstHalf = bool(pos.x < res.x/2);
-    if ((firstHalf && !checkerOn) || (!firstHalf && checkerOn)) {
-        fragColor = vec4(imageLoad(scene_unscaled_image, pos));
-    } else {
-        fragColor = vec4(imageLoad(scene_unscaled_image, pos+ivec2(0, 1)));
+    vec2 pos = vec2(gl_FragCoord.xy);
+    checkerOn = checker(ivec2(pos));
+    bool firstHalf = bool(pos.x < res.x / 2);
+    if (!((firstHalf && !checkerOn) || (!firstHalf && checkerOn))) {
+        pos.y++;
     }
+    fragColor = vec4(imageLoad(scene_unscaled_image, ivec3(pos.xy, 0)));
+
+    vec4 reflectData = vec4(imageLoad(scene_unscaled_image, ivec3(pos.xy, 1)));
+    reflectivity = reflectData.w;
+    if (reflectivity > 0.f) {
+        vec3 reflectDir = reflectData.xyz;
+        pos = vec2(gl_FragCoord.xy);
+        vec2 uv = (pos * 2. - res.xy) / res.y;
+        uvDir = normalize(vec3(uv, 1));
+        vec3 ogDir = vec3(cam * vec4(uvDir, 0));
+        prevReflectPos = camPos + (ogDir * (fragColor.a * renderDistance));
+        float oldReflectivity = reflectivity;
+        reflectivity = 0.f;
+        fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f, renderDistance), oldReflectivity);
+        if (reflectivity > 0.f) {
+            reflectDir = reflect(reflectDir, normalize(reflectPos - prevReflectPos));
+            fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && reflectivity > 0.25f, renderDistance), reflectivity);
+        }
+    }
+    fragColor = toLinear(fragColor);
 }

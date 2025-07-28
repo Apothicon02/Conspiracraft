@@ -157,12 +157,12 @@ public class Renderer {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 2048, 2048, 0, GL_RED, GL_UNSIGNED_BYTE, imageToGrayscaleBuffer(Noises.CLOUD_NOISE.image));
 
         sceneUnscaledImageId = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, sceneUnscaledImageId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glBindTexture(GL_TEXTURE_3D, sceneUnscaledImageId);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, window.getWidth(), window.getHeight(), 2);
         glBindImageTexture(0, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
     }
     public static void generateVao() {
@@ -221,8 +221,8 @@ public class Renderer {
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
-        finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
-                new String[]{"res"});
+        finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "final_scene.frag"},
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
     }
 
     public static void  updateUniforms(ShaderProgram program) {
@@ -639,8 +639,6 @@ public class Renderer {
             unscaledScene.bind();
             updateUniforms(unscaledScene);
             glUniform2i(unscaledScene.uniforms.get("res"), window.getWidth(), window.getHeight());
-//            glBindTextureUnit(0, sceneImageId);
-//            glBindTextureUnit(2, sceneLightingBlurredId);
             bindTextures();
             glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
 
@@ -648,6 +646,7 @@ public class Renderer {
             unscaledScene.unbind();
 
             finalScene.bind();
+            updateUniforms(finalScene);
             glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
             draw();
             finalScene.unbind();
