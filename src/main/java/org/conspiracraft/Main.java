@@ -127,6 +127,7 @@ public class Main {
     boolean wasQDown = false;
     boolean wasF1Down = false;
     boolean wasF4Down = false;
+    boolean wasF5Down = false;
     public static boolean isClosing = false;
 
     public static long lastBlockBroken = 0L;
@@ -252,6 +253,9 @@ public class Main {
                 if (wasF4Down && !window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS)) {
                     Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
                 }
+                if (wasF5Down && !window.isKeyPressed(GLFW_KEY_F5, GLFW_PRESS)) {
+                    Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
+                }
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasCDown && !window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS)) {
@@ -322,6 +326,7 @@ public class Main {
 
                 wasF1Down = window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS);
                 wasF4Down = window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS);
+                wasF5Down = window.isKeyPressed(GLFW_KEY_F5, GLFW_PRESS);
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
                 wasCDown = window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS);

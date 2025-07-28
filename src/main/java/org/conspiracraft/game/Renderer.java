@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.LinkedList;
@@ -31,10 +30,12 @@ public class Renderer {
     public static ShaderProgram scene;
     public static int sceneVaoId;
     public static int sceneHalfVaoId;
+    public static int sceneOtherHalfVaoId;
     public static int lowFboId;
     public static int mediumFboId;
     public static ShaderProgram blurScene;
     public static ShaderProgram unscaledScene;
+    public static ShaderProgram reflectionScene;
     public static ShaderProgram finalScene;
 
     public static int sceneImageId;
@@ -64,6 +65,7 @@ public class Renderer {
     public static boolean showUI = true;
     public static boolean shadowsEnabled = true;
     public static boolean reflectionShadows = false;
+    public static boolean reflectionsEnabled = true;
     public static boolean cloudsEnabled = true;
     public static Vector2i lowRes = new Vector2i(960, 540);
 
@@ -185,6 +187,16 @@ public class Renderer {
                 0, 3, 0
         }, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        sceneOtherHalfVaoId = glGenVertexArrays();
+        glBindVertexArray(sceneOtherHalfVaoId);
+        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
+        glBufferData(GL_ARRAY_BUFFER, new float[]{
+                0, 3, 0,
+                3, 0, 0,
+                0, -3, 0
+        }, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
     public static void createBuffers() {
         atlasSSBOId = glCreateBuffers();
@@ -221,8 +233,10 @@ public class Renderer {
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
-        finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "final_scene.frag"},
+        reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
+        finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
+                new String[]{"res"});
     }
 
     public static void  updateUniforms(ShaderProgram program) {
@@ -598,6 +612,12 @@ public class Renderer {
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableVertexAttribArray(0);
     }
+    public static void drawOtherHalf() {
+        glBindVertexArray(sceneOtherHalfVaoId);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray(0);
+    }
 
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
@@ -645,8 +665,15 @@ public class Renderer {
             drawHalf();
             unscaledScene.unbind();
 
+            if (reflectionsEnabled) {
+                reflectionScene.bind();
+                updateUniforms(reflectionScene);
+                glUniform2i(reflectionScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+                drawHalf();
+                reflectionScene.unbind();
+            }
+
             finalScene.bind();
-            updateUniforms(finalScene);
             glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
             draw();
             finalScene.unbind();

@@ -84,16 +84,16 @@ public class Engine {
                             String.format("%.1f", 1000d/(avgMS)) + "ms");
                     framesUntilUpdate = 40;
                 }
-            }
-            if (Main.renderingEnabled) {
-                long diffTimeNanos = (System.nanoTime() - initialNanoTime);
-                frameTimes.addLast(diffTimeNanos);
-                if (frameTimes.size() > 60) {
-                    frameTimes.removeFirst();
+                if (Main.renderingEnabled) {
+                    long diffTimeNanos = (System.nanoTime() - initialNanoTime);
+                    frameTimes.addLast(diffTimeNanos);
+                    if (frameTimes.size() > 60) {
+                        frameTimes.removeFirst();
+                    }
                 }
+                initialNanoTime = System.nanoTime();
             }
             initialTime = now;
-            initialNanoTime = System.nanoTime();
         }
 
         cleanup();
