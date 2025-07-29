@@ -618,8 +618,9 @@ public class Renderer {
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableVertexAttribArray(0);
     }
-
+    public static boolean everyOtherFrame = true;
     public static void render(Window window) throws IOException {
+        everyOtherFrame = !everyOtherFrame;
         if (!Main.isClosing) {
             if (resized) {
                 generateTextures(window);
@@ -633,7 +634,7 @@ public class Renderer {
 //
 //            updateUniforms(scene);
 //            glUniform2i(scene.uniforms.get("res"), lowRes.x, lowRes.y);
-            updateBuffers();
+                updateBuffers();
 //            glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 //            glBindImageTexture(1, sceneLightingId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 //            bindTextures();
@@ -656,21 +657,23 @@ public class Renderer {
 //            draw();
 //            blurScene.unbind();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            unscaledScene.bind();
-            updateUniforms(unscaledScene);
-            glUniform2i(unscaledScene.uniforms.get("res"), window.getWidth(), window.getHeight());
             bindTextures();
-            glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+            if (everyOtherFrame) {
+                unscaledScene.bind();
+                updateUniforms(unscaledScene);
+                glUniform2i(unscaledScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+                glBindImageTexture(6, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
 
-            drawHalf();
-            unscaledScene.unbind();
-
-            if (reflectionsEnabled) {
-                reflectionScene.bind();
-                updateUniforms(reflectionScene);
-                glUniform2i(reflectionScene.uniforms.get("res"), window.getWidth(), window.getHeight());
                 drawHalf();
-                reflectionScene.unbind();
+                unscaledScene.unbind();
+
+                if (reflectionsEnabled) {
+                    reflectionScene.bind();
+                    updateUniforms(reflectionScene);
+                    glUniform2i(reflectionScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+                    drawHalf();
+                    reflectionScene.unbind();
+                }
             }
 
             finalScene.bind();

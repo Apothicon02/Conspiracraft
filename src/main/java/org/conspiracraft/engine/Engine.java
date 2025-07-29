@@ -10,6 +10,7 @@ import java.util.List;
 public class Engine {
 
     public static final int TARGET_UPS = 75;
+    public static final int TARGET_FPS = 360;
     private final Main main;
     public final Window window;
     private boolean running;
@@ -77,7 +78,7 @@ public class Engine {
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
-                    double avgMS = 1000000000d/ConspiracraftMath.averageLongs(frameTimes);
+                    double avgMS = 500000000d/ConspiracraftMath.averageLongs(frameTimes);
                     GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " +
                             Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " +
                             (long)(avgMS) + "fps " +

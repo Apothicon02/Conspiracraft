@@ -144,7 +144,7 @@ public class Window {
 
     public static class WindowOptions {
         public boolean compatibleProfile;
-        public int fps;
+        public int fps = Engine.TARGET_FPS;
         public int height;
         public int ups = Engine.TARGET_UPS;
         public int width;
