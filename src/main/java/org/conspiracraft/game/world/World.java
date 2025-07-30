@@ -30,6 +30,7 @@ public class World {
     public static int seaLevel = 63;
     public static int size = 2048; //6976
     public static int halfSize = size/2;
+    public static int eigthSize = size/8;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size / chunkSize;

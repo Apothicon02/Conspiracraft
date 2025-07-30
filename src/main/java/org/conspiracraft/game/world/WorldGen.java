@@ -64,9 +64,12 @@ public class WorldGen {
                     double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
                     int volcanoElevation = (int) (Math.max(((Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400)+((Math.min(-0.95, secondaryVolcanoDist-1)+0.95)*10000), ((Math.min(0.25, centDist)-0.25)*-2000)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/4)));
                     int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
+                    double oceanDist = Math.min(40, Math.abs(1-Math.min(1, distance(x, z, eigthSize, eigthSize)/eigthSize))*eigthSize);
                     for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
-                        double baseGradient = ConspiracraftMath.gradient(y, surface, 48, 2, -1);
+                        double baseGradient = ConspiracraftMath.gradient(y, (int)(surface-oceanDist), (int)(48-oceanDist), 2, -1);
                         double baseDensity = baseCellularNoise + baseGradient;
+                        double islands = basePerlinNoise + ConspiracraftMath.gradient(y, seaLevel+6, 10, 2, -1);
+                        baseDensity += islands;
                         if (baseDensity > 0 || volcanoElevation >= y) {
                             heightmap[condensePos(x, z)] = (short) y;
                             break;
@@ -129,7 +132,16 @@ public class WorldGen {
                         }
                         boolean flat = maxSteepness < 3;
                         int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
-                        if (flat) {
+                        double oceanDist = distance(x, z, eigthSize, eigthSize)/eigthSize;
+                        if (y >= seaLevel && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
+                            heightmap[condensePos(x, z)] = (short) (y);
+                            for (int newY = y; newY > y-5; newY--) {
+                                setBlockWorldgen(x, newY, z, 23, 0);
+                            }
+                            for (int newY = y-6; newY > 0; newY--) {
+                                setBlockWorldgen(x, newY, z, 24, 0);
+                            }
+                        } else if (flat) {
                             setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
                             setBlockWorldgen(x, y - 1, z, 3, 0);
                             setBlockWorldgen(x, y - 2, z, 3, 0);

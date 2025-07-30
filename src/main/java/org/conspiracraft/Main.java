@@ -255,6 +255,7 @@ public class Main {
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasCDown && !window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS)) {
                         Renderer.cloudsEnabled = !Renderer.cloudsEnabled;
+                        Renderer.atlasChanged = true;
                     }
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
                         selectedBlock.add(new Vector3i(0, isShiftDown ? 10 : 1, 0));

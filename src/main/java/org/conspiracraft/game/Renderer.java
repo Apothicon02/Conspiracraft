@@ -14,6 +14,7 @@ import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -257,7 +258,7 @@ public class Renderer {
         glUniform1i(program.uniforms.get("shadowsEnabled"), shadowsEnabled ? 1 : 0);
         glUniform1i(program.uniforms.get("reflectionShadows"), reflectionShadows ? 1 : 0);
         float halfSize = size / 2f;
-        Vector3f sunPos = new Vector3f(size / 4f, 0, size / 4f);
+        Vector3f sunPos = new Vector3f(halfSize, 0, halfSize);
         sunPos.rotateY((float) time);
         sunPos = new Vector3f(sunPos.x + halfSize, height + 64, sunPos.z + halfSize);
         glUniform3f(program.uniforms.get("sun"), sunPos.x, sunPos.y, sunPos.z);
@@ -270,15 +271,15 @@ public class Renderer {
     public static LinkedList<Integer> chunkCornerPointerChanges = new LinkedList<>();
     public static LinkedList<Integer> chunkLightPointerChanges = new LinkedList<>();
     public static void updateAtlasBuffer() throws IOException {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atlasSSBOId);
         if (atlasChanged) {
             atlasChanged = false;
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atlasSSBOId);
 
-            BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
+            BufferedImage atlasImage = ImageIO.read(new File("C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/textures/atlas.png"));//ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = (1024*1024)+1024;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 184; x++) {
+            for (int x = 0; x < 232; x++) {
                 for (int y = 0; y < 1024; y++) {
                     atlasData[(x*1024) + y] = colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(x*1024) + y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -287,8 +288,8 @@ public class Renderer {
 
             IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
             glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_COPY);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
     public static void updateCornerBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);

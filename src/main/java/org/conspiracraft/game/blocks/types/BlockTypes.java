@@ -23,8 +23,7 @@ public class BlockTypes {
 
     public static BlockType
             AIR = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))), 
-            WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false)
-            .blockSFX(new int[]{8}, 1f, 1.25f))),
+            WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(new int[]{8}, 1f, 1.25f))),
             GRASS = create(new BlockType(new BlockProperties())),
             DIRT = create(new BlockType(new BlockProperties())),
             TALL_GRASS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
@@ -41,9 +40,16 @@ public class BlockTypes {
             WILLOW_LOG = create(new BlockType(new BlockProperties())),
             WILLOW_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
             HYDRANGEA = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)),
-            MAGMA = create(new LightBlockType(((LightBlockProperties)KYANITE.blockProperties).copy().r(8).g(3).b(0))),
-            MAHOGANY_LOG = create(new BlockType(new BlockProperties())),MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
-            BUCKET = create(new BlockType(new BlockProperties().blocksLight(false).needsSupport(true)));
+            MAGMA = create(new LightBlockType(((LightBlockProperties)KYANITE.blockProperties).copy().r(16).g(6).b(0))),
+            MAHOGANY_LOG = create(new BlockType(new BlockProperties())),
+            MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
+            BUCKET = create(new BlockType(new BlockProperties().blocksLight(false).needsSupport(true))),
+            SAND = create(new BlockType(new BlockProperties())),
+            SANDSTONE = create(new BlockType(new BlockProperties())),
+            PALM_LOG = create(new BlockType(new BlockProperties())),
+            PALM_PLANKS = create(new BlockType(new BlockProperties())),
+            PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
+            MAHOGANY_PLANKS = create(new BlockType(new BlockProperties()));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {
