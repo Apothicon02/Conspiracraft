@@ -28,16 +28,16 @@ import static org.conspiracraft.game.world.WorldGen.*;
 
 public class World {
     public static int seaLevel = 63;
-    public static int size = 2048; //6976
+    public static int size = 4208; //6976
     public static int halfSize = size/2;
-    public static int eigthSize = size/8;
+    public static int eighthSize = size/8;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
     public static int sizeChunks = size / chunkSize;
     public static short height = 432;
     public static int heightChunks = height / chunkSize;
     public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
-    public static boolean quarterWorld = false;
+    public static boolean quarterWorld = true;
     public static boolean doLight = true;
 
     public static boolean cleanPalettes = false;

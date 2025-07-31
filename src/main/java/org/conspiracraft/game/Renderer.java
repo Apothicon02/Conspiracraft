@@ -71,7 +71,7 @@ public class Renderer {
     public static Vector2i lowRes = new Vector2i(960, 540);
 
     public static boolean resized = false;
-    public static int defaultSSBOSize = (int) (0.2f*1000000000)*((size/2048)^2);
+    public static int defaultSSBOSize = Integer.MAX_VALUE;
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
     public static long[] chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];

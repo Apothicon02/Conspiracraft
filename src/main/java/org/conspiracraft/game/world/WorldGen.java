@@ -64,11 +64,11 @@ public class WorldGen {
                     double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
                     int volcanoElevation = (int) (Math.max(((Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400)+((Math.min(-0.95, secondaryVolcanoDist-1)+0.95)*10000), ((Math.min(0.25, centDist)-0.25)*-2000)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/4)));
                     int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
-                    double oceanDist = Math.min(40, Math.abs(1-Math.min(1, distance(x, z, eigthSize, eigthSize)/eigthSize))*eigthSize);
+                    double oceanDist = Math.min(40, Math.abs(1-Math.min(1, distance(x, z, eighthSize, eighthSize)/eighthSize))*eighthSize);
                     for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
                         double baseGradient = ConspiracraftMath.gradient(y, (int)(surface-oceanDist), (int)(48-oceanDist), 2, -1);
                         double baseDensity = baseCellularNoise + baseGradient;
-                        double islands = basePerlinNoise + ConspiracraftMath.gradient(y, seaLevel+6, 10, 2, -1);
+                        double islands = oceanDist > 1 ? Math.max(0, basePerlinNoise + ConspiracraftMath.gradient(y, seaLevel+24, 20, 2, -1)) : 0;
                         baseDensity += islands;
                         if (baseDensity > 0 || volcanoElevation >= y) {
                             heightmap[condensePos(x, z)] = (short) y;
@@ -83,6 +83,10 @@ public class WorldGen {
 //        System.out.print("World is " + (progress + "% generated. \n"));
     }
 
+    public static boolean isCave(int x, int y, int z, float noise) {
+        return Math.min(0, (ConspiracraftMath.gradient(y, 30, 1, 2, -0.5f)+ConspiracraftMath.gradient(y, 58, 22, -0.5f, 2))+noise) < 0;
+    }
+
     public static void generateSurface() {
 //        long time = System.currentTimeMillis();
         int startX = currentChunk*chunkSize;
@@ -92,6 +96,9 @@ public class WorldGen {
                     int lavaX = x*3;
                     int lavaZ = z*3;
                     float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
+                    int miniX = x*8;
+                    int miniZ = z*8;
+                    float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
                     int y = surfaceHeightmap[condensePos(x, z)];
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
@@ -99,12 +106,20 @@ public class WorldGen {
                     if (centDist < 0.05f && y < lavaLevel) {
                         heightmap[condensePos(x, z)] = (short) lavaLevel;
                         for (int newY = lavaLevel; newY > 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 19, 0);
+                            if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                setBlockWorldgen(x, newY, z, 19, 0);
+                            } else {
+                                setLightWorldgen(x, newY, z, new Vector4i(0));
+                            }
                         }
                     } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
                         heightmap[condensePos(x, z)] = (short) (lavaLevel-100);
                         for (int newY = lavaLevel-100; newY > 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 19, 0);
+                            if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                setBlockWorldgen(x, newY, z, 19, 0);
+                            } else {
+                                setLightWorldgen(x, newY, z, new Vector4i(0));
+                            }
                         }
                     } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
@@ -118,7 +133,11 @@ public class WorldGen {
                             setBlockWorldgen(x, newY, z, 3, 0);
                         }
                         for (int newY = y-3; newY >= 0; newY--) {
-                            setBlockWorldgen(x, newY, z, 10, 0);
+                            if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                setBlockWorldgen(x, newY, z, 10, 0);
+                            } else {
+                                setLightWorldgen(x, newY, z, new Vector4i(0));
+                            }
                         }
                     } else {
                         int maxSteepness = 0;
@@ -132,14 +151,18 @@ public class WorldGen {
                         }
                         boolean flat = maxSteepness < 3;
                         int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
-                        double oceanDist = distance(x, z, eigthSize, eigthSize)/eigthSize;
-                        if (y >= seaLevel && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
+                        double oceanDist = distance(x, z, eighthSize, eighthSize)/eighthSize;
+                        if (y >= seaLevel && y < seaLevel+6 && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
                             heightmap[condensePos(x, z)] = (short) (y);
                             for (int newY = y; newY > y-5; newY--) {
                                 setBlockWorldgen(x, newY, z, 23, 0);
                             }
                             for (int newY = y-6; newY > 0; newY--) {
-                                setBlockWorldgen(x, newY, z, 24, 0);
+                                if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                    setBlockWorldgen(x, newY, z, 24, 0);
+                                } else {
+                                    setLightWorldgen(x, newY, z, new Vector4i(0));
+                                }
                             }
                         } else if (flat) {
                             setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
@@ -147,14 +170,22 @@ public class WorldGen {
                             setBlockWorldgen(x, y - 2, z, 3, 0);
                             setBlockWorldgen(x, y - 3, z, 3, 0);
                             for (int newY = y - 4; newY >= 0; newY--) {
-                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
+                                if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                    setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
+                                } else {
+                                    setLightWorldgen(x, newY, z, new Vector4i(0));
+                                }
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);
                             for (int newY = y; newY >= 0; newY--) {
                                 if (newY <= volcanoElevation) {
-                                    int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y-lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
-                                    setBlockWorldgen(x, newY, z, blockTypeId, 0);
+                                    if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
+                                        int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y - lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
+                                        setBlockWorldgen(x, newY, z, blockTypeId, 0);
+                                    } else {
+                                        setLightWorldgen(x, newY, z, new Vector4i(0));
+                                    }
                                 } else {
                                     setBlockWorldgen(x, newY, z, 10, 0);
                                 }
@@ -181,11 +212,14 @@ public class WorldGen {
                         float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                         float foliageNoise = (basePerlinNoise + 0.5f);
                         float exponentialFoliageNoise = foliageNoise * foliageNoise;
+                        double northEastDist = distance(x, z, size, size) / size;
                         double southWestDist = distance(x, z, 0, 0) / size;
+                        double oceanDist = distance(x, z, eighthSize, eighthSize) / eighthSize;
                         double centDist = distance(x, z, size/2, size/2) / size;
-                        double forestness = (Math.max(0.34, (1.5f-southWestDist)*0.34f)-0.4)/3;
-                        double jungleness = Math.min(0.03f, Math.max(0.7, (1.5f-centDist)*0.7f)-0.8)/9;
-                        double plainness = 0.01d-Math.max(0, Math.max(forestness, jungleness));
+                        double taiganess = Math.min(0.03f, Math.max(0.7, (1.5f-centDist)*0.7f)-0.8)/9;
+                        double jungleness = oceanDist < 1 ? (Math.max(0.25, (1.5f-southWestDist)*0.25f)-0.3)/9 : 0;
+                        double forestness = (Math.max(0.34, (1.5f-Math.max(southWestDist-jungleness, northEastDist))*0.34f)-0.4);
+                        double plainness = 0.01d-Math.max(0, Math.max(forestness, taiganess));
                         double randomNumber = Math.random();
                         boolean setAnything = false;
                         if (randomNumber > 0.99995d) {
@@ -211,7 +245,7 @@ public class WorldGen {
                                     OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)) - 2, 16, 0, 17, 0);
                                     setAnything = true;
                                 }
-                            } else if (blockOn.x == 2  && randomNumber < forestness*exponentialFoliageNoise) { //forest
+                            } else if (blockOn.x == 2  && randomNumber < forestness*(exponentialFoliageNoise*4)) { //forest
                                 int maxHeight = (int) (Math.random() * 4) + 8;
                                 OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
                                 setAnything = true;
