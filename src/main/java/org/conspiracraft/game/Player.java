@@ -218,6 +218,7 @@ public class Player {
                 }
             }
 
+            vel = new Vector3f(Math.clamp(vel.x, -1, 1), Math.clamp(vel.y, -1, 1), Math.clamp(vel.z, -1, 1));
             float mX = vel.x + movement.x;
             float mY = vel.y + movement.y;
             float mZ = vel.z + movement.z;

@@ -1,6 +1,7 @@
 package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.ConspiracraftMath;
+import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.noise.Noises;
@@ -45,6 +46,9 @@ public class WorldGen {
     }
     public static void setLightWorldgen(int x, int y, int z, Vector4i light) {
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setLight(new Vector3i(x & 15, y & 15, z & 15), light, new Vector3i(x, y, z));
+    }
+    public static void blackenLightPaletteWorldgen(int x, int y, int z) {
+        chunks[condenseChunkPos(x, y, z)].lightPalette.set(0, 0);
     }
     public static void generateTerrain() {
 //        long time = System.currentTimeMillis();
@@ -91,7 +95,10 @@ public class WorldGen {
 //        long time = System.currentTimeMillis();
         int startX = currentChunk*chunkSize;
         for (int x = startX; x < startX+chunkSize; x++) {
+            int minY = height-1;
+            int prevChunkZ = 0;
             for (int z = 0; z < size; z++) {
+                int condensedPos = condensePos(x, z);
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
                     int lavaX = x*3;
                     int lavaZ = z*3;
@@ -99,34 +106,29 @@ public class WorldGen {
                     int miniX = x*8;
                     int miniZ = z*8;
                     float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
-                    int y = surfaceHeightmap[condensePos(x, z)];
+                    int y = surfaceHeightmap[condensedPos];
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
                     int lavaLevel = (int) (293-(lavaNoise*5));
                     if (centDist < 0.05f && y < lavaLevel) {
-                        heightmap[condensePos(x, z)] = (short) lavaLevel;
+                        heightmap[condensedPos] = (short) lavaLevel;
                         for (int newY = lavaLevel; newY > 0; newY--) {
                             if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                 setBlockWorldgen(x, newY, z, 19, 0);
-                            } else {
-                                setLightWorldgen(x, newY, z, new Vector4i(0));
                             }
                         }
                     } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
-                        heightmap[condensePos(x, z)] = (short) (lavaLevel-100);
+                        heightmap[condensedPos] = (short) (lavaLevel-100);
                         for (int newY = lavaLevel-100; newY > 0; newY--) {
                             if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                 setBlockWorldgen(x, newY, z, 19, 0);
-                            } else {
-                                setLightWorldgen(x, newY, z, new Vector4i(0));
                             }
                         }
                     } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
                             setBlockWorldgen(x, newY, z, 1, 15);
-                            setLightWorldgen(x, newY, z, new Vector4i(0, 0, 0, 0));
                             if (newY == seaLevel) {
-                                heightmap[condensePos(x, z)] = (short) y;
+                                heightmap[condensedPos] = (short) y;
                             }
                         }
                         for (int newY = y; newY > y-3; newY--) {
@@ -135,8 +137,6 @@ public class WorldGen {
                         for (int newY = y-3; newY >= 0; newY--) {
                             if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                 setBlockWorldgen(x, newY, z, 10, 0);
-                            } else {
-                                setLightWorldgen(x, newY, z, new Vector4i(0));
                             }
                         }
                     } else {
@@ -153,15 +153,13 @@ public class WorldGen {
                         int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
                         double oceanDist = distance(x, z, eighthSize, eighthSize)/eighthSize;
                         if (y >= seaLevel && y < seaLevel+6 && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
-                            heightmap[condensePos(x, z)] = (short) (y);
+                            heightmap[condensedPos] = (short) (y);
                             for (int newY = y; newY > y-5; newY--) {
                                 setBlockWorldgen(x, newY, z, 23, 0);
                             }
                             for (int newY = y-6; newY > 0; newY--) {
                                 if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                     setBlockWorldgen(x, newY, z, 24, 0);
-                                } else {
-                                    setLightWorldgen(x, newY, z, new Vector4i(0));
                                 }
                             }
                         } else if (flat) {
@@ -172,25 +170,34 @@ public class WorldGen {
                             for (int newY = y - 4; newY >= 0; newY--) {
                                 if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                     setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
-                                } else {
-                                    setLightWorldgen(x, newY, z, new Vector4i(0));
                                 }
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);
+                            short lowestY = (short)(y);
                             for (int newY = y; newY >= 0; newY--) {
                                 if (newY <= volcanoElevation) {
                                     if (!isCave(x, newY, z, lavaNoise+miniCellularNoise)) {
                                         int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y - lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
                                         setBlockWorldgen(x, newY, z, blockTypeId, 0);
-                                    } else {
-                                        setLightWorldgen(x, newY, z, new Vector4i(0));
+                                        if (blockTypeId == 0) {
+                                            lowestY = (short)(newY);
+                                        }
                                     }
                                 } else {
                                     setBlockWorldgen(x, newY, z, 10, 0);
                                 }
                             }
+                            heightmap[condensedPos] = lowestY;
                         }
+                    }
+                    minY = Math.min(minY, heightmap[condensedPos]);
+                    int chunkZ = z >> 4;
+                    if (chunkZ != prevChunkZ) {
+                        for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
+                            blackenLightPaletteWorldgen(currentChunk, chunkY, prevChunkZ);
+                        }
+                        prevChunkZ = chunkZ;
                     }
                 }
             }
@@ -288,7 +295,7 @@ public class WorldGen {
 //            long time = System.currentTimeMillis();
             for (int z = 1; z < size - 1; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    for (int y = height - 1; y > 1; y--) {
+                    for (int y = heightmap[condensePos(x, z)] - 1; y > 0; y--) {
                         Vector2i block = getBlockWorldgen(x, y, z);
                         Vector4i light = getLightWorldgen(x, y, z);
                         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);

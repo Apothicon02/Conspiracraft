@@ -100,6 +100,7 @@ public class World {
                         if (currentChunk == sizeChunks) {
                             System.out.print("Light filling took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
                             stageTime = 0;
+                            surfaceHeightmap = null;
                             cleanPalettes = true;
                             currentChunk = -1;
                             Renderer.worldChanged = true;
@@ -145,7 +146,6 @@ public class World {
                             System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             currentChunk = -1;
-                            surfaceHeightmap = null;
                             featuresGenerated = true;
                             worldGenerated = true;
                             Renderer.worldChanged = true;
