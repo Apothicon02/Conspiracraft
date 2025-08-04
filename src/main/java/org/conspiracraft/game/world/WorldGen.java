@@ -6,9 +6,11 @@ import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.world.cover.Plains;
 import org.conspiracraft.game.world.shapes.Blob;
 import org.conspiracraft.game.world.trees.JungleTree;
 import org.conspiracraft.game.world.trees.OakTree;
+import org.conspiracraft.game.world.trees.PalmTree;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -238,45 +240,44 @@ public class WorldGen {
                                 setBlockWorldgen(x, y + 1, z, 14, 0);
                             }
                             setAnything = true;
-                        } else if (blockOn.x == 2 || blockOn.x == 3) {
-                            if (blockOn.x == 2 && randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) { //jungle
-                                JungleTree.generate(x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
+                        } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23) {
+                            if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) { //jungle
+                                JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
+                                PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, 25, 0, 27, 0);
                                 setAnything = true;
                             } else if (randomNumber < jungleness*0.2) {
                                 if (randomNumber > jungleness*0.05) {
                                     int maxHeight = (int) (Math.random() + 1);
-                                    OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                    OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                     setAnything = true;
-                                } else if (blockOn.x == 2) {
+                                } else {
                                     int maxHeight = (int) (Math.random() * 4) + 8;
-                                    OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)) - 2, 16, 0, 17, 0);
+                                    OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)) - 2, 16, 0, 17, 0);
                                     setAnything = true;
                                 }
-                            } else if (blockOn.x == 2  && randomNumber < forestness*(exponentialFoliageNoise*4)) { //forest
+                            } else if (randomNumber < forestness*(exponentialFoliageNoise*4)) { //forest
                                 int maxHeight = (int) (Math.random() * 4) + 8;
-                                OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                                OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
                                 setAnything = true;
-                            } else if (blockOn.x == 2 && randomNumber < forestness/2) {
+                            } else if (randomNumber < forestness/2) {
                                 int maxHeight = (int) (Math.random() + 1);
-                                OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                 setAnything = true;
-                            } else if (blockOn.x == 2 && randomNumber*20 < plainness) { //plains
+                            } else if (randomNumber*20 < plainness) { //plains
                                 int maxHeight = (int) (Math.random() + 1);
-                                OakTree.generate(x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                 setAnything = true;
-                            } else if (blockOn.x == 2 && randomNumber*18 < plainness) {
+                            } else if (randomNumber*18 < plainness) {
                                 int maxHeight = (int) (Math.random() * 4) + 8;
-                                OakTree.generate(x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                                OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
                                 setAnything = true;
                             }
                         }
                         if (!setAnything) {
                             if (getBlockWorldgen(x, y + 1, z).x <= 1) { //only replace air and water
-                                if (blockOn.x == 2) {
-                                    double flowerChance = Math.random();
-                                    setBlockWorldgenNoReplace(x, y + 1, z, 4 + (flowerChance > 0.95f ? (flowerChance > 0.97f ? 14 : 1) : 0), (int) (Math.random() * 3));
-                                } else if (blockOn.x == 10 && randomNumber < 0.08f) {
-                                    Blob.generate(x, y, z, 8, 0, (int) (2 + ((Math.random() + 1)*3)));
+                                Plains.generate(blockOn, x, y, z);
+                                if (randomNumber < 0.08f) {
+                                    Blob.generate(blockOn, x, y, z, 8, 0, (int) (2 + ((Math.random() + 1) * 3)));
                                 }
                             }
                         }

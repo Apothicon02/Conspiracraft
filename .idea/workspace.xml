@@ -10,9 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/cover/Plains.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,10 +139,10 @@
       <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="org.conspiracraft.game.blocks.types" />
-      <recent name="org.conspiracraft.game.world.trees" />
-      <recent name="org.conspiracraft.game.world.trees.trunks" />
       <recent name="org.conspiracraft.game.world.trees.canopies" />
+      <recent name="org.conspiracraft.game.world.trees" />
+      <recent name="org.conspiracraft.game.blocks.types" />
+      <recent name="org.conspiracraft.game.world.trees.trunks" />
       <recent name="org.conspiracraft.game.world" />
     </key>
   </component>
@@ -196,14 +201,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00142" summary="- Optimized lighting. &#10;- Optimized world generation massively. &#10;- Added fastutil as a dependency. &#10;- Blue flowers now generate naturally. &#10;- Fixed light pointers being uploaded to the GPU every frame, reducing fps.">
-      <option name="closed" value="true" />
-      <created>1740700036312</created>
-      <option name="number" value="00142" />
-      <option name="presentableId" value="LOCAL-00142" />
-      <option name="project" value="LOCAL" />
-      <updated>1740700036312</updated>
     </task>
     <task id="LOCAL-00143" summary="- Added mountains. &#10;- Fixed sunlight worldgen. &#10;- Re-enabled reflections.">
       <option name="closed" value="true" />
@@ -589,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754283121506</updated>
     </task>
-    <option name="localTasksCounter" value="191" />
+    <task id="LOCAL-00191" summary="- Fixed reflections. &#10;- Fixed distance fogginess. &#10;- Added way to toggle reflections. &#10;- Improved water fog. &#10;- Fixed light fog. &#10;- Greatly optimized water rendering.">
+      <option name="closed" value="true" />
+      <created>1754333627800</created>
+      <option name="number" value="00191" />
+      <option name="presentableId" value="LOCAL-00191" />
+      <option name="project" value="LOCAL" />
+      <updated>1754333627800</updated>
+    </task>
+    <option name="localTasksCounter" value="192" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -612,7 +617,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Added system for destroying blocks that require a solid block below them when the block below them is broken. &#10;- Added ability to change scale of player. &#10;- Pressing up and down arrows now adds or subtracts from the players hand stack." />
     <MESSAGE value="- Fixed precision issue. &#10;- Increased sun shadow contrast." />
     <MESSAGE value="- Re-enabled hand rendering. &#10;- Doubled light intensity of blocklight." />
     <MESSAGE value="- The sun is now rendered." />
@@ -637,7 +641,8 @@
     <MESSAGE value="- Fixed sky rendering wrong color.&#10;- Added islands. &#10;- Increased world size.  &#10;- Added caves. &#10;- Fixed sunlight being in places it shouldn't." />
     <MESSAGE value="- Added speed limit. &#10;- Fixed sunlight spreading being underground. &#10;- Remade sky. &#10;- Fixed sun and luna not rendering. &#10;- Fixed sunlight being brighter at night. &#10;- Enabled fog noise." />
     <MESSAGE value="- Fixed torch brightness being too high. &#10;- Fixed rendering issues.&#10;- Removed sun / luna / hand rendering.&#10;- Fixed distance fogginess seam.  &#10;- Fixed crash. &#10;- Fixed weird rendering issue with water. &#10;- Improved caustics. &#10;- Optimized water rendering." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed torch brightness being too high. &#10;- Fixed rendering issues.&#10;- Removed sun / luna / hand rendering.&#10;- Fixed distance fogginess seam.  &#10;- Fixed crash. &#10;- Fixed weird rendering issue with water. &#10;- Improved caustics. &#10;- Optimized water rendering." />
+    <MESSAGE value="- Fixed reflections. &#10;- Fixed distance fogginess. &#10;- Added way to toggle reflections. &#10;- Improved water fog. &#10;- Fixed light fog. &#10;- Greatly optimized water rendering." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed reflections. &#10;- Fixed distance fogginess. &#10;- Added way to toggle reflections. &#10;- Improved water fog. &#10;- Fixed light fog. &#10;- Greatly optimized water rendering." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
