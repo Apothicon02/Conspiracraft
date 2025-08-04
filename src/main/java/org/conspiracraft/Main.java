@@ -118,6 +118,7 @@ public class Main {
     boolean wasDownDown = false;
     boolean wasEDown = false;
     boolean wasCDown = false;
+    boolean wasRDown = false;
     boolean wasWDown = false;
     boolean wasQDown = false;
     boolean wasF1Down = false;
@@ -253,9 +254,11 @@ public class Main {
                 }
 
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+                    if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
+                        Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
+                    }
                     if (wasCDown && !window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS)) {
                         Renderer.cloudsEnabled = !Renderer.cloudsEnabled;
-                        Renderer.atlasChanged = true;
                     }
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
                         selectedBlock.add(new Vector3i(0, isShiftDown ? 10 : 1, 0));
@@ -268,6 +271,7 @@ public class Main {
                     }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.worldChanged = true;
+                        Renderer.atlasChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
                         if (Renderer.renderDistanceMul < 200) {
@@ -326,6 +330,7 @@ public class Main {
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
                 wasCDown = window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS);
+                wasRDown = window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS);
                 wasWDown = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
                 wasXDown = window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS);
