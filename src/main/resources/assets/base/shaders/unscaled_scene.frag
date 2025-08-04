@@ -5,7 +5,7 @@ in vec4 gl_FragCoord;
 out vec4 fragColor;
 
 void main() {
-//    uint64_t startTime = clockARB();
+    //uint64_t startTime = clockARB();
 
     checkerOn = checker(ivec2(gl_FragCoord.xy));
     vec2 pos = gl_FragCoord.xy + (checkerOn ? ivec2(res.x/2, 0) : ivec2(0));
@@ -15,19 +15,7 @@ void main() {
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
-        renderingHand = true;
-        vec2 relativePos = pos/res;
-        vec4 handColor = relativePos.x >= 0.35f && relativePos.x <= 0.65f && relativePos.y < 0.25f ? raytrace(vec3(0, 0, 0), uvDir, true, 2) : vec4(0);
-        renderingHand = false;
-        shift = 0;
-        prevFog = vec4(1);
-        prevSuperFinalTint = vec4(1);
-        distanceFogginess = 0;
-        if (handColor.a < 1) {
-            fragColor = raytrace(camPos, ogDir, true, renderDistance);
-        } else {
-            fragColor = handColor;
-        }
+        fragColor = raytrace(camPos, ogDir, true, renderDistance);
     }
     //fragColor = vec4(float(clockARB() - startTime) * 0.0000005);
     imageStore(scene_unscaled_image, ivec3(pos.xy, 0), vec4(fragColor.rgb, depth));

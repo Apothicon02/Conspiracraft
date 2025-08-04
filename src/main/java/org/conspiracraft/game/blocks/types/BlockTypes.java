@@ -28,7 +28,7 @@ public class BlockTypes {
             DIRT = create(new BlockType(new BlockProperties())),
             TALL_GRASS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(Tags.flowers), new BlockType(TALL_GRASS.blockProperties)),
-            TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(63).g(41).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             KYANITE = create(List.of(Tags.rocks), new LightBlockType(new LightBlockProperties().g(2).b(6))),
             WHITE_STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
             IGNEOUS = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
