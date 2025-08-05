@@ -1,5 +1,6 @@
 package org.conspiracraft.game.world.trees.canopies;
 
+import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -19,7 +20,7 @@ public class PalmCanopy extends Canopy {
 
     private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Random random) {
         if (pos.x >= 0 && pos.y >= 0 && pos.z >= 0 && pos.x < size && pos.y < height && pos.z < size) {
-        map.put(pos, getLeaves(random, pos));
+            map.put(pos, getLeaves(random, pos));
         }
     }
 
@@ -40,25 +41,25 @@ public class PalmCanopy extends Canopy {
     }
 
     private static void createFrond(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int trunkDist, Vector3i origin, Vector3i treeOrigin, int northSouth, int eastWest) {
-        addSquare(map, pos.add(northSouth, 0, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
-        addSquare(map, pos.add(northSouth, -1, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
+        addSquare(map, ConspiracraftMath.addVec(pos, northSouth, 0, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
+        addSquare(map, ConspiracraftMath.addVec(pos, northSouth, -1, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
 
         for (int i = 3; i <= 5; i++) {
-            addSquare(map, pos.add(northSouth * i, 0, eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
-            addSquare(map, pos.add(northSouth * i, -1 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
-            addSquare(map, pos.add(northSouth * i, -2 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
+            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, 0, eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
+            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, -1 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
+            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, -2 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
         }
 
-        addToMap(map, pos.add(northSouth*6, -1, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*6, -2, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*6, -3, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*6, -4, eastWest*6), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -1, eastWest*6), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -2, eastWest*6), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -3, eastWest*6), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -4, eastWest*6), random, trunkDist, origin, treeOrigin);
 
-        addToMap(map, pos.add(northSouth*7, -2, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*7, -3, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*7, -4, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*7, -5, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, pos.add(northSouth*7, -6, eastWest*7), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -2, eastWest*7), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -3, eastWest*7), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -4, eastWest*7), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -5, eastWest*7), random, trunkDist, origin, treeOrigin);
+        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -6, eastWest*7), random, trunkDist, origin, treeOrigin);
     }
     
     public static Map<Vector3i, Vector2i> generateCanopy(int x, int y, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
@@ -73,14 +74,14 @@ public class PalmCanopy extends Canopy {
             int xTrunkDist = origin.x()-treeOrigin.x();
             int zTrunkDist = origin.z()-treeOrigin.z();
             int trunkDist = xTrunkDist*xTrunkDist+zTrunkDist*zTrunkDist;
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, 1, 0);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, 0, 1);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, -1, 0);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, 0, -1);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, 1, 1);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, -1, 1);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, -1, -1);
-            createFrond(map, origin.add(0, random.nextInt(-2, 0), 0), random, trunkDist, origin, treeOrigin, 1, -1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, 0);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 0, 1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, 0);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 0, -1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, 1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, 1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, -1);
+            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, -1);
         } else {
             x = origin.x();
             y = origin.y();

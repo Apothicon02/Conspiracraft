@@ -243,7 +243,7 @@ public class WorldGen {
                         } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23) {
                             if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) { //jungle
                                 JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
-                                PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, 25, 0, 27, 0);
+                                PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 14) + 8, 25, 0, 27, 0);
                                 setAnything = true;
                             } else if (randomNumber < jungleness*0.2) {
                                 if (randomNumber > jungleness*0.05) {

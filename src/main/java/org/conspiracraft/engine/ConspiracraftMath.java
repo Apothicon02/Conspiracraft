@@ -1,8 +1,14 @@
 package org.conspiracraft.engine;
 
+import org.joml.Vector3i;
+
 import java.util.List;
 
 public class ConspiracraftMath {
+    public static Vector3i addVec(Vector3i vec, int x, int y, int z) {
+        return new Vector3i(vec.x+x, vec.y+y, vec.z+z);
+    }
+
     public static double gradient(int y, int fromY, int toY, float fromValue, float toValue) {
         return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
     }
