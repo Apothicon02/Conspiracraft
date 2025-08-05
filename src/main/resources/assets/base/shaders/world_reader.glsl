@@ -124,7 +124,9 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
     bool[8] corners = getCorners(bX, bY, bZ);
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
     if (corners[cornerIndex]) {
-        return fromLinear(intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+        vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+        color.rgb = fromLinear(color.rgb);
+        return color;
     } else {
         return vec4(0, 0, 0, 0);
     }
@@ -234,7 +236,7 @@ void setDistanceFogginess(vec3 pos) {
     float camDist = distance(camPos, pos)/renderDistance;
     float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
     distanceFogginess = clamp(((exp2(linearDistFog-0.75f)+min(0.f, linearDistFog-0.25f)+fogNoise)*2)-1, 0.f, 1.f);
-    distanceFogginess = max(borders, distanceFogginess);
+    distanceFogginess = max(borders, distanceFogginess*min(1, camDist+0.2));
 }
 
 vec3 stepMask(vec3 sideDist) {
@@ -317,7 +319,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 if (blockType == 1) {
                     if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x != 1) {
                         if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
-                            voxelColor = fromLinear(vec4(1, 1, 1, 1));
+                            voxelColor = vec4(fromLinear(vec3(1)), 1);
                             shouldReflect = -1;
                             caustic = true;
                         }
@@ -327,7 +329,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 } else {
                     float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(rayMapPos.y*8)+mapPos.y)+(vec2(rayMapPos.x, rayMapPos.z)*8));
                     if (samp > -0.004 && samp < -0.002 || samp > 0 && samp < 0.002) {
-                        voxelColor = fromLinear(vec4(1, 1, 1, 1));
+                        voxelColor = vec4(fromLinear(vec3(1)), 1);
                     }
                 }
                 if (!caustic) {
@@ -663,21 +665,22 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float adjustedTime = clamp((abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.5f)/size, 0, 1))*1.2)-abs(0.25f-min(0.25f, distance(rayMapPos, vec3(0))/size)), 0.05f, 1.f);
     float adjustedTimeCam = clamp((abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.5f)/size, 0, 1))*1.2)-abs(0.25f-min(0.25f, distance(rayMapPos, vec3(0))/size)), 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64.f, 372.f, 0.1f, 0.f);
-    float mixedTime = max(0.2f, (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus);
+    float unmaxxedTime = (adjustedTime/2)+(adjustedTimeCam/2)+timeBonus;
+    float mixedTime = max(0.2f, unmaxxedTime);
     float finalDistanceFogginess = distanceFogginess;
     setDistanceFogginess(hitPos);
     float finalHitDistanceFogginess = distanceFogginess;
-    lighting = pow(lighting/20, vec4(2.f))*vec4(200, 200, 200, 35);
-    lightFog = pow(lightFog/20, vec4(2.f))*vec4(200, 200, 200, 35);
-    float sunLight = (lighting.a/20)*(mixedTime-timeBonus);
+    lighting = lighting/fromLinear(vec4(10));
+    lightFog = lightFog/fromLinear(vec4(10));
+    float sunLight = lighting.a*(mixedTime-timeBonus);
     float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);
-    vec3 sunColor = (mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f) + mix(vec3(0), vec3(0, 0, 1), abs(0.5f-min(0.5f, mixedTime)));
+    vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
 
     vec3 finalRayMapPos = rayMapPos;
     vec4 finalLighting = lighting;
     float finalNormalBrightness = normalBrightness;
-    float sunLightFog = (lightFog.a/12)*mixedTime;
-    vec3 finalLightFog = max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a/20)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
+    float sunLightFog = (lightFog.a)*mixedTime;
+    vec3 finalLightFog = sunColor;//max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
     vec3 finalTint = tint;
 
     vec3 cloudPos = (vec3(cam * vec4(uvDir * 500.f, 1.f))-camPos);
@@ -694,26 +697,25 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
         if (color.a >= 1.f && sunLight > 0.f && finalLighting.a > 0) {
             vec3 shadowPos = prevPos;
             vec3 sunDir = normalize(sun - shadowPos);
-            float factor = max(1, 2.5-finalDistanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10));;
             float oldReflectivity = reflectivity;
             reflectivity = 1.f;
             clearVars(true, true);
             if (traceWorld(true, shadowPos, sunDir, maxDistance).a >= 1.f) {
-                sunLight /= factor;
+                sunLight *= max(0.66f, abs(1-mixedTime)*1.5f);
             } else {
                 finalTint += tint;//sun tint
             }
             reflectivity = oldReflectivity;
         }
     }
-    vec3 finalLight = (vec3(finalLighting*((0.7-min(0.7, (finalLighting.a/20)*mixedTime))/4))+((finalLighting.a/20)*max(0.23f, sunLight)))*finalNormalBrightness;
-    color = vec4(vec3(color)*finalLight, color.a);//light
+    vec3 finalLight = max(finalLighting.rgb, sunLight)*finalNormalBrightness;
+    color.rgb *= finalLight;
     //fog start
     vec4 fog = 1+vec4(vec3(finalLightFog)*1.5f, 1);
     color *= fog;
     color *= prevFog;
     prevFog = fog;
-    color.rgb = mix(color.rgb, unmixedFogColor, finalDistanceFogginess);
+    color.rgb = mix(color.rgb, unmixedFogColor*fog.rgb, finalDistanceFogginess);
     reflectivity *= (1-finalDistanceFogginess);
     //fog end
     //transparency start

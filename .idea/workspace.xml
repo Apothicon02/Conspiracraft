@@ -10,12 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/BendingTrunk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ConspiracraftMath.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ConspiracraftMath.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,14 +196,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00144" summary="- Changed chunk data storage to be like 59138591x faster. &#10;- Added cliffs. &#10;- Flying while holding capslock now makes you super fast.">
-      <option name="closed" value="true" />
-      <created>1740795424961</created>
-      <option name="number" value="00144" />
-      <option name="presentableId" value="LOCAL-00144" />
-      <option name="project" value="LOCAL" />
-      <updated>1740795424962</updated>
     </task>
     <task id="LOCAL-00145" summary="- Added the volcano. &#10;- Added magma.">
       <option name="closed" value="true" />
@@ -592,7 +581,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754340606185</updated>
     </task>
-    <option name="localTasksCounter" value="193" />
+    <task id="LOCAL-00193" summary="- Finished palm trees. &#10;- Improved palm leaves texture.">
+      <option name="closed" value="true" />
+      <created>1754413297035</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
+      <option name="project" value="LOCAL" />
+      <updated>1754413297035</updated>
+    </task>
+    <option name="localTasksCounter" value="194" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -615,7 +612,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Re-enabled hand rendering. &#10;- Doubled light intensity of blocklight." />
     <MESSAGE value="- The sun is now rendered." />
     <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
     <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
@@ -640,7 +636,8 @@
     <MESSAGE value="- Fixed torch brightness being too high. &#10;- Fixed rendering issues.&#10;- Removed sun / luna / hand rendering.&#10;- Fixed distance fogginess seam.  &#10;- Fixed crash. &#10;- Fixed weird rendering issue with water. &#10;- Improved caustics. &#10;- Optimized water rendering." />
     <MESSAGE value="- Fixed reflections. &#10;- Fixed distance fogginess. &#10;- Added way to toggle reflections. &#10;- Improved water fog. &#10;- Fixed light fog. &#10;- Greatly optimized water rendering." />
     <MESSAGE value="- Added palm trees. &#10;- Improved feature generation code." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added palm trees. &#10;- Improved feature generation code." />
+    <MESSAGE value="- Finished palm trees. &#10;- Improved palm leaves texture." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Finished palm trees. &#10;- Improved palm leaves texture." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
