@@ -487,11 +487,11 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
             setDistanceFogginess(rayMapPos);
             color = traceBlock(isShadow, chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
             //lighting start
-            float lightNoise = max(0, cloudNoise((vec2(prevPos.x, prevPos.y)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.y, prevPos.z)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.z, prevPos.x)*64)+(float(time)*10000)));
+            //float lightNoise = max(0, cloudNoise((vec2(prevPos.x, prevPos.y)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.y, prevPos.z)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.z, prevPos.x)*64)+(float(time)*10000)));
 
             lighting = fromLinear(getLighting(prevPos.x, prevPos.y, prevPos.z));
-            lightFog = max(lightFog, lighting*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
-            lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, 1));
+            lightFog = max(lightFog, lighting);//*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
+            //lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, 1));
         } else {
             lighting = fromLinear(getLighting(rayMapPos.x, rayMapPos.y, rayMapPos.z));
             lightFog = max(lightFog, lighting);
@@ -680,7 +680,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     vec4 finalLighting = lighting;
     float finalNormalBrightness = normalBrightness;
     float sunLightFog = (lightFog.a)*mixedTime;
-    vec3 finalLightFog = sunColor;//max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
+    vec3 finalLightFog = sunColor*sunLightFog;//max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
     vec3 finalTint = tint;
 
     vec3 cloudPos = (vec3(cam * vec4(uvDir * 500.f, 1.f))-camPos);
