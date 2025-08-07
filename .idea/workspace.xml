@@ -196,14 +196,6 @@
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00146" summary="- Fixed clouds. &#10;- Dramatically improved magma rendering. &#10;- Fixed top of volcano getting cut-off. &#10;- Removed grass from volcanoes.">
-      <option name="closed" value="true" />
-      <created>1740942159943</created>
-      <option name="number" value="00146" />
-      <option name="presentableId" value="LOCAL-00146" />
-      <option name="project" value="LOCAL" />
-      <updated>1740942159943</updated>
-    </task>
     <task id="LOCAL-00147" summary="- Updated README.md">
       <option name="closed" value="true" />
       <created>1740954139413</created>
@@ -588,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754437017852</updated>
     </task>
-    <option name="localTasksCounter" value="195" />
+    <task id="LOCAL-00195" summary="- I forget.">
+      <option name="closed" value="true" />
+      <created>1754439996726</created>
+      <option name="number" value="00195" />
+      <option name="presentableId" value="LOCAL-00195" />
+      <option name="project" value="LOCAL" />
+      <updated>1754439996726</updated>
+    </task>
+    <option name="localTasksCounter" value="196" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -611,7 +611,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray." />
     <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
     <MESSAGE value="- Logs now make 4 planks instead of 1." />
     <MESSAGE value="- Revert last change." />
@@ -636,7 +635,8 @@
     <MESSAGE value="- Added palm trees. &#10;- Improved feature generation code." />
     <MESSAGE value="- Finished palm trees. &#10;- Improved palm leaves texture." />
     <MESSAGE value="- Shadows are less dark. &#10;- Fixed sunlight only using the first 4 levels. &#10;- Grealty improved sunlight / sky colors." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Shadows are less dark. &#10;- Fixed sunlight only using the first 4 levels. &#10;- Grealty improved sunlight / sky colors." />
+    <MESSAGE value="- I forget." />
+    <option name="LAST_COMMIT_MESSAGE" value="- I forget." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -176,10 +176,17 @@ bool castsShadow(int x) {
     return true;//(x != 4 && x != 5 && x != 18);
 }
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27);
 }
-bool hasAO(ivec2 block) {
-    return (isBlockSolid(block) ? true : ((block.x == 17 || block.x == 21) && block.y == 0));
+bool hasAO(ivec3 voxelPos, ivec3 pos) {
+    bool[8] corners = getCorners(pos.x, pos.y, pos.z);
+    int cornerIndex = (voxelPos.y < 4 ? 0 : 4) + (voxelPos.z < 4 ? 0 : 2) + (voxelPos.x < 4 ? 0 : 1);
+    if (corners[cornerIndex]) {
+        ivec2 block = getBlock(pos.x, pos.y, pos.z);
+        return (isBlockSolid(block) ? true : ((block.x == 17 || block.x == 21 || block.x == 27) && block.y == 0));
+    } else {
+        return false;
+    }
 }
 bool isBlockLight(ivec2 block) {
     return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
@@ -379,29 +386,29 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 }
                 //face-based brightness end
 
-//                float occlusion = 1.5f;
-//                if (ceil(prevPos.x)-prevPos.x < 0.5f) {
-//                    if (hasAO(getBlock(ceil(prevPos.x), prevPos.y, prevPos.z))) {
-//                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.x) - prevPos.x)));
-//                    }
-//                } else if (hasAO(getBlock(floor(prevPos.x) - 0.1f, prevPos.y, prevPos.z))) {
-//                    occlusion -= abs(0.5f-min(0.5f, (prevPos.x - floor(prevPos.x))));
-//                }
-//                if (ceil(prevPos.y)-prevPos.y < 0.5f) {
-//                    if (hasAO(getBlock(prevPos.x, ceil(prevPos.y), prevPos.z))) {
-//                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.y) - prevPos.y)));
-//                    }
-//                } else if (hasAO(getBlock(prevPos.x, floor(prevPos.y) - 0.1f, prevPos.z))) {
-//                    occlusion -= abs(0.5f-min(0.5f, (prevPos.y - floor(prevPos.y))));
-//                }
-//                if (ceil(prevPos.z)-prevPos.z < 0.5f) {
-//                    if (hasAO(getBlock(prevPos.x, prevPos.y, ceil(prevPos.z)))) {
-//                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.z) - prevPos.z)));
-//                    }
-//                } else if (hasAO(getBlock(prevPos.x, prevPos.y, floor(prevPos.z) - 0.1f))) {
-//                    occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
-//                }
-//                normalBrightness *= clamp(occlusion, 0.25f, 1.f);
+                float occlusion = 1.5f;
+                if (ceil(prevPos.x)-prevPos.x < 0.5f) {
+                    if (hasAO(ivec3(mapPos), ivec3(ceil(prevPos.x), prevPos.y, prevPos.z))) {
+                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.x) - prevPos.x)));
+                    }
+                } else if (hasAO(ivec3(mapPos), ivec3(floor(prevPos.x) - 0.1f, prevPos.y, prevPos.z))) {
+                    occlusion -= abs(0.5f-min(0.5f, (prevPos.x - floor(prevPos.x))));
+                }
+                if (ceil(prevPos.y)-prevPos.y < 0.5f) {
+                    if (hasAO(ivec3(mapPos), ivec3(prevPos.x, ceil(prevPos.y), prevPos.z))) {
+                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.y) - prevPos.y)));
+                    }
+                } else if (hasAO(ivec3(mapPos), ivec3(prevPos.x, floor(prevPos.y) - 0.1f, prevPos.z))) {
+                    occlusion -= abs(0.5f-min(0.5f, (prevPos.y - floor(prevPos.y))));
+                }
+                if (ceil(prevPos.z)-prevPos.z < 0.5f) {
+                    if (hasAO(ivec3(mapPos), ivec3(prevPos.x, prevPos.y, ceil(prevPos.z)))) {
+                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.z) - prevPos.z)));
+                    }
+                } else if (hasAO(ivec3(mapPos), ivec3(prevPos.x, prevPos.y, floor(prevPos.z) - 0.1f))) {
+                    occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
+                }
+                normalBrightness *= clamp(occlusion, 0.5f, 1.f);
 
                 if (prevBlock.x == 1 && prevBlock.y > 0) {
                     if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8) + (rayMapPos.y+(mapPos.y / 8)))) {
@@ -483,7 +490,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
         bool underwater = bool(blockInfo.x == 1 && prevBlockInfo.x == 1);
         if (blockInfo.x != 0.f && !underwater) {
-            float sunLight = (lighting.a/20)*(mixedTime-timeBonus);
+            float sunLight = (lighting.a/fromLinear(vec4(10)).a)*(mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
             color = traceBlock(isShadow, chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
             //lighting start
