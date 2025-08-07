@@ -490,7 +490,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
         bool underwater = bool(blockInfo.x == 1 && prevBlockInfo.x == 1);
         if (blockInfo.x != 0.f && !underwater) {
-            float sunLight = (lighting.a/fromLinear(vec4(10)).a)*(mixedTime-timeBonus);
+            float sunLight = (lighting.a/fromLinear(vec4(20)).a)*(mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
             color = traceBlock(isShadow, chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
             //lighting start
@@ -677,7 +677,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float finalDistanceFogginess = distanceFogginess;
     setDistanceFogginess(hitPos);
     float finalHitDistanceFogginess = distanceFogginess;
-    lighting = lighting/fromLinear(vec4(10));
+    lighting = lighting/fromLinear(vec4(20));
     lightFog = lightFog/fromLinear(vec4(10));
     float sunLight = lighting.a*(mixedTime-timeBonus);
     float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);

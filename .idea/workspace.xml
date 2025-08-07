@@ -196,14 +196,6 @@
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00147" summary="- Updated README.md">
-      <option name="closed" value="true" />
-      <created>1740954139413</created>
-      <option name="number" value="00147" />
-      <option name="presentableId" value="LOCAL-00147" />
-      <option name="project" value="LOCAL" />
-      <updated>1740954139413</updated>
-    </task>
     <task id="LOCAL-00148" summary="- Updated README.md">
       <option name="closed" value="true" />
       <created>1740954241670</created>
@@ -588,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754439996726</updated>
     </task>
-    <option name="localTasksCounter" value="196" />
+    <task id="LOCAL-00196" summary="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy.">
+      <option name="closed" value="true" />
+      <created>1754535720633</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
+      <option name="project" value="LOCAL" />
+      <updated>1754535720635</updated>
+    </task>
+    <option name="localTasksCounter" value="197" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -611,7 +611,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code." />
     <MESSAGE value="- Logs now make 4 planks instead of 1." />
     <MESSAGE value="- Revert last change." />
     <MESSAGE value="- Fixed clouds toggle not doing anything." />
@@ -636,7 +635,8 @@
     <MESSAGE value="- Finished palm trees. &#10;- Improved palm leaves texture." />
     <MESSAGE value="- Shadows are less dark. &#10;- Fixed sunlight only using the first 4 levels. &#10;- Grealty improved sunlight / sky colors." />
     <MESSAGE value="- I forget." />
-    <option name="LAST_COMMIT_MESSAGE" value="- I forget." />
+    <MESSAGE value="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
