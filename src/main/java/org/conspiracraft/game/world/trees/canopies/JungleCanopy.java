@@ -30,7 +30,7 @@ public class JungleCanopy extends Canopy {
                     int condensedPos = condensePos(newX, newZ);
                     int surfaceY = heightmap[condensedPos];
                     heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], y-1);
-                    for (int extraY = y-1; extraY >= seaLevel; extraY--) {
+                    for (int extraY = y-1; extraY >= surfaceY; extraY--) {
                         setLightWorldgen(newX, extraY, newZ, new Vector4i(0, 0, 0, 0));
                         if (extraY == surfaceY) {
                             if (BlockTypes.blockTypeMap.get(getBlockWorldgen(newX, extraY, newZ).x).blockProperties.isSolid) {

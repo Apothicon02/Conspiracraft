@@ -15,6 +15,7 @@ public class Noises {
     public static Noise WHITE_NOISE;
     public static Noise NOODLE_NOISE;
     public static Noise CLOUD_NOISE;
+    public static Noise SPIRAL_NOISE;
 
     public static void init() throws IOException {
         COHERERENT_NOISE = create(new Noise(loadImage("coherent_noise")));
@@ -22,6 +23,7 @@ public class Noises {
         WHITE_NOISE = create(new Noise(loadImage("white_noise")));
         NOODLE_NOISE = create(new Noise(loadImage("noodle_noise")));
         CLOUD_NOISE = create(new Noise(loadImage("cloud_noise")));
+        SPIRAL_NOISE = create(new Noise(loadImage("spiral_noise")));
     }
 
     private static Noise create(Noise type) {
@@ -31,11 +33,5 @@ public class Noises {
 
     private static BufferedImage loadImage(String name) throws IOException {
         return ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/"+name+".png"));
-    }
-
-    public static void clearImages() {
-        for (int i = 0; i < noiseMap.size(); i++) {
-            noiseMap.get(i).image = null;
-        }
     }
 }

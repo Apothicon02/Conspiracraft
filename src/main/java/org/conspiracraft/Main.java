@@ -13,9 +13,11 @@ import org.joml.*;
 import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
 
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.Math;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +39,18 @@ public class Main {
 
     public void init(Window window) throws Exception {
         Noises.init();
+        //debug worldgen / noise
+//        float[] debugData = new float[2048*2048];
+//        for (int x = 0; x < 2048; x++) {
+//            for (int z = 0; z < 2048; z++) {
+//                float spiralNoise = Noises.SPIRAL_NOISE.sample(x, z);
+//                double spiralGradient = ConspiracraftMath.gradient(72, 72, 63, 0, -1)+ConspiracraftMath.gradient(72, 128, 72, 0, 1);
+//                double spiralY = (spiralNoise*spiralGradient);
+//                debugData[(x*2048)+z] = (float) (spiralY < 0.5 ? 0 : 1);
+//            }
+//        }
+//        Noises.COHERERENT_NOISE.data = debugData;
+        //debug worldgen / noise
         GL.createCapabilities();
         AudioController.init();
         AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new float[6]);
@@ -253,6 +267,9 @@ public class Main {
                     Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
                 }
 
+                if (window.isKeyPressed(GLFW_KEY_F11, GLFW_PRESS)) {
+                    glfwSetWindowMonitor(window.getWindowHandle(), glfwGetWindowMonitor(window.getWindowHandle()), 0, 0, 2560, 1440, GLFW_DONT_CARE);
+                }
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
@@ -388,12 +405,41 @@ public class Main {
             timePassed += diffTimeMillis;
         }
     }
+    public static Vector3f stepMask(Vector3f sideDist) {
+        Vector3i mask = new Vector3i();
+        Vector3i b1 = new Vector3i(sideDist.x < sideDist.y ? 1 : 0, sideDist.y < sideDist.z ? 1 : 0, sideDist.z < sideDist.x ? 1 : 0);
+        Vector3i b2 = new Vector3i(sideDist.x < sideDist.z ? 1 : 0, sideDist.y < sideDist.x ? 1 : 0, sideDist.z < sideDist.y ? 1 : 0);
+        mask.z = b1.z > 0 && b2.z > 0 ? 1 : 0;
+        mask.x = b1.x > 0 && b2.x > 0 ? 1 : 0;
+        mask.y = b1.y > 0 && b2.y > 0 ? 1 : 0;
+        if (!(mask.x == 1 || mask.y == 1 || mask.z == 1)) {
+            mask.z = 1;
+        }
+
+        return new Vector3f(mask);
+    }
 
     public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids, float accuracy) { //prevPos is inverted
         Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-        Vector3f rayPos = new Vector3f(0);
-        for (int i = 0; i < range*accuracy; i++) {
-            rayPos.set(ray.m30(), ray.m31(), ray.m32());
+
+//        Vector4f uvDir = new Vector4f(new Vector3f(0.5f, 0.5f, 1).normalize(), 0);
+//        ray = new Matrix4f(
+//                ray.m00(), ray.m10(), ray.m20(), ray.m30(),
+//                ray.m01(), ray.m11(), ray.m21(), ray.m31(),
+//                ray.m02(), ray.m12(), ray.m22(), ray.m32(),
+//                ray.m03(), ray.m13(), ray.m23(), ray.m33()).transpose();
+//        ray.mul(new Matrix4f(uvDir, uvDir, uvDir, uvDir));
+//        Vector3f rayDir = new Vector3f(ray.m00(), ray.m01(), ray.m02());
+
+        Matrix4f forwarded = new Matrix4f(ray).translate(0, 0, 10000);
+        Vector3f rayDir = new Vector3f(new Vector3f(forwarded.m30()-prevRayPos.x, forwarded.m31()-prevRayPos.y, forwarded.m32()-prevRayPos.z));
+        Vector3f rayPos = new Vector3f(prevRayPos).floor();
+        Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
+        Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
+        Vector3f sideDist = new Vector3f(rayPos).sub(ray.m30(), ray.m31(), ray.m32()).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
+        Vector3f mask = stepMask(sideDist);
+
+        for (int i = 0; i < range; i++) {
             Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
             if (block != null) {
                 int typeId = block.x();
@@ -419,8 +465,42 @@ public class Main {
                 }
             }
             prevRayPos.set(rayPos);
-            ray.translate(0, 0, 0.1f/accuracy);
+            mask = stepMask(sideDist);
+            rayPos.add(new Vector3f(mask).mul(raySign));
+            sideDist.add(new Vector3f(mask).mul(raySign).mul(deltaDist));
         }
+
+//        Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
+//        Vector3f rayPos = new Vector3f(0);
+//        for (int i = 0; i < range*accuracy; i++) {
+//            rayPos.set(ray.m30(), ray.m31(), ray.m32());
+//            Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
+//            if (block != null) {
+//                int typeId = block.x();
+//                if (typeId != 0) {
+//                    int subTypeId = block.y();
+//                    boolean isFluid = BlockTypes.blockTypeMap.get(typeId).blockProperties.isFluid;
+//                    if (countFluids || !isFluid) {
+//                        if (isFluid) {
+//                            subTypeId = Math.min(20, subTypeId);
+//                        }
+//                        int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
+//                        int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
+//                        if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
+//                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
+//                                if (prevPos) {
+//                                    return rayPos;
+//                                } else {
+//                                    return prevRayPos;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            prevRayPos.set(rayPos);
+//            ray.translate(0, 0, 0.1f/accuracy);
+//        }
         return null;
     }
 }

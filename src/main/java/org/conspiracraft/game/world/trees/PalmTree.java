@@ -1,17 +1,25 @@
 package org.conspiracraft.game.world.trees;
 
 import kotlin.Pair;
+import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.WorldGen;
 import org.conspiracraft.game.world.trees.canopies.PalmCanopy;
 import org.conspiracraft.game.world.trees.trunks.BendingTrunk;
 import org.conspiracraft.game.world.trees.trunks.StraightTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import static org.conspiracraft.engine.Utils.condensePos;
+import static org.conspiracraft.game.world.World.heightmap;
+import static org.conspiracraft.game.world.World.seaLevel;
+import static org.conspiracraft.game.world.WorldGen.*;
+import static org.conspiracraft.game.world.WorldGen.setBlockWorldgen;
 
 public class PalmTree {
     public static void generate(Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType, int leafType, int leafSubType) {
@@ -34,6 +42,12 @@ public class PalmTree {
             if (!colliding) {
                 blocks.forEach((pos, block) -> {
                     WorldGen.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+                    int condensedPos = condensePos(pos.x, pos.z);
+                    int surfaceY = heightmap[condensedPos];
+                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y-1);
+                    for (int extraY = pos.y-1; extraY >= surfaceY; extraY--) {
+                        setLightWorldgen(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
+                    }
                 });
             }
         }
