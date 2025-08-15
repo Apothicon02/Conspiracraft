@@ -268,7 +268,9 @@ public class Main {
                 }
 
                 if (window.isKeyPressed(GLFW_KEY_F11, GLFW_PRESS)) {
-                    glfwSetWindowMonitor(window.getWindowHandle(), glfwGetWindowMonitor(window.getWindowHandle()), 0, 0, 2560, 1440, GLFW_DONT_CARE);
+                    glfwSetWindowPos(window.getWindowHandle(), 0, 0);
+                    glfwSetWindowSize(window.getWindowHandle(), 2560, 1440);
+                    //glfwSetWindowMonitor(window.getWindowHandle(), glfwGetWindowMonitor(window.getWindowHandle()), 0, 0, 2560, 1440, GLFW_DONT_CARE);
                 }
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {

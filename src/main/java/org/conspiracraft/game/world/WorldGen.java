@@ -28,11 +28,6 @@ public class WorldGen {
     public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
     }
-    public static void setBlockWorldgenIfNotCave(int x, int y, int z, int blockTypeId, int blockSubtypeId, float noise) {
-        if (Math.min(0, (ConspiracraftMath.gradient(y, 30, 1, 2, -0.5f) + ConspiracraftMath.gradient(y, 58, 22, -0.5f, 2)) + noise) >= 0) {
-            setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
-        }
-    }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (World.inBounds(x, y, z)) {
             chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
@@ -57,7 +52,7 @@ public class WorldGen {
     public static void blackenLightPaletteWorldgen(int x, int y, int z) {
         chunks[condenseChunkPos(x, y, z)].lightPalette.set(0, 0);
     }
-    public static void generateTerrain() {
+    public static void generateHeightmap() {
 //        long time = System.currentTimeMillis();
         int startX = currentChunk*chunkSize;
         for (int x = startX; x < startX+chunkSize; x++) {
@@ -106,35 +101,34 @@ public class WorldGen {
                     int lavaX = x*3;
                     int lavaZ = z*3;
                     float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
-                    int miniX = x*8;
-                    int miniZ = z*8;
-                    float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
                     int y = surfaceHeightmap[condensedPos];
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
                     int lavaLevel = (int) (293-(lavaNoise*5));
                     if (centDist < 0.05f && y < lavaLevel) {
                         heightmap[condensedPos] = (short) lavaLevel;
-                        for (int newY = lavaLevel; newY > 0; newY--) {
-                            setBlockWorldgenIfNotCave(x, newY, z, 19, 0, lavaNoise+miniCellularNoise);
+                        for (int newY = lavaLevel; newY >= 0; newY--) {
+                            setBlockWorldgen(x, newY, z, 19, 0);
                         }
                     } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
                         heightmap[condensedPos] = (short) (lavaLevel-100);
-                        for (int newY = lavaLevel-100; newY > 0; newY--) {
-                            setBlockWorldgenIfNotCave(x, newY, z, 19, 0, lavaNoise+miniCellularNoise);
+                        int stopY = Math.floorDiv(lavaLevel-100, chunkSize)*chunkSize;
+                        for (int newY = lavaLevel-100; newY >= stopY; newY--) {
+                            setBlockWorldgen(x, newY, z, 19, 0);
                         }
                     } else if (y < seaLevel) {
                         for (int newY = seaLevel; newY > y; newY--) {
-                            setBlockWorldgenIfNotCave(x, newY, z, 1, 15, lavaNoise+miniCellularNoise);
+                            setBlockWorldgen(x, newY, z, 1, 15);
                             if (newY == seaLevel) {
                                 heightmap[condensedPos] = (short) y;
                             }
                         }
                         for (int newY = y; newY > y-3; newY--) {
-                            setBlockWorldgenIfNotCave(x, newY, z, 3, 0, lavaNoise+miniCellularNoise);
+                            setBlockWorldgen(x, newY, z, 3, 0);
                         }
-                        for (int newY = y-3; newY >= 0; newY--) {
-                            setBlockWorldgenIfNotCave(x, newY, z, 10, 0, lavaNoise+miniCellularNoise);
+                        int stopY = Math.floorDiv(y-3, chunkSize)*chunkSize;
+                        for (int newY = y-3; newY >= stopY; newY--) {
+                            setBlockWorldgen(x, newY, z, 10, 0);
                         }
                     } else {
                         int maxSteepness = 0;
@@ -152,18 +146,20 @@ public class WorldGen {
                         if (y >= seaLevel && y < seaLevel+6 && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
                             heightmap[condensedPos] = (short) (y);
                             for (int newY = y; newY > y-5; newY--) {
-                                setBlockWorldgenIfNotCave(x, newY, z, 23, 0, lavaNoise+miniCellularNoise);
+                                setBlockWorldgen(x, newY, z, 23, 0);
                             }
-                            for (int newY = y-6; newY > 0; newY--) {
-                                setBlockWorldgenIfNotCave(x, newY, z, 24, 0, lavaNoise+miniCellularNoise);
+                            int stopY = Math.floorDiv(y-6, chunkSize)*chunkSize;
+                            for (int newY = y-6; newY >= stopY; newY--) {
+                                setBlockWorldgen(x, newY, z, 24, 0);
                             }
                         } else if (flat) {
-                            setBlockWorldgenIfNotCave(x, y, z, y <= volcanoElevation ? 3 : 2, 0, lavaNoise+miniCellularNoise);
-                            setBlockWorldgenIfNotCave(x, y - 1, z, 3, 0, lavaNoise+miniCellularNoise);
-                            setBlockWorldgenIfNotCave(x, y - 2, z, 3, 0, lavaNoise+miniCellularNoise);
-                            setBlockWorldgenIfNotCave(x, y - 3, z, 3, 0, lavaNoise+miniCellularNoise);
-                            for (int newY = y - 4; newY >= 0; newY--) {
-                                setBlockWorldgenIfNotCave(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0, lavaNoise+miniCellularNoise);
+                            setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
+                            setBlockWorldgen(x, y - 1, z, 3, 0);
+                            setBlockWorldgen(x, y - 2, z, 3, 0);
+                            setBlockWorldgen(x, y - 3, z, 3, 0);
+                            int stopY = Math.floorDiv(y-4, chunkSize)*chunkSize;
+                            for (int newY = y - 4; newY >= stopY; newY--) {
+                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);
@@ -171,12 +167,12 @@ public class WorldGen {
                             for (int newY = y; newY >= 0; newY--) {
                                 if (newY <= volcanoElevation) {
                                     int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y - lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
-                                    setBlockWorldgenIfNotCave(x, newY, z, blockTypeId, 0, lavaNoise+miniCellularNoise);
+                                    setBlockWorldgen(x, newY, z, blockTypeId, 0);
                                     if (blockTypeId == 0) {
                                         lowestY = (short)(newY);
                                     }
                                 } else {
-                                    setBlockWorldgenIfNotCave(x, newY, z, 10, 0, lavaNoise+miniCellularNoise);
+                                    setBlockWorldgen(x, newY, z, 10, 0);
                                 }
                             }
                             heightmap[condensedPos] = lowestY;
@@ -186,7 +182,8 @@ public class WorldGen {
                     int chunkZ = z >> 4;
                     if (chunkZ != prevChunkZ) {
                         for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
-                            blackenLightPaletteWorldgen(currentChunk, chunkY, prevChunkZ);
+                            //blackenLightPaletteWorldgen(currentChunk, chunkY, prevChunkZ);
+                            chunks[condenseChunkPos(currentChunk, chunkY, prevChunkZ)] = new Chunk(new Vector2i(10, 0), 0);
                         }
                         prevChunkZ = chunkZ;
                     }
@@ -285,7 +282,7 @@ public class WorldGen {
 //            long time = System.currentTimeMillis();
             for (int z = 1; z < size - 1; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
-                    for (int y = heightmap[condensePos(x, z)] - 1; y > 0; y--) {
+                    for (int y = heightmap[condensePos(x, z)] - 1; y > surfaceHeightmap[condensePos(x, z)]; y--) {
                         Vector2i block = getBlockWorldgen(x, y, z);
                         Vector4i light = getLightWorldgen(x, y, z);
                         BlockType blockType = BlockTypes.blockTypeMap.get(block.x);

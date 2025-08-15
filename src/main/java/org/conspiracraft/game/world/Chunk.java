@@ -25,6 +25,11 @@ public class Chunk {
         lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, 20)));
         cornerPalette.add(0);
     }
+    public Chunk(Vector2i block, int sunLight) {
+        blockPalette.add(Utils.packInts(block.x, block.y));
+        lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, sunLight)));
+        cornerPalette.add(0);
+    }
 
     public int getNeededBitsPerValue(int uniqueValues) {
         return (int) Math.ceil(Math.log(uniqueValues) / Math.log(2));

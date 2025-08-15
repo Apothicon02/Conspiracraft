@@ -9,19 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid16940.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/spiral_noise.png" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noise.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noises.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noises.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,14 +200,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00149" summary="- Fixed crash when music folder doesnt exist.">
-      <option name="closed" value="true" />
-      <created>1740958579831</created>
-      <option name="number" value="00149" />
-      <option name="presentableId" value="LOCAL-00149" />
-      <option name="project" value="LOCAL" />
-      <updated>1740958579831</updated>
     </task>
     <task id="LOCAL-00150" summary="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class.">
       <option name="closed" value="true" />
@@ -598,7 +585,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754544826068</updated>
     </task>
-    <option name="localTasksCounter" value="198" />
+    <task id="LOCAL-00198" summary="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA.">
+      <option name="closed" value="true" />
+      <created>1755219820086</created>
+      <option name="number" value="00198" />
+      <option name="presentableId" value="LOCAL-00198" />
+      <option name="project" value="LOCAL" />
+      <updated>1755219820087</updated>
+    </task>
+    <option name="localTasksCounter" value="199" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -621,7 +616,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Revert last change." />
     <MESSAGE value="- Fixed clouds toggle not doing anything." />
     <MESSAGE value="- Atmosphere can now be toggled. &#10;- Added luna terrain generator." />
     <MESSAGE value="- Optimized rendering slightly." />
@@ -646,7 +640,8 @@
     <MESSAGE value="- I forget." />
     <MESSAGE value="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy." />
     <MESSAGE value="- Fixed light being too bright." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed light being too bright." />
+    <MESSAGE value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

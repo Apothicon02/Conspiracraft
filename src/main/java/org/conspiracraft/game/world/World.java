@@ -37,13 +37,13 @@ public class World {
     public static short height = 432;
     public static int heightChunks = height / chunkSize;
     public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
-    public static boolean quarterWorld = true;
+    public static boolean quarterWorld = false;
     public static boolean doLight = true;
 
     public static boolean cleanPalettes = false;
     public static boolean createdChunks = false;
     public static boolean worldGenerated = false;
-    public static boolean terrainGenerated = false;
+    public static boolean heightmapGenerated = false;
     public static boolean surfaceGenerated = false;
     public static boolean featuresGenerated = false;
     public static int currentChunk = -1;
@@ -77,7 +77,7 @@ public class World {
                 String path = (World.worldPath + "/chunks.data");
                 loadWorld(path);
                 createdChunks = true;
-                terrainGenerated = true;
+                heightmapGenerated = true;
                 surfaceGenerated = true;
                 featuresGenerated = true;
                 worldGenerated = true;
@@ -92,7 +92,7 @@ public class World {
             }
             currentChunk++;
             if (!cleanPalettes) {
-                if (terrainGenerated && surfaceGenerated && featuresGenerated) {
+                if (heightmapGenerated && surfaceGenerated && featuresGenerated) {
                     if (doLight) {
                         if (stageTime == 0) {
                             stageTime = System.currentTimeMillis() / 1000;
@@ -109,21 +109,21 @@ public class World {
                         }
                     }
                 } else if (!worldGenerated) {
-                    if (!terrainGenerated) {
+                    if (!heightmapGenerated) {
                         if (stageTime == 0) {
                             stageTime = System.currentTimeMillis() / 1000;
                         }
                         if (currentChunk == sizeChunks) {
-                            System.out.print("Terrain generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                            System.out.print("Heightmap generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             int i = 0;
                             for (short y : heightmap) {
                                 surfaceHeightmap[i++] = y;
                             }
                             currentChunk = -1;
-                            terrainGenerated = true;
+                            heightmapGenerated = true;
                         } else {
-                            generateTerrain();
+                            generateHeightmap();
                         }
                     } else if (!surfaceGenerated) {
                         if (stageTime == 0) {

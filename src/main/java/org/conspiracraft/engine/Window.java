@@ -51,6 +51,7 @@ public class Window {
         }
 
         windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
+        glfwSetWindowPos(windowHandle, 0, 32);
         if (windowHandle == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
