@@ -87,7 +87,7 @@ public class World {
             if (!worldGenerated && !createdChunks) {
                 createdChunks = true;
                 for (int i = 0; i < chunks.length; i++) {
-                    chunks[i] = new Chunk();
+                    chunks[i] = new Chunk(i);
                 }
             }
             currentChunk++;
@@ -305,7 +305,7 @@ public class World {
                         dataIndex++;
                     }
 
-                    Chunk chunk = new Chunk();
+                    Chunk chunk = new Chunk(Utils.condenseChunkPos(x, y, z));
                     chunk.setSubChunks(subChunks);
                     chunk.setBlockPalette(blockPalette);
                     chunk.setBlockData(blocks);

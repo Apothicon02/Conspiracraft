@@ -12,8 +12,6 @@
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
@@ -200,14 +198,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00150" summary="- Modularized tree generation.&#10;- Oak trees now only generate in the northeast corner of the map. &#10;- Split the world generation out of the world class.">
-      <option name="closed" value="true" />
-      <created>1741017672832</created>
-      <option name="number" value="00150" />
-      <option name="presentableId" value="LOCAL-00150" />
-      <option name="project" value="LOCAL" />
-      <updated>1741017672833</updated>
     </task>
     <task id="LOCAL-00151" summary="- Fixed clouds preventing block rendering in their chunks. &#10;- Added cloud movement. &#10;- Clouds can now be toggled with F3+C. &#10;- Cloud shading now changes based on camera altitude.">
       <option name="closed" value="true" />
@@ -593,7 +583,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755219820087</updated>
     </task>
-    <option name="localTasksCounter" value="199" />
+    <task id="LOCAL-00199" summary="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed.">
+      <option name="closed" value="true" />
+      <created>1755272782159</created>
+      <option name="number" value="00199" />
+      <option name="presentableId" value="LOCAL-00199" />
+      <option name="project" value="LOCAL" />
+      <updated>1755272782160</updated>
+    </task>
+    <option name="localTasksCounter" value="200" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -616,7 +614,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed clouds toggle not doing anything." />
     <MESSAGE value="- Atmosphere can now be toggled. &#10;- Added luna terrain generator." />
     <MESSAGE value="- Optimized rendering slightly." />
     <MESSAGE value="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed." />
@@ -641,7 +638,8 @@
     <MESSAGE value="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy." />
     <MESSAGE value="- Fixed light being too bright." />
     <MESSAGE value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
+    <MESSAGE value="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

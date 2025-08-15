@@ -183,7 +183,8 @@ public class WorldGen {
                     if (chunkZ != prevChunkZ) {
                         for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
                             //blackenLightPaletteWorldgen(currentChunk, chunkY, prevChunkZ);
-                            chunks[condenseChunkPos(currentChunk, chunkY, prevChunkZ)] = new Chunk(new Vector2i(10, 0), 0);
+                            int condensedChunkPos = condenseChunkPos(currentChunk, chunkY, prevChunkZ);
+                            chunks[condensedChunkPos] = new Chunk(condensedChunkPos, new Vector2i(10, 0), 0);
                         }
                         prevChunkZ = chunkZ;
                     }

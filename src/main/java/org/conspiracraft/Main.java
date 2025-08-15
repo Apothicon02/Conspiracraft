@@ -389,7 +389,7 @@ public class Main {
             World.saveWorld(World.worldPath+"/");
             glfwSetWindowShouldClose(window.getWindowHandle(), true);
         } else {
-            if (!renderingEnabled) {
+            if (!renderingEnabled && World.worldGenerated) {
                 renderingEnabled = true;
                 Renderer.init(window);
             }

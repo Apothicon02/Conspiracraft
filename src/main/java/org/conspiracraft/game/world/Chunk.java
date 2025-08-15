@@ -11,6 +11,7 @@ import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.world.World.*;
 
 public class Chunk {
+    public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public final IntArrayList blockPalette = new IntArrayList();
     private BitBuffer blockData = new BitBuffer(totalBlocks, 0);
@@ -20,19 +21,21 @@ public class Chunk {
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
     private BitBuffer subChunks = new BitBuffer(8, 1);
 
-    public Chunk() {
+    public Chunk(int compressedChunkPos) {
+        condensedChunkPos = compressedChunkPos;
         blockPalette.add(0);
         lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, 20)));
         cornerPalette.add(0);
     }
-    public Chunk(Vector2i block, int sunLight) {
+    public Chunk(int compressedChunkPos, Vector2i block, int sunLight) {
+        condensedChunkPos = compressedChunkPos;
         blockPalette.add(Utils.packInts(block.x, block.y));
         lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, sunLight)));
         cornerPalette.add(0);
     }
 
     public int getNeededBitsPerValue(int uniqueValues) {
-        return (int) Math.ceil(Math.log(uniqueValues) / Math.log(2));
+        return 32-Integer.numberOfLeadingZeros(uniqueValues);
     }
 
     //Blocks start
@@ -106,7 +109,6 @@ public class Chunk {
             if (isEmpty) {
                 blockPalette.clear();
                 blockPalette.add(0);
-                int condensedChunkPos = Utils.condenseChunkPos(globalPos.x / chunkSize, globalPos.y / chunkSize, globalPos.z / chunkSize);
                 int chunkDataIndex = condensedChunkPos / 32;
                 int bit = (condensedChunkPos - (chunkDataIndex * 32)) - 1;
                 int prev = World.chunkEmptiness[chunkDataIndex];
@@ -126,18 +128,10 @@ public class Chunk {
     }
     public void setBlock(Vector3i pos, int type, int subType, Vector3i globalPos) {
         int block = Utils.packInts(type, subType);
-        boolean wasInPalette = false;
-        int key = -1;
-        for (int paletteEntry : blockPalette) {
-            key++;
-            if (paletteEntry == block) {
-                setBlockKey(pos, key, globalPos);
-                wasInPalette = true;
-                break;
-            }
-        }
-        if (!wasInPalette) {
-            int condensedChunkPos = Utils.condenseChunkPos(globalPos.x/chunkSize, globalPos.y/chunkSize, globalPos.z/chunkSize);
+        int key = blockPalette.indexOf(block);
+        if (key > -1) {
+            setBlockKey(pos, key, globalPos);
+        } else {
             int chunkDataIndex = condensedChunkPos/32;
             int bit = (condensedChunkPos-(chunkDataIndex*32)) - 1;
             int prev = World.chunkEmptiness[chunkDataIndex];
@@ -227,17 +221,10 @@ public class Chunk {
         return cornerPalette.get(index);
     }
     public void setCorner(Vector3i pos, int corner, Vector3i globalPos) {
-        boolean wasInPalette = false;
-        int key = -1;
-        for (int paletteEntry : cornerPalette) {
-            key++;
-            if (paletteEntry == corner) {
-                setCornerKey(pos, key);
-                wasInPalette = true;
-                break;
-            }
-        }
-        if (!wasInPalette) {
+        int key = cornerPalette.indexOf(corner);
+        if (key > -1) {
+            setCornerKey(pos, key);
+        } else {
             cornerPalette.addLast(corner);
             setCornerKey(pos, cornerPalette.size()-1);
         }
@@ -322,17 +309,10 @@ public class Chunk {
     }
     public void setLight(Vector3i pos, Vector4i unpackedLight, Vector3i globalPos) {
         int light = Utils.packColor(unpackedLight);
-        boolean wasInPalette = false;
-        int key = -1;
-        for (int paletteEntry : lightPalette) {
-            key++;
-            if (paletteEntry == light) {
-                setLightKey(pos, key);
-                wasInPalette = true;
-                break;
-            }
-        }
-        if (!wasInPalette) {
+        int key = lightPalette.indexOf(light);
+        if (key > -1) {
+            setLightKey(pos, key);
+        } else {
             lightPalette.addLast(light);
             setLightKey(pos, lightPalette.size()-1);
         }
