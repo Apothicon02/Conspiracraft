@@ -103,6 +103,7 @@ public class World {
                             surfaceHeightmap = null;
                             cleanPalettes = true;
                             currentChunk = -1;
+                            worldGenerated = true;
                             Renderer.worldChanged = true;
                         } else {
                             fillLight();
@@ -165,7 +166,6 @@ public class World {
                             stageTime = 0;
                             currentChunk = -1;
                             surfaceGenerated = true;
-                            Renderer.worldChanged = true;
                         } else {
                             generateSurface();
                         }
@@ -178,8 +178,6 @@ public class World {
                             stageTime = 0;
                             currentChunk = -1;
                             featuresGenerated = true;
-                            worldGenerated = true;
-                            Renderer.worldChanged = true;
                         } else {
                             generateFeatures();
                         }
