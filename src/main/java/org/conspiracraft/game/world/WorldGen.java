@@ -21,26 +21,49 @@ import static org.conspiracraft.game.world.World.*;
 
 public class WorldGen {
     public static int maxWorldgenHeight = 256;
+    public static boolean areChunksCompressed = false;
 
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
-        return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlock(condenseLocalPos(x & 15, y & 15, z & 15));
+        if (areChunksCompressed) {
+            return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlock(condenseLocalPos(x & 15, y & 15, z & 15));
+        } else {
+            return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlockUncompressed(condenseLocalPos(x & 15, y & 15, z & 15));
+        }
     }
     public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
-        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+        if (areChunksCompressed) {
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+        } else {
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+        }
     }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (World.inBounds(x, y, z)) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            if (areChunksCompressed) {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            } else {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+
+            }
         }
     }
     public static void setBlockWorldgenNoReplace(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (getBlockWorldgen(x, y, z).x <= 1) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            if (areChunksCompressed) {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            } else {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+
+            }
         }
     }
     public static void setBlockWorldgenNoReplaceSolids(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (!BlockTypes.blockTypeMap.get(getBlockWorldgen(x, y, z).x).blockProperties.isSolid) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            if (areChunksCompressed) {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
+            } else {
+                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+            }
         }
     }
     public static Vector4i getLightWorldgen(int x, int y, int z) {
@@ -48,9 +71,6 @@ public class WorldGen {
     }
     public static void setLightWorldgen(int x, int y, int z, Vector4i light) {
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setLight(new Vector3i(x & 15, y & 15, z & 15), light, new Vector3i(x, y, z));
-    }
-    public static void blackenLightPaletteWorldgen(int x, int y, int z) {
-        chunks[condenseChunkPos(x, y, z)].lightPalette.set(0, 0);
     }
     public static void generateHeightmap() {
 //        long time = System.currentTimeMillis();
@@ -182,7 +202,6 @@ public class WorldGen {
                     int chunkZ = z >> 4;
                     if (chunkZ != prevChunkZ) {
                         for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
-                            //blackenLightPaletteWorldgen(currentChunk, chunkY, prevChunkZ);
                             int condensedChunkPos = condenseChunkPos(currentChunk, chunkY, prevChunkZ);
                             chunks[condensedChunkPos] = new Chunk(condensedChunkPos, new Vector2i(10, 0), 0);
                         }

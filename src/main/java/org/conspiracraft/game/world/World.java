@@ -131,6 +131,37 @@ public class World {
                         }
                         if (currentChunk == sizeChunks) {
                             System.out.print("Surface generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                            stageTime = System.currentTimeMillis() / 1000;
+                            for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                                for (int chunkY = 0; chunkY < maxWorldgenHeight/chunkSize; chunkY++) {
+                                    for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+                                        int condensedChunkPos = Utils.condenseChunkPos(chunkX, chunkY, chunkZ);
+                                        Chunk chunk = chunks[condensedChunkPos];
+                                        if (chunk.uncompressedBlocks != null) {
+                                            int i = 0;
+                                            int key = 0;
+                                            int prevBlock = 0;
+                                            for (int block : chunk.uncompressedBlocks) {
+                                                if (block != prevBlock) {
+                                                    key = chunk.blockPalette.indexOf(block);
+                                                    if (key == -1) {
+                                                        key = chunk.blockPalette.size();
+                                                        chunk.blockPalette.add(block);
+                                                        chunk.updateBlockPaletteKeySize();
+                                                    }
+                                                    prevBlock = block;
+                                                }
+
+                                                chunk.blockData.setValue(i, key);
+                                                i++;
+                                            }
+                                            chunk.uncompressedBlocks = null;
+                                        }
+                                    }
+                                }
+                            }
+                            areChunksCompressed = true;
+                            System.out.print("Palette compression took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             currentChunk = -1;
                             surfaceGenerated = true;

@@ -13,8 +13,9 @@ import static org.conspiracraft.game.world.World.*;
 public class Chunk {
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
+    public int[] uncompressedBlocks;
     public final IntArrayList blockPalette = new IntArrayList();
-    private BitBuffer blockData = new BitBuffer(totalBlocks, 0);
+    public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
     public final IntArrayList lightPalette = new IntArrayList();
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
     public final IntArrayList cornerPalette = new IntArrayList();
@@ -38,7 +39,29 @@ public class Chunk {
         return 32-Integer.numberOfLeadingZeros(uniqueValues);
     }
 
+    public void setChunkNonEmpty() {
+        int chunkDataIndex = condensedChunkPos/32;
+        int bit = (condensedChunkPos-(chunkDataIndex*32)) - 1;
+        int prev = World.chunkEmptiness[chunkDataIndex];
+        World.chunkEmptiness[chunkDataIndex] |= 1 << bit;
+        if (prev != World.chunkEmptiness[chunkDataIndex]) {
+            chunkEmptinessChanged = true;
+        }
+    }
+
     //Blocks start
+    public void setBlockUncompressed(Vector3i pos, int type, int subType) {
+        if (uncompressedBlocks == null) {
+            uncompressedBlocks = new int[totalBlocks];
+            setChunkNonEmpty();
+        }
+        subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
+        uncompressedBlocks[Utils.condenseLocalPos(pos)] = Utils.packInts(type, subType);
+    }
+    public Vector2i getBlockUncompressed(int pos) {
+        return uncompressedBlocks == null ? new Vector2i(0) : Utils.unpackInt(uncompressedBlocks[pos]);
+    }
+
     public int bitsPerBlock() {
         return blockData.bitsPerValue;
     }
@@ -82,7 +105,7 @@ public class Chunk {
     public int[] getSubChunks() {
         return subChunks.getData();
     }
-    public void setBlockKey(Vector3i pos, int key, Vector3i globalPos) {
+    public void updateBlockPaletteKeySize() {
         int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
         if (neededBitsPerValue != blockData.bitsPerValue) {
             BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
@@ -91,6 +114,9 @@ public class Chunk {
             }
             blockData = newData;
         }
+    }
+    public void setBlockKey(Vector3i pos, int key, Vector3i globalPos) {
+        updateBlockPaletteKeySize();
         blockData.setValue(condenseLocalPos(pos), key);
         if (blockPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
@@ -109,13 +135,7 @@ public class Chunk {
             if (isEmpty) {
                 blockPalette.clear();
                 blockPalette.add(0);
-                int chunkDataIndex = condensedChunkPos / 32;
-                int bit = (condensedChunkPos - (chunkDataIndex * 32)) - 1;
-                int prev = World.chunkEmptiness[chunkDataIndex];
-                World.chunkEmptiness[chunkDataIndex] &= ~(1 << bit);
-                if (prev != World.chunkEmptiness[chunkDataIndex]) {
-                    chunkEmptinessChanged = true;
-                }
+                setChunkNonEmpty();
             }
         }
     }
@@ -132,13 +152,7 @@ public class Chunk {
         if (key > -1) {
             setBlockKey(pos, key, globalPos);
         } else {
-            int chunkDataIndex = condensedChunkPos/32;
-            int bit = (condensedChunkPos-(chunkDataIndex*32)) - 1;
-            int prev = World.chunkEmptiness[chunkDataIndex];
-            World.chunkEmptiness[chunkDataIndex] |= 1 << bit;
-            if (prev != World.chunkEmptiness[chunkDataIndex]) {
-                chunkEmptinessChanged = true;
-            }
+            setChunkNonEmpty();
             blockPalette.addLast(block);
             setBlockKey(pos, blockPalette.size()-1, globalPos);
         }
