@@ -36,7 +36,7 @@ public class BitBuffer {
         return bits;
     }
     public int getValue(int index) {
-        if (bits.length == 0) {
+        if (bits == null || bits.length == 0) {
             return 0;
         }
         int intIndex = index / valuesPerInt;

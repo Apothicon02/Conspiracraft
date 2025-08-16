@@ -9,12 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/BitBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/BitBuffer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-    </list>
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -197,14 +192,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00154" summary="- Improved log and leaf textures. &#10;- Improved leaf shading. &#10;- Fixed ground leaves replacing tree wood. &#10;- Leaf piles no longer slow you down as much. &#10;- Leaf piles now generate under trees instead of just in jungles.">
-      <option name="closed" value="true" />
-      <created>1741198852814</created>
-      <option name="number" value="00154" />
-      <option name="presentableId" value="LOCAL-00154" />
-      <option name="project" value="LOCAL" />
-      <updated>1741198852814</updated>
     </task>
     <task id="LOCAL-00155" summary="- Improved distance fog greatly. &#10;- Trees now generate leaf piles under them. &#10;- Fixed sub-chunk fog being broken. &#10;- Moved the jungle to be surrounding the volcano. &#10;- Fixed world-generated light sources not propagating light. &#10;- Updated readme.">
       <option name="closed" value="true" />
@@ -590,7 +577,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755304165909</updated>
     </task>
-    <option name="localTasksCounter" value="203" />
+    <task id="LOCAL-00203" summary="- Fixed worlds not loading.">
+      <option name="closed" value="true" />
+      <created>1755306840109</created>
+      <option name="number" value="00203" />
+      <option name="presentableId" value="LOCAL-00203" />
+      <option name="project" value="LOCAL" />
+      <updated>1755306840109</updated>
+    </task>
+    <option name="localTasksCounter" value="204" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,7 +608,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Removed snow." />
     <MESSAGE value="- Re-added noise shader changes." />
     <MESSAGE value="- Greatly improved grass textures. &#10;- Fixed hand rendering. &#10;- Fixed sunlight tinting not being affected by sun intensity or actual line of sight to sun. &#10;- Added shadow support to hand rendering. &#10;- Made kyanite transparent." />
     <MESSAGE value="- Fixed reflections. &#10;- Added bounces to reflections." />
@@ -638,7 +632,8 @@
     <MESSAGE value="- Optimized chunks." />
     <MESSAGE value="- Doubled surface generation speed." />
     <MESSAGE value="- Disabled rendering until after the world is generated." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Disabled rendering until after the world is generated." />
+    <MESSAGE value="- Fixed worlds not loading." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed worlds not loading." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
