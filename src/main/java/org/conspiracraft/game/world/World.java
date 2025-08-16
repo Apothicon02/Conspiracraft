@@ -40,7 +40,6 @@ public class World {
     public static boolean quarterWorld = false;
     public static boolean doLight = true;
 
-    public static boolean cleanPalettes = false;
     public static boolean createdChunks = false;
     public static boolean worldGenerated = false;
     public static boolean heightmapGenerated = false;
@@ -72,42 +71,43 @@ public class World {
     }
 
     public static void run() throws IOException {
-        if (Files.exists(worldPath)) {
-            if (!worldGenerated) {
+        if (!worldGenerated) {
+            if (Files.exists(worldPath)) {
                 String path = (World.worldPath + "/chunks.data");
                 loadWorld(path);
                 createdChunks = true;
                 heightmapGenerated = true;
                 surfaceGenerated = true;
                 featuresGenerated = true;
+                areChunksCompressed = true;
                 worldGenerated = true;
                 Renderer.worldChanged = true;
-            }
-        } else {
-            if (!worldGenerated && !createdChunks) {
-                createdChunks = true;
-                for (int i = 0; i < chunks.length; i++) {
-                    chunks[i] = new Chunk(i);
+            } else {
+                if (!createdChunks) {
+                    createdChunks = true;
+                    for (int i = 0; i < chunks.length; i++) {
+                        chunks[i] = new Chunk(i);
+                    }
                 }
-            }
-            currentChunk++;
-            if (!cleanPalettes) {
+                currentChunk++;
                 if (heightmapGenerated && surfaceGenerated && featuresGenerated) {
                     if (doLight) {
                         if (stageTime == 0) {
                             stageTime = System.currentTimeMillis() / 1000;
                         }
                         if (currentChunk == sizeChunks) {
-                            System.out.print("Light filling took " + ((System.currentTimeMillis()/1000)-stageTime) + "s \n");
+                            System.out.print("Light filling took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             surfaceHeightmap = null;
-                            cleanPalettes = true;
                             currentChunk = -1;
                             worldGenerated = true;
                             Renderer.worldChanged = true;
                         } else {
                             fillLight();
                         }
+                    } else {
+                        worldGenerated = true;
+                        Renderer.worldChanged = true;
                     }
                 } else if (!worldGenerated) {
                     if (!heightmapGenerated) {
@@ -132,9 +132,21 @@ public class World {
                         }
                         if (currentChunk == sizeChunks) {
                             System.out.print("Surface generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                            stageTime = 0;
+                            currentChunk = -1;
+                            surfaceGenerated = true;
+                        } else {
+                            generateSurface();
+                        }
+                    } else if (!featuresGenerated) {
+                        if (stageTime == 0) {
+                            stageTime = System.currentTimeMillis() / 1000;
+                        }
+                        if (currentChunk == sizeChunks) {
+                            System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = System.currentTimeMillis() / 1000;
                             for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                                for (int chunkY = 0; chunkY < maxWorldgenHeight/chunkSize; chunkY++) {
+                                for (int chunkY = 0; chunkY < maxWorldgenHeight / chunkSize; chunkY++) {
                                     for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
                                         int condensedChunkPos = Utils.condenseChunkPos(chunkX, chunkY, chunkZ);
                                         Chunk chunk = chunks[condensedChunkPos];
@@ -163,18 +175,6 @@ public class World {
                             }
                             areChunksCompressed = true;
                             System.out.print("Palette compression took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = 0;
-                            currentChunk = -1;
-                            surfaceGenerated = true;
-                        } else {
-                            generateSurface();
-                        }
-                    } else if (!featuresGenerated) {
-                        if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis() / 1000;
-                        }
-                        if (currentChunk == sizeChunks) {
-                            System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = 0;
                             currentChunk = -1;
                             featuresGenerated = true;

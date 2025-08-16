@@ -394,17 +394,19 @@ public class Main {
                 Renderer.init(window);
             }
             World.run();
-            updateTime(diffTimeMillis, 1);
-            interpolationTime = timePassed/tickTime;
-            while (timePassed >= tickTime) {
-                currentTick++;
-                timePassed -= tickTime;
+            if (World.worldGenerated) {
+                updateTime(diffTimeMillis, 1);
                 interpolationTime = timePassed/tickTime;
-                World.tick();
-                player.tick();
-                ScheduledTicker.tick();
+                while (timePassed >= tickTime) {
+                    currentTick++;
+                    timePassed -= tickTime;
+                    interpolationTime = timePassed/tickTime;
+                    World.tick();
+                    player.tick();
+                    ScheduledTicker.tick();
+                }
+                timePassed += diffTimeMillis;
             }
-            timePassed += diffTimeMillis;
         }
     }
     public static Vector3f stepMask(Vector3f sideDist) {
