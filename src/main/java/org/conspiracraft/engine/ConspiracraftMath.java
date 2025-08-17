@@ -9,8 +9,8 @@ public class ConspiracraftMath {
         return new Vector3i(vec.x+x, vec.y+y, vec.z+z);
     }
 
-    public static double gradient(int y, int fromY, int toY, float fromValue, float toValue) {
-        return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
+    public static double gradient(int y, int fromY, int toY, float toValue, float fromValue) {
+        return clampedLerp(fromValue, toValue, inverseLerp(y, fromY, toY));
     }
 
     public static double inverseLerp(double y, double fromY, double toY) {
