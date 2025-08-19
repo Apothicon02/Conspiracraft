@@ -279,7 +279,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(new File("C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/textures/atlas.png"));//ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = (1024*1024)+1024;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 232; x++) {
+            for (int x = 0; x < 240; x++) {
                 for (int y = 0; y < 1024; y++) {
                     atlasData[(x*1024) + y] = colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(x*1024) + y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;

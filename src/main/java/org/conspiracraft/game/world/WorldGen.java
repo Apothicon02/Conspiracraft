@@ -8,6 +8,7 @@ import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.cover.Plains;
 import org.conspiracraft.game.world.shapes.Blob;
+import org.conspiracraft.game.world.shapes.Pillar;
 import org.conspiracraft.game.world.trees.JungleTree;
 import org.conspiracraft.game.world.trees.OakTree;
 import org.conspiracraft.game.world.trees.PalmTree;
@@ -78,19 +79,28 @@ public class WorldGen {
         for (int x = startX; x < startX+chunkSize; x++) {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
+                    int lavaX = x*3;
+                    int lavaZ = z*3;
+                    float lavaNoise = Noises.NOODLE_NOISE.sample(lavaX, lavaZ);
                     float baseCellularNoise = Noises.CELLULAR_NOISE.sample(x, z);
                     float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                     float noodleNoise = Noises.NOODLE_NOISE.sample(x, z);
                     int miniX = x*8;
                     int miniZ = z*8;
                     float miniCellularNoise = Noises.CELLULAR_NOISE.sample(miniX, miniZ);
+                    double northEastDist = (distance(x, z, size, size)/eighthSize)+(lavaNoise/2);
+                    double desertness = northEastDist < 1 ? (Math.max(0.25, (1.5f-northEastDist)*0.25f)-0.3)/9 : 0;
 
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
                     double valley = (noodleNoise > 0.67 ? 184 : (184 * Math.min(1, Math.abs(noodleNoise) + 0.33f)));
                     int volcanoElevation = (int) (Math.max(((Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400)+((Math.min(-0.95, secondaryVolcanoDist-1)+0.95)*10000), ((Math.min(0.25, centDist)-0.25)*-2000)+((Math.min(-0.95, centDist-1)+0.95)*10000))*(1 - Math.abs((miniCellularNoise*miniCellularNoise)/4)));
-                    int surface = (int) (maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise)))));
-                    double oceanDist = Math.min(40, Math.abs(1-Math.min(1, distance(x, z, eighthSize, eighthSize)/eighthSize))*eighthSize);
+                    double dunes = (Math.abs(desertness*lavaNoise)*3000);
+                    if (dunes > 0) {
+                        dunes -= Math.min(4, dunes);
+                    }
+                    int surface = (int) (dunes+(maxWorldgenHeight - Math.max(centDist * 184, (valley - (Math.max(0, noodleNoise * 320) * Math.abs(basePerlinNoise))))));
+                    double oceanDist = Math.min(40, Math.abs(1-Math.min(1, (distance(x, z, eighthSize, eighthSize)/eighthSize)+(lavaNoise/10)))*eighthSize);
                     for (int y = Math.max(surface, volcanoElevation); y >= 0; y--) {
                         double baseGradient = ConspiracraftMath.gradient(y, (int)(surface-oceanDist), (int)(48-oceanDist), 2, -1);
                         double baseDensity = baseCellularNoise + baseGradient;
@@ -107,6 +117,13 @@ public class WorldGen {
 //        System.out.print("Took "+(System.currentTimeMillis()-time)+"ms to generate slice of terrain. \n");
 //        String progress = String.valueOf(((float) currentChunk / sizeChunks)*100).substring(0, 3);
 //        System.out.print("World is " + (progress + "% generated. \n"));
+    }
+
+    public static int getSurfaceBlock(int x, int y, int z, double desertDist) {
+        return desertDist > 1 ? 2 : 23;
+    }
+    public static int getCrustBlock(int x, int y, int z, double desertDist) {
+        return desertDist > 1 ?  3 : 24;
     }
 
     public static void generateSurface() {
@@ -162,7 +179,7 @@ public class WorldGen {
                         }
                         boolean flat = maxSteepness < 3;
                         int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
-                        double oceanDist = distance(x, z, eighthSize, eighthSize)/eighthSize;
+                        double oceanDist = (distance(x, z, eighthSize, eighthSize)/eighthSize)+(lavaNoise/8);
                         if (y >= seaLevel && y < seaLevel+6 && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
                             heightmap[condensedPos] = (short) (y);
                             for (int newY = y; newY > y-5; newY--) {
@@ -173,13 +190,17 @@ public class WorldGen {
                                 setBlockWorldgen(x, newY, z, 24, 0);
                             }
                         } else if (flat) {
-                            setBlockWorldgen(x, y, z, y <= volcanoElevation ? 3 : 2, 0);
-                            setBlockWorldgen(x, y - 1, z, 3, 0);
-                            setBlockWorldgen(x, y - 2, z, 3, 0);
-                            setBlockWorldgen(x, y - 3, z, 3, 0);
+                            double desertDist = (distance(x, z, size, size)/eighthSize)+(lavaNoise/2);
+                            int surface = getSurfaceBlock(x, y, z, desertDist);
+                            int crust = getCrustBlock(x, y, z, desertDist);
+                            int rock = 10;
+                            setBlockWorldgen(x, y, z, y <= volcanoElevation ? crust : surface, 0);
+                            setBlockWorldgen(x, y - 1, z, crust, 0);
+                            setBlockWorldgen(x, y - 2, z, crust, 0);
+                            setBlockWorldgen(x, y - 3, z, crust, 0);
                             int stopY = Math.floorDiv(y-4, chunkSize)*chunkSize;
                             for (int newY = y - 4; newY >= stopY; newY--) {
-                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : 10, 0);
+                                setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : rock, 0);
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);
@@ -232,7 +253,9 @@ public class WorldGen {
                         double oceanDist = distance(x, z, eighthSize, eighthSize) / eighthSize;
                         double centDist = distance(x, z, size/2, size/2) / size;
                         double taiganess = Math.min(0.03f, Math.max(0.7, (1.5f-centDist)*0.7f)-0.8)/9;
+                        double oceanness = oceanDist < 1.1 ? (Math.max(0.25, (1.5f-southWestDist)*0.25)-0.3)/9 : 0;
                         double jungleness = oceanDist < 1 ? (Math.max(0.25, (1.5f-southWestDist)*0.25f)-0.3)/9 : 0;
+                        double desertness = northEastDist < 1 ? (Math.max(0.25, (1.5f-northEastDist)*0.25f)-0.3)/9 : 0;
                         double forestness = (Math.max(0.34, (1.5f-Math.max(southWestDist-jungleness, northEastDist))*0.34f)-0.4);
                         double plainness = 0.01d-Math.max(0, Math.max(forestness, taiganess));
                         double randomNumber = Math.random();
@@ -247,9 +270,16 @@ public class WorldGen {
                             }
                             setAnything = true;
                         } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23) {
-                            if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) { //jungle
-                                JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
-                                PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 14) + 8, 25, 0, 27, 0);
+                            if (randomNumber < Math.max(desertness, oceanness)*Math.max(0.8f, exponentialFoliageNoise)) { //jungle & desert
+                                if (blockOn.x == 23) {
+                                    if (desertness <= jungleness || (desertness > jungleness && y <= seaLevel+1)) {
+                                        PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 14) + 8, 25, 0, 27, 0);
+                                    } else {
+                                        Pillar.generate(blockOn, x, y, z, (int) (Math.random() * 4) + 2, 29, 0);
+                                    }
+                                } else if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) {
+                                    JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
+                                }
                                 setAnything = true;
                             } else if (randomNumber < jungleness*0.2) {
                                 if (randomNumber > jungleness*0.05) {

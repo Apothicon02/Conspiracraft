@@ -50,7 +50,8 @@ public class BlockTypes {
             PALM_LOG = create(new BlockType(new BlockProperties())), //25
             PALM_PLANKS = create(new BlockType(new BlockProperties())),
             PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
-            MAHOGANY_PLANKS = create(new BlockType(new BlockProperties()));
+            MAHOGANY_PLANKS = create(new BlockType(new BlockProperties())),
+            CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(true).isFluidReplaceable(true).obstructsHeightmap(false)));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {
