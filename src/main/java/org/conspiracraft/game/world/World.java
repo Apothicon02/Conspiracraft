@@ -146,8 +146,9 @@ public class World {
                             System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
                             stageTime = System.currentTimeMillis() / 1000;
                             for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                                for (int chunkY = 0; chunkY < maxWorldgenHeight / chunkSize; chunkY++) {
-                                    for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+                                for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+                                    double centDist = distance(chunkX*chunkSize, chunkZ*chunkSize, halfSize, halfSize) / halfSize;
+                                    for (int chunkY = 0; chunkY < ((centDist < 0.5) ? heightChunks : (maxWorldgenHeight / chunkSize)); chunkY++) {
                                         int condensedChunkPos = Utils.condenseChunkPos(chunkX, chunkY, chunkZ);
                                         Chunk chunk = chunks[condensedChunkPos];
                                         if (chunk.uncompressedBlocks != null) {
