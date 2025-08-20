@@ -123,14 +123,25 @@ public class WorldGen {
         return desertDist > 1 ? 2 : 23;
     }
     public static int getCrustBlock(int x, int y, int z, double desertDist) {
-        return desertDist > 1 ?  3 : 24;
+        return desertDist > 1 ?  3 : 23;
+    }
+    public static int getRockBlock(int x, int y, int z, double desertDist, int volcanoElevation) {
+        return volcanoElevation >= y ? 19 : (desertDist > 1 ?  10 : 24);
     }
 
     public static void generateSurface() {
 //        long time = System.currentTimeMillis();
         int startX = currentChunk*chunkSize;
+        int minY = height-1;
         for (int x = startX; x < startX+chunkSize; x++) {
-            int minY = height-1;
+            for (int z = 0; z < size; z++) {
+                int condensedPos = condensePos(x, z);
+                minY = Math.min(minY, heightmap[condensedPos]);
+            }
+        }
+        minY /= chunkSize;
+        minY = chunkSize*((int)(minY));
+        for (int x = startX; x < startX+chunkSize; x++) {
             int prevChunkZ = 0;
             for (int z = 0; z < size; z++) {
                 int condensedPos = condensePos(x, z);
@@ -141,6 +152,8 @@ public class WorldGen {
                     int y = surfaceHeightmap[condensedPos];
                     double centDist = Math.min(1, (distance(x, z, halfSize, halfSize) / halfSize) * 1.15f);
                     double secondaryVolcanoDist = Math.min(1, (distance(x, z, halfSize*1.25f, halfSize*1.25f) / halfSize)*1.66f);
+                    int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
+                    double desertDist = (distance(x, z, size, size)/eighthSize)+(lavaNoise/2);
                     int lavaLevel = (int) (293-(lavaNoise*5));
                     if (centDist < 0.05f && y < lavaLevel) {
                         heightmap[condensedPos] = (short) lavaLevel;
@@ -149,8 +162,7 @@ public class WorldGen {
                         }
                     } else if (secondaryVolcanoDist < 0.05f && y < lavaLevel-100) {
                         heightmap[condensedPos] = (short) (lavaLevel-100);
-                        int stopY = Math.floorDiv(lavaLevel-100, chunkSize)*chunkSize;
-                        for (int newY = lavaLevel-100; newY >= stopY; newY--) {
+                        for (int newY = lavaLevel-100; newY >= minY; newY--) {
                             setBlockWorldgen(x, newY, z, 19, 0);
                         }
                     } else if (y < seaLevel) {
@@ -163,8 +175,7 @@ public class WorldGen {
                         for (int newY = y; newY > y-3; newY--) {
                             setBlockWorldgen(x, newY, z, 3, 0);
                         }
-                        int stopY = Math.floorDiv(y-3, chunkSize)*chunkSize;
-                        for (int newY = y-3; newY >= stopY; newY--) {
+                        for (int newY = y-3; newY >= minY; newY--) {
                             setBlockWorldgen(x, newY, z, 10, 0);
                         }
                     } else {
@@ -178,34 +189,30 @@ public class WorldGen {
                             maxSteepness = Math.max(maxSteepness, steepness);
                         }
                         boolean flat = maxSteepness < 3;
-                        int volcanoElevation = (int) Math.max((Math.min(0.25, centDist)-0.25)*-2000, (Math.min(0.25, secondaryVolcanoDist)-0.25)*-1400);
                         double oceanDist = (distance(x, z, eighthSize, eighthSize)/eighthSize)+(lavaNoise/8);
                         if (y >= seaLevel && y < seaLevel+6 && (oceanDist < 0.95f || (flat && oceanDist < 1f))) {
                             heightmap[condensedPos] = (short) (y);
                             for (int newY = y; newY > y-5; newY--) {
                                 setBlockWorldgen(x, newY, z, 23, 0);
                             }
-                            int stopY = Math.floorDiv(y-6, chunkSize)*chunkSize;
-                            for (int newY = y-6; newY >= stopY; newY--) {
+                            for (int newY = y-6; newY >= minY; newY--) {
                                 setBlockWorldgen(x, newY, z, 24, 0);
                             }
                         } else if (flat) {
-                            double desertDist = (distance(x, z, size, size)/eighthSize)+(lavaNoise/2);
                             int surface = getSurfaceBlock(x, y, z, desertDist);
                             int crust = getCrustBlock(x, y, z, desertDist);
-                            int rock = 10;
+                            int rock = getRockBlock(x, y, z, desertDist, volcanoElevation);
                             setBlockWorldgen(x, y, z, y <= volcanoElevation ? crust : surface, 0);
                             setBlockWorldgen(x, y - 1, z, crust, 0);
                             setBlockWorldgen(x, y - 2, z, crust, 0);
                             setBlockWorldgen(x, y - 3, z, crust, 0);
-                            int stopY = Math.floorDiv(y-4, chunkSize)*chunkSize;
-                            for (int newY = y - 4; newY >= stopY; newY--) {
+                            for (int newY = y - 4; newY >= minY; newY--) {
                                 setBlockWorldgen(x, newY, z, newY <= volcanoElevation ? 9 : rock, 0);
                             }
                         } else {
                             int lavaAir = (int)(Math.abs(lavaNoise)*200);
                             short lowestY = (short)(y);
-                            for (int newY = y; newY >= 0; newY--) {
+                            for (int newY = y; newY >= minY; newY--) {
                                 if (newY <= volcanoElevation) {
                                     int blockTypeId = lavaNoise > -0.1 && lavaNoise < 0.1 ? (newY >= y - lavaAir ? 0 : (lavaAir > 3 ? 19 : 9)) : 9;
                                     setBlockWorldgen(x, newY, z, blockTypeId, 0);
@@ -219,12 +226,11 @@ public class WorldGen {
                             heightmap[condensedPos] = lowestY;
                         }
                     }
-                    minY = Math.min(minY, heightmap[condensedPos]);
                     int chunkZ = z >> 4;
                     if (chunkZ != prevChunkZ) {
                         for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
                             int condensedChunkPos = condenseChunkPos(currentChunk, chunkY, prevChunkZ);
-                            chunks[condensedChunkPos] = new Chunk(condensedChunkPos, new Vector2i(10, 0), 0);
+                            chunks[condensedChunkPos] = new Chunk(condensedChunkPos, new Vector2i(getRockBlock(currentChunk*chunkSize, chunkY*chunkSize, prevChunkZ*chunkSize, desertDist, volcanoElevation), 0), 0);
                         }
                         prevChunkZ = chunkZ;
                     }
@@ -275,7 +281,22 @@ public class WorldGen {
                                     if (desertness <= jungleness || (desertness > jungleness && y <= seaLevel+1)) {
                                         PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 14) + 8, 25, 0, 27, 0);
                                     } else {
-                                        Pillar.generate(blockOn, x, y, z, (int) (Math.random() * 4) + 2, 29, 0);
+                                        double deadBushChance = Math.random();
+                                        if (deadBushChance < 0.03) {
+                                            int variant = deadBushChance < 0.015 ? 0 : 1;
+                                            Blob.generate(blockOn, x, y-3+variant, z+variant, 24, 0, 3+variant);
+                                            Blob.generate(blockOn, x, y, z+variant, 24, 0, 2+variant);
+                                            Blob.generate(blockOn, x, y+2+variant, z+variant, 24, 0, 1);
+                                            Blob.generate(blockOn, x, y+4+variant, z+1+variant, 24, 0, 1);
+                                            variant *= 2;
+                                            Blob.generate(blockOn, x, y+7+variant, z+1+variant, 24, 0, 2+variant);
+                                            Blob.generate(blockOn, x-1-variant, y+7+variant, z+variant, 24, 0, 2+variant);
+                                            Blob.generate(blockOn, x+1+variant, y+7+variant, z+variant, 24, 0, 2+variant);
+                                        } else if (deadBushChance < 0.2) {
+                                            setBlockWorldgenNoReplace(x, y+1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                        } else {
+                                            Pillar.generate(blockOn, x, y+1, z, (int) (Math.random() * 6) + 2, 29, 0);
+                                        }
                                     }
                                 } else if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) {
                                     JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
@@ -312,7 +333,7 @@ public class WorldGen {
                         if (!setAnything) {
                             if (getBlockWorldgen(x, y + 1, z).x <= 1) { //only replace air and water
                                 Plains.generate(blockOn, x, y, z);
-                                if (randomNumber < 0.08f) {
+                                if (randomNumber < 0.08f && blockOn.x == 10) {
                                     Blob.generate(blockOn, x, y, z, 8, 0, (int) (2 + ((Math.random() + 1) * 3)));
                                 }
                             }

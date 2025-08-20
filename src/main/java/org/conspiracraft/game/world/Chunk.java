@@ -197,7 +197,8 @@ public class Chunk {
     public int[] getCornerData() {
         return cornerData.getData();
     }
-    public void setCornerKey(Vector3i pos, int key) {
+
+    public void updateCornerPaletteKeySize() {
         int neededBitsPerValue = getNeededBitsPerValue(cornerPalette.size());
         if (neededBitsPerValue != cornerData.bitsPerValue) {
             BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
@@ -206,6 +207,9 @@ public class Chunk {
             }
             cornerData = newData;
         }
+    }
+    public void setCornerKey(Vector3i pos, int key) {
+        updateCornerPaletteKeySize();
         cornerData.setValue(condenseLocalPos(pos), key);
         if (cornerPalette.get(key) != 0) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
@@ -284,7 +288,8 @@ public class Chunk {
         return lightData.getData();
     }
     public static Vector4i fullSunlight = new Vector4i(0, 0, 0, 20);
-    public void setLightKey(Vector3i pos, int key) {
+
+    public void updateLightPaletteKeySize() {
         int neededBitsPerValue = getNeededBitsPerValue(lightPalette.size());
         if (neededBitsPerValue != lightData.bitsPerValue) {
             BitBuffer newData = new BitBuffer(totalBlocks, neededBitsPerValue);
@@ -293,6 +298,9 @@ public class Chunk {
             }
             lightData = newData;
         }
+    }
+    public void setLightKey(Vector3i pos, int key) {
+        updateLightPaletteKeySize();
         lightData.setValue(Utils.condenseLocalPos(pos), key);
         if (!Utils.unpackColor(lightPalette.get(key)).equals(fullSunlight)) {
             subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);

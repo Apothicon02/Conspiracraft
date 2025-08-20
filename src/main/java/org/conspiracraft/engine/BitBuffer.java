@@ -23,7 +23,7 @@ public class BitBuffer {
         bits = data;
     }
     public void setValue(int index, int value) {
-        if (bitsPerValue > 0) {
+        if (bitsPerValue > 0 && !(bits == null || bits.length == 0)) {
             // Each int fits `valuesPerInt` values of `bitsPerValue` each.
             int intIndex = index / valuesPerInt;
             int bitIndex = (index % valuesPerInt) * bitsPerValue;

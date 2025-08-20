@@ -120,12 +120,16 @@ bool[8] getCorners(int x, int y, int z) {
     }
     return data;
 }
+bool hitSelection = false;
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
     bool[8] corners = getCorners(bX, bY, bZ);
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
     if (corners[cornerIndex]) {
         vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
-        color.rgb = fromLinear(color.rgb);
+        color.rgb = fromLinear(color.rgb)*0.9;
+        if (ui && selected == ivec3(bX, bY, bZ) && color.a > 0) {
+            hitSelection = true;
+        }
         return color;
     } else {
         return vec4(0, 0, 0, 0);
@@ -176,7 +180,7 @@ bool castsShadow(int x) {
     return true;//(x != 4 && x != 5 && x != 18);
 }
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30);
 }
 bool hasAO(ivec3 voxelPos, ivec3 pos) {
     bool[8] corners = getCorners(pos.x, pos.y, pos.z);
@@ -308,7 +312,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
             float shouldReflect = 0.f;
             if (reflectivity == 0.f && canHit) {
                 if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
-                    if (blockType == 1 && blockSubtype > 0 && prevBlock.x == 0) { //water
+                    if (blockType == 1 && blockSubtype > 0) { //water
                         shouldReflect = 0.6f;
                     } else if (blockType == 7 || (blockType >= 11 && blockType <= 13)) { //glass & kyanite
                         reflectivity = 0.5f;
@@ -488,7 +492,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         float camDist = distance(camPos, rayMapPos)/renderDistance;
         float whiteness = gradient(rayMapPos.y, 64, 372, 0, 0.8);
         vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
-        bool underwater = bool(blockInfo.x == 1 && prevBlockInfo.x == 1);
+        bool underwater = bool(blockInfo == ivec2(1, 15) && prevBlockInfo == ivec2(1, 15));
         if (blockInfo.x != 0.f && !underwater) {
             float sunLight = (lighting.a/fromLinear(vec4(20)).a)*(mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
@@ -663,6 +667,7 @@ vec4 prevSuperFinalTint = vec4(1);
 vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     clearVars(true, false);
     vec4 color = traceWorld(false, ogRayPos, dir, maxDistance);
+    bool finalHitSelection = hitSelection;
     depth = distance(camPos, hitPos)/renderDistance;
     isSky = (color.a < 1.f && lighting.a > 0);
     if (reflectPos == vec3(0)) {
@@ -733,11 +738,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     color *= prevSuperFinalTint;
     prevSuperFinalTint = superFinalTint;
     //transparency end
-
-    //selection start
-    if (ui && selected == ivec3(finalRayMapPos)) {
-        color = vec4(mix(vec3(color), vec3(0.7, 0.7, 1), 0.5f), color.a);
+    if (finalHitSelection) {
+        color.rgb = mix(color.rgb, vec3(0.7, 0.7, 1), 0.5f);
     }
-    //selection end
     return color;
 }

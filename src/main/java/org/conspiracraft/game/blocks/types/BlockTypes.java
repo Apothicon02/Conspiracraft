@@ -51,7 +51,8 @@ public class BlockTypes {
             PALM_PLANKS = create(new BlockType(new BlockProperties())),
             PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
             MAHOGANY_PLANKS = create(new BlockType(new BlockProperties())),
-            CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(true).isFluidReplaceable(true).obstructsHeightmap(false)));
+            CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
+            DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

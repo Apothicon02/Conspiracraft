@@ -102,7 +102,7 @@ public class Main {
             selectedBlock.y = data[i++];
             selectedBlock.z = data[i++];
         } else {
-            player = new Player(new Vector3f(512, 256, 512));
+            player = new Player(new Vector3f(World.size-512, 256, World.size-512));
         }
         String globalPath = (World.worldPath + "/world.data");
         if (Files.exists(Path.of(globalPath))) {
@@ -424,27 +424,20 @@ public class Main {
     }
 
     public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids, float accuracy) { //prevPos is inverted
-        Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-
-//        Vector4f uvDir = new Vector4f(new Vector3f(0.5f, 0.5f, 1).normalize(), 0);
-//        ray = new Matrix4f(
-//                ray.m00(), ray.m10(), ray.m20(), ray.m30(),
-//                ray.m01(), ray.m11(), ray.m21(), ray.m31(),
-//                ray.m02(), ray.m12(), ray.m22(), ray.m32(),
-//                ray.m03(), ray.m13(), ray.m23(), ray.m33()).transpose();
-//        ray.mul(new Matrix4f(uvDir, uvDir, uvDir, uvDir));
-//        Vector3f rayDir = new Vector3f(ray.m00(), ray.m01(), ray.m02());
+        Vector3f prevRayPos = new Vector3f(ray.m30()*8, ray.m31()*8, ray.m32()*8);
 
         Matrix4f forwarded = new Matrix4f(ray).translate(0, 0, 10000);
-        Vector3f rayDir = new Vector3f(new Vector3f(forwarded.m30()-prevRayPos.x, forwarded.m31()-prevRayPos.y, forwarded.m32()-prevRayPos.z));
+        Vector3f rayDir = new Vector3f(new Vector3f((forwarded.m30()*8)-prevRayPos.x, (forwarded.m31()*8)-prevRayPos.y, (forwarded.m32()*8)-prevRayPos.z));
         Vector3f rayPos = new Vector3f(prevRayPos).floor();
         Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
         Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
-        Vector3f sideDist = new Vector3f(rayPos).sub(ray.m30(), ray.m31(), ray.m32()).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
+        Vector3f sideDist = new Vector3f(rayPos).sub(prevRayPos.x, prevRayPos.y, prevRayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
         Vector3f mask = stepMask(sideDist);
 
         for (int i = 0; i < range; i++) {
-            Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
+            Vector3f realPos = new Vector3f(rayPos).div(8);
+            Vector3f prevRealPos = new Vector3f(prevRayPos).div(8);
+            Vector2i block = World.getBlock(realPos.x, realPos.y, realPos.z);
             if (block != null) {
                 int typeId = block.x();
                 if (typeId != 0) {
@@ -454,14 +447,14 @@ public class Main {
                         if (isFluid) {
                             subTypeId = Math.min(20, subTypeId);
                         }
-                        int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
-                        int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
+                        int cornerData = World.getCorner((int) realPos.x, (int) realPos.y, (int) realPos.z);
+                        int cornerIndex = (realPos.y < (int) (realPos.y) + 0.5 ? 0 : 4) + (realPos.z < (int) (realPos.z) + 0.5 ? 0 : 2) + (realPos.x < (int) (realPos.x) + 0.5 ? 0 : 1);
                         if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
-                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
+                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((realPos.x - Math.floor(realPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((realPos.y - Math.floor(realPos.y)) * 8)) - 8) - 1) * 8) + (int) ((realPos.z - Math.floor(realPos.z)) * 8)]) {
                                 if (prevPos) {
-                                    return rayPos;
+                                    return realPos;
                                 } else {
-                                    return prevRayPos;
+                                    return prevRealPos;
                                 }
                             }
                         }
