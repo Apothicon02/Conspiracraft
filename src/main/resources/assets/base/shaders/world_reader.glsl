@@ -414,7 +414,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 } else if (hasAO(ivec3(mapPos), ivec3(prevPos.x, prevPos.y, floor(prevPos.z) - 0.1f))) {
                     occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
                 }
-                normalBrightness *= clamp(occlusion, 0.5f, 1.f);
+                normalBrightness *= clamp(occlusion, blockType == 31 ? 0.9f : 0.5f, 1.f);
 
                 if (prevBlock.x == 1 && prevBlock.y > 0) {
                     if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8) + (rayMapPos.y+(mapPos.y / 8)))) {
@@ -590,10 +590,10 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir, float maxDistance) {
 
     for (int i = 0; distance(rayMapChunkPos, rayPos) < maxDistance/chunkSize && i < (maxDistance/chunkSize); i++) {
         bool inHorizontalBounds = bool(rayMapChunkPos.x >= 0 && rayMapChunkPos.x < sizeChunks && rayMapChunkPos.z >= 0 && rayMapChunkPos.z < sizeChunks);
-        if (!inHorizontalBounds) {
+        bool inBounds = bool(inHorizontalBounds && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks);
+        if (!inHorizontalBounds || (ogPos.y < height && !inBounds)) {
             break;
         }
-        bool inBounds = bool(inHorizontalBounds && rayMapChunkPos.y >= 0 && rayMapChunkPos.y < heightChunks);
         bool checkSubChunks = inBounds ? !isChunkAir(int(rayMapChunkPos.x), int(rayMapChunkPos.y), int(rayMapChunkPos.z)) : false;
         if (checkSubChunks) {
             vec3 mini = ((rayMapChunkPos - rayPos) + 0.5 - 0.5 * vec3(raySign)) * deltaDist;
@@ -637,8 +637,8 @@ vec4 traceWorld(bool isShadow, vec3 ogPos, vec3 rayDir, float maxDistance) {
     }
     prevHitPos = (rayMapChunkPos+uv3d)*chunkSize;
     hitPos = prevHitPos;
-    vec3 nearestPos = clamp(prevHitPos, vec3(0), vec3(size-1, height-1, size-1));
-    lighting = fromLinear(getLighting(nearestPos.x, nearestPos.y, nearestPos.z));
+    //vec3 nearestPos = clamp(prevHitPos, vec3(0), vec3(size-1, height-1, size-1));
+    lighting = fromLinear(vec4(20));//fromLinear(getLighting(nearestPos.x, nearestPos.y, nearestPos.z));
     lightFog = max(lightFog, lighting);
     distanceFogginess = 1;
     return vec4(0);

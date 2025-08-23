@@ -25,46 +25,24 @@ public class WorldGen {
     public static boolean areChunksCompressed = false;
 
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
-        if (areChunksCompressed) {
-            return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlock(condenseLocalPos(x & 15, y & 15, z & 15));
-        } else {
-            return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlockUncompressed(condenseLocalPos(x & 15, y & 15, z & 15));
-        }
+        return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlockUncompressed(condenseLocalPos(x & 15, y & 15, z & 15));
     }
     public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
-        if (areChunksCompressed) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
-        } else {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
-        }
+        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
     }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (World.inBounds(x, y, z)) {
-            if (areChunksCompressed) {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
-            } else {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
-
-            }
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
         }
     }
     public static void setBlockWorldgenNoReplace(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (getBlockWorldgen(x, y, z).x <= 1) {
-            if (areChunksCompressed) {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
-            } else {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
-
-            }
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
         }
     }
     public static void setBlockWorldgenNoReplaceSolids(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (!BlockTypes.blockTypeMap.get(getBlockWorldgen(x, y, z).x).blockProperties.isSolid) {
-            if (areChunksCompressed) {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlock(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId, new Vector3i(x, y, z));
-            } else {
-                chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
-            }
+            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
         }
     }
     public static Vector4i getLightWorldgen(int x, int y, int z) {
@@ -252,7 +230,7 @@ public class WorldGen {
                     float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                     int cloudScale = (int)(4+(basePerlinNoise*4));
                     if (Noises.CLOUD_NOISE.sample(x*cloudScale, z*cloudScale) > 0.1f && Math.random() > 0.95f && y < 200) {
-                        boolean isRainCloud = (Math.random() < 0.005f);
+                        boolean isRainCloud = (distance(x, z, size, 0) / quarterSize < 1 && (Math.random() < 0.0005f));
                         Blob.generate(new Vector2i(0), x, 216+(int)Math.abs(Noises.CELLULAR_NOISE.sample(x, z)*32), z, isRainCloud ? 32 : 31, 0, (isRainCloud ? 10 : 0) +(int)(2+(Math.random()*8)));
                     }
                     if (y >= seaLevel) {

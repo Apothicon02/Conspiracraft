@@ -9,13 +9,33 @@ import org.joml.Math;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import java.util.Collections;
+
 public class FluidHelper {
     private static final Vector3i[] neighborPositions = new Vector3i[4];
     public static void updateFluid(Vector3i pos, Vector2i fluid) {
-        neighborPositions[0] = new Vector3i(pos.x, pos.y, pos.z+1);
-        neighborPositions[1] = new Vector3i(pos.x+1, pos.y, pos.z);
-        neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z-1);
-        neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
+        double random = Math.random();
+        if (random < 0.25f) {
+            neighborPositions[0] = new Vector3i(pos.x, pos.y, pos.z+1);
+            neighborPositions[1] = new Vector3i(pos.x+1, pos.y, pos.z);
+            neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z-1);
+            neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
+        } else if (random < 0.5f) {
+            neighborPositions[0] = new Vector3i(pos.x, pos.y, pos.z-1);
+            neighborPositions[1] = new Vector3i(pos.x+1, pos.y, pos.z);
+            neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z+1);
+            neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
+        } else if (random < 0.75f) {
+            neighborPositions[0] = new Vector3i(pos.x+1, pos.y, pos.z);
+            neighborPositions[1] = new Vector3i(pos.x, pos.y, pos.z+1);
+            neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z-1);
+            neighborPositions[3] = new Vector3i(pos.x-1, pos.y, pos.z);
+        } else {
+            neighborPositions[0] = new Vector3i(pos.x-1, pos.y, pos.z);
+            neighborPositions[1] = new Vector3i(pos.x+1, pos.y, pos.z);
+            neighborPositions[2] = new Vector3i(pos.x, pos.y, pos.z-1);
+            neighborPositions[3] = new Vector3i(pos.x, pos.y, pos.z+1);
+        }
         BlockType type = BlockTypes.blockTypeMap.get(fluid.x);
         boolean scheduleTick = false;
         int maxChange = 0;

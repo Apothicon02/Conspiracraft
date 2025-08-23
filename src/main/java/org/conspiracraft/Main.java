@@ -397,13 +397,18 @@ public class Main {
             if (World.worldGenerated && renderingEnabled) {
                 updateTime(diffTimeMillis, 1);
                 interpolationTime = timePassed/tickTime;
+                int ticksDone = 0;
                 while (timePassed >= tickTime) {
+                    ticksDone++;
                     currentTick++;
                     timePassed -= tickTime;
                     interpolationTime = timePassed/tickTime;
                     World.tick();
                     player.tick();
                     ScheduledTicker.tick();
+                    if (ticksDone >= 3) {
+                        timePassed = tickTime-1;
+                    }
                 }
                 timePassed += diffTimeMillis;
             }

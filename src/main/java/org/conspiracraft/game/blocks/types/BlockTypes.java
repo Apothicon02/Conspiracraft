@@ -26,9 +26,9 @@ public class BlockTypes {
             WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(new int[]{8}, 1f, 1.25f))),
             GRASS = create(new BlockType(new BlockProperties())),
             DIRT = create(new BlockType(new BlockProperties())),
-            TALL_GRASS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            TALL_GRASS = create(new BlockType(new BlockProperties().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(Tags.flowers), new BlockType(TALL_GRASS.blockProperties)), //5
-            TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             KYANITE = create(List.of(Tags.rocks), new LightBlockType(new LightBlockProperties().g(2).b(6))),
             WHITE_STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
             IGNEOUS = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
@@ -51,7 +51,7 @@ public class BlockTypes {
             PALM_PLANKS = create(new BlockType(new BlockProperties())),
             PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
             MAHOGANY_PLANKS = create(new BlockType(new BlockProperties())),
-            CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
+            CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
             DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
             CLOUD = create(new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false)));

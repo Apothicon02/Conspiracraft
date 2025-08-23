@@ -5,9 +5,9 @@ import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 
-import static org.conspiracraft.game.world.World.getBlock;
-import static org.conspiracraft.game.world.World.setBlock;
+import static org.conspiracraft.game.world.World.*;
 
 public class BlockType {
     public BlockProperties blockProperties;
@@ -24,13 +24,15 @@ public class BlockType {
         this.blockProperties = blockProperties;
     }
 
-    public void tick(Vector3i pos) {
-        if (pos.x > 0 && pos.x < World.size-1 && pos.z > 0 && pos.z < World.size-1) {
-            FluidHelper.updateFluid(pos, getBlock(pos));
+    public void tick(Vector4i pos) {
+        if (inBounds(pos.x, pos.y, pos.z)) {
+            fluidTick(pos.xyz(new Vector3i()));
         }
     }
 
-    public void randomTick(Vector3i pos) {}
+    public void fluidTick(Vector3i pos) {
+        FluidHelper.updateFluid(pos, getBlock(pos));
+    }
 
     public void onPlace(Vector3i pos, boolean isSilent) {
         if (!isSilent) {

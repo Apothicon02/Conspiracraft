@@ -31,6 +31,7 @@ public class World {
     public static int seaLevel = 63;
     public static int size = 4208; //6976
     public static int halfSize = size/2;
+    public static int quarterSize = size/4;
     public static int eighthSize = size/8;
     public static byte chunkSize = 16;
     public static byte subChunkSize = (byte) (chunkSize/2);
@@ -60,41 +61,7 @@ public class World {
     public static long stageTime = 0;
 
     public static void tick() {
-        randomTick();
         iterateLightQueue();
-    }
-
-    public static int prevRandomTickX = 0;
-    public static void randomTick() {
-        Random random = new Random();
-        long startTime = System.currentTimeMillis();
-        for (int x = prevRandomTickX; x < sizeChunks; x++) {
-            for (int z = 0; z < sizeChunks; z++) {
-                for (int y = 0; y < heightChunks; y++) {
-//                long nanoTime = System.nanoTime();
-                    Vector3i pos = new Vector3i((x*chunkSize)+random.nextInt(0, chunkSize - 1), (y*chunkSize)+random.nextInt(0, chunkSize - 1), (z*chunkSize)+random.nextInt(0, chunkSize - 1));
-//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to make position. \n");
-//          nanoTime = System.nanoTime();
-                    Vector2i block = getBlock(pos);
-//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to get block. \n");
-//          nanoTime = System.nanoTime();
-                    BlockType type = BlockTypes.blockTypeMap.get(block.x);
-//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to get type. \n");
-//          nanoTime = System.nanoTime();
-                    type.randomTick(pos);
-//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to do random tick. \n");
-                }
-            }
-            if (System.currentTimeMillis()-startTime > 10) {
-                prevRandomTickX = x;
-                break;
-            }
-            if (x == sizeChunks-1) {
-                prevRandomTickX = 0;
-                break;
-            }
-        }
-//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to do all random ticks. \n");
     }
 
     public static void iterateLightQueue() {
@@ -692,6 +659,7 @@ public class World {
     }
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority, int tickDelay, boolean silent) {
+        //long startTime = System.nanoTime();
         if (inBounds(x, y, z)) {
             Vector2i existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.x() == 0)) {
@@ -721,7 +689,7 @@ public class World {
                 BlockType oldBlockType = BlockTypes.blockTypeMap.get(oldBlock.x);
                 chunk.setBlock(localPos, blockTypeId, blockSubtypeId, pos);
                 if (tickDelay > 0) {
-                    ScheduledTicker.scheduleTick(Main.currentTick+tickDelay, pos);
+                    ScheduledTicker.scheduleTick(Main.currentTick+tickDelay, pos, 0);
                 }
                 if (!lightChanged) {
                     lightChanged = blockType.blockProperties.blocksLight != oldBlockType.blockProperties.blocksLight;
@@ -741,6 +709,7 @@ public class World {
                 BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, silent);
             }
         }
+        //System.out.print("Took "+(System.nanoTime()-startTime)+"ns to set block. \n");
     }
 
     public static void setCorner(int x, int y, int z, int corner) {

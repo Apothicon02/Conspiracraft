@@ -1,8 +1,12 @@
 package org.conspiracraft.game.world.shapes;
 
+import org.conspiracraft.Main;
+import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.blocks.types.CloudBlockType;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import static org.conspiracraft.engine.Utils.condensePos;
@@ -26,6 +30,9 @@ public class Blob {
                         int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                         if (dist <= radius * 3) {
                             setBlockWorldgen(lX, lY, lZ, blockType, blockSubType);
+                            if (type instanceof CloudBlockType) {
+                                ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), new Vector3i(lX, lY, lZ), 1);
+                            }
                             if (type.obstructingHeightmap(block)) {
                                 heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
                                 if (type.blockProperties.blocksLight) {
