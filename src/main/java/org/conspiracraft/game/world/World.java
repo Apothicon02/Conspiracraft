@@ -659,7 +659,6 @@ public class World {
     }
 
     public static void setBlock(int x, int y, int z, int blockTypeId, int blockSubtypeId, boolean replace, boolean priority, int tickDelay, boolean silent) {
-        //long startTime = System.nanoTime();
         if (inBounds(x, y, z)) {
             Vector2i existing = getBlock(x, y, z);
             if (replace || (existing == null || existing.x() == 0)) {
@@ -709,7 +708,6 @@ public class World {
                 BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, silent);
             }
         }
-        //System.out.print("Took "+(System.nanoTime()-startTime)+"ns to set block. \n");
     }
 
     public static void setCorner(int x, int y, int z, int corner) {

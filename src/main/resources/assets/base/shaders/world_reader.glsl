@@ -245,11 +245,11 @@ bool isChunkAir(int x, int y, int z) {
 
 void setDistanceFogginess(vec3 pos) {
     float borders = max(gradient(pos.x, 0, 128, 0, 1), max(gradient(pos.z, 0, 128, 0, 1), max(gradient(pos.x, size, size-128, 0, 1), gradient(pos.z, size, size-128, 0, 1))));
-    float fogNoise = 0.25f*((max(0, cloudNoise((vec2(pos.x, pos.z))+(floor(pos.y/16)+(float(time)*7500))))*gradient(pos.y, 63, 96, 0, 0.77))+gradient(pos.y, 63, 96, 0, 0.33f));
+    float fogNoise = 0.15f*((max(0, cloudNoise((vec2(pos.x, pos.z))+(floor(pos.y/16)+(float(time)*7500))))*gradient(pos.y, 63, 96, 0, 0.77))+gradient(pos.y, 63, 96, 0, 0.33f));
     float camDist = distance(camPos, pos)/renderDistance;
     float linearDistFog = camDist+(fogNoise/2)+((fogNoise/2)*camDist);
     distanceFogginess = clamp(((exp2(linearDistFog-0.75f)+min(0.f, linearDistFog-0.25f)+fogNoise)*2)-1, 0.f, 1.f);
-    distanceFogginess = max(borders, distanceFogginess*min(1, camDist+0.2));
+    distanceFogginess = max(borders, pow(distanceFogginess, 2));
 }
 
 vec3 stepMask(vec3 sideDist) {
