@@ -25,9 +25,7 @@
 - Capslock: Super sprint (only when flying) 
 - T: Skip forward in time 
 - F1: Hide UI 
-- F4: Toggle shadows (very demanding) 
-- F3 + W: Toggle snow 
-- F3 + C: Toggle clouds
+- F4: Toggle shadows
 - F3 + T: Reloads GPU data
 - F3 + Up: Increase render distance
 - F3 + Down: Decrease render distance

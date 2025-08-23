@@ -11,10 +11,11 @@ import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.world.World.*;
 
 public class Chunk {
+    public final Vector3i chunkPos;
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public int[] uncompressedBlocks;
-    public final IntArrayList blockPalette = new IntArrayList();
+    public final IntArrayList blockPalette = new IntArrayList(); //make sure and fix same blocks being added multiple times
     public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
     public final IntArrayList lightPalette = new IntArrayList();
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
@@ -22,13 +23,15 @@ public class Chunk {
     private BitBuffer cornerData = new BitBuffer(totalBlocks, 0);
     private BitBuffer subChunks = new BitBuffer(8, 1);
 
-    public Chunk(int compressedChunkPos) {
+    public Chunk(Vector3i chunkPos, int compressedChunkPos) {
+        this.chunkPos = chunkPos;
         condensedChunkPos = compressedChunkPos;
         blockPalette.add(0);
         lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, 20)));
         cornerPalette.add(0);
     }
-    public Chunk(int compressedChunkPos, Vector2i block, int sunLight) {
+    public Chunk(Vector3i chunkPos, int compressedChunkPos, Vector2i block, int sunLight) {
+        this.chunkPos = chunkPos;
         condensedChunkPos = compressedChunkPos;
         blockPalette.add(Utils.packInts(block.x, block.y));
         lightPalette.add(Utils.packColor(new Vector4i(0, 0, 0, sunLight)));

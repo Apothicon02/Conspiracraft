@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.world.WorldGen.*;
@@ -49,7 +50,7 @@ public class World {
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static boolean chunkEmptinessChanged = false;
-    public static int[] chunkEmptiness = new int[(sizeChunks*sizeChunks*heightChunks)/32];
+    public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
     public static short[] surfaceHeightmap = new short[size*size];
     public static short[] heightmap = new short[size*size];
     public static ArrayList<Integer> chunkBlockQueue = new ArrayList<>();
@@ -59,7 +60,41 @@ public class World {
     public static long stageTime = 0;
 
     public static void tick() {
+        randomTick();
         iterateLightQueue();
+    }
+
+    public static int prevRandomTickX = 0;
+    public static void randomTick() {
+        Random random = new Random();
+        long startTime = System.currentTimeMillis();
+        for (int x = prevRandomTickX; x < sizeChunks; x++) {
+            for (int z = 0; z < sizeChunks; z++) {
+                for (int y = 0; y < heightChunks; y++) {
+//                long nanoTime = System.nanoTime();
+                    Vector3i pos = new Vector3i((x*chunkSize)+random.nextInt(0, chunkSize - 1), (y*chunkSize)+random.nextInt(0, chunkSize - 1), (z*chunkSize)+random.nextInt(0, chunkSize - 1));
+//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to make position. \n");
+//          nanoTime = System.nanoTime();
+                    Vector2i block = getBlock(pos);
+//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to get block. \n");
+//          nanoTime = System.nanoTime();
+                    BlockType type = BlockTypes.blockTypeMap.get(block.x);
+//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to get type. \n");
+//          nanoTime = System.nanoTime();
+                    type.randomTick(pos);
+//          System.out.print("Took "+(System.nanoTime()-nanoTime)+"ns to do random tick. \n");
+                }
+            }
+            if (System.currentTimeMillis()-startTime > 10) {
+                prevRandomTickX = x;
+                break;
+            }
+            if (x == sizeChunks-1) {
+                prevRandomTickX = 0;
+                break;
+            }
+        }
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to do all random ticks. \n");
     }
 
     public static void iterateLightQueue() {
@@ -70,118 +105,120 @@ public class World {
         }
     }
 
-    public static void run() throws IOException {
-        if (!worldGenerated) {
-            if (Files.exists(worldPath)) {
-                String path = (World.worldPath + "/chunks.data");
-                loadWorld(path);
+    public static void generate() throws IOException {
+        if (Files.exists(worldPath)) {
+            String path = (World.worldPath + "/chunks.data");
+            loadWorld(path);
+            createdChunks = true;
+            heightmapGenerated = true;
+            surfaceGenerated = true;
+            featuresGenerated = true;
+            areChunksCompressed = true;
+            worldGenerated = true;
+            Renderer.worldChanged = true;
+        } else {
+            if (!createdChunks) {
                 createdChunks = true;
-                heightmapGenerated = true;
-                surfaceGenerated = true;
-                featuresGenerated = true;
-                areChunksCompressed = true;
-                worldGenerated = true;
-                Renderer.worldChanged = true;
-            } else {
-                if (!createdChunks) {
-                    createdChunks = true;
-                    for (int i = 0; i < chunks.length; i++) {
-                        chunks[i] = new Chunk(i);
+                for (int x = 0; x < sizeChunks; x++) {
+                    for (int z = 0; z < sizeChunks; z++) {
+                        for (int y = 0; y < heightChunks; y++) {
+                            int condensedChunkPos = condenseChunkPos(x, y, z);
+                            chunks[condensedChunkPos] = new Chunk(new Vector3i(x, y, z), condensedChunkPos);
+                        }
                     }
                 }
-                currentChunk++;
-                if (heightmapGenerated && surfaceGenerated && featuresGenerated) {
-                    if (doLight) {
-                        if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis() / 1000;
-                        }
-                        if (currentChunk == sizeChunks) {
-                            System.out.print("Light filling took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = 0;
-                            surfaceHeightmap = null;
-                            currentChunk = -1;
-                            worldGenerated = true;
-                            Renderer.worldChanged = true;
-                        } else {
-                            fillLight();
-                        }
-                    } else {
+            }
+            currentChunk++;
+            if (heightmapGenerated && surfaceGenerated && featuresGenerated) {
+                if (doLight) {
+                    if (stageTime == 0) {
+                        stageTime = System.currentTimeMillis() / 1000;
+                    }
+                    if (currentChunk == sizeChunks) {
+                        System.out.print("Light filling took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                        stageTime = 0;
+                        surfaceHeightmap = null;
+                        currentChunk = -1;
                         worldGenerated = true;
                         Renderer.worldChanged = true;
+                    } else {
+                        fillLight();
                     }
-                } else if (!worldGenerated) {
-                    if (!heightmapGenerated) {
-                        if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis() / 1000;
+                } else {
+                    worldGenerated = true;
+                    Renderer.worldChanged = true;
+                }
+            } else if (!worldGenerated) {
+                if (!heightmapGenerated) {
+                    if (stageTime == 0) {
+                        stageTime = System.currentTimeMillis() / 1000;
+                    }
+                    if (currentChunk == sizeChunks) {
+                        System.out.print("Heightmap generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                        stageTime = 0;
+                        int i = 0;
+                        for (short y : heightmap) {
+                            surfaceHeightmap[i++] = y;
                         }
-                        if (currentChunk == sizeChunks) {
-                            System.out.print("Heightmap generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = 0;
-                            int i = 0;
-                            for (short y : heightmap) {
-                                surfaceHeightmap[i++] = y;
-                            }
-                            currentChunk = -1;
-                            heightmapGenerated = true;
-                        } else {
-                            generateHeightmap();
-                        }
-                    } else if (!surfaceGenerated) {
-                        if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis() / 1000;
-                        }
-                        if (currentChunk == sizeChunks) {
-                            System.out.print("Surface generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = 0;
-                            currentChunk = -1;
-                            surfaceGenerated = true;
-                        } else {
-                            generateSurface();
-                        }
-                    } else if (!featuresGenerated) {
-                        if (stageTime == 0) {
-                            stageTime = System.currentTimeMillis() / 1000;
-                        }
-                        if (currentChunk == sizeChunks) {
-                            System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = System.currentTimeMillis() / 1000;
-                            for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                                for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
-                                    double centDist = distance(chunkX*chunkSize, chunkZ*chunkSize, halfSize, halfSize) / halfSize;
-                                    for (int chunkY = 0; chunkY < ((centDist < 0.5) ? heightChunks : (maxWorldgenHeight / chunkSize)); chunkY++) {
-                                        int condensedChunkPos = Utils.condenseChunkPos(chunkX, chunkY, chunkZ);
-                                        Chunk chunk = chunks[condensedChunkPos];
-                                        if (chunk.uncompressedBlocks != null) {
-                                            int i = 0;
-                                            int key = 0;
-                                            int prevBlock = 0;
-                                            for (int block : chunk.uncompressedBlocks) {
-                                                if (block != prevBlock) {
-                                                    key = chunk.blockPalette.indexOf(block);
-                                                    if (key == -1) {
-                                                        key = chunk.blockPalette.size();
-                                                        chunk.blockPalette.add(block);
-                                                        chunk.updateBlockPaletteKeySize();
-                                                    }
-                                                    prevBlock = block;
+                        currentChunk = -1;
+                        heightmapGenerated = true;
+                    } else {
+                        generateHeightmap();
+                    }
+                } else if (!surfaceGenerated) {
+                    if (stageTime == 0) {
+                        stageTime = System.currentTimeMillis() / 1000;
+                    }
+                    if (currentChunk == sizeChunks) {
+                        System.out.print("Surface generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                        stageTime = 0;
+                        currentChunk = -1;
+                        surfaceGenerated = true;
+                    } else {
+                        generateSurface();
+                    }
+                } else if (!featuresGenerated) {
+                    if (stageTime == 0) {
+                        stageTime = System.currentTimeMillis() / 1000;
+                    }
+                    if (currentChunk == sizeChunks) {
+                        System.out.print("Feature generation took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                        stageTime = System.currentTimeMillis() / 1000;
+                        for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                            for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+                                for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
+                                    int condensedChunkPos = Utils.condenseChunkPos(chunkX, chunkY, chunkZ);
+                                    Chunk chunk = chunks[condensedChunkPos];
+                                    if (chunk.uncompressedBlocks != null) {
+                                        int i = 0;
+                                        int key = 0;
+                                        int prevBlock = 0;
+                                        for (int block : chunk.uncompressedBlocks) {
+                                            if (block != prevBlock) {
+                                                key = chunk.blockPalette.indexOf(block);
+                                                if (key == -1) {
+                                                    key = chunk.blockPalette.size();
+                                                    chunk.blockPalette.add(block);
+                                                    chunk.updateBlockPaletteKeySize();
                                                 }
-
-                                                chunk.blockData.setValue(i, key);
-                                                i++;
+                                                prevBlock = block;
                                             }
-                                            chunk.uncompressedBlocks = null;
+
+                                            chunk.blockData.setValue(i, key);
+                                            i++;
                                         }
+                                        chunk.uncompressedBlocks = null;
                                     }
                                 }
                             }
-                            areChunksCompressed = true;
-                            System.out.print("Palette compression took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
-                            stageTime = 0;
-                            currentChunk = -1;
-                            featuresGenerated = true;
-                        } else {
-                            generateFeatures();
                         }
+                        areChunksCompressed = true;
+                        System.out.print("Palette compression took " + ((System.currentTimeMillis() / 1000) - stageTime) + "s \n");
+                        stageTime = 0;
+                        currentChunk = -1;
+                        featuresGenerated = true;
+                    } else {
+                        generateFeatures();
                     }
                 }
             }
@@ -335,7 +372,7 @@ public class World {
                         dataIndex++;
                     }
 
-                    Chunk chunk = new Chunk(Utils.condenseChunkPos(x, y, z));
+                    Chunk chunk = new Chunk(new Vector3i(x, y, z), Utils.condenseChunkPos(x, y, z));
                     chunk.setSubChunks(subChunks);
                     chunk.setBlockPalette(blockPalette);
                     chunk.setBlockData(blocks);
@@ -349,6 +386,9 @@ public class World {
         }
     }
 
+    public static Vector2i getBlockUnsafe(Vector3i blockPos) {
+        return chunks[condenseChunkPos(blockPos.x >> 4, blockPos.y >> 4, blockPos.z >> 4)].getBlock(condenseLocalPos(blockPos.x & 15, blockPos.y & 15, blockPos.z & 15));
+    }
     public static Vector2i getBlock(Vector3i blockPos) {
         if (blockPos.x >= 0 && blockPos.x < size && blockPos.z >= 0 && blockPos.z < size && blockPos.y >= 0 && blockPos.y < height) {
             return chunks[condenseChunkPos(blockPos.x >> 4, blockPos.y >> 4, blockPos.z >> 4)].getBlock(condenseLocalPos(blockPos.x & 15, blockPos.y & 15, blockPos.z & 15));
@@ -629,9 +669,11 @@ public class World {
             for (int z = -1; z <= 1; z++) {
                 for (int y = -1; y <= 1; y++) {
                     int condensedChunkPos = Utils.condenseChunkPos(chunkPos.x+x, chunkPos.y+y, chunkPos.z+z);
-                    boolean exists = chunkLightQueue.contains(condensedChunkPos);
-                    if (!exists) {
-                        chunkLightQueue.addFirst(condensedChunkPos);
+                    if (condensedChunkPos > 0 && condensedChunkPos < chunks.length) {
+                        boolean exists = chunkLightQueue.contains(condensedChunkPos);
+                        if (!exists) {
+                            chunkLightQueue.addFirst(condensedChunkPos);
+                        }
                     }
                 }
             }

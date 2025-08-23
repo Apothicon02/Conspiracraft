@@ -1,6 +1,7 @@
 package org.conspiracraft.game.blocks.types;
 
 import org.conspiracraft.game.world.FluidHelper;
+import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -24,8 +25,12 @@ public class BlockType {
     }
 
     public void tick(Vector3i pos) {
-        FluidHelper.updateFluid(pos, getBlock(pos));
+        if (pos.x > 0 && pos.x < World.size-1 && pos.z > 0 && pos.z < World.size-1) {
+            FluidHelper.updateFluid(pos, getBlock(pos));
+        }
     }
+
+    public void randomTick(Vector3i pos) {}
 
     public void onPlace(Vector3i pos, boolean isSilent) {
         if (!isSilent) {

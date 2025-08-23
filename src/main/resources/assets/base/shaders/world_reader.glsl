@@ -15,7 +15,6 @@ uniform bool ui;
 uniform bool shadowsEnabled;
 uniform bool reflectionShadows;
 uniform vec3 sun;
-uniform bool cloudsEnabled;
 uniform ivec3 hand;
 uniform ivec2 res;
 
@@ -129,6 +128,9 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
         color.rgb = fromLinear(color.rgb)*0.9;
         if (ui && selected == ivec3(bX, bY, bZ) && color.a > 0) {
             hitSelection = true;
+        }
+        if (blockType == 31) {
+            color.rgb *= 2;
         }
         return color;
     } else {
@@ -694,11 +696,6 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float sunLightFog = (lightFog.a)*mixedTime;
     vec3 finalLightFog = sunColor*sunLightFog;//max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
     vec3 finalTint = tint;
-
-    vec3 cloudPos = (vec3(cam * vec4(uvDir * 500.f, 1.f))-camPos);
-    if (cloudsEnabled) {
-        whiteness = whiteness+((sqrt(max(0, cloudNoise((vec2(cloudPos.x, cloudPos.y*1.5f))+(float(time)*cloudSpeed))+cloudNoise((vec2(cloudPos.y*1.5f, cloudPos.z))+(float(time)*cloudSpeed))+cloudNoise((vec2(cloudPos.z, cloudPos.x))+(float(time)*cloudSpeed)))*gradient(hitPos.y, 0, 372, 1.5f, 0))*gradient(hitPos.y, 0, 372, 1, 0)) * pow(finalDistanceFogginess, 32));
-    }
     vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, sunLightFog);
 
     if (addFakeCaustics) {
@@ -723,17 +720,17 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     vec3 finalLight = max(finalLighting.rgb, sunLight)*finalNormalBrightness;
     color.rgb *= finalLight;
     //fog start
-    vec4 fog = 1+vec4(vec3(finalLightFog)*1.5f, 1);
+    vec4 fog = 1 + vec4(vec3(finalLightFog) * 1.5f, 1);
     color *= fog;
     color *= prevFog;
     prevFog = fog;
-    color.rgb = mix(color.rgb, unmixedFogColor*fog.rgb, finalDistanceFogginess);
-    reflectivity *= (1-finalDistanceFogginess);
+    color.rgb = mix(color.rgb, unmixedFogColor * fog.rgb, finalDistanceFogginess);
+    reflectivity *= (1 - finalDistanceFogginess);
     //fog end
     //transparency start
-    finalTint = (vec3(1)+finalTint);
+    finalTint = (vec3(1) + finalTint);
     //finalTint.rgb = mix(finalTint.rgb, unmixedFogColor, finalHitDistanceFogginess);
-    vec4 superFinalTint = fromLinear(vec4(vec3(finalTint)/(max(finalTint.r, max(finalTint.g, finalTint.b))), 1));
+    vec4 superFinalTint = fromLinear(vec4(vec3(finalTint) / (max(finalTint.r, max(finalTint.g, finalTint.b))), 1));
     color *= superFinalTint;
     color *= prevSuperFinalTint;
     prevSuperFinalTint = superFinalTint;

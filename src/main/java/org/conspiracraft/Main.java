@@ -276,9 +276,6 @@ public class Main {
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
                     }
-                    if (wasCDown && !window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS)) {
-                        Renderer.cloudsEnabled = !Renderer.cloudsEnabled;
-                    }
                     if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
                         selectedBlock.add(new Vector3i(0, isShiftDown ? 10 : 1, 0));
                     } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
@@ -389,12 +386,15 @@ public class Main {
             World.saveWorld(World.worldPath+"/");
             glfwSetWindowShouldClose(window.getWindowHandle(), true);
         } else {
-            if (!renderingEnabled && World.worldGenerated) {
-                renderingEnabled = true;
-                Renderer.init(window);
-            }
-            World.run();
             if (World.worldGenerated) {
+                if (!renderingEnabled) {
+                    renderingEnabled = true;
+                    Renderer.init(window);
+                }
+            } else {
+                World.generate();
+            }
+            if (World.worldGenerated && renderingEnabled) {
                 updateTime(diffTimeMillis, 1);
                 interpolationTime = timePassed/tickTime;
                 while (timePassed >= tickTime) {

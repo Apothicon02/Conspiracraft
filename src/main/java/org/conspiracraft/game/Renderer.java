@@ -67,20 +67,21 @@ public class Renderer {
     public static boolean shadowsEnabled = true;
     public static boolean reflectionShadows = false;
     public static boolean reflectionsEnabled = true;
-    public static boolean cloudsEnabled = true;
     public static Vector2i lowRes = new Vector2i(960, 540);
 
     public static boolean resized = false;
-    public static int defaultSSBOSize = Integer.MAX_VALUE;
+    public static int gigabyte = 1000000000;
+    public static int defaultSSBOSize = gigabyte;
+    public static int chunkArrSize = ((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks);
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkBlockPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*5];
-    public static long[] chunkBlockAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
+    public static int[] chunkBlockPointers = new int[chunkArrSize*5];
+    public static long[] chunkBlockAllocs = new long[chunkArrSize];
     public static PointerBuffer corners = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkCornerPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
-    public static long[] chunkCornerAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
+    public static int[] chunkCornerPointers = new int[chunkArrSize*4];
+    public static long[] chunkCornerAllocs = new long[chunkArrSize];
     public static PointerBuffer lights = BufferUtils.createPointerBuffer(1);
-    public static int[] chunkLightPointers = new int[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)*4];
-    public static long[] chunkLightAllocs = new long[((((sizeChunks*sizeChunks)+sizeChunks)*heightChunks)+heightChunks)];
+    public static int[] chunkLightPointers = new int[chunkArrSize*4];
+    public static long[] chunkLightAllocs = new long[chunkArrSize];
 
     public static void createGLDebugger() {
         glEnable(GL_DEBUG_OUTPUT);
@@ -225,7 +226,7 @@ public class Renderer {
         mediumFboId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
         scene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
         generateVao();
         generateTextures(window);
         createBuffers();
@@ -233,9 +234,9 @@ public class Renderer {
         blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
         reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "cloudsEnabled", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
         finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
                 new String[]{"res"});
     }
@@ -262,7 +263,6 @@ public class Renderer {
         sunPos.rotateY((float) time);
         sunPos = new Vector3f(sunPos.x + halfSize, height + 64, sunPos.z + halfSize);
         glUniform3f(program.uniforms.get("sun"), sunPos.x, sunPos.y, sunPos.z);
-        glUniform1i(program.uniforms.get("cloudsEnabled"), cloudsEnabled ? 1 : 0);
         glUniform3i(program.uniforms.get("hand"), selectedBlock.x, selectedBlock.y, selectedBlock.z);
         glUniform1i(program.uniforms.get("ui"), showUI ? 1 : 0);
     }
@@ -279,7 +279,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(new File("C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/textures/atlas.png"));//ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = (1024*1024)+1024;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 248; x++) {
+            for (int x = 0; x < 264; x++) {
                 for (int y = 0; y < 1024; y++) {
                     atlasData[(x*1024) + y] = colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(x*1024) + y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -295,7 +295,8 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
         if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
+            vmaClearVirtualBlock(corners.get());
+            glBufferData(GL_SHADER_STORAGE_BUFFER, gigabyte/10, GL_DYNAMIC_DRAW); //0.1gb
             chunkCornerPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
             chunkCornerAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
 
@@ -319,7 +320,7 @@ public class Renderer {
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
                         long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
                         if (res == VK_SUCCESS) {
-                            chunkCornerAllocs[condensedChunkPos] = res;
+                            chunkCornerAllocs[condensedChunkPos] = alloc.get();
                             int pointer = (int) offset.get(0);
                             chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
                             chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
@@ -359,7 +360,7 @@ public class Renderer {
                 LongBuffer offset = BufferUtils.createLongBuffer(1);
                 long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
                 if (res == VK_SUCCESS) {
-                    chunkCornerAllocs[condensedChunkPos] = res;
+                    chunkCornerAllocs[condensedChunkPos] = alloc.get();
                     int pointer = (int) offset.get(0);
                     chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
                     chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
@@ -397,6 +398,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
         if (worldChanged) {
+            vmaClearVirtualBlock(lights.get());
             glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
             chunkLightPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
             chunkLightAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
@@ -421,7 +423,7 @@ public class Renderer {
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
                         long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
                         if (res == VK_SUCCESS) {
-                            chunkLightAllocs[condensedChunkPos] = res;
+                            chunkLightAllocs[condensedChunkPos] = alloc.get();
                             int pointer = (int) offset.get(0);
                             chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
                             chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
@@ -463,7 +465,7 @@ public class Renderer {
                 LongBuffer offset = BufferUtils.createLongBuffer(1);
                 long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
                 if (res == VK_SUCCESS) {
-                    chunkLightAllocs[condensedChunkPos] = res;
+                    chunkLightAllocs[condensedChunkPos] = alloc.get();
                     int pointer = (int) offset.get(0);
                     chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
                     chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
@@ -506,6 +508,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
         if (worldChanged) {
+            vmaClearVirtualBlock(blocks.get());
             glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
             chunkBlockPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 5];
             chunkBlockAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
@@ -530,7 +533,7 @@ public class Renderer {
                         LongBuffer offset = BufferUtils.createLongBuffer(1);
                         long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
                         if (res == VK_SUCCESS) {
-                            chunkBlockAllocs[condensedChunkPos] = res;
+                            chunkBlockAllocs[condensedChunkPos] = alloc.get();
                             int pointer = (int) offset.get(0);
                             chunkBlockPointers[condensedChunkPos * 5] = pointer / 4;
                             chunkBlockPointers[(condensedChunkPos * 5) + 1] = paletteSize;
@@ -703,7 +706,7 @@ public class Renderer {
         LongBuffer offset = BufferUtils.createLongBuffer(1);
         long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
         if (res == VK_SUCCESS) {
-            chunkBlockAllocs[condensedChunkPos] = res;
+            chunkBlockAllocs[condensedChunkPos] = alloc.get();
             int pointer = (int) offset.get(0);
             chunkBlockPointers[condensedChunkPos*5] = pointer / 4;
             chunkBlockPointers[(condensedChunkPos*5) + 1] = paletteSize;

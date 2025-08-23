@@ -230,7 +230,7 @@ public class WorldGen {
                     if (chunkZ != prevChunkZ) {
                         for (int chunkY = (minY / chunkSize) - 1; chunkY >= 0; chunkY--) {
                             int condensedChunkPos = condenseChunkPos(currentChunk, chunkY, prevChunkZ);
-                            chunks[condensedChunkPos] = new Chunk(condensedChunkPos, new Vector2i(getRockBlock(currentChunk*chunkSize, chunkY*chunkSize, prevChunkZ*chunkSize, desertDist, volcanoElevation), 0), 0);
+                            chunks[condensedChunkPos] = new Chunk(new Vector3i(currentChunk, chunkY, prevChunkZ), condensedChunkPos, new Vector2i(getRockBlock(currentChunk*chunkSize, chunkY*chunkSize, prevChunkZ*chunkSize, desertDist, volcanoElevation), 0), 0);
                         }
                         prevChunkZ = chunkZ;
                     }
@@ -249,9 +249,14 @@ public class WorldGen {
             for (int z = 0; z < size; z++) {
                 if ((x <= halfSize && z <= halfSize) || !quarterWorld) {
                     int y = surfaceHeightmap[condensePos(x, z)];
+                    float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
+                    int cloudScale = (int)(4+(basePerlinNoise*4));
+                    if (Noises.CLOUD_NOISE.sample(x*cloudScale, z*cloudScale) > 0.1f && Math.random() > 0.95f && y < 200) {
+                        boolean isRainCloud = (Math.random() < 0.005f);
+                        Blob.generate(new Vector2i(0), x, 216+(int)Math.abs(Noises.CELLULAR_NOISE.sample(x, z)*32), z, isRainCloud ? 32 : 31, 0, (isRainCloud ? 10 : 0) +(int)(2+(Math.random()*8)));
+                    }
                     if (y >= seaLevel) {
                         Vector2i blockOn = getBlockWorldgen(x, y, z);
-                        float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                         float foliageNoise = (basePerlinNoise + 0.5f);
                         float exponentialFoliageNoise = foliageNoise * foliageNoise;
                         double northEastDist = distance(x, z, size, size) / size;
