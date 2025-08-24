@@ -10,10 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/Trunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/Trunk.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +98,7 @@
     "Gradle.Build Terraflat.executor": "Run",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "Gradle.Terraflat [build].executor": "Run",
@@ -135,11 +139,11 @@
       <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.game.world.trees" />
       <recent name="org.conspiracraft.game.blocks.types" />
       <recent name="org.conspiracraft.game.world.shapes" />
       <recent name="org.conspiracraft.game.world.trees.trunks" />
       <recent name="org.conspiracraft.game.world.trees.canopies" />
-      <recent name="org.conspiracraft.game.world.trees" />
     </key>
   </component>
   <component name="RunManager" selected="Application.Run">
@@ -197,22 +201,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00161" summary="- Removed hand rendering. &#10;- Updated README.">
-      <option name="closed" value="true" />
-      <created>1742315736571</created>
-      <option name="number" value="00161" />
-      <option name="presentableId" value="LOCAL-00161" />
-      <option name="project" value="LOCAL" />
-      <updated>1742315736571</updated>
-    </task>
-    <task id="LOCAL-00162" summary="- Cleaned up fragment shader.">
-      <option name="closed" value="true" />
-      <created>1742316818355</created>
-      <option name="number" value="00162" />
-      <option name="presentableId" value="LOCAL-00162" />
-      <option name="project" value="LOCAL" />
-      <updated>1742316818355</updated>
     </task>
     <task id="LOCAL-00163" summary="- Added brick dda.">
       <option name="closed" value="true" />
@@ -590,7 +578,23 @@
       <option name="project" value="LOCAL" />
       <updated>1755917903656</updated>
     </task>
-    <option name="localTasksCounter" value="210" />
+    <task id="LOCAL-00210" summary="- Will now only do 3 ticks per frame at max to fix issues with pausing. &#10;- Removed random ticking. &#10;- Clouds now use scheduled ticking. &#10;- Rainclouds now only generate in one corner of the map. &#10;- Added randomization to water flow direction. &#10;- Fixed black squares in the sky. &#10;- Reduced AO on clouds.">
+      <option name="closed" value="true" />
+      <created>1755971768155</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
+      <option name="project" value="LOCAL" />
+      <updated>1755971768155</updated>
+    </task>
+    <task id="LOCAL-00211" summary="- Improved fog.">
+      <option name="closed" value="true" />
+      <created>1755974892422</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
+      <option name="project" value="LOCAL" />
+      <updated>1755974892422</updated>
+    </task>
+    <option name="localTasksCounter" value="212" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,8 +617,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Increased ups target from 30 to 75." />
-    <MESSAGE value="- Rendering is now done every other frame to eliminate rendering-inflicted simulation slowdown as long as fps is greater than 37.5." />
     <MESSAGE value="- Added ocean. &#10;- Added islands. &#10;- Added mahogany planks. &#10;- Added palm logs. &#10;- Added palm leaves. &#10;- Added palm planks. &#10;- Greatly improved log textures. &#10;- Added sand. &#10;- Added sandstone. &#10;- F3+C now regenerates atlas. &#10;- Improved color accuracy. &#10;- Reverted some textures. &#10;- Sun/Luna now orbit outside of the world border. &#10;- Doubled magma brightness. &#10;- Added minimum sun intensity." />
     <MESSAGE value="- Fixed sky rendering wrong color.&#10;- Added islands. &#10;- Increased world size.  &#10;- Added caves. &#10;- Fixed sunlight being in places it shouldn't." />
     <MESSAGE value="- Added speed limit. &#10;- Fixed sunlight spreading being underground. &#10;- Remade sky. &#10;- Fixed sun and luna not rendering. &#10;- Fixed sunlight being brighter at night. &#10;- Enabled fog noise." />
@@ -638,7 +640,9 @@
     <MESSAGE value="- Fixed volcanoes being cutoff." />
     <MESSAGE value="- Fixed issues with sub-surface generation. &#10;- Updated cacti texture. &#10;- Fixed cacti generating one block into the ground. &#10;- Reduced overall voxel brightness. &#10;- Added dead bushes. &#10;- Fixed cacti having AO. &#10;- Fixed cacti not needing block support. &#10;- Increased max cacti height. &#10;- Improved sand/sandstone generation. &#10;- Added sandstone rocks to the desert. &#10;- Fixed non-full water rendering." />
     <MESSAGE value="- Added physical clouds. &#10;- Added cloud blocks. &#10;- Added rain cloud blocks. &#10;- Added random ticks." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added physical clouds. &#10;- Added cloud blocks. &#10;- Added rain cloud blocks. &#10;- Added random ticks." />
+    <MESSAGE value="- Will now only do 3 ticks per frame at max to fix issues with pausing. &#10;- Removed random ticking. &#10;- Clouds now use scheduled ticking. &#10;- Rainclouds now only generate in one corner of the map. &#10;- Added randomization to water flow direction. &#10;- Fixed black squares in the sky. &#10;- Reduced AO on clouds." />
+    <MESSAGE value="- Improved fog." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved fog." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -650,12 +654,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>547</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>721</line>
+          <line>720</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
       </breakpoints>

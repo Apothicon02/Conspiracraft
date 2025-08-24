@@ -218,6 +218,166 @@ public class Renderer {
         vmaCreateVirtualBlock(blockCreateInfo, lights);
     }
 
+    public static void fillBuffers() {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
+        chunkBlockPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 5];
+        chunkBlockAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
+
+        outerLoop:
+        for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+            for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
+                    VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                    int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
+                    int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
+                    int bitsPerValue = chunks[condensedChunkPos].bitsPerBlock();
+                    int valueMask = chunks[condensedChunkPos].blockValueMask();
+                    int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
+                    if (compressedBlocks == null) {
+                        allocCreateInfo.size((paletteSize) * 4L);
+                    } else {
+                        allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+                    }
+
+                    PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                    LongBuffer offset = BufferUtils.createLongBuffer(1);
+                    long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
+                    if (res == VK_SUCCESS) {
+                        chunkBlockAllocs[condensedChunkPos] = alloc.get();
+                        int pointer = (int) offset.get(0);
+                        chunkBlockPointers[condensedChunkPos * 5] = pointer / 4;
+                        chunkBlockPointers[(condensedChunkPos * 5) + 1] = paletteSize;
+                        chunkBlockPointers[(condensedChunkPos * 5) + 2] = bitsPerValue;
+                        chunkBlockPointers[(condensedChunkPos * 5) + 3] = valueMask;
+                        chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
+                        if (compressedBlocks != null) {
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
+                        }
+                    } else {
+                        System.out.print("blocksSSBO ran out of space! \n");
+                        Main.isClosing = true;
+                        break outerLoop;
+                    }
+                }
+            }
+        }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkBlocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunkBlocksSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, chunkEmptySSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
+        chunkLightPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
+        chunkLightAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
+
+        outerLoop:
+        for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+            for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
+                    VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                    int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
+                    int paletteSize = chunks[condensedChunkPos].getLightPaletteSize();
+                    int bitsPerValue = chunks[condensedChunkPos].bitsPerLight();
+                    int valueMask = chunks[condensedChunkPos].lightValueMask();
+                    int[] compressedLights = chunks[condensedChunkPos].getLightData();
+                    if (compressedLights == null) {
+                        allocCreateInfo.size((paletteSize) * 4L);
+                    } else {
+                        allocCreateInfo.size((paletteSize + compressedLights.length) * 4L);
+                    }
+
+                    PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                    LongBuffer offset = BufferUtils.createLongBuffer(1);
+                    long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
+                    if (res == VK_SUCCESS) {
+                        chunkLightAllocs[condensedChunkPos] = alloc.get();
+                        int pointer = (int) offset.get(0);
+                        chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
+                        chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
+                        chunkLightPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
+                        chunkLightPointers[(condensedChunkPos * 4) + 3] = valueMask;
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getLightPalette());
+                        if (compressedLights != null) {
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedLights);
+                        }
+                    } else {
+                        System.out.print("lightsSSBO ran out of space! \n");
+                        Main.isClosing = true;
+                        break outerLoop;
+                    }
+                }
+            }
+        }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, gigabyte/10, GL_DYNAMIC_DRAW); //0.1gb
+        chunkCornerPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
+        chunkCornerAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
+
+        outerLoop:
+        for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
+            for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
+                for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
+                    VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+                    int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
+                    int paletteSize = chunks[condensedChunkPos].getCornerPaletteSize();
+                    int bitsPerValue = chunks[condensedChunkPos].bitsPerCorner();
+                    int valueMask = chunks[condensedChunkPos].cornerValueMask();
+                    int[] compressedCorners = chunks[condensedChunkPos].getCornerData();
+                    if (compressedCorners == null) {
+                        allocCreateInfo.size((paletteSize) * 4L);
+                    } else {
+                        allocCreateInfo.size((paletteSize + compressedCorners.length) * 4L);
+                    }
+
+                    PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+                    LongBuffer offset = BufferUtils.createLongBuffer(1);
+                    long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
+                    if (res == VK_SUCCESS) {
+                        chunkCornerAllocs[condensedChunkPos] = alloc.get();
+                        int pointer = (int) offset.get(0);
+                        chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
+                        chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
+                        chunkCornerPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
+                        chunkCornerPointers[(condensedChunkPos * 4) + 3] = valueMask;
+                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getCornerPalette());
+                        if (compressedCorners != null) {
+                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
+                        }
+                    } else {
+                        System.out.print("cornersSSBO ran out of space! \n");
+                        Main.isClosing = true;
+                        break outerLoop;
+                    }
+                }
+            }
+        }
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
+    }
+
     public static void init(Window window) throws Exception {
         createGLDebugger();
 
@@ -231,6 +391,7 @@ public class Renderer {
         generateTextures(window);
         createBuffers();
         createVMA();
+        fillBuffers();
         blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
@@ -294,304 +455,142 @@ public class Renderer {
     public static void updateCornerBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
-        if (worldChanged) {
-            vmaClearVirtualBlock(corners.get());
-            glBufferData(GL_SHADER_STORAGE_BUFFER, gigabyte/10, GL_DYNAMIC_DRAW); //0.1gb
-            chunkCornerPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
-            chunkCornerAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
+        while (!chunkCornerQueue.isEmpty()) {
+            int condensedChunkPos = chunkCornerQueue.getFirst();
+            chunkCornerQueue.removeFirst();
 
-            outerLoop:
-            for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
-                for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                    for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
-                        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                        int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
-                        int paletteSize = chunks[condensedChunkPos].getCornerPaletteSize();
-                        int bitsPerValue = chunks[condensedChunkPos].bitsPerCorner();
-                        int valueMask = chunks[condensedChunkPos].cornerValueMask();
-                        int[] compressedCorners = chunks[condensedChunkPos].getCornerData();
-                        if (compressedCorners == null) {
-                            allocCreateInfo.size((paletteSize) * 4L);
-                        } else {
-                            allocCreateInfo.size((paletteSize + compressedCorners.length) * 4L);
-                        }
-
-                        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                        LongBuffer offset = BufferUtils.createLongBuffer(1);
-                        long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
-                        if (res == VK_SUCCESS) {
-                            chunkCornerAllocs[condensedChunkPos] = alloc.get();
-                            int pointer = (int) offset.get(0);
-                            chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
-                            chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-                            chunkCornerPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-                            chunkCornerPointers[(condensedChunkPos * 4) + 3] = valueMask;
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getCornerPalette());
-                            if (compressedCorners != null) {
-                                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
-                            }
-                        } else {
-                            System.out.print("cornersSSBO ran out of space! \n");
-                            Main.isClosing = true;
-                            break outerLoop;
-                        }
-                    }
-                }
+            vmaVirtualFree(corners.get(0), chunkCornerAllocs[condensedChunkPos]);
+            VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+            int paletteSize = chunks[condensedChunkPos].getCornerPaletteSize();
+            int bitsPerValue = chunks[condensedChunkPos].bitsPerCorner();
+            int valueMask = chunks[condensedChunkPos].cornerValueMask();
+            int[] compressedCorners = chunks[condensedChunkPos].getCornerData();
+            if (compressedCorners == null) {
+                allocCreateInfo.size((paletteSize) * 4L);
+            } else {
+                allocCreateInfo.size((paletteSize + compressedCorners.length) * 4L);
             }
 
-        } else {
-            while (!chunkCornerQueue.isEmpty()) {
-                int condensedChunkPos = chunkCornerQueue.getFirst();
-                chunkCornerQueue.removeFirst();
-
-                vmaVirtualFree(corners.get(0), chunkCornerAllocs[condensedChunkPos]);
-                VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                int paletteSize = chunks[condensedChunkPos].getCornerPaletteSize();
-                int bitsPerValue = chunks[condensedChunkPos].bitsPerCorner();
-                int valueMask = chunks[condensedChunkPos].cornerValueMask();
-                int[] compressedCorners = chunks[condensedChunkPos].getCornerData();
-                if (compressedCorners == null) {
-                    allocCreateInfo.size((paletteSize) * 4L);
-                } else {
-                    allocCreateInfo.size((paletteSize + compressedCorners.length) * 4L);
+            PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+            LongBuffer offset = BufferUtils.createLongBuffer(1);
+            long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
+            if (res == VK_SUCCESS) {
+                chunkCornerAllocs[condensedChunkPos] = alloc.get();
+                int pointer = (int) offset.get(0);
+                chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
+                chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
+                chunkCornerPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
+                chunkCornerPointers[(condensedChunkPos * 4) + 3] = valueMask;
+                chunkCornerPointerChanges.addLast(condensedChunkPos * 4);
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getCornerPalette());
+                if (compressedCorners != null) {
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
                 }
-
-                PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                LongBuffer offset = BufferUtils.createLongBuffer(1);
-                long res = vmaVirtualAllocate(corners.get(0), allocCreateInfo, alloc, offset);
-                if (res == VK_SUCCESS) {
-                    chunkCornerAllocs[condensedChunkPos] = alloc.get();
-                    int pointer = (int) offset.get(0);
-                    chunkCornerPointers[condensedChunkPos * 4] = pointer / 4;
-                    chunkCornerPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-                    chunkCornerPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-                    chunkCornerPointers[(condensedChunkPos * 4) + 3] = valueMask;
-                    chunkCornerPointerChanges.addLast(condensedChunkPos * 4);
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getCornerPalette());
-                    if (compressedCorners != null) {
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedCorners);
-                    }
-                    chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-                    chunkBlockPointerChanges.addLast(condensedChunkPos * 5);
-                } else {
-                    System.out.print("cornersSSBO ran out of space! \n");
-                    Main.isClosing = true;
-                    break;
-                }
+                chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                chunkBlockPointerChanges.addLast(condensedChunkPos * 5);
+            } else {
+                System.out.print("cornersSSBO ran out of space! \n");
+                Main.isClosing = true;
+                break;
             }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
-        if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
-        } else {
-            for (int pos : chunkCornerPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos + 1], chunkCornerPointers[pos + 2], chunkCornerPointers[pos + 3]});
-            }
-            chunkCornerPointerChanges.clear();
+        for (int pos : chunkCornerPointerChanges) {
+            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos + 1], chunkCornerPointers[pos + 2], chunkCornerPointers[pos + 3]});
         }
+        chunkCornerPointerChanges.clear();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
     public static void updateLightBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
-        if (worldChanged) {
-            vmaClearVirtualBlock(lights.get());
-            glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
-            chunkLightPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
-            chunkLightAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
-
-            outerLoop:
-            for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
-                for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                    for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
-                        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                        int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
-                        int paletteSize = chunks[condensedChunkPos].getLightPaletteSize();
-                        int bitsPerValue = chunks[condensedChunkPos].bitsPerLight();
-                        int valueMask = chunks[condensedChunkPos].lightValueMask();
-                        int[] compressedLights = chunks[condensedChunkPos].getLightData();
-                        if (compressedLights == null) {
-                            allocCreateInfo.size((paletteSize) * 4L);
-                        } else {
-                            allocCreateInfo.size((paletteSize + compressedLights.length) * 4L);
-                        }
-
-                        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                        LongBuffer offset = BufferUtils.createLongBuffer(1);
-                        long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
-                        if (res == VK_SUCCESS) {
-                            chunkLightAllocs[condensedChunkPos] = alloc.get();
-                            int pointer = (int) offset.get(0);
-                            chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
-                            chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-                            chunkLightPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-                            chunkLightPointers[(condensedChunkPos * 4) + 3] = valueMask;
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getLightPalette());
-                            if (compressedLights != null) {
-                                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedLights);
-                            }
-                        } else {
-                            System.out.print("lightsSSBO ran out of space! \n");
-                            Main.isClosing = true;
-                            break outerLoop;
-                        }
-                    }
-                }
-            }
-
-        } else {
 //            long startTime = System.currentTimeMillis();
 //            boolean wasEmpty = lightQueue.isEmpty();
-            while (!chunkLightQueue.isEmpty()) {
-                int condensedChunkPos = chunkLightQueue.getFirst();
-                chunkLightQueue.removeFirst();
+        while (!chunkLightQueue.isEmpty()) {
+            int condensedChunkPos = chunkLightQueue.getFirst();
+            chunkLightQueue.removeFirst();
 
-                vmaVirtualFree(lights.get(0), chunkLightAllocs[condensedChunkPos]);
-                VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                int paletteSize = chunks[condensedChunkPos].getLightPaletteSize();
-                int bitsPerValue = chunks[condensedChunkPos].bitsPerLight();
-                int valueMask = chunks[condensedChunkPos].lightValueMask();
-                int[] compressedLights = chunks[condensedChunkPos].getLightData();
-                if (compressedLights == null) {
-                    allocCreateInfo.size((paletteSize) * 4L);
-                } else {
-                    allocCreateInfo.size((paletteSize + compressedLights.length) * 4L);
-                }
-
-                PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                LongBuffer offset = BufferUtils.createLongBuffer(1);
-                long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
-                if (res == VK_SUCCESS) {
-                    chunkLightAllocs[condensedChunkPos] = alloc.get();
-                    int pointer = (int) offset.get(0);
-                    chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
-                    chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
-                    chunkLightPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
-                    chunkLightPointers[(condensedChunkPos * 4) + 3] = valueMask;
-                    chunkLightPointerChanges.addLast(condensedChunkPos * 4);
-                    Chunk chunk = chunks[condensedChunkPos];
-                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunk.getLightPalette());
-                    if (compressedLights != null) {
-                        glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedLights);
-                    }
-                    chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-                    chunkBlockPointerChanges.addLast(condensedChunkPos * 5);
-                } else {
-                    System.out.print("lightsSSBO ran out of space! \n");
-                    Main.isClosing = true;
-                    break;
-                }
+            vmaVirtualFree(lights.get(0), chunkLightAllocs[condensedChunkPos]);
+            VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+            int paletteSize = chunks[condensedChunkPos].getLightPaletteSize();
+            int bitsPerValue = chunks[condensedChunkPos].bitsPerLight();
+            int valueMask = chunks[condensedChunkPos].lightValueMask();
+            int[] compressedLights = chunks[condensedChunkPos].getLightData();
+            if (compressedLights == null) {
+                allocCreateInfo.size((paletteSize) * 4L);
+            } else {
+                allocCreateInfo.size((paletteSize + compressedLights.length) * 4L);
             }
+
+            PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+            LongBuffer offset = BufferUtils.createLongBuffer(1);
+            long res = vmaVirtualAllocate(lights.get(0), allocCreateInfo, alloc, offset);
+            if (res == VK_SUCCESS) {
+                chunkLightAllocs[condensedChunkPos] = alloc.get();
+                int pointer = (int) offset.get(0);
+                chunkLightPointers[condensedChunkPos * 4] = pointer / 4;
+                chunkLightPointers[(condensedChunkPos * 4) + 1] = paletteSize;
+                chunkLightPointers[(condensedChunkPos * 4) + 2] = bitsPerValue;
+                chunkLightPointers[(condensedChunkPos * 4) + 3] = valueMask;
+                chunkLightPointerChanges.addLast(condensedChunkPos * 4);
+                Chunk chunk = chunks[condensedChunkPos];
+                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunk.getLightPalette());
+                if (compressedLights != null) {
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedLights);
+                }
+                chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
+                chunkBlockPointerChanges.addLast(condensedChunkPos * 5);
+            } else {
+                System.out.print("lightsSSBO ran out of space! \n");
+                Main.isClosing = true;
+                break;
+            }
+        }
 //            if (!wasEmpty) {
 //                System.out.print(System.currentTimeMillis()-startTime + "ms \n");
 //            }
-        }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
-        if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
-        } else {
-            for (int pos : chunkLightPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkLightPointers[pos], chunkLightPointers[pos + 1], chunkLightPointers[pos + 2], chunkLightPointers[pos + 3]});
-            }
-            chunkLightPointerChanges.clear();
+        for (int pos : chunkLightPointerChanges) {
+            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkLightPointers[pos], chunkLightPointers[pos + 1], chunkLightPointers[pos + 2], chunkLightPointers[pos + 3]});
         }
+        chunkLightPointerChanges.clear();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Lights end
     }
     public static void updateBlockBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
-        if (worldChanged) {
-            vmaClearVirtualBlock(blocks.get());
-            glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
-            chunkBlockPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 5];
-            chunkBlockAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
-
-            outerLoop:
-            for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
-                for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
-                    for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
-                        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-                        int condensedChunkPos = condenseChunkPos(chunkX, chunkY, chunkZ);
-                        int paletteSize = chunks[condensedChunkPos].getBlockPaletteSize();
-                        int bitsPerValue = chunks[condensedChunkPos].bitsPerBlock();
-                        int valueMask = chunks[condensedChunkPos].blockValueMask();
-                        int[] compressedBlocks = chunks[condensedChunkPos].getBlockData();
-                        if (compressedBlocks == null) {
-                            allocCreateInfo.size((paletteSize) * 4L);
-                        } else {
-                            allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
-                        }
-
-                        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                        LongBuffer offset = BufferUtils.createLongBuffer(1);
-                        long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
-                        if (res == VK_SUCCESS) {
-                            chunkBlockAllocs[condensedChunkPos] = alloc.get();
-                            int pointer = (int) offset.get(0);
-                            chunkBlockPointers[condensedChunkPos * 5] = pointer / 4;
-                            chunkBlockPointers[(condensedChunkPos * 5) + 1] = paletteSize;
-                            chunkBlockPointers[(condensedChunkPos * 5) + 2] = bitsPerValue;
-                            chunkBlockPointers[(condensedChunkPos * 5) + 3] = valueMask;
-                            chunkBlockPointers[(condensedChunkPos * 5) + 4] = chunks[condensedChunkPos].getSubChunks()[0];
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer, chunks[condensedChunkPos].getBlockPalette());
-                            if (compressedBlocks != null) {
-                                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pointer + (paletteSize * 4L), compressedBlocks);
-                            }
-                        } else {
-                            System.out.print("blocksSSBO ran out of space! \n");
-                            Main.isClosing = true;
-                            break outerLoop;
-                        }
-                    }
-                }
-            }
-
-        } else {
-            while (!chunkBlockQueue.isEmpty()) {
-                int condensedChunkPos = chunkBlockQueue.getFirst();
-                chunkBlockQueue.removeFirst();
-                updateBlock(condensedChunkPos, chunkBlockPointerChanges);
-            }
+        while (!chunkBlockQueue.isEmpty()) {
+            int condensedChunkPos = chunkBlockQueue.getFirst();
+            chunkBlockQueue.removeFirst();
+            updateBlock(condensedChunkPos, chunkBlockPointerChanges);
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkBlocksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunkBlocksSSBOId);
-        if (worldChanged) {
-            glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
-        } else {
-            for (int pos : chunkBlockPointerChanges) {
-                glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos + 1], chunkBlockPointers[pos + 2], chunkBlockPointers[pos + 3], chunkBlockPointers[pos + 4], chunkBlockPointers[pos + 5], chunkBlockPointers[pos + 6]});
-            }
-            chunkBlockPointerChanges.clear();
+        for (int pos : chunkBlockPointerChanges) {
+            glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos + 1], chunkBlockPointers[pos + 2], chunkBlockPointers[pos + 3], chunkBlockPointers[pos + 4], chunkBlockPointers[pos + 5], chunkBlockPointers[pos + 6]});
         }
+        chunkBlockPointerChanges.clear();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, chunkEmptySSBOId);
-        if (worldChanged) {
+        if (chunkEmptinessChanged) {
+            chunkEmptinessChanged = false;
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
-        } else {
-            if (chunkEmptinessChanged) {
-                chunkEmptinessChanged = false;
-                glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
-            }
         }
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     public static void updateBuffers() throws IOException {
-        chunkBlockPointerChanges.clear();
-        chunkCornerPointerChanges.clear();
-        chunkLightPointerChanges.clear();
-
         updateAtlasBuffer();
         updateCornerBuffers();
         updateLightBuffers();

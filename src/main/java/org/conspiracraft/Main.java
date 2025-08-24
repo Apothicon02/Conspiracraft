@@ -286,7 +286,6 @@ public class Main {
                         selectedBlock = new Vector3i(selectedBlock.x, newSubId, selectedBlock.z());
                     }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
-                        Renderer.worldChanged = true;
                         Renderer.atlasChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {

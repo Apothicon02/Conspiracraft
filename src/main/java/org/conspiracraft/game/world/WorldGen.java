@@ -1,7 +1,6 @@
 package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.ConspiracraftMath;
-import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.noise.Noises;
@@ -10,6 +9,7 @@ import org.conspiracraft.game.world.cover.Plains;
 import org.conspiracraft.game.world.shapes.Blob;
 import org.conspiracraft.game.world.shapes.Pillar;
 import org.conspiracraft.game.world.trees.JungleTree;
+import org.conspiracraft.game.world.trees.OakShrub;
 import org.conspiracraft.game.world.trees.OakTree;
 import org.conspiracraft.game.world.trees.PalmTree;
 import org.joml.Vector2i;
@@ -229,7 +229,7 @@ public class WorldGen {
                     int y = surfaceHeightmap[condensePos(x, z)];
                     float basePerlinNoise = Noises.COHERERENT_NOISE.sample(x, z);
                     int cloudScale = (int)(4+(basePerlinNoise*4));
-                    if (Noises.CLOUD_NOISE.sample(x*cloudScale, z*cloudScale) > 0.1f && Math.random() > 0.95f && y < 200) {
+                    if (Noises.CLOUD_NOISE.sample(x*cloudScale, z*cloudScale) > 0.1f && Math.random() > 0.95f && y < 166) {
                         boolean isRainCloud = (distance(x, z, size, 0) / quarterSize < 1 && (Math.random() < 0.0005f));
                         Blob.generate(new Vector2i(0), x, 216+(int)Math.abs(Noises.CELLULAR_NOISE.sample(x, z)*32), z, isRainCloud ? 32 : 31, 0, (isRainCloud ? 10 : 0) +(int)(2+(Math.random()*8)));
                     }
@@ -238,6 +238,7 @@ public class WorldGen {
                         float foliageNoise = (basePerlinNoise + 0.5f);
                         float exponentialFoliageNoise = foliageNoise * foliageNoise;
                         double northEastDist = distance(x, z, size, size) / size;
+                        double southDist = (double) z / halfSize;
                         double southWestDist = distance(x, z, 0, 0) / size;
                         double oceanDist = distance(x, z, eighthSize, eighthSize) / eighthSize;
                         double centDist = distance(x, z, size/2, size/2) / size;
@@ -245,7 +246,7 @@ public class WorldGen {
                         double oceanness = oceanDist < 1.1 ? (Math.max(0.25, (1.5f-southWestDist)*0.25)-0.3)/9 : 0;
                         double jungleness = oceanDist < 1 ? (Math.max(0.25, (1.5f-southWestDist)*0.25f)-0.3)/9 : 0;
                         double desertness = northEastDist < 1 ? (Math.max(0.25, (1.5f-northEastDist)*0.25f)-0.3)/9 : 0;
-                        double forestness = (Math.max(0.34, (1.5f-Math.max(southWestDist-jungleness, northEastDist))*0.34f)-0.4);
+                        double forestness = southDist < 1 ? (Math.max(0.5, (1.5f-(southDist-oceanness))*0.5)-0.6)/9 : 0;
                         double plainness = 0.01d-Math.max(0, Math.max(forestness, taiganess));
                         double randomNumber = Math.random();
                         boolean setAnything = false;
@@ -288,28 +289,34 @@ public class WorldGen {
                             } else if (randomNumber < jungleness*0.2) {
                                 if (randomNumber > jungleness*0.05) {
                                     int maxHeight = (int) (Math.random() + 1);
-                                    OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                    OakShrub.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                     setAnything = true;
                                 } else {
-                                    int maxHeight = (int) (Math.random() * 4) + 8;
-                                    OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)) - 2, 16, 0, 17, 0);
+                                    int maxHeight = (int) (Math.random() * 6) + 12;
+                                    int leavesHeight = (int) (Math.random()*3) + 3;
+                                    int radius = (int) (Math.random()*4) + 6;
+                                    OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                     setAnything = true;
                                 }
-                            } else if (randomNumber < forestness*(exponentialFoliageNoise*4)) { //forest
-                                int maxHeight = (int) (Math.random() * 4) + 8;
-                                OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                            } else if (randomNumber < forestness*(exponentialFoliageNoise-0.2)) { //forest
+                                int maxHeight = (int) (Math.random() * 6) + 12;
+                                int leavesHeight = (int) (Math.random()*3) + 3;
+                                int radius = (int) (Math.random()*4) + 6;
+                                OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                 setAnything = true;
                             } else if (randomNumber < forestness/2) {
                                 int maxHeight = (int) (Math.random() + 1);
-                                OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                OakShrub.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                 setAnything = true;
                             } else if (randomNumber*20 < plainness) { //plains
                                 int maxHeight = (int) (Math.random() + 1);
-                                OakTree.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
+                                OakShrub.generate(blockOn, x, y, z, maxHeight, 3 + (maxHeight * 2), 16, 0, 17, 0);
                                 setAnything = true;
                             } else if (randomNumber*18 < plainness) {
-                                int maxHeight = (int) (Math.random() * 4) + 8;
-                                OakTree.generate(blockOn, x, y, z, maxHeight, (int) (maxHeight + (randomNumber * 100)), 16, 0, 17, 0);
+                                int maxHeight = (int) (Math.random() * 6) + 12;
+                                int leavesHeight = (int) (Math.random()*3) + 3;
+                                int radius = (int) (Math.random()*4) + 6;
+                                OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                 setAnything = true;
                             }
                         }
