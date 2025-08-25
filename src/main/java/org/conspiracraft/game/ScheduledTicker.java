@@ -15,8 +15,18 @@ public class ScheduledTicker {
     public static long lastTick = 0;
 
     public static void scheduleTick(long tickTime, Vector3i pos, int tickType) {
+        while (schedule.containsKey(tickTime)) {
+            if (schedule.get(tickTime).size() > 50000) {
+                tickTime++;
+            } else {
+                break;
+            }
+        }
         schedule.putIfAbsent(tickTime, new ArrayList<>());
-        schedule.get(tickTime).add(new Vector4i(pos.x, pos.y, pos.z, tickType));
+        Vector4i value = new Vector4i(pos.x, pos.y, pos.z, tickType);
+        if (!schedule.get(tickTime).contains(value)) {
+            schedule.get(tickTime).add(value);
+        }
     }
 
     public static void tick() {

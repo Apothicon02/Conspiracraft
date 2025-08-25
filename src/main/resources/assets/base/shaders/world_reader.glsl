@@ -304,7 +304,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
     prevPos = realPos + (hitNormal * 0.001f);
     ivec2 prevBlock = getBlock(prevPos.x, prevPos.y, prevPos.z);
     float fire = blockType == 19 ? 1.f : (blockType == 9 ? 0.05f : 0.f);
-    vec4 prevVoxelColor = firstVoxel ? vec4(0) : getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
+    vec4 prevVoxelColor = getVoxel((prevPos.x-int(prevPos.x))*8, (prevPos.y-int(prevPos.y))*8, (prevPos.z-int(prevPos.z))*8, prevPos.x, prevPos.y, prevPos.z, prevBlock.x, prevBlock.y, fire);
     firstVoxel = false;
     for (int i = 0; mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0 && i < 8*3; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, blockType, blockSubtype, fire);
@@ -330,8 +330,8 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 bool underwater = false;
                 bool caustic = false;
                 if (blockType == 1) {
-                    if (getBlock(realPos.x, realPos.y+0.15f, realPos.z).x != 1) {
-                        if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8))) {
+                    if (prevVoxelColor.a != voxelColor.a) {
+                        if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8)+mapPos.y)) {
                             voxelColor = vec4(fromLinear(vec3(1)), 1);
                             shouldReflect = -1;
                             caustic = true;
@@ -356,15 +356,12 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 if (isShadow) {
                     return vec4(0);
                 }
-                if (canHit) {
-                    if (reflectivity == 0.f) {
-                        reflectivity = shouldReflect;
-                    }
-
-                    if (!underwater && hitPos == vec3(256)) {
-                        prevHitPos = prevPos;
-                        hitPos = realPos;
-                    }
+                if (reflectivity == 0.f && !underwater && blockType == 1) {
+                    reflectivity = shouldReflect;
+                }
+                if (reflectivity > 0.f && hitPos == vec3(256)) {
+                    prevHitPos = prevPos;
+                    hitPos = realPos;
                 }
 
                 if (underwater) {
@@ -686,7 +683,8 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float finalHitDistanceFogginess = distanceFogginess;
     lighting = lighting/fromLinear(vec4(20));
     lightFog = lightFog/fromLinear(vec4(10));
-    float sunLight = lighting.a*(mixedTime-timeBonus);
+    float sunLight = lighting.a*max(0.4f, mixedTime-timeBonus);
+    float sunLightCam = lighting.a*adjustedTimeCam;
     float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);
     vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
 
@@ -718,7 +716,9 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
         }
     }
     vec3 finalLight = max(finalLighting.rgb, sunLight)*finalNormalBrightness;
+    vec3 desaturation = clamp(-1.5f*(1-max(finalLighting.rgb, sunLightCam)), vec3(0.f), vec3(0.8f));
     color.rgb *= finalLight;
+    color.rgb = hsv2rgb(max(vec3(0), rgb2hsv(color.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));
     //fog start
     vec4 fog = 1 + vec4(vec3(finalLightFog) * 1.5f, 1);
     color *= fog;

@@ -440,7 +440,7 @@ public class Renderer {
             BufferedImage atlasImage = ImageIO.read(new File("C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/textures/atlas.png"));//ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = (1024*1024)+1024;
             int[] atlasData = new int[size];
-            for (int x = 0; x < 264; x++) {
+            for (int x = 0; x < 272; x++) {
                 for (int y = 0; y < 1024; y++) {
                     atlasData[(x*1024) + y] = colorToInt(new Color(atlasImage.getRGB(x, y), true));
                     collisionData[(x*1024) + y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
@@ -563,7 +563,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         //Lights end
     }
-    public static void updateBlockBuffers() {
+    public static void updateBlockBuffers(long startTime) {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
         while (!chunkBlockQueue.isEmpty()) {
@@ -591,10 +591,11 @@ public class Renderer {
     }
 
     public static void updateBuffers() throws IOException {
+        long startTime = System.currentTimeMillis();
         updateAtlasBuffer();
         updateCornerBuffers();
         updateLightBuffers();
-        updateBlockBuffers();
+        updateBlockBuffers(startTime);
     }
 
     public static void bindTextures() {

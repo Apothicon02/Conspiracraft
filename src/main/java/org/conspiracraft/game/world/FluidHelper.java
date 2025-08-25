@@ -3,6 +3,7 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.ScheduledTicker;
+import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Math;
@@ -43,25 +44,32 @@ public class FluidHelper {
         if (type.blockProperties.isFluid) {
             Vector3i bPos = new Vector3i(pos.x, pos.y-1, pos.z);
             Vector2i bFluid = World.getBlock(bPos);
-            BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
-            boolean fluidReplacable = bType.blockProperties.isFluidReplaceable;
-            int room = fluidReplacable ? 15 : 15-bFluid.y;
-            if ((bType.blockProperties.isFluid && bFluid.x == fluid.x && room > 0) || fluidReplacable) {
-                bFluid.x = fluid.x;
-                int flow = Math.min(room, fluid.y);
-                if (fluidReplacable) {
-                    bFluid.y = flow;
-                } else {
-                    bFluid.y += flow;
-                }
-                fluid.y -= flow;
-                if (fluid.y < 1) {
-                    fluid.x = 0;
-                }
-
-                maxChange = flow;
+            if (Tags.soakers.tagged.contains(bFluid.x)) {
+                maxChange = fluid.y;
+                fluid.x = 0;
+                fluid.y = 0;
                 scheduleTick = true;
-                World.setBlock(bPos.x, bPos.y, bPos.z, bFluid.x, bFluid.y, true, false, 4, true);
+            } else {
+                BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
+                boolean fluidReplacable = bType.blockProperties.isFluidReplaceable;
+                int room = fluidReplacable ? 15 : 15 - bFluid.y;
+                if ((bType.blockProperties.isFluid && bFluid.x == fluid.x && room > 0) || fluidReplacable) {
+                    bFluid.x = fluid.x;
+                    int flow = Math.min(room, fluid.y);
+                    if (fluidReplacable) {
+                        bFluid.y = flow;
+                    } else {
+                        bFluid.y += flow;
+                    }
+                    fluid.y -= flow;
+                    if (fluid.y < 1) {
+                        fluid.x = 0;
+                    }
+
+                    maxChange = flow;
+                    scheduleTick = true;
+                    World.setBlock(bPos.x, bPos.y, bPos.z, bFluid.x, bFluid.y, true, false, 4, true);
+                }
             }
         }
 
@@ -125,7 +133,7 @@ public class FluidHelper {
         }
 
         if (scheduleTick) {
-            World.setBlock(pos.x, pos.y, pos.z, fluid.x, fluid.y, true, false, 4, maxChange < 2);
+            World.setBlock(pos.x, pos.y, pos.z, fluid.x, fluid.y, true, false, 4, true); //maxChange < 2
         }
     }
 }

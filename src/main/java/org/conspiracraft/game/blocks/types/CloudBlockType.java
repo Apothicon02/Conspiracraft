@@ -20,7 +20,7 @@ public class CloudBlockType extends BlockType {
         if (inBounds(pos.x, pos.y, pos.z)) {
             if (pos.w == 1) {
                 ScheduledTicker.scheduleTick(Main.currentTick+1200, pos.xyz(new Vector3i()), 1);
-                setBlock(pos.x, pos.y - 1, pos.z, 1, 1, false, false, 1, false);
+                setBlock(pos.x, pos.y - 1, pos.z, 1, 15, false, false, 1, false);
             }
             fluidTick(pos.xyz(new Vector3i()));
         }

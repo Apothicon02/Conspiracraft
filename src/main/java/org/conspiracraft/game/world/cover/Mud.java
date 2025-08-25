@@ -1,12 +1,9 @@
-package org.conspiracraft.game.world.shapes;
+package org.conspiracraft.game.world.cover;
 
-import org.conspiracraft.Main;
-import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
-import org.conspiracraft.game.blocks.types.CloudBlockType;
+import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
-import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import static org.conspiracraft.engine.Utils.condensePos;
@@ -14,7 +11,7 @@ import static org.conspiracraft.game.world.World.heightmap;
 import static org.conspiracraft.game.world.World.inBounds;
 import static org.conspiracraft.game.world.WorldGen.*;
 
-public class Blob {
+public class Mud {
     public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, boolean replace) {
         Vector2i block = new Vector2i(blockType, blockSubType);
         BlockType type = BlockTypes.blockTypeMap.get(blockType);
@@ -23,7 +20,7 @@ public class Blob {
                 if (inBounds(lX, y, lZ)) {
                     int condensedPos = condensePos(lX, lZ);
                     int surfaceY = heightmap[condensedPos];
-                    for (int lY = y - radius; lY <= y + radius; lY++) {
+                    for (int lY = Math.max(World.seaLevel, y - radius); lY <= y + radius; lY++) {
                         int xDist = lX - x;
                         int yDist = lY - y;
                         int zDist = lZ - z;
@@ -31,9 +28,6 @@ public class Blob {
                         if (dist <= radius * 3) {
                             if (replace ? BlockTypes.blockTypeMap.get(getBlockWorldgen(lX, lY, lZ).x).blockProperties.isSolid : true) {
                                 setBlockWorldgen(lX, lY, lZ, blockType, blockSubType);
-                                if (type instanceof CloudBlockType) {
-                                    ScheduledTicker.scheduleTick(Main.currentTick + 200 + (int) (Math.random() * 1000), new Vector3i(lX, lY, lZ), 1);
-                                }
                                 if (type.obstructingHeightmap(block)) {
                                     heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
                                     if (type.blockProperties.blocksLight) {

@@ -637,8 +637,7 @@ public class World {
                 for (int y = -1; y <= 1; y++) {
                     int condensedChunkPos = Utils.condenseChunkPos(chunkPos.x+x, chunkPos.y+y, chunkPos.z+z);
                     if (condensedChunkPos > 0 && condensedChunkPos < chunks.length) {
-                        boolean exists = chunkLightQueue.contains(condensedChunkPos);
-                        if (!exists) {
+                        if (!chunkLightQueue.contains(condensedChunkPos)) {
                             chunkLightQueue.addFirst(condensedChunkPos);
                         }
                     }
@@ -665,10 +664,12 @@ public class World {
                 Vector3i pos = new Vector3i(x, y, z);
                 Vector3i chunkPos = new Vector3i(x >> 4, y >> 4, z >> 4);
                 int condensedChunkPos = condenseChunkPos(chunkPos);
-                if (priority) {
-                    chunkBlockQueue.addFirst(condensedChunkPos);
-                } else {
-                    chunkBlockQueue.addLast(condensedChunkPos);
+                if (!chunkBlockQueue.contains(condensedChunkPos)) {
+                    if (priority) {
+                        chunkBlockQueue.addFirst(condensedChunkPos);
+                    } else {
+                        chunkBlockQueue.addLast(condensedChunkPos);
+                    }
                 }
                 Vector4i oldLight = getLight(pos);
                 byte r = 0;
@@ -734,7 +735,9 @@ public class World {
 
             Vector2i existing = getBlock(x, y, z);
             if (existing.x() != 0) {
-                chunkCornerQueue.addLast(condenseChunkPos(chunkPos));
+                if (chunkCornerQueue.contains(condensedChunkPos)) {
+                    chunkCornerQueue.addLast(condensedChunkPos);
+                }
             }
         }
     }
