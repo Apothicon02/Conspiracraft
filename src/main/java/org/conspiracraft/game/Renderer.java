@@ -437,7 +437,7 @@ public class Renderer {
         if (atlasChanged) {
             atlasChanged = false;
 
-            BufferedImage atlasImage = ImageIO.read(new File("C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/textures/atlas.png"));//ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
+            BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
             int size = (1024*1024)+1024;
             int[] atlasData = new int[size];
             for (int x = 0; x < 272; x++) {

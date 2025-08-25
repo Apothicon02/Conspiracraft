@@ -132,6 +132,7 @@ public class Main {
     boolean wasDownDown = false;
     boolean wasEDown = false;
     boolean wasCDown = false;
+    boolean wasSDown = false;
     boolean wasRDown = false;
     boolean wasWDown = false;
     boolean wasQDown = false;
@@ -260,12 +261,6 @@ public class Main {
                 if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
                     Renderer.showUI = !Renderer.showUI;
                 }
-                if (wasF4Down && !window.isKeyPressed(GLFW_KEY_F4, GLFW_PRESS)) {
-                    Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
-                }
-                if (wasF5Down && !window.isKeyPressed(GLFW_KEY_F5, GLFW_PRESS)) {
-                    Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
-                }
 
                 if (window.isKeyPressed(GLFW_KEY_F11, GLFW_PRESS)) {
                     glfwSetWindowPos(window.getWindowHandle(), 0, 0);
@@ -273,6 +268,9 @@ public class Main {
                     //glfwSetWindowMonitor(window.getWindowHandle(), glfwGetWindowMonitor(window.getWindowHandle()), 0, 0, 2560, 1440, GLFW_DONT_CARE);
                 }
                 if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+                    if (wasSDown && !window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
+                        Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
+                    }
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
                     }
@@ -345,6 +343,7 @@ public class Main {
                 wasQDown = window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS);
                 wasEDown = window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS);
                 wasCDown = window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS);
+                wasSDown = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
                 wasRDown = window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS);
                 wasWDown = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
