@@ -57,7 +57,7 @@ public class Renderer {
     public static int lightsSSBOId;
     public static int chunkEmptySSBOId;
 
-    public static int renderDistanceMul = 3; //4
+    public static int renderDistanceMul = 8; //3
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
     public static boolean atlasChanged = true;
