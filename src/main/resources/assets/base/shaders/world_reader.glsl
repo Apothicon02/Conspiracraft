@@ -709,7 +709,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
             vec3 finalHitPos = hitPos;
             clearVars(true, true);
             if (traceWorld(true, shadowPos, sunDir, maxDistance).a >= 1.f) {
-                sunLight *= max(mix(0.66f, 0.9f, min(1, distance(finalHitPos, hitPos)/840)), abs(1-mixedTime)*1.5f);
+                sunLight *= max(mix(0.66f, 0.9f, min(1, distance(finalHitPos, hitPos)/420)), abs(1-mixedTime)*1.5f);
             } else {
                 finalTint += tint;//sun tint
             }
