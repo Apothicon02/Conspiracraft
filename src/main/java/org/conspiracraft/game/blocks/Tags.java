@@ -7,5 +7,6 @@ public class Tags {
     public static Tag leaves = new Tag();
     public static Tag flowers = new Tag();
     public static Tag soakers = new Tag();
-    public static List<Tag> tags = List.of(rocks, leaves, flowers, soakers);
+    public static Tag crystals = new Tag();
+    public static List<Tag> tags = List.of(rocks, leaves, flowers, soakers, crystals);
 }

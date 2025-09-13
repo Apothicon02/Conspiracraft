@@ -29,7 +29,7 @@ public class BlockTypes {
             TALL_GRASS = create(new BlockType(new BlockProperties().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(Tags.flowers), new BlockType(TALL_GRASS.blockProperties)), //5
             TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
-            KYANITE = create(List.of(Tags.rocks), new LightBlockType(new LightBlockProperties().g(2).b(6))),
+            KYANITE = create(List.of(Tags.rocks, Tags.crystals), new LightBlockType(new LightBlockProperties().g(2).b(6))),
             WHITE_STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
             IGNEOUS = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
             STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())), //10

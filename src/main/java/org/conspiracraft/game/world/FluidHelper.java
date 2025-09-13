@@ -49,6 +49,11 @@ public class FluidHelper {
                 fluid.x = 0;
                 fluid.y = 0;
                 scheduleTick = true;
+            } else if (Tags.crystals.tagged.contains(bFluid.x) && fluid.x == 1 && fluid.y >= 15) {
+                maxChange = fluid.y;
+                fluid.x = 7;
+                fluid.y = 0;
+                scheduleTick = true;
             } else {
                 BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
                 boolean fluidReplacable = bType.blockProperties.isFluidReplaceable;
@@ -78,7 +83,12 @@ public class FluidHelper {
         BlockType aType = BlockTypes.blockTypeMap.get(aFluid.x);
         boolean fluidReplacable = type.blockProperties.isFluidReplaceable;
         int room = fluidReplacable ? 15 : 15-fluid.y;
-        if ((aType.blockProperties.isFluid && (aFluid.x == fluid.x || type.blockProperties.isFluidReplaceable) && room > 0)) {
+        if (Tags.crystals.tagged.contains(aFluid.x) && fluid.x == 1 && fluid.y >= 15) {
+            maxChange = fluid.y;
+            fluid.x = 7;
+            fluid.y = 0;
+            scheduleTick = true;
+        } else if ((aType.blockProperties.isFluid && (aFluid.x == fluid.x || type.blockProperties.isFluidReplaceable) && room > 0)) {
             fluid.x = aFluid.x;
             int flow = Math.min(room, aFluid.y);
             if (fluidReplacable) {
@@ -102,7 +112,12 @@ public class FluidHelper {
             boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y;
             boolean isMainFluid = areBothFluid ? true : (nType.blockProperties.isFluidReplaceable && type.blockProperties.isFluid);
             boolean isNFluid = areBothFluid ? true : (type.blockProperties.isFluidReplaceable && nType.blockProperties.isFluid);
-            if (isMainFluid || isNFluid) {
+            if (Tags.crystals.tagged.contains(nFluid.x) && fluid.x == 1 && fluid.y >= 15) {
+                maxChange = fluid.y;
+                fluid.x = 7;
+                fluid.y = 0;
+                scheduleTick = true;
+            } else if (isMainFluid || isNFluid) {
                 int newLevel = areBothFluid ? (fluid.y + nFluid.y) : (isMainFluid ? (fluid.y) : (nFluid.y));
                 if (newLevel > 1) {
                     int prevFluidLevel = fluid.y;
@@ -116,15 +131,15 @@ public class FluidHelper {
                             fluid.x = nFluid.x;
                         }
                     }
-                    fluid.y = newLevel/2;
-                    nFluid.y = newLevel/2;
+                    fluid.y = newLevel / 2;
+                    nFluid.y = newLevel / 2;
 
                     if (newLevel % 2 != 0) { //if odd, neighbor gets extra fluid.
                         nFluid.y++;
                     }
 
                     if (prevFluidLevel != fluid.y || prevNFluidLevel != nFluid.y) { //only update if something changed.
-                        maxChange = Math.max(maxChange, Math.max(Math.abs(prevFluidLevel-fluid.y), Math.abs(prevNFluidLevel-nFluid.y)));
+                        maxChange = Math.max(maxChange, Math.max(Math.abs(prevFluidLevel - fluid.y), Math.abs(prevNFluidLevel - nFluid.y)));
                         scheduleTick = true;
                         World.setBlock(nPos.x, nPos.y, nPos.z, nFluid.x, nFluid.y, true, false, 4, true);
                     }
