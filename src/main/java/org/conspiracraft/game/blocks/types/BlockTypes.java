@@ -55,7 +55,10 @@ public class BlockTypes {
             DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
             CLOUD = create(new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties()));
+            MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties())),
+            SPRUCE_PLANKS = create(new BlockType(new BlockProperties())),
+            SPRUCE_LOG = create(new BlockType(new BlockProperties())), //35
+            SPRUCE_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

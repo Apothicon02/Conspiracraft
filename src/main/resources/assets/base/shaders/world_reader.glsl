@@ -313,14 +313,14 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
             bool canHit = bool(prevVoxelColor.a < voxelColor.a);
             float shouldReflect = 0.f;
             if (reflectivity == 0.f && canHit) {
-                if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) > 0.8f) {
+                if (max(voxelColor.r, max(voxelColor.g, voxelColor.b)) >= 0.4f) {
                     if (blockType == 1 && blockSubtype > 0) { //water
                         shouldReflect = 0.6f;
                     } else if (blockType == 7 || (blockType >= 11 && blockType <= 13)) { //glass & kyanite
                         reflectivity = 0.5f;
                     } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22) { //steel
                         reflectivity = 0.16f;
-                    } else if (blockType == 15) { //planks
+                    } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34) { //planks
                         reflectivity = 0.12f;
                     }
                 }
