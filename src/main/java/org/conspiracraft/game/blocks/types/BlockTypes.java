@@ -37,19 +37,19 @@ public class BlockTypes {
             PURPLE_STAINED_GLASS = create(new BlockType(GLASS.blockProperties)),
             LIME_STAINED_GLASS = create(new BlockType(GLASS.blockProperties)),
             PORECAP = create(new LightBlockType(((LightBlockProperties)TORCH.blockProperties).copy().r(0).g(12).b(6))),
-            WILLOW_PLANKS = create(new BlockType(new BlockProperties())), //15
-            WILLOW_LOG = create(new BlockType(new BlockProperties())),
-            WILLOW_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
+            OAK_PLANKS = create(new BlockType(new BlockProperties())), //15
+            OAK_LOG = create(new BlockType(new BlockProperties())),
+            OAK_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
             HYDRANGEA = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)),
             MAGMA = create(new LightBlockType(((LightBlockProperties)KYANITE.blockProperties).copy().r(16).g(6).b(0))),
             MAHOGANY_LOG = create(new BlockType(new BlockProperties())), //20
-            MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
+            MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             BUCKET = create(new BlockType(new BlockProperties().blocksLight(false).needsSupport(true))),
             SAND = create(new BlockType(new BlockProperties())),
             SANDSTONE = create(new BlockType(new BlockProperties())),
             PALM_LOG = create(new BlockType(new BlockProperties())), //25
             PALM_PLANKS = create(new BlockType(new BlockProperties())),
-            PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(WILLOW_LEAVES.blockProperties)),
+            PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             MAHOGANY_PLANKS = create(new BlockType(new BlockProperties())),
             CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
             DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
@@ -58,7 +58,22 @@ public class BlockTypes {
             MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties())),
             SPRUCE_PLANKS = create(new BlockType(new BlockProperties())),
             SPRUCE_LOG = create(new BlockType(new BlockProperties())), //35
-            SPRUCE_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)));
+            SPRUCE_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
+            CHERRY_PLANKS = create(new BlockType(new BlockProperties())),
+            CHERRY_LOG = create(new BlockType(new BlockProperties())),
+            CHERRY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
+            BIRCH_PLANKS = create(new BlockType(new BlockProperties())), //40
+            BIRCH_LOG = create(new BlockType(new BlockProperties())),
+            BIRCH_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
+            ACACIA_PLANKS = create(new BlockType(new BlockProperties())),
+            ACACIA_LOG = create(new BlockType(new BlockProperties())),
+            ACACIA_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)), //45
+            WILLOW_PLANKS = create(new BlockType(new BlockProperties())),
+            WILLOW_LOG = create(new BlockType(new BlockProperties())),
+            WILLOW_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
+            REDWOOD_PLANKS = create(new BlockType(new BlockProperties())),
+            REDWOOD_LOG = create(new BlockType(new BlockProperties())), //50
+            REDWOOD_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

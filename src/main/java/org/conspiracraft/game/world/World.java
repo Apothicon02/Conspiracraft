@@ -735,7 +735,7 @@ public class World {
 
             Vector2i existing = getBlock(x, y, z);
             if (existing.x() != 0) {
-                if (chunkCornerQueue.contains(condensedChunkPos)) {
+                if (!chunkCornerQueue.contains(condensedChunkPos)) {
                     chunkCornerQueue.addLast(condensedChunkPos);
                 }
             }
