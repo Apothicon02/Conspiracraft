@@ -1,20 +1,16 @@
 package org.conspiracraft.engine;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
-import org.lwjgl.BufferUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.util.BitSet;
 import java.util.List;
 
 public class Utils {
@@ -103,14 +99,6 @@ public class Utils {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-
-    public static float closestToZero(float first, float second) {
-        return Math.abs(first) < Math.abs(second) ? first : second;
-    }
-
     public static float furthestFromZero(float first, float second) {
         return Math.abs(first) > Math.abs(second) ? first : second;
     }
@@ -160,39 +148,5 @@ public class Utils {
     }
     public static Vector4i unpackColor(int color) {
         return new Vector4i(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
-    }
-
-    public static int condensePos(int x, int z) {
-        return (x * World.size) + z;
-    }
-    public static int condensePos(int x, int y, int z) {
-        return (((x*World.size)+z)*World.height)+y;
-    }
-    public static int condensePos(int x, int y, int z, int customSize) {
-        return (((x*customSize)+z)*World.height)+y;
-    }
-    public static int condensePos(Vector3i pos) {
-        return (((pos.x*World.size)+pos.z)*World.height)+pos.y;
-    }
-    public static int condenseSubchunkPos(Vector3i pos) {
-        return (((pos.x*2)+pos.z)*2)+pos.y;
-    }
-    public static int condenseSubchunkPos(int x, int y, int z) {
-        return (((x*2)+z)*2)+y;
-    }
-    public static int condenseLocalPos(int x, int y, int z) {
-        return (((x*World.chunkSize)+z)*World.chunkSize)+y;
-    }
-    public static int condenseLocalPos(Vector3i pos) {
-        return (((pos.x*World.chunkSize)+pos.z)*World.chunkSize)+pos.y;
-    }
-    public static int condenseChunkPos(Vector3i pos) {
-        return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
-    }
-    public static int condenseChunkPos(int x, int y, int z) {
-        return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
-    }
-    public static int condenseChunkPos(int x, int z) {
-        return (x*World.sizeChunks)+z;
     }
 }
