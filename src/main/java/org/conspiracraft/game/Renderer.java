@@ -61,7 +61,7 @@ public class Renderer {
                 camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
-        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, true, Main.reachAccuracy);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }
@@ -71,8 +71,8 @@ public class Renderer {
 
     public static void updateVoxelBuffer() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, voxelsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, voxelsSSBOId);
-
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, voxelsSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, World.voxels, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 

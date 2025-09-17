@@ -28,7 +28,7 @@ public class Player {
     public boolean leftward = false;
     public boolean upward = false;
     public boolean downward = false;
-    public static Vector3i selectedBlock = new Vector3i(0);
+    public static Vector4f voxelColor = new Vector4f(1);
 
     public Player(Vector3f newPos) {
         setPos(newPos);
@@ -36,11 +36,7 @@ public class Player {
     }
 
     public void tick() {
-        boolean onGround = false;
-        Vector2i blockIn = new Vector2i(0);
-        Vector2i blockBreathing = new Vector2i(0);
         float modifiedSpeed = speed;
-        float modifiedGrav = grav;
         friction = 0.75f;
 
         Vector3f newMovement = new Vector3f(0f);
