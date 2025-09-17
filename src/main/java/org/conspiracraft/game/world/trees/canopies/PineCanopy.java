@@ -1,19 +1,13 @@
 package org.conspiracraft.game.world.trees.canopies;
 
 import org.conspiracraft.engine.ConspiracraftMath;
-import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import org.joml.Vector4i;
 
 import java.util.Map;
 import java.util.Random;
 
-import static org.conspiracraft.engine.Utils.condensePos;
-import static org.conspiracraft.game.world.World.*;
-import static org.conspiracraft.game.world.WorldGen.*;
-
-public class PalmCanopy extends Canopy {
+public class PineCanopy extends Canopy {
     private static Vector2i getLeaves(Random random, Vector3i pos) {
         return new Vector2i(27, 0);
     }

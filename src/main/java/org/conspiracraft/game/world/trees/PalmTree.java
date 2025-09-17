@@ -2,6 +2,7 @@ package org.conspiracraft.game.world.trees;
 
 import kotlin.Pair;
 import org.conspiracraft.game.blocks.types.BlockTypes;
+import org.conspiracraft.game.world.FeatureHelper;
 import org.conspiracraft.game.world.WorldGen;
 import org.conspiracraft.game.world.trees.canopies.PalmCanopy;
 import org.conspiracraft.game.world.trees.trunks.BendingTrunk;
@@ -27,12 +28,12 @@ public class PalmTree {
             Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = BendingTrunk.generateTrunk(new Random(), x, y, z, true, 0, maxHeight, logType, logSubType);
             boolean colliding = false;
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-            blocks.putAll(generatedTrunk.getFirst());
+            int minCollisionY = y+5;
             outerLoop:
             for (Vector3i canopyPos : generatedTrunk.getSecond()) {
                 Map<Vector3i, Vector2i> canopy = PalmCanopy.generateCanopy(canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z));
                 for (Vector3i pos : canopy.keySet()) {
-                    if (WorldGen.getBlockWorldgen(pos.x, pos.y, pos.z).x != 0) {
+                    if (pos.y > minCollisionY && FeatureHelper.inBounds(pos) && WorldGen.getBlockWorldgen(pos.x, pos.y, pos.z).x != 0) {
                         colliding = true;
                         break outerLoop;
                     }
@@ -41,12 +42,14 @@ public class PalmTree {
             }
             if (!colliding) {
                 blocks.forEach((pos, block) -> {
-                    WorldGen.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
-                    int condensedPos = condensePos(pos.x, pos.z);
-                    int surfaceY = heightmap[condensedPos];
-                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y-1);
-                    for (int extraY = pos.y-1; extraY >= surfaceY; extraY--) {
-                        setLightWorldgen(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
+                    if (FeatureHelper.inBounds(pos)) {
+                        WorldGen.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+                        int condensedPos = condensePos(pos.x, pos.z);
+                        int surfaceY = heightmap[condensedPos];
+                        heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                        for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
+                            setLightWorldgen(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
+                        }
                     }
                 });
             }

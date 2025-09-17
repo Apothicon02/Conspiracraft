@@ -10,13 +10,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FeatureHelper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/DeadOakTree.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmShrub.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PineTree.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PineCanopy.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/interactions/Recipes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/interactions/Recipes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/BendingTrunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/BendingTrunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/StraightTrunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/StraightTrunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/TwistingTrunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/TwistingTrunk.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,11 +159,11 @@
       <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.game.world.trees" />
+      <recent name="org.conspiracraft.game.world.trees.canopies" />
       <recent name="org.conspiracraft.game.blocks.types" />
       <recent name="org.conspiracraft.game.world.shapes" />
-      <recent name="org.conspiracraft.game.world.trees" />
       <recent name="org.conspiracraft.game.world.trees.trunks" />
-      <recent name="org.conspiracraft.game.world.trees.canopies" />
     </key>
   </component>
   <component name="RunManager" selected="Application.Run">
@@ -211,14 +221,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00171" summary="- Fixed the sun blocking shadows. &#10;- Made the sun bigger. &#10;- Reflections no longer cast an extra shadow ray.">
-      <option name="closed" value="true" />
-      <created>1751083426511</created>
-      <option name="number" value="00171" />
-      <option name="presentableId" value="LOCAL-00171" />
-      <option name="project" value="LOCAL" />
-      <updated>1751083426511</updated>
     </task>
     <task id="LOCAL-00172" summary="- Added clouds. &#10;- Optimized sun rendering. &#10;- Removed unused shader code.">
       <option name="closed" value="true" />
@@ -604,7 +606,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757870779755</updated>
     </task>
-    <option name="localTasksCounter" value="220" />
+    <task id="LOCAL-00220" summary="- Added cherry wood. &#10;- Added birch wood.&#10;- Added acacia wood. &#10;- Added oak wood. &#10;- Added redwood wood. &#10;- Rotated jungle log textures. &#10;- Added recipes for all planks. &#10;- Reduced plank reflectivity. &#10;- Fixed corner changes only loading when the game reloads.">
+      <option name="closed" value="true" />
+      <created>1757884019374</created>
+      <option name="number" value="00220" />
+      <option name="presentableId" value="LOCAL-00220" />
+      <option name="project" value="LOCAL" />
+      <updated>1757884019374</updated>
+    </task>
+    <option name="localTasksCounter" value="221" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -627,7 +637,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- I forget." />
     <MESSAGE value="- Re-enabled an improved version of the old ambient occlusion. &#10;- Fixed sunlight inaccuracy." />
     <MESSAGE value="- Fixed light being too bright." />
     <MESSAGE value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
@@ -652,7 +661,8 @@
     <MESSAGE value="- Upon creation, full water blocks will be converted to kyanite if kyanite is touching." />
     <MESSAGE value="- Added LICENSE." />
     <MESSAGE value="- Added spruce logs. &#10;- Added spruce planks. &#10;- Added spruce leaves. &#10;- Fixed only willow planks being reflective. &#10;- Changed oak and palm plank colors." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added spruce logs. &#10;- Added spruce planks. &#10;- Added spruce leaves. &#10;- Fixed only willow planks being reflective. &#10;- Changed oak and palm plank colors." />
+    <MESSAGE value="- Added cherry wood. &#10;- Added birch wood.&#10;- Added acacia wood. &#10;- Added oak wood. &#10;- Added redwood wood. &#10;- Rotated jungle log textures. &#10;- Added recipes for all planks. &#10;- Reduced plank reflectivity. &#10;- Fixed corner changes only loading when the game reloads." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added cherry wood. &#10;- Added birch wood.&#10;- Added acacia wood. &#10;- Added oak wood. &#10;- Added redwood wood. &#10;- Rotated jungle log textures. &#10;- Added recipes for all planks. &#10;- Reduced plank reflectivity. &#10;- Fixed corner changes only loading when the game reloads." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

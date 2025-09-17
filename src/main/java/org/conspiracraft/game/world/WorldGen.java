@@ -9,10 +9,7 @@ import org.conspiracraft.game.world.cover.Mud;
 import org.conspiracraft.game.world.cover.Plains;
 import org.conspiracraft.game.world.shapes.Blob;
 import org.conspiracraft.game.world.shapes.Pillar;
-import org.conspiracraft.game.world.trees.JungleTree;
-import org.conspiracraft.game.world.trees.OakShrub;
-import org.conspiracraft.game.world.trees.OakTree;
-import org.conspiracraft.game.world.trees.PalmTree;
+import org.conspiracraft.game.world.trees.*;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
@@ -247,30 +244,45 @@ public class WorldGen {
                             }
                             setAnything = true;
                         } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23) {
-                            if (randomNumber < Math.max(desertness, oceanness)*Math.max(0.8f, exponentialFoliageNoise)) { //jungle & desert
-                                if (blockOn.x == 23) {
-                                    if (desertness <= jungleness || (desertness > jungleness && y <= seaLevel+1)) {
+                            double jungDes = Math.max(desertness, oceanness);
+                            if (randomNumber/10 < jungDes) { //jungle & desert
+                                if (blockOn.x == 23 && randomNumber < jungDes*Math.max(0.8f, exponentialFoliageNoise)) {
+                                    if (desertness <= jungleness || (desertness > jungleness && y <= seaLevel + 1)) {
                                         PalmTree.generate(blockOn, x, y, z, (int) (Math.random() * 14) + 8, 25, 0, 27, 0);
                                     } else {
                                         double deadBushChance = Math.random();
-                                        if (deadBushChance < 0.03) {
-                                            int variant = deadBushChance < 0.015 ? 0 : 1;
-                                            Blob.generate(blockOn, x, y-3+variant, z+variant, 24, 0, 3+variant);
-                                            Blob.generate(blockOn, x, y, z+variant, 24, 0, 2+variant);
-                                            Blob.generate(blockOn, x, y+2+variant, z+variant, 24, 0, 1);
-                                            Blob.generate(blockOn, x, y+4+variant, z+1+variant, 24, 0, 1);
-                                            variant *= 2;
-                                            Blob.generate(blockOn, x, y+7+variant, z+1+variant, 24, 0, 2+variant);
-                                            Blob.generate(blockOn, x-1-variant, y+7+variant, z+variant, 24, 0, 2+variant);
-                                            Blob.generate(blockOn, x+1+variant, y+7+variant, z+variant, 24, 0, 2+variant);
+                                         if (deadBushChance < 0.03) {
+                                             int variant = deadBushChance < 0.015 ? 0 : 1;
+                                             Blob.generate(blockOn, x, y - 3 + variant, z + variant, 24, 0, 3 + variant);
+                                             Blob.generate(blockOn, x, y, z + variant, 24, 0, 2 + variant);
+                                             Blob.generate(blockOn, x, y + 2 + variant, z + variant, 24, 0, 1);
+                                             Blob.generate(blockOn, x, y + 4 + variant, z + 1 + variant, 24, 0, 1);
+                                             variant *= 2;
+                                             Blob.generate(blockOn, x, y + 7 + variant, z + 1 + variant, 24, 0, 2 + variant);
+                                             Blob.generate(blockOn, x - 1 - variant, y + 7 + variant, z + variant, 24, 0, 2 + variant);
+                                             Blob.generate(blockOn, x + 1 + variant, y + 7 + variant, z + variant, 24, 0, 2 + variant);
                                         } else if (deadBushChance < 0.2) {
-                                            setBlockWorldgenNoReplace(x, y+1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                             if (deadBushChance > 0.19) {
+                                                 int maxHeight = (int) (Math.random() * 6) + 12;
+                                                 DeadOakTree.generate(blockOn, x, y, z, maxHeight, 16, 0);
+                                             } else {
+                                                 setBlockWorldgenNoReplace(x, y + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                             }
                                         } else {
-                                            Pillar.generate(blockOn, x, y+1, z, (int) (Math.random() * 6) + 2, 29, 0);
+                                            Pillar.generate(blockOn, x, y + 1, z, (int) (Math.random() * 6) + 2, 29, 0);
                                         }
                                     }
-                                } else if (randomNumber < jungleness*Math.max(0.8f, exponentialFoliageNoise)) {
-                                    JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f);
+                                } else if (jungleness > desertness) {
+                                    if (!JungleTree.generate(blockOn, x, y, z, (int) (Math.random() * 8) + 28, (int) (3 + (randomNumber + 0.5f)), 20, 0, 21, 0, randomNumber < 0.25f)) {
+                                        // attempt to place an oak tree if jungle tree fails.
+                                        int maxHeight = (int) (Math.random() * 6) + 12;
+                                        int leavesHeight = (int) (Math.random()*3) + 3;
+                                        int radius = (int) (Math.random()*4) + 6;
+                                        if (!OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0)) {
+                                            //attempts to place a willow shrub if oak tree fails.
+                                            PalmShrub.generate(blockOn, x, y, z, (int) (Math.random() * 3) + 1, 25, 0, 27, 0);
+                                        }
+                                    }
                                 }
                                 setAnything = true;
                             } else if (randomNumber < jungleness*0.2) {

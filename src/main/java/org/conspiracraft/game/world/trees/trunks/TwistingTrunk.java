@@ -1,14 +1,16 @@
 package org.conspiracraft.game.world.trees.trunks;
 
+import kotlin.Pair;
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import static org.conspiracraft.game.world.WorldGen.setBlockWorldgenInBounds;
-
 public class TwistingTrunk extends Trunk {
-    public static Set<Vector3i> generateTrunk(int oX, int oY, int oZ, int trunkHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(int oX, int oY, int oZ, int trunkHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
+        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
         Set<Vector3i> canopies = new HashSet<>();
 
         int minBranch = minBranchHeight+oY;
@@ -45,12 +47,12 @@ public class TwistingTrunk extends Trunk {
             }
             pos.add(dir);
             pos.y = height;
-            makeSquare(new Vector3i(pos.x, pos.y-1, pos.z), blockType, blockSubType);
-            makeSquare(pos, blockType, blockSubType);
+            makeSquare(map, new Vector3i(pos.x, pos.y-1, pos.z), blockType, blockSubType);
+            makeSquare(map, pos, blockType, blockSubType);
             if (branch && pos.y >= minBranch) {
-                canopies.add(makeBranch(pos, dir, blockType, blockSubType));
+                canopies.add(makeBranch(map, pos, dir, blockType, blockSubType));
                 if (overgrown) {
-                    canopies.add(makeBranch(pos, new Vector3i(dir.x * (Math.random() >= 0.5f ? 1 : 0), +2, dir.z * (Math.random() >= 0.5f ? 1 : 0)), blockType, blockSubType));
+                    canopies.add(makeBranch(map, pos, new Vector3i(dir.x * (Math.random() >= 0.5f ? 1 : 0), +2, dir.z * (Math.random() >= 0.5f ? 1 : 0)), blockType, blockSubType));
                 }
             }
             if (pos.y == maxHeight) {
@@ -64,22 +66,22 @@ public class TwistingTrunk extends Trunk {
             }
         }
 
-        return canopies;
+        return new Pair<>(map, canopies);
     }
 
-    private static void makeSquare(Vector3i pos, int blockType, int blockSubType) {
-        setBlockWorldgenInBounds(pos.x, pos.y, pos.z, blockType, blockSubType);
-        setBlockWorldgenInBounds(pos.x, pos.y, pos.z+1, blockType, blockSubType);
-        setBlockWorldgenInBounds(pos.x+1, pos.y, pos.z, blockType, blockSubType);
-        setBlockWorldgenInBounds(pos.x+1, pos.y, pos.z+1, blockType, blockSubType);
+    private static void makeSquare(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
+        map.put(new Vector3i(pos.x, pos.y, pos.z), new Vector2i(blockType, blockSubType));
+        map.put(new Vector3i(pos.x, pos.y, pos.z+1), new Vector2i(blockType, blockSubType));
+        map.put(new Vector3i(pos.x+1, pos.y, pos.z), new Vector2i(blockType, blockSubType));
+        map.put(new Vector3i(pos.x+1, pos.y, pos.z+1), new Vector2i(blockType, blockSubType));
     }
 
-    private static Vector3i makeBranch(Vector3i pos, Vector3i dir, int blockType, int blockSubType) {
-        makeSquare(new Vector3i(pos.x+dir.x, pos.y, pos.z+dir.z), blockType, blockSubType);
-        makeSquare(new Vector3i(pos.x+(dir.x*2), pos.y-1, pos.z+(dir.z*2)), blockType, blockSubType);
-        makeSquare(new Vector3i(pos.x+(dir.x*3), pos.y-1, pos.z+(dir.z*3)), blockType, blockSubType);
-        setBlockWorldgenInBounds(pos.x+(dir.x*4), pos.y, pos.z+(dir.z*4), blockType, blockSubType);
-        setBlockWorldgenInBounds(pos.x+(dir.x*5), pos.y, pos.z+(dir.z*5), blockType, blockSubType);
+    private static Vector3i makeBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Vector3i dir, int blockType, int blockSubType) {
+        makeSquare(map, new Vector3i(pos.x+dir.x, pos.y, pos.z+dir.z), blockType, blockSubType);
+        makeSquare(map, new Vector3i(pos.x+(dir.x*2), pos.y-1, pos.z+(dir.z*2)), blockType, blockSubType);
+        makeSquare(map, new Vector3i(pos.x+(dir.x*3), pos.y-1, pos.z+(dir.z*3)), blockType, blockSubType);
+        map.put(new Vector3i(pos.x+(dir.x*4), pos.y, pos.z+(dir.z*4)), new Vector2i(blockType, blockSubType));
+        map.put(new Vector3i(pos.x+(dir.x*5), pos.y, pos.z+(dir.z*5)), new Vector2i(blockType, blockSubType));
         return new Vector3i(pos.x+(dir.x*5), pos.y+1, pos.z+(dir.z*5));
     }
 }

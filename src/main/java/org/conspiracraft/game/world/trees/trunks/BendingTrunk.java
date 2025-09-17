@@ -10,14 +10,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.conspiracraft.game.world.World.height;
-import static org.conspiracraft.game.world.World.size;
-
 public class BendingTrunk extends Trunk {
     private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Vector2i block) {
-        if (pos.x >= 0 && pos.y >= 0 && pos.z >= 0 && pos.x < size && pos.y < height && pos.z < size) {
-            map.put(pos, block);
-        }
+        map.put(pos, block);
     }
     
     public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, boolean crown, int count, int trunkHeight, int blockType, int blockSubType) {
