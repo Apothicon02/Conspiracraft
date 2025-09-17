@@ -179,8 +179,8 @@ public class Main {
         Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
 
         Matrix4f forwarded = new Matrix4f(ray).translate(0, 0, 10000);
-        Vector3f rayPos = new Vector3f(prevRayPos).floor();
         Vector3f rayDir = new Vector3f(new Vector3f((forwarded.m30())-prevRayPos.x, (forwarded.m31())-prevRayPos.y, (forwarded.m32())-prevRayPos.z));
+        Vector3f rayPos = new Vector3f(prevRayPos).floor();
         Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
         Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
         Vector3f sideDist = new Vector3f(rayPos).sub(rayPos.x, rayPos.y, rayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
