@@ -1,6 +1,6 @@
 package org.conspiracraft.game.world.trees.canopies;
 
-import org.conspiracraft.engine.ConspiracraftMath;
+import org.conspiracraft.game.world.Directions;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -8,221 +8,188 @@ import java.util.Map;
 import java.util.Random;
 
 public class PineCanopy extends Canopy {
-    private static Vector2i getLeaves(Random random, Vector3i pos) {
-        return new Vector2i(27, 0);
-    }
 
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Random random) {
-        map.put(pos, getLeaves(random, pos));
-    }
-
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int trunkDist, Vector3i origin, Vector3i treeOrigin) {
-        int x = pos.x();
-        int y = pos.y();
-        int z = pos.z();
-        int xDist = x-origin.x();
-        int zDist = z-origin.z();
-        int dist = xDist*xDist+zDist*zDist;
-        int xTreeDist = x-treeOrigin.x();
-        int zTreeDist = z-treeOrigin.z();
-        int treeDist = xTreeDist * xTreeDist + zTreeDist * zTreeDist;
-        Vector3i offsetPos = new Vector3i(x, y-(treeDist/52)-(dist/52)+(trunkDist/38), z);
-        map.put(offsetPos, getLeaves(random, offsetPos));
-    }
-
-    private static void createFrond(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int trunkDist, Vector3i origin, Vector3i treeOrigin, int northSouth, int eastWest) {
-        addSquare(map, ConspiracraftMath.addVec(pos, northSouth, 0, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
-        addSquare(map, ConspiracraftMath.addVec(pos, northSouth, -1, eastWest), random, 1, true, trunkDist, origin, treeOrigin);
-
-        for (int i = 3; i <= 5; i++) {
-            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, 0, eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
-            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, -1 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
-            addSquare(map, ConspiracraftMath.addVec(pos, northSouth * i, -2 , eastWest * i), random, 0, true, trunkDist, origin, treeOrigin);
-        }
-
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -1, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -2, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -3, eastWest*6), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*6, -4, eastWest*6), random, trunkDist, origin, treeOrigin);
-
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -2, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -3, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -4, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -5, eastWest*7), random, trunkDist, origin, treeOrigin);
-        addToMap(map, ConspiracraftMath.addVec(pos, northSouth*7, -6, eastWest*7), random, trunkDist, origin, treeOrigin);
+    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
+        map.put(pos, new Vector2i(blockType, blockSubType));
     }
     
-    public static Map<Vector3i, Vector2i> generateCanopy(int x, int y, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
-        Vector3i origin = new Vector3i(x, y, z);
+    public static Map<Vector3i, Vector2i> generateCanopy(int x, int ogY, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
+        Vector3i origin = new Vector3i(x, ogY, z);
         Random random = new Random();
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
+        
+        addToMap(map, origin, blockType, blockSubType);
+        addToMap(map, new Vector3i(origin).add(0, 1, 0), blockType, blockSubType);
+        addToMap(map, new Vector3i(origin).add(0, 2, 0), blockType, blockSubType);
+        int max = ogY;
+        int min = max-trunkHeight+2;
+        for (int y = max; y >= min; y -= 3) {
+            int dirOffset = random.nextInt(0, 2);
+            Vector3i pos = new Vector3i(x, y, z);
 
-        if (origin.y()-treeOrigin.y() > 12) {
-            addSquare(map, origin.add(0, -1, 0), random, 1, true);
-            addSquare(map, origin, random, 1, true);
-            addSquare(map, origin.add(0, 1, 0), random, 1, true);
-            int xTrunkDist = origin.x()-treeOrigin.x();
-            int zTrunkDist = origin.z()-treeOrigin.z();
-            int trunkDist = xTrunkDist*xTrunkDist+zTrunkDist*zTrunkDist;
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, 0);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 0, 1);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, 0);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 0, -1);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, 1);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, 1);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, -1, -1);
-            createFrond(map, origin.add(0, random.nextInt(0, 1), 0), random, trunkDist, origin, treeOrigin, 1, -1);
-        } else {
-            x = origin.x();
-            y = origin.y();
-            z = origin.z();
-
-            addToMap(map, new Vector3i(x, y, z), random);
-            addToMap(map, new Vector3i(x + 1, y, z), random);
-            addToMap(map, new Vector3i(x - 1, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 1), random);
-            addToMap(map, new Vector3i(x, y, z - 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z), random);
-            addToMap(map, new Vector3i(x - 2, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 2), random);
-            addToMap(map, new Vector3i(x, y, z - 2), random);
-
-            y--;
-
-            addToMap(map, new Vector3i(x + 1, y, z), random);
-            addToMap(map, new Vector3i(x - 1, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 1), random);
-            addToMap(map, new Vector3i(x, y, z - 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z), random);
-            addToMap(map, new Vector3i(x - 2, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 2), random);
-            addToMap(map, new Vector3i(x, y, z - 2), random);
-            addToMap(map, new Vector3i(x + 3, y, z), random);
-            addToMap(map, new Vector3i(x - 3, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 3), random);
-            addToMap(map, new Vector3i(x, y, z - 3), random);
-            addToMap(map, new Vector3i(x - 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 1, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 2), random);
-
-            y--;
-
-            addToMap(map, new Vector3i(x - 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z), random);
-            addToMap(map, new Vector3i(x - 2, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 1), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 1), random);
-            addToMap(map, new Vector3i(x, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 1, y, z - 2), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 2), random);
-            addToMap(map, new Vector3i(x, y, z + 2), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 2), random);
-            addToMap(map, new Vector3i(x - 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x, y, z + 3), random);
-            addToMap(map, new Vector3i(x, y, z + 4), random);
-            addToMap(map, new Vector3i(x, y, z - 3), random);
-            addToMap(map, new Vector3i(x, y, z - 4), random);
-            addToMap(map, new Vector3i(x + 3, y, z), random);
-            addToMap(map, new Vector3i(x + 4, y, z), random);
-            addToMap(map, new Vector3i(x - 3, y, z), random);
-            addToMap(map, new Vector3i(x - 4, y, z), random);
-
-            y--;
-
-            addToMap(map, new Vector3i(x - 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x, y, z + 2), random);
-            addToMap(map, new Vector3i(x, y, z + 3), random);
-            addToMap(map, new Vector3i(x, y, z + 4), random);
-            addToMap(map, new Vector3i(x, y, z - 2), random);
-            addToMap(map, new Vector3i(x, y, z - 3), random);
-            addToMap(map, new Vector3i(x, y, z - 4), random);
-            addToMap(map, new Vector3i(x + 2, y, z), random);
-            addToMap(map, new Vector3i(x + 3, y, z), random);
-            addToMap(map, new Vector3i(x + 4, y, z), random);
-            addToMap(map, new Vector3i(x - 2, y, z), random);
-            addToMap(map, new Vector3i(x - 3, y, z), random);
-            addToMap(map, new Vector3i(x - 4, y, z), random);
-
-            y--;
-
-            addToMap(map, new Vector3i(x - 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z + 1), random);
-            addToMap(map, new Vector3i(x + 1, y, z - 1), random);
-            addToMap(map, new Vector3i(x - 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x + 4, y, z), random);
-            addToMap(map, new Vector3i(x - 4, y, z), random);
-            addToMap(map, new Vector3i(x, y, z + 4), random);
-            addToMap(map, new Vector3i(x, y, z - 4), random);
-
-            y--;
-
-            addToMap(map, new Vector3i(x - 2, y, z - 2), random);
-            addToMap(map, new Vector3i(x - 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z + 2), random);
-            addToMap(map, new Vector3i(x + 2, y, z - 2), random);
+            if (y <= min+trunkHeight/3 && trunkHeight > 10) {
+                addLargeBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
+                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
+            } else if (y <= max-trunkHeight/5) {
+                addMediumBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addMediumBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
+                addMediumBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+                addSmallBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
+            } else {
+                addSmallBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addSmallBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+            }
         }
 
         return map;
     }
 
-    private static void addSquare(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int radius, boolean corners, int trunkDist, Vector3i origin, Vector3i treeOrigin) {
-        int minX = pos.x()-radius;
-        int maxX = pos.x()+radius;
-        int minZ = pos.z()-radius;
-        int maxZ = pos.z()+radius;
-        if (radius == 0) {
-            maxX+=1;
-            maxZ+=1;
-        }
-        for (int x = pos.x()-radius; x <= maxX; x++) {
-            for (int z = pos.z()-radius; z <= maxZ; z++) {
-                if (!((x == minX || x == maxX) && (z == minZ || z == maxZ)) || corners) {
-                    addToMap(map, new Vector3i(x, pos.y(), z), random, trunkDist, origin, treeOrigin);
-                }
+    private static Vector3i getDir(Vector3i dir, int offset) {
+        if (offset == 1) {
+            if (dir == Directions.NORTH) {
+                return Directions.EAST;
+            } else if (dir == Directions.EAST) {
+                return Directions.SOUTH;
+            } else if (dir == Directions.SOUTH) {
+                return Directions.WEST;
+            } else if (dir == Directions.WEST) {
+                return Directions.NORTH;
             }
+        } else if (offset == 2) {
+            if (dir == Directions.NORTH) {
+                return Directions.SOUTH;
+            } else if (dir == Directions.EAST) {
+                return Directions.WEST;
+            } else if (dir == Directions.SOUTH) {
+                return Directions.NORTH;
+            } else if (dir == Directions.WEST) {
+                return Directions.EAST;
+            }
+        }
+        return dir;
+    }
+
+    private static void addLargeBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+        if (random.nextInt(0, 4) == 0) {
+            addMediumBranch(map, pos, random, dir, blockType, blockSubType);
+        } else {
+            int x;
+            int y = 0;
+            int z;
+            if (dir == Directions.NORTH) {
+                x = 1;
+                z = 1;
+            } else if (dir == Directions.EAST) {
+                x = 1;
+                z = -1;
+            } else if (dir == Directions.SOUTH) {
+                x = -1;
+                z = -1;
+            } else {
+                x = -1;
+                z = 1;
+            }
+            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+
+            y--;
+
+            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, z * 3), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 3, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 3), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 2), blockType, blockSubType);
+
+            y--;
+
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 3), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 3), blockType, blockSubType);
+
+            y--;
+
+            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 3), blockType, blockSubType);
         }
     }
 
-    private static void addSquare(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int radius, boolean corners) {
-        int minX = pos.x()-radius;
-        int maxX = pos.x()+radius;
-        int minZ = pos.z()-radius;
-        int maxZ = pos.z()+radius;
-        for (int x = pos.x()-radius; x <= maxX; x++) {
-            for (int z = pos.z()-radius; z <= maxZ; z++) {
-                if (!((x == minX || x == maxX) && (z == minZ || z == maxZ)) || corners) {
-                    addToMap(map, new Vector3i(x, pos.y(), z), random);
-                }
+    private static void addMediumBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+        if (random.nextInt(0, 4) == 0) {
+            addLargeBranch(map, pos, random, dir, blockType, blockSubType);
+        } else {
+            int x;
+            int y = 0;
+            int z;
+            if (dir == Directions.NORTH) {
+                x = 1;
+                z = 1;
+            } else if (dir == Directions.EAST) {
+                x = 1;
+                z = -1;
+            } else if (dir == Directions.SOUTH) {
+                x = -1;
+                z = -1;
+            } else {
+                x = -1;
+                z = 1;
             }
+            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+
+            y--;
+
+            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
+
+            y--;
+
+            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
         }
+    }
+
+    private static void addSmallBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+        int x;
+        int y = 0;
+        int z;
+        if (dir == Directions.NORTH) {
+            x = 1;
+            z = 1;
+        } else if (dir == Directions.EAST) {
+            x = 1;
+            z = -1;
+        } else if (dir == Directions.SOUTH) {
+            x = -1;
+            z = -1;
+        } else {
+            x = -1;
+            z = 1;
+        }
+
+        addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
+        addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
+        addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+
+        y--;
+
+        addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
     }
 }

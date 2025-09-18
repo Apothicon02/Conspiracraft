@@ -75,7 +75,8 @@ public class BlockTypes {
             REDWOOD_LOG = create(new BlockType(new BlockProperties())), //50
             REDWOOD_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
-            BLUE_HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17)));
+            BLUE_HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
+            SNOW = create(new BlockType(new BlockProperties()));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

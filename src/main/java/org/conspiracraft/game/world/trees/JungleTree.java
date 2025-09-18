@@ -39,7 +39,11 @@ public class JungleTree {
             if (!colliding) {
                 blocks.forEach((pos, block) -> {
                     if (FeatureHelper.inBounds(pos)) {
-                        WorldGen.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+                        if (block.y > 0) {
+                            WorldGen.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+                        } else {
+                            WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, block.x, block.y);
+                        }
                         int condensedPos = condensePos(pos.x, pos.z);
                         int surfaceY = heightmap[condensedPos];
                         heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);

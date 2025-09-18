@@ -334,7 +334,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 if (blockType == 1) {
                     if (prevVoxelColor.a != voxelColor.a) {
                         if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8)+mapPos.y)) {
-                            voxelColor = vec4(fromLinear(vec3(1)), 1);
+                            voxelColor = vec4(fromLinear(vec3(1))*sunLight, 1);
                             shouldReflect = -1;
                             caustic = true;
                         }
@@ -495,7 +495,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness);
         bool underwater = bool(blockInfo == ivec2(1, 15) && prevBlockInfo == ivec2(1, 15));
         if (blockInfo.x != 0.f && !underwater) {
-            float sunLight = (lighting.a/fromLinear(vec4(20)).a)*(mixedTime-timeBonus);
+            float sunLight = (lighting.a/fromLinear(vec4(20)).a)*max(0.4f, mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
             color = traceBlock(isShadow, chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
             //lighting start
@@ -667,6 +667,8 @@ vec4 prevSuperFinalTint = vec4(1);
 
 vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     clearVars(true, false);
+    lighting = fromLinear(getLighting(ogRayPos.x, ogRayPos.y, ogRayPos.z));
+    lightFog = max(lightFog, lighting);
     vec4 color = traceWorld(false, ogRayPos, dir, maxDistance);
     bool finalHitSelection = hitSelection;
     depth = distance(camPos, hitPos)/renderDistance;

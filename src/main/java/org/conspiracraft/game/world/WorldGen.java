@@ -2,6 +2,7 @@ package org.conspiracraft.game.world;
 
 import org.conspiracraft.engine.ConspiracraftMath;
 import org.conspiracraft.game.blocks.types.BlockType;
+import org.conspiracraft.game.blocks.types.LightBlockProperties;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -26,6 +27,13 @@ public class WorldGen {
         return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getBlockUncompressed(condenseLocalPos(x & 15, y & 15, z & 15));
     }
     public static void setBlockWorldgen(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
+        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+    }
+    public static void setBlockWorldgenUpdates(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
+        Vector2i above = getBlockWorldgen(x, y+1, z);
+        if (BlockTypes.blockTypeMap.get(above.x).needsSupport(above)) {
+            setBlockWorldgenUpdates(x, y+1, z, 0, 0);
+        }
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
     }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
@@ -96,7 +104,8 @@ public class WorldGen {
     }
 
     public static int getSurfaceBlock(int x, int y, int z, double desertDist) {
-        return desertDist > 1 ? 2 : 23;
+        int snowLevel = (int) (((distance(x, z, halfSize, halfSize)/halfSize)*100)+72);
+        return desertDist > 1 ? (snowLevel <= y ? 54 : 2) : 23;
     }
     public static int getCrustBlock(int x, int y, int z, double desertDist) {
         return desertDist > 1 ?  3 : 23;
@@ -234,16 +243,25 @@ public class WorldGen {
                         double plainness = 0.01d-Math.max(0, Math.max(forestness, taiganess));
                         double randomNumber = Math.random();
                         boolean setAnything = false;
-                        if (randomNumber > 0.99995d) {
+                        if (randomNumber > 0.999d) {
                             if (randomNumber > 0.99997d) {
                                 setBlockWorldgen(x, y, z, 7, 0);
                                 setBlockWorldgen(x, y + 1, z, 7, 0);
                                 setBlockWorldgen(x, y + 2, z, 7, 0);
-                            } else {
-                                setBlockWorldgen(x, y + 1, z, 14, 0);
+                            } else if (blockOn.x == 2) {
+                                if (randomNumber > 0.9992d) {
+                                    if (jungleness > 0) {
+                                        int type = 52 + (Math.random() > 0.5f ? 1 : 0);
+                                        setBlockWorldgen(x, y + 1, z, type, 2);
+                                        setBlockWorldgen(x, y + 2, z, type, 1);
+                                        setBlockWorldgen(x, y + 3, z, type, 0);
+                                    }
+                                } else {
+                                    setBlockWorldgen(x, y + 1, z, 14, 0);
+                                }
                             }
                             setAnything = true;
-                        } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23) {
+                        } else if (blockOn.x == 2 || blockOn.x == 3 || blockOn.x == 23 || blockOn.x == 54) {
                             double jungDes = Math.max(desertness, oceanness);
                             if (randomNumber/10 < jungDes) { //jungle & desert
                                 if (blockOn.x == 23 && randomNumber < jungDes*Math.max(0.8f, exponentialFoliageNoise)) {
@@ -297,11 +315,19 @@ public class WorldGen {
                                     OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                     setAnything = true;
                                 }
+                            } else if (randomNumber < taiganess*(exponentialFoliageNoise+0.4)) { //taiga
+                                int maxHeight = (int) (Math.random() * 19) + 5;
+                                PineTree.generate(blockOn, x, y, z, maxHeight, 35, 0, 36, 0);
+                                setAnything = true;
                             } else if (randomNumber < forestness*(exponentialFoliageNoise-0.2)) { //forest
                                 int maxHeight = (int) (Math.random() * 6) + 12;
                                 int leavesHeight = (int) (Math.random()*3) + 3;
                                 int radius = (int) (Math.random()*4) + 6;
-                                OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
+                                if (Math.random() < 0.015f) { //1.5% chance the tree is dead
+                                    DeadOakTree.generate(blockOn, x, y, z, maxHeight, 47, 0);
+                                } else {
+                                    OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
+                                }
                                 setAnything = true;
                             } else if (randomNumber < forestness/2) {
                                 int maxHeight = (int) (Math.random() + 1);
