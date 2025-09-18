@@ -182,7 +182,9 @@ bool castsShadow(int x) {
     return true;//(x != 4 && x != 5 && x != 18);
 }
 bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 && block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30);
+    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 &&
+    block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30 && block.x != 36 && block.x != 39 && block.x != 42 && block.x != 45
+    && block.x != 48 && block.x != 51 && block.x != 52 && block.x != 53);
 }
 bool hasAO(ivec3 voxelPos, ivec3 pos) {
     bool[8] corners = getCorners(pos.x, pos.y, pos.z);
@@ -716,9 +718,10 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
             reflectivity = oldReflectivity;
         }
     }
-    vec3 finalLight = max(finalLighting.rgb, sunLight)*finalNormalBrightness;
+    vec3 finalLight = max(finalLighting.rgb*0.66f, sunLight)*finalNormalBrightness;
     vec3 desaturation = clamp(-1.5f*(1-max(finalLighting.rgb, sunLightCam)), vec3(0.f), vec3(0.8f));
     color.rgb *= finalLight;
+    color.rgb += finalLighting.rgb*0.34f;
     color.rgb = hsv2rgb(max(vec3(0), rgb2hsv(color.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));
     //fog start
     vec4 fog = 1 + vec4(vec3(finalLightFog) * 1.5f, 1);
