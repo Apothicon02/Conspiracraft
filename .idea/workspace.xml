@@ -10,21 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Directions.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmShrub.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmShrub.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PineTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PineTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PineCanopy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PineCanopy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.pdn" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -219,14 +209,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00173" summary="- Logs now make 4 planks instead of 1.">
-      <option name="closed" value="true" />
-      <created>1751128275970</created>
-      <option name="number" value="00173" />
-      <option name="presentableId" value="LOCAL-00173" />
-      <option name="project" value="LOCAL" />
-      <updated>1751128275970</updated>
     </task>
     <task id="LOCAL-00174" summary="- Revert last change.">
       <option name="closed" value="true" />
@@ -612,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758155280359</updated>
     </task>
-    <option name="localTasksCounter" value="222" />
+    <task id="LOCAL-00222" summary="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen.">
+      <option name="closed" value="true" />
+      <created>1758218016757</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
+      <option name="project" value="LOCAL" />
+      <updated>1758218016757</updated>
+    </task>
+    <option name="localTasksCounter" value="223" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -635,7 +625,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed light being too bright." />
     <MESSAGE value="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA." />
     <MESSAGE value="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed." />
     <MESSAGE value="- Optimized chunks." />
@@ -660,7 +649,8 @@
     <MESSAGE value="- Added spruce logs. &#10;- Added spruce planks. &#10;- Added spruce leaves. &#10;- Fixed only willow planks being reflective. &#10;- Changed oak and palm plank colors." />
     <MESSAGE value="- Added cherry wood. &#10;- Added birch wood.&#10;- Added acacia wood. &#10;- Added oak wood. &#10;- Added redwood wood. &#10;- Rotated jungle log textures. &#10;- Added recipes for all planks. &#10;- Reduced plank reflectivity. &#10;- Fixed corner changes only loading when the game reloads." />
     <MESSAGE value="- Fixed new leaves being marked as solid. &#10;- Added hibiscus flowers. &#10;- Improved block lighting." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed new leaves being marked as solid. &#10;- Added hibiscus flowers. &#10;- Improved block lighting." />
+    <MESSAGE value="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -672,7 +662,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>721</line>
+          <line>722</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">

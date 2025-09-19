@@ -399,7 +399,7 @@ public class Renderer {
         reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
         finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
-                new String[]{"res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
     }
 
     public static void  updateUniforms(ShaderProgram program) {
@@ -681,6 +681,7 @@ public class Renderer {
             }
 
             finalScene.bind();
+            updateUniforms(finalScene);
             glUniform2i(finalScene.uniforms.get("res"), window.getWidth(), window.getHeight());
             draw();
             finalScene.unbind();

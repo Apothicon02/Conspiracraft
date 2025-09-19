@@ -704,7 +704,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
         float factor = max(1, 2.5-finalDistanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10));
         color += (sunLight*(factor/10));
     }
-    if (checkShadow && shadowsEnabled && !isSky && adjustedTimeCam > 0.23f) {
+    if (checkShadow && shadowsEnabled && !isSky) { //to remove shadows at night:  && adjustedTimeCam > 0.23f
         if (color.a >= 1.f && sunLight > 0.f && finalLighting.a > 0) {
             vec3 shadowPos = prevPos;
             vec3 sunDir = normalize(sun - shadowPos);
@@ -713,7 +713,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
             vec3 finalHitPos = hitPos;
             clearVars(true, true);
             if (traceWorld(true, shadowPos, sunDir, maxDistance).a >= 1.f) {
-                sunLight *= max(mix(0.66f, 0.9f, min(1, distance(finalHitPos, hitPos)/420)), abs(1-mixedTime)*1.5f);
+                sunLight *= min(1, max(mix(0.66f, 0.9f, min(1, distance(finalHitPos, hitPos)/420)), abs(1-mixedTime)*1.5f));
             } else {
                 finalTint += tint;//sun tint
             }

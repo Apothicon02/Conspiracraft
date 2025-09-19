@@ -162,10 +162,7 @@ public class Player {
                 modifiedGrav *= 0.2f;
                 friction *= 0.9f;
                 modifiedSpeed *= 0.5f;
-            } else if (blockIn.x == 4 || blockIn.x == 5) { //grass
-                friction *= 0.9f;
-                modifiedSpeed *= 0.9f;
-            } else if (blockIn.x == 17 || blockIn.x == 21) { //leaves
+            } else if (Tags.leaves.tagged.contains(blockIn.x)) { //leaves
                 if (blockIn.y == 0) {
                     friction *= 0.5f;
                     modifiedSpeed *= 0.5f;
