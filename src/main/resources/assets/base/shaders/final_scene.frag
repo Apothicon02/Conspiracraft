@@ -76,10 +76,10 @@ vec3 stepMask(vec3 sideDist) {
 }
 
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ) {
-    bool rightHand = bX >= 1 && bX < 2 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    bool stack = bX >= 23 && bX < 24 && bY >= -5.5f && bY < (-6.5+hand.z) && bZ >= 13.5f && bZ < 14.5f;
-    bool leftHand = false;//bX >= -2 && bX < -1 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    if (rightHand || stack) {
+    //bool rightHand = bX >= 1 && bX < 2 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
+    bool stack = bX >= -10 && bX < (-10+((hand.z)*2)) && bY >= -15.5f && bY < -14.5 && bZ >= 15.5f && bZ < 16.5f;
+    bool leftHand = bX >= -2 && bX < -1 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
+    if (leftHand || (stack && ((int(bX+10) % 2) == 0))) {
         y += 4; //when the bounds contain a decimal, that decimal should be multiplied by 8 and added to its axis
         z += 4;
         int localX = int(x-(floor(x/8)*8));
