@@ -77,8 +77,9 @@ vec3 stepMask(vec3 sideDist) {
 
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ) {
     bool rightHand = bX >= 1 && bX < 2 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
+    bool stack = bX >= 23 && bX < 24 && bY >= -5.5f && bY < (-6.5+hand.z) && bZ >= 13.5f && bZ < 14.5f;
     bool leftHand = false;//bX >= -2 && bX < -1 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    if (rightHand) {
+    if (rightHand || stack) {
         y += 4; //when the bounds contain a decimal, that decimal should be multiplied by 8 and added to its axis
         z += 4;
         int localX = int(x-(floor(x/8)*8));
@@ -101,7 +102,7 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
     vec3 mask = stepMask(sideDist);
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
-    for (int i = 0; i < 128; i++) {
+    for (int i = 0; i < 512; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, (mapPos.x/8)+rayPos.x, (mapPos.y/8)+rayPos.y, (mapPos.z/8)+rayPos.z);
         if (voxelColor.a > 0.f) {
             if (voxelColor.a < fromLinear(vec4(1)).a) {
@@ -175,7 +176,9 @@ void main() {
     vec2 uv = (pos*2. - res.xy) / res.y;
     uvDir = normalize(vec3(uv, 1));
 
-    fragColor = raytrace(vec3(0, 0, 0), uvDir);
+    if (ui) {
+        fragColor = raytrace(vec3(0, 0, 0), uvDir);
+    }
     if (fragColor.a < 1) {
         bool checkerOn = checker(pos);
         bool firstHalf = bool(pos.x < res.x/2);
