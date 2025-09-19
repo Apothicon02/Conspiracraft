@@ -14,14 +14,12 @@ import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.LinkedList;
 
 import static org.conspiracraft.engine.Utils.*;
-import static org.conspiracraft.game.Player.selectedBlock;
 import static org.conspiracraft.game.world.World.*;
 import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.util.vma.Vma.*;
@@ -56,6 +54,7 @@ public class Renderer {
     public static int chunkLightsSSBOId;
     public static int lightsSSBOId;
     public static int chunkEmptySSBOId;
+    public static int playerSSBOId;
 
     public static int renderDistanceMul = 8; //3
     public static float timeOfDay = 0.5f;
@@ -209,6 +208,7 @@ public class Renderer {
         chunkLightsSSBOId = glCreateBuffers();
         lightsSSBOId = glCreateBuffers();
         chunkEmptySSBOId = glCreateBuffers();
+        playerSSBOId = glCreateBuffers();
     }
     public static void createVMA() {
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
@@ -386,7 +386,7 @@ public class Renderer {
         mediumFboId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
         scene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         generateVao();
         generateTextures(window);
         createBuffers();
@@ -395,11 +395,11 @@ public class Renderer {
         blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
                 new String[]{"dir", "lowRes", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "hand", "ui", "res"});
+                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
     }
 
     public static void  updateUniforms(ShaderProgram program) {
@@ -424,7 +424,6 @@ public class Renderer {
         sunPos.rotateY((float) time);
         sunPos = new Vector3f(sunPos.x + halfSize, height + 64, sunPos.z + halfSize);
         glUniform3f(program.uniforms.get("sun"), sunPos.x, sunPos.y, sunPos.z);
-        glUniform3i(program.uniforms.get("hand"), selectedBlock.x, selectedBlock.y, selectedBlock.z);
         glUniform1i(program.uniforms.get("ui"), showUI ? 1 : 0);
     }
 
@@ -590,12 +589,20 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
+    public static void updatePlayerBuffer() {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, playerSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, playerSSBOId);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, Main.player.stack, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
     public static void updateBuffers() throws IOException {
         long startTime = System.currentTimeMillis();
         updateAtlasBuffer();
         updateCornerBuffers();
         updateLightBuffers();
         updateBlockBuffers(startTime);
+        updatePlayerBuffer();
     }
 
     public static void bindTextures() {

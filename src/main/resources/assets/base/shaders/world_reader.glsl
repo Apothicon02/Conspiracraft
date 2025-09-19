@@ -15,7 +15,6 @@ uniform bool ui;
 uniform bool shadowsEnabled;
 uniform bool reflectionShadows;
 uniform vec3 sun;
-uniform ivec3 hand;
 uniform ivec2 res;
 
 vec3 normal = vec3(0);

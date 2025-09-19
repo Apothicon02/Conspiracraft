@@ -13,7 +13,6 @@ uniform bool ui;
 uniform bool shadowsEnabled;
 uniform bool reflectionShadows;
 uniform vec3 sun;
-uniform ivec3 hand;
 uniform ivec2 res;
 
 vec3 uvDir = vec3(0);
@@ -30,6 +29,10 @@ layout(std430, binding = 5) buffer chunkLightsSSBO
 layout(std430, binding = 6) buffer lightsSSBO
 {
     int[] lightsData;
+};
+layout(std430, binding = 8) buffer playerSSBO
+{
+    int[] playerData;
 };
 layout(binding = 4) uniform sampler2D white_noise;
 layout(binding = 6, rgba32f) uniform image3D scene_unscaled_image;
@@ -77,17 +80,24 @@ vec3 stepMask(vec3 sideDist) {
 
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ) {
     //bool rightHand = bX >= 1 && bX < 2 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    bool stack = bX >= -10 && bX < (-10+((hand.z)*2)) && bY >= -15.5f && bY < -14.5 && bZ >= 15.5f && bZ < 16.5f;
+    bool stack = bX >= -10 && bX < (-10+30) && bY >= -15.5f && bY < -14.5 && bZ >= 15.5f && bZ < 16.5f;
     bool leftHand = bX >= -2 && bX < -1 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
     if (leftHand || (stack && ((int(bX+10) % 2) == 0))) {
+        ivec2 block = ivec2(0);
+        if (leftHand) {
+            block = ivec2(playerData[0], playerData[1]);
+        } else {
+            int slot = int(bX+12);
+            block = ivec2(playerData[slot], playerData[slot+1]);
+        }
         y += 4; //when the bounds contain a decimal, that decimal should be multiplied by 8 and added to its axis
         z += 4;
         int localX = int(x-(floor(x/8)*8));
         int localY = int(y-(floor(y/8)*8));
         int localZ = int(z-(floor(z/8)*8));
-        return fromLinear(intToColor(atlasData[(1024*((hand.x*8)+localX)) + (hand.y*64) + ((abs(localY-8)-1)*8) + localZ])/255);
+        return fromLinear(intToColor(atlasData[(1024*((block.x*8)+localX)) + (block.y*64) + ((abs(localY-8)-1)*8) + localZ])/255);
     }
-    return vec4(0.f);
+    return vec4(0);
 }
 
 vec4 maxVoxelColor = vec4(0);

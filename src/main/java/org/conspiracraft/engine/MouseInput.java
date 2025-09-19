@@ -1,6 +1,8 @@
 package org.conspiracraft.engine;
 
+import org.joml.Vector2d;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -8,6 +10,7 @@ public class MouseInput {
 
     private Vector2f currentPos;
     private Vector2f displVec;
+    public Vector2d scroll = new Vector2d(0);
     private boolean inWindow;
     private boolean leftButtonPressed;
     private boolean middleButtonPressed;
@@ -24,6 +27,10 @@ public class MouseInput {
         rightButtonPressed = false;
         inWindow = false;
 
+        glfwSetScrollCallback(windowHandle, (handle, xOffset,  yOffset) -> {
+            scroll.x += xOffset;
+            scroll.y += yOffset;
+        });
         glfwSetCursorEnterCallback(windowHandle, (handle, entered) -> inWindow = entered);
         glfwSetMouseButtonCallback(windowHandle, (handle, button, action, mode) -> {
             leftButtonPressed = button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS;

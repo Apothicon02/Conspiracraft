@@ -50,7 +50,7 @@ public class Player {
     public boolean upward = false;
     public boolean downward = false;
     public boolean flying = true;
-    public static Vector3i selectedBlock = new Vector3i(0);
+    public int[] stack = new int[32];
 
     public Player(Vector3f newPos) {
         jumpSource = new Source(newPos, 1, 1, 0, 0);
@@ -71,7 +71,7 @@ public class Player {
     public int[] getData() {
         float[] cam = new float[16];
         camera.getViewMatrixWithoutPitch().get(cam);
-        int[] data = new int[30];
+        int[] data = new int[91];
         for (int i = 0; i < 16; i++) {
             data[i] = (int)(cam[i]*1000);
         }
@@ -84,9 +84,9 @@ public class Player {
             data[i] = (int)(posVelData[i-20]*1000);
         }
         data[26] = flying ? 1 : 0;
-        data[27] = selectedBlock.x;
-        data[28] = selectedBlock.y;
-        data[29] = selectedBlock.z;
+        for (int i = 27; i < 59; i++) {
+            data[i] = stack[i-27];
+        }
         return data;
     }
 

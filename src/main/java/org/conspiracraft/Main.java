@@ -2,7 +2,6 @@ package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.blocks.types.BlockProperties;
-import org.conspiracraft.game.interactions.Handcrafting;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.audio.AudioController;
@@ -13,17 +12,14 @@ import org.joml.*;
 import org.conspiracraft.engine.*;
 import org.lwjgl.opengl.GL;
 
-import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.Math;
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-import static org.conspiracraft.game.Player.selectedBlock;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
@@ -98,9 +94,9 @@ public class Main {
             player.setCameraMatrix(camMatrix);
             player.setCameraPitch(pitch);
             player.flying = data[i++] != 0;
-            selectedBlock.x = data[i++];
-            selectedBlock.y = data[i++];
-            selectedBlock.z = data[i++];
+            for (int item = 0; item < player.stack.length; item++) {
+                player.stack[item] = data[i++];
+            }
         } else {
             player = new Player(new Vector3f(World.size-512, 256, World.size-512));
         }
@@ -145,6 +141,56 @@ public class Main {
     public static int reach = 50;
     public static float reachAccuracy = 200;
 
+    public void dropStackToGround() {
+        // add block entities and use one to make a bundle containing the stack
+    }
+    public void cycleStackForward() {
+        int ogType = player.stack[0];
+        int ogSubtype = player.stack[1];
+        for (int i = 0; i < player.stack.length-2; i+=2) {
+            player.stack[i] = player.stack[i+2];
+            player.stack[i+1] = player.stack[i+3];
+        }
+        player.stack[player.stack.length-1] = ogSubtype;
+        player.stack[player.stack.length-2] = ogType;
+    }
+    public void cycleStackBackward() {
+        int ogType = player.stack[player.stack.length-2];
+        int ogSubtype = player.stack[player.stack.length-1];
+        for (int i = player.stack.length-1; i >= 2; i-=2) {
+            player.stack[i-1] = player.stack[i-3];
+            player.stack[i] = player.stack[i-2];
+        }
+        player.stack[0] = ogType;
+        player.stack[1] = ogSubtype;
+    }
+    public void removeFirstEntryInStack() {
+        player.stack[0] = 0;
+        player.stack[1] = 0;
+        for (int i = 0; i < player.stack.length-2; i+=2) {
+            player.stack[i] = player.stack[i+2];
+            player.stack[i+1] = player.stack[i+3];
+        }
+        player.stack[player.stack.length-1] = 0;
+        player.stack[player.stack.length-2] = 0;
+    }
+    public boolean addToStack(Vector2i block) {
+        for (int i = 0; i < player.stack.length; i+=2) {
+            if (player.stack[i] == 0) {
+                player.stack[i] = block.x;
+                player.stack[i + 1] = block.y;
+                return true;
+            }
+        }
+        return false;
+    }
+    public void setWholeStack(Vector2i block) {
+        for (int i = 0; i < player.stack.length; i+=2) {
+            player.stack[i] = block.x;
+            player.stack[i+1] = block.y;
+        }
+    }
+
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
             if (window.isKeyPressed(GLFW_KEY_ESCAPE, GLFW_PRESS)) {
@@ -166,6 +212,16 @@ public class Main {
                 }
 
                 MouseInput mouseInput = window.getMouseInput();
+                if (mouseInput.scroll.y > 0) {
+                    for (int i = 0; i < mouseInput.scroll.y; i++) {
+                        cycleStackForward();
+                    }
+                } else if (mouseInput.scroll.y < 0) {
+                    for (int i = 0; i < -1*mouseInput.scroll.y; i++) {
+                        cycleStackBackward();
+                    }
+                }
+                mouseInput.scroll.set(0.d);
                 Vector2f displVec = mouseInput.getDisplVec();
                 player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                         (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
@@ -177,30 +233,24 @@ public class Main {
                         Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, mmbDown, reachAccuracy);
                         if (pos != null) {
                             if (mmbDown) {
-                                if (isShiftDown) {
-                                    Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
-                                    if (block != null) {
-                                        selectedBlock = Handcrafting.interact(selectedBlock, block);
+                                Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
+                                if (block != null) {
+                                    if (BlockTypes.blockTypeMap.get(block.x).blockProperties.isFluid) {
+                                        block.y = 0;
                                     }
-                                } else {
-                                    Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
-                                    if (block != null) {
-                                        selectedBlock = new Vector3i(block.x, BlockTypes.blockTypeMap.get(block.x).blockProperties.isFluid ? 0 : block.y, 15);
-                                    }
+                                    setWholeStack(block);
                                 }
-                            } else if (BlockTypes.blockTypeMap.get(selectedBlock.x()) != null) {
+                            } else if (BlockTypes.blockTypeMap.get(player.stack[0]) != null) {
                                 lastBlockBroken = timeMillis;
-                                int blockTypeId = selectedBlock.x();
-                                int blockSubtypeId = selectedBlock.y();
-                                int amount = selectedBlock.z();
+                                int blockTypeId = player.stack[0];
+                                int blockSubtypeId = player.stack[1];
                                 int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
                                 int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
                                 if (lmbDown) {
                                     cornerData |= (1 << (cornerIndex - 1));
                                     if (cornerData == -2147483521 || !isShiftDown) {
                                         Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
-                                        if (amount == 0 || (blockTypeId == blockBreaking.x && amount < 15)) {
-                                            selectedBlock = new Vector3i(blockBreaking.x, BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid ? 0 : blockBreaking.y, amount+1);
+                                        if (addToStack(new Vector2i(blockBreaking.x, BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid ? 0 : blockBreaking.y))) {
                                             World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                             blockTypeId = 0;
                                             blockSubtypeId = 0;
@@ -213,43 +263,19 @@ public class Main {
                                     if (cornerData != 0) {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
-                                    } else if (amount > 0) {
+                                    } else if (player.stack[0] > 0) {
                                         Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
                                         BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                        BlockProperties selectedProperties = BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties;
-                                        if (oldType.isFluidReplaceable) {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? amount : blockSubtypeId, true, false, 1, false);
-                                            boolean isFluid = BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid;
-                                            if (!(isFluid && isShiftDown)) {
-                                                selectedBlock.z -= BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluid ? (amount - oldBlock.y) : 1;
-                                            }
+                                        if (oldType.isFluid) {
+                                            //displace all fluid to first of 6 neighbors so a block can be placed here.
 
-                                            if (selectedBlock.z <= 0) {
-                                                if (isFluid) {
-                                                    selectedBlock.x = 22;
-                                                    selectedBlock.y = 0;
-                                                    selectedBlock.z = 1;
-                                                } else {
-                                                    selectedBlock.x = 0;
-                                                    selectedBlock.y = 0;
-                                                }
-                                            }
-                                        } else if (selectedProperties.isFluid && oldBlock.x == selectedBlock.x) {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, Math.min(15, oldBlock.y()+amount), true, false, 1, false);
-                                            selectedBlock.z -= (amount - oldBlock.y);
-                                            if (selectedBlock.z <= 0) {
-                                                selectedBlock.x = 22;
-                                                selectedBlock.y = 0;
-                                                selectedBlock.z = 1;
-                                            }
-                                        } else if (!selectedProperties.isFluidReplaceable && oldType.isFluid) {
-                                            //displace all fluid to first of 6 neighbors, if impossible then block will not be placed.
+                                            //refresh oldblock
+                                            oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
+                                            oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
+                                        }
+                                        if (oldType.isFluidReplaceable) {
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
-                                            selectedBlock.z--;
-                                            if (selectedBlock.z <= 0) {
-                                                selectedBlock.x = 0;
-                                                selectedBlock.y = 0;
-                                            }
+                                            removeFirstEntryInStack();
                                         }
                                     }
                                 }
@@ -274,14 +300,30 @@ public class Main {
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
                     }
-                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        selectedBlock.add(new Vector3i(0, isShiftDown ? 10 : 1, 0));
-                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newSubId = selectedBlock.y() - (isShiftDown ? 10 : 1);
-                        if (newSubId < 0) {
-                            newSubId = 0;
+                    if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
+                        if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                            player.stack[1] += (isShiftDown ? 10 : 1);
+                        } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                            int newSubId = player.stack[1] - (isShiftDown ? 10 : 1);
+                            if (newSubId < 0) {
+                                newSubId = 0;
+                            }
+                            player.stack[1] = newSubId;
                         }
-                        selectedBlock = new Vector3i(selectedBlock.x, newSubId, selectedBlock.z());
+                    } else {
+                        if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
+                            int newId = player.stack[0] + 1;
+                            if (newId >= BlockTypes.blockTypeMap.size()) {
+                                newId = 0;
+                            }
+                            player.stack[0] = newId;
+                        } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                            int newId = player.stack[0] - 1;
+                            if (newId < 0) {
+                                newId = BlockTypes.blockTypeMap.size() - 1;
+                            }
+                            player.stack[0] = newId;
+                        }
                     }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         Renderer.atlasChanged = true;
@@ -297,43 +339,14 @@ public class Main {
                         }
                     }
                 } else {
-                    if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                        int newId = selectedBlock.x() + 1;
-                        if (newId >= BlockTypes.blockTypeMap.size()) {
-                            newId = 0;
-                        }
-                        selectedBlock = new Vector3i(newId, selectedBlock.y, selectedBlock.z());
-                    } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        int newId = selectedBlock.x() - 1;
-                        if (newId < 0) {
-                            newId = BlockTypes.blockTypeMap.size() - 1;
-                        }
-                        selectedBlock = new Vector3i(newId, selectedBlock.y, selectedBlock.z());
+                    if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
+                        dropStackToGround();
                     }
                     if (wasXDown && !window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS)) {
                         player.flying = !player.flying;
                     }
                     if (wasTDown && !window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS)) {
                         updateTime(100000L, 1);
-                    }
-                    if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                        if (isShiftDown) {
-                            selectedBlock.z = 16;
-                        } else {
-                            selectedBlock.z++;
-                            if (selectedBlock.z > 16) {
-                                selectedBlock.z = 16;
-                            }
-                        }
-                        if (BlockTypes.blockTypeMap.get(selectedBlock.x).blockProperties.isFluid && selectedBlock.z > 15) {
-                            selectedBlock.z = 15;
-                        }
-                    }
-                    if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
-                        selectedBlock.z--;
-                        if (selectedBlock.z < 0) {
-                            selectedBlock.z = 0;
-                        }
                     }
                 }
 

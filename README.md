@@ -20,7 +20,9 @@
 - LMB: Break a block 
 - RMB: Place a block 
 - MMB: Pick a block 
-- Q / E: Cycle the block being placed (Cycles block variant if holding F3)
+- Q / E: Cycle the selected block out of your stack
+- F3 + Q / E: Cycle the block type of your selected block
+- F3 + Shift + Q / E: Cycle the block subtype of your selected block
 - X: Toggle flight 
 - Capslock: Super sprint (only when flying) 
 - T: Skip forward in time 
