@@ -321,7 +321,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                         reflectivity = 0.5f;
                     } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22) { //steel
                         reflectivity = 0.16f;
-                    } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49) { //planks
+                    } else if (blockType == 33 || blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49) { //planks & mud
                         reflectivity = 0.05f;
                     }
                 }
@@ -475,11 +475,11 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         vec3 uv3d = vec3(0);
         vec3 intersect = vec3(0);
         vec3 mini = ((mapPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-        float blocKDist = max(mini.x, max(mini.y, mini.z));
+        float blockDist = max(mini.x, max(mini.y, mini.z));
         if (inBounds) {
             blockInfo = getBlock(rayMapPos);
 
-            intersect = rayPos + rayDir*blocKDist;
+            intersect = rayPos + rayDir*blockDist;
             uv3d = intersect - mapPos;
 
             if (mapPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
@@ -496,7 +496,7 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
         if (blockInfo.x != 0.f && !underwater) {
             float sunLight = (lighting.a/fromLinear(vec4(20)).a)*max(0.4f, mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
-            color = traceBlock(isShadow, chunkDist, subChunkDist, blocKDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
+            color = traceBlock(isShadow, chunkDist, subChunkDist, blockDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
             //lighting start
             //float lightNoise = max(0, cloudNoise((vec2(prevPos.x, prevPos.y)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.y, prevPos.z)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.z, prevPos.x)*64)+(float(time)*10000)));
 

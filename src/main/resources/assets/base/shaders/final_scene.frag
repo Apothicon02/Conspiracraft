@@ -78,47 +78,33 @@ vec3 stepMask(vec3 sideDist) {
     return vec3(mask);
 }
 
-vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ) {
-    //bool rightHand = bX >= 1 && bX < 2 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    bool stack = bX >= -10 && bX < (-10+30) && bY >= -15.5f && bY < -14.5 && bZ >= 15.5f && bZ < 16.5f;
-    bool leftHand = bX >= -2 && bX < -1 && bY >= -1.5f && bY < -0.5f && bZ >= 0.5f && bZ < 1.5f;
-    if (leftHand || (stack && ((int(bX+10) % 2) == 0))) {
-        ivec2 block = ivec2(0);
-        if (leftHand) {
-            block = ivec2(playerData[0], playerData[1]);
-        } else {
-            int slot = int(bX+12);
-            block = ivec2(playerData[slot], playerData[slot+1]);
-        }
-        y += 4; //when the bounds contain a decimal, that decimal should be multiplied by 8 and added to its axis
-        z += 4;
-        int localX = int(x-(floor(x/8)*8));
-        int localY = int(y-(floor(y/8)*8));
-        int localZ = int(z-(floor(z/8)*8));
-        return fromLinear(intToColor(atlasData[(1024*((block.x*8)+localX)) + (block.y*64) + ((abs(localY-8)-1)*8) + localZ])/255);
-    }
-    return vec4(0);
+vec4 getVoxel(int x, int y, int z, ivec2 block) {
+    return fromLinear(intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255);
+}
+
+vec4 getVoxel(float x, float y, float z, ivec2 block) {
+    return getVoxel(int(x), int(y), int(z), block);
 }
 
 vec4 maxVoxelColor = vec4(0);
 vec3 prevTintColor = vec3(0);
 vec3 tint = vec3(0);
 
-vec4 raytrace(vec3 rayPos, vec3 rayDir) {
-    vec3 mapPos = vec3(0);
+vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
+    vec3 mapPos = floor(clamp(rayPos, vec3(0.0001), vec3(7.9999)));
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
-    vec3 sideDist = (mapPos + 0.5 + raySign * 0.5) * deltaDist;
-    vec3 mask = stepMask(sideDist);
+    vec3 sideDist = ((mapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
+    vec3 mask = iMask;
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
-    for (int i = 0; i < 512; i++) {
-        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, (mapPos.x/8)+rayPos.x, (mapPos.y/8)+rayPos.y, (mapPos.z/8)+rayPos.z);
+    for (int i = 0; mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0 && i < 8*3; i++) {
+        vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, block);
         if (voxelColor.a > 0.f) {
             if (voxelColor.a < fromLinear(vec4(1)).a) {
                 float samp = whiteNoise(((vec2(mapPos.x, mapPos.z)*128)+(16)+mapPos.y)+(vec2(16)));
                 if (samp > -0.004 && samp < -0.002 || samp > 0 && samp < 0.002) {
-                    voxelColor = vec4(fromLinear(vec3(1)), 1);
+                    voxelColor = fromLinear(vec4(1));
                 }
             }
             vec3 normal = ivec3(mapPos - prevMapPos);
@@ -153,7 +139,6 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
             vec3 finalLightFog = sunColor*(sunLightFog);
             vec3 fog = 1 + (vec3(finalLightFog) * 1.5f);
             voxelColor.rgb*=fog;
-            voxelColor = toLinear(voxelColor);
             if (voxelColor.a >= 1) {
                 vec3 finalTint = (vec3(1) + tint);
                 vec4 superFinalTint = fromLinear(vec4(vec3(finalTint) / (max(finalTint.r, max(finalTint.g, finalTint.b))), 1));
@@ -178,6 +163,53 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
         sideDist += mask * raySign * deltaDist;
     }
 
+    return vec4(0);
+}
+
+vec4 raytrace(vec3 rayPos, vec3 rayDir) {
+    vec3 mapPos = vec3(0);
+    vec3 raySign = sign(rayDir);
+    vec3 deltaDist = 1.0/rayDir;
+    vec3 sideDist = (mapPos + 0.5 + raySign * 0.5) * deltaDist;
+    vec3 mask = stepMask(sideDist);
+    vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
+
+    for (int i = 0; i < 64; i++) {
+        vec3 realPos = rayPos+(mapPos);
+        bool leftHand = realPos.x >= -3 && realPos.x < -2 && realPos.y >= -2f && realPos.y < -1f && realPos.z >= 1f && realPos.z < 2f;
+        bool stack = realPos.x >= -16 && realPos.x < (-16+30) && realPos.y >= -16f && realPos.y < -15f && realPos.z >= 16f && realPos.z < 17f;
+        if (leftHand || (stack && ((int(realPos+100) % 2) == 0))) {
+            ivec2 block = ivec2(0);
+            if (leftHand) {
+                block = ivec2(playerData[0], playerData[1]);
+            } else {
+                int slot = int(realPos.x+18);
+                block = ivec2(playerData[slot], playerData[slot+1]);
+            }
+            vec3 uv3d = vec3(0);
+            vec3 intersect = vec3(0);
+            vec3 mini = ((realPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float blockDist = max(mini.x, max(mini.y, mini.z));
+
+            intersect = rayPos + rayDir*blockDist;
+            uv3d = intersect - realPos;
+
+            if (realPos == floor(rayPos)) { // Handle edge case where camera origin is inside of block
+                uv3d = rayPos - realPos;
+            }
+
+            vec4 voxelColor = traceBlock(uv3d * 8.0, rayDir, mask, block);
+            if (voxelColor.a >= 1) {
+                return voxelColor;
+            }
+        }
+
+        mask = stepMask(sideDist);
+        prevMapPos = mapPos;
+        mapPos += mask * raySign;
+        sideDist += mask * raySign * deltaDist;
+    }
+
     return maxVoxelColor;
 }
 
@@ -187,7 +219,7 @@ void main() {
     uvDir = normalize(vec3(uv, 1));
 
     if (ui) {
-        fragColor = raytrace(vec3(0, 0, 0), uvDir);
+        fragColor = toLinear(raytrace(vec3(0.5f, 0.5f, 0.5f), uvDir));
     }
     if (fragColor.a < 1) {
         bool checkerOn = checker(pos);

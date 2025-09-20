@@ -19,11 +19,12 @@ void main() {
         prevReflectPos = camPos + (ogDir * (fragColor.a * renderDistance));
         float oldReflectivity = reflectivity;
         reflectivity = 0.f;
-        fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f, renderDistance), oldReflectivity);
+        vec4 reflectColor = raytrace(prevReflectPos, reflectDir, reflectionShadows && oldReflectivity > 0.25f, renderDistance);
         if (reflectivity > 0.f) {
             reflectDir = reflect(reflectDir, normalize(reflectPos - prevReflectPos));
-            fragColor = mix(fragColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && reflectivity > 0.25f, renderDistance), reflectivity);
+            reflectColor = mix(reflectColor, raytrace(prevReflectPos, reflectDir, reflectionShadows && reflectivity > 0.25f, renderDistance), reflectivity);
         }
+        fragColor = mix(fragColor, reflectColor, oldReflectivity);
     }
     imageStore(scene_unscaled_image, ivec3(pos.xy, 0), vec4(fragColor.rgb, ogFragColor.a));
     fragColor = vec4(0);
