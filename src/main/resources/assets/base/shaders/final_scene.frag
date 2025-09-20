@@ -141,10 +141,10 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
             float adjustedTimeCam = clamp((abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.5)/size, 0, 1))*1.2)-abs(0.25f-min(0.25f, distance(camPos, vec3(0))/size)), 0.05f, 0.9f);
             float timeBonus = gradient(camPos.y, 64.f, 372.f, 0.1f, 0.f);
             float mixedTime =  max(0.2f, adjustedTimeCam+timeBonus);
-            float sunLight = lighting.a*max(0.4f, mixedTime-timeBonus);
+            float sunLight = lighting.a*(mixedTime-timeBonus);
             float sunLightNoBonus = lighting.a*mixedTime;
             vec3 brightness = max(lighting.rgb*0.66, vec3(sunLight));
-            vec3 desaturation = clamp(-1.5f*(1-max(lighting.rgb, sunLightNoBonus)), vec3(0.f), vec3(0.8f));
+            vec3 desaturation = clamp(-3f*(1-max(lighting.rgb, sunLightNoBonus)), vec3(0.f), vec3(0.8f));
             voxelColor.rgb*=brightness;
             voxelColor.rgb+=lighting.rgb*0.34f;
             voxelColor.rgb = hsv2rgb(max(vec3(0), rgb2hsv(voxelColor.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));

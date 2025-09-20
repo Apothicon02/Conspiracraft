@@ -686,9 +686,9 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float finalHitDistanceFogginess = distanceFogginess;
     lighting = lighting/fromLinear(vec4(20));
     lightFog = lightFog/fromLinear(vec4(10));
-    float sunLight = lighting.a*max(0.4f, mixedTime-timeBonus);
+    float sunLight = lighting.a*(mixedTime-timeBonus);
     float sunLightCam = lighting.a*adjustedTimeCam;
-    float whiteness = gradient(hitPos.y, 64, 372, 0, 0.8);
+    float whiteness = gradient(hitPos.y, 0, 372, 0, 0.9);
     vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
 
     vec3 finalRayMapPos = rayMapPos;
@@ -697,7 +697,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float sunLightFog = (lightFog.a)*mixedTime;
     vec3 finalLightFog = sunColor*sunLightFog;//max(vec3(lightFog)*((0.7-min(0.7, (lightFog.a)*mixedTime))/4), max(vec3(sunColor.b), (sunColor*mix(sunColor.r*6, 0.2, max(sunColor.r, max(sunColor.g, sunColor.b))))*sunLightFog));
     vec3 finalTint = tint;
-    vec3 unmixedFogColor = mix(vec3(0.416, 0.495, 0.75), vec3(1), whiteness)*min(1, sunLightFog);
+    vec3 unmixedFogColor = mix(vec3(0.416, 0.416, 0.75), vec3(1), whiteness)*min(1, sunLightFog);
 
     if (addFakeCaustics) {
         float factor = max(1, 2.5-finalDistanceFogginess)*(1+(max(0, abs(1-mixedTime)-0.9)*10));
@@ -720,7 +720,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
         }
     }
     vec3 finalLight = max(finalLighting.rgb*0.66f, sunLight)*finalNormalBrightness;
-    vec3 desaturation = clamp(-1.5f*(1-max(finalLighting.rgb, sunLightCam)), vec3(0.f), vec3(0.8f));
+    vec3 desaturation = clamp(-3f*(1-max(finalLighting.rgb, sunLightCam)), vec3(0.f), vec3(0.8f));
     color.rgb *= finalLight;
     color.rgb += finalLighting.rgb*0.34f;
     color.rgb = hsv2rgb(max(vec3(0), rgb2hsv(color.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));

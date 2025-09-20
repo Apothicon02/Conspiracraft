@@ -11,6 +11,8 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,30 +207,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00175" summary="- Fixed clouds toggle not doing anything.">
-      <option name="closed" value="true" />
-      <created>1752078997965</created>
-      <option name="number" value="00175" />
-      <option name="presentableId" value="LOCAL-00175" />
-      <option name="project" value="LOCAL" />
-      <updated>1752078997965</updated>
-    </task>
-    <task id="LOCAL-00176" summary="- Atmosphere can now be toggled. &#10;- Added luna terrain generator.">
-      <option name="closed" value="true" />
-      <created>1752085503670</created>
-      <option name="number" value="00176" />
-      <option name="presentableId" value="LOCAL-00176" />
-      <option name="project" value="LOCAL" />
-      <updated>1752085503670</updated>
-    </task>
-    <task id="LOCAL-00177" summary="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed.">
-      <option name="closed" value="true" />
-      <created>1752355926449</created>
-      <option name="number" value="00177" />
-      <option name="presentableId" value="LOCAL-00177" />
-      <option name="project" value="LOCAL" />
-      <updated>1752355926449</updated>
     </task>
     <task id="LOCAL-00178" summary="- Removed snow.">
       <option name="closed" value="true" />
@@ -598,7 +576,31 @@
       <option name="project" value="LOCAL" />
       <updated>1758245131791</updated>
     </task>
-    <option name="localTasksCounter" value="224" />
+    <task id="LOCAL-00224" summary="- Added stack visualization.">
+      <option name="closed" value="true" />
+      <created>1758299216802</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1758299216802</updated>
+    </task>
+    <task id="LOCAL-00225" summary="- Stack is now left-handed and horizontal.">
+      <option name="closed" value="true" />
+      <created>1758300183022</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1758300183022</updated>
+    </task>
+    <task id="LOCAL-00226" summary="- Added new stack system.">
+      <option name="closed" value="true" />
+      <created>1758309597039</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1758309597039</updated>
+    </task>
+    <option name="localTasksCounter" value="227" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -621,9 +623,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed." />
-    <MESSAGE value="- Optimized chunks." />
-    <MESSAGE value="- Doubled surface generation speed." />
     <MESSAGE value="- Disabled rendering until after the world is generated." />
     <MESSAGE value="- Fixed worlds not loading." />
     <MESSAGE value="- Fixed world not generating." />
@@ -646,29 +645,32 @@
     <MESSAGE value="- Fixed new leaves being marked as solid. &#10;- Added hibiscus flowers. &#10;- Improved block lighting." />
     <MESSAGE value="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen." />
     <MESSAGE value="- Removed grass slowdown. &#10;- Fixed not all leaf blocks having slowdown. &#10;- Added new held block renderer. &#10;- Re-enabled night shadows." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Removed grass slowdown. &#10;- Fixed not all leaf blocks having slowdown. &#10;- Added new held block renderer. &#10;- Re-enabled night shadows." />
+    <MESSAGE value="- Added stack visualization." />
+    <MESSAGE value="- Stack is now left-handed and horizontal." />
+    <MESSAGE value="- Added new stack system." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added new stack system." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>91</line>
+          <line>90</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>722</line>
+          <line>729</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>501</line>
+          <line>500</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>458</line>
+          <line>457</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
       </breakpoints>
