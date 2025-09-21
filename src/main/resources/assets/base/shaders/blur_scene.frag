@@ -1,10 +1,7 @@
 uniform vec2 dir;
-uniform ivec2 lowRes;
 uniform ivec2 res;
 
-layout(binding = 0) uniform sampler2D scene_image;
-layout(binding = 1) uniform sampler2D scene_lighting;
-layout(binding = 2, rgba32f) uniform writeonly image2D scene_lighting_blurred;
+layout(binding = 6, rgba32f) uniform image3D scene_unscaled_image;
 
 in vec4 gl_FragCoord;
 
@@ -82,45 +79,47 @@ const float WEIGHTS[33] = float[33](
 0.010955753413352
 );
 
-
-const int SAMPLE_COUNT_AO = 5;
-
-const float OFFSETS_AO[5] = float[5](
--3.4458098836553415,
--1.4767017588568079,
-0.492228282731395,
-2.4612181104350137,
-4
-);
-
-const float WEIGHTS_AO[5] = float[5](
-0.1835121872508657,
-0.2492203893736597,
-0.26495143816720684,
-0.2205044383606221,
-0.08181154684764567
-);
-
-
 void main() {
-    //uint64_t startTime = clockARB();
+    vec2 pos = gl_FragCoord.xy;
+    checkerOn = checker(ivec2(pos));
+    pos += (checkerOn ? ivec2(res.x/2, 0) : ivec2(0));
+    float reflectivity = imageLoad(scene_unscaled_image, ivec3(pos, 1)).w;
+    bool firstPass = dir.x > 0;
+    if (reflectivity > 0) {
+        vec4 result = vec4(0.0);
+        float nulls = 0;
+        for (int i = 0; i < SAMPLE_COUNT; ++i) {
+            vec2 offset = dir * OFFSETS[i];
+            float weight = WEIGHTS[i];
+            vec4 newResult = imageLoad(scene_unscaled_image, ivec3(min(res-1, max(vec2(0), pos + offset)), firstPass ? 2 : 3));
+            if (newResult.r+newResult.g+newResult.b > 0) {
+                result += newResult * (weight+nulls);
+                nulls = 0;
+            } else {
+                newResult = imageLoad(scene_unscaled_image, ivec3(min(res-1, max(vec2(0), pos + offset))+vec2(0, 1), firstPass ? 2 : 3));
+                if (newResult.r+newResult.g+newResult.b > 0) {
+                    result += newResult * (weight+nulls);
+                    nulls = 0;
+                } else {
+                    newResult = imageLoad(scene_unscaled_image, ivec3(min(res-1, max(vec2(0), pos + offset))+vec2(1, 0), firstPass ? 2 : 3));
+                    if (newResult.r+newResult.g+newResult.b > 0) {
+                        result += newResult * (weight+nulls);
+                        nulls = 0;
+                    } else {
+                        nulls+=weight;
+                    }
+                }
+            }
+        }
+        result += nulls;
 
-    vec2 texCoord = gl_FragCoord.xy/res;
-
-    vec4 result = vec4(0.0);
-    for (int i = 0; i < SAMPLE_COUNT; ++i) {
-        vec2 offset = dir * OFFSETS[i] / res;
-        float weight = WEIGHTS[i];
-        result += texture(scene_lighting, texCoord + offset) * weight;
+        if (firstPass) {
+            imageStore(scene_unscaled_image, ivec3(pos, 3), result);
+        } else {
+            vec4 ogColor = imageLoad(scene_unscaled_image, ivec3(pos, 0));
+            vec4 ogReflectionColor = imageLoad(scene_unscaled_image, ivec3(pos, 2));
+            float roughness = reflectivity; //replace with actual roughness.
+            imageStore(scene_unscaled_image, ivec3(pos, 0), vec4(mix(ogColor.rgb, mix(result.rgb, ogReflectionColor.rgb, roughness), reflectivity), 1));
+        }
     }
-    float AO = 0.0f;
-    for (int i = 0; i < SAMPLE_COUNT_AO; ++i) {
-        vec2 offset = dir * OFFSETS_AO[i] / res;
-        float weight = WEIGHTS_AO[i];
-        AO += texture(scene_lighting, texCoord + offset).a * weight;
-    }
-
-    imageStore(scene_lighting_blurred, ivec2(gl_FragCoord.xy), vec4(result.rgb, mix(result.a, AO, min(1, texture(scene_image, texCoord).a*16))));
-
-    //fragColor = mix(fragColor, vec4(float(clockARB() - startTime) * 0.0000005, 0.0, 1.0, 1.0), 0.95f);
 }

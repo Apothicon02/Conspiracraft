@@ -5,6 +5,10 @@ out vec4 fragColor;
 
 void main() {
     checkerOn = checker(ivec2(gl_FragCoord.xy));
+    bool firstHalf = bool(gl_FragCoord.x <= res.x/2);
+    if (!firstHalf) {
+        checkerOn = !checkerOn;
+    }
     vec2 pos = gl_FragCoord.xy + (checkerOn ? ivec2(res.x/2, 0) : ivec2(0));
     vec2 uv =  (2.*pos-res.xy)/res.y;
     uvDir = normalize(vec3(uv, 1));

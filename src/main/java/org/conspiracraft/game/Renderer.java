@@ -31,7 +31,6 @@ public class Renderer {
     public static int sceneHalfVaoId;
     public static int sceneOtherHalfVaoId;
     public static int lowFboId;
-    public static int mediumFboId;
     public static ShaderProgram blurScene;
     public static ShaderProgram unscaledScene;
     public static ShaderProgram reflectionScene;
@@ -165,7 +164,7 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, window.getWidth(), window.getHeight(), 2);
+        glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, window.getWidth(), window.getHeight(), 4);
         glBindImageTexture(0, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
     }
     public static void generateVao() {
@@ -383,8 +382,6 @@ public class Renderer {
 
         lowFboId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
-        mediumFboId = glGenFramebuffers();
-        glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
         scene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         generateVao();
@@ -392,8 +389,8 @@ public class Renderer {
         createBuffers();
         createVMA();
         fillBuffers();
-        blurScene = new ShaderProgram("scene.vert", new String[]{"blur_scene.frag"},
-                new String[]{"dir", "lowRes", "res"});
+        blurScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "blur_scene.frag"},
+                new String[]{"dir", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
                 new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
@@ -637,36 +634,10 @@ public class Renderer {
                 generateTextures(window);
                 resized = false;
             }
-//            glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
+            updateBuffers();
 
-//            scene.bind();
-//
-//            updateUniforms(scene);
-//            glUniform2i(scene.uniforms.get("res"), lowRes.x, lowRes.y);
-                updateBuffers();
-//            glBindImageTexture(0, sceneImageId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-//            glBindImageTexture(1, sceneLightingId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-//            bindTextures();
-//            draw();
-//            scene.unbind();
-//
-//            glBindFramebuffer(GL_FRAMEBUFFER, mediumFboId);
-//            blurScene.bind();
-//            glUniform2f(blurScene.uniforms.get("dir"), 1f, 0f);
-//            glUniform2i(blurScene.uniforms.get("lowRes"), lowRes.x, lowRes.y);
-//            glUniform2i(blurScene.uniforms.get("res"), mediumRes.x, mediumRes.y);
-//            glBindTextureUnit(0, sceneImageId);
-//            glBindTextureUnit(1, sceneLightingId);
-//            glBindImageTexture(2, sceneLightingHalfBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-//            draw();
-//            glUniform2f(blurScene.uniforms.get("dir"), 0f, 1f);
-//            glBindTextureUnit(0, sceneImageId);
-//            glBindTextureUnit(1, sceneLightingHalfBlurredId);
-//            glBindImageTexture(2, sceneLightingBlurredId, 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-//            draw();
-//            blurScene.unbind();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             bindTextures();
             if (everyOtherFrame) {
@@ -679,11 +650,20 @@ public class Renderer {
                 unscaledScene.unbind();
 
                 if (reflectionsEnabled) {
+                    //glBindFramebuffer(GL_FRAMEBUFFER, lowFboId);
                     reflectionScene.bind();
                     updateUniforms(reflectionScene);
                     glUniform2i(reflectionScene.uniforms.get("res"), window.getWidth(), window.getHeight());
                     drawHalf();
                     reflectionScene.unbind();
+                    blurScene.bind();
+                    glUniform2f(blurScene.uniforms.get("dir"), 1f, 0f);
+                    glUniform2i(blurScene.uniforms.get("res"), window.getWidth(), window.getHeight());
+                    drawHalf();
+                    glUniform2f(blurScene.uniforms.get("dir"), 0f, 1f);
+                    drawHalf();
+                    blurScene.unbind();
+                    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 }
             }
 

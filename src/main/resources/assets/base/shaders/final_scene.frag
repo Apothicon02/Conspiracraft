@@ -230,4 +230,7 @@ void main() {
         vec4 worldColor = toLinear(vec4(imageLoad(scene_unscaled_image, ivec3(pos.xy, 0))));
         fragColor = mix(worldColor, fragColor, fragColor.a);
     }
+//    //clear reflections
+//    imageStore(scene_unscaled_image, ivec3(pos.xy, 2), vec4(0));
+//    imageStore(scene_unscaled_image, ivec3(pos.xy, 3), vec4(0));
 }

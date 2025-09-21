@@ -319,9 +319,9 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                         shouldReflect = 0.6f;
                     } else if (blockType == 7 || (blockType >= 11 && blockType <= 13)) { //glass & kyanite
                         reflectivity = 0.5f;
-                    } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22) { //steel
+                    } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 33) { //steel & mud
                         reflectivity = 0.16f;
-                    } else if (blockType == 33 || blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49) { //planks & mud
+                    } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49) { //planks
                         reflectivity = 0.05f;
                     }
                 }
