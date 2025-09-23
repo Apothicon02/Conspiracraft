@@ -23,9 +23,9 @@ public class BlockTypes {
 
     public static BlockType
             AIR = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))), 
-            WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(new int[]{8}, 1f, 1.25f))),
-            GRASS = create(new BlockType(new BlockProperties())),
-            DIRT = create(new BlockType(new BlockProperties())),
+            WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(new int[]{8}, 1f, 1.25f, new int[]{1, 2, 3}, 1f, 1f))),
+            GRASS = create(new BlockType(new BlockProperties().blockSFX(new int[]{2, 3}, 1, 1, new int[]{1, 2, 3}, 1, 1))),
+            DIRT = create(new BlockType(new BlockProperties().blockSFX(new int[]{4, 5, 6}, 1, 1, new int[]{4, 5, 6}, 1, 1))),
             TALL_GRASS = create(new BlockType(new BlockProperties().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(Tags.flowers), new BlockType(TALL_GRASS.blockProperties)), //5
             TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
@@ -45,7 +45,7 @@ public class BlockTypes {
             MAHOGANY_LOG = create(new BlockType(new BlockProperties())), //20
             MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             BUCKET = create(new BlockType(new BlockProperties().blocksLight(false).needsSupport(true))),
-            SAND = create(new BlockType(new BlockProperties())),
+            SAND = create(new PowderBlockType(new BlockProperties().blockSFX(new int[]{14, 15}, 0.45f, 1.33f, new int[]{14, 15}, 0.45f, 1.33f).needsSupport(true).blocksLight(false).obstructsHeightmap(false))),
             SANDSTONE = create(new BlockType(new BlockProperties())),
             PALM_LOG = create(new BlockType(new BlockProperties())), //25
             PALM_PLANKS = create(new BlockType(new BlockProperties())),
@@ -76,7 +76,9 @@ public class BlockTypes {
             REDWOOD_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
             BLUE_HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
-            SNOW = create(new BlockType(new BlockProperties()));
+            SNOW = create(new BlockType(new BlockProperties().blockSFX(new int[]{16, 17}, 0.4f, 1.1f, new int[]{16, 17}, 0.4f, 1.1f))),
+            GRAVEL = create(new PowderBlockType(SAND.blockProperties.copy().blockSFX(new int[]{16, 17}, 0.4f, 1, new int[]{16, 17}, 0.4f, 1))), //55
+            FLINT = create(new BlockType(new BlockProperties()));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

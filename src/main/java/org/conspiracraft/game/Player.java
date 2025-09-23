@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.audio.AudioController;
+import org.conspiracraft.game.audio.BlockSFX;
 import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -344,10 +345,11 @@ public class Player {
                     }
                 }
                 int blockOn = World.getBlock(newPos.x, newPos.y - 0.1f, newPos.z).x;
-                if (blockOn == 2) {
-                    stepSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
-                } else if (blockOn == 3) {
-                    stepSource.play(AudioController.buffers.get((int) (4 + (Math.random() * 2))));
+                if (BlockTypes.blockTypeMap.get(blockOn).blockProperties.isSolid) {
+                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn).blockProperties.blockSFX;
+                    stepSource.baseGain = sfx.stepGain;
+                    stepSource.basePitch = sfx.stepPitch;
+                    stepSource.play(AudioController.buffers.get(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]));
                 }
             }
 

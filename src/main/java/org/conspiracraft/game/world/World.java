@@ -3,14 +3,11 @@ package org.conspiracraft.game.world;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.ScheduledTicker;
-import org.conspiracraft.game.audio.AudioController;
-import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.Renderer;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
@@ -22,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Random;
 
 import static org.conspiracraft.engine.Utils.*;
 import static org.conspiracraft.game.world.WorldGen.*;
@@ -706,7 +702,11 @@ public class World {
                     recalculateLight(pos, org.joml.Math.max(oldLight.x, r), org.joml.Math.max(oldLight.y, g), org.joml.Math.max(oldLight.z, b), oldLight.w);
                 }
 
-                BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, silent);
+                if (blockTypeId == 0) {
+                    BlockTypes.blockTypeMap.get(existing.x).onPlace(pos, existing, silent);
+                } else {
+                    BlockTypes.blockTypeMap.get(blockTypeId).onPlace(pos, new Vector2i(blockTypeId, blockSubtypeId), silent);
+                }
             }
         }
     }

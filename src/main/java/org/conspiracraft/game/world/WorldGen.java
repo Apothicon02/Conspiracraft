@@ -30,25 +30,24 @@ public class WorldGen {
         chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
     }
     public static void setBlockWorldgenUpdates(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
+        setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
         Vector2i above = getBlockWorldgen(x, y+1, z);
-        if (BlockTypes.blockTypeMap.get(above.x).needsSupport(above)) {
-            setBlockWorldgenUpdates(x, y+1, z, 0, 0);
-        }
-        chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+        BlockType type = BlockTypes.blockTypeMap.get(above.x);
+        type.onPlace(new Vector3i(x, y, z), above, true);
     }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (World.inBounds(x, y, z)) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+            setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
         }
     }
     public static void setBlockWorldgenNoReplace(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (getBlockWorldgen(x, y, z).x <= 1) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+            setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
         }
     }
     public static void setBlockWorldgenNoReplaceSolids(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (!BlockTypes.blockTypeMap.get(getBlockWorldgen(x, y, z).x).blockProperties.isSolid) {
-            chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].setBlockUncompressed(new Vector3i(x & 15, y & 15, z & 15), blockTypeId, blockSubtypeId);
+            setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
         }
     }
     public static Vector4i getLightWorldgen(int x, int y, int z) {

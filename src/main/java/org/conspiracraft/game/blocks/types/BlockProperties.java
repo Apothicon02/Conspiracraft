@@ -38,9 +38,9 @@ public class BlockProperties implements Cloneable {
         this.needsSupport = needsSupport;
         return this;
     }
-    public BlockSFX blockSFX = new BlockSFX(new int[]{2, 3}, 1f, 1f);
-    public BlockProperties blockSFX(int[] placeIds, float gain, float pitch) {
-        this.blockSFX = new BlockSFX(placeIds, gain, pitch);
+    public BlockSFX blockSFX = new BlockSFX(new int[]{2, 3}, 1f, 1f, new int[]{1, 2, 3}, 1f, 1f);
+    public BlockProperties blockSFX(int[] placeIds, float placeGain, float placePitch, int[] stepIds, float stepGain, float stepPitch) {
+        this.blockSFX = new BlockSFX(placeIds, placeGain, placePitch, stepIds, stepGain, stepPitch);
         return this;
     }
 

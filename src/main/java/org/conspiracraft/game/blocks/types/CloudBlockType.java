@@ -23,11 +23,12 @@ public class CloudBlockType extends BlockType {
                 setBlock(pos.x, pos.y - 1, pos.z, 1, 15, false, false, 1, false);
             }
             fluidTick(pos.xyz(new Vector3i()));
+            updateSupport(new Vector3i(pos.x, pos.y, pos.z));
         }
     }
 
     @Override
-    public void onPlace(Vector3i pos, boolean isSilent) {
+    public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
         ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), pos, 1);
 
         if (!isSilent) {
@@ -35,11 +36,21 @@ public class CloudBlockType extends BlockType {
         }
 
         if (!blockProperties.isSolid) {
-            Vector2i aboveBlock = getBlock(new Vector3i(pos.x, pos.y + 1, pos.z));
+            Vector3i abovePos = new Vector3i(pos.x, pos.y + 1, pos.z);
+            Vector2i aboveBlock = getBlock(abovePos);
             if (aboveBlock != null) {
                 int aboveBlockId = aboveBlock.x();
                 if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport(aboveBlock)) {
-                    setBlock(pos.x, pos.y + 1, pos.z, 0, 0, true, true, 1, false);
+                    lostSupport(abovePos, aboveBlock, false);
+                }
+            }
+        }
+        if (needsSupport(block)) {
+            Vector2i belowBlock = getBlock(new Vector3i(pos.x, pos.y - 1, pos.z));
+            if (belowBlock != null) {
+                int belowBlockId = belowBlock.x();
+                if (!BlockTypes.blockTypeMap.get(belowBlockId).blockProperties.isSolid) {
+                    lostSupport(pos, block, false);
                 }
             }
         }

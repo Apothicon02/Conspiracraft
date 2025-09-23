@@ -109,7 +109,7 @@ public class FluidHelper {
         for (Vector3i nPos : neighborPositions) {
             Vector2i nFluid = World.getBlock(nPos);
             BlockType nType = BlockTypes.blockTypeMap.get(nFluid.x);
-            boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y;
+            boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y && nType.blockProperties.isFluid;
             boolean isMainFluid = areBothFluid ? true : (nType.blockProperties.isFluidReplaceable && type.blockProperties.isFluid);
             boolean isNFluid = areBothFluid ? true : (type.blockProperties.isFluidReplaceable && nType.blockProperties.isFluid);
             if (Tags.crystals.tagged.contains(nFluid.x) && fluid.x == 1 && fluid.y >= 15) {

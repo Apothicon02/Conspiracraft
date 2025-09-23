@@ -10,13 +10,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/graveL_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/graveL_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step2.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/blur_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/blur_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/reflect_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/reflect_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/test.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/test.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,36 +112,36 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Run.executor": "Run",
+    "Gradle.Build Conspiracraft.executor": "Run",
+    "Gradle.Build Terraflat.executor": "Run",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "Gradle.Terraflat [build].executor": "Run",
+    "Gradle.Terraflat [jar].executor": "Run",
+    "Gradle.build.executor": "Run",
+    "JAR Application.VisualVMLauncher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "ShowUsagesActions.previewPropertyKey": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
@@ -149,9 +161,9 @@
       <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.game.blocks.types" />
       <recent name="org.conspiracraft.game.world.trees.canopies" />
       <recent name="org.conspiracraft.game.world.trees" />
-      <recent name="org.conspiracraft.game.blocks.types" />
       <recent name="org.conspiracraft.game.world.shapes" />
       <recent name="org.conspiracraft.game.world.trees.trunks" />
     </key>
@@ -653,5 +665,16 @@
     <MESSAGE value="- Added new stack system." />
     <MESSAGE value="- Improved sky colors. &#10;- Increased night desaturation. &#10;- Reduced night brightness." />
     <option name="LAST_COMMIT_MESSAGE" value="- Improved sky colors. &#10;- Increased night desaturation. &#10;- Reduced night brightness." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java</url>
+          <line>656</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
