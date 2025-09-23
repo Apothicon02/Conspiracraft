@@ -10,25 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/graveL_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/graveL_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step2.wav" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -223,14 +205,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00179" summary="- Re-added noise shader changes.">
-      <option name="closed" value="true" />
-      <created>1753410013038</created>
-      <option name="number" value="00179" />
-      <option name="presentableId" value="LOCAL-00179" />
-      <option name="project" value="LOCAL" />
-      <updated>1753410013039</updated>
     </task>
     <task id="LOCAL-00180" summary="- Greatly improved grass textures. &#10;- Fixed hand rendering. &#10;- Fixed sunlight tinting not being affected by sun intensity or actual line of sight to sun. &#10;- Added shadow support to hand rendering. &#10;- Made kyanite transparent.">
       <option name="closed" value="true" />
@@ -616,7 +590,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758384230118</updated>
     </task>
-    <option name="localTasksCounter" value="228" />
+    <task id="LOCAL-00228" summary="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;">
+      <option name="closed" value="true" />
+      <created>1758664530608</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1758664530609</updated>
+    </task>
+    <option name="localTasksCounter" value="229" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -639,7 +621,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed worlds not loading." />
     <MESSAGE value="- Fixed world not generating." />
     <MESSAGE value="- Clarified gradient math method naming." />
     <MESSAGE value="- Improved coastlines. &#10;- Added desert. &#10;- Added cacti." />
@@ -664,7 +645,8 @@
     <MESSAGE value="- Stack is now left-handed and horizontal." />
     <MESSAGE value="- Added new stack system." />
     <MESSAGE value="- Improved sky colors. &#10;- Increased night desaturation. &#10;- Reduced night brightness." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Improved sky colors. &#10;- Increased night desaturation. &#10;- Reduced night brightness." />
+    <MESSAGE value="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

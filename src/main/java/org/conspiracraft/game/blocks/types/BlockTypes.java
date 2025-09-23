@@ -55,7 +55,7 @@ public class BlockTypes {
             DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
             CLOUD = create(new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties())),
+            MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties().blockSFX(new int[]{16, 17}, 0.5f, 0.8f, new int[]{16, 17}, 0.5f, 0.8f))),
             SPRUCE_PLANKS = create(new BlockType(new BlockProperties())),
             SPRUCE_LOG = create(new BlockType(new BlockProperties())), //35
             SPRUCE_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
@@ -76,7 +76,7 @@ public class BlockTypes {
             REDWOOD_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
             BLUE_HIBISCUS = create(List.of(Tags.flowers), new LightBlockType(((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
-            SNOW = create(new BlockType(new BlockProperties().blockSFX(new int[]{16, 17}, 0.4f, 1.1f, new int[]{16, 17}, 0.4f, 1.1f))),
+            SNOW = create(new BlockType(new BlockProperties().blockSFX(new int[]{16, 17}, 0.5f, 0.8f, new int[]{16, 17}, 0.5f, 0.8f))),
             GRAVEL = create(new PowderBlockType(SAND.blockProperties.copy().blockSFX(new int[]{16, 17}, 0.4f, 1, new int[]{16, 17}, 0.4f, 1))), //55
             FLINT = create(new BlockType(new BlockProperties()));
 
