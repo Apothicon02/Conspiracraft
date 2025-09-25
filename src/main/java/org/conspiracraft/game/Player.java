@@ -17,7 +17,6 @@ public class Player {
     private final Camera camera = new Camera();
     public final Source jumpSource;
     public final Source passthroughSource;
-    public final Source stepSource;
     public final Source swimSource;
     public final Source splashSource;
     public final Source submergeSource;
@@ -56,7 +55,6 @@ public class Player {
     public Player(Vector3f newPos) {
         jumpSource = new Source(newPos, 1, 1, 0, 0);
         passthroughSource = new Source(newPos, 1, 1, 0, 0);
-        stepSource = new Source(newPos, -0.25f, 0.66f, 0, 0); //make quieter for some reason gain aint workin on this sound
         swimSource = new Source(newPos, -1, 1, 0, 0);
         splashSource = new Source(newPos, 1, 1, 0, 0);
         submergeSource = new Source(newPos, 1, 1, 0, 0);
@@ -66,7 +64,7 @@ public class Player {
         musicSource = new Source(newPos, 0.15f, 1, 0.25f, 0);
         setPos(newPos);
         oldPos = newPos;
-        musicSource.play(AudioController.buffers.get(14));
+        musicSource.play(AudioController.buffers.get(18));
     }
 
     public int[] getData() {
@@ -316,19 +314,22 @@ public class Player {
         }
     }
 
-    public long timeSinceAmibentSoundAttempt = 0;
+    public long timeSinceAmbientSoundAttempt = 0;
     public float windGain = 0f;
+    public long timeLastFootstepSoundPlayed = 0;
 
     public void setPos(Vector3f newPos) {
         oldPos = pos;
         pos = newPos;
         blockPos = new Vector3i((int) newPos.x, (int) newPos.y, (int) newPos.z);
         if (World.worldGenerated) {
-            AudioController.setListenerData(newPos, vel, camera.getViewMatrix().get(new float[16]));
+            Matrix4f camNoPitch = camera.getViewMatrixWithoutPitch();
+            AudioController.setListenerData(newPos, vel, new float[]{camNoPitch.m02(), camNoPitch.m20(), camNoPitch.m33(), camera.pitch.x, camera.pitch.y, camera.pitch.z});
             musicSource.setPos(newPos);
             Vector3f combinedVel = new Vector3f(vel.x + movement.x, vel.y + movement.y, vel.z + movement.z);
             musicSource.setVel(combinedVel);
             if (Math.abs(combinedVel.x) > 0.01 || Math.abs(combinedVel.y) > 0.01 || Math.abs(combinedVel.z) > 0.01) {
+                float maxVel = Math.max(Math.abs(combinedVel.x), Math.max(Math.abs(combinedVel.y), Math.abs(combinedVel.z)));
                 int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
                 if (block == 1) {
                     if (swimSource.soundPlaying == -1) {
@@ -345,17 +346,18 @@ public class Player {
                     }
                 }
                 int blockOn = World.getBlock(newPos.x, newPos.y - 0.1f, newPos.z).x;
-                if (BlockTypes.blockTypeMap.get(blockOn).blockProperties.isSolid) {
+                if (blockOn > 0 && System.currentTimeMillis()-timeLastFootstepSoundPlayed > 1200-Math.min(1000, 4000*maxVel)) {
+                    timeLastFootstepSoundPlayed = System.currentTimeMillis();
                     BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn).blockProperties.blockSFX;
-                    stepSource.baseGain = sfx.stepGain;
-                    stepSource.basePitch = sfx.stepPitch;
-                    stepSource.play(AudioController.buffers.get(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]));
+                    Source newSource = new Source(new Vector3f(newPos).sub(0, 0.1f, 0), (float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), (float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0, 0);
+                    newSource.setVel(combinedVel);
+                    newSource.play(AudioController.buffers.get(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]), true);
                 }
             }
 
             long currentTime = System.currentTimeMillis();
-            if (currentTime-timeSinceAmibentSoundAttempt >= 1000) {
-                timeSinceAmibentSoundAttempt = currentTime;
+            if (currentTime-timeSinceAmbientSoundAttempt >= 1000) {
+                timeSinceAmbientSoundAttempt = currentTime;
                 if (windSource.soundPlaying == -1) {
                     windSource.play(AudioController.buffers.get((10)));
                 }
@@ -400,8 +402,6 @@ public class Player {
             swimSource.setVel(combinedVel);
             passthroughSource.setPos(newPos);
             passthroughSource.setVel(combinedVel);
-            stepSource.setPos(newPos);
-            stepSource.setVel(combinedVel);
         }
     }
 

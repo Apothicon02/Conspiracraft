@@ -30,6 +30,7 @@ public class AudioController {
         ALC10.alcMakeContextCurrent(context);
 
         alCapabilities = AL.createCapabilities(alcCapabilities);
+        AL10.alDistanceModel(AL11.AL_EXPONENT_DISTANCE);
     }
 
     public static void setListenerData(Vector3f pos, Vector3f vel, float[] orientation) {

@@ -20,7 +20,7 @@ public class BlockSFX {
     }
 
     public void placed(Vector3f pos) {
-        Source placeSource = new Source(new Vector3f(pos.x, pos.y, pos.z), placeGain, placePitch, 0, 0);
+        Source placeSource = new Source(new Vector3f(pos.x, pos.y, pos.z), (float) (placeGain+((placeGain*Math.random())/3)), (float) (placePitch+((placePitch*Math.random())/3)), 0, 0);
         placeSource.play(AudioController.buffers.get(placeIds[(int) (Math.random()*placeIds.length)]));
     }
 }

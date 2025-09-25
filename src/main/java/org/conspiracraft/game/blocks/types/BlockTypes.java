@@ -53,8 +53,8 @@ public class BlockTypes {
             MAHOGANY_PLANKS = create(new BlockType(new BlockProperties())),
             CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
             DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
-            CLOUD = create(new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            RAIN_CLOUD = create(new CloudBlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            CLOUD = create(new BlockType(new BlockProperties().blockSFX(new int[]{0}, 0.75f, 0.75f, new int[]{0}, 0.75f, 0.75f).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            RAIN_CLOUD = create(new CloudBlockType(CLOUD.blockProperties)),
             MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties().blockSFX(new int[]{16, 17}, 0.5f, 0.8f, new int[]{16, 17}, 0.5f, 0.8f))),
             SPRUCE_PLANKS = create(new BlockType(new BlockProperties())),
             SPRUCE_LOG = create(new BlockType(new BlockProperties())), //35

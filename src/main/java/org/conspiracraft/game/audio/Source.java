@@ -16,19 +16,24 @@ public class Source {
         AL10.alSourcei(sourceID, AL10.AL_LOOPING, loop);
         AL10.alSourcef(sourceID, AL10.AL_GAIN, gain);
         AL10.alSourcef(sourceID, AL10.AL_PITCH, pitch);
+        AL10.alSourcef(sourceID, AL10.AL_REFERENCE_DISTANCE, 3);
+        AL10.alSourcef(sourceID, AL10.AL_MIN_GAIN, 0);
         baseGain = gain;
         basePitch = pitch;
         AL10.alSource3f(sourceID, AL10.AL_POSITION, pos.x, pos.y, pos.z);
     }
 
-    public void play(SFX sfx) {
+    public void play(SFX sfx, boolean force) {
         int[] result = new int[1];
         AL10.alGetSourcei(sourceID, AL10.AL_SOURCE_STATE, result);
-        if (result[0] != AL10.AL_PLAYING) {
+        if (force || result[0] != AL10.AL_PLAYING) {
             soundPlaying = sfx.id;
             AL10.alSourcei(sourceID, AL10.AL_BUFFER, sfx.id);
             AL10.alSourcePlay(sourceID);
         }
+    }
+    public void play(SFX sfx) {
+        play(sfx, false);
     }
 
     public void stop() {
