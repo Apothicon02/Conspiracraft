@@ -3,14 +3,14 @@ package org.conspiracraft.game.audio;
 import org.joml.Vector3f;
 
 public class BlockSFX {
-    private final int[] placeIds;
+    private final SFX[] placeIds;
     private final float placeGain;
     private final float placePitch;
-    public final int[] stepIds;
+    public final SFX[] stepIds;
     public final float stepGain;
     public final float stepPitch;
 
-    public BlockSFX(int[] placeIds, float placeGain, float placePitch, int[] stepIds, float stepGain, float stepPitch) {
+    public BlockSFX(SFX[] placeIds, float placeGain, float placePitch, SFX[] stepIds, float stepGain, float stepPitch) {
         this.placeIds = placeIds;
         this.placeGain = placeGain;
         this.placePitch = placePitch;
@@ -21,6 +21,6 @@ public class BlockSFX {
 
     public void placed(Vector3f pos) {
         Source placeSource = new Source(new Vector3f(pos.x, pos.y, pos.z), (float) (placeGain+((placeGain*Math.random())/3)), (float) (placePitch+((placePitch*Math.random())/3)), 0, 0);
-        placeSource.play(AudioController.buffers.get(placeIds[(int) (Math.random()*placeIds.length)]));
+        placeSource.play(placeIds[(int) (Math.random()*placeIds.length)]);
     }
 }

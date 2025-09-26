@@ -13,17 +13,17 @@ public class PowderBlockType extends BlockType {
         if (worldgen) {
             if (BlockTypes.blockTypeMap.get(WorldGen.getBlockWorldgen(pos.x, pos.y-1, pos.z).x).blockProperties.isFluidReplaceable) {
                 WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, 0, 0);
-                pos.sub(0, 1, 0);
+                WorldGen.setBlockWorldgenUpdates(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1));
+            } else {
+                WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, block.y >= 5 ? block.x+1 : block.x, 0);
             }
-            boolean onSolidBlock = BlockTypes.blockTypeMap.get(WorldGen.getBlockWorldgen(pos.x, pos.y-1, pos.z).x).blockProperties.isSolid;
-            WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, onSolidBlock && block.y >= 5 ? block.x+1 : block.x, onSolidBlock ? 0 : Math.min(5, block.y+1));
         } else {
             if (BlockTypes.blockTypeMap.get(World.getBlock(pos.x, pos.y-1, pos.z).x).blockProperties.isFluidReplaceable) {
                 World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 2, true);
-                pos.sub(0, 1, 0);
+                World.setBlock(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1), true, false, 2, false);
+            } else {
+                World.setBlock(pos.x, pos.y, pos.z, block.y >= 5 ? block.x+1 : block.x, 0, true, false, -1, false);
             }
-            boolean onSolidBlock = BlockTypes.blockTypeMap.get(World.getBlock(pos.x, pos.y-1, pos.z).x).blockProperties.isSolid;
-            World.setBlock(pos.x, pos.y, pos.z, onSolidBlock && block.y >= 5 ? block.x+1 : block.x, onSolidBlock ? 0 : Math.min(5, block.y+1), true, false, 2, false);
         }
     }
 

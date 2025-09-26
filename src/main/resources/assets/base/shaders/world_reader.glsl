@@ -722,7 +722,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     vec3 finalLight = max(finalLighting.rgb*0.66f, sunLight)*finalNormalBrightness;
     vec3 desaturation = clamp(-3f*(1-max(finalLighting.rgb, sunLightCam)), vec3(0.f), vec3(0.8f));
     color.rgb *= finalLight;
-    color.rgb += finalLighting.rgb*0.34f;
+    color.rgb += finalLighting.rgb*(0.34f-min(0.2f, sunLight/3));
     color.rgb = hsv2rgb(max(vec3(0), rgb2hsv(color.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));
     //fog start
     vec4 fog = 1 + vec4(vec3(finalLightFog) * 1.5f, 1);

@@ -5,6 +5,7 @@ import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
 import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.audio.BlockSFX;
+import org.conspiracraft.game.audio.Sounds;
 import org.conspiracraft.game.audio.Source;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -51,6 +52,7 @@ public class Player {
     public boolean downward = false;
     public boolean flying = true;
     public int[] stack = new int[32];
+    public Vector2i blockOn = new Vector2i(0);
 
     public Player(Vector3f newPos) {
         jumpSource = new Source(newPos, 1, 1, 0, 0);
@@ -64,7 +66,7 @@ public class Player {
         musicSource = new Source(newPos, 0.15f, 1, 0.25f, 0);
         setPos(newPos);
         oldPos = newPos;
-        musicSource.play(AudioController.buffers.get(18));
+        //musicSource.play((18));
     }
 
     public int[] getData() {
@@ -89,6 +91,7 @@ public class Player {
         return data;
     }
 
+    public boolean setSolidBlockOn = false;
     public boolean solid(float x, float y, float z, boolean recordFriction, boolean recordBounciness) {
         Vector2i block = World.getBlock(x, y, z);
         if (block != null) {
@@ -105,11 +108,13 @@ public class Player {
                                 friction = Math.min(friction, 0.95f);
                             } else if (typeId == 11 || typeId == 12 || typeId == 13) { //glass
                                 friction = Math.min(friction, 0.85f);
-                            } else if (typeId == 15 || typeId == 16) { //wood
+                            } else if (Tags.planks.tagged.contains(block.x)) { //wood
                                 friction = Math.min(friction, 0.5f);
                             } else if (BlockTypes.blockTypeMap.get(typeId).blockProperties.isCollidable) {
                                 friction = Math.min(friction, 0.75f);
                             }
+                            blockOn = block;
+                            setSolidBlockOn = true;
                         }
                         if (recordBounciness) {
                             if (typeId == 7) { //kyanite
@@ -122,14 +127,18 @@ public class Player {
                     }
                 }
             }
+            if (!setSolidBlockOn && recordFriction) {
+                blockOn = block;
+            }
         }
         return false;
     }
     public boolean solid(float x, float y, float z, float w, float h, boolean recordFriction, boolean recordBounciness) {
+        setSolidBlockOn = false;
         boolean returnValue = false;
         for (float newX = x-w; newX <= x+w; newX+=0.125f) {
-            for (float newY = y; newY <= y+h; newY+=0.125f) {
-                for (float newZ = z-w; newZ <= z+w; newZ+=0.125f) {
+            for (float newY = y; newY <= y + h; newY += 0.125f) {
+                for (float newZ = z - w; newZ <= z + w; newZ += 0.125f) {
                     if (solid(newX, newY, newZ, recordFriction, recordBounciness)) {
                         if (recordFriction) {
                             returnValue = true;
@@ -208,9 +217,12 @@ public class Player {
                     jump = 1000;
                     lastJump = Main.timeMS;
                     vel.y = Math.max(vel.y, jumpStrength);
-                    jumpSource.setPos(pos);
+                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn.x).blockProperties.blockSFX;
+                    jumpSource.setPos(new Vector3f(pos).sub(0, 0.1f, 0));
                     jumpSource.setVel(new Vector3f(vel.x+movement.x, Math.max(vel.y+movement.y, jumpStrength), vel.z+movement.z));
-                    jumpSource.play(AudioController.buffers.get(0));
+                    jumpSource.setGain((float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), 0);
+                    jumpSource.setPitch((float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0);
+                    jumpSource.play(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)], true);
                 }
             }
 
@@ -304,12 +316,12 @@ public class Player {
         if (Math.random() <= 0.0002d) {
             if (Tags.leaves.tagged.contains(unpackedBlock.x)) {
                 Source source = new Source(pos, 0.01f*sunLight, 1, 1, 0);
-                source.play(AudioController.buffers.get(12));
+                source.play(Sounds.CHIRP1);
             }
         } else if (Math.random() <= 0.0001d) {
             if (Tags.flowers.tagged.contains(unpackedBlock.x)) {
                 Source source = new Source(pos, 0.5f, 1, 1, 0);
-                source.play(AudioController.buffers.get(11));
+                source.play(Sounds.BUZZ);
             }
         }
     }
@@ -333,25 +345,21 @@ public class Player {
                 int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
                 if (block == 1) {
                     if (swimSource.soundPlaying == -1) {
-                        submergeSource.play(AudioController.buffers.get(8));
+                        submergeSource.play(Sounds.SPLASH1);
                     }
-                    swimSource.play(AudioController.buffers.get(7));
+                    swimSource.play(Sounds.SWIM1);
                 } else {
                     if (swimSource.soundPlaying != -1) {
                         swimSource.stop();
-                        splashSource.play(AudioController.buffers.get(8));
-                    }
-                    if (block == 17 || block == 4 || block == 5) {
-                        passthroughSource.play(AudioController.buffers.get((int) (1 + (Math.random() * 2))));
+                        splashSource.play(Sounds.SPLASH1);
                     }
                 }
-                int blockOn = World.getBlock(newPos.x, newPos.y - 0.1f, newPos.z).x;
-                if (blockOn > 0 && System.currentTimeMillis()-timeLastFootstepSoundPlayed > 1200-Math.min(1000, 4000*maxVel)) {
+                if (blockOn.x > 0 && System.currentTimeMillis()-timeLastFootstepSoundPlayed > 1200-Math.min(1000, 4000*maxVel)) {
                     timeLastFootstepSoundPlayed = System.currentTimeMillis();
-                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn).blockProperties.blockSFX;
+                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn.x).blockProperties.blockSFX;
                     Source newSource = new Source(new Vector3f(newPos).sub(0, 0.1f, 0), (float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), (float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0, 0);
                     newSource.setVel(combinedVel);
-                    newSource.play(AudioController.buffers.get(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]), true);
+                    newSource.play((sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]), true);
                 }
             }
 
@@ -359,7 +367,7 @@ public class Player {
             if (currentTime-timeSinceAmbientSoundAttempt >= 1000) {
                 timeSinceAmbientSoundAttempt = currentTime;
                 if (windSource.soundPlaying == -1) {
-                    windSource.play(AudioController.buffers.get((10)));
+                    windSource.play(Sounds.WIND);
                 }
                 if (World.inBounds(blockPos.x, blockPos.y, blockPos.z)) {
                     updatedWater = false;
@@ -377,11 +385,11 @@ public class Player {
                         }
                     }
                     if (waterFlowingSource.soundPlaying == -1) {
-                        waterFlowingSource.play(AudioController.buffers.get(9));
+                        waterFlowingSource.play(Sounds.FLOW);
                     }
                     waterFlowingSource.setGain(Math.clamp(ambientWater / 10000f, 0, 1), 0);
                     if (magmaSource.soundPlaying == -1) {
-                        magmaSource.play(AudioController.buffers.get(13));
+                        magmaSource.play(Sounds.MAGMA);
                     }
                     magmaSource.setGain(Math.clamp(ambientMagma / 333f, 0, 1), 0);
                     ambientWind = Math.min(333, ambientWind + sunLight);

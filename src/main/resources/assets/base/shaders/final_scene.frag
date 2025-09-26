@@ -132,7 +132,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
             vec3 brightness = max(lighting.rgb*0.66, vec3(sunLight));
             vec3 desaturation = clamp(-3f*(1-max(lighting.rgb, sunLightNoBonus)), vec3(0.f), vec3(0.8f));
             voxelColor.rgb*=brightness;
-            voxelColor.rgb+=lighting.rgb*0.34f;
+            voxelColor.rgb+=lighting.rgb*(0.34f-min(0.2f, sunLight/3));
             voxelColor.rgb = hsv2rgb(max(vec3(0), rgb2hsv(voxelColor.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));
             float sunLightFog = (lightFog.a)*mixedTime;
             vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;

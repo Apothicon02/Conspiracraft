@@ -1,6 +1,8 @@
 package org.conspiracraft.game.blocks.types;
 
 import org.conspiracraft.game.audio.BlockSFX;
+import org.conspiracraft.game.audio.SFX;
+import org.conspiracraft.game.audio.Sounds;
 
 public class BlockProperties implements Cloneable {
     public boolean isSolid = true;
@@ -38,8 +40,8 @@ public class BlockProperties implements Cloneable {
         this.needsSupport = needsSupport;
         return this;
     }
-    public BlockSFX blockSFX = new BlockSFX(new int[]{2, 3}, 1f, 1f, new int[]{1, 2, 3}, 1f, 1f);
-    public BlockProperties blockSFX(int[] placeIds, float placeGain, float placePitch, int[] stepIds, float stepGain, float stepPitch) {
+    public BlockSFX blockSFX = new BlockSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f, new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f);
+    public BlockProperties blockSFX(SFX[] placeIds, float placeGain, float placePitch, SFX[] stepIds, float stepGain, float stepPitch) {
         this.blockSFX = new BlockSFX(placeIds, placeGain, placePitch, stepIds, stepGain, stepPitch);
         return this;
     }

@@ -8,5 +8,6 @@ public class Tags {
     public static Tag flowers = new Tag();
     public static Tag soakers = new Tag();
     public static Tag crystals = new Tag();
-    public static List<Tag> tags = List.of(rocks, leaves, flowers, soakers, crystals);
+    public static Tag planks = new Tag();
+    public static List<Tag> tags = List.of(rocks, leaves, flowers, soakers, crystals, planks);
 }

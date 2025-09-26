@@ -1,6 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
+import org.conspiracraft.game.audio.Sounds;
 import org.conspiracraft.game.blocks.types.BlockProperties;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
@@ -50,25 +51,6 @@ public class Main {
         GL.createCapabilities();
         AudioController.init();
         AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new float[6]);
-        AudioController.loadSound("jump.wav");
-        AudioController.loadSound("grass_step1.wav");
-        AudioController.loadSound("grass_step2.wav");
-        AudioController.loadSound("grass_step3.wav");
-        AudioController.loadSound("dirt_step1.wav");
-        AudioController.loadSound("dirt_step2.wav"); //5
-        AudioController.loadSound("dirt_step3.wav");
-        AudioController.loadSound("swim1.wav");
-        AudioController.loadSound("splash1.wav");
-        AudioController.loadSound("flow.wav");
-        AudioController.loadSound("wind.wav"); //10
-        AudioController.loadSound("buzz.wav");
-        AudioController.loadSound("chirp_1.wav");
-        AudioController.loadSound("magma.wav");
-        AudioController.loadSound("sand_step1.wav");
-        AudioController.loadSound("sand_step2.wav"); //15
-        AudioController.loadSound("gravel_step1.wav");
-        AudioController.loadSound("gravel_step2.wav");
-        AudioController.loadRandomSound("Music/");
         Path deletePath = Paths.get(System.getenv("APPDATA") + "/Conspiracraft/delete");
         if (Files.exists(deletePath)) {
             Files.walk(deletePath).sorted(Comparator.reverseOrder()).forEach((path -> {
