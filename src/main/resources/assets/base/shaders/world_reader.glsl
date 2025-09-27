@@ -413,6 +413,74 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
                 }
                 normalBrightness *= clamp(occlusion, blockType == 31 ? 0.9f : 0.5f, 1.f);
+                vec3 baseNPos = (mapPos/8)+rayMapPos;
+                int sss = 0;
+                bool hitSel = hitSelection;
+                float one = fromLinear(vec4(1)).a;
+                vec3 nPos = baseNPos+vec3(0, 0.125f, 0);
+                ivec2 nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                nPos = baseNPos+vec3(0, -0.125f, 0);
+                nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                nPos = baseNPos+vec3(0.125, 0, 0);
+                nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                nPos = baseNPos+vec3(-0.125, 0, 0);
+                nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                nPos = baseNPos+vec3(0, 0, 0.125);
+                nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                nPos = baseNPos+vec3(0, 0, -0.125);
+                nBlock = getBlock(nPos.x, nPos.y, nPos.z);
+                if (nBlock.x > 0) {
+                    vec3 nVoxelPos = (nPos-floor(nPos))*8;
+                    if (getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, blockType, blockSubtype, fire).a < one) {
+                        sss++;
+                    }
+                } else {
+                    sss++;
+                }
+                hitSelection = hitSel;
+                if (sss >= 2) {
+                    normalBrightness += 0.1f;
+                }
 
                 if (prevBlock.x == 1 && prevBlock.y > 0) {
                     if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8) + (rayMapPos.y+(mapPos.y / 8)))) {

@@ -10,31 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Sounds.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/glass_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/glass_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/mud_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/mud_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_place1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_place2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_scrape1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_scrape2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sizzle1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sizzle2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/wood_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/wood_step2.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/jump.wav" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/cloud.wav" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,36 +95,36 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
@@ -229,14 +206,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00182" summary="- Greatly optimized hand rendering. &#10;- Greatly optimized reflections.">
-      <option name="closed" value="true" />
-      <created>1753647475614</created>
-      <option name="number" value="00182" />
-      <option name="presentableId" value="LOCAL-00182" />
-      <option name="project" value="LOCAL" />
-      <updated>1753647475614</updated>
     </task>
     <task id="LOCAL-00183" summary="- Greatly optimized performance. &#10;- Temporarily disabled hand rendering.">
       <option name="closed" value="true" />
@@ -622,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758830530156</updated>
     </task>
-    <option name="localTasksCounter" value="231" />
+    <task id="LOCAL-00231" summary="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one.">
+      <option name="closed" value="true" />
+      <created>1758912412482</created>
+      <option name="number" value="00231" />
+      <option name="presentableId" value="LOCAL-00231" />
+      <option name="project" value="LOCAL" />
+      <updated>1758912412482</updated>
+    </task>
+    <option name="localTasksCounter" value="232" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -645,7 +622,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Improved coastlines. &#10;- Added desert. &#10;- Added cacti." />
     <MESSAGE value="- Fixed volcanoes being cutoff." />
     <MESSAGE value="- Fixed issues with sub-surface generation. &#10;- Updated cacti texture. &#10;- Fixed cacti generating one block into the ground. &#10;- Reduced overall voxel brightness. &#10;- Added dead bushes. &#10;- Fixed cacti having AO. &#10;- Fixed cacti not needing block support. &#10;- Increased max cacti height. &#10;- Improved sand/sandstone generation. &#10;- Added sandstone rocks to the desert. &#10;- Fixed non-full water rendering." />
     <MESSAGE value="- Added physical clouds. &#10;- Added cloud blocks. &#10;- Added rain cloud blocks. &#10;- Added random ticks." />
@@ -670,6 +646,7 @@
     <MESSAGE value="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;" />
     <MESSAGE value="- Adjusted snow sounds. &#10;- Added mud sounds." />
     <MESSAGE value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
+    <MESSAGE value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
   </component>
 </project>
