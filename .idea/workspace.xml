@@ -207,14 +207,6 @@
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00185" summary="- Increased ups target from 30 to 75.">
-      <option name="closed" value="true" />
-      <created>1753738951740</created>
-      <option name="number" value="00185" />
-      <option name="presentableId" value="LOCAL-00185" />
-      <option name="project" value="LOCAL" />
-      <updated>1753738951740</updated>
-    </task>
     <task id="LOCAL-00186" summary="- Rendering is now done every other frame to eliminate rendering-inflicted simulation slowdown as long as fps is greater than 37.5.">
       <option name="closed" value="true" />
       <created>1753803627269</created>
@@ -599,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759003160512</updated>
     </task>
-    <option name="localTasksCounter" value="234" />
+    <task id="LOCAL-00234" summary="- Fixed inaccurate SSS. &#10;- Pixelized shadows.">
+      <option name="closed" value="true" />
+      <created>1759156460173</created>
+      <option name="number" value="00234" />
+      <option name="presentableId" value="LOCAL-00234" />
+      <option name="project" value="LOCAL" />
+      <updated>1759156460173</updated>
+    </task>
+    <option name="localTasksCounter" value="235" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +622,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed issues with sub-surface generation. &#10;- Updated cacti texture. &#10;- Fixed cacti generating one block into the ground. &#10;- Reduced overall voxel brightness. &#10;- Added dead bushes. &#10;- Fixed cacti having AO. &#10;- Fixed cacti not needing block support. &#10;- Increased max cacti height. &#10;- Improved sand/sandstone generation. &#10;- Added sandstone rocks to the desert. &#10;- Fixed non-full water rendering." />
     <MESSAGE value="- Added physical clouds. &#10;- Added cloud blocks. &#10;- Added rain cloud blocks. &#10;- Added random ticks." />
     <MESSAGE value="- Will now only do 3 ticks per frame at max to fix issues with pausing. &#10;- Removed random ticking. &#10;- Clouds now use scheduled ticking. &#10;- Rainclouds now only generate in one corner of the map. &#10;- Added randomization to water flow direction. &#10;- Fixed black squares in the sky. &#10;- Reduced AO on clouds." />
     <MESSAGE value="- Improved fog." />
@@ -647,6 +646,7 @@
     <MESSAGE value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
     <MESSAGE value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
     <MESSAGE value="- Added subsurface scattering." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added subsurface scattering." />
+    <MESSAGE value="- Fixed inaccurate SSS. &#10;- Pixelized shadows." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed inaccurate SSS. &#10;- Pixelized shadows." />
   </component>
 </project>

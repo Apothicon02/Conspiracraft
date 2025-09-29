@@ -276,79 +276,91 @@ bool isCaustic(vec2 checkPos) {
 
 vec3 prevTintColor = vec3(0);
 ivec2 prevBlockInfo = ivec2(0);
+float one = fromLinear(vec4(1)).a;
 
-int getSSS(vec3 baseNPos, bool invert) {
-    baseNPos = (floor(baseNPos*8)+0.5f)/8;
-    int sss = 0;
-    float one = fromLinear(vec4(1)).a;
-    vec3 nPos = baseNPos+vec3(0, 0.125f, 0);
-    ivec2 nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    float voxelOpacity = 0;
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
+vec4 getVoxelAndBlock(vec3 pos) {
+    vec3 rayMapPos = floor(pos);
+    vec3 mapPos = (pos-rayMapPos)*8;
+    ivec2 block = getBlock(rayMapPos.x, rayMapPos.y, rayMapPos.z);
+    return getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, block.x, block.y, 0);
+}
+
+float getAO(vec3 mapPos) {
+    int aoQuality = 2;
+    float occlusion = 1.75f;
+    if (aoQuality >= 3) {
+        bool skipped = false;
+        bool skippedAgain = false;
+        for (float x = prevPos.x-0.25f; x <= prevPos.x+0.25; x+=0.125f) {
+            for (float y = prevPos.y-0.25f; y <= prevPos.y+0.25; y+=0.125f) {
+                for (float z = prevPos.z-0.25f; z <= prevPos.z+0.25; z+=0.125f) {
+                    if (skipped) {
+                        if (skippedAgain) {
+                            if (getVoxelAndBlock(vec3(x, y, z)).a >= one) {
+                                occlusion-=0.06f;
+                            }
+                        }
+                        skippedAgain = !skippedAgain;
+                    }
+                    skipped = !skipped;
+                }
+            }
+        }
+    } else if (aoQuality == 2) {
+        for (float y = prevPos.y-0.125f; y <= prevPos.y+0.125f; y+=0.25f) {
+            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x, y, prevPos.z-0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x, y, prevPos.z+0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z-0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z-0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z+0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z+0.125f)).a >= one) {
+                occlusion-=0.085f;
+            }
+        }
+    } else if (aoQuality == 1) {
+        float xFactor = mapPos.x >= 4 ? 0.125f : -0.125f;
+        float yFactor = mapPos.y >= 4 ? 0.125f : -0.125f;
+        float zFactor = mapPos.z >= 4 ? 0.125f : -0.125f;
+        occlusion = 1f;
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z)).a >= one) {
+            occlusion-=0.083f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.083f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.083f;
+        }
+
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y+yFactor, prevPos.z)).a >= one) {
+            occlusion-=0.083f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.083f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y+yFactor, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.083f;
         }
     } else {
-        sss++;
+        occlusion = 1;
     }
-    nPos = baseNPos+vec3(0, -0.125f, 0);
-    nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
-        }
-    } else {
-        sss++;
-    }
-    nPos = baseNPos+vec3(0.125, 0, 0);
-    nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        float voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
-        }
-    } else {
-        sss++;
-    }
-    nPos = baseNPos+vec3(-0.125, 0, 0);
-    nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
-        }
-    } else {
-        sss++;
-    }
-    nPos = baseNPos+vec3(0, 0, 0.125);
-    nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
-        }
-    } else {
-        sss++;
-    }
-    nPos = baseNPos+vec3(0, 0, -0.125);
-    nBlock = getBlock(nPos.x, nPos.y, nPos.z);
-    if (invert ? nBlock.x <= 0 : nBlock.x > 0) {
-        vec3 nVoxelPos = (nPos-floor(nPos))*8;
-        voxelOpacity = getVoxel(nVoxelPos.x, nVoxelPos.y, nVoxelPos.z, nPos.x, nPos.y, nPos.z, nBlock.x, nBlock.y, 0).a;
-        if (invert ? voxelOpacity >= 1 : voxelOpacity < one) {
-            sss++;
-        }
-    } else {
-        sss++;
-    }
-    return sss;
+    return occlusion;
 }
 
 vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockDist, vec3 intersect, vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float mixedTime) {
@@ -448,55 +460,31 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     prevHitPos = prevPos;
                     hitPos = realPos;
                 }
-                //face-based brightness start
-                if (normal.y >0) { //down
-                    normalBrightness = 0.7f;
-                } else if (normal.y <0) { //up
-                    normalBrightness = 1.f;
-                } else if (normal.z >0) { //south
-                    normalBrightness = 0.85f;
-                } else if (normal.z <0) { //north
-                    normalBrightness = 0.85f;
-                } else if (normal.x >0) { //west
-                    normalBrightness = 0.75f;
-                } else if (normal.x <0) { //east
-                    normalBrightness = 0.95f;
-                }
-                //face-based brightness end
+                if (!isShadow) {
+                    //face-based brightness start
+                    if (normal.y >0) { //down
+                        normalBrightness = 0.7f;
+                    } else if (normal.y <0) { //up
+                        normalBrightness = 1.f;
+                    } else if (normal.z >0) { //south
+                        normalBrightness = 0.85f;
+                    } else if (normal.z <0) { //north
+                        normalBrightness = 0.85f;
+                    } else if (normal.x >0) { //west
+                        normalBrightness = 0.75f;
+                    } else if (normal.x <0) { //east
+                        normalBrightness = 0.95f;
+                    }
+                    //face-based brightness end
 
-                float occlusion = 1.5f;
-                if (ceil(prevPos.x)-prevPos.x < 0.5f) {
-                    if (hasAO(ivec3(mapPos), ivec3(ceil(prevPos.x), prevPos.y, prevPos.z))) {
-                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.x) - prevPos.x)));
-                    }
-                } else if (hasAO(ivec3(mapPos), ivec3(floor(prevPos.x) - 0.1f, prevPos.y, prevPos.z))) {
-                    occlusion -= abs(0.5f-min(0.5f, (prevPos.x - floor(prevPos.x))));
-                }
-                if (ceil(prevPos.y)-prevPos.y < 0.5f) {
-                    if (hasAO(ivec3(mapPos), ivec3(prevPos.x, ceil(prevPos.y), prevPos.z))) {
-                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.y) - prevPos.y)));
-                    }
-                } else if (hasAO(ivec3(mapPos), ivec3(prevPos.x, floor(prevPos.y) - 0.1f, prevPos.z))) {
-                    occlusion -= abs(0.5f-min(0.5f, (prevPos.y - floor(prevPos.y))));
-                }
-                if (ceil(prevPos.z)-prevPos.z < 0.5f) {
-                    if (hasAO(ivec3(mapPos), ivec3(prevPos.x, prevPos.y, ceil(prevPos.z)))) {
-                        occlusion -= abs(0.5f-min(0.5f, (ceil(prevPos.z) - prevPos.z)));
-                    }
-                } else if (hasAO(ivec3(mapPos), ivec3(prevPos.x, prevPos.y, floor(prevPos.z) - 0.1f))) {
-                    occlusion -= abs(0.5f-min(0.5f, (prevPos.z - floor(prevPos.z))));
-                }
-                normalBrightness *= clamp(occlusion, blockType == 31 ? 0.9f : 0.5f, 1.f);
-                bool hitSel = hitSelection;
-                int sss = getSSS((mapPos/8)+rayMapPos, false);
-                hitSelection = hitSel;
-                if (sss >= 2) {
-                    normalBrightness += 0.1f;
-                }
+                    bool hitSel = hitSelection;
+                    normalBrightness *= getAO(mapPos);
+                    hitSelection = hitSel;
 
-                if (prevBlock.x == 1 && prevBlock.y > 0) {
-                    if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8) + (rayMapPos.y+(mapPos.y / 8)))) {
-                        addFakeCaustics = true;
+                    if (prevBlock.x == 1 && prevBlock.y > 0) {
+                        if (isCaustic(vec2(rayMapPos.x, rayMapPos.z) + (mapPos.xz / 8) + (rayMapPos.y+(mapPos.y / 8)))) {
+                            addFakeCaustics = true;
+                        }
                     }
                 }
 
