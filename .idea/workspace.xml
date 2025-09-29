@@ -207,22 +207,6 @@
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00183" summary="- Greatly optimized performance. &#10;- Temporarily disabled hand rendering.">
-      <option name="closed" value="true" />
-      <created>1753672039877</created>
-      <option name="number" value="00183" />
-      <option name="presentableId" value="LOCAL-00183" />
-      <option name="project" value="LOCAL" />
-      <updated>1753672039877</updated>
-    </task>
-    <task id="LOCAL-00184" summary="- Fixed FPS limiter. &#10;- Optimized reflections even more. &#10;- Added toggle to reflections.">
-      <option name="closed" value="true" />
-      <created>1753677384730</created>
-      <option name="number" value="00184" />
-      <option name="presentableId" value="LOCAL-00184" />
-      <option name="project" value="LOCAL" />
-      <updated>1753677384730</updated>
-    </task>
     <task id="LOCAL-00185" summary="- Increased ups target from 30 to 75.">
       <option name="closed" value="true" />
       <created>1753738951740</created>
@@ -599,7 +583,23 @@
       <option name="project" value="LOCAL" />
       <updated>1758912412482</updated>
     </task>
-    <option name="localTasksCounter" value="232" />
+    <task id="LOCAL-00232" summary="- Added subsurface scattering.">
+      <option name="closed" value="true" />
+      <created>1759003099665</created>
+      <option name="number" value="00232" />
+      <option name="presentableId" value="LOCAL-00232" />
+      <option name="project" value="LOCAL" />
+      <updated>1759003099665</updated>
+    </task>
+    <task id="LOCAL-00233" summary="- Added subsurface scattering.">
+      <option name="closed" value="true" />
+      <created>1759003160512</created>
+      <option name="number" value="00233" />
+      <option name="presentableId" value="LOCAL-00233" />
+      <option name="project" value="LOCAL" />
+      <updated>1759003160512</updated>
+    </task>
+    <option name="localTasksCounter" value="234" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +622,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed volcanoes being cutoff." />
     <MESSAGE value="- Fixed issues with sub-surface generation. &#10;- Updated cacti texture. &#10;- Fixed cacti generating one block into the ground. &#10;- Reduced overall voxel brightness. &#10;- Added dead bushes. &#10;- Fixed cacti having AO. &#10;- Fixed cacti not needing block support. &#10;- Increased max cacti height. &#10;- Improved sand/sandstone generation. &#10;- Added sandstone rocks to the desert. &#10;- Fixed non-full water rendering." />
     <MESSAGE value="- Added physical clouds. &#10;- Added cloud blocks. &#10;- Added rain cloud blocks. &#10;- Added random ticks." />
     <MESSAGE value="- Will now only do 3 ticks per frame at max to fix issues with pausing. &#10;- Removed random ticking. &#10;- Clouds now use scheduled ticking. &#10;- Rainclouds now only generate in one corner of the map. &#10;- Added randomization to water flow direction. &#10;- Fixed black squares in the sky. &#10;- Reduced AO on clouds." />
@@ -647,6 +646,7 @@
     <MESSAGE value="- Adjusted snow sounds. &#10;- Added mud sounds." />
     <MESSAGE value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
     <MESSAGE value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
+    <MESSAGE value="- Added subsurface scattering." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added subsurface scattering." />
   </component>
 </project>
