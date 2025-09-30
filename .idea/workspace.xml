@@ -12,9 +12,6 @@
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +151,7 @@
       <recent name="org.conspiracraft.game.world.trees.trunks" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.build">
+  <component name="RunManager" selected="Application.Run">
     <configuration name="Run" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -209,14 +206,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00187" summary="- Added ocean. &#10;- Added islands. &#10;- Added mahogany planks. &#10;- Added palm logs. &#10;- Added palm leaves. &#10;- Added palm planks. &#10;- Greatly improved log textures. &#10;- Added sand. &#10;- Added sandstone. &#10;- F3+C now regenerates atlas. &#10;- Improved color accuracy. &#10;- Reverted some textures. &#10;- Sun/Luna now orbit outside of the world border. &#10;- Doubled magma brightness. &#10;- Added minimum sun intensity.">
-      <option name="closed" value="true" />
-      <created>1753848613464</created>
-      <option name="number" value="00187" />
-      <option name="presentableId" value="LOCAL-00187" />
-      <option name="project" value="LOCAL" />
-      <updated>1753848613464</updated>
     </task>
     <task id="LOCAL-00188" summary="- Fixed sky rendering wrong color.&#10;- Added islands. &#10;- Increased world size.  &#10;- Added caves. &#10;- Fixed sunlight being in places it shouldn't.">
       <option name="closed" value="true" />
@@ -602,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759182591352</updated>
     </task>
-    <option name="localTasksCounter" value="236" />
+    <task id="LOCAL-00236" summary="- Updated to 0.5. &#10;- Fixed light removal flickering.">
+      <option name="closed" value="true" />
+      <created>1759248676722</created>
+      <option name="number" value="00236" />
+      <option name="presentableId" value="LOCAL-00236" />
+      <option name="project" value="LOCAL" />
+      <updated>1759248676722</updated>
+    </task>
+    <option name="localTasksCounter" value="237" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -625,7 +622,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Will now only do 3 ticks per frame at max to fix issues with pausing. &#10;- Removed random ticking. &#10;- Clouds now use scheduled ticking. &#10;- Rainclouds now only generate in one corner of the map. &#10;- Added randomization to water flow direction. &#10;- Fixed black squares in the sky. &#10;- Reduced AO on clouds." />
     <MESSAGE value="- Improved fog." />
     <MESSAGE value="- Cleaned up renderer class code. &#10;- Fixed clouds generating inside volcanoes. &#10;- Added new oak trees. &#10;- Re-added forests. &#10;- Improved plains generation." />
     <MESSAGE value="- Fixed water reflections. &#10;- Added moonlight. &#10;- Fixed clouds still generating in volcanoes. &#10;- Fixed caustic rendering with non-full water blocks. &#10;- Greatly optimized buffer updating. &#10;- Greatly optimized scheduled ticker.&#10;- Greatly optimized water flow. &#10;- Increased water output of rainclouds by 15x. &#10;- Added mud that generates beneath rain clouds." />
@@ -650,6 +646,7 @@
     <MESSAGE value="- Added subsurface scattering." />
     <MESSAGE value="- Fixed inaccurate SSS. &#10;- Pixelized shadows." />
     <MESSAGE value="- Added new AO implementation. &#10;- Merged SSS into AO." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added new AO implementation. &#10;- Merged SSS into AO." />
+    <MESSAGE value="- Updated to 0.5. &#10;- Fixed light removal flickering." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Updated to 0.5. &#10;- Fixed light removal flickering." />
   </component>
 </project>
