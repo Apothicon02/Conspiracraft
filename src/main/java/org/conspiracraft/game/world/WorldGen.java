@@ -33,7 +33,7 @@ public class WorldGen {
         setBlockWorldgen(x, y, z, blockTypeId, blockSubtypeId);
         Vector2i above = getBlockWorldgen(x, y+1, z);
         BlockType type = BlockTypes.blockTypeMap.get(above.x);
-        type.onPlace(new Vector3i(x, y, z), above, true);
+        type.onPlace(new Vector3i(x, y+1, z), above, true);
     }
     public static void setBlockWorldgenInBounds(int x, int y, int z, int blockTypeId, int blockSubtypeId) {
         if (World.inBounds(x, y, z)) {
@@ -204,7 +204,7 @@ public class WorldGen {
                                         lowestY = newY;
                                     }
                                 } else {
-                                    setBlockWorldgen(x, newY, z, 10, 0);
+                                    setBlockWorldgen(x, newY, z, 55, 0);
                                 }
                             }
                             heightmap[condensedPos] = (short)(lowestY);
@@ -230,7 +230,7 @@ public class WorldGen {
                     int cloudScale = (int)(4+(basePerlinNoise*4));
                     if (Noises.CLOUD_NOISE.sample(x*cloudScale, z*cloudScale) > 0.1f && Math.random() > 0.95f && heightmap[condensedPos] < 166) {
                         boolean isRainCloud = (distance(x, z, size, 0) / quarterSize < 1 && (Math.random() < 0.0005f));
-                        Blob.generate(new Vector2i(0), x, 216+(int)Math.abs(Noises.CELLULAR_NOISE.sample(x, z)*32), z, isRainCloud ? 32 : 31, 0, (isRainCloud ? 10 : 0) +(int)(2+(Math.random()*8)));
+                        Blob.generate(new Vector2i(0), x, 216+(int)Math.abs(Noises.CELLULAR_NOISE.sample(x, z)*32), z, isRainCloud ? 32 : 31, 0, (isRainCloud ? 10 : 0) +(int)(2+(Math.random()*8)), true);
                         if (isRainCloud) {
                             Mud.generate(new Vector2i(0), x, y, z, 33, 0, 16 + (int) (2 + (Math.random() * 8)), true);
                         }
@@ -292,6 +292,7 @@ public class WorldGen {
                                              if (deadBushChance > 0.19) {
                                                  int maxHeight = (int) (Math.random() * 6) + 12;
                                                  DeadOakTree.generate(blockOn, x, y, z, maxHeight, 16, 0);
+                                                 Blob.generate(blockOn, x, y, z, 33, 0, (int) (2 + ((Math.random() + 1) * 3)), new int[]{2, 23}, true);
                                              } else {
                                                  setBlockWorldgenNoReplace(x, y + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
                                              }
@@ -334,6 +335,7 @@ public class WorldGen {
                                 int radius = (int) (Math.random()*4) + 6;
                                 if (Math.random() < 0.015f) { //1.5% chance the tree is dead
                                     DeadOakTree.generate(blockOn, x, y, z, maxHeight, 47, 0);
+                                    Blob.generate(blockOn, x, y, z, 3, 0, (int) ((Math.random() + 1) * 3), new int[]{2, 23}, true);
                                 } else {
                                     OakTree.generate(blockOn, x, y, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                 }
@@ -357,7 +359,7 @@ public class WorldGen {
                         if (!setAnything) {
                             if (getBlockWorldgen(x, y + 1, z).x <= 1) { //only replace air and water
                                 Plains.generate(blockOn, x, y, z);
-                                if (randomNumber < 0.08f && blockOn.x == 10) {
+                                if (randomNumber < 0.08f && blockOn.x == 55) {
                                     Blob.generate(blockOn, x, y, z, 8, 0, (int) (2 + ((Math.random() + 1) * 3)));
                                 }
                             }

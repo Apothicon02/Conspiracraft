@@ -15,7 +15,7 @@ import static org.conspiracraft.game.world.World.inBounds;
 import static org.conspiracraft.game.world.WorldGen.*;
 
 public class Blob {
-    public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, boolean replace) {
+    public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
         Vector2i block = new Vector2i(blockType, blockSubType);
         BlockType type = BlockTypes.blockTypeMap.get(blockType);
         for (int lX = x - radius; lX <= x + radius; lX++) {
@@ -29,10 +29,25 @@ public class Blob {
                         int zDist = lZ - z;
                         int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                         if (dist <= radius * 3) {
-                            if (replace ? BlockTypes.blockTypeMap.get(getBlockWorldgen(lX, lY, lZ).x).blockProperties.isSolid : true) {
-                                setBlockWorldgen(lX, lY, lZ, blockType, blockSubType);
-                                if (type instanceof CloudBlockType) {
-                                    ScheduledTicker.scheduleTick(Main.currentTick + 200 + (int) (Math.random() * 1000), new Vector3i(lX, lY, lZ), 1);
+                            boolean canReplace = true;
+                            if (replace.length > 0) {
+                                canReplace = false;
+                                int replacing = getBlockWorldgen(lX, lY, lZ).x;
+                                for (int replaceable : replace) {
+                                    if (replaceable == replacing) {
+                                        canReplace = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (canReplace) {
+                                if (update) {
+                                    setBlockWorldgenUpdates(lX, lY, lZ, blockType, blockSubType);
+                                    if (type instanceof CloudBlockType) {
+                                        ScheduledTicker.scheduleTick(Main.currentTick + 200 + (int) (Math.random() * 1000), new Vector3i(lX, lY, lZ), 1);
+                                    }
+                                } else {
+                                    setBlockWorldgen(lX, lY, lZ, blockType, blockSubType);
                                 }
                                 if (type.obstructingHeightmap(block)) {
                                     heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
@@ -50,7 +65,15 @@ public class Blob {
         }
     }
 
+    public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace) {
+        generate(blockOn, x, y, z, blockType, blockSubType, radius, replace, false);
+    }
+
+    public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, boolean update) {
+        generate(blockOn, x, y, z, blockType, blockSubType, radius, new int[0], update);
+    }
+
     public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius) {
-        generate(blockOn, x, y, z, blockType, blockSubType, radius, false);
+        generate(blockOn, x, y, z, blockType, blockSubType, radius, new int[0], false);
     }
 }

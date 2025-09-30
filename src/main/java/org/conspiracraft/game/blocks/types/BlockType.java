@@ -9,6 +9,7 @@ import org.joml.Vector3i;
 import org.joml.Vector4i;
 
 import static org.conspiracraft.game.world.World.*;
+import static org.conspiracraft.game.world.WorldGen.areChunksCompressed;
 
 public class BlockType {
     public BlockProperties blockProperties;
@@ -17,8 +18,8 @@ public class BlockType {
         return blockProperties.needsSupport;
     }
 
-    public void lostSupport(Vector3i pos, Vector2i block, boolean worldgen) {
-        if (worldgen) {
+    public void lostSupport(Vector3i pos, Vector2i block) {
+        if (!areChunksCompressed) {
             WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, 0, 0);
         } else {
             World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 2, false);
@@ -41,7 +42,7 @@ public class BlockType {
             if (aboveBlock != null) {
                 int aboveBlockId = aboveBlock.x();
                 if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport(aboveBlock)) {
-                    lostSupport(abovePos, aboveBlock, false);
+                    lostSupport(abovePos, aboveBlock);
                 }
             }
         }
@@ -50,7 +51,7 @@ public class BlockType {
             if (belowBlock != null) {
                 int belowBlockId = belowBlock.x();
                 if (!BlockTypes.blockTypeMap.get(belowBlockId).blockProperties.isSolid) {
-                    lostSupport(pos, block, false);
+                    lostSupport(pos, block);
                 }
             }
         }
