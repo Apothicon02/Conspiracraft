@@ -15,7 +15,7 @@ public class Chunk {
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public int[] uncompressedBlocks;
-    public final IntArrayList blockPalette = new IntArrayList(); //make sure and fix same blocks being added multiple times
+    public final IntArrayList blockPalette = new IntArrayList();
     public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
     public final IntArrayList lightPalette = new IntArrayList();
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
