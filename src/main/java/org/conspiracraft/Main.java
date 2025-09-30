@@ -407,6 +407,7 @@ public class Main {
                         timePassed = tickTime-1;
                     }
                 }
+                World.iterateLightQueue();
                 timePassed += diffTimeMillis;
             }
         }

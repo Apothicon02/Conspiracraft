@@ -57,7 +57,7 @@ public class World {
     public static long stageTime = 0;
 
     public static void tick() {
-        iterateLightQueue();
+
     }
 
     public static void iterateLightQueue() {
@@ -620,11 +620,13 @@ public class World {
     }
 
 
-    public static void queueLightUpdate(Vector3i pos) {
+    public static boolean queueLightUpdate(Vector3i pos) {
         boolean exists = lightQueue.contains(pos);
         if (!exists) {
             lightQueue.add(pos);
+            return true;
         }
+        return false;
     }
     public static void updateLight(Vector3i pos) {
         Vector3i chunkPos = new Vector3i(pos.x >> 4, pos.y >> 4, pos.z >> 4);

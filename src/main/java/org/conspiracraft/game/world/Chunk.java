@@ -15,7 +15,7 @@ public class Chunk {
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public int[] uncompressedBlocks;
-    public final IntArrayList blockPalette = new IntArrayList(); //make sure and fix same blocks being added multiple times
+    public final IntArrayList blockPalette = new IntArrayList();
     public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
     public final IntArrayList lightPalette = new IntArrayList();
     private BitBuffer lightData = new BitBuffer(totalBlocks, 0);
@@ -127,7 +127,7 @@ public class Chunk {
             boolean isEmpty = true;
             for (int x = 0; x < chunkSize && isEmpty; x++) {
                 for (int z = 0; z < chunkSize && isEmpty; z++) {
-                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                    for (int y = 0; y < chunkSize; y++) {
                         if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
                             isEmpty = false;
                             break;
@@ -220,7 +220,7 @@ public class Chunk {
             boolean isEmpty = true;
             for (int x = 0; x < chunkSize && isEmpty; x++) {
                 for (int z = 0; z < chunkSize && isEmpty; z++) {
-                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                    for (int y = 0; y < chunkSize; y++) {
                         if (cornerPalette.get(getCornerKey(condenseLocalPos(x, y, z))) != 0) {
                             isEmpty = false;
                             break;
@@ -311,7 +311,7 @@ public class Chunk {
             boolean isEmpty = true;
             for (int x = 0; x < chunkSize && isEmpty; x++) {
                 for (int z = 0; z < chunkSize && isEmpty; z++) {
-                    for (int y = 0; y < chunkSize && isEmpty; y++) {
+                    for (int y = 0; y < chunkSize; y++) {
                         if (lightPalette.get(getLightKey(condenseLocalPos(x, y, z))) != 0) {
                             isEmpty = false;
                             break;
