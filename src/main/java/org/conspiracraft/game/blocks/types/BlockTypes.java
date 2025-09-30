@@ -26,7 +26,7 @@ public class BlockTypes {
     public static BlockType
             AIR = create(new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))),
-            WATER = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
+            WATER = create(new WaterBlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.SPLASH1}, 1f, 1.25f, new SFX[]{Sounds.SPLASH1}, 0f, 1f))),
             GRASS = create(new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1,
                     new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
@@ -34,7 +34,7 @@ public class BlockTypes {
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
             TALL_GRASS = create(new BlockType(GRASS.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)
                     .needsSupport(true))),
-            ROSE = create(List.of(Tags.flowers), new BlockType(TALL_GRASS.blockProperties)), //5
+            ROSE = create(List.of(Tags.shortFlowers, Tags.flowers), new BlockType(TALL_GRASS.blockProperties)), //5
             TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).obstructsHeightmap(false).isSolid(false).blocksLight(false)
                     .isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             KYANITE = create(List.of(Tags.rocks, Tags.crystals), new LightBlockType((LightBlockProperties) (new LightBlockProperties().g(2).b(6)
@@ -53,7 +53,7 @@ public class BlockTypes {
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             OAK_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1,
                     new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
-            HYDRANGEA = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)),
+            HYDRANGEA = create(List.of(Tags.shortFlowers, Tags.flowers), new BlockType(ROSE.blockProperties)),
             MAGMA = create(new LightBlockType(((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
             MAHOGANY_LOG = create(new BlockType(OAK_LOG.blockProperties)), //20
@@ -67,12 +67,11 @@ public class BlockTypes {
             PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             MAHOGANY_PLANKS = create(List.of(Tags.planks), new BlockType(OAK_PLANKS.blockProperties)),
             CACTUS = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
-            DEAD_BUSH = create(List.of(Tags.flowers), new BlockType(ROSE.blockProperties)), //30
+            DEAD_BUSH = create(new BlockType(ROSE.blockProperties)), //30
             CLOUD = create(new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(CLOUD.blockProperties)),
-            MUD = create(List.of(Tags.soakers), new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f,
-                    new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
+            DRY_MUD = create(List.of(Tags.soakers), new BlockType(DIRT.blockProperties)),
             SPRUCE_PLANKS = create(List.of(Tags.planks), new BlockType(OAK_PLANKS.blockProperties)),
             SPRUCE_LOG = create(new BlockType(OAK_LOG.blockProperties)), //35
             SPRUCE_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
@@ -97,7 +96,10 @@ public class BlockTypes {
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
             GRAVEL = create(new PowderBlockType(SAND.blockProperties.copy().blockSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1,
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))), //55
-            FLINT = create(new BlockType(new BlockProperties()));
+            FLINT = create(new BlockType(new BlockProperties())),
+            MUD = create(new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f,
+                    new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
+            CLAY = create(new BlockType(MUD.blockProperties));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

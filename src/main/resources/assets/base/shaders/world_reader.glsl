@@ -406,9 +406,9 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     reflectivity = 0.5f;
                 } else if (blockType == 56) { //flint
                     reflectivity = 0.25f;
-                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 33) { //steel & mud
+                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 57) { //steel & mud
                     reflectivity = 0.16f;
-                } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49) { //planks
+                } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49 || blockType == 58) { //planks & clay
                     reflectivity = 0.05f;
                 }
             }

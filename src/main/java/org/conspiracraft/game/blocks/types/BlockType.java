@@ -58,8 +58,9 @@ public class BlockType {
 
     public void tick(Vector4i pos) {
         if (inBounds(pos.x, pos.y, pos.z)) {
-            fluidTick(pos.xyz(new Vector3i()));
-            updateSupport(new Vector3i(pos.x, pos.y, pos.z));
+            Vector3i justPos = new Vector3i(pos.x, pos.y, pos.z);
+            fluidTick(justPos);
+            updateSupport(justPos);
         }
     }
 

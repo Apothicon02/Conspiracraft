@@ -147,11 +147,21 @@ public class WorldGen {
                                 heightmap[condensedPos] = (short) y;
                             }
                         }
+                        int surface = 57;
+                        int subSurface = 10;
+                        if (lavaNoise > -0.15f && lavaNoise < 0.15f) {
+                            surface = 58;
+                        } else if (lavaNoise > 0.7f) {
+                            surface = 55;
+                        } else if (lavaNoise < -0.7f) {
+                            surface = 23;
+                            subSurface = 24;
+                        }
                         for (int newY = y; newY > y-3; newY--) {
-                            setBlockWorldgen(x, newY, z, 3, 0);
+                            setBlockWorldgen(x, newY, z, surface, 0);
                         }
                         for (int newY = y-3; newY >= seaLevel; newY--) {
-                            setBlockWorldgen(x, newY, z, 10, 0);
+                            setBlockWorldgen(x, newY, z, subSurface, 0);
                         }
                     } else {
                         int maxSteepness = 0;
