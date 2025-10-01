@@ -409,7 +409,7 @@ public class Renderer {
         glUniform1i(program.uniforms.get("renderDistance"), 200 + (100 * renderDistanceMul));
         glUniform1f(program.uniforms.get("timeOfDay"), timeOfDay);
         glUniform1d(program.uniforms.get("time"), time);
-        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, true, Main.reachAccuracy);
+        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, false, Main.reachAccuracy);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }

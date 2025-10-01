@@ -120,10 +120,14 @@ bool[8] getCorners(int x, int y, int z) {
 }
 bool hitSelection = false;
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
-    bool[8] corners = getCorners(bX, bY, bZ);
-    int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
-    if (corners[cornerIndex]) {
-        vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+    vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+    bool real = true;
+    if (color.a > 0) {
+        int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
+        bool[8] corners = getCorners(bX, bY, bZ);
+        real = corners[cornerIndex];
+    }
+    if (real) {
         color.rgb = fromLinear(color.rgb)*0.8;
         if (ui && selected == ivec3(bX, bY, bZ) && color.a > 0) {
             hitSelection = true;
@@ -133,8 +137,9 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
         }
         return color;
     } else {
-        return vec4(0, 0, 0, 0);
+        return vec4(0);
     }
+
 }
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype, float fire) {
     return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype, fire);
@@ -185,15 +190,8 @@ bool isBlockSolid(ivec2 block) {
     block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30 && block.x != 36 && block.x != 39 && block.x != 42 && block.x != 45
     && block.x != 48 && block.x != 51 && block.x != 52 && block.x != 53);
 }
-bool hasAO(ivec3 voxelPos, ivec3 pos) {
-    bool[8] corners = getCorners(pos.x, pos.y, pos.z);
-    int cornerIndex = (voxelPos.y < 4 ? 0 : 4) + (voxelPos.z < 4 ? 0 : 2) + (voxelPos.x < 4 ? 0 : 1);
-    if (corners[cornerIndex]) {
-        ivec2 block = getBlock(pos.x, pos.y, pos.z);
-        return (isBlockSolid(block) ? true : ((block.x == 17 || block.x == 21 || block.x == 27) && block.y == 0));
-    } else {
-        return false;
-    }
+bool isBlockLeaves(ivec2 block) {
+    return block.y == 0 && (block.x == 17 || block.x == 21 || block.x == 27 || block.x == 36 || block.x == 39 || block.x == 42 || block.x == 45 || block.x == 48 || block.x == 51);
 }
 bool isBlockLight(ivec2 block) {
     return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
@@ -282,6 +280,11 @@ vec4 getVoxelAndBlock(vec3 pos) {
     vec3 rayMapPos = floor(pos);
     vec3 mapPos = (pos-rayMapPos)*8;
     ivec2 block = getBlock(rayMapPos.x, rayMapPos.y, rayMapPos.z);
+    if (block.x <= 1) {
+        return vec4(0.f);
+    } else if (isBlockLeaves(block)) {
+        return vec4(1.f);
+    }
     return getVoxel(mapPos.x, mapPos.y, mapPos.z, rayMapPos.x, rayMapPos.y, rayMapPos.z, block.x, block.y, 0);
 }
 
@@ -411,6 +414,9 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49 || blockType == 58) { //planks & clay
                     reflectivity = 0.05f;
                 }
+                if (prevVoxelColor.a > 0 && reflectivity < 0.25f) {
+                    reflectivity = 0.f;
+                }
             }
             normal = ivec3(mapPos - prevMapPos);
             if (voxelColor.a < 1.f) {
@@ -434,7 +440,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                 }
                 if (!caustic) {
                     vec4 tintColor = voxelColor * voxelColor.a;
-                    if (prevTintColor != tintColor.rgb) {
+                    if (prevTintColor != tintColor.rgb || blockType == 1) {
                         vec3 finalTintColor = vec3(toLinear(tintColor*2));
                         tint += finalTintColor;
                     }
@@ -565,18 +571,11 @@ vec4 dda(bool isShadow, float chunkDist, float subChunkDist, int condensedChunkP
             float sunLight = (lighting.a/fromLinear(vec4(20)).a)*max(0.4f, mixedTime-timeBonus);
             setDistanceFogginess(rayMapPos);
             color = traceBlock(isShadow, chunkDist, subChunkDist, blockDist, intersect, uv3d * 8.0, rayDir, mask, blockInfo.x, blockInfo.y, sunLight, unmixedFogColor, mixedTime);
-            //lighting start
-            //float lightNoise = max(0, cloudNoise((vec2(prevPos.x, prevPos.y)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.y, prevPos.z)*64)+(float(time)*10000))+cloudNoise((vec2(prevPos.z, prevPos.x)*64)+(float(time)*10000)));
-
-            lighting = fromLinear(getLighting(prevPos.x, prevPos.y, prevPos.z));
-            lightFog = max(lightFog, lighting);//*(1-(vec4(0.5, 0.5, 0.5, 0)*vec4(lightNoise))));
-            //lighting *= 1+(vec4(0.5, 0.5, 0.5, -0.25f)*vec4(lightNoise, lightNoise, lightNoise, 1));
-        } else {
-            lighting = fromLinear(getLighting(rayMapPos.x, rayMapPos.y, rayMapPos.z));
-            lightFog = max(lightFog, lighting);
         }
 
         if (color.a >= 1) {
+            lighting = fromLinear(getLighting(prevPos.x, prevPos.y, prevPos.z));
+            lightFog = max(lightFog, lighting);
             return color;
         } else if (color.a <= -1) {
             return vec4(-1);

@@ -79,9 +79,7 @@ vec3 stepMask(vec3 sideDist) {
 }
 
 vec4 getVoxel(int x, int y, int z, ivec2 block) {
-    vec4 color = intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255;
-    color.rgb = fromLinear(color.rgb)*0.8f;
-    return color;
+    return fromLinear(intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255);
 }
 
 vec4 getVoxel(float x, float y, float z, ivec2 block) {
@@ -137,7 +135,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
             voxelColor.rgb+=lighting.rgb*(0.34f-min(0.2f, sunLight/3));
             voxelColor.rgb = hsv2rgb(max(vec3(0), rgb2hsv(voxelColor.rgb)-vec3(0, max(desaturation.r, max(desaturation.g, desaturation.b)), 0)));
             float sunLightFog = (lightFog.a)*mixedTime;
-            vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
+            vec3 sunColor = hsv2rgb(rgb2hsv(mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f)-vec3(0, max(0, mixedTime-0.8), 0));
             vec3 finalLightFog = sunColor*(sunLightFog);
             vec3 fog = 1 + (vec3(finalLightFog) * 1.5f);
             voxelColor.rgb*=fog;

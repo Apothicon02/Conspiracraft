@@ -216,7 +216,7 @@ public class Main {
                     boolean mmbDown = mouseInput.isMiddleButtonPressed();
                     boolean rmbDown = mouseInput.isRightButtonPressed();
                     if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, mmbDown, reachAccuracy);
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, false, reachAccuracy);
                         if (pos != null) {
                             if (mmbDown) {
                                 Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
@@ -234,15 +234,15 @@ public class Main {
                                 int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
                                 if (lmbDown) {
                                     cornerData |= (1 << (cornerIndex - 1));
+                                    Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
                                     if (cornerData == -2147483521 || !isShiftDown) {
-                                        Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
                                         if (addToStack(new Vector2i(blockBreaking.x, BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid ? 0 : blockBreaking.y))) {
                                             World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                             blockTypeId = 0;
                                             blockSubtypeId = 0;
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
                                         }
-                                    } else {
+                                    } else if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isSolid) {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     }
                                 } else if (rmbDown) {
