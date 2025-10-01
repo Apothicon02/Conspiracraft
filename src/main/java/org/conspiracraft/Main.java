@@ -216,7 +216,7 @@ public class Main {
                     boolean mmbDown = mouseInput.isMiddleButtonPressed();
                     boolean rmbDown = mouseInput.isRightButtonPressed();
                     if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, false, reachAccuracy);
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, mmbDown && isShiftDown, reachAccuracy);
                         if (pos != null) {
                             if (mmbDown) {
                                 Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
@@ -252,14 +252,7 @@ public class Main {
                                     } else if (player.stack[0] > 0) {
                                         Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
                                         BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                        if (oldType.isFluid) {
-                                            //displace all fluid to first of 6 neighbors so a block can be placed here.
-
-                                            //refresh oldblock
-                                            oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                                            oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                        }
-                                        if (oldType.isFluidReplaceable) {
+                                        if (oldType.isFluidReplaceable || (oldType.isFluid && !BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluidReplaceable)) {
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
                                             removeFirstEntryInStack();
                                         }

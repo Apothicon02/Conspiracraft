@@ -10,11 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -209,14 +205,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00192" summary="- Added palm trees. &#10;- Improved feature generation code.">
-      <option name="closed" value="true" />
-      <created>1754340606185</created>
-      <option name="number" value="00192" />
-      <option name="presentableId" value="LOCAL-00192" />
-      <option name="project" value="LOCAL" />
-      <updated>1754340606185</updated>
     </task>
     <task id="LOCAL-00193" summary="- Finished palm trees. &#10;- Improved palm leaves texture.">
       <option name="closed" value="true" />
@@ -602,7 +590,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759330766170</updated>
     </task>
-    <option name="localTasksCounter" value="241" />
+    <task id="LOCAL-00241" summary="- Fixed hand-held blocks being inaccurately lit.&#10;- Fixed hand-held blocks not rendering. &#10;- Improved leaf AO.&#10;- Improved SSS with water. &#10;- Optimized voxel sampling. &#10;- Optimized lighting. &#10;- Optimized SSS &amp; AO. &#10;- Removed ability to remove corners of non-solid blocks. &#10;- Disabled reflections through transparent objects when the reflection strength is less than 25%. &#10;- Underwater now looks more watery. &#10;- MMB now picks blocks through water instead of picking the water.">
+      <option name="closed" value="true" />
+      <created>1759337334923</created>
+      <option name="number" value="00241" />
+      <option name="presentableId" value="LOCAL-00241" />
+      <option name="project" value="LOCAL" />
+      <updated>1759337334923</updated>
+    </task>
+    <option name="localTasksCounter" value="242" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -625,7 +621,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Increased default render distance from 3 to 8. &#10;- Added variable shadow darkness." />
     <MESSAGE value="- Slightly improved shadow darkness." />
     <MESSAGE value="- Upon creation, full water blocks will be converted to kyanite if kyanite is touching." />
     <MESSAGE value="- Added LICENSE." />
@@ -650,6 +645,7 @@
     <MESSAGE value="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt." />
     <MESSAGE value="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die." />
     <MESSAGE value="- Reduced voxel brightness. &#10;- Reduced sand saturation. &#10;- Improved voxel coloring from fog. &#10;- Capped SSS." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Reduced voxel brightness. &#10;- Reduced sand saturation. &#10;- Improved voxel coloring from fog. &#10;- Capped SSS." />
+    <MESSAGE value="- Fixed hand-held blocks being inaccurately lit.&#10;- Fixed hand-held blocks not rendering. &#10;- Improved leaf AO.&#10;- Improved SSS with water. &#10;- Optimized voxel sampling. &#10;- Optimized lighting. &#10;- Optimized SSS &amp; AO. &#10;- Removed ability to remove corners of non-solid blocks. &#10;- Disabled reflections through transparent objects when the reflection strength is less than 25%. &#10;- Underwater now looks more watery. &#10;- MMB now picks blocks through water instead of picking the water." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed hand-held blocks being inaccurately lit.&#10;- Fixed hand-held blocks not rendering. &#10;- Improved leaf AO.&#10;- Improved SSS with water. &#10;- Optimized voxel sampling. &#10;- Optimized lighting. &#10;- Optimized SSS &amp; AO. &#10;- Removed ability to remove corners of non-solid blocks. &#10;- Disabled reflections through transparent objects when the reflection strength is less than 25%. &#10;- Underwater now looks more watery. &#10;- MMB now picks blocks through water instead of picking the water." />
   </component>
 </project>
