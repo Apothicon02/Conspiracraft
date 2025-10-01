@@ -30,6 +30,11 @@ public class BlockProperties implements Cloneable {
         this.isFluid = isFluid;
         return this;
     }
+    public boolean isGas = false;
+    public BlockProperties isGas(boolean isGas) {
+        this.isGas = isGas;
+        return this;
+    }
     protected boolean obstructsHeightmap = true;
     public BlockProperties obstructsHeightmap(boolean obstructsHeightmap) {
         this.obstructsHeightmap = obstructsHeightmap;

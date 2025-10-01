@@ -1,7 +1,9 @@
 package org.conspiracraft.game.blocks.types;
 
+import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.world.World;
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
@@ -10,15 +12,42 @@ import static org.conspiracraft.game.world.World.inBounds;
 public class WaterBlockType extends BlockType {
 
     public void moisturize(Vector3i pos) {
-        if (World.getBlock(pos.x, pos.y-1, pos.z).x == BlockTypes.getId(BlockTypes.DIRT)) {
-            World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 3, false);
-            World.setBlock(pos.x, pos.y-1, pos.z, BlockTypes.getId(BlockTypes.MUD), 0, true, false, 3, false);
-        } else if (World.getBlock(pos.x, pos.y-1, pos.z).x == BlockTypes.getId(BlockTypes.GRASS)) {
-            int blockType = 4;
-            if (Math.random() < 0.33f) { //33% chance to generate a flower
-                blockType = Tags.shortFlowers.tagged.get((int)(Math.random()*Tags.shortFlowers.tagged.size()));
+        Vector2i fluid = World.getBlock(pos);
+        Vector2i ogFluid = new Vector2i(fluid);
+        if (fluid.y > 0) {
+            Vector2i belowBlock = World.getBlock(pos.x, pos.y - 1, pos.z);
+            if (belowBlock.x == BlockTypes.getId(BlockTypes.DIRT)) {
+                fluid.x = fluid.y <= 1 ? 0 : fluid.x;
+                fluid.y--;
+                World.setBlock(pos.x, pos.y - 1, pos.z, BlockTypes.getId(BlockTypes.MUD), 0, true, false, 3, false);
+            } else if (Tags.crystals.tagged.contains(belowBlock.x)) {
+                fluid.x = BlockTypes.getId(BlockTypes.KYANITE);
+                fluid.y = 0;
+            } else if (Tags.soakers.tagged.contains(belowBlock.x)) {
+                fluid.x = 0;
+                fluid.y = 0;
+            } else if (fluid.y == 1 && belowBlock.x == BlockTypes.getId(BlockTypes.GRASS)) {
+                int blockType = 4;
+                if (Math.random() < 0.33f) { //33% chance to generate a flower
+                    blockType = Tags.shortFlowers.tagged.get((int) (Math.random() * Tags.shortFlowers.tagged.size()));
+                }
+                fluid.x = -1;
+                World.setBlock(pos.x, pos.y, pos.z, blockType, (int) (Math.random() * 4), true, false, 3, false);
             }
-            World.setBlock(pos.x, pos.y, pos.z, blockType, (int)(Math.random()*4), true, false, 3, false);
+            if (BlockTypes.blockTypeMap.get(fluid.x).blockProperties.isFluid && fluid.y >= 1) {
+                for (Vector3i nPos : new Vector3i[]{new Vector3i(pos.x, pos.y - 1, pos.z), new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x + 1, pos.y, pos.z),
+                        new Vector3i(pos.x, pos.y, pos.z - 1), new Vector3i(pos.x, pos.y, pos.z + 1)}) {
+                    Vector2i nBlock = World.getBlock(nPos.x, nPos.y, nPos.z);
+                    if (nBlock.x == BlockTypes.getId(BlockTypes.MAGMA)) {
+                        World.setBlock(nPos.x, nPos.y, nPos.z, BlockTypes.getId(BlockTypes.OBSIDIAN), 0, true, false, 3, false);
+                        fluid.x = Fluids.liquidGasMap.get(fluid.x);
+                        break;
+                    }
+                }
+            }
+            if (fluid.x != ogFluid.x || fluid.y != ogFluid.y) { //only set block if it changed
+                World.setBlock(pos.x, pos.y, pos.z, fluid.x, fluid.y, true, false, 3, false);
+            }
         }
     }
 

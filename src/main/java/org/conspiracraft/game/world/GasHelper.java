@@ -1,20 +1,15 @@
 package org.conspiracraft.game.world;
 
-import org.conspiracraft.Main;
-import org.conspiracraft.engine.Utils;
-import org.conspiracraft.game.ScheduledTicker;
-import org.conspiracraft.game.blocks.Tags;
+import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.joml.Math;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import java.util.Collections;
-
-public class FluidHelper {
+public class GasHelper {
     private static final Vector3i[] neighborPositions = new Vector3i[4];
-    public static void updateFluid(Vector3i pos, Vector2i fluid) {
+    public static void updateGas(Vector3i pos, Vector2i fluid) {
         double random = Math.random();
         if (random < 0.25f) {
             neighborPositions[0] = new Vector3i(pos.x, pos.y, pos.z+1);
@@ -41,19 +36,23 @@ public class FluidHelper {
         boolean scheduleTick = false;
         int maxChange = 0;
 
-        if (type.blockProperties.isFluid) {
-            Vector3i bPos = new Vector3i(pos.x, pos.y-1, pos.z);
-            Vector2i bFluid = World.getBlock(bPos);
-            BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
-            boolean fluidReplacable = bType.blockProperties.isFluidReplaceable;
-            int room = fluidReplacable ? 15 : 15 - bFluid.y;
-            if ((bType.blockProperties.isFluid && bFluid.x == fluid.x && room > 0) || fluidReplacable) {
-                bFluid.x = fluid.x;
+        if (type.blockProperties.isGas) {
+            Vector3i aPos = new Vector3i(pos.x, pos.y+1, pos.z);
+            if (aPos.y >= World.height) {
+                World.setBlock(pos.x, pos.y, pos.z, Fluids.liquidGasMap.get(fluid.x), fluid.y, true, false, 4, true);
+                return;
+            }
+            Vector2i aFluid = World.getBlock(aPos);
+            BlockType aType = BlockTypes.blockTypeMap.get(aFluid.x);
+            boolean fluidReplacable = aType.blockProperties.isFluidReplaceable;
+            int room = fluidReplacable ? 15 : 15 - aFluid.y;
+            if ((aType.blockProperties.isGas && aFluid.x == fluid.x && room > 0) || fluidReplacable) {
+                aFluid.x = fluid.x;
                 int flow = Math.min(room, fluid.y);
                 if (fluidReplacable) {
-                    bFluid.y = flow;
+                    aFluid.y = flow;
                 } else {
-                    bFluid.y += flow;
+                    aFluid.y += flow;
                 }
                 fluid.y -= flow;
                 if (fluid.y < 1) {
@@ -62,39 +61,43 @@ public class FluidHelper {
 
                 maxChange = flow;
                 scheduleTick = true;
-                World.setBlock(bPos.x, bPos.y, bPos.z, bFluid.x, bFluid.y, true, false, 4, true);
+                World.setBlock(aPos.x, aPos.y, aPos.z, aFluid.x, aFluid.y, true, false, 4, true);
+            } else if (aType.blockProperties.isFluid) {
+                World.setBlock(aPos.x, aPos.y, aPos.z, fluid.x, fluid.y, true, false, 4, true);
+                World.setBlock(pos.x, pos.y, pos.z, aFluid.x, aFluid.y, true, false, 4, true);
+                return;
             }
         }
 
-        Vector3i aPos = new Vector3i(pos.x, pos.y+1, pos.z);
-        Vector2i aFluid = World.getBlock(aPos);
-        BlockType aType = BlockTypes.blockTypeMap.get(aFluid.x);
+        Vector3i bPos = new Vector3i(pos.x, pos.y-1, pos.z);
+        Vector2i bFluid = World.getBlock(bPos);
+        BlockType bType = BlockTypes.blockTypeMap.get(bFluid.x);
         boolean fluidReplacable = type.blockProperties.isFluidReplaceable;
         int room = fluidReplacable ? 15 : 15-fluid.y;
-        if ((aType.blockProperties.isFluid && (aFluid.x == fluid.x || type.blockProperties.isFluidReplaceable) && room > 0)) {
-            fluid.x = aFluid.x;
-            int flow = Math.min(room, aFluid.y);
+        if ((bType.blockProperties.isGas && (bFluid.x == fluid.x || type.blockProperties.isFluidReplaceable) && room > 0)) {
+            fluid.x = bFluid.x;
+            int flow = Math.min(room, bFluid.y);
             if (fluidReplacable) {
                 fluid.y = flow;
             } else {
                 fluid.y += flow;
             }
-            aFluid.y -= flow;
-            if (aFluid.y < 1) {
-                aFluid.x = 0;
+            bFluid.y -= flow;
+            if (bFluid.y < 1) {
+                bFluid.x = 0;
             }
 
             maxChange = flow;
             scheduleTick = true;
-            World.setBlock(aPos.x, aPos.y, aPos.z, aFluid.x, aFluid.y, true, false, 4, true);
+            World.setBlock(bPos.x, bPos.y, bPos.z, bFluid.x, bFluid.y, true, false, 4, true);
         }
 
         for (Vector3i nPos : neighborPositions) {
             Vector2i nFluid = World.getBlock(nPos);
             BlockType nType = BlockTypes.blockTypeMap.get(nFluid.x);
-            boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y && nType.blockProperties.isFluid;
-            boolean isMainFluid = areBothFluid ? true : (nType.blockProperties.isFluidReplaceable && type.blockProperties.isFluid);
-            boolean isNFluid = areBothFluid ? true : (type.blockProperties.isFluidReplaceable && nType.blockProperties.isFluid);
+            boolean areBothFluid = nFluid.x == fluid.x && nFluid.y != fluid.y && nType.blockProperties.isGas;
+            boolean isMainFluid = areBothFluid ? true : (nType.blockProperties.isFluidReplaceable && type.blockProperties.isGas);
+            boolean isNFluid = areBothFluid ? true : (type.blockProperties.isFluidReplaceable && nType.blockProperties.isGas);
             if (isMainFluid || isNFluid) {
                 int newLevel = areBothFluid ? (fluid.y + nFluid.y) : (isMainFluid ? (fluid.y) : (nFluid.y));
                 if (newLevel > 1) {

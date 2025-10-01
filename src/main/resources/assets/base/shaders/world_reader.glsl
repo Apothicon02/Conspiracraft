@@ -185,17 +185,20 @@ ivec2 getBlock(vec3 pos) {
 bool castsShadow(int x) {
     return true;//(x != 4 && x != 5 && x != 18);
 }
-bool isBlockSolid(ivec2 block) {
-    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 &&
-    block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30 && block.x != 36 && block.x != 39 && block.x != 42 && block.x != 45
-    && block.x != 48 && block.x != 51 && block.x != 52 && block.x != 53);
-}
+//bool isBlockSolid(ivec2 block) {
+//    return (block.x != 0 && block.x != 1 && block.x != 4 && block.x != 5 && block.x != 6 && block.x != 7 && block.x != 11 && block.x != 12 && block.x != 13 && block.x != 14 &&
+//    block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30 && block.x != 36 && block.x != 39 && block.x != 42 && block.x != 45
+//    && block.x != 48 && block.x != 51 && block.x != 52 && block.x != 53);
+//}
 bool isBlockLeaves(ivec2 block) {
     return block.y == 0 && (block.x == 17 || block.x == 21 || block.x == 27 || block.x == 36 || block.x == 39 || block.x == 42 || block.x == 45 || block.x == 48 || block.x == 51);
 }
-bool isBlockLight(ivec2 block) {
-    return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
+bool isGas(ivec2 block) {
+    return block.x == 60;
 }
+//bool isBlockLight(ivec2 block) {
+//    return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
+//}
 
 ivec3 prevLightChunkPos = ivec3(-1);
 ivec4 lightPaletteInfo = ivec4(-1);
@@ -409,7 +412,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
                     reflectivity = 0.5f;
                 } else if (blockType == 56) { //flint
                     reflectivity = 0.25f;
-                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 57) { //steel & mud
+                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 57 || blockType == 59) { //steel & mud & obsidian
                     reflectivity = 0.16f;
                 } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49 || blockType == 58) { //planks & clay
                     reflectivity = 0.05f;
@@ -422,7 +425,7 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
             if (voxelColor.a < 1.f) {
                 bool underwater = false;
                 bool caustic = false;
-                if (blockType == 1) {
+                if (blockType == 1 || isGas(ivec2(blockType, blockSubtype))) {
                     if (prevVoxelColor.a != voxelColor.a) {
                         if (isCaustic(vec2(rayMapPos.x, rayMapPos.z)+(mapPos.xz/8)+mapPos.y)) {
                             voxelColor = vec4(fromLinear(vec3(1))*sunLight, 1);

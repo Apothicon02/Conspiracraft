@@ -1,6 +1,7 @@
 package org.conspiracraft.game.blocks.types;
 
 import org.conspiracraft.game.world.FluidHelper;
+import org.conspiracraft.game.world.GasHelper;
 import org.conspiracraft.game.world.World;
 import org.conspiracraft.game.world.WorldGen;
 import org.joml.Vector2i;
@@ -66,12 +67,22 @@ public class BlockType {
     }
 
     public void fluidTick(Vector3i pos) {
-        FluidHelper.updateFluid(pos, getBlock(pos));
+        Vector2i block = getBlock(pos);
+        FluidHelper.updateFluid(pos, block);
+        GasHelper.updateGas(pos, block);
     }
 
     public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
+        }
+        for (Vector3i nPos : new Vector3i[]{new Vector3i(pos.x, pos.y - 1, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x - 1, pos.y, pos.z),
+                new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1), new Vector3i(pos.x, pos.y, pos.z + 1)}) {
+            Vector2i nBlock = World.getBlock(nPos.x, nPos.y, nPos.z);
+            BlockType blockType = BlockTypes.blockTypeMap.get(nBlock.x);
+            if (blockType instanceof WaterBlockType) {
+                ((WaterBlockType) blockType).moisturize(nPos);
+            }
         }
     }
 }

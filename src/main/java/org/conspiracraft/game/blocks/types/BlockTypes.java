@@ -99,7 +99,9 @@ public class BlockTypes {
             FLINT = create(new BlockType(new BlockProperties())),
             MUD = create(List.of(Tags.sediment), new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f,
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
-            CLAY = create(List.of(Tags.sediment), new BlockType(MUD.blockProperties));
+            CLAY = create(List.of(Tags.sediment), new BlockType(MUD.blockProperties)),
+            OBSIDIAN = create(List.of(Tags.crystals), new BlockType(GLASS.blockProperties.copy().blocksLight(true))),
+            STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true)));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {
