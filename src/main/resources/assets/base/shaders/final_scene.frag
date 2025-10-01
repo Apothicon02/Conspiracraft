@@ -79,7 +79,9 @@ vec3 stepMask(vec3 sideDist) {
 }
 
 vec4 getVoxel(int x, int y, int z, ivec2 block) {
-    return fromLinear(intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255);
+    vec4 color = intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255;
+    color.rgb = fromLinear(color.rgb)*0.8f;
+    return color;
 }
 
 vec4 getVoxel(float x, float y, float z, ivec2 block) {

@@ -10,16 +10,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PlantBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PlantLightBlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -214,14 +208,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00190" summary="- Fixed torch brightness being too high. &#10;- Fixed rendering issues.&#10;- Removed sun / luna / hand rendering.&#10;- Fixed distance fogginess seam.  &#10;- Fixed crash. &#10;- Fixed weird rendering issue with water. &#10;- Improved caustics. &#10;- Optimized water rendering.">
-      <option name="closed" value="true" />
-      <created>1754283121506</created>
-      <option name="number" value="00190" />
-      <option name="presentableId" value="LOCAL-00190" />
-      <option name="project" value="LOCAL" />
-      <updated>1754283121506</updated>
     </task>
     <task id="LOCAL-00191" summary="- Fixed reflections. &#10;- Fixed distance fogginess. &#10;- Added way to toggle reflections. &#10;- Improved water fog. &#10;- Fixed light fog. &#10;- Greatly optimized water rendering.">
       <option name="closed" value="true" />
@@ -607,7 +593,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759258481198</updated>
     </task>
-    <option name="localTasksCounter" value="239" />
+    <task id="LOCAL-00239" summary="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die.">
+      <option name="closed" value="true" />
+      <created>1759264871574</created>
+      <option name="number" value="00239" />
+      <option name="presentableId" value="LOCAL-00239" />
+      <option name="project" value="LOCAL" />
+      <updated>1759264871574</updated>
+    </task>
+    <option name="localTasksCounter" value="240" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -630,7 +624,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed water reflections. &#10;- Added moonlight. &#10;- Fixed clouds still generating in volcanoes. &#10;- Fixed caustic rendering with non-full water blocks. &#10;- Greatly optimized buffer updating. &#10;- Greatly optimized scheduled ticker.&#10;- Greatly optimized water flow. &#10;- Increased water output of rainclouds by 15x. &#10;- Added mud that generates beneath rain clouds." />
     <MESSAGE value="- Updated version to 0.3.0. &#10;- Fixed not having any textures if your microsoft account had a different username than mine. &#10;- Updated keybinds." />
     <MESSAGE value="- Increased default render distance from 3 to 8. &#10;- Added variable shadow darkness." />
     <MESSAGE value="- Slightly improved shadow darkness." />
@@ -655,6 +648,7 @@
     <MESSAGE value="- Updated to 0.5. &#10;- Fixed light removal flickering." />
     <MESSAGE value="- Updated to 0.6." />
     <MESSAGE value="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt." />
+    <MESSAGE value="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die." />
   </component>
 </project>

@@ -124,7 +124,7 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
     int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
     if (corners[cornerIndex]) {
         vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
-        color.rgb = fromLinear(color.rgb)*0.9;
+        color.rgb = fromLinear(color.rgb)*0.8;
         if (ui && selected == ivec3(bX, bY, bZ) && color.a > 0) {
             hitSelection = true;
         }
@@ -360,7 +360,7 @@ float getAO(vec3 mapPos) {
     } else {
         occlusion = 1;
     }
-    return occlusion;
+    return min(occlusion, 1.33f);
 }
 
 vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockDist, vec3 intersect, vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float mixedTime) {
@@ -757,7 +757,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     float sunLight = lighting.a*(mixedTime-timeBonus);
     float sunLightCam = lighting.a*adjustedTimeCam;
     float whiteness = gradient(hitPos.y, 0, 372, 0, 0.9);
-    vec3 sunColor = mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f;
+    vec3 sunColor = hsv2rgb(rgb2hsv(mix(mix(vec3(0.0f, 0.0f, 4.5f), vec3(2.125f, -0.4f, 0.125f), mixedTime*4), vec3(0.1f, 0.95f, 1.5f), mixedTime) * 0.15f)-vec3(0, max(0, mixedTime-0.8), 0));
 
     vec3 finalRayMapPos = rayMapPos;
     vec4 finalLighting = lighting;
