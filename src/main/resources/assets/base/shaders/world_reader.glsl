@@ -37,9 +37,9 @@ float reflectivity = 0.f;
 float cloudSpeed = 1000.f;
 float depth = 0.f;
 
-layout(binding = 3) uniform sampler2D coherent_noise;
-layout(binding = 4) uniform sampler2D white_noise;
-layout(binding = 5) uniform sampler2D cloud_noise;
+layout(binding = 1) uniform sampler2D coherent_noise;
+layout(binding = 2) uniform sampler2D white_noise;
+layout(binding = 3) uniform sampler2D cloud_noise;
 
 float noise(vec2 coords) {
     return (texture(coherent_noise, coords/1024).r)-0.5f;

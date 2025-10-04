@@ -34,8 +34,8 @@ layout(std430, binding = 8) buffer playerSSBO
 {
     int[] playerData;
 };
-layout(binding = 4) uniform sampler2D white_noise;
-layout(binding = 6, rgba32f) uniform image3D scene_unscaled_image;
+layout(binding = 2) uniform sampler2D white_noise;
+layout(binding = 4, rgba32f) uniform image3D scene_unscaled_image;
 
 in vec4 gl_FragCoord;
 

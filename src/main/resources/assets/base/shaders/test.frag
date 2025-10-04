@@ -1,4 +1,4 @@
-layout(binding = 6, rgba32f) uniform image3D scene_unscaled_image;
+layout(binding = 4, rgba32f) uniform image3D scene_unscaled_image;
 
 in vec2 gl_FragCoord;
 out vec4 fragColor;
