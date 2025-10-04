@@ -34,6 +34,7 @@ layout(std430, binding = 8) buffer playerSSBO
 {
     int[] playerData;
 };
+layout(binding = 0, rgba32f) uniform image3D atlas;
 layout(binding = 2) uniform sampler2D white_noise;
 layout(binding = 4, rgba32f) uniform image3D scene_unscaled_image;
 
@@ -79,7 +80,7 @@ vec3 stepMask(vec3 sideDist) {
 }
 
 vec4 getVoxel(int x, int y, int z, ivec2 block) {
-    return fromLinear(intToColor(atlasData[(1024*((block.x*8)+x)) + (block.y*64) + ((abs(y-8)-1)*8) + z])/255);
+    return fromLinear(imageLoad(atlas, ivec3(x+(block.x*8), ((abs(y-8)-1)*8)+z, block.y)));
 }
 
 vec4 getVoxel(float x, float y, float z, ivec2 block) {

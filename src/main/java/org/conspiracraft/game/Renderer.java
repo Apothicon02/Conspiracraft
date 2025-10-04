@@ -35,13 +35,15 @@ public class Renderer {
     public static ShaderProgram reflectionScene;
     public static ShaderProgram finalScene;
 
+    public static int atlasWidth = 488;
+    public static int atlasHeight = 1024;
+    public static int atlasDepth = atlasHeight/64;
     public static int atlasImageId;
     public static int coherentNoiseId;
     public static int whiteNoiseId;
     public static int cloudNoiseId;
     public static int sceneUnscaledImageId;
 
-    public static int atlasSSBOId;
     public static int chunkBlocksSSBOId;
     public static int blocksSSBOId;
     public static int chunkCornersSSBOId;
@@ -87,15 +89,15 @@ public class Renderer {
         }, 0);
     }
 
-    public static void generateTextures(Window window) {
+    public static void generateTextures(Window window) throws IOException {
         atlasImageId = glGenTextures();
+        BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
         glBindTexture(GL_TEXTURE_3D, atlasImageId);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, window.getWidth(), window.getHeight(), 4);
-        glBindImageTexture(0, atlasImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, atlasWidth, 64, atlasDepth, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(atlasImage));
 
         coherentNoiseId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, coherentNoiseId);
@@ -128,7 +130,6 @@ public class Renderer {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, window.getWidth(), window.getHeight(), 4);
-        glBindImageTexture(0, sceneUnscaledImageId, 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
     }
     public static void generateVao() {
         sceneVaoId = glGenVertexArrays();
@@ -162,7 +163,6 @@ public class Renderer {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
     public static void createBuffers() {
-        atlasSSBOId = glCreateBuffers();
         chunkBlocksSSBOId = glCreateBuffers();
         blocksSSBOId = glCreateBuffers();
         chunkCornersSSBOId = glCreateBuffers();
@@ -388,26 +388,20 @@ public class Renderer {
     public static LinkedList<Integer> chunkBlockPointerChanges = new LinkedList<>();
     public static LinkedList<Integer> chunkCornerPointerChanges = new LinkedList<>();
     public static LinkedList<Integer> chunkLightPointerChanges = new LinkedList<>();
-    public static void updateAtlasBuffer() throws IOException {
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, atlasSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atlasSSBOId);
+    public static void updateAtlasTexture() throws IOException {
         if (atlasChanged) {
             atlasChanged = false;
 
             BufferedImage atlasImage = ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/textures/atlas.png"));
-            int size = (1024*1024)+1024;
-            int[] atlasData = new int[size];
-            for (int x = 0; x < 488; x++) {
-                for (int y = 0; y < 1024; y++) {
-                    atlasData[(x*1024) + y] = colorToInt(new Color(atlasImage.getRGB(x, y), true));
-                    collisionData[(x*1024) + y] = new Color(atlasImage.getRGB(x, y), true).getAlpha() != 0;
+            for (int x = 0; x < atlasWidth; x++) {
+                for (int y = 0; y < atlasHeight; y++) {
+                    Color color = new Color(atlasImage.getRGB(x, y), true);
+                    collisionData[(x*atlasHeight) + y] = color.getAlpha() != 0;
                 }
             }
-
-            IntBuffer atlasBuffer = BufferUtils.createIntBuffer(size).put(atlasData).flip();
-            glBufferData(GL_SHADER_STORAGE_BUFFER, atlasBuffer, GL_STATIC_COPY);
+            glBindTexture(GL_TEXTURE_3D, atlasImageId);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, atlasWidth, 64, atlasDepth, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(atlasImage));
         }
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
     public static void updateCornerBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
@@ -554,16 +548,17 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    public static void updateBuffers() throws IOException {
+    public static void updateBuffers() {
         long startTime = System.currentTimeMillis();
-        updateAtlasBuffer();
         updateCornerBuffers();
         updateLightBuffers();
         updateBlockBuffers(startTime);
         updatePlayerBuffer();
     }
 
-    public static void bindTextures() {
+    public static void bindTextures() throws IOException {
+        glBindImageTexture(0, atlasImageId, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
+        updateAtlasTexture();
         glBindTextureUnit(1, coherentNoiseId);
         glBindTextureUnit(2, whiteNoiseId);
         glBindTextureUnit(3, cloudNoiseId);

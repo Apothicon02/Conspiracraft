@@ -37,15 +37,20 @@ public class AudioController {
         AL10.alListenerfv(AL10.AL_ORIENTATION, orientation);
     }
 
+    public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
+
     public static SFX loadSound(String file) {
         int buffer = AL10.alGenBuffers();
-        WaveData waveFile = WaveData.create(file);
+        WaveData waveFile = null;
+        try {
+            waveFile = WaveData.createFromAppdata(resourcesPath+"sounds/"+file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
         waveFile.dispose();
         return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
     }
-
-    public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
 
     public static SFX loadRandomSound(String path) throws FileNotFoundException {
         String folder = resourcesPath+path;

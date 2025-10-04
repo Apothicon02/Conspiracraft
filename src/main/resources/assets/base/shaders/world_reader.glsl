@@ -37,6 +37,7 @@ float reflectivity = 0.f;
 float cloudSpeed = 1000.f;
 float depth = 0.f;
 
+layout(binding = 0, rgba32f) uniform image3D atlas;
 layout(binding = 1) uniform sampler2D coherent_noise;
 layout(binding = 2) uniform sampler2D white_noise;
 layout(binding = 3) uniform sampler2D cloud_noise;
@@ -120,7 +121,7 @@ bool[8] getCorners(int x, int y, int z) {
 }
 bool hitSelection = false;
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
-    vec4 color = (intToColor(atlasData[(1024*((blockType*8)+x)) + (blockSubtype*64) + ((abs(y-8)-1)*8) + z])/255) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+    vec4 color = imageLoad(atlas, ivec3(x+(blockType*8), ((abs(y-8)-1)*8)+z, blockSubtype)) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
     bool real = true;
     if (color.a > 0) {
         int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
@@ -143,6 +144,10 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
 }
 vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int blockType, int blockSubtype, float fire) {
     return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype, fire);
+}
+
+int condensePos(ivec3 pos) {
+    return pos.x;
 }
 
 ivec3 prevBlockChunkPos = ivec3(-1);
