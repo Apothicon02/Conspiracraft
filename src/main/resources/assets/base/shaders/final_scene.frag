@@ -6,6 +6,7 @@ int heightChunks = height>> 4;
 
 uniform mat4 cam;
 uniform int renderDistance;
+uniform int aoQuality;
 uniform float timeOfDay;
 uniform double time;
 uniform ivec3 selected;
@@ -18,19 +19,15 @@ uniform ivec2 res;
 vec3 uvDir = vec3(0);
 vec3 camPos = vec3(cam[3]);
 
-layout(std430, binding = 0) buffer atlasSSBO
-{
-    int[] atlasData;
-};
-layout(std430, binding = 5) buffer chunkLightsSSBO
+layout(std430, binding = 4) buffer chunkLightsSSBO
 {
     ivec4[] chunkLightsData;
 };
-layout(std430, binding = 6) buffer lightsSSBO
+layout(std430, binding = 5) buffer lightsSSBO
 {
     int[] lightsData;
 };
-layout(std430, binding = 8) buffer playerSSBO
+layout(std430, binding = 7) buffer playerSSBO
 {
     int[] playerData;
 };
@@ -86,6 +83,103 @@ vec4 getVoxel(int x, int y, int z, ivec2 block) {
 vec4 getVoxel(float x, float y, float z, ivec2 block) {
     return getVoxel(int(x), int(y), int(z), block);
 }
+ivec2 getBlock(vec3 realPos) {
+    bool leftHand = realPos.x >= -3 && realPos.x < -2 && realPos.y >= -2f && realPos.y < -1f && realPos.z >= 1f && realPos.z < 2f;
+    bool stack = realPos.x >= -16 && realPos.x < (-16+30) && realPos.y >= -16f && realPos.y < -15f && realPos.z >= 16f && realPos.z < 17f;
+    if (leftHand || (stack && ((int(realPos+100) % 2) == 0))) {
+        if (leftHand) {
+            return ivec2(playerData[0], playerData[1]);
+        } else {
+            int slot = int(realPos.x+18);
+            return ivec2(playerData[slot], playerData[slot+1]);
+        }
+    }
+    return ivec2(0);
+}
+vec4 getVoxelAndBlock(vec3 pos) {
+    vec3 rayMapPos = floor(pos);
+    vec3 mapPos = (pos-rayMapPos)*8;
+    ivec2 block = getBlock(pos);
+    if (block.x <= 1) {
+        return vec4(0.f);
+    } else if (isBlockLeaves(block)) {
+        return vec4(1.f);
+    }
+    return getVoxel(mapPos.x, mapPos.y, mapPos.z, ivec2(block.x, block.y));
+}
+
+vec3 rayMapPos = vec3(0);
+vec3 prevPos = vec3(0);
+
+float getAO(vec3 mapPos) {
+    float occlusion = 1.4f;
+    if (aoQuality >= 3) {
+        occlusion = 2f;
+        bool skipped = false;
+        bool skippedAgain = false;
+        for (float x = prevPos.x-0.25f; x <= prevPos.x+0.25; x+=0.125f) {
+            for (float y = prevPos.y-0.25f; y <= prevPos.y+0.25; y+=0.125f) {
+                for (float z = prevPos.z-0.25f; z <= prevPos.z+0.25; z+=0.125f) {
+                    if (skipped) {
+                        if (skippedAgain) {
+                            if (getVoxelAndBlock(vec3(x, y, z)).a >= one) {
+                                occlusion-=0.06f;
+                            }
+                        }
+                        skippedAgain = !skippedAgain;
+                    }
+                    skipped = !skipped;
+                }
+            }
+        }
+    } else if (aoQuality == 2) {
+        float xFactor = mapPos.x >= 4 ? 0.125f : -0.125f;
+        float yFactor = mapPos.y >= 4 ? 0.125f : -0.125f;
+        float zFactor = mapPos.z >= 4 ? 0.125f : -0.125f;
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (occlusion == 1.4f) {
+            occlusion = 1.25f;
+            float sss = -0.25f;
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(xFactor, 0, 0)).a < one) {
+                sss+=0.25f;
+            }
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(0, 0, zFactor)).a < one) {
+                sss+=0.25f;
+            }
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(0, yFactor, 0)).a < one) {
+                sss+=0.25f;
+            }
+            occlusion+=max(sss, 0);
+        }
+    } else if (aoQuality == 1) {
+        float xFactor = mapPos.x >= 4 ? 0.125f : -0.125f;
+        float yFactor = mapPos.y >= 4 ? 0.125f : -0.125f;
+        float zFactor = mapPos.z >= 4 ? 0.125f : -0.125f;
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (occlusion == 1.4f) {
+            occlusion = 1.25f;
+        }
+    } else {
+        occlusion = 1.25f;
+    }
+    return min(occlusion, 1.33f);
+}
 
 vec4 maxVoxelColor = vec4(0);
 vec3 prevTintColor = vec3(0);
@@ -98,6 +192,9 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
     vec3 sideDist = ((mapPos-rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = iMask;
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
+    vec3 hitNormal = -mask * raySign;
+    prevPos = rayPos+(mapPos/8) + (hitNormal * 0.001f);
+    rayMapPos = rayPos;
 
     for (int i = 0; mapPos.x < 8.0 && mapPos.x >= 0.0 && mapPos.y < 8.0 && mapPos.y >= 0.0 && mapPos.z < 8.0 && mapPos.z >= 0.0 && i < 8*3; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z, block);
@@ -122,6 +219,7 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
             } else if (normal.x <0) { //east
                 voxelColor.rgb *= 0.95f;
             }
+            voxelColor.rgb *= getAO(mapPos);
             vec4 lighting = getLighting(camPos.x, camPos.y, camPos.z)*0.95f;
             vec4 lightFog = lighting/fromLinear(vec4(10));
             lighting/=fromLinear(vec4(20));
@@ -161,6 +259,8 @@ vec4 traceBlock(vec3 rayPos, vec3 rayDir, vec3 iMask, ivec2 block) {
         mask = stepMask(sideDist);
         prevMapPos = mapPos;
         mapPos += mask * raySign;
+        vec3 hitNormal = -mask * raySign;
+        prevPos = rayPos+(mapPos/8) + (hitNormal * 0.001f);
         sideDist += mask * raySign * deltaDist;
     }
 
@@ -177,16 +277,8 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
 
     for (int i = 0; i < 64; i++) {
         vec3 realPos = rayPos+(mapPos);
-        bool leftHand = realPos.x >= -3 && realPos.x < -2 && realPos.y >= -2f && realPos.y < -1f && realPos.z >= 1f && realPos.z < 2f;
-        bool stack = realPos.x >= -16 && realPos.x < (-16+30) && realPos.y >= -16f && realPos.y < -15f && realPos.z >= 16f && realPos.z < 17f;
-        if (leftHand || (stack && ((int(realPos+100) % 2) == 0))) {
-            ivec2 block = ivec2(0);
-            if (leftHand) {
-                block = ivec2(playerData[0], playerData[1]);
-            } else {
-                int slot = int(realPos.x+18);
-                block = ivec2(playerData[slot], playerData[slot+1]);
-            }
+        ivec2 block = getBlock(realPos);
+        if (block.x > 0) {
             vec3 uv3d = vec3(0);
             vec3 intersect = vec3(0);
             vec3 mini = ((realPos-rayPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;

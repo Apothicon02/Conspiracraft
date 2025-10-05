@@ -95,3 +95,12 @@ bool checker(ivec2 pixel) {
     }
     return false;
 }
+
+float one = fromLinear(vec4(1)).a;
+
+bool isBlockLeaves(ivec2 block) {
+    return block.y == 0 && (block.x == 17 || block.x == 21 || block.x == 27 || block.x == 36 || block.x == 39 || block.x == 42 || block.x == 45 || block.x == 48 || block.x == 51);
+}
+bool isGas(ivec2 block) {
+    return block.x == 60;
+}

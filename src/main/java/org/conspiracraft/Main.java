@@ -116,6 +116,7 @@ public class Main {
     boolean wasCDown = false;
     boolean wasSDown = false;
     boolean wasRDown = false;
+    boolean wasADown = false;
     boolean wasWDown = false;
     boolean wasQDown = false;
     boolean wasF1Down = false;
@@ -183,15 +184,19 @@ public class Main {
                 isClosing = true;
             } else {
                 window.getMouseInput().input(window);
+                boolean f3Down = window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS);
                 boolean isShiftDown = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
-                player.sprint = isShiftDown;
-                player.superSprint = window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS);
-                player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
-                player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
-                player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
-                player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
-                player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
-                player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
+                if (!f3Down) {
+                    player.sprint = isShiftDown;
+                    player.superSprint = window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS);
+                    player.forward = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
+                    player.backward = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
+                    player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
+                    player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
+                    player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
+                    player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
+                }
+
 
                 if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis - player.lastJump > 200) { //only jump at most five times a second
                     player.jump = timeMillis;
@@ -272,12 +277,18 @@ public class Main {
                     glfwSetWindowSize(window.getWindowHandle(), 2560, 1440);
                     //glfwSetWindowMonitor(window.getWindowHandle(), glfwGetWindowMonitor(window.getWindowHandle()), 0, 0, 2560, 1440, GLFW_DONT_CARE);
                 }
-                if (window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS)) {
+                if (f3Down) {
                     if (wasSDown && !window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
                         Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
                     }
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
+                    }
+                    if (wasADown && !window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS)) {
+                        Renderer.aoQuality++;
+                        if (Renderer.aoQuality > 3) {
+                            Renderer.aoQuality = 0;
+                        }
                     }
                     if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
                         if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
@@ -337,6 +348,7 @@ public class Main {
                 wasCDown = window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS);
                 wasSDown = window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS);
                 wasRDown = window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS);
+                wasADown = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
                 wasWDown = window.isKeyPressed(GLFW_KEY_W, GLFW_PRESS);
                 wasTDown = window.isKeyPressed(GLFW_KEY_T, GLFW_PRESS);
                 wasXDown = window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS);

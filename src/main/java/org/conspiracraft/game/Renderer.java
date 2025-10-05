@@ -54,6 +54,7 @@ public class Renderer {
     public static int playerSSBOId;
 
     public static int renderDistanceMul = 8; //3
+    public static int aoQuality = 2;
     public static float timeOfDay = 0.5f;
     public static double time = 0.5d;
     public static boolean atlasChanged = true;
@@ -182,7 +183,7 @@ public class Renderer {
 
     public static void fillBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, blocksSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
         chunkBlockPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 5];
         chunkBlockAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
@@ -229,17 +230,17 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkBlocksSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunkBlocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, chunkBlocksSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, chunkBlockPointers, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, chunkEmptySSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, chunkEmptySSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, lightsSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, defaultSSBOSize, GL_DYNAMIC_DRAW);
         chunkLightPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
         chunkLightAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
@@ -285,12 +286,12 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, chunkLightsSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, chunkLightPointers, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, cornersSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, gigabyte/10, GL_DYNAMIC_DRAW); //0.1gb
         chunkCornerPointers = new int[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks) * 4];
         chunkCornerAllocs = new long[((((sizeChunks * sizeChunks) + sizeChunks) * heightChunks) + heightChunks)];
@@ -336,7 +337,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, chunkCornersSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, chunkCornerPointers, GL_DYNAMIC_DRAW);
     }
 
@@ -353,11 +354,11 @@ public class Renderer {
         blurScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "blur_scene.frag"},
                 new String[]{"dir", "res"});
         unscaledScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "unscaled_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
+                new String[]{"cam", "renderDistance", "aoQuality", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         reflectionScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "world_reader.glsl", "reflect_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
+                new String[]{"cam", "renderDistance", "aoQuality",  "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
         finalScene = new ShaderProgram("scene.vert", new String[]{"math.glsl", "final_scene.frag"},
-                new String[]{"cam", "renderDistance", "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
+                new String[]{"cam", "renderDistance", "aoQuality",  "timeOfDay", "time", "selected", "shadowsEnabled", "reflectionShadows", "sun", "ui", "res"});
     }
 
     public static void  updateUniforms(ShaderProgram program) {
@@ -368,6 +369,7 @@ public class Renderer {
                 camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
                 camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
         glUniform1i(program.uniforms.get("renderDistance"), 200 + (100 * renderDistanceMul));
+        glUniform1i(program.uniforms.get("aoQuality"), aoQuality);
         glUniform1f(program.uniforms.get("timeOfDay"), timeOfDay);
         glUniform1d(program.uniforms.get("time"), time);
         Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, false, Main.reachAccuracy);
@@ -405,7 +407,7 @@ public class Renderer {
     }
     public static void updateCornerBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, cornersSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, cornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, cornersSSBOId);
         while (!chunkCornerQueue.isEmpty()) {
             int condensedChunkPos = chunkCornerQueue.getFirst();
             chunkCornerQueue.removeFirst();
@@ -448,7 +450,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkCornersSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, chunkCornersSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, chunkCornersSSBOId);
         for (int pos : chunkCornerPointerChanges) {
             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkCornerPointers[pos], chunkCornerPointers[pos + 1], chunkCornerPointers[pos + 2], chunkCornerPointers[pos + 3]});
         }
@@ -457,7 +459,7 @@ public class Renderer {
     }
     public static void updateLightBuffers() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, lightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, lightsSSBOId);
 //            long startTime = System.currentTimeMillis();
 //            boolean wasEmpty = lightQueue.isEmpty();
         while (!chunkLightQueue.isEmpty()) {
@@ -506,7 +508,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkLightsSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, chunkLightsSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, chunkLightsSSBOId);
         for (int pos : chunkLightPointerChanges) {
             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkLightPointers[pos], chunkLightPointers[pos + 1], chunkLightPointers[pos + 2], chunkLightPointers[pos + 3]});
         }
@@ -516,7 +518,7 @@ public class Renderer {
     }
     public static void updateBlockBuffers(long startTime) {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, blocksSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, blocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, blocksSSBOId);
         while (!chunkBlockQueue.isEmpty()) {
             int condensedChunkPos = chunkBlockQueue.getFirst();
             chunkBlockQueue.removeFirst();
@@ -525,7 +527,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkBlocksSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, chunkBlocksSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, chunkBlocksSSBOId);
         for (int pos : chunkBlockPointerChanges) {
             glBufferSubData(GL_SHADER_STORAGE_BUFFER, pos * 4L, new int[]{chunkBlockPointers[pos], chunkBlockPointers[pos + 1], chunkBlockPointers[pos + 2], chunkBlockPointers[pos + 3], chunkBlockPointers[pos + 4], chunkBlockPointers[pos + 5], chunkBlockPointers[pos + 6]});
         }
@@ -533,7 +535,7 @@ public class Renderer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, chunkEmptySSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, chunkEmptySSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, chunkEmptySSBOId);
         if (chunkEmptinessChanged) {
             chunkEmptinessChanged = false;
             glBufferData(GL_SHADER_STORAGE_BUFFER, chunkEmptiness, GL_DYNAMIC_DRAW);
@@ -543,7 +545,7 @@ public class Renderer {
 
     public static void updatePlayerBuffer() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, playerSSBOId);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, playerSSBOId);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, playerSSBOId);
         glBufferData(GL_SHADER_STORAGE_BUFFER, Main.player.stack, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }

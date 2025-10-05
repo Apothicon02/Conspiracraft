@@ -8,6 +8,7 @@ int heightChunks = height>> 4;
 
 uniform mat4 cam;
 uniform int renderDistance;
+uniform int aoQuality;
 uniform float timeOfDay;
 uniform double time;
 uniform ivec3 selected;
@@ -52,35 +53,31 @@ float cloudNoise(vec2 coords) {
     return (texture(cloud_noise, coords/1024).r)-0.5f;
 }
 
-layout(std430, binding = 0) buffer atlasSSBO
-{
-    int[] atlasData;
-};
-layout(std430, binding = 1) buffer chunkBlocksSSBO
+layout(std430, binding = 0) buffer chunkBlocksSSBO
 {
     int[] chunkBlocksData;
 };
-layout(std430, binding = 2) buffer blocksSSBO
+layout(std430, binding = 1) buffer blocksSSBO
 {
     int[] blocksData;
 };
-layout(std430, binding = 3) buffer chunkCornersSSBO
+layout(std430, binding = 2) buffer chunkCornersSSBO
 {
     ivec4[] chunkCornersData;
 };
-layout(std430, binding = 4) buffer cornersSSBO
+layout(std430, binding = 3) buffer cornersSSBO
 {
     int[] cornersData;
 };
-layout(std430, binding = 5) buffer chunkLightsSSBO
+layout(std430, binding = 4) buffer chunkLightsSSBO
 {
     ivec4[] chunkLightsData;
 };
-layout(std430, binding = 6) buffer lightsSSBO
+layout(std430, binding = 5) buffer lightsSSBO
 {
     int[] lightsData;
 };
-layout(std430, binding = 7) buffer chunkEmptySSBO
+layout(std430, binding = 6) buffer chunkEmptySSBO
 {
     int[] chunkEmptyData;
 };
@@ -146,10 +143,6 @@ vec4 getVoxel(float x, float y, float z, float bX, float bY, float bZ, int block
     return getVoxel(int(x), int(y), int(z), int(bX), int(bY), int(bZ), blockType, blockSubtype, fire);
 }
 
-int condensePos(ivec3 pos) {
-    return pos.x;
-}
-
 ivec3 prevBlockChunkPos = ivec3(-1);
 ivec4 blockPaletteInfo = ivec4(-1);
 int blockValuesPerInt = -1;
@@ -195,12 +188,6 @@ bool castsShadow(int x) {
 //    block.x != 17 && block.x != 18 && block.x != 21 && block.x != 22 && block.x != 27 && block.x != 29 && block.x != 30 && block.x != 36 && block.x != 39 && block.x != 42 && block.x != 45
 //    && block.x != 48 && block.x != 51 && block.x != 52 && block.x != 53);
 //}
-bool isBlockLeaves(ivec2 block) {
-    return block.y == 0 && (block.x == 17 || block.x == 21 || block.x == 27 || block.x == 36 || block.x == 39 || block.x == 42 || block.x == 45 || block.x == 48 || block.x == 51);
-}
-bool isGas(ivec2 block) {
-    return block.x == 60;
-}
 //bool isBlockLight(ivec2 block) {
 //    return (block.x == 6 || block.x == 7 || block.x == 14 || block.x == 19);
 //}
@@ -282,7 +269,6 @@ bool isCaustic(vec2 checkPos) {
 
 vec3 prevTintColor = vec3(0);
 ivec2 prevBlockInfo = ivec2(0);
-float one = fromLinear(vec4(1)).a;
 
 vec4 getVoxelAndBlock(vec3 pos) {
     vec3 rayMapPos = floor(pos);
@@ -297,9 +283,9 @@ vec4 getVoxelAndBlock(vec3 pos) {
 }
 
 float getAO(vec3 mapPos) {
-    int aoQuality = 2;
-    float occlusion = 1.75f;
+    float occlusion = 1.4f;
     if (aoQuality >= 3) {
+        occlusion = 2f;
         bool skipped = false;
         bool skippedAgain = false;
         for (float x = prevPos.x-0.25f; x <= prevPos.x+0.25; x+=0.125f) {
@@ -318,58 +304,50 @@ float getAO(vec3 mapPos) {
             }
         }
     } else if (aoQuality == 2) {
-        for (float y = prevPos.y-0.125f; y <= prevPos.y+0.125f; y+=0.25f) {
-            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z)).a >= one) {
-                occlusion-=0.085f;
+        float xFactor = mapPos.x >= 4 ? 0.125f : -0.125f;
+        float yFactor = mapPos.y >= 4 ? 0.125f : -0.125f;
+        float zFactor = mapPos.z >= 4 ? 0.125f : -0.125f;
+        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y, prevPos.z+zFactor)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
+        }
+        if (occlusion == 1.4f) {
+            occlusion = 1.25f;
+            float sss = -0.25f;
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(xFactor, 0, 0)).a < one) {
+                sss+=0.25f;
             }
-            if (getVoxelAndBlock(vec3(prevPos.x, y, prevPos.z-0.125f)).a >= one) {
-                occlusion-=0.085f;
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(0, 0, zFactor)).a < one) {
+                sss+=0.25f;
             }
-            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z)).a >= one) {
-                occlusion-=0.085f;
+            if (getVoxelAndBlock(rayMapPos+(mapPos/8)+vec3(0, yFactor, 0)).a < one) {
+                sss+=0.25f;
             }
-            if (getVoxelAndBlock(vec3(prevPos.x, y, prevPos.z+0.125f)).a >= one) {
-                occlusion-=0.085f;
-            }
-            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z-0.125f)).a >= one) {
-                occlusion-=0.085f;
-            }
-            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z-0.125f)).a >= one) {
-                occlusion-=0.085f;
-            }
-            if (getVoxelAndBlock(vec3(prevPos.x-0.125f, y, prevPos.z+0.125f)).a >= one) {
-                occlusion-=0.085f;
-            }
-            if (getVoxelAndBlock(vec3(prevPos.x+0.125f, y, prevPos.z+0.125f)).a >= one) {
-                occlusion-=0.085f;
-            }
+            occlusion+=max(sss, 0);
         }
     } else if (aoQuality == 1) {
         float xFactor = mapPos.x >= 4 ? 0.125f : -0.125f;
         float yFactor = mapPos.y >= 4 ? 0.125f : -0.125f;
         float zFactor = mapPos.z >= 4 ? 0.125f : -0.125f;
-        occlusion = 1f;
         if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z)).a >= one) {
-            occlusion-=0.083f;
+            occlusion-=0.4f;
         }
         if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y, prevPos.z+zFactor)).a >= one) {
-            occlusion-=0.083f;
+            occlusion-=0.4f;
         }
-        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y, prevPos.z+zFactor)).a >= one) {
-            occlusion-=0.083f;
+        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z)).a >= one) {
+            occlusion-=0.4f;
         }
-
-        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y+yFactor, prevPos.z)).a >= one) {
-            occlusion-=0.083f;
-        }
-        if (getVoxelAndBlock(vec3(prevPos.x, prevPos.y+yFactor, prevPos.z+zFactor)).a >= one) {
-            occlusion-=0.083f;
-        }
-        if (getVoxelAndBlock(vec3(prevPos.x+xFactor, prevPos.y+yFactor, prevPos.z+zFactor)).a >= one) {
-            occlusion-=0.083f;
+        if (occlusion == 1.4f) {
+            occlusion = 1.25f;
         }
     } else {
-        occlusion = 1;
+        occlusion = 1.25f;
     }
     return min(occlusion, 1.33f);
 }

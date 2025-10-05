@@ -32,6 +32,7 @@
 - F3 + R: Toggle reflections
 - F3 + S: Toggle shadows
 - F3 + T: Reload texture atlas
+- F3 + A: Cycle ao quality 
 - F3 + Up: Increase render distance
 - F3 + Down: Decrease render distance
 
