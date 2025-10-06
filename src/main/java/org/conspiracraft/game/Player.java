@@ -69,7 +69,7 @@ public class Player {
         waterFlowingSource = new Source(newPos, 0, 1, 0, 1);
         windSource = new Source(newPos, 0, 1, 0, 1);
         magmaSource = new Source(newPos, 0, 1, 0, 1);
-        musicSource = new Source(newPos, 1f, 1, 0.25f, 0);
+        musicSource = new Source(newPos, 0.15f, 1, 0, 0);
         setPos(newPos);
         oldPos = newPos;
     }
@@ -168,7 +168,9 @@ public class Player {
                     if (sfx != null) {
                         musicSource.play(sfx);
                     }
-                } catch (IOException _) {}
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
             friction = 1f;
             boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
@@ -240,7 +242,7 @@ public class Player {
                     BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn.x).blockProperties.blockSFX;
                     jumpSource.setPos(new Vector3f(pos).sub(0, 0.1f, 0));
                     jumpSource.setVel(new Vector3f(vel.x+movement.x, Math.max(vel.y+movement.y, jumpStrength), vel.z+movement.z));
-                    jumpSource.setGain((float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), 0);
+                    jumpSource.setGain((float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)));
                     jumpSource.setPitch((float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0);
                     jumpSource.play(sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)], true);
                 }
@@ -357,7 +359,7 @@ public class Player {
         if (World.worldGenerated) {
             Matrix4f camNoPitch = camera.getViewMatrixWithoutPitch();
             AudioController.setListenerData(newPos, vel, new float[]{camNoPitch.m02(), camNoPitch.m20(), camNoPitch.m33(), camera.pitch.x, camera.pitch.y, camera.pitch.z});
-            musicSource.setPos(newPos);
+            musicSource.setPos(oldPos);
             Vector3f combinedVel = new Vector3f(vel.x + movement.x, vel.y + movement.y, vel.z + movement.z);
             musicSource.setVel(combinedVel);
             float maxVel = Math.max(Math.abs(combinedVel.x), Math.max(Math.abs(combinedVel.y), Math.abs(combinedVel.z)));
@@ -377,7 +379,8 @@ public class Player {
                 if (blockOn.x > 0 && System.currentTimeMillis()-timeLastFootstepSoundPlayed > 1200-Math.min(1000, 4000*maxVel)) {
                     timeLastFootstepSoundPlayed = System.currentTimeMillis();
                     BlockSFX sfx = BlockTypes.blockTypeMap.get(blockOn.x).blockProperties.blockSFX;
-                    Source newSource = new Source(new Vector3f(newPos).sub(0, 0.1f, 0), (float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), (float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0, 0);
+                    Source newSource = new Source(new Vector3f(oldPos).sub(0, height, 0), (float) (sfx.stepGain+((sfx.stepGain*Math.random())/3)), (float) (sfx.stepPitch+((sfx.stepPitch*Math.random())/3)), 0, 0);
+                    AudioController.disposableSources.add(newSource);
                     newSource.setVel(combinedVel);
                     newSource.play((sfx.stepIds[(int) (Math.random() * sfx.stepIds.length)]), true);
                 }
@@ -407,29 +410,29 @@ public class Player {
                     if (waterFlowingSource.soundPlaying == -1) {
                         waterFlowingSource.play(Sounds.FLOW);
                     }
-                    waterFlowingSource.setGain(Math.clamp(ambientWater / 10000f, 0, 1), 0);
+                    waterFlowingSource.setGain(Math.clamp(ambientWater / 10000f, 0, 1));
                     if (magmaSource.soundPlaying == -1) {
                         magmaSource.play(Sounds.MAGMA);
                     }
-                    magmaSource.setGain(Math.clamp(ambientMagma / 333f, 0, 1), 0);
+                    magmaSource.setGain(Math.clamp(ambientMagma / 333f, 0, 1));
                     ambientWind = Math.min(333, ambientWind + sunLight);
                     windGain = ambientWind/333f;
                 }
             }
             float velocity = (Math.max(Math.abs(vel.x+movement.x), Math.max(Math.abs(vel.y+movement.y), Math.abs(vel.z+movement.z))));
-            windSource.setGain(Math.clamp(windGain+(Math.max(0.05f, velocity/10)-0.05f), 0, 1), 0);
+            windSource.setGain(Math.clamp(windGain+(Math.max(0.05f, velocity/10)-0.05f), 0, 1));
             ambientWind = Math.max(0, ambientWind-1);
             ambientWater = Math.max(0, ambientWater-1);
             waterFlow = Math.max(0, waterFlow-1);
 
-            splashSource.setPos(newPos);
+            splashSource.setPos(oldPos);
             splashSource.setVel(combinedVel);
-            submergeSource.setPos(newPos);
+            submergeSource.setPos(oldPos);
             submergeSource.setVel(combinedVel);
             swimSource.baseGain = Math.min(0.5f, maxVel*100);
-            swimSource.setPos(newPos);
+            swimSource.setPos(oldPos);
             swimSource.setVel(combinedVel);
-            passthroughSource.setPos(newPos);
+            passthroughSource.setPos(oldPos);
             passthroughSource.setVel(combinedVel);
         }
     }

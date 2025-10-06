@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 import org.lwjgl.openal.AL10;
 
 public class Source {
-    private int sourceID;
+    public int sourceID;
     public int soundPlaying = -1;
     public float baseGain;
     public float basePitch;
@@ -45,22 +45,18 @@ public class Source {
         AL10.alSourceStop(sourceID);
     }
 
-    public void setGain(float newGain, float speed) {
-        speed = Math.max(1, speed);
+    public void setGain(float newGain) {
         baseGain = newGain;
-        if (baseGain < 0) {
-            AL10.alSourcef(sourceID, AL10.AL_GAIN, speed*Math.abs(baseGain));
-        } else {
-            AL10.alSourcef(sourceID, AL10.AL_GAIN, (baseGain / 2) + (speed * (baseGain / 2)));
-        }
+        AL10.alSourcef(sourceID, AL10.AL_GAIN, Math.abs(baseGain));
+
     }
     public void setPitch(float newPitch, float speed) {
-        speed = Math.max(1, speed);
+        speed = (float) Math.sqrt(Math.max(1, speed)-1);
         basePitch = newPitch;
         if (basePitch < 0) {
             AL10.alSourcef(sourceID, AL10.AL_PITCH, speed*Math.abs(basePitch));
         } else {
-            AL10.alSourcef(sourceID, AL10.AL_PITCH, basePitch+(speed/10));
+            AL10.alSourcef(sourceID, AL10.AL_PITCH, basePitch+speed);
         }
     }
     public void setPos(Vector3f pos) {
@@ -68,9 +64,7 @@ public class Source {
     }
     public void setVel(Vector3f vel) {
         AL10.alSource3f(sourceID, AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
-        float speed = Math.max(threshold, Math.max(Math.abs(vel.x), Math.max(Math.abs(vel.y), Math.abs(vel.z))))-threshold;
-        speed = Math.max(1, speed);
-        setGain(baseGain, speed);
+        float speed = Math.max(1+threshold, Math.max(Math.abs(vel.x), Math.max(Math.abs(vel.y), Math.abs(vel.z))))-(1+threshold);
         setPitch(basePitch, speed);
     }
 

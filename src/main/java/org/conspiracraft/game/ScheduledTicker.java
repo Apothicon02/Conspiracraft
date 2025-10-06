@@ -39,5 +39,6 @@ public class ScheduledTicker {
             }
             schedule.remove(scheduledTick);
         }
+        lastTick = Main.currentTick;
     }
 }

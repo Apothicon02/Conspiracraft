@@ -293,9 +293,9 @@ public class Main {
                                                     blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, BlockTypes.blockTypeMap.get(blockBreaking.x).getTTB());
                                                     BlockSFX sfx = BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.blockSFX;
                                                     player.breakingSource.setPos(pos);
-                                                    player.breakingSource.setGain(sfx.placeGain, 0);
+                                                    player.breakingSource.setGain(sfx.placeGain);
                                                     player.breakingSource.setPitch(sfx.placePitch, 0);
-                                                    player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.stepIds.length)], true);
+                                                    player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
                                                 }
                                             }
                                             if (canBreak) {
@@ -494,6 +494,7 @@ public class Main {
                     World.tick();
                     player.tick();
                     ScheduledTicker.tick();
+                    AudioController.disposeSources();
                     if (ticksDone >= 3) {
                         timePassed = tickTime-1;
                     }

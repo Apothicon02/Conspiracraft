@@ -6,14 +6,11 @@ import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class AudioController {
     public static long context;
@@ -33,6 +30,16 @@ public class AudioController {
         AL10.alDistanceModel(AL11.AL_EXPONENT_DISTANCE);
     }
 
+    public static ArrayList<Source> disposableSources = new ArrayList<>(List.of());
+
+    public static void disposeSources() {
+        disposableSources.forEach((Source source) -> {
+            if (!source.isPlaying()) {
+                source.delete();
+            }
+        });
+    }
+
     public static void setListenerData(Vector3f pos, Vector3f vel, float[] orientation) {
         AL10.alListener3f(AL10.AL_POSITION, pos.x, pos.y, pos.z);
         AL10.alListener3f(AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
@@ -41,24 +48,25 @@ public class AudioController {
 
     public static SFX loadSound(String file) {
         int buffer = AL10.alGenBuffers();
-        WaveData waveFile = null;
-        try {
-            waveFile = WaveData.createFromAppdata(Engine.resourcesPath+"sounds/"+file);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        WaveData waveFile = WaveData.create(file);
+        if (waveFile != null) {
+            AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
+            waveFile.dispose();
+            return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
         }
-        AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
-        waveFile.dispose();
-        return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
+        return new SFX(buffer, 0);
     }
 
+    public static String prevRandomSound = "";
     public static SFX loadRandomSound(String path) throws IOException {
         String folder = Engine.resourcesPath+path;
         Path folderPath = Path.of(folder);
         if (Files.exists(folderPath)) {
             int buffer = AL10.alGenBuffers();
             List<String> allSounds = new ArrayList<>(Arrays.asList(new File(folder).list()));
+            allSounds.remove(prevRandomSound);
             String name = allSounds.get((int) (Math.random() * (allSounds.size() - 1)));
+            prevRandomSound = name;
             WaveData waveFile = WaveData.createFromAppdata(folder + name);
             AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
             waveFile.dispose();
