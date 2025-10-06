@@ -104,3 +104,12 @@ bool isBlockLeaves(ivec2 block) {
 bool isGas(ivec2 block) {
     return block.x == 60;
 }
+bool isLiquid(ivec2 block) {
+    return block.x == 1;
+}
+bool isFluid(ivec2 block) {
+    return isGas(block) || isLiquid(block);
+}
+bool isBucket(int blockType) {
+    return blockType == 61 || blockType == 62;
+}

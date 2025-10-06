@@ -20,7 +20,8 @@ public class Tags {
     public static Tag soakers = new Tag();
     public static Tag crystals = new Tag();
     public static Tag planks = new Tag();
-    public static List<Tag> tags = List.of(rocks, leaves, shortFlowers, flowers, soakers, crystals, planks);
+    public static Tag buckets = new Tag();
+    public static List<Tag> tags = List.of(rocks, leaves, shortFlowers, flowers, soakers, crystals, planks, buckets);
     public static List<Pair<Tag, Tag>> survivalTags = List.of(
             new Pair<>(survivesOnGrass, grass),
             new Pair<>(survivesOnDirt, dirt),

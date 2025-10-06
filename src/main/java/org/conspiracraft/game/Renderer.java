@@ -1,6 +1,7 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.world.Chunk;
 import org.joml.*;
@@ -35,7 +36,7 @@ public class Renderer {
     public static ShaderProgram reflectionScene;
     public static ShaderProgram finalScene;
 
-    public static int atlasWidth = 488;
+    public static int atlasWidth = 504;
     public static int atlasHeight = 1024;
     public static int atlasDepth = atlasHeight/64;
     public static int atlasImageId;

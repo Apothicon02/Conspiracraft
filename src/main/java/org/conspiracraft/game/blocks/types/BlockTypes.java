@@ -58,7 +58,7 @@ public class BlockTypes {
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
             MAHOGANY_LOG = create(new BlockType(OAK_LOG.blockProperties)), //20
             MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
-            BUCKET = create(new BlockType(new BlockProperties().blocksLight(false).needsSupport(true))),
+            BUCKET = create(List.of(Tags.buckets), new BlockType(new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false))),
             SAND = create(List.of(Tags.sediment, Tags.sand), new PowderBlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f,
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(false).obstructsHeightmap(false))),
             SANDSTONE = create(new BlockType(new BlockProperties())),
@@ -100,8 +100,10 @@ public class BlockTypes {
             MUD = create(List.of(Tags.sediment), new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f,
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
             CLAY = create(List.of(Tags.sediment), new BlockType(MUD.blockProperties)),
-            OBSIDIAN = create(List.of(Tags.crystals), new BlockType(GLASS.blockProperties.copy().blocksLight(true))),
-            STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true)));
+            OBSIDIAN = create(new BlockType(GLASS.blockProperties.copy().blocksLight(true))),
+            STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true))), //60
+            STEAM_BUCKET = create(List.of(Tags.buckets), new FullBucketBlockType(BUCKET.blockProperties)),
+            WATER_BUCKET = create(List.of(Tags.buckets), new FullBucketBlockType(BUCKET.blockProperties));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {

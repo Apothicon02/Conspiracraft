@@ -21,8 +21,8 @@ public class WaterBlockType extends BlockType {
                 fluid.y--;
                 World.setBlock(pos.x, pos.y - 1, pos.z, BlockTypes.getId(BlockTypes.MUD), 0, true, false, 3, false);
             } else if (Tags.crystals.tagged.contains(belowBlock.x)) {
-                fluid.x = BlockTypes.getId(BlockTypes.KYANITE);
-                fluid.y = 0;
+                fluid.x = belowBlock.x;
+                fluid.y = belowBlock.y;
             } else if (Tags.soakers.tagged.contains(belowBlock.x)) {
                 fluid.x = 0;
                 fluid.y = 0;

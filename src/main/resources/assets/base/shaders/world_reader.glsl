@@ -118,7 +118,7 @@ bool[8] getCorners(int x, int y, int z) {
 }
 bool hitSelection = false;
 vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype, float fire) {
-    vec4 color = imageLoad(atlas, ivec3(x+(blockType*8), ((abs(y-8)-1)*8)+z, blockSubtype)) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 1)) : vec4(0));
+    vec4 color = imageLoad(atlas, ivec3(x+(blockType*8), ((abs(y-8)-1)*8)+z, blockSubtype)) + (fire > 0 ? (vec4(vec3(1, 0.3, 0.05)*(abs(max(0, noise((vec2(x+bX, y+bZ)*64)+(float(time)*10000))+noise((vec2(y+bX, z+bZ)*8)+(float(time)*10000))+noise((vec2(z+bZ+x+bX, x+bY)*64)+(float(time)*10000)))*6.66)*fire), 0)) : vec4(0));
     bool real = true;
     if (color.a > 0) {
         int cornerIndex = (y < 4 ? 0 : 4) + (z < 4 ? 0 : 2) + (x < 4 ? 0 : 1);
@@ -131,7 +131,7 @@ vec4 getVoxel(int x, int y, int z, int bX, int bY, int bZ, int blockType, int bl
             hitSelection = true;
         }
         if (blockType == 31) {
-            color.rgb *= 2;
+            color.rgb *= 1.5f;
         }
         return color;
     } else {
@@ -349,7 +349,7 @@ float getAO(vec3 mapPos) {
     } else {
         occlusion = 1.25f;
     }
-    return min(occlusion, 1.33f);
+    return min(occlusion-0.15f, 1.33f);
 }
 
 vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockDist, vec3 intersect, vec3 rayPos, vec3 rayDir, vec3 iMask, int blockType, int blockSubtype, float sunLight, vec3 unmixedFogColor, float mixedTime) {
@@ -389,13 +389,16 @@ vec4 traceBlock(bool isShadow, float chunkDist, float subChunkDist, float blockD
             bool canHit = bool(prevVoxelColor.a < voxelColor.a);
             float shouldReflect = 0.f;
             if (reflectivity == 0.f && canHit) {
-                if (blockType == 1 && blockSubtype > 0) { //water
+                bool wasBucket = isBucket(blockType);
+                if (isLiquid(ivec2(blockType, blockSubtype))) { //Liquids
                     shouldReflect = 0.6f;
+                } else if (wasBucket && voxelColor.a < 1) { //bucket contents
+                    reflectivity = 0.6f;
                 } else if (blockType == 7 || (blockType >= 11 && blockType <= 13)) { //glass & kyanite
                     reflectivity = 0.5f;
                 } else if (blockType == 56) { //flint
                     reflectivity = 0.25f;
-                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 57 || blockType == 59) { //steel & mud & obsidian
+                } else if ((blockType == 1 && blockSubtype == 0) || blockType == 22 || blockType == 57 || blockType == 59 || wasBucket) { //steel & mud & obsidian
                     reflectivity = 0.16f;
                 } else if (blockType == 15 || blockType == 26 || blockType == 28 || blockType == 34 || blockType == 37 || blockType == 40 || blockType == 43 || blockType == 46 || blockType == 49 || blockType == 58) { //planks & clay
                     reflectivity = 0.05f;

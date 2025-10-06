@@ -2,7 +2,11 @@ package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.audio.Sounds;
+import org.conspiracraft.game.blocks.Fluids;
+import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockProperties;
+import org.conspiracraft.game.blocks.types.BlockType;
+import org.conspiracraft.game.blocks.types.FullBucketBlockType;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.Player;
 import org.conspiracraft.game.audio.AudioController;
@@ -171,6 +175,10 @@ public class Main {
         }
         return false;
     }
+    public void setFirstEntryInStack(Vector2i block) {
+        player.stack[0] = block.x;
+        player.stack[1] = block.y;
+    }
     public void setWholeStack(Vector2i block) {
         for (int i = 0; i < player.stack.length; i+=2) {
             player.stack[i] = block.x;
@@ -195,8 +203,9 @@ public class Main {
                     player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
                     player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
                     player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
+                } else if (window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS) && !wasCDown) {
+                    player.creative = !player.creative;
                 }
-
 
                 if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis - player.lastJump > 200) { //only jump at most five times a second
                     player.jump = timeMillis;
@@ -221,15 +230,15 @@ public class Main {
                     boolean mmbDown = mouseInput.isMiddleButtonPressed();
                     boolean rmbDown = mouseInput.isRightButtonPressed();
                     if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, mmbDown && isShiftDown, reachAccuracy);
+                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, (Tags.buckets.tagged.contains(player.stack[0]) && lmbDown) || (mmbDown && isShiftDown), reachAccuracy);
                         if (pos != null) {
-                            if (mmbDown) {
+                            if (mmbDown && player.creative) {
                                 Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
                                 if (block != null) {
                                     if (BlockTypes.blockTypeMap.get(block.x).blockProperties.isFluid) {
-                                        block.y = 0;
+                                        block.x = Fluids.fluidBucketMap.get(block.x);
                                     }
-                                    setWholeStack(block);
+                                    setFirstEntryInStack(block);
                                 }
                             } else if (BlockTypes.blockTypeMap.get(player.stack[0]) != null) {
                                 lastBlockBroken = timeMillis;
@@ -241,11 +250,31 @@ public class Main {
                                     cornerData |= (1 << (cornerIndex - 1));
                                     Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
                                     if (cornerData == -2147483521 || !isShiftDown) {
-                                        if (addToStack(new Vector2i(blockBreaking.x, BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid ? 0 : blockBreaking.y))) {
-                                            World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                            blockTypeId = 0;
-                                            blockSubtypeId = 0;
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
+                                        boolean canBreak = true;
+                                        if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid) {
+                                            if (BlockTypes.blockTypeMap.get(blockTypeId) == BlockTypes.BUCKET) {
+                                                removeFirstEntryInStack();
+                                                blockBreaking.x = Fluids.fluidBucketMap.get(blockBreaking.x);
+                                            } else if (Fluids.fluidBucketMap.get(blockBreaking.x) == blockTypeId) {
+                                                int room = 15-blockSubtypeId;
+                                                int flow = Math.min(room, blockBreaking.y);
+                                                player.stack[1] += flow;
+                                                blockBreaking.y -= flow;
+                                                if (blockBreaking.y < 1) {
+                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                                } else {
+                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockBreaking.x, blockBreaking.y, true, false, 1, false);
+                                                }
+                                                canBreak = false;
+                                            } else {
+                                                canBreak = false;
+                                            }
+                                        }
+                                        if (canBreak) {
+                                            if (player.creative ? true : addToStack(blockBreaking)) {
+                                                World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
+                                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                            }
                                         }
                                     } else if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isSolid) {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
@@ -257,9 +286,34 @@ public class Main {
                                     } else if (player.stack[0] > 0) {
                                         Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
                                         BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                        if (oldType.isFluidReplaceable || (oldType.isFluid && !BlockTypes.blockTypeMap.get(blockTypeId).blockProperties.isFluidReplaceable)) {
+                                        BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
+                                        if (blockType instanceof FullBucketBlockType && !isShiftDown) {
+                                            blockTypeId = Fluids.fluidBucketMap.get(blockTypeId);
+                                            blockType = BlockTypes.blockTypeMap.get(blockTypeId);
+                                        }
+                                        if (oldType.isFluidReplaceable || (oldType.isFluid && !Tags.buckets.tagged.contains(blockTypeId) && !blockType.blockProperties.isFluidReplaceable && !blockType.blockProperties.isFluid)) {
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
-                                            removeFirstEntryInStack();
+                                            if (!player.creative) {
+                                                if (blockType.blockProperties.isFluid) {
+                                                    blockTypeId = BlockTypes.getId(BlockTypes.BUCKET);
+                                                    blockSubtypeId = 0;
+                                                    setFirstEntryInStack(new Vector2i(blockTypeId, blockSubtypeId));
+                                                } else {
+                                                    removeFirstEntryInStack();
+                                                }
+                                            }
+                                        } else if (oldType.isFluid && blockTypeId == oldBlock.x) { //merge liquid
+                                            int room = 15-oldBlock.y;
+                                            int flow = Math.min(room, blockSubtypeId);
+                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, oldBlock.y+flow, true, false, 1, false);
+                                            if (!player.creative) {
+                                                blockSubtypeId -= flow;
+                                                if (blockSubtypeId < 1) {
+                                                    blockTypeId = BlockTypes.getId(BlockTypes.BUCKET);
+                                                    blockSubtypeId = 0;
+                                                }
+                                                setFirstEntryInStack(new Vector2i(blockTypeId, blockSubtypeId));
+                                            }
                                         }
                                     }
                                 }

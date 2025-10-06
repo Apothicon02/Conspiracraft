@@ -42,6 +42,7 @@ public class Player {
     public float jumpStrength = Math.max(0.33f, 0.33f*scale);
     public long lastJump = 1000;
     public long jump = 0;
+    public boolean creative = false;
     public boolean sprint = false;
     public boolean superSprint = false;
     public boolean forward = false;
@@ -153,6 +154,9 @@ public class Player {
     }
 
     public void tick() {
+        if (!creative) {
+            flying = false;
+        }
         if (!Renderer.worldChanged) {
             friction = 1f;
             boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
