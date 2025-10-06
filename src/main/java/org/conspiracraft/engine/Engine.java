@@ -4,7 +4,12 @@ import org.lwjgl.glfw.GLFW;
 import org.conspiracraft.Main;
 import org.conspiracraft.game.Renderer;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Engine {
@@ -37,6 +42,7 @@ public class Engine {
         //resize stuff
     }
 
+    public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
     public List<Long> frameTimes = new ArrayList<>(List.of());
 
     private void run() throws Exception {

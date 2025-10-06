@@ -1,6 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
+import org.conspiracraft.game.audio.BlockSFX;
 import org.conspiracraft.game.audio.Sounds;
 import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.Tags;
@@ -231,6 +232,10 @@ public class Main {
                 boolean lmbDown = mouseInput.isLeftButtonPressed();
                 boolean mmbDown = mouseInput.isMiddleButtonPressed();
                 boolean rmbDown = mouseInput.isRightButtonPressed();
+                if (!lmbDown) {
+                    player.breakingSource.stop();
+                    blockStartedBreaking.set(0, 0, 0, 0);
+                }
                 if ((!player.creative || (timeMillis - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || timeMillis - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
                     if (lmbDown || mmbDown || rmbDown) {
                         Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, (Tags.buckets.tagged.contains(player.stack[0]) && lmbDown) || (mmbDown && isShiftDown), reachAccuracy);
@@ -286,11 +291,17 @@ public class Main {
                                                     canBreak = false;
                                                     lastBlockBreakCheck = System.currentTimeMillis();
                                                     blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, BlockTypes.blockTypeMap.get(blockBreaking.x).getTTB());
+                                                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.blockSFX;
+                                                    player.breakingSource.setPos(pos);
+                                                    player.breakingSource.setGain(sfx.placeGain, 0);
+                                                    player.breakingSource.setPitch(sfx.placePitch, 0);
+                                                    player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.stepIds.length)], true);
                                                 }
                                             }
                                             if (canBreak) {
                                                 if (player.creative ? true : addToStack(blockBreaking)) {
                                                     blockStartedBreaking.set(0, 0, 0, 0);
+                                                    player.breakingSource.stop();
                                                     World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                                     World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
                                                 }

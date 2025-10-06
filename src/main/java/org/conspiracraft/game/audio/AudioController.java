@@ -1,11 +1,13 @@
 package org.conspiracraft.game.audio;
 
+import org.conspiracraft.engine.Engine;
 import org.joml.Vector3f;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,13 +39,11 @@ public class AudioController {
         AL10.alListenerfv(AL10.AL_ORIENTATION, orientation);
     }
 
-    public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
-
     public static SFX loadSound(String file) {
         int buffer = AL10.alGenBuffers();
         WaveData waveFile = null;
         try {
-            waveFile = WaveData.createFromAppdata(resourcesPath+"sounds/"+file);
+            waveFile = WaveData.createFromAppdata(Engine.resourcesPath+"sounds/"+file);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -52,9 +52,10 @@ public class AudioController {
         return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
     }
 
-    public static SFX loadRandomSound(String path) throws FileNotFoundException {
-        String folder = resourcesPath+path;
-        if (Files.exists(Path.of(folder))) {
+    public static SFX loadRandomSound(String path) throws IOException {
+        String folder = Engine.resourcesPath+path;
+        Path folderPath = Path.of(folder);
+        if (Files.exists(folderPath)) {
             int buffer = AL10.alGenBuffers();
             List<String> allSounds = new ArrayList<>(Arrays.asList(new File(folder).list()));
             String name = allSounds.get((int) (Math.random() * (allSounds.size() - 1)));
@@ -63,7 +64,8 @@ public class AudioController {
             waveFile.dispose();
             return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
         } else {
-            return loadSound("cloud.wav");
+            Files.createDirectory(folderPath);
+            return null;
         }
     }
 

@@ -3,9 +3,9 @@ package org.conspiracraft.game.audio;
 import org.joml.Vector3f;
 
 public class BlockSFX {
-    private final SFX[] placeIds;
-    private final float placeGain;
-    private final float placePitch;
+    public final SFX[] placeIds;
+    public final float placeGain;
+    public final float placePitch;
     public final SFX[] stepIds;
     public final float stepGain;
     public final float stepPitch;

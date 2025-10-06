@@ -23,6 +23,10 @@ public class Source {
         AL10.alSource3f(sourceID, AL10.AL_POSITION, pos.x, pos.y, pos.z);
     }
 
+    public boolean isPlaying() {
+        return AL10.alGetSourcef(sourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
+    }
+
     public void play(SFX sfx, boolean force) {
         int[] result = new int[1];
         AL10.alGetSourcei(sourceID, AL10.AL_SOURCE_STATE, result);

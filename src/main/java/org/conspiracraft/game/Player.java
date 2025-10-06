@@ -3,19 +3,20 @@ package org.conspiracraft.game;
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
-import org.conspiracraft.game.audio.AudioController;
-import org.conspiracraft.game.audio.BlockSFX;
-import org.conspiracraft.game.audio.Sounds;
-import org.conspiracraft.game.audio.Source;
+import org.conspiracraft.game.audio.*;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.world.World;
 import org.joml.*;
+import org.lwjgl.openal.AL10;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.Math;
 
 public class Player {
     private final Camera camera = new Camera();
+    public final Source breakingSource;
     public final Source jumpSource;
     public final Source passthroughSource;
     public final Source swimSource;
@@ -54,20 +55,23 @@ public class Player {
     public boolean flying = true;
     public int[] stack = new int[32];
     public Vector2i blockOn = new Vector2i(0);
+    public Vector2i blockIn = new Vector2i(0);
+    public Vector2i blockBreathing = new Vector2i(0);
+    boolean submerged = false;
 
     public Player(Vector3f newPos) {
+        breakingSource = new Source(newPos, 1, 1, 0, 1);
         jumpSource = new Source(newPos, 1, 1, 0, 0);
         passthroughSource = new Source(newPos, 1, 1, 0, 0);
-        swimSource = new Source(newPos, -1, 1, 0, 0);
+        swimSource = new Source(newPos, 0.5f, 1, 0, 0);
         splashSource = new Source(newPos, 1, 1, 0, 0);
         submergeSource = new Source(newPos, 1, 1, 0, 0);
         waterFlowingSource = new Source(newPos, 0, 1, 0, 1);
         windSource = new Source(newPos, 0, 1, 0, 1);
         magmaSource = new Source(newPos, 0, 1, 0, 1);
-        musicSource = new Source(newPos, 0.15f, 1, 0.25f, 0);
+        musicSource = new Source(newPos, 1f, 1, 0.25f, 0);
         setPos(newPos);
         oldPos = newPos;
-        //musicSource.play((18));
     }
 
     public int[] getData() {
@@ -154,14 +158,26 @@ public class Player {
     }
 
     public void tick() {
-        if (!creative) {
-            flying = false;
-        }
         if (!Renderer.worldChanged) {
+            if (!creative) {
+                flying = false;
+            }
+            if (!musicSource.isPlaying()) {
+                try {
+                    SFX sfx = AudioController.loadRandomSound("/music/");
+                    if (sfx != null) {
+                        musicSource.play(sfx);
+                    }
+                } catch (IOException _) {}
+            }
             friction = 1f;
             boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
-            Vector2i blockIn = World.getBlock(blockPos.x, blockPos.y, blockPos.z);
-            Vector2i blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
+            blockIn = World.getBlock(blockPos.x, blockPos.y, blockPos.z);
+            blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
+            submerged = BlockTypes.blockTypeMap.get(blockBreathing.x).blockProperties.isFluid;
+            if (submerged) {
+                AL10.alListenerf(AL10.AL_GAIN, 0.2f);
+            }
             if (blockIn.x == 0 && onGround && sprint) {
                 Vector2i blocKBelow = World.getBlock(blockPos.x, blockPos.y-1, blockPos.z);
                 if (blocKBelow.x == BlockTypes.getId(BlockTypes.GRASS)) {
@@ -204,7 +220,7 @@ public class Player {
                 if (flying) {
                     Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? (-10 * (sprint || superSprint ? (superSprint ? -5 : 0) : 1f)) : -12 * (sprint || superSprint ? (superSprint ? 20 : 2) : 1)), 0).getTranslation(new Vector3f());
                     newMovement.add(0, pos.y - translatedPos.y, 0);
-                } else if (blockIn.x == 1 && blockBreathing.x == 1) {
+                } else if (blockIn.x == 1 && submerged) {
                     Vector3f translatedPos = new Matrix4f(getCameraMatrixWithoutPitch()).translate(0, speed * (downward ? -10 : -12), 0).getTranslation(new Vector3f());
                     newMovement.add(0, pos.y - translatedPos.y, 0);
                 }
@@ -217,7 +233,7 @@ public class Player {
             }
 
             if (Main.timeMS-jump < 100 && !flying) { //prevent jumping when space bar was pressed longer than 0.1s ago or when flying
-                if ((onGround || (blockIn.x == 1 && solid(pos.x, pos.y, pos.z, width*1.125f, height, false, false))) && blockBreathing.x != 1) {
+                if ((onGround || (blockIn.x == 1 && solid(pos.x, pos.y, pos.z, width*1.125f, height, false, false))) && !submerged) {
                     jump = 1000;
                     lastJump = Main.timeMS;
                     vel.y = Math.max(vel.y, jumpStrength);
@@ -344,8 +360,8 @@ public class Player {
             musicSource.setPos(newPos);
             Vector3f combinedVel = new Vector3f(vel.x + movement.x, vel.y + movement.y, vel.z + movement.z);
             musicSource.setVel(combinedVel);
+            float maxVel = Math.max(Math.abs(combinedVel.x), Math.max(Math.abs(combinedVel.y), Math.abs(combinedVel.z)));
             if (Math.abs(combinedVel.x) > 0.01 || Math.abs(combinedVel.y) > 0.01 || Math.abs(combinedVel.z) > 0.01) {
-                float maxVel = Math.max(Math.abs(combinedVel.x), Math.max(Math.abs(combinedVel.y), Math.abs(combinedVel.z)));
                 int block = World.getBlock(newPos.x, newPos.y, newPos.z).x;
                 if (block == 1) {
                     if (swimSource.soundPlaying == -1) {
@@ -410,6 +426,7 @@ public class Player {
             splashSource.setVel(combinedVel);
             submergeSource.setPos(newPos);
             submergeSource.setVel(combinedVel);
+            swimSource.baseGain = Math.min(0.5f, maxVel*100);
             swimSource.setPos(newPos);
             swimSource.setVel(combinedVel);
             passthroughSource.setPos(newPos);
