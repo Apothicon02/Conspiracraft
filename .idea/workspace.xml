@@ -10,20 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/FullBucketBlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Fluids.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Fluids.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/WaterBlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/WaterBlockType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +106,7 @@
     "Gradle.Build Terraflat.executor": "Run",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
     "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
     "Gradle.Terraflat [build].executor": "Run",
@@ -218,14 +209,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00198" summary="- Optimized noise. &#10;- Optimized feature generation. &#10;- Fixed palm trees no darkening light beneath them.&#10;- Pressing F11 now enters fullscreen. &#10;- Hit detection now uses DDA.">
-      <option name="closed" value="true" />
-      <created>1755219820086</created>
-      <option name="number" value="00198" />
-      <option name="presentableId" value="LOCAL-00198" />
-      <option name="project" value="LOCAL" />
-      <updated>1755219820087</updated>
     </task>
     <task id="LOCAL-00199" summary="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed.">
       <option name="closed" value="true" />
@@ -611,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759683200276</updated>
     </task>
-    <option name="localTasksCounter" value="247" />
+    <task id="LOCAL-00247" summary="- Added creative mode that can be toggled with F3 + C. &#10;- Creative mode now must be enabled to be able to fly or pick blocks. &#10;- Block picking now only replaces the block in your hand instead of the whole stack. &#10;- Implemented bucket behavior. &#10;- Removed crystals tag from obsidian. &#10;- Reduced cloud brightness. &#10;- Fire now renders on hand-held blocks. &#10;- Removed AO on hand-held blocks.&#10;- Fixed fire removing transparency.  &#10;- Fixed transparency not always rendering on blocks held in-hand.">
+      <option name="closed" value="true" />
+      <created>1759713672357</created>
+      <option name="number" value="00247" />
+      <option name="presentableId" value="LOCAL-00247" />
+      <option name="project" value="LOCAL" />
+      <updated>1759713672357</updated>
+    </task>
+    <option name="localTasksCounter" value="248" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -634,7 +625,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed new leaves being marked as solid. &#10;- Added hibiscus flowers. &#10;- Improved block lighting." />
     <MESSAGE value="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen." />
     <MESSAGE value="- Removed grass slowdown. &#10;- Fixed not all leaf blocks having slowdown. &#10;- Added new held block renderer. &#10;- Re-enabled night shadows." />
     <MESSAGE value="- Added stack visualization." />
@@ -659,7 +649,8 @@
     <MESSAGE value="- Removed unused textures." />
     <MESSAGE value="- Sped up atlas generation. &#10;- Converted atlas to a 3d texture." />
     <MESSAGE value="- Optimized AO greatly. &#10;- AO quality setting can now be changed. &#10;- AO now affects hand-held blocks.&#10;- You no longer move while holding F3." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Optimized AO greatly. &#10;- AO quality setting can now be changed. &#10;- AO now affects hand-held blocks.&#10;- You no longer move while holding F3." />
+    <MESSAGE value="- Added creative mode that can be toggled with F3 + C. &#10;- Creative mode now must be enabled to be able to fly or pick blocks. &#10;- Block picking now only replaces the block in your hand instead of the whole stack. &#10;- Implemented bucket behavior. &#10;- Removed crystals tag from obsidian. &#10;- Reduced cloud brightness. &#10;- Fire now renders on hand-held blocks. &#10;- Removed AO on hand-held blocks.&#10;- Fixed fire removing transparency.  &#10;- Fixed transparency not always rendering on blocks held in-hand." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added creative mode that can be toggled with F3 + C. &#10;- Creative mode now must be enabled to be able to fly or pick blocks. &#10;- Block picking now only replaces the block in your hand instead of the whole stack. &#10;- Implemented bucket behavior. &#10;- Removed crystals tag from obsidian. &#10;- Reduced cloud brightness. &#10;- Fire now renders on hand-held blocks. &#10;- Removed AO on hand-held blocks.&#10;- Fixed fire removing transparency.  &#10;- Fixed transparency not always rendering on blocks held in-hand." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -668,11 +659,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
           <line>88</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java</url>
-          <line>254</line>
-          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

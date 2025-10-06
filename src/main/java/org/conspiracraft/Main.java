@@ -128,7 +128,8 @@ public class Main {
     boolean wasF5Down = false;
     public static boolean isClosing = false;
 
-    public static long lastBlockBroken = 0L;
+    public static long lastBlockBrokenOrPlaced = 0L;
+    public static long lastBlockPlaced = 0L;
     public static int reach = 50;
     public static float reachAccuracy = 200;
 
@@ -185,6 +186,8 @@ public class Main {
             player.stack[i+1] = block.y;
         }
     }
+    long lastBlockBreakCheck = 0;
+    Vector4i blockStartedBreaking = new Vector4i();
 
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
@@ -225,10 +228,10 @@ public class Main {
                 Vector2f displVec = mouseInput.getDisplVec();
                 player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                         (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
-                if (timeMillis - lastBlockBroken >= 200) { //two tenth second minimum delay between breaking blocks
-                    boolean lmbDown = mouseInput.isLeftButtonPressed();
-                    boolean mmbDown = mouseInput.isMiddleButtonPressed();
-                    boolean rmbDown = mouseInput.isRightButtonPressed();
+                boolean lmbDown = mouseInput.isLeftButtonPressed();
+                boolean mmbDown = mouseInput.isMiddleButtonPressed();
+                boolean rmbDown = mouseInput.isRightButtonPressed();
+                if ((!player.creative || (timeMillis - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || timeMillis - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
                     if (lmbDown || mmbDown || rmbDown) {
                         Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, (Tags.buckets.tagged.contains(player.stack[0]) && lmbDown) || (mmbDown && isShiftDown), reachAccuracy);
                         if (pos != null) {
@@ -241,7 +244,7 @@ public class Main {
                                     setFirstEntryInStack(block);
                                 }
                             } else if (BlockTypes.blockTypeMap.get(player.stack[0]) != null) {
-                                lastBlockBroken = timeMillis;
+                                lastBlockBrokenOrPlaced = timeMillis;
                                 int blockTypeId = player.stack[0];
                                 int blockSubtypeId = player.stack[1];
                                 int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
@@ -271,15 +274,33 @@ public class Main {
                                             }
                                         }
                                         if (canBreak) {
-                                            if (player.creative ? true : addToStack(blockBreaking)) {
-                                                World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                                World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                            if (!player.creative) {
+                                                boolean sameBlock = blockStartedBreaking.x == (int)(pos.x) && blockStartedBreaking.y == (int)(pos.y) && blockStartedBreaking.z == (int)(pos.z);
+                                                if (sameBlock) {
+                                                    if (blockStartedBreaking.w > 0) {
+                                                        canBreak = false;
+                                                        blockStartedBreaking.sub(0, 0, 0, (int) (System.currentTimeMillis()-lastBlockBreakCheck));
+                                                        lastBlockBreakCheck = System.currentTimeMillis();
+                                                    }
+                                                } else {
+                                                    canBreak = false;
+                                                    lastBlockBreakCheck = System.currentTimeMillis();
+                                                    blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, BlockTypes.blockTypeMap.get(blockBreaking.x).getTTB());
+                                                }
+                                            }
+                                            if (canBreak) {
+                                                if (player.creative ? true : addToStack(blockBreaking)) {
+                                                    blockStartedBreaking.set(0, 0, 0, 0);
+                                                    World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
+                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                                }
                                             }
                                         }
                                     } else if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isSolid) {
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                                     }
                                 } else if (rmbDown) {
+                                    lastBlockPlaced = System.currentTimeMillis();
                                     if (cornerData != 0) {
                                         cornerData &= (~(1 << (cornerIndex - 1)));
                                         World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);

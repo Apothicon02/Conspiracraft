@@ -15,6 +15,10 @@ import static org.conspiracraft.game.world.WorldGen.areChunksCompressed;
 public class BlockType {
     public BlockProperties blockProperties;
 
+    public int getTTB() {
+        return blockProperties.ttb;
+    }
+
     public boolean needsSupport(Vector2i block) {
         return blockProperties.needsSupport;
     }

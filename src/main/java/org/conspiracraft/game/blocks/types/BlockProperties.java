@@ -5,6 +5,11 @@ import org.conspiracraft.game.audio.SFX;
 import org.conspiracraft.game.audio.Sounds;
 
 public class BlockProperties implements Cloneable {
+    public int ttb = 500;
+    public BlockProperties ttb(int ttb) {
+        this.ttb = ttb;
+        return this;
+    }
     public boolean isSolid = true;
     public BlockProperties isSolid(boolean isSolid) {
         this.isSolid = isSolid;
