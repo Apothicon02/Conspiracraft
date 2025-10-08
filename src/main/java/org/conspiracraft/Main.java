@@ -378,9 +378,9 @@ public class Main {
                     }
                     if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
                         if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
-                            player.stack[1] += (isShiftDown ? 10 : 1);
+                            player.stack[1] += 1;
                         } else if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                            int newSubId = player.stack[1] - (isShiftDown ? 10 : 1);
+                            int newSubId = player.stack[1] - 1;
                             if (newSubId < 0) {
                                 newSubId = 0;
                             }

@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.LinkedList;
 
@@ -36,7 +35,7 @@ public class Renderer {
     public static ShaderProgram reflectionScene;
     public static ShaderProgram finalScene;
 
-    public static int atlasWidth = 504;
+    public static int atlasWidth = 528;
     public static int atlasHeight = 1024;
     public static int atlasDepth = atlasHeight/64;
     public static int atlasImageId;

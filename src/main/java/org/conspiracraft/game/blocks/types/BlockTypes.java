@@ -103,7 +103,12 @@ public class BlockTypes {
             OBSIDIAN = create(new BlockType(GLASS.blockProperties.copy().ttb(2000).blocksLight(true))),
             STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true))), //60
             STEAM_BUCKET = create(List.of(Tags.buckets), new FullBucketBlockType(BUCKET.blockProperties)),
-            WATER_BUCKET = create(List.of(Tags.buckets), new FullBucketBlockType(BUCKET.blockProperties));
+            WATER_BUCKET = create(List.of(Tags.buckets), new FullBucketBlockType(BUCKET.blockProperties)),
+            FLINT_HAMMER = create(List.of(Tags.sediment), new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            OBSIDIAN_MACE = create(List.of(Tags.sediment), new BlockType(FLINT_HAMMER.blockProperties.copy().blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
+                    new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1))),
+            STICK = create(List.of(Tags.sediment), new BlockType(FLINT_HAMMER.blockProperties.copy().isFluidReplaceable(true).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
+                    new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {
