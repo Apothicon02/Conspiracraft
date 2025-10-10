@@ -1,10 +1,10 @@
 package org.conspiracraft.engine;
 
-import org.conspiracraft.game.Player;
+import org.conspiracraft.game.gameplay.Player;
 import org.joml.*;
 
 public class Camera {
-    private final Matrix4f viewMatrix = new Matrix4f().setTranslation(new Vector3f(0, Player.eyeHeight, 0));
+    public final Matrix4f viewMatrix = new Matrix4f().setTranslation(new Vector3f(0, Player.eyeHeight, 0));
     public Quaternionf pitch = new Quaternionf();
 
     public void setPitch(Quaternionf newPitch) {

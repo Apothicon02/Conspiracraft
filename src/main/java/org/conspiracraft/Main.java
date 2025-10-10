@@ -2,14 +2,15 @@ package org.conspiracraft;
 
 import org.conspiracraft.game.ScheduledTicker;
 import org.conspiracraft.game.audio.BlockSFX;
-import org.conspiracraft.game.audio.Sounds;
 import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockProperties;
 import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.FullBucketBlockType;
+import org.conspiracraft.game.gameplay.HandManager;
+import org.conspiracraft.game.gameplay.StackManager;
 import org.conspiracraft.game.noise.Noises;
-import org.conspiracraft.game.Player;
+import org.conspiracraft.game.gameplay.Player;
 import org.conspiracraft.game.audio.AudioController;
 import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -129,67 +130,6 @@ public class Main {
     boolean wasF5Down = false;
     public static boolean isClosing = false;
 
-    public static long lastBlockBrokenOrPlaced = 0L;
-    public static long lastBlockPlaced = 0L;
-    public static int reach = 50;
-    public static float reachAccuracy = 200;
-
-    public void dropStackToGround() {
-        // add block entities and use one to make a bundle containing the stack
-    }
-    public void cycleStackForward() {
-        int ogType = player.stack[0];
-        int ogSubtype = player.stack[1];
-        for (int i = 0; i < player.stack.length-2; i+=2) {
-            player.stack[i] = player.stack[i+2];
-            player.stack[i+1] = player.stack[i+3];
-        }
-        player.stack[player.stack.length-1] = ogSubtype;
-        player.stack[player.stack.length-2] = ogType;
-    }
-    public void cycleStackBackward() {
-        int ogType = player.stack[player.stack.length-2];
-        int ogSubtype = player.stack[player.stack.length-1];
-        for (int i = player.stack.length-1; i >= 2; i-=2) {
-            player.stack[i-1] = player.stack[i-3];
-            player.stack[i] = player.stack[i-2];
-        }
-        player.stack[0] = ogType;
-        player.stack[1] = ogSubtype;
-    }
-    public void removeFirstEntryInStack() {
-        player.stack[0] = 0;
-        player.stack[1] = 0;
-        for (int i = 0; i < player.stack.length-2; i+=2) {
-            player.stack[i] = player.stack[i+2];
-            player.stack[i+1] = player.stack[i+3];
-        }
-        player.stack[player.stack.length-1] = 0;
-        player.stack[player.stack.length-2] = 0;
-    }
-    public boolean addToStack(Vector2i block) {
-        for (int i = 0; i < player.stack.length; i+=2) {
-            if (player.stack[i] == 0) {
-                player.stack[i] = block.x;
-                player.stack[i + 1] = block.y;
-                return true;
-            }
-        }
-        return false;
-    }
-    public void setFirstEntryInStack(Vector2i block) {
-        player.stack[0] = block.x;
-        player.stack[1] = block.y;
-    }
-    public void setWholeStack(Vector2i block) {
-        for (int i = 0; i < player.stack.length; i+=2) {
-            player.stack[i] = block.x;
-            player.stack[i+1] = block.y;
-        }
-    }
-    long lastBlockBreakCheck = 0;
-    Vector4i blockStartedBreaking = new Vector4i();
-
     public void input(Window window, long timeMillis, long diffTimeMillis) {
         if (!isClosing) {
             if (window.isKeyPressed(GLFW_KEY_ESCAPE, GLFW_PRESS)) {
@@ -198,6 +138,7 @@ public class Main {
                 window.getMouseInput().input(window);
                 boolean f3Down = window.isKeyPressed(GLFW_KEY_F3, GLFW_PRESS);
                 boolean isShiftDown = window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS);
+                boolean isCtrlDown = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
                 if (!f3Down) {
                     player.sprint = isShiftDown;
                     player.superSprint = window.isKeyPressed(GLFW_KEY_CAPS_LOCK, GLFW_PRESS);
@@ -206,7 +147,8 @@ public class Main {
                     player.rightward = window.isKeyPressed(GLFW_KEY_D, GLFW_PRESS);
                     player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
                     player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
-                    player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
+                    player.crouching = isCtrlDown;
+                    player.downward = isCtrlDown;
                 } else if (window.isKeyPressed(GLFW_KEY_C, GLFW_PRESS) && !wasCDown) {
                     player.creative = !player.creative;
                 }
@@ -216,143 +158,11 @@ public class Main {
                 }
 
                 MouseInput mouseInput = window.getMouseInput();
-                if (mouseInput.scroll.y > 0) {
-                    for (int i = 0; i < mouseInput.scroll.y; i++) {
-                        cycleStackForward();
-                    }
-                } else if (mouseInput.scroll.y < 0) {
-                    for (int i = 0; i < -1*mouseInput.scroll.y; i++) {
-                        cycleStackBackward();
-                    }
-                }
-                mouseInput.scroll.set(0.d);
                 Vector2f displVec = mouseInput.getDisplVec();
                 player.rotate((float) Math.toRadians(displVec.x * MOUSE_SENSITIVITY),
                         (float) Math.toRadians(displVec.y * MOUSE_SENSITIVITY));
-                boolean lmbDown = mouseInput.isLeftButtonPressed();
-                boolean mmbDown = mouseInput.isMiddleButtonPressed();
-                boolean rmbDown = mouseInput.isRightButtonPressed();
-                if (!lmbDown) {
-                    player.breakingSource.stop();
-                    blockStartedBreaking.set(0, 0, 0, 0);
-                }
-                if ((!player.creative || (timeMillis - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || timeMillis - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
-                    if (lmbDown || mmbDown || rmbDown) {
-                        Vector3f pos = raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, reach, (Tags.buckets.tagged.contains(player.stack[0]) && lmbDown) || (mmbDown && isShiftDown), reachAccuracy);
-                        if (pos != null) {
-                            if (mmbDown && player.creative) {
-                                Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
-                                if (block != null) {
-                                    if (BlockTypes.blockTypeMap.get(block.x).blockProperties.isFluid) {
-                                        block.x = Fluids.fluidBucketMap.get(block.x);
-                                    }
-                                    setFirstEntryInStack(block);
-                                }
-                            } else if (BlockTypes.blockTypeMap.get(player.stack[0]) != null) {
-                                lastBlockBrokenOrPlaced = timeMillis;
-                                int blockTypeId = player.stack[0];
-                                int blockSubtypeId = player.stack[1];
-                                int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
-                                int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
-                                if (lmbDown) {
-                                    cornerData |= (1 << (cornerIndex - 1));
-                                    Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
-                                    if (cornerData == -2147483521 || !isShiftDown) {
-                                        boolean canBreak = true;
-                                        if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid) {
-                                            if (BlockTypes.blockTypeMap.get(blockTypeId) == BlockTypes.BUCKET) {
-                                                removeFirstEntryInStack();
-                                                blockBreaking.x = Fluids.fluidBucketMap.get(blockBreaking.x);
-                                            } else if (Fluids.fluidBucketMap.get(blockBreaking.x) == blockTypeId) {
-                                                int room = 15-blockSubtypeId;
-                                                int flow = Math.min(room, blockBreaking.y);
-                                                player.stack[1] += flow;
-                                                blockBreaking.y -= flow;
-                                                if (blockBreaking.y < 1) {
-                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                                } else {
-                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockBreaking.x, blockBreaking.y, true, false, 1, false);
-                                                }
-                                                canBreak = false;
-                                            } else {
-                                                canBreak = false;
-                                            }
-                                        }
-                                        if (canBreak) {
-                                            if (!player.creative) {
-                                                boolean sameBlock = blockStartedBreaking.x == (int)(pos.x) && blockStartedBreaking.y == (int)(pos.y) && blockStartedBreaking.z == (int)(pos.z);
-                                                if (sameBlock) {
-                                                    if (blockStartedBreaking.w > 0) {
-                                                        canBreak = false;
-                                                        blockStartedBreaking.sub(0, 0, 0, (int) (System.currentTimeMillis()-lastBlockBreakCheck));
-                                                        lastBlockBreakCheck = System.currentTimeMillis();
-                                                    }
-                                                } else {
-                                                    canBreak = false;
-                                                    lastBlockBreakCheck = System.currentTimeMillis();
-                                                    blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, BlockTypes.blockTypeMap.get(blockBreaking.x).getTTB());
-                                                    BlockSFX sfx = BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.blockSFX;
-                                                    player.breakingSource.setPos(pos);
-                                                    player.breakingSource.setGain(sfx.placeGain);
-                                                    player.breakingSource.setPitch(sfx.placePitch, 0);
-                                                    player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
-                                                }
-                                            }
-                                            if (canBreak) {
-                                                if (player.creative ? true : addToStack(blockBreaking)) {
-                                                    blockStartedBreaking.set(0, 0, 0, 0);
-                                                    player.breakingSource.stop();
-                                                    World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                                }
-                                            }
-                                        }
-                                    } else if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isSolid) {
-                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
-                                    }
-                                } else if (rmbDown) {
-                                    lastBlockPlaced = System.currentTimeMillis();
-                                    if (cornerData != 0) {
-                                        cornerData &= (~(1 << (cornerIndex - 1)));
-                                        World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
-                                    } else if (player.stack[0] > 0) {
-                                        Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                                        BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                        BlockType blockType = BlockTypes.blockTypeMap.get(blockTypeId);
-                                        if (blockType instanceof FullBucketBlockType && !isShiftDown) {
-                                            blockTypeId = Fluids.fluidBucketMap.get(blockTypeId);
-                                            blockType = BlockTypes.blockTypeMap.get(blockTypeId);
-                                        }
-                                        if (oldType.isFluidReplaceable || (oldType.isFluid && !Tags.buckets.tagged.contains(blockTypeId) && !blockType.blockProperties.isFluidReplaceable && !blockType.blockProperties.isFluid)) {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, blockSubtypeId, true, false, 1, false);
-                                            if (!player.creative) {
-                                                if (blockType.blockProperties.isFluid) {
-                                                    blockTypeId = BlockTypes.getId(BlockTypes.BUCKET);
-                                                    blockSubtypeId = 0;
-                                                    setFirstEntryInStack(new Vector2i(blockTypeId, blockSubtypeId));
-                                                } else {
-                                                    removeFirstEntryInStack();
-                                                }
-                                            }
-                                        } else if (oldType.isFluid && blockTypeId == oldBlock.x) { //merge liquid
-                                            int room = 15-oldBlock.y;
-                                            int flow = Math.min(room, blockSubtypeId);
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockTypeId, oldBlock.y+flow, true, false, 1, false);
-                                            if (!player.creative) {
-                                                blockSubtypeId -= flow;
-                                                if (blockSubtypeId < 1) {
-                                                    blockTypeId = BlockTypes.getId(BlockTypes.BUCKET);
-                                                    blockSubtypeId = 0;
-                                                }
-                                                setFirstEntryInStack(new Vector2i(blockTypeId, blockSubtypeId));
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                HandManager.useHands(timeMillis, mouseInput);
+                mouseInput.scroll.set(0.d);
 
                 if (wasF1Down && !window.isKeyPressed(GLFW_KEY_F1, GLFW_PRESS)) {
                     Renderer.showUI = !Renderer.showUI;
@@ -424,7 +234,7 @@ public class Main {
                     }
                 } else {
                     if (wasQDown && !window.isKeyPressed(GLFW_KEY_Q, GLFW_PRESS)) {
-                        dropStackToGround();
+                        StackManager.dropStackToGround();
                     }
                     if (wasXDown && !window.isKeyPressed(GLFW_KEY_X, GLFW_PRESS)) {
                         player.flying = !player.flying;
@@ -512,96 +322,5 @@ public class Main {
                 timePassed += diffTimeMillis;
             }
         }
-    }
-    public static Vector3f stepMask(Vector3f sideDist) {
-        Vector3i mask = new Vector3i();
-        Vector3i b1 = new Vector3i(sideDist.x < sideDist.y ? 1 : 0, sideDist.y < sideDist.z ? 1 : 0, sideDist.z < sideDist.x ? 1 : 0);
-        Vector3i b2 = new Vector3i(sideDist.x < sideDist.z ? 1 : 0, sideDist.y < sideDist.x ? 1 : 0, sideDist.z < sideDist.y ? 1 : 0);
-        mask.z = b1.z > 0 && b2.z > 0 ? 1 : 0;
-        mask.x = b1.x > 0 && b2.x > 0 ? 1 : 0;
-        mask.y = b1.y > 0 && b2.y > 0 ? 1 : 0;
-        if (!(mask.x == 1 || mask.y == 1 || mask.z == 1)) {
-            mask.z = 1;
-        }
-
-        return new Vector3f(mask);
-    }
-
-    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids, float accuracy) { //prevPos is inverted
-        Vector3f prevRayPos = new Vector3f(ray.m30()*8, ray.m31()*8, ray.m32()*8);
-
-        Matrix4f forwarded = new Matrix4f(ray).translate(0, 0, 10000);
-        Vector3f rayDir = new Vector3f(new Vector3f((forwarded.m30()*8)-prevRayPos.x, (forwarded.m31()*8)-prevRayPos.y, (forwarded.m32()*8)-prevRayPos.z));
-        Vector3f rayPos = new Vector3f(prevRayPos).floor();
-        Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
-        Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
-        Vector3f sideDist = new Vector3f(rayPos).sub(prevRayPos.x, prevRayPos.y, prevRayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
-        Vector3f mask = stepMask(sideDist);
-
-        for (int i = 0; i < range; i++) {
-            Vector3f realPos = new Vector3f(rayPos).div(8);
-            Vector3f prevRealPos = new Vector3f(prevRayPos).div(8);
-            Vector2i block = World.getBlock(realPos.x, realPos.y, realPos.z);
-            if (block != null) {
-                int typeId = block.x();
-                if (typeId != 0) {
-                    int subTypeId = block.y();
-                    boolean isFluid = BlockTypes.blockTypeMap.get(typeId).blockProperties.isFluid;
-                    if (countFluids || !isFluid) {
-                        if (isFluid) {
-                            subTypeId = Math.min(20, subTypeId);
-                        }
-                        int cornerData = World.getCorner((int) realPos.x, (int) realPos.y, (int) realPos.z);
-                        int cornerIndex = (realPos.y < (int) (realPos.y) + 0.5 ? 0 : 4) + (realPos.z < (int) (realPos.z) + 0.5 ? 0 : 2) + (realPos.x < (int) (realPos.x) + 0.5 ? 0 : 1);
-                        if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
-                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((realPos.x - Math.floor(realPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((realPos.y - Math.floor(realPos.y)) * 8)) - 8) - 1) * 8) + (int) ((realPos.z - Math.floor(realPos.z)) * 8)]) {
-                                if (prevPos) {
-                                    return realPos;
-                                } else {
-                                    return prevRealPos;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            prevRayPos.set(rayPos);
-            mask = stepMask(sideDist);
-            rayPos.add(new Vector3f(mask).mul(raySign));
-            sideDist.add(new Vector3f(mask).mul(raySign).mul(deltaDist));
-        }
-
-//        Vector3f prevRayPos = new Vector3f(ray.m30(), ray.m31(), ray.m32());
-//        Vector3f rayPos = new Vector3f(0);
-//        for (int i = 0; i < range*accuracy; i++) {
-//            rayPos.set(ray.m30(), ray.m31(), ray.m32());
-//            Vector2i block = World.getBlock(rayPos.x, rayPos.y, rayPos.z);
-//            if (block != null) {
-//                int typeId = block.x();
-//                if (typeId != 0) {
-//                    int subTypeId = block.y();
-//                    boolean isFluid = BlockTypes.blockTypeMap.get(typeId).blockProperties.isFluid;
-//                    if (countFluids || !isFluid) {
-//                        if (isFluid) {
-//                            subTypeId = Math.min(20, subTypeId);
-//                        }
-//                        int cornerData = World.getCorner((int) rayPos.x, (int) rayPos.y, (int) rayPos.z);
-//                        int cornerIndex = (rayPos.y < (int) (rayPos.y) + 0.5 ? 0 : 4) + (rayPos.z < (int) (rayPos.z) + 0.5 ? 0 : 2) + (rayPos.x < (int) (rayPos.x) + 0.5 ? 0 : 1);
-//                        if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
-//                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((rayPos.x - Math.floor(rayPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((rayPos.y - Math.floor(rayPos.y)) * 8)) - 8) - 1) * 8) + (int) ((rayPos.z - Math.floor(rayPos.z)) * 8)]) {
-//                                if (prevPos) {
-//                                    return rayPos;
-//                                } else {
-//                                    return prevRayPos;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            prevRayPos.set(rayPos);
-//            ray.translate(0, 0, 0.1f/accuracy);
-//        }
-        return null;
     }
 }

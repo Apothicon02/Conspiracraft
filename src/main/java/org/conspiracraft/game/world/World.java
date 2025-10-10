@@ -7,14 +7,13 @@ import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.LightBlockType;
 import org.conspiracraft.game.Renderer;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
-import org.joml.Vector4i;
+import org.joml.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -749,5 +748,65 @@ public class World {
             return chunks[condenseChunkPos(x >> 4, y >> 4, z >> 4)].getCorner(condenseLocalPos(x & 15, y & 15, z & 15));
         }
         return 0;
+    }
+
+    public static Vector3f stepMask(Vector3f sideDist) {
+        Vector3i mask = new Vector3i();
+        Vector3i b1 = new Vector3i(sideDist.x < sideDist.y ? 1 : 0, sideDist.y < sideDist.z ? 1 : 0, sideDist.z < sideDist.x ? 1 : 0);
+        Vector3i b2 = new Vector3i(sideDist.x < sideDist.z ? 1 : 0, sideDist.y < sideDist.x ? 1 : 0, sideDist.z < sideDist.y ? 1 : 0);
+        mask.z = b1.z > 0 && b2.z > 0 ? 1 : 0;
+        mask.x = b1.x > 0 && b2.x > 0 ? 1 : 0;
+        mask.y = b1.y > 0 && b2.y > 0 ? 1 : 0;
+        if (!(mask.x == 1 || mask.y == 1 || mask.z == 1)) {
+            mask.z = 1;
+        }
+
+        return new Vector3f(mask);
+    }
+
+    public static Vector3f raycast(Matrix4f ray, boolean prevPos, int range, boolean countFluids, float accuracy) { //prevPos is inverted
+        Vector3f prevRayPos = new Vector3f(ray.m30()*8, ray.m31()*8, ray.m32()*8);
+
+        Matrix4f forwarded = new Matrix4f(ray).translate(0, 0, 10000);
+        Vector3f rayDir = new Vector3f(new Vector3f((forwarded.m30()*8)-prevRayPos.x, (forwarded.m31()*8)-prevRayPos.y, (forwarded.m32()*8)-prevRayPos.z));
+        Vector3f rayPos = new Vector3f(prevRayPos).floor();
+        Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
+        Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
+        Vector3f sideDist = new Vector3f(rayPos).sub(prevRayPos.x, prevRayPos.y, prevRayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
+        Vector3f mask = stepMask(sideDist);
+
+        for (int i = 0; i < range; i++) {
+            Vector3f realPos = new Vector3f(rayPos).div(8);
+            Vector3f prevRealPos = new Vector3f(prevRayPos).div(8);
+            Vector2i block = World.getBlock(realPos.x, realPos.y, realPos.z);
+            if (block != null) {
+                int typeId = block.x();
+                if (typeId != 0) {
+                    int subTypeId = block.y();
+                    boolean isFluid = BlockTypes.blockTypeMap.get(typeId).blockProperties.isFluid;
+                    if (countFluids || !isFluid) {
+                        if (isFluid) {
+                            subTypeId = Math.min(20, subTypeId);
+                        }
+                        int cornerData = World.getCorner((int) realPos.x, (int) realPos.y, (int) realPos.z);
+                        int cornerIndex = (realPos.y < (int) (realPos.y) + 0.5 ? 0 : 4) + (realPos.z < (int) (realPos.z) + 0.5 ? 0 : 2) + (realPos.x < (int) (realPos.x) + 0.5 ? 0 : 1);
+                        if (((cornerData & (1 << (cornerIndex - 1))) >> (cornerIndex - 1)) == 0) {
+                            if (Renderer.collisionData[(1024 * ((typeId * 8) + (int) ((realPos.x - Math.floor(realPos.x)) * 8))) + (subTypeId * 64) + ((Math.abs(((int) ((realPos.y - Math.floor(realPos.y)) * 8)) - 8) - 1) * 8) + (int) ((realPos.z - Math.floor(realPos.z)) * 8)]) {
+                                if (prevPos) {
+                                    return realPos;
+                                } else {
+                                    return prevRealPos;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            prevRayPos.set(rayPos);
+            mask = stepMask(sideDist);
+            rayPos.add(new Vector3f(mask).mul(raySign));
+            sideDist.add(new Vector3f(mask).mul(raySign).mul(deltaDist));
+        }
+        return null;
     }
 }

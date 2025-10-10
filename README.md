@@ -16,7 +16,8 @@
 
 # Keybinds 
 - Shift: Sprint
-- Shift + LMB: Break a corner of a block
+- Shift + CTRL: Crawl
+- CTRL + LMB: Break a corner of a block
 - LMB: Break a block 
 - RMB: Place a block 
 - MMB: Pick a block 

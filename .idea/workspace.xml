@@ -10,9 +10,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/HandManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/StackManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,36 +102,36 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
@@ -207,14 +213,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00207" summary="- Fixed volcanoes being cutoff.">
-      <option name="closed" value="true" />
-      <created>1755633450049</created>
-      <option name="number" value="00207" />
-      <option name="presentableId" value="LOCAL-00207" />
-      <option name="project" value="LOCAL" />
-      <updated>1755633450050</updated>
     </task>
     <task id="LOCAL-00208" summary="- Fixed issues with sub-surface generation. &#10;- Updated cacti texture. &#10;- Fixed cacti generating one block into the ground. &#10;- Reduced overall voxel brightness. &#10;- Added dead bushes. &#10;- Fixed cacti having AO. &#10;- Fixed cacti not needing block support. &#10;- Increased max cacti height. &#10;- Improved sand/sandstone generation. &#10;- Added sandstone rocks to the desert. &#10;- Fixed non-full water rendering.">
       <option name="closed" value="true" />
@@ -600,7 +598,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760116284749</updated>
     </task>
-    <option name="localTasksCounter" value="256" />
+    <task id="LOCAL-00256" summary="- Added ability to speed up or slow down time.">
+      <option name="closed" value="true" />
+      <created>1760121804483</created>
+      <option name="number" value="00256" />
+      <option name="presentableId" value="LOCAL-00256" />
+      <option name="project" value="LOCAL" />
+      <updated>1760121804483</updated>
+    </task>
+    <option name="localTasksCounter" value="257" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -623,7 +629,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
     <MESSAGE value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
     <MESSAGE value="- Added subsurface scattering." />
     <MESSAGE value="- Fixed inaccurate SSS. &#10;- Pixelized shadows." />
@@ -648,14 +653,15 @@
     <MESSAGE value="- Added stick platforms. &#10;- Fixed tools and sticks having the wrong tags." />
     <MESSAGE value="- Added platform orientations." />
     <MESSAGE value="- Made movement feel alot smoother." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Made movement feel alot smoother." />
+    <MESSAGE value="- Added ability to speed up or slow down time." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added ability to speed up or slow down time." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>87</line>
+          <line>88</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

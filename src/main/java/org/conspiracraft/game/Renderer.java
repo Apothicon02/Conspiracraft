@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.noise.Noises;
 import org.conspiracraft.game.world.Chunk;
+import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.conspiracraft.engine.*;
@@ -372,7 +373,7 @@ public class Renderer {
         glUniform1i(program.uniforms.get("aoQuality"), aoQuality);
         glUniform1f(program.uniforms.get("timeOfDay"), timeOfDay);
         glUniform1d(program.uniforms.get("time"), time);
-        Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach, false, Main.reachAccuracy);
+        Vector3f selected = World.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.player.reach, false, Main.player.reachAccuracy);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
         }

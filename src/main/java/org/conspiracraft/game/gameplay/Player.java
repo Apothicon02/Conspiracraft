@@ -1,8 +1,9 @@
-package org.conspiracraft.game;
+package org.conspiracraft.game.gameplay;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.engine.Camera;
 import org.conspiracraft.engine.Utils;
+import org.conspiracraft.game.Renderer;
 import org.conspiracraft.game.audio.*;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockTypes;
@@ -10,7 +11,6 @@ import org.conspiracraft.game.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.Math;
 
@@ -28,8 +28,10 @@ public class Player {
     public float waterFlow = 0f;
     public final Source musicSource;
     public static float scale = 1f;
-    public static float eyeHeight = 1.625f*scale;
-    public static float height = eyeHeight+(0.175f*scale);
+    public static float baseEyeHeight = 1.625f*scale;
+    public static float eyeHeight = baseEyeHeight;
+    public static float baseHeight = eyeHeight+(0.175f*scale);
+    public static float height = baseHeight;
     public static float width = 0.4f*scale;
     public Vector3i blockPos;
     public Vector3f pos;
@@ -39,11 +41,16 @@ public class Player {
     public float bounciness = 0.66f;
     public float friction = 0.75f;
     public float grav = 0.05f;
-    public float speed = Math.max(0.15f, 0.15f*scale);
+    public float baseSpeed = Math.max(0.15f, 0.15f*scale);
+    public float speed = baseSpeed;
     public float jumpStrength = Math.max(0.33f, 0.33f*scale);
     public long lastJump = 1000;
     public long jump = 0;
+    public int reach = 50;
+    public float reachAccuracy = 200;
     public boolean creative = false;
+    public boolean crawling = false;
+    public boolean crouching = false;
     public boolean sprint = false;
     public boolean superSprint = false;
     public boolean forward = false;
@@ -159,6 +166,33 @@ public class Player {
 
     public void tick() {
         if (!Renderer.worldChanged) {
+            blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
+            crawling = false;
+            speed = baseSpeed;
+            if (!crouching && !solid(pos.x, pos.y+height, pos.z, width, 0.125f, false, false)) {
+                height = Math.min(height+0.125f, baseHeight);
+                eyeHeight = Math.min(eyeHeight+0.125f, baseEyeHeight);
+            } else {
+                crouching = true;
+            }
+            if (crouching) {
+//                if (!solid(pos.x, pos.y+(baseHeight*0.5f), pos.z, width, 0.125f, false, false)) {
+//                    crawling = true;
+//                }
+//                if (sprint || crawling) {
+//                    sprint = false;
+//                    superSprint = false;
+//                    crawling = true;
+//                    speed = baseSpeed*0.5f;
+//                    height = Math.max(height-0.125f, baseHeight*0.5f);
+//                    eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.5f);
+//                } else {
+                    speed = baseSpeed*0.8f;
+                    height = Math.max(height-0.125f, baseHeight*0.83f);
+                    eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.83f);
+//                }
+            }
+            camera.viewMatrix.setTranslation(new Vector3f(0, Player.eyeHeight, 0));
             if (!creative) {
                 flying = false;
             }
@@ -175,7 +209,6 @@ public class Player {
             friction = 1f;
             boolean onGround = solid(pos.x, pos.y-0.125f, pos.z, width, 0.125f, true, false);
             blockIn = World.getBlock(blockPos.x, blockPos.y, blockPos.z);
-            blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
             submerged = BlockTypes.blockTypeMap.get(blockBreathing.x).blockProperties.isFluid;
             if (submerged) {
                 AL10.alListenerf(AL10.AL_GAIN, 0.2f);
