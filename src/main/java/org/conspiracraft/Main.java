@@ -484,13 +484,11 @@ public class Main {
             }
             if (World.worldGenerated && renderingEnabled) {
                 updateTime(diffTimeMillis, 1);
-                interpolationTime = timePassed/tickTime;
                 int ticksDone = 0;
                 while (timePassed >= tickTime) {
                     ticksDone++;
                     currentTick++;
                     timePassed -= tickTime;
-                    interpolationTime = timePassed/tickTime;
                     World.tick();
                     player.tick();
                     ScheduledTicker.tick();
@@ -499,6 +497,7 @@ public class Main {
                         timePassed = tickTime-1;
                     }
                 }
+                interpolationTime = timePassed/tickTime;
                 World.iterateLightQueue();
                 timePassed += diffTimeMillis;
             }

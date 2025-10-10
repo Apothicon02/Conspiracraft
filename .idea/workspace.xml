@@ -11,7 +11,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -206,14 +206,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00205" summary="- Clarified gradient math method naming.">
-      <option name="closed" value="true" />
-      <created>1755464970730</created>
-      <option name="number" value="00205" />
-      <option name="presentableId" value="LOCAL-00205" />
-      <option name="project" value="LOCAL" />
-      <updated>1755464970730</updated>
     </task>
     <task id="LOCAL-00206" summary="- Improved coastlines. &#10;- Added desert. &#10;- Added cacti.">
       <option name="closed" value="true" />
@@ -599,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760023980975</updated>
     </task>
-    <option name="localTasksCounter" value="254" />
+    <task id="LOCAL-00254" summary="- Added platform orientations.">
+      <option name="closed" value="true" />
+      <created>1760040683946</created>
+      <option name="number" value="00254" />
+      <option name="presentableId" value="LOCAL-00254" />
+      <option name="project" value="LOCAL" />
+      <updated>1760040683947</updated>
+    </task>
+    <option name="localTasksCounter" value="255" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +622,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;" />
     <MESSAGE value="- Adjusted snow sounds. &#10;- Added mud sounds." />
     <MESSAGE value="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing." />
     <MESSAGE value="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one." />
@@ -647,7 +646,8 @@
     <MESSAGE value="- Updated to 0.7. &#10;- Updated preview image." />
     <MESSAGE value="- Added the flint hammer. &#10;- Added the obsidian mace. &#10;- Added sticks. &#10;- Fixed F3 + Shift + Q / E not allowing to swap between subtypes in intervals less than 10." />
     <MESSAGE value="- Added stick platforms. &#10;- Fixed tools and sticks having the wrong tags." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added stick platforms. &#10;- Fixed tools and sticks having the wrong tags." />
+    <MESSAGE value="- Added platform orientations." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added platform orientations." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
