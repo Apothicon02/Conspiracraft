@@ -405,13 +405,21 @@ public class Main {
                         Renderer.atlasChanged = true;
                     }
                     if (wasUpDown && !window.isKeyPressed(GLFW_KEY_UP, GLFW_PRESS)) {
-                        if (Renderer.renderDistanceMul < 200) {
-                            Renderer.renderDistanceMul++;
+                        if (isShiftDown) {
+                            timeMul+=0.25f;
+                        } else {
+                            if (Renderer.renderDistanceMul < 200) {
+                                Renderer.renderDistanceMul++;
+                            }
                         }
                     }
                     if (wasDownDown && !window.isKeyPressed(GLFW_KEY_DOWN, GLFW_PRESS)) {
-                        if (Renderer.renderDistanceMul > 0) {
-                            Renderer.renderDistanceMul--;
+                        if (isShiftDown) {
+                            timeMul-=0.25f;
+                        } else {
+                            if (Renderer.renderDistanceMul > 0) {
+                                Renderer.renderDistanceMul--;
+                            }
                         }
                     }
                 } else {
@@ -464,11 +472,13 @@ public class Main {
     public static boolean renderingEnabled = false;
     public static double interpolationTime = 0;
     public static double timePassed = 0;
-    public static double tickTime = 50;
+    public static double timeMul = 1;
+    public static double tickTime = 50; //50 = base
     public static long timeMS;
     public static long currentTick = 0;
 
     public void update(Window window, long diffTimeMillis, long time) throws Exception {
+        tickTime=50/timeMul;
         timeMS = time;
         if (isClosing) {
             World.saveWorld(World.worldPath+"/");
@@ -483,7 +493,7 @@ public class Main {
                 World.generate();
             }
             if (World.worldGenerated && renderingEnabled) {
-                updateTime(diffTimeMillis, 1);
+                updateTime(diffTimeMillis, (float) timeMul);
                 int ticksDone = 0;
                 while (timePassed >= tickTime) {
                     ticksDone++;

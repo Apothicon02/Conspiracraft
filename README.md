@@ -36,6 +36,8 @@
 - F3 + C: Toggle creative mode
 - F3 + Up: Increase render distance
 - F3 + Down: Decrease render distance
+- F3 + Shift + Up: Speed up time by +25%
+- F3 + Shift + Down: Slow down time by -25%
 
 # Credits 
 Sound effects are sourced from [ZapSplat](https://www.zapsplat.com/)
