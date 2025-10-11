@@ -167,7 +167,6 @@ public class Player {
     public void tick() {
         if (!Renderer.worldChanged) {
             blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
-            crawling = false;
             speed = baseSpeed;
             if (!crouching && !solid(pos.x, pos.y+height, pos.z, width, 0.125f, false, false)) {
                 height = Math.min(height+0.125f, baseHeight);
@@ -176,21 +175,29 @@ public class Player {
                 crouching = true;
             }
             if (crouching) {
-//                if (!solid(pos.x, pos.y+(baseHeight*0.5f), pos.z, width, 0.125f, false, false)) {
-//                    crawling = true;
-//                }
-//                if (sprint || crawling) {
-//                    sprint = false;
-//                    superSprint = false;
-//                    crawling = true;
-//                    speed = baseSpeed*0.5f;
-//                    height = Math.max(height-0.125f, baseHeight*0.5f);
-//                    eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.5f);
-//                } else {
+                if (sprint) {
+                    crawling = true;
+                } else {
+                    crawling = false;
+                }
+                if (!crawling && !solid(pos.x, pos.y+(baseHeight*0.5f), pos.z, width, 0.125f, false, false)) {
+                    crawling = false;
                     speed = baseSpeed*0.8f;
-                    height = Math.max(height-0.125f, baseHeight*0.83f);
-                    eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.83f);
-//                }
+                    if (height < baseHeight*0.83f) {
+                        height = Math.min(height+0.125f, baseHeight * 0.83f);
+                        eyeHeight = Math.min(eyeHeight+0.125f, baseEyeHeight * 0.83f);
+                    } else {
+                        height = Math.max(height - 0.125f, baseHeight * 0.83f);
+                        eyeHeight = Math.max(eyeHeight - 0.125f, baseEyeHeight * 0.83f);
+                    }
+                } else {
+                    crawling = true;
+                    sprint = false;
+                    superSprint = false;
+                    speed = baseSpeed*0.5f;
+                    height = Math.max(height-0.125f, baseHeight*0.5f);
+                    eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.5f);
+                }
             }
             camera.viewMatrix.setTranslation(new Vector3f(0, Player.eyeHeight, 0));
             if (!creative) {
