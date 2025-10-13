@@ -1,6 +1,6 @@
 package org.conspiracraft.game.audio;
 
-import org.conspiracraft.engine.Engine;
+import org.conspiracraft.Main;
 import org.joml.Vector3f;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
@@ -59,22 +59,24 @@ public class AudioController {
 
     public static String prevRandomSound = "";
     public static SFX loadRandomSound(String path) throws IOException {
-        String folder = Engine.resourcesPath+path;
+        String folder = Main.resourcesPath+path;
         Path folderPath = Path.of(folder);
         if (Files.exists(folderPath)) {
             int buffer = AL10.alGenBuffers();
             List<String> allSounds = new ArrayList<>(Arrays.asList(new File(folder).list()));
-            allSounds.remove(prevRandomSound);
-            String name = allSounds.get((int) (Math.random() * (allSounds.size() - 1)));
-            prevRandomSound = name;
-            WaveData waveFile = WaveData.createFromAppdata(folder + name);
-            AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
-            waveFile.dispose();
-            return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
+            if (allSounds.size() > 1) {
+                allSounds.remove(prevRandomSound);
+                String name = allSounds.get((int) (Math.random() * (allSounds.size() - 1)));
+                prevRandomSound = name;
+                WaveData waveFile = WaveData.createFromAppdata(folder + name);
+                AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
+                waveFile.dispose();
+                return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
+            }
         } else {
             Files.createDirectory(folderPath);
-            return null;
         }
+        return Sounds.CLOUD;
     }
 
     public static void cleanup() {

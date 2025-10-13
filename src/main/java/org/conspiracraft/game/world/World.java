@@ -33,7 +33,7 @@ public class World {
     public static int sizeChunks = size / chunkSize;
     public static short height = 432;
     public static int heightChunks = height / chunkSize;
-    public static Path worldPath = Path.of(System.getenv("APPDATA")+"/Conspiracraft/world0");
+    public static Path worldPath = Path.of(Main.mainFolder+"world0");
     public static boolean quarterWorld = false;
     public static boolean doLight = true;
 

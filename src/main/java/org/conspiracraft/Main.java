@@ -1,12 +1,11 @@
 package org.conspiracraft;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import org.conspiracraft.game.Config;
 import org.conspiracraft.game.ScheduledTicker;
-import org.conspiracraft.game.audio.BlockSFX;
-import org.conspiracraft.game.blocks.Fluids;
-import org.conspiracraft.game.blocks.Tags;
-import org.conspiracraft.game.blocks.types.BlockProperties;
-import org.conspiracraft.game.blocks.types.BlockType;
-import org.conspiracraft.game.blocks.types.FullBucketBlockType;
 import org.conspiracraft.game.gameplay.HandManager;
 import org.conspiracraft.game.gameplay.StackManager;
 import org.conspiracraft.game.noise.Noises;
@@ -30,9 +29,11 @@ import java.util.Comparator;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
+    public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
+    public static String resourcesPath = mainFolder+"resources/";
+    public static Gson gson = new Gson();
     public static Player player;
-    private static final float MOUSE_SENSITIVITY = 0.01f;
-    private static final float MOVEMENT_SPEED = 0.005f;
+    public static float MOUSE_SENSITIVITY = 0.01f;
 
     public static void main(String[] args) throws Exception {
         Main main = new Main();
@@ -41,6 +42,10 @@ public class Main {
     }
 
     public void init(Window window) throws Exception {
+        if (!Files.exists(Path.of(resourcesPath))) {
+            Files.createDirectory(Path.of(resourcesPath));
+        }
+        Config.readConfig();
         Noises.init();
         //debug worldgen / noise
 //        float[] debugData = new float[2048*2048];
@@ -57,7 +62,7 @@ public class Main {
         GL.createCapabilities();
         AudioController.init();
         AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new float[6]);
-        Path deletePath = Paths.get(System.getenv("APPDATA") + "/Conspiracraft/delete");
+        Path deletePath = Paths.get(mainFolder + "delete");
         if (Files.exists(deletePath)) {
             Files.walk(deletePath).sorted(Comparator.reverseOrder()).forEach((path -> {
                 try {
@@ -130,7 +135,7 @@ public class Main {
     boolean wasF5Down = false;
     public static boolean isClosing = false;
 
-    public void input(Window window, long timeMillis, long diffTimeMillis) {
+    public void input(Window window, long timeMillis, long diffTimeMillis) throws IOException {
         if (!isClosing) {
             if (window.isKeyPressed(GLFW_KEY_ESCAPE, GLFW_PRESS)) {
                 isClosing = true;
@@ -176,15 +181,18 @@ public class Main {
                 if (f3Down) {
                     if (wasSDown && !window.isKeyPressed(GLFW_KEY_S, GLFW_PRESS)) {
                         Renderer.shadowsEnabled = !Renderer.shadowsEnabled;
+                        Config.writeConfig();
                     }
                     if (wasRDown && !window.isKeyPressed(GLFW_KEY_R, GLFW_PRESS)) {
                         Renderer.reflectionsEnabled = !Renderer.reflectionsEnabled;
+                        Config.writeConfig();
                     }
                     if (wasADown && !window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS)) {
                         Renderer.aoQuality++;
                         if (Renderer.aoQuality > 3) {
                             Renderer.aoQuality = 0;
                         }
+                        Config.writeConfig();
                     }
                     if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) {
                         if (wasEDown && !window.isKeyPressed(GLFW_KEY_E, GLFW_PRESS)) {
@@ -220,6 +228,7 @@ public class Main {
                         } else {
                             if (Renderer.renderDistanceMul < 200) {
                                 Renderer.renderDistanceMul++;
+                                Config.writeConfig();
                             }
                         }
                     }
@@ -229,6 +238,7 @@ public class Main {
                         } else {
                             if (Renderer.renderDistanceMul > 0) {
                                 Renderer.renderDistanceMul--;
+                                Config.writeConfig();
                             }
                         }
                     }
@@ -292,6 +302,7 @@ public class Main {
         timeMS = time;
         if (isClosing) {
             World.saveWorld(World.worldPath+"/");
+            Config.writeConfig();
             glfwSetWindowShouldClose(window.getWindowHandle(), true);
         } else {
             if (World.worldGenerated) {

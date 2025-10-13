@@ -5,7 +5,7 @@
 # Getting Started
 - Do not run the jar directly. 
 - Open a cmd prompt in the folder of the jar. 
-- Paste this without the quotes: "java -jar Conspiracraft-0.3-SNAPSHOT-standalone.jar"
+- Paste this without the quotes: "java -Xss1000m -Xmx10000m -jar Conspiracraft-0.7-SNAPSHOT-standalone.jar"
 - Hit enter. 
 - Wait a minute for the world to generate. 
 

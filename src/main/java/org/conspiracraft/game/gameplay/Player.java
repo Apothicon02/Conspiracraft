@@ -16,6 +16,7 @@ import java.lang.Math;
 
 public class Player {
     private final Camera camera = new Camera();
+    public final Vector3f oldCamOffset = new Vector3f();
     public final Source breakingSource;
     public final Source jumpSource;
     public final Source passthroughSource;
@@ -166,38 +167,45 @@ public class Player {
 
     public void tick() {
         if (!Renderer.worldChanged) {
+            new Matrix4f(camera.getViewMatrix()).getTranslation(oldCamOffset);
             blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
             speed = baseSpeed;
-            if (!crouching && !solid(pos.x, pos.y+height, pos.z, width, 0.125f, false, false)) {
+            boolean hittingCeiling = solid(pos.x, pos.y+height, pos.z, width, 0.125f, false, false);
+            boolean mightBeCrawling = false;
+            if (!crouching && !hittingCeiling) {
                 height = Math.min(height+0.125f, baseHeight);
                 eyeHeight = Math.min(eyeHeight+0.125f, baseEyeHeight);
             } else {
-                crouching = true;
+                mightBeCrawling = true;
             }
-            if (crouching) {
+            if (crouching || mightBeCrawling) {
                 if (sprint) {
                     crawling = true;
                 } else {
                     crawling = false;
                 }
-                if (!crawling && !solid(pos.x, pos.y+(baseHeight*0.5f), pos.z, width, 0.125f, false, false)) {
-                    crawling = false;
-                    speed = baseSpeed*0.8f;
-                    if (height < baseHeight*0.83f) {
-                        height = Math.min(height+0.125f, baseHeight * 0.83f);
-                        eyeHeight = Math.min(eyeHeight+0.125f, baseEyeHeight * 0.83f);
+                if (!crawling) {
+                    if (height < baseHeight * 0.83f) {
+                        speed = baseSpeed*0.5f;
+                        if (!hittingCeiling) {
+                            height = Math.min(height + 0.125f, baseHeight * 0.83f);
+                            eyeHeight = Math.min(eyeHeight + 0.125f, baseEyeHeight * 0.83f);
+                        }
                     } else {
-                        height = Math.max(height - 0.125f, baseHeight * 0.83f);
-                        eyeHeight = Math.max(eyeHeight - 0.125f, baseEyeHeight * 0.83f);
+                        speed = baseSpeed * 0.75f;
+                        if (crouching) {
+                            height = Math.max(height - 0.125f, baseHeight * 0.83f);
+                            eyeHeight = Math.max(eyeHeight - 0.125f, baseEyeHeight * 0.83f);
+                        }
                     }
                 } else {
-                    crawling = true;
-                    sprint = false;
-                    superSprint = false;
                     speed = baseSpeed*0.5f;
                     height = Math.max(height-0.125f, baseHeight*0.5f);
                     eyeHeight = Math.max(eyeHeight-0.125f, baseEyeHeight*0.5f);
                 }
+
+                sprint = false;
+                superSprint = false;
             }
             camera.viewMatrix.setTranslation(new Vector3f(0, Player.eyeHeight, 0));
             if (!creative) {
@@ -300,6 +308,16 @@ public class Player {
             float detail = 1+Math.max(Math.abs(mX*256f), Math.max(Math.abs(mY*256f), Math.abs(mZ*256f)));
             for (int i = 0; i <= detail; i++) {
                 Vector3f rayPos = new Vector3f(maxX != null ? maxX : pos.x+((destPos.x-pos.x)*(i/detail)), maxY != null ? maxY : pos.y+((destPos.y-pos.y)*(i/detail)), maxZ != null ? maxZ : pos.z+((destPos.z-pos.z)*(i/detail)));
+                if (crouching) {
+                    if (!solid(rayPos.x, hitPos.y - 0.125f, hitPos.z, width, 0.125f, true, false)) {
+                        maxX = hitPos.x;
+                        rayPos.x = hitPos.x;
+                    }
+                    if (!solid(hitPos.x, hitPos.y - 0.125f, rayPos.z, width, 0.125f, true, false)) {
+                        maxZ = hitPos.z;
+                        rayPos.z = hitPos.z;
+                    }
+                }
                 if (solid(rayPos.x, rayPos.y, rayPos.z, width, height, false, false)) {
                     if (maxX == null) {
                         bounciness = 0.66f;
@@ -350,6 +368,7 @@ public class Player {
         Vector3f camOffset = new Vector3f();
         Matrix4f camMatrix = new Matrix4f(camera.getViewMatrix());
         camMatrix.getTranslation(camOffset);
+        camOffset = Utils.getInterpolatedVec(oldCamOffset, camOffset);
         Vector3f interpolatedPos = Utils.getInterpolatedVec(oldPos, pos);
         return camMatrix.setTranslation(interpolatedPos.x+camOffset.x, interpolatedPos.y+camOffset.y, interpolatedPos.z+camOffset.z);
     }

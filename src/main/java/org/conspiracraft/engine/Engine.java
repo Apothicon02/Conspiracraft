@@ -42,7 +42,6 @@ public class Engine {
         //resize stuff
     }
 
-    public static String resourcesPath = System.getenv("APPDATA")+"/Conspiracraft/resources/";
     public List<Long> frameTimes = new ArrayList<>(List.of());
 
     private void run() throws Exception {
