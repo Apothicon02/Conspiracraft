@@ -167,6 +167,10 @@ public class Player {
 
     public void tick() {
         if (!Renderer.worldChanged) {
+            if (flying) {
+                crouching = false;
+                crawling = false;
+            }
             new Matrix4f(camera.getViewMatrix()).getTranslation(oldCamOffset);
             blockBreathing = World.getBlock(blockPos.x, blockPos.y+eyeHeight, blockPos.z);
             speed = baseSpeed;
@@ -308,7 +312,7 @@ public class Player {
             float detail = 1+Math.max(Math.abs(mX*256f), Math.max(Math.abs(mY*256f), Math.abs(mZ*256f)));
             for (int i = 0; i <= detail; i++) {
                 Vector3f rayPos = new Vector3f(maxX != null ? maxX : pos.x+((destPos.x-pos.x)*(i/detail)), maxY != null ? maxY : pos.y+((destPos.y-pos.y)*(i/detail)), maxZ != null ? maxZ : pos.z+((destPos.z-pos.z)*(i/detail)));
-                if (crouching) {
+                if (crouching && onGround) {
                     if (!solid(rayPos.x, hitPos.y - 0.125f, hitPos.z, width, 0.125f, true, false)) {
                         maxX = hitPos.x;
                         rayPos.x = hitPos.x;

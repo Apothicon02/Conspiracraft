@@ -2,11 +2,13 @@ package org.conspiracraft.game.blocks.types;
 
 import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.Tags;
+import org.conspiracraft.game.gameplay.StackManager;
 import org.conspiracraft.game.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
+import static org.conspiracraft.Main.player;
 import static org.conspiracraft.game.world.World.inBounds;
 
 public class WaterBlockType extends BlockType {
@@ -59,6 +61,29 @@ public class WaterBlockType extends BlockType {
             updateSupport(justPos);
             moisturize(justPos);
         }
+    }
+
+    @Override
+    public boolean whilePlayerBreaking(Vector3i pos, Vector2i blockBreaking, Vector2i hand) {
+        if (BlockTypes.blockTypeMap.get(hand.x) == BlockTypes.BUCKET) {
+            player.stack[0] = Fluids.fluidBucketMap.get(blockBreaking.x);
+            player.stack[1] = blockBreaking.y;
+            World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 1, false);
+        } else if (Fluids.fluidBucketMap.get(blockBreaking.x) == hand.x) {
+            int room = 15-hand.y;
+            int flow = Math.min(room, blockBreaking.y);
+            player.stack[1] += flow;
+            blockBreaking.y -= flow;
+            if (blockBreaking.y < 1) {
+                World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 1, false);
+            } else {
+                World.setBlock(pos.x, pos.y, pos.z, blockBreaking.x, blockBreaking.y, true, false, 1, false);
+            }
+            return false;
+        } else {
+            return false;
+        }
+        return true;
     }
 
     public WaterBlockType(BlockProperties blockProperties) {

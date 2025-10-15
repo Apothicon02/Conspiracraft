@@ -15,16 +15,20 @@ public class PowderBlockType extends BlockType {
         if (!areChunksCompressed) {
             if (BlockTypes.blockTypeMap.get(WorldGen.getBlockWorldgen(pos.x, pos.y-1, pos.z).x).blockProperties.isFluidReplaceable) {
                 WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, 0, 0);
-                WorldGen.setBlockWorldgenUpdates(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1));
-            } else {
-                WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, block.y >= 5 ? block.x+1 : block.x, 0);
+                if (BlockTypes.blockTypeMap.get(WorldGen.getBlockWorldgen(pos.x, pos.y-2, pos.z).x).blockProperties.isFluidReplaceable) {
+                    WorldGen.setBlockWorldgenUpdates(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1));
+                } else {
+                    WorldGen.setBlockWorldgenUpdates(pos.x, pos.y, pos.z, block.y >= 5 ? block.x+1 : block.x, 0);
+                }
             }
         } else {
             if (BlockTypes.blockTypeMap.get(World.getBlock(pos.x, pos.y-1, pos.z).x).blockProperties.isFluidReplaceable) {
                 World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 2, true);
-                World.setBlock(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1), true, false, 2, false);
-            } else {
-                World.setBlock(pos.x, pos.y, pos.z, block.y >= 5 ? block.x+1 : block.x, 0, true, false, -1, false);
+                if (BlockTypes.blockTypeMap.get(World.getBlock(pos.x, pos.y-2, pos.z).x).blockProperties.isFluidReplaceable) {
+                    World.setBlock(pos.x, pos.y-1, pos.z, block.x, Math.min(5, block.y+1), true, false, 2, false);
+                } else {
+                    World.setBlock(pos.x, pos.y-1, pos.z, block.y >= 5 ? block.x+1 : block.x, 0, true, false, -1, false);
+                }
             }
         }
     }

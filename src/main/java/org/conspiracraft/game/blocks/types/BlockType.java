@@ -76,6 +76,10 @@ public class BlockType {
         GasHelper.updateGas(pos, block);
     }
 
+    public boolean whilePlayerBreaking(Vector3i pos, Vector2i blockBreaking, Vector2i hand) {
+        return true;
+    }
+
     public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));

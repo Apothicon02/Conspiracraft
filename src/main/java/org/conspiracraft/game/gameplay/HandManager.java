@@ -1,8 +1,8 @@
 package org.conspiracraft.game.gameplay;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.engine.MouseInput;
 import org.conspiracraft.game.audio.BlockSFX;
+import org.conspiracraft.game.blocks.BlockBreaking;
 import org.conspiracraft.game.blocks.Fluids;
 import org.conspiracraft.game.blocks.Tags;
 import org.conspiracraft.game.blocks.types.BlockProperties;
@@ -10,10 +10,9 @@ import org.conspiracraft.game.blocks.types.BlockType;
 import org.conspiracraft.game.blocks.types.BlockTypes;
 import org.conspiracraft.game.blocks.types.FullBucketBlockType;
 import org.conspiracraft.game.world.World;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector4i;
+import org.joml.*;
+
+import java.lang.Math;
 
 import static org.conspiracraft.Main.player;
 
@@ -42,7 +41,11 @@ public class HandManager {
         }
         if ((!player.creative || (timeMillis - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || timeMillis - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
             if (lmbDown || mmbDown || rmbDown) {
-                Vector3f pos = World.raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, player.reach, (Tags.buckets.tagged.contains(player.stack[0]) && lmbDown) || (mmbDown && player.crouching), player.reachAccuracy);
+                int blockTypeId = player.stack[0]+0;
+                int blockSubtypeId = player.stack[1]+0;
+                Vector2i handBlock = new Vector2i(blockTypeId, blockSubtypeId);
+                BlockType handType = BlockTypes.blockTypeMap.get(blockTypeId);
+                Vector3f pos = World.raycast(new Matrix4f(player.getCameraMatrix()), lmbDown || mmbDown, player.reach, Tags.buckets.tagged.contains(blockTypeId) || (mmbDown && player.crouching), player.reachAccuracy);
                 if (pos != null) {
                     if (mmbDown) {
                         Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
@@ -56,37 +59,18 @@ public class HandManager {
                                 StackManager.cycleToEntryInStack(block);
                             }
                         }
-                    } else if (BlockTypes.blockTypeMap.get(player.stack[0]) != null) {
+                    } else  {
                         lastBlockBrokenOrPlaced = timeMillis;
-                        int blockTypeId = player.stack[0];
-                        int blockSubtypeId = player.stack[1];
                         int cornerData = World.getCorner((int) pos.x, (int) pos.y, (int) pos.z);
                         int cornerIndex = (pos.y < (int)(pos.y)+0.5 ? 0 : 4) + (pos.z < (int)(pos.z)+0.5 ? 0 : 2) + (pos.x < (int)(pos.x)+0.5 ? 0 : 1);
                         if (lmbDown) {
                             cornerData |= (1 << (cornerIndex - 1));
                             Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
+                            BlockType breakingType = BlockTypes.blockTypeMap.get(blockBreaking.x);
                             if (cornerData == -2147483521 || !player.crouching) {
-                                boolean canBreak = true;
-                                if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isFluid) {
-                                    if (BlockTypes.blockTypeMap.get(blockTypeId) == BlockTypes.BUCKET) {
-                                        StackManager.removeFirstEntryInStack();
-                                        blockBreaking.x = Fluids.fluidBucketMap.get(blockBreaking.x);
-                                    } else if (Fluids.fluidBucketMap.get(blockBreaking.x) == blockTypeId) {
-                                        int room = 15-blockSubtypeId;
-                                        int flow = Math.min(room, blockBreaking.y);
-                                        player.stack[1] += flow;
-                                        blockBreaking.y -= flow;
-                                        if (blockBreaking.y < 1) {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                        } else {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockBreaking.x, blockBreaking.y, true, false, 1, false);
-                                        }
-                                        canBreak = false;
-                                    } else {
-                                        canBreak = false;
-                                    }
-                                }
-                                if (canBreak) {
+                                Vector3i intBreakingPos = new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
+                                boolean canBreak = breakingType.whilePlayerBreaking(intBreakingPos, blockBreaking, handBlock);
+                                if (canBreak && !Tags.cantBreakBlocks.tagged.contains(blockTypeId)) {
                                     if (!player.creative) {
                                         boolean sameBlock = blockStartedBreaking.x == (int)(pos.x) && blockStartedBreaking.y == (int)(pos.y) && blockStartedBreaking.z == (int)(pos.z);
                                         if (sameBlock) {
@@ -98,8 +82,8 @@ public class HandManager {
                                         } else {
                                             canBreak = false;
                                             lastBlockBreakCheck = System.currentTimeMillis();
-                                            blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, BlockTypes.blockTypeMap.get(blockBreaking.x).getTTB());
-                                            BlockSFX sfx = BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.blockSFX;
+                                            blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, breakingType.getTTB());
+                                            BlockSFX sfx = breakingType.blockProperties.blockSFX;
                                             player.breakingSource.setPos(pos);
                                             player.breakingSource.setGain(sfx.placeGain);
                                             player.breakingSource.setPitch(sfx.placePitch, 0);
@@ -112,10 +96,11 @@ public class HandManager {
                                             player.breakingSource.stop();
                                             World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
                                             World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                            BlockBreaking.blockBroken(blockBreaking, handBlock);
                                         }
                                     }
                                 }
-                            } else if (BlockTypes.blockTypeMap.get(blockBreaking.x).blockProperties.isSolid) {
+                            } else if (breakingType.blockProperties.isSolid) {
                                 World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
                             }
                         } else if (rmbDown) {
