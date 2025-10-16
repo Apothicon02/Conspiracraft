@@ -3,8 +3,16 @@ package org.conspiracraft.game.blocks.types;
 import org.conspiracraft.game.audio.BlockSFX;
 import org.conspiracraft.game.audio.SFX;
 import org.conspiracraft.game.audio.Sounds;
+import org.conspiracraft.game.blocks.Tag;
+
+import java.util.Map;
 
 public class BlockProperties implements Cloneable {
+    public Map<Tag, Float> proficiencies = Map.of();
+    public BlockProperties proficiencies(Map<Tag, Float> proficiencies) {
+        this.proficiencies = proficiencies;
+        return this;
+    }
     public int ttb = 500;
     public BlockProperties ttb(int ttb) {
         this.ttb = ttb;

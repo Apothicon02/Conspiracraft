@@ -37,15 +37,15 @@ public class BlockTypes {
             ROSE = create(List.of(Tags.shortFlowers, Tags.flowers, Tags.survivesOnGrass), new PlantBlockType(TALL_GRASS.blockProperties)), //5
             TORCH = create(new LightBlockType((LightBlockProperties) new LightBlockProperties().r(20).g(15).ttb(100).obstructsHeightmap(false).isSolid(false).blocksLight(false)
                     .isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
-            KYANITE = create(List.of(Tags.rocks, Tags.crystals), new LightBlockType((LightBlockProperties) (new LightBlockProperties().g(2).b(6)
+            KYANITE = create(List.of(Tags.rocks, Tags.crystals, Tags.blunt), new LightBlockType((LightBlockProperties) (new LightBlockProperties().g(2).b(6)
                     .blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))),
-            WHITE_STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
-            IGNEOUS = create(List.of(Tags.rocks), new BlockType(new BlockProperties())),
-            STONE = create(List.of(Tags.rocks), new BlockType(new BlockProperties())), //10
-            GLASS = create(new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
+            WHITE_STONE = create(List.of(Tags.rocks, Tags.blunt), new BlockType(new BlockProperties())),
+            IGNEOUS = create(List.of(Tags.rocks, Tags.blunt), new BlockType(new BlockProperties())),
+            STONE = create(List.of(Tags.rocks, Tags.blunt), new BlockType(new BlockProperties())), //10
+            GLASS = create(List.of(Tags.blunt), new BlockType(new BlockProperties().blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1).blocksLight(false))),
-            PURPLE_STAINED_GLASS = create(new BlockType(GLASS.blockProperties)),
-            LIME_STAINED_GLASS = create(new BlockType(GLASS.blockProperties)),
+            PURPLE_STAINED_GLASS = create(List.of(Tags.blunt), new BlockType(GLASS.blockProperties)),
+            LIME_STAINED_GLASS = create(List.of(Tags.blunt), new BlockType(GLASS.blockProperties)),
             PORECAP = create(List.of(Tags.sediment), new PlantLightBlockType(((LightBlockProperties)TORCH.blockProperties.copy().ttb(50)).r(0).g(12).b(6))),
             OAK_PLANKS = create(List.of(Tags.planks), new BlockType(new BlockProperties().ttb(200).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))), //15
@@ -54,14 +54,14 @@ public class BlockTypes {
             OAK_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(new BlockProperties().ttb(100).blockSFX(new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1,
                     new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
             HYDRANGEA = create(List.of(Tags.shortFlowers, Tags.flowers, Tags.survivesOnGrass), new PlantBlockType(ROSE.blockProperties)),
-            MAGMA = create(new LightBlockType(((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
+            MAGMA = create(List.of(Tags.blunt), new LightBlockType(((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
             MAHOGANY_LOG = create(new BlockType(OAK_LOG.blockProperties)), //20
             MAHOGANY_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
             BUCKET = create(List.of(Tags.buckets, Tags.cantBreakBlocks), new BlockType(new BlockProperties().ttb(0).isSolid(false).blocksLight(false).obstructsHeightmap(false))),
             SAND = create(List.of(Tags.sediment, Tags.sand), new PowderBlockType(new BlockProperties().ttb(200).blockSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f,
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(false).obstructsHeightmap(false))),
-            SANDSTONE = create(new BlockType(new BlockProperties())),
+            SANDSTONE = create(List.of(Tags.blunt), new BlockType(new BlockProperties())),
             PALM_LOG = create(new BlockType(OAK_LOG.blockProperties)), //25
             PALM_PLANKS = create(List.of(Tags.planks), new BlockType(OAK_PLANKS.blockProperties)),
             PALM_LEAVES = create(List.of(Tags.leaves), new LeafBlockType(OAK_LEAVES.blockProperties)),
@@ -96,16 +96,16 @@ public class BlockTypes {
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
             GRAVEL = create(List.of(Tags.sediment), new PowderBlockType(SAND.blockProperties.copy().blockSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1,
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))), //55
-            FLINT = create(new BlockType(new BlockProperties())),
+            FLINT = create(List.of(Tags.blunt), new BlockType(new BlockProperties())),
             MUD = create(List.of(Tags.sediment), new BlockType(new BlockProperties().ttb(200).blockSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f,
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
             CLAY = create(List.of(Tags.sediment), new BlockType(MUD.blockProperties)),
-            OBSIDIAN = create(new BlockType(GLASS.blockProperties.copy().ttb(2000).blocksLight(true))),
+            OBSIDIAN = create(List.of(Tags.blunt), new BlockType(GLASS.blockProperties.copy().ttb(2000).blocksLight(true))),
             STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true))), //60
             STEAM_BUCKET = create(List.of(Tags.buckets, Tags.cantBreakBlocks), new FullBucketBlockType(BUCKET.blockProperties)),
             WATER_BUCKET = create(List.of(Tags.buckets, Tags.cantBreakBlocks), new FullBucketBlockType(BUCKET.blockProperties)),
-            FLINT_HAMMER = create(new BlockType(new BlockProperties().isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            OBSIDIAN_MACE = create(new BlockType(FLINT_HAMMER.blockProperties.copy().blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
+            FLINT_HAMMER = create(new BlockType(new BlockProperties().proficiencies(Map.of(Tags.blunt, 0.5f)).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            OBSIDIAN_MACE = create(new BlockType(FLINT_HAMMER.blockProperties.copy().proficiencies(Map.of(Tags.blunt, 0.4f)).blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1))),
             STICK = create(new BlockType(FLINT_HAMMER.blockProperties.copy().isFluidReplaceable(true).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
@@ -115,6 +115,7 @@ public class BlockTypes {
         for (Tag tag : tags) {
             tag.tagged.add(blockTypeMap.size());
         }
+        type.tags = tags;
         blockTypeMap.put(blockTypeMap.size(), type);
         return type;
     }

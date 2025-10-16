@@ -1,5 +1,6 @@
 package org.conspiracraft.game.blocks.types;
 
+import org.conspiracraft.game.blocks.Tag;
 import org.conspiracraft.game.world.FluidHelper;
 import org.conspiracraft.game.world.GasHelper;
 import org.conspiracraft.game.world.World;
@@ -9,12 +10,24 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 
+import java.util.List;
+
 import static org.conspiracraft.game.world.World.*;
 import static org.conspiracraft.game.world.WorldGen.areChunksCompressed;
 
 public class BlockType {
     public BlockProperties blockProperties;
+    public List<Tag> tags = List.of();
 
+    public float getTTBSpeed(int tool) {
+        for (Tag tag : tags) {
+            Float speed = blockProperties.proficiencies.get(tag);
+            if (speed != null) {
+                return speed;
+            }
+        }
+        return 1;
+    }
     public int getTTB() {
         return blockProperties.ttb;
     }

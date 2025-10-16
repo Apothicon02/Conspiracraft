@@ -76,7 +76,7 @@ public class HandManager {
                                         if (sameBlock) {
                                             if (blockStartedBreaking.w > 0) {
                                                 canBreak = false;
-                                                blockStartedBreaking.sub(0, 0, 0, (int) (System.currentTimeMillis()-lastBlockBreakCheck));
+                                                blockStartedBreaking.sub(0, 0, 0, (int) ((System.currentTimeMillis()-lastBlockBreakCheck)*breakingType.getTTBSpeed(blockTypeId)));
                                                 lastBlockBreakCheck = System.currentTimeMillis();
                                             }
                                         } else {
@@ -86,7 +86,7 @@ public class HandManager {
                                             BlockSFX sfx = breakingType.blockProperties.blockSFX;
                                             player.breakingSource.setPos(pos);
                                             player.breakingSource.setGain(sfx.placeGain);
-                                            player.breakingSource.setPitch(sfx.placePitch, 0);
+                                            player.breakingSource.setPitch(sfx.placePitch*(1+(Math.abs(1-breakingType.getTTBSpeed(blockTypeId))*0.8f)), 0);
                                             player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
                                         }
                                     }
