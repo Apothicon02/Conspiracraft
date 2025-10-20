@@ -9,13 +9,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Replaced flint hammer with flint club. &#10;- Added tungsten hammer.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockBreaking.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockBreaking.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/HandManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/HandManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,8 +194,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Run" />
         <item itemvalue="Gradle.build" />
+        <item itemvalue="Application.Run" />
         <item itemvalue="Gradle.build" />
         <item itemvalue="Application.Run" />
       </list>
@@ -210,14 +210,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00212" summary="- Cleaned up renderer class code. &#10;- Fixed clouds generating inside volcanoes. &#10;- Added new oak trees. &#10;- Re-added forests. &#10;- Improved plains generation.">
-      <option name="closed" value="true" />
-      <created>1756051080244</created>
-      <option name="number" value="00212" />
-      <option name="presentableId" value="LOCAL-00212" />
-      <option name="project" value="LOCAL" />
-      <updated>1756051080244</updated>
     </task>
     <task id="LOCAL-00213" summary="- Fixed water reflections. &#10;- Added moonlight. &#10;- Fixed clouds still generating in volcanoes. &#10;- Fixed caustic rendering with non-full water blocks. &#10;- Greatly optimized buffer updating. &#10;- Greatly optimized scheduled ticker.&#10;- Greatly optimized water flow. &#10;- Increased water output of rainclouds by 15x. &#10;- Added mud that generates beneath rain clouds.">
       <option name="closed" value="true" />
@@ -603,7 +595,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760552749126</updated>
     </task>
-    <option name="localTasksCounter" value="261" />
+    <task id="LOCAL-00261" summary="- Tools now break blocks quicker.">
+      <option name="closed" value="true" />
+      <created>1760620037122</created>
+      <option name="number" value="00261" />
+      <option name="presentableId" value="LOCAL-00261" />
+      <option name="project" value="LOCAL" />
+      <updated>1760620037122</updated>
+    </task>
+    <option name="localTasksCounter" value="262" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -626,7 +626,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Updated to 0.5. &#10;- Fixed light removal flickering." />
     <MESSAGE value="- Updated to 0.6." />
     <MESSAGE value="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt." />
     <MESSAGE value="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die." />
@@ -651,7 +650,8 @@
     <MESSAGE value="- Finished adding crawling." />
     <MESSAGE value="- Updated readme. &#10;- Fixed crash when resources folder was missing. &#10;- Music no longer plays if there's only 1 song to choose from. &#10;- Added gson dependency. &#10;- Added json config. &#10;- Made camera movement smoother. &#10;- Fixed issues with crouching &amp; crawling.&#10;- Crouching now slows you down slightly more. &#10;- Crouching now stops you from falling off edges." />
     <MESSAGE value="- Added recipe system. &#10;- Breaking leaves with an empty hand now puts a stick in your hand. &#10;- Breaking flint or obsidian with a stick-in-hand now creates a hammer / mace. &#10;- Fixed bug with placing liquids. &#10;- Cleaned up hand manager class. &#10;- Can no longer break blocks while holding buckets. &#10;- Fixed powder block conversions. &#10;- Fixed crouching stopping horizontal movement when in the air. &#10;- Can no longer crouch or crawl while flying." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added recipe system. &#10;- Breaking leaves with an empty hand now puts a stick in your hand. &#10;- Breaking flint or obsidian with a stick-in-hand now creates a hammer / mace. &#10;- Fixed bug with placing liquids. &#10;- Cleaned up hand manager class. &#10;- Can no longer break blocks while holding buckets. &#10;- Fixed powder block conversions. &#10;- Fixed crouching stopping horizontal movement when in the air. &#10;- Can no longer crouch or crawl while flying." />
+    <MESSAGE value="- Tools now break blocks quicker." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Tools now break blocks quicker." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

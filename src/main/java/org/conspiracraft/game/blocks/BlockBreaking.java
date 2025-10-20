@@ -10,7 +10,7 @@ import static org.conspiracraft.Main.player;
 public class BlockBreaking {
     public static Recipe[] recipes = new Recipe[]{
             new Recipe(new Ingredient(Tags.leaves), new Ingredient(0), new Vector2i(BlockTypes.getId(BlockTypes.STICK), 0)),
-            new Recipe(new Ingredient(BlockTypes.getId(BlockTypes.FLINT)), new Ingredient(BlockTypes.getId(BlockTypes.STICK)), new Vector2i(BlockTypes.getId(BlockTypes.FLINT_HAMMER), 0)),
+            new Recipe(new Ingredient(BlockTypes.getId(BlockTypes.FLINT)), new Ingredient(BlockTypes.getId(BlockTypes.STICK)), new Vector2i(BlockTypes.getId(BlockTypes.FLINT_BATON), 0)),
             new Recipe(new Ingredient(BlockTypes.getId(BlockTypes.OBSIDIAN)), new Ingredient(BlockTypes.getId(BlockTypes.STICK)), new Vector2i(BlockTypes.getId(BlockTypes.OBSIDIAN_MACE), 0)),
     };
 

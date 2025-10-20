@@ -23,7 +23,8 @@ public class Tags {
     public static Tag buckets = new Tag();
     public static Tag cantBreakBlocks = new Tag();
     public static Tag blunt = new Tag();
-    public static List<Tag> tags = List.of(rocks, leaves, shortFlowers, flowers, soakers, crystals, planks, buckets, cantBreakBlocks, blunt);
+    public static Tag chipping = new Tag();
+    public static List<Tag> tags = List.of(rocks, leaves, shortFlowers, flowers, soakers, crystals, planks, buckets, cantBreakBlocks, blunt, chipping);
     public static List<Pair<Tag, Tag>> survivalTags = List.of(
             new Pair<>(survivesOnGrass, grass),
             new Pair<>(survivesOnDirt, dirt),

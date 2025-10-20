@@ -36,7 +36,7 @@ public class Renderer {
     public static ShaderProgram reflectionScene;
     public static ShaderProgram finalScene;
 
-    public static int atlasWidth = 536;
+    public static int atlasWidth = 544;
     public static int atlasHeight = 1024;
     public static int atlasDepth = atlasHeight/64;
     public static int atlasImageId;

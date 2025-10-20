@@ -104,12 +104,13 @@ public class BlockTypes {
             STEAM = create(new BlockType(new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).obstructsHeightmap(false).isGas(true))), //60
             STEAM_BUCKET = create(List.of(Tags.buckets, Tags.cantBreakBlocks), new FullBucketBlockType(BUCKET.blockProperties)),
             WATER_BUCKET = create(List.of(Tags.buckets, Tags.cantBreakBlocks), new FullBucketBlockType(BUCKET.blockProperties)),
-            FLINT_HAMMER = create(new BlockType(new BlockProperties().proficiencies(Map.of(Tags.blunt, 0.5f)).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            OBSIDIAN_MACE = create(new BlockType(FLINT_HAMMER.blockProperties.copy().proficiencies(Map.of(Tags.blunt, 0.4f)).blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
+            FLINT_BATON = create(new BlockType(new BlockProperties().proficiencies(Map.of(Tags.blunt, 0.75f)).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            OBSIDIAN_MACE = create(new BlockType(FLINT_BATON.blockProperties.copy().proficiencies(Map.of(Tags.chipping, 0.75f)).blockSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1,
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1))),
-            STICK = create(new BlockType(FLINT_HAMMER.blockProperties.copy().isFluidReplaceable(true).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
+            STICK = create(new BlockType(FLINT_BATON.blockProperties.copy().isFluidReplaceable(true).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            STICK_PLATFORM = create(new BlockType(STICK.blockProperties.copy().isCollidable(true)));
+            STICK_PLATFORM = create(new BlockType(STICK.blockProperties.copy().isCollidable(true))),
+            TUNGSTEN_HAMMER = create(new BlockType(FLINT_BATON.blockProperties.copy().proficiencies(Map.of(Tags.blunt, 0.5f))));
 
     private static BlockType create(List<Tag> tags, BlockType type) {
         for (Tag tag : tags) {
