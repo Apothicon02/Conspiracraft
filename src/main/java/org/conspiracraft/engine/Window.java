@@ -1,6 +1,11 @@
 package org.conspiracraft.engine;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.game.Renderer;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
 import org.tinylog.Logger;
@@ -19,8 +24,10 @@ public class Window {
     private MouseInput mouseInput;
     private Callable<Void> resizeFunc;
     private int width;
+    private final Matrix4f projectionMatrix;
 
     public Window(String title, WindowOptions opts, Callable<Void> resizeFunc) {
+        projectionMatrix = new Matrix4f();
         this.resizeFunc = resizeFunc;
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
@@ -137,6 +144,14 @@ public class Window {
 
     public void update() {
         glfwSwapBuffers(windowHandle);
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
+    public Matrix4f updateProjectionMatrix() {
+        float aspectRatio = (float) width / height;
+        return projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
     }
 
     public boolean windowShouldClose() {

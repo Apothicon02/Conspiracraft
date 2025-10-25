@@ -138,34 +138,34 @@ public class Main {
                 Renderer.init(window);
             }
             if (renderingEnabled) {
-                interpolationTime = timePassed/tickTime;
                 int ticksDone = 0;
                 while (timePassed >= tickTime) {
                     ticksDone++;
                     currentTick++;
                     timePassed -= tickTime;
-                    interpolationTime = timePassed/tickTime;
                     player.tick();
                     if (ticksDone >= 3) {
                         timePassed = tickTime-1;
                     }
                 }
+                interpolationTime = timePassed/tickTime;
                 timePassed += diffTimeMillis;
             }
         }
     }
     public static Vector3f stepMask(Vector3f sideDist) {
-        Vector3i mask = new Vector3i();
         Vector3i b1 = new Vector3i(sideDist.x < sideDist.y ? 1 : 0, sideDist.y < sideDist.z ? 1 : 0, sideDist.z < sideDist.x ? 1 : 0);
-        Vector3i b2 = new Vector3i(sideDist.x < sideDist.z ? 1 : 0, sideDist.y < sideDist.x ? 1 : 0, sideDist.z < sideDist.y ? 1 : 0);
-        mask.z = b1.z > 0 && b2.z > 0 ? 1 : 0;
-        mask.x = b1.x > 0 && b2.x > 0 ? 1 : 0;
-        mask.y = b1.y > 0 && b2.y > 0 ? 1 : 0;
+        Vector3i b2 = new Vector3i(sideDist.x <= sideDist.z ? 1 : 0, sideDist.y <= sideDist.x ? 1 : 0, sideDist.z <= sideDist.y ? 1 : 0);
+        Vector3f mask = new Vector3f(
+                b1.x > 0 && b2.x > 0 ? 1 : 0,
+                b1.y > 0 && b2.y > 0 ? 1 : 0,
+                b1.z > 0 && b2.z > 0 ? 1 : 0
+        );
         if (!(mask.x == 1 || mask.y == 1 || mask.z == 1)) {
             mask.z = 1;
         }
 
-        return new Vector3f(mask);
+        return mask;
     }
 
     public static Vector4f getVoxel(Vector3f realPos) {
@@ -183,8 +183,8 @@ public class Main {
         Vector3f rayPos = new Vector3f(prevRayPos).floor();
         Vector3f raySign = new Vector3f(Math.signum(rayDir.x), Math.signum(rayDir.y), Math.signum(rayDir.z));
         Vector3f deltaDist = new Vector3f(1/rayDir.x, 1/rayDir.y, 1/rayDir.z);
-        Vector3f sideDist = new Vector3f(rayPos).sub(rayPos.x, rayPos.y, rayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
-        Vector3f mask;
+        Vector3f sideDist = new Vector3f(rayPos).sub(prevRayPos.x, prevRayPos.y, prevRayPos.z).add(0.5f, 0.5f, 0.5f).add(raySign).mul(0.5f, 0.5f, 0.5f).mul(deltaDist);
+        Vector3f mask = stepMask(sideDist);
 
         for (int i = 0; i < range; i++) {
             Vector4f voxel = getVoxel(rayPos);

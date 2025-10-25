@@ -14,6 +14,10 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Utils {
+    public static Vector3f vec3iToVec3f(Vector3i vec3i) {
+        return new Vector3f(vec3i.x, vec3i.y, vec3i.z);
+    }
+
     public static int[] flipIntArray(int[] arr) {
         int[] newArr = new int[arr.length];
         int i = arr.length-1;

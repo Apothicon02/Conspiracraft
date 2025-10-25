@@ -13,12 +13,13 @@ in vec4 gl_FragCoord;
 out vec4 fragColor;
 
 vec3 stepMask(vec3 sideDist) {
-    bvec3 mask;
     bvec3 b1 = lessThan(sideDist.xyz, sideDist.yzx);
     bvec3 b2 = lessThanEqual(sideDist.xyz, sideDist.zxy);
-    mask.z = b1.z && b2.z;
-    mask.x = b1.x && b2.x;
-    mask.y = b1.y && b2.y;
+    bvec3 mask = bvec3(
+        b1.x && b2.x,
+        b1.y && b2.y,
+        b1.z && b2.z
+    );
     if(!any(mask)) {
         mask.z = true;
     }
@@ -58,6 +59,7 @@ vec4 getVoxel(float x, float y, float z) {
 }
 
 bool hitSelection = false;
+float voxelBrightness = 0.f;
 
 vec4 raytrace(vec3 rayPos, vec3 rayDir) {
     vec3 mapPos = floor(rayPos);
@@ -70,6 +72,7 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
     for (int i = 0; i < 128; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z);
         if (voxelColor.a > 0.f) {
+            voxelBrightness = max(voxelColor.r, max(voxelColor.g, voxelColor.b));
             if (selected == mapPos) {
                 hitSelection = true;
             }
@@ -110,7 +113,7 @@ void main() {
     } else {
         fragColor = raytrace(vec3(cam[3]), ogDir);
         if (hitSelection) {
-            if (max(fragColor.r, max(fragColor.g, fragColor.b)) > 0.5f) {
+            if (voxelBrightness > 0.5f) {
                 fragColor/=2;
             } else {
                 fragColor*=2;

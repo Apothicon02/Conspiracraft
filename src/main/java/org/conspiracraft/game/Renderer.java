@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.joml.*;
 import org.conspiracraft.engine.*;
 import org.conspiracraft.engine.Window;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 
@@ -11,7 +12,9 @@ import static org.lwjgl.opengl.GL46.*;
 
 public class Renderer {
     public static ShaderProgram scene;
+    public static ShaderProgram debug;
     public static int sceneVaoId;
+    public static int debugVaoId;
 
     public static int voxelsSSBOId;
 
@@ -31,7 +34,7 @@ public class Renderer {
         }, 0);
     }
 
-    public static void generateVao() {
+    public static void generateVaos() {
         sceneVaoId = glGenVertexArrays();
         glBindVertexArray(sceneVaoId);
         glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
@@ -39,6 +42,49 @@ public class Renderer {
                 -1, -1, 0,
                 3, -1, 0,
                 -1, 3, 0
+        }, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        debugVaoId = glGenVertexArrays();
+        glBindVertexArray(debugVaoId);
+        glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
+        glBufferData(GL_ARRAY_BUFFER, new float[]{
+                -0.1f,-0.1f,-0.1f, // triangle 1 : begin
+                -0.1f,-0.1f, 0.1f,
+                -0.1f, 0.1f, 0.1f, // triangle 1 : end
+                0.1f, 0.1f,-0.1f, // triangle 2 : begin
+                -0.1f,-0.1f,-0.1f,
+                -0.1f, 0.1f,-0.1f, // triangle 2 : end
+                0.1f,-0.1f, 0.1f,
+                -0.1f,-0.1f,-0.1f,
+                0.1f,-0.1f,-0.1f,
+                0.1f, 0.1f,-0.1f,
+                0.1f,-0.1f,-0.1f,
+                -0.1f,-0.1f,-0.1f,
+                -0.1f,-0.1f,-0.1f,
+                -0.1f, 0.1f, 0.1f,
+                -0.1f, 0.1f,-0.1f,
+                0.1f,-0.1f, 0.1f,
+                -0.1f,-0.1f, 0.1f,
+                -0.1f,-0.1f,-0.1f,
+                -0.1f, 0.1f, 0.1f,
+                -0.1f,-0.1f, 0.1f,
+                0.1f,-0.1f, 0.1f,
+                0.1f, 0.1f, 0.1f,
+                0.1f,-0.1f,-0.1f,
+                0.1f, 0.1f,-0.1f,
+                0.1f,-0.1f,-0.1f,
+                0.1f, 0.1f, 0.1f,
+                0.1f,-0.1f, 0.1f,
+                0.1f, 0.1f, 0.1f,
+                0.1f, 0.1f,-0.1f,
+                -0.1f, 0.1f,-0.1f,
+                0.1f, 0.1f, 0.1f,
+                -0.1f, 0.1f,-0.1f,
+                -0.1f, 0.1f, 0.1f,
+                0.1f, 0.1f, 0.1f,
+                -0.1f, 0.1f, 0.1f,
+                0.1f,-0.1f, 0.1f
         }, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
@@ -50,7 +96,9 @@ public class Renderer {
         createGLDebugger();
         scene = new ShaderProgram("scene.vert", new String[]{"scene.frag"},
                 new String[]{"cam", "selected", "ui", "res"});
-        generateVao();
+        debug = new ShaderProgram("debug.vert", new String[]{"debug.frag"},
+                new String[]{"projection", "view", "model"});
+        generateVaos();
         createBuffers();
     }
 
@@ -82,6 +130,12 @@ public class Renderer {
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableVertexAttribArray(0);
     }
+    public static void drawDebug() {
+        glBindVertexArray(debugVaoId);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 12*3);
+        glDisableVertexAttribArray(0);
+    }
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
             glClearColor(0, 0, 0, 1);
@@ -93,6 +147,22 @@ public class Renderer {
             updateVoxelBuffer();
             glUniform2i(scene.uniforms.get("res"), window.getWidth(), window.getHeight());
             draw();
+
+            debug.bind();
+
+            try(MemoryStack stack = MemoryStack.stackPush()) {
+                glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(2, 2, 2).get(stack.mallocFloat(16)));
+            }
+            try(MemoryStack stack = MemoryStack.stackPush()) {
+                glUniformMatrix4fv(debug.uniforms.get("projection"), false, window.updateProjectionMatrix().get(stack.mallocFloat(16)));
+            }
+            Matrix4f camMatrix = new Matrix4f(Main.player.getCameraMatrix());
+            glUniformMatrix4fv(debug.uniforms.get("view"), true, new float[]{
+                    camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
+                    camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
+                    camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
+                    camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
+            drawDebug();
         }
     }
 }
