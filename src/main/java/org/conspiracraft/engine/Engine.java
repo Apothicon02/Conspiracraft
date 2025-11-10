@@ -78,9 +78,8 @@ public class Engine {
                 window.update();
                 framesUntilUpdate--;
                 if (framesUntilUpdate <= 0) {
-                    double avgMS = 500000000d/ConspiracraftMath.averageLongs(frameTimes);
+                    double avgMS = 1000000000d/ConspiracraftMath.averageLongs(frameTimes);
                     GLFW.glfwSetWindowTitle(window.getWindowHandle(), "Conspiracraft | " +
-                            Main.player.blockPos.x+"x,"+Main.player.blockPos.y+"y,"+Main.player.blockPos.z+"z | " +
                             (long)(avgMS) + "fps " +
                             String.format("%.1f", 1000d/(avgMS)) + "ms");
                     framesUntilUpdate = 40;

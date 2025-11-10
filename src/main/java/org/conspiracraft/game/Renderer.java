@@ -49,42 +49,42 @@ public class Renderer {
         glBindVertexArray(debugVaoId);
         glBindBuffer(GL_ARRAY_BUFFER, glGenBuffers());
         glBufferData(GL_ARRAY_BUFFER, new float[]{
-                -0.1f,-0.1f,-0.1f, // triangle 1 : begin
-                -0.1f,-0.1f, 0.1f,
-                -0.1f, 0.1f, 0.1f, // triangle 1 : end
-                0.1f, 0.1f,-0.1f, // triangle 2 : begin
-                -0.1f,-0.1f,-0.1f,
-                -0.1f, 0.1f,-0.1f, // triangle 2 : end
-                0.1f,-0.1f, 0.1f,
-                -0.1f,-0.1f,-0.1f,
-                0.1f,-0.1f,-0.1f,
-                0.1f, 0.1f,-0.1f,
-                0.1f,-0.1f,-0.1f,
-                -0.1f,-0.1f,-0.1f,
-                -0.1f,-0.1f,-0.1f,
-                -0.1f, 0.1f, 0.1f,
-                -0.1f, 0.1f,-0.1f,
-                0.1f,-0.1f, 0.1f,
-                -0.1f,-0.1f, 0.1f,
-                -0.1f,-0.1f,-0.1f,
-                -0.1f, 0.1f, 0.1f,
-                -0.1f,-0.1f, 0.1f,
-                0.1f,-0.1f, 0.1f,
-                0.1f, 0.1f, 0.1f,
-                0.1f,-0.1f,-0.1f,
-                0.1f, 0.1f,-0.1f,
-                0.1f,-0.1f,-0.1f,
-                0.1f, 0.1f, 0.1f,
-                0.1f,-0.1f, 0.1f,
-                0.1f, 0.1f, 0.1f,
-                0.1f, 0.1f,-0.1f,
-                -0.1f, 0.1f,-0.1f,
-                0.1f, 0.1f, 0.1f,
-                -0.1f, 0.1f,-0.1f,
-                -0.1f, 0.1f, 0.1f,
-                0.1f, 0.1f, 0.1f,
-                -0.1f, 0.1f, 0.1f,
-                0.1f,-0.1f, 0.1f
+                -0.5f,-0.5f,-0.5f, // triangle 1 : begin
+                -0.5f,-0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f, // triangle 1 : end
+                0.5f, 0.5f,-0.5f, // triangle 2 : begin
+                -0.5f,-0.5f,-0.5f,
+                -0.5f, 0.5f,-0.5f, // triangle 2 : end
+                0.5f,-0.5f, 0.5f,
+                -0.5f,-0.5f,-0.5f,
+                0.5f,-0.5f,-0.5f,
+                0.5f, 0.5f,-0.5f,
+                0.5f,-0.5f,-0.5f,
+                -0.5f,-0.5f,-0.5f,
+                -0.5f,-0.5f,-0.5f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f,-0.5f,
+                0.5f,-0.5f, 0.5f,
+                -0.5f,-0.5f, 0.5f,
+                -0.5f,-0.5f,-0.5f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f,-0.5f, 0.5f,
+                0.5f,-0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                0.5f,-0.5f,-0.5f,
+                0.5f, 0.5f,-0.5f,
+                0.5f,-0.5f,-0.5f,
+                0.5f, 0.5f, 0.5f,
+                0.5f,-0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f,-0.5f,
+                -0.5f, 0.5f,-0.5f,
+                0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f,-0.5f,
+                -0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f,
+                0.5f,-0.5f, 0.5f
         }, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     }
@@ -103,12 +103,9 @@ public class Renderer {
     }
 
     public static void  updateUniforms(ShaderProgram program) {
-        Matrix4f camMatrix = Main.player.getCameraMatrix();
-        glUniformMatrix4fv(program.uniforms.get("cam"), true, new float[]{
-                camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
-                camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
-                camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
-                camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(program.uniforms.get("cam"), false, new Matrix4f(Main.player.getCameraMatrix()).get(stack.mallocFloat(16)));
+        }
         Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach);
         if (selected == null) {
             selected = new Vector3f(-1000, -1000, -1000);
@@ -136,6 +133,42 @@ public class Renderer {
         glDrawArrays(GL_TRIANGLES, 0, 12*3);
         glDisableVertexAttribArray(0);
     }
+    public static void drawLowerCorner() {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, -1, -1).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, 0, -1).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, -1, 0).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(0, -1, -1).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+    }
+    public static void drawUpperCorner() {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 8, 8).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 7, 8).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 8, 7).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(7, 8, 8).get(stack.mallocFloat(16)));
+        }
+        drawDebug();
+    }
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
             glClearColor(0, 0, 0, 1);
@@ -151,22 +184,13 @@ public class Renderer {
             debug.bind();
 
             try(MemoryStack stack = MemoryStack.stackPush()) {
-                glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(new Vector3f(Main.player.pos).mul(-1)).get(stack.mallocFloat(16)));
-            }
-            try(MemoryStack stack = MemoryStack.stackPush()) {
                 glUniformMatrix4fv(debug.uniforms.get("projection"), false, window.updateProjectionMatrix().get(stack.mallocFloat(16)));
             }
             try (MemoryStack stack = MemoryStack.stackPush()) {
-                glUniformMatrix4fv(debug.uniforms.get("view"), false, new Matrix4f(Main.player.getCameraMatrix()).setTranslation(0, 0, 0).get(stack.mallocFloat(16)));
+                glUniformMatrix4fv(debug.uniforms.get("view"), false, new Matrix4f(Main.player.getCameraMatrix()).get(stack.mallocFloat(16)));
             }
-//            Matrix4f camMatrix = new Matrix4f(Main.player.getCameraMatrix());
-//            Matrix4f invCamMatrix = new Matrix4f(camMatrix).invert();
-//            glUniformMatrix4fv(debug.uniforms.get("view"), true, new float[]{
-//                    camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
-//                    camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), invCamMatrix.m31(),
-//                    camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
-//                    camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
-            drawDebug();
+            drawLowerCorner();
+            drawUpperCorner();
         }
     }
 }

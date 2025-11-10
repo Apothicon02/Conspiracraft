@@ -13,7 +13,7 @@ import static org.conspiracraft.game.Player.voxelColor;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Main {
-    public static Player player = new Player(new Vector3f(0, 0, 0));
+    public static Player player = new Player();
     private static final float MOUSE_SENSITIVITY = 0.01f;
 
     public static void main(String[] args) throws Exception {
@@ -61,10 +61,6 @@ public class Main {
                 player.leftward = window.isKeyPressed(GLFW_KEY_A, GLFW_PRESS);
                 player.upward = window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS);
                 player.downward = window.isKeyPressed(GLFW_KEY_LEFT_CONTROL, GLFW_PRESS);
-
-                if (window.isKeyPressed(GLFW_KEY_SPACE, GLFW_PRESS) && timeMillis - player.lastJump > 200) { //only jump at most five times a second
-                    player.jump = timeMillis;
-                }
 
                 MouseInput mouseInput = window.getMouseInput();
                 Vector2f displVec = mouseInput.getDisplVec();
