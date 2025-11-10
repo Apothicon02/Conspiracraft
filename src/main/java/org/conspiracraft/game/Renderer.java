@@ -151,17 +151,21 @@ public class Renderer {
             debug.bind();
 
             try(MemoryStack stack = MemoryStack.stackPush()) {
-                glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(2, 2, 2).get(stack.mallocFloat(16)));
+                glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(new Vector3f(Main.player.pos).mul(-1)).get(stack.mallocFloat(16)));
             }
             try(MemoryStack stack = MemoryStack.stackPush()) {
                 glUniformMatrix4fv(debug.uniforms.get("projection"), false, window.updateProjectionMatrix().get(stack.mallocFloat(16)));
             }
-            Matrix4f camMatrix = new Matrix4f(Main.player.getCameraMatrix());
-            glUniformMatrix4fv(debug.uniforms.get("view"), true, new float[]{
-                    camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
-                    camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), camMatrix.m31(),
-                    camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
-                    camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                glUniformMatrix4fv(debug.uniforms.get("view"), false, new Matrix4f(Main.player.getCameraMatrix()).setTranslation(0, 0, 0).get(stack.mallocFloat(16)));
+            }
+//            Matrix4f camMatrix = new Matrix4f(Main.player.getCameraMatrix());
+//            Matrix4f invCamMatrix = new Matrix4f(camMatrix).invert();
+//            glUniformMatrix4fv(debug.uniforms.get("view"), true, new float[]{
+//                    camMatrix.m00(), camMatrix.m10(), camMatrix.m20(), camMatrix.m30(),
+//                    camMatrix.m01(), camMatrix.m11(), camMatrix.m21(), invCamMatrix.m31(),
+//                    camMatrix.m02(), camMatrix.m12(), camMatrix.m22(), camMatrix.m32(),
+//                    camMatrix.m03(), camMatrix.m13(), camMatrix.m23(), camMatrix.m33()});
             drawDebug();
         }
     }

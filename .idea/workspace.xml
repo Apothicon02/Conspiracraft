@@ -10,15 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Constants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/debug.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/debug.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,37 +95,37 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Run.executor": "Run",
-    "Gradle.Build Conspiracraft.executor": "Run",
-    "Gradle.Build Terraflat.executor": "Run",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:Main.main()].executor": "Debug",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:org.conspiracraft.editor.Editor.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "Gradle.Terraflat [build].executor": "Run",
-    "Gradle.Terraflat [jar].executor": "Run",
-    "Gradle.build.executor": "Run",
-    "JAR Application.VisualVMLauncher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "ShowUsagesActions.previewPropertyKey": "true",
-    "git-widget-placeholder": "editor",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.editor.Editor.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;editor&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
@@ -215,14 +208,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00175" summary="- Fixed clouds toggle not doing anything.">
-      <option name="closed" value="true" />
-      <created>1752078997965</created>
-      <option name="number" value="00175" />
-      <option name="presentableId" value="LOCAL-00175" />
-      <option name="project" value="LOCAL" />
-      <updated>1752078997965</updated>
     </task>
     <task id="LOCAL-00176" summary="- Atmosphere can now be toggled. &#10;- Added luna terrain generator.">
       <option name="closed" value="true" />
@@ -608,7 +593,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758141818104</updated>
     </task>
-    <option name="localTasksCounter" value="224" />
+    <task id="LOCAL-00224" summary="- Progress">
+      <option name="closed" value="true" />
+      <created>1761412861702</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1761412861702</updated>
+    </task>
+    <option name="localTasksCounter" value="225" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -631,7 +624,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Removed caves. &#10;- Fullscreen is now borderless fullscreen. &#10;- Greatly increased surface generation speed. &#10;- Greatly increased light filling speed." />
     <MESSAGE value="- Optimized chunks." />
     <MESSAGE value="- Doubled surface generation speed." />
     <MESSAGE value="- Disabled rendering until after the world is generated." />
@@ -656,7 +648,8 @@
     <MESSAGE value="- Added oak trees to jungles. &#10;- Added palm shrubs to jungles. &#10;- Converted some tree stuff to have collision avoidance." />
     <MESSAGE value="- Initial Commit." />
     <MESSAGE value="- Stuff." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Stuff." />
+    <MESSAGE value="- Progress" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Progress" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
