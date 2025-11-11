@@ -3,7 +3,8 @@ layout(std430, binding = 0) buffer voxelsSSBO
     float[] voxelsData;
 };
 
-uniform mat4 cam;
+uniform mat4 projection;
+uniform mat4 view;
 uniform ivec3 selected;
 uniform bool ui;
 uniform ivec2 res;
@@ -99,19 +100,19 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
         sideDist += mask * raySign * deltaDist;
     }
 
-    return vec4(0.5f, 0.75f, 1.f, 1.f);
+    return mapPos.y < 0 ? vec4(0.85f, 0.95f, 1.f, 1.f) : vec4(0.5f, 0.75f, 1.f, 1.f);
 }
 
 void main() {
-    vec2 pos = gl_FragCoord.xy;
-    vec2 uv = (pos*2. - res.xy) / res.y;
-    vec3 uvDir = normalize(vec3(uv, 1));
-    mat4 modifiedCam = (cam * mat4(vec4(uvDir, 0), vec4(uvDir, 0), vec4(uvDir, 0), vec4(uvDir, 0)));
-    vec3 ogDir = vec3(modifiedCam[0][0], modifiedCam[0][1], modifiedCam[0][2]);
+    vec2 pos = gl_FragCoord.xy; //window space
+    vec2 uv = ((pos / res)*2.f)-1.f; //ndc clip space
+    vec4 clipSpace = (inverse(projection) * vec4(uv, -1.f, 1.f)); //world space
+    clipSpace.w = 0;
+    vec3 ogDir = normalize((inverse(view)*clipSpace).xyz);
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
-        fragColor = raytrace(vec3(cam[3]), ogDir);
+        fragColor = raytrace(inverse(view)[3].xyz, ogDir);
         if (hitSelection) {
             if (voxelBrightness > 0.5f) {
                 fragColor/=2;

@@ -151,7 +151,7 @@ public class Window {
     }
     public Matrix4f updateProjectionMatrix() {
         float aspectRatio = (float) width / height;
-        return projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        return projectionMatrix.identity().setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
     }
 
     public boolean windowShouldClose() {

@@ -108,29 +108,6 @@ public class Utils {
     public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
         return new Vector3f(ConspiracraftMath.mix(old.x, current.x, (float) Main.interpolationTime), ConspiracraftMath.mix(old.y, current.y, (float) Main.interpolationTime), ConspiracraftMath.mix(old.z, current.z, (float) Main.interpolationTime));
     }
-    public static Matrix4f getInterpolatedMat4(Matrix4f old, Matrix4f current) {
-        return new Matrix4f(
-                ConspiracraftMath.mix(old.m00(), current.m00(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m01(), current.m01(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m02(), current.m02(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m00(), current.m03(), (float) Main.interpolationTime),
-
-                ConspiracraftMath.mix(old.m10(), current.m10(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m11(), current.m11(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m12(), current.m12(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m10(), current.m13(), (float) Main.interpolationTime),
-
-                ConspiracraftMath.mix(old.m20(), current.m20(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m21(), current.m21(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m22(), current.m22(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m20(), current.m23(), (float) Main.interpolationTime),
-
-                ConspiracraftMath.mix(old.m30(), current.m30(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m31(), current.m31(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m32(), current.m32(), (float) Main.interpolationTime),
-                ConspiracraftMath.mix(old.m30(), current.m33(), (float) Main.interpolationTime)
-        );
-    }
 
     public static int packInts(int first4, int last4) {
         return (first4 << 16) | last4;

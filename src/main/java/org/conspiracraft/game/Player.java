@@ -1,13 +1,13 @@
 package org.conspiracraft.game;
 
 import org.conspiracraft.engine.Camera;
-import org.conspiracraft.engine.Utils;
 import org.joml.*;
 
 import java.lang.Math;
 
 public class Player {
     private final Camera camera = new Camera();
+    public Vector3f pos = new Vector3f();
     public static float scale = 1f;
     public float speed = Math.max(0.15f, 0.15f*scale);
     public boolean sprint = false;
@@ -23,7 +23,7 @@ public class Player {
     public Player() {}
 
     public void tick() {
-        camera.oldViewMatrix = new Matrix4f(camera.getViewMatrix());
+        camera.oldPosition.set(camera.position);
         float modifiedSpeed = speed;
         if (sprint) {
             modifiedSpeed *= 10;
@@ -46,14 +46,12 @@ public class Player {
         } else if (downward) {
             camera.moveDown(modifiedSpeed);
         }
+        pos = camera.getPosition();
     }
 
     public Matrix4f getCameraMatrix() {
-        return Utils.getInterpolatedMat4(camera.oldViewMatrix, camera.getViewMatrix());
-//        Matrix4f camMatrix = new Matrix4f(camera.getViewMatrix());
-//        return camMatrix.setTranslation(Utils.getInterpolatedVec(camera.oldViewMatrix.getTranslation(new Vector3f(0)), camMatrix.getTranslation(new Vector3f(0))));
+        return camera.getViewMatrix();
     }
-
 
     public void rotate(float pitch, float yaw) {
         camera.addRotation(pitch, yaw);

@@ -95,16 +95,19 @@ public class Renderer {
     public static void init(Window window) throws Exception {
         createGLDebugger();
         scene = new ShaderProgram("scene.vert", new String[]{"scene.frag"},
-                new String[]{"cam", "selected", "ui", "res"});
+                new String[]{"projection", "view", "selected", "ui", "res"});
         debug = new ShaderProgram("debug.vert", new String[]{"debug.frag"},
-                new String[]{"projection", "view", "model"});
+                new String[]{"projection", "view", "model", "selected", "ui", "res"});
         generateVaos();
         createBuffers();
     }
 
-    public static void  updateUniforms(ShaderProgram program) {
+    public static void  updateUniforms(ShaderProgram program, Window window) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(program.uniforms.get("projection"), false, window.updateProjectionMatrix().get(stack.mallocFloat(16)));
+        }
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(program.uniforms.get("cam"), false, new Matrix4f(Main.player.getCameraMatrix()).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(program.uniforms.get("view"), false, new Matrix4f(Main.player.getCameraMatrix()).get(stack.mallocFloat(16)));
         }
         Vector3f selected = Main.raycast(new Matrix4f(Main.player.getCameraMatrix()), true, Main.reach);
         if (selected == null) {
@@ -135,37 +138,37 @@ public class Renderer {
     }
     public static void drawLowerCorner() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, -1, -1).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-0.5f, -0.5f, -0.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, 0, -1).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-0.5f, 0.5f, -0.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-1, -1, 0).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(-0.5f, -0.5f, 0.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(0, -1, -1).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(0.5f, -0.5f, -0.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
     }
     public static void drawUpperCorner() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 8, 8).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8.5f, 8.5f, 8.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 7, 8).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8.5f, 7.5f, 8.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8, 8, 7).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(8.5f, 8.5f, 7.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(7, 8, 8).get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(debug.uniforms.get("model"), false, new Matrix4f().translate(7.5f, 8.5f, 8.5f).get(stack.mallocFloat(16)));
         }
         drawDebug();
     }
@@ -176,19 +179,13 @@ public class Renderer {
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             scene.bind();
-            updateUniforms(scene);
+            updateUniforms(scene, window);
             updateVoxelBuffer();
             glUniform2i(scene.uniforms.get("res"), window.getWidth(), window.getHeight());
             draw();
 
             debug.bind();
-
-            try(MemoryStack stack = MemoryStack.stackPush()) {
-                glUniformMatrix4fv(debug.uniforms.get("projection"), false, window.updateProjectionMatrix().get(stack.mallocFloat(16)));
-            }
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                glUniformMatrix4fv(debug.uniforms.get("view"), false, new Matrix4f(Main.player.getCameraMatrix()).get(stack.mallocFloat(16)));
-            }
+            updateUniforms(debug, window);
             drawLowerCorner();
             drawUpperCorner();
         }

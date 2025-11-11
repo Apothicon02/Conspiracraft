@@ -11,10 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" afterDir="false" />
@@ -195,17 +194,6 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="kotlin.scripts.KotlinSettingsScript.settings.gradle.kts" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="kotlin.scripts.KotlinSettingsScript.settings.gradle.kts" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Application.Run" />
       <item itemvalue="Gradle.build" />
@@ -229,14 +217,6 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
       <workItem from="1751127809201" duration="48000" />
-    </task>
-    <task id="LOCAL-00176" summary="- Atmosphere can now be toggled. &#10;- Added luna terrain generator.">
-      <option name="closed" value="true" />
-      <created>1752085503670</created>
-      <option name="number" value="00176" />
-      <option name="presentableId" value="LOCAL-00176" />
-      <option name="project" value="LOCAL" />
-      <updated>1752085503670</updated>
     </task>
     <task id="LOCAL-00177" summary="- Optimized rendering slightly. &#10;- Block palettes can now be re-compressed.">
       <option name="closed" value="true" />
@@ -622,7 +602,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761412861702</updated>
     </task>
-    <option name="localTasksCounter" value="225" />
+    <task id="LOCAL-00225" summary="- New camera">
+      <option name="closed" value="true" />
+      <created>1762786813712</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1762786813712</updated>
+    </task>
+    <option name="localTasksCounter" value="226" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -645,7 +633,6 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Optimized chunks." />
     <MESSAGE value="- Doubled surface generation speed." />
     <MESSAGE value="- Disabled rendering until after the world is generated." />
     <MESSAGE value="- Fixed worlds not loading." />
@@ -670,7 +657,8 @@
     <MESSAGE value="- Initial Commit." />
     <MESSAGE value="- Stuff." />
     <MESSAGE value="- Progress" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Progress" />
+    <MESSAGE value="- New camera" />
+    <option name="LAST_COMMIT_MESSAGE" value="- New camera" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
