@@ -150,8 +150,15 @@ public class Window {
         return projectionMatrix;
     }
     public Matrix4f updateProjectionMatrix() {
-        float aspectRatio = (float) width / height;
-        return projectionMatrix.identity().setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        float aspectRatio = (float) width /height;
+        projectionMatrix.identity();
+        projectionMatrix.set(
+                1.f/Constants.FOV, 0.f, 0.f, 0.f,
+                0.f, aspectRatio/Constants.FOV, 0.f, 0.f,
+                0.f, 0.f, 0.f, -1.f,
+                0.f, 0.f, Constants.Z_NEAR, 0.f
+        );
+        return projectionMatrix;
     }
 
     public boolean windowShouldClose() {

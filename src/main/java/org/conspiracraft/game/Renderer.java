@@ -204,6 +204,7 @@ public class Renderer {
         if (!Main.isClosing) {
             glBindFramebuffer(GL_FRAMEBUFFER, rasterFBOId);
             glClearColor(0, 0, 0, 0);
+            glClearDepthf(0.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             debug.bind();
             updateUniforms(debug, window);
@@ -212,6 +213,7 @@ public class Renderer {
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClearColor(0, 0, 0, 0);
+            glClearDepthf(0.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             scene.bind();
             updateUniforms(scene, window);

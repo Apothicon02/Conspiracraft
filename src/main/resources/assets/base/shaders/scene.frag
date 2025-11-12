@@ -62,6 +62,7 @@ vec4 getVoxel(float x, float y, float z) {
     return vec4(0.f);
 }
 
+bool didntTraceAnything = true;
 bool hitSelection = false;
 float voxelBrightness = 0.f;
 vec3 mapPos = vec3(0);
@@ -74,7 +75,7 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
     vec3 mask = stepMask(sideDist);
     vec3 prevMapPos = mapPos+(stepMask(sideDist+(mask*(-raySign)*deltaDist))*(-raySign));
 
-    for (int i = 0; i < 96; i++) {
+    for (int i = 0; i < 256; i++) {
         vec4 voxelColor = getVoxel(mapPos.x, mapPos.y, mapPos.z);
         if (voxelColor.a > 0.f) {
             voxelBrightness = max(voxelColor.r, max(voxelColor.g, voxelColor.b));
@@ -106,6 +107,7 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
                 uv3d = rayPos - mapPos;
             }
             mapPos += uv3d;
+            didntTraceAnything = false;
             return voxelColor;
         }
 
@@ -118,13 +120,13 @@ vec4 raytrace(vec3 rayPos, vec3 rayDir) {
     return mapPos.y < 0 ? vec4(0.85f, 0.95f, 1.f, 1.f) : vec4(0.5f, 0.75f, 1.f, 1.f);
 }
 
-
+float nearClip = 0.1f;
 
 void main() {
     vec2 pos = gl_FragCoord.xy;//window space
     vec4 rasterColor = texture(raster_color, pos/res);
     float rasterDepth = texture(raster_depth, pos/res).r;
-
+    fragColor = vec4(rasterDepth);
     vec2 uv = ((pos / res)*2.f)-1.f;//ndc clip space
     vec4 clipSpace = (inverse(projection) * vec4(uv, -1.f, 1.f));//world space
     clipSpace.w = 0;
@@ -143,8 +145,8 @@ void main() {
         }
     }
 
-    float tracedDepth = ((1.f/distance(mapPos, ogPos))-(1.f/0.1f))/((1.f/100.f)-(1.f/0.1f));
-    if (rasterDepth < tracedDepth) {
+    float tracedDepth = nearClip/dot(mapPos-ogPos, vec3(view[0][2], view[1][2], view[2][2])*-1);
+    if (rasterDepth > tracedDepth || (didntTraceAnything && rasterColor.a >= 1)) {
         fragColor = rasterColor;
     }
 }
