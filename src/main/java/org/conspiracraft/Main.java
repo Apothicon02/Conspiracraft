@@ -11,6 +11,7 @@ import java.lang.Math;
 
 import static org.conspiracraft.game.Player.voxelColor;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Main {
     public static Player player = new Player();
@@ -24,6 +25,10 @@ public class Main {
 
     public void init(Window window) throws Exception {
         GL.createCapabilities();
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
     }
 
     boolean wasXDown = false;

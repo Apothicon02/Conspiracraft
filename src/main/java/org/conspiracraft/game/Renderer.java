@@ -16,6 +16,11 @@ public class Renderer {
     public static int sceneVaoId;
     public static int debugVaoId;
 
+    public static int rasterFBOId;
+
+    public static int rasterColorId;
+    public static int rasterDepthId;
+
     public static int voxelsSSBOId;
 
     public static boolean showUI = true;
@@ -100,6 +105,29 @@ public class Renderer {
                 new String[]{"projection", "view", "model", "selected", "ui", "res"});
         generateVaos();
         createBuffers();
+
+        rasterFBOId = glGenFramebuffers();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rasterFBOId);
+        
+        rasterColorId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, rasterColorId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, window.getWidth(), window.getHeight());
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rasterColorId, 0);
+
+
+        rasterDepthId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, rasterDepthId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, window.getWidth(), window.getHeight());
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rasterDepthId, 0);
     }
 
     public static void  updateUniforms(ShaderProgram program, Window window) {
@@ -174,20 +202,25 @@ public class Renderer {
     }
     public static void render(Window window) throws IOException {
         if (!Main.isClosing) {
-            glClearColor(0, 0, 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            scene.bind();
-            updateUniforms(scene, window);
-            updateVoxelBuffer();
-            glUniform2i(scene.uniforms.get("res"), window.getWidth(), window.getHeight());
-            draw();
-
+            glBindFramebuffer(GL_FRAMEBUFFER, rasterFBOId);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             debug.bind();
             updateUniforms(debug, window);
             drawLowerCorner();
             drawUpperCorner();
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            scene.bind();
+            updateUniforms(scene, window);
+            glBindTextureUnit(0, rasterColorId);
+            glBindTextureUnit(1, rasterDepthId);
+            updateVoxelBuffer();
+            glUniform2i(scene.uniforms.get("res"), window.getWidth(), window.getHeight());
+
+            draw();
         }
     }
 }
