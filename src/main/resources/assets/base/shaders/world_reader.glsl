@@ -726,12 +726,12 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     lightFog = max(lightFog, lighting);
     vec4 color = traceWorld(false, ogRayPos, dir, maxDistance);
     bool finalHitSelection = hitSelection;
-    depth = distance(camPos, hitPos)/renderDistance;
     isSky = (color.a < 1.f && lighting.a > 0);
     if (reflectPos == vec3(0)) {
         prevReflectPos = prevHitPos;
         reflectPos = hitPos;
     }
+    depth = distance(camPos, reflectPos)/renderDistance;
     float adjustedTime = clamp((abs(1-clamp((distance(hitPos, sun-vec3(0, sun.y, 0))/1.5f)/size, 0, 1))*1.2)-abs(0.25f-min(0.25f, distance(rayMapPos, vec3(0))/size)), 0.05f, 1.f);
     float adjustedTimeCam = clamp((abs(1-clamp((distance(camPos, sun-vec3(0, sun.y, 0))/1.5f)/size, 0, 1))*1.2)-abs(0.25f-min(0.25f, distance(rayMapPos, vec3(0))/size)), 0.05f, 0.9f);
     float timeBonus = gradient(hitPos.y, 64.f, 372.f, 0.1f, 0.f);
@@ -786,7 +786,7 @@ vec4 raytrace(vec3 ogRayPos, vec3 dir, bool checkShadow, float maxDistance) {
     color *= prevFog;
     prevFog = fog;
     color.rgb = mix(color.rgb, unmixedFogColor * fog.rgb, finalDistanceFogginess);
-    reflectivity *= (1 - finalDistanceFogginess);
+    reflectivity *= (1 - depth);
     //fog end
     //transparency start
     finalTint = (vec3(1) + finalTint);

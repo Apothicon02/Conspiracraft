@@ -239,6 +239,18 @@ void main() {
         }
         vec4 worldColor = toLinear(vec4(imageLoad(scene_unscaled_image, ivec3(pos.xy, 0))));
         fragColor = mix(worldColor, fragColor, fragColor.a);
+//        vec4 fakeTint = vec4(0);
+//        if (uv.x < 0) {
+//            fakeTint += vec4(1, 0.1, 0.12, 0.15);
+//        }
+//        if ( uv.y > -0.2f && uv.y < 0.2) {
+//            fakeTint += vec4(0.12, 0.1, 0.5f, 0.75);
+//        }
+//        if (uv.x < 0.1 && uv.x > -0.1 && uv.y < 0) {
+//            fakeTint += vec4(1, 0.1, 0.12, 0.15);
+//        }
+//        fakeTint = vec4(max(vec3(0.f), fakeTint.rgb/max(fakeTint.r, max(fakeTint.g, fakeTint.b))), min(0.5f, fakeTint.a));
+//        fragColor.rgb = mix(fragColor.rgb, fakeTint.rgb, fakeTint.a);
     }
 //    //clear reflections
 //    imageStore(scene_unscaled_image, ivec3(pos.xy, 2), vec4(0));

@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ArtifactsWorkspaceSettings">
-    <artifacts-to-build>
-      <artifact name="Terraflat:jar" />
-    </artifacts-to-build>
-  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Replaced flint hammer with flint club. &#10;- Added tungsten hammer.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Thing.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockBreaking.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockBreaking.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,23 +28,7 @@
         </task>
         <projects_view>
           <tree_state>
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="Conspiracraft" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="Conspiracraft" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="Conspiracraft" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
-              </path>
-            </expand>
+            <expand />
             <select />
           </tree_state>
         </projects_view>
@@ -66,11 +43,6 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="568c69ed8cabe066ae083ad9cad4fb95d5ccd620" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -87,6 +59,9 @@
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4f.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Matrix4fc.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.7/de7e11ac842f6b71d67586892a99cdb08274a9e1/joml-1.10.7-sources.jar!/org/joml/Quaternionf.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -102,102 +77,55 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Run.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Conspiracraft.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build Terraflat.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:Main.main()].executor&quot;: &quot;Debug&quot;,
     &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.build.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.VisualVMLauncher.jar.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shaders&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;it.czerwinski.intellij.wavefront.settings.WavefrontObjSettingsConfigurable&quot;
   }
 }</component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shaders" />
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\game\world\trees\canopies" />
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\sounds" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures\blocks" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\blocks" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\resources\assets" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\resources" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\resources" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base" />
-      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\resources\base\textures" />
-    </key>
-    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
-      <recent name="" />
+      <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="org.conspiracraft.game.blocks" />
-      <recent name="org.conspiracraft.game.blocks.types" />
-      <recent name="org.conspiracraft.game.world" />
-      <recent name="org.conspiracraft.game.world.trees.canopies" />
-      <recent name="org.conspiracraft.game.world.trees" />
+      <recent name="org.apothicon.engine" />
+      <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run">
-    <configuration name="Run" type="Application" factoryName="Application" temporary="true">
-      <option name="ALTERNATIVE_JRE_PATH" value="21" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+  <component name="RunManager">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.conspiracraft.Main" />
       <module name="Conspiracraft.main" />
-      <option name="VM_PARAMETERS" value="-Xms1g -Xmx16g --enable-preview -Xss1g" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="org.conspiracraft.game.blocks.properties.*" />
+          <option name="PATTERN" value="org.conspiracraft.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <method v="2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
-    <configuration name="build" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="Terraflat" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="Terraflat" />
+      <option name="filePath" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.build" />
-        <item itemvalue="Application.Run" />
-        <item itemvalue="Gradle.build" />
-        <item itemvalue="Application.Run" />
+        <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
   </component>
@@ -209,459 +137,73 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-      <workItem from="1751127809201" duration="48000" />
     </task>
-    <task id="LOCAL-00213" summary="- Fixed water reflections. &#10;- Added moonlight. &#10;- Fixed clouds still generating in volcanoes. &#10;- Fixed caustic rendering with non-full water blocks. &#10;- Greatly optimized buffer updating. &#10;- Greatly optimized scheduled ticker.&#10;- Greatly optimized water flow. &#10;- Increased water output of rainclouds by 15x. &#10;- Added mud that generates beneath rain clouds.">
+    <task id="LOCAL-00001" summary="- Initial commit.">
       <option name="closed" value="true" />
-      <created>1756151182772</created>
-      <option name="number" value="00213" />
-      <option name="presentableId" value="LOCAL-00213" />
+      <created>1722308629838</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1756151182772</updated>
+      <updated>1722308629838</updated>
     </task>
-    <task id="LOCAL-00214" summary="- Updated version to 0.3.0. &#10;- Fixed not having any textures if your microsoft account had a different username than mine. &#10;- Updated keybinds.">
+    <task id="LOCAL-00002" summary="- Initial commit.">
       <option name="closed" value="true" />
-      <created>1756152076954</created>
-      <option name="number" value="00214" />
-      <option name="presentableId" value="LOCAL-00214" />
+      <created>1722559709809</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1756152076954</updated>
+      <updated>1722559709809</updated>
     </task>
-    <task id="LOCAL-00215" summary="- Increased default render distance from 3 to 8. &#10;- Added variable shadow darkness.">
+    <task id="LOCAL-00003" summary="- Update .gitignore.">
       <option name="closed" value="true" />
-      <created>1756997894435</created>
-      <option name="number" value="00215" />
-      <option name="presentableId" value="LOCAL-00215" />
+      <created>1722559772024</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1756997894435</updated>
+      <updated>1722559772024</updated>
     </task>
-    <task id="LOCAL-00216" summary="- Slightly improved shadow darkness.">
+    <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
       <option name="closed" value="true" />
-      <created>1757083228127</created>
-      <option name="number" value="00216" />
-      <option name="presentableId" value="LOCAL-00216" />
+      <created>1722613150852</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1757083228127</updated>
+      <updated>1722613150852</updated>
     </task>
-    <task id="LOCAL-00217" summary="- Upon creation, full water blocks will be converted to kyanite if kyanite is touching.">
+    <task id="LOCAL-00005" summary="- Rewrite.">
       <option name="closed" value="true" />
-      <created>1757793895822</created>
-      <option name="number" value="00217" />
-      <option name="presentableId" value="LOCAL-00217" />
+      <created>1722638056821</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
       <option name="project" value="LOCAL" />
-      <updated>1757793895822</updated>
+      <updated>1722638056821</updated>
     </task>
-    <task id="LOCAL-00218" summary="- Added LICENSE.">
+    <task id="LOCAL-00006" summary="- Thing.">
       <option name="closed" value="true" />
-      <created>1757862364579</created>
-      <option name="number" value="00218" />
-      <option name="presentableId" value="LOCAL-00218" />
+      <created>1724971018346</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1757862364579</updated>
+      <updated>1724971018346</updated>
     </task>
-    <task id="LOCAL-00219" summary="- Added spruce logs. &#10;- Added spruce planks. &#10;- Added spruce leaves. &#10;- Fixed only willow planks being reflective. &#10;- Changed oak and palm plank colors.">
+    <task id="LOCAL-00007" summary="- Thing.">
       <option name="closed" value="true" />
-      <created>1757870779755</created>
-      <option name="number" value="00219" />
-      <option name="presentableId" value="LOCAL-00219" />
+      <created>1725040805492</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
       <option name="project" value="LOCAL" />
-      <updated>1757870779755</updated>
+      <updated>1725040805493</updated>
     </task>
-    <task id="LOCAL-00220" summary="- Added cherry wood. &#10;- Added birch wood.&#10;- Added acacia wood. &#10;- Added oak wood. &#10;- Added redwood wood. &#10;- Rotated jungle log textures. &#10;- Added recipes for all planks. &#10;- Reduced plank reflectivity. &#10;- Fixed corner changes only loading when the game reloads.">
-      <option name="closed" value="true" />
-      <created>1757884019374</created>
-      <option name="number" value="00220" />
-      <option name="presentableId" value="LOCAL-00220" />
-      <option name="project" value="LOCAL" />
-      <updated>1757884019374</updated>
-    </task>
-    <task id="LOCAL-00221" summary="- Fixed new leaves being marked as solid. &#10;- Added hibiscus flowers. &#10;- Improved block lighting.">
-      <option name="closed" value="true" />
-      <created>1758155280359</created>
-      <option name="number" value="00221" />
-      <option name="presentableId" value="LOCAL-00221" />
-      <option name="project" value="LOCAL" />
-      <updated>1758155280359</updated>
-    </task>
-    <task id="LOCAL-00222" summary="- Added snow blocks. &#10;- Added pine trees. &#10;- Increased amount of porecaps that generate. &#10;- Added hibiscus flowers to worldgen. &#10;- Improved caustic rendering at night. &#10;- Porecaps no longer generate on non-grass blocks. &#10;- Added dead willow trees to forests. &#10;- Fixed some lights not spreading during worldgen.">
-      <option name="closed" value="true" />
-      <created>1758218016757</created>
-      <option name="number" value="00222" />
-      <option name="presentableId" value="LOCAL-00222" />
-      <option name="project" value="LOCAL" />
-      <updated>1758218016757</updated>
-    </task>
-    <task id="LOCAL-00223" summary="- Removed grass slowdown. &#10;- Fixed not all leaf blocks having slowdown. &#10;- Added new held block renderer. &#10;- Re-enabled night shadows.">
-      <option name="closed" value="true" />
-      <created>1758245131791</created>
-      <option name="number" value="00223" />
-      <option name="presentableId" value="LOCAL-00223" />
-      <option name="project" value="LOCAL" />
-      <updated>1758245131791</updated>
-    </task>
-    <task id="LOCAL-00224" summary="- Added stack visualization.">
-      <option name="closed" value="true" />
-      <created>1758299216802</created>
-      <option name="number" value="00224" />
-      <option name="presentableId" value="LOCAL-00224" />
-      <option name="project" value="LOCAL" />
-      <updated>1758299216802</updated>
-    </task>
-    <task id="LOCAL-00225" summary="- Stack is now left-handed and horizontal.">
-      <option name="closed" value="true" />
-      <created>1758300183022</created>
-      <option name="number" value="00225" />
-      <option name="presentableId" value="LOCAL-00225" />
-      <option name="project" value="LOCAL" />
-      <updated>1758300183022</updated>
-    </task>
-    <task id="LOCAL-00226" summary="- Added new stack system.">
-      <option name="closed" value="true" />
-      <created>1758309597039</created>
-      <option name="number" value="00226" />
-      <option name="presentableId" value="LOCAL-00226" />
-      <option name="project" value="LOCAL" />
-      <updated>1758309597039</updated>
-    </task>
-    <task id="LOCAL-00227" summary="- Improved sky colors. &#10;- Increased night desaturation. &#10;- Reduced night brightness.">
-      <option name="closed" value="true" />
-      <created>1758384230118</created>
-      <option name="number" value="00227" />
-      <option name="presentableId" value="LOCAL-00227" />
-      <option name="project" value="LOCAL" />
-      <updated>1758384230118</updated>
-    </task>
-    <task id="LOCAL-00228" summary="- Added gravel.&#10;- Added flint. &#10;- Reflections no longer only apply to bright voxels. &#10;- Dirt, sand, &amp; snow now have unique place / break sounds.  &#10;- Fixed block breaking always playing grass sounds. &#10;- Foot step sounds now use the block's sounds from beneath. &#10;- Fixed solid blocks sometimes being treated as liquids and &quot;flowing.&quot;">
-      <option name="closed" value="true" />
-      <created>1758664530608</created>
-      <option name="number" value="00228" />
-      <option name="presentableId" value="LOCAL-00228" />
-      <option name="project" value="LOCAL" />
-      <updated>1758664530609</updated>
-    </task>
-    <task id="LOCAL-00229" summary="- Adjusted snow sounds. &#10;- Added mud sounds.">
-      <option name="closed" value="true" />
-      <created>1758664814683</created>
-      <option name="number" value="00229" />
-      <option name="presentableId" value="LOCAL-00229" />
-      <option name="project" value="LOCAL" />
-      <updated>1758664814683</updated>
-    </task>
-    <task id="LOCAL-00230" summary="- Fixed audio listener being oriented incorrectly. &#10;- Audio now uses an exponential distance curve. &#10;- Sounds now have no minimum volume. &#10;- Tripled audio reference distance. &#10;- Block sounds now have 33% of their gain and pitch randomized. &#10;- Improved footstep sound playing. &#10;- Added sound effects for clouds. &#10;- Fixed music not playing.">
-      <option name="closed" value="true" />
-      <created>1758830530155</created>
-      <option name="number" value="00230" />
-      <option name="presentableId" value="LOCAL-00230" />
-      <option name="project" value="LOCAL" />
-      <updated>1758830530156</updated>
-    </task>
-    <task id="LOCAL-00231" summary="- Jumping now uses the footstep sound of the block your on. &#10;- Added stone sound effects. &#10;- Added mud sound effects. &#10;- Added magma sound effects. &#10;- Added wood sound effects. &#10;- Added glass sound effects. &#10;- Re-implemented sound effects. &#10;- Fixed issues with powder blocks and water. &#10;- Fixed blocklight fog being too visible in daylight. &#10;- Added plank tag. &#10;- Fixed not all planks having the right friction. &#10;- Fixed block sounds being incorrect if standing on the edge of one.">
-      <option name="closed" value="true" />
-      <created>1758912412482</created>
-      <option name="number" value="00231" />
-      <option name="presentableId" value="LOCAL-00231" />
-      <option name="project" value="LOCAL" />
-      <updated>1758912412482</updated>
-    </task>
-    <task id="LOCAL-00232" summary="- Added subsurface scattering.">
-      <option name="closed" value="true" />
-      <created>1759003099665</created>
-      <option name="number" value="00232" />
-      <option name="presentableId" value="LOCAL-00232" />
-      <option name="project" value="LOCAL" />
-      <updated>1759003099665</updated>
-    </task>
-    <task id="LOCAL-00233" summary="- Added subsurface scattering.">
-      <option name="closed" value="true" />
-      <created>1759003160512</created>
-      <option name="number" value="00233" />
-      <option name="presentableId" value="LOCAL-00233" />
-      <option name="project" value="LOCAL" />
-      <updated>1759003160512</updated>
-    </task>
-    <task id="LOCAL-00234" summary="- Fixed inaccurate SSS. &#10;- Pixelized shadows.">
-      <option name="closed" value="true" />
-      <created>1759156460173</created>
-      <option name="number" value="00234" />
-      <option name="presentableId" value="LOCAL-00234" />
-      <option name="project" value="LOCAL" />
-      <updated>1759156460173</updated>
-    </task>
-    <task id="LOCAL-00235" summary="- Added new AO implementation. &#10;- Merged SSS into AO.">
-      <option name="closed" value="true" />
-      <created>1759182591352</created>
-      <option name="number" value="00235" />
-      <option name="presentableId" value="LOCAL-00235" />
-      <option name="project" value="LOCAL" />
-      <updated>1759182591352</updated>
-    </task>
-    <task id="LOCAL-00236" summary="- Updated to 0.5. &#10;- Fixed light removal flickering.">
-      <option name="closed" value="true" />
-      <created>1759248676722</created>
-      <option name="number" value="00236" />
-      <option name="presentableId" value="LOCAL-00236" />
-      <option name="project" value="LOCAL" />
-      <updated>1759248676722</updated>
-    </task>
-    <task id="LOCAL-00237" summary="- Updated to 0.6.">
-      <option name="closed" value="true" />
-      <created>1759249129935</created>
-      <option name="number" value="00237" />
-      <option name="presentableId" value="LOCAL-00237" />
-      <option name="project" value="LOCAL" />
-      <updated>1759249129935</updated>
-    </task>
-    <task id="LOCAL-00238" summary="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt.">
-      <option name="closed" value="true" />
-      <created>1759258481198</created>
-      <option name="number" value="00238" />
-      <option name="presentableId" value="LOCAL-00238" />
-      <option name="project" value="LOCAL" />
-      <updated>1759258481198</updated>
-    </task>
-    <task id="LOCAL-00239" summary="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die.">
-      <option name="closed" value="true" />
-      <created>1759264871574</created>
-      <option name="number" value="00239" />
-      <option name="presentableId" value="LOCAL-00239" />
-      <option name="project" value="LOCAL" />
-      <updated>1759264871574</updated>
-    </task>
-    <task id="LOCAL-00240" summary="- Reduced voxel brightness. &#10;- Reduced sand saturation. &#10;- Improved voxel coloring from fog. &#10;- Capped SSS.">
-      <option name="closed" value="true" />
-      <created>1759330766170</created>
-      <option name="number" value="00240" />
-      <option name="presentableId" value="LOCAL-00240" />
-      <option name="project" value="LOCAL" />
-      <updated>1759330766170</updated>
-    </task>
-    <task id="LOCAL-00241" summary="- Fixed hand-held blocks being inaccurately lit.&#10;- Fixed hand-held blocks not rendering. &#10;- Improved leaf AO.&#10;- Improved SSS with water. &#10;- Optimized voxel sampling. &#10;- Optimized lighting. &#10;- Optimized SSS &amp; AO. &#10;- Removed ability to remove corners of non-solid blocks. &#10;- Disabled reflections through transparent objects when the reflection strength is less than 25%. &#10;- Underwater now looks more watery. &#10;- MMB now picks blocks through water instead of picking the water.">
-      <option name="closed" value="true" />
-      <created>1759337334923</created>
-      <option name="number" value="00241" />
-      <option name="presentableId" value="LOCAL-00241" />
-      <option name="project" value="LOCAL" />
-      <updated>1759337334923</updated>
-    </task>
-    <task id="LOCAL-00242" summary="- MMB now can pick liquids again if shift is held. &#10;- You can now replace liquids with solid blocks.">
-      <option name="closed" value="true" />
-      <created>1759338573301</created>
-      <option name="number" value="00242" />
-      <option name="presentableId" value="LOCAL-00242" />
-      <option name="project" value="LOCAL" />
-      <updated>1759338573301</updated>
-    </task>
-    <task id="LOCAL-00243" summary="- Improved water reactions. &#10;- Added steam. &#10;- Added obsidian. &#10;- Kyanite spreading now only occurs upwards and is instantaneous.">
-      <option name="closed" value="true" />
-      <created>1759359397236</created>
-      <option name="number" value="00243" />
-      <option name="presentableId" value="LOCAL-00243" />
-      <option name="project" value="LOCAL" />
-      <updated>1759359397236</updated>
-    </task>
-    <task id="LOCAL-00244" summary="- Removed unused textures.">
-      <option name="closed" value="true" />
-      <created>1759594183479</created>
-      <option name="number" value="00244" />
-      <option name="presentableId" value="LOCAL-00244" />
-      <option name="project" value="LOCAL" />
-      <updated>1759594183479</updated>
-    </task>
-    <task id="LOCAL-00245" summary="- Sped up atlas generation. &#10;- Converted atlas to a 3d texture.">
-      <option name="closed" value="true" />
-      <created>1759603594858</created>
-      <option name="number" value="00245" />
-      <option name="presentableId" value="LOCAL-00245" />
-      <option name="project" value="LOCAL" />
-      <updated>1759603594858</updated>
-    </task>
-    <task id="LOCAL-00246" summary="- Optimized AO greatly. &#10;- AO quality setting can now be changed. &#10;- AO now affects hand-held blocks.&#10;- You no longer move while holding F3.">
-      <option name="closed" value="true" />
-      <created>1759683200276</created>
-      <option name="number" value="00246" />
-      <option name="presentableId" value="LOCAL-00246" />
-      <option name="project" value="LOCAL" />
-      <updated>1759683200276</updated>
-    </task>
-    <task id="LOCAL-00247" summary="- Added creative mode that can be toggled with F3 + C. &#10;- Creative mode now must be enabled to be able to fly or pick blocks. &#10;- Block picking now only replaces the block in your hand instead of the whole stack. &#10;- Implemented bucket behavior. &#10;- Removed crystals tag from obsidian. &#10;- Reduced cloud brightness. &#10;- Fire now renders on hand-held blocks. &#10;- Removed AO on hand-held blocks.&#10;- Fixed fire removing transparency.  &#10;- Fixed transparency not always rendering on blocks held in-hand.">
-      <option name="closed" value="true" />
-      <created>1759713672357</created>
-      <option name="number" value="00247" />
-      <option name="presentableId" value="LOCAL-00247" />
-      <option name="project" value="LOCAL" />
-      <updated>1759713672357</updated>
-    </task>
-    <task id="LOCAL-00248" summary="- Blocks now take time to break.">
-      <option name="closed" value="true" />
-      <created>1759716001958</created>
-      <option name="number" value="00248" />
-      <option name="presentableId" value="LOCAL-00248" />
-      <option name="project" value="LOCAL" />
-      <updated>1759716001958</updated>
-    </task>
-    <task id="LOCAL-00249" summary="- Re-enabled music player. &#10;- Improved water sounds.">
-      <option name="closed" value="true" />
-      <created>1759767971938</created>
-      <option name="number" value="00249" />
-      <option name="presentableId" value="LOCAL-00249" />
-      <option name="project" value="LOCAL" />
-      <updated>1759767971938</updated>
-    </task>
-    <task id="LOCAL-00250" summary="- Sounds are now read in the jar again. &#10;- Fixed gravel sounds being named incorrectly. &#10;- No longer uses experimental java features.&#10;- Fixed scheduled ticker iterating from the first tick.  &#10;- Sources are now disposed of after being used. &#10;- Fixed rare crash when breaking blocks. &#10;- Fixed player sounds being at the wrong positions. &#10;- Fixed all sounds being 10% higher pitch and volume than intended.">
-      <option name="closed" value="true" />
-      <created>1759774189198</created>
-      <option name="number" value="00250" />
-      <option name="presentableId" value="LOCAL-00250" />
-      <option name="project" value="LOCAL" />
-      <updated>1759774189198</updated>
-    </task>
-    <task id="LOCAL-00251" summary="- Updated to 0.7. &#10;- Updated preview image.">
-      <option name="closed" value="true" />
-      <created>1759774416875</created>
-      <option name="number" value="00251" />
-      <option name="presentableId" value="LOCAL-00251" />
-      <option name="project" value="LOCAL" />
-      <updated>1759774416875</updated>
-    </task>
-    <task id="LOCAL-00252" summary="- Added the flint hammer. &#10;- Added the obsidian mace. &#10;- Added sticks. &#10;- Fixed F3 + Shift + Q / E not allowing to swap between subtypes in intervals less than 10.">
-      <option name="closed" value="true" />
-      <created>1759960787793</created>
-      <option name="number" value="00252" />
-      <option name="presentableId" value="LOCAL-00252" />
-      <option name="project" value="LOCAL" />
-      <updated>1759960787793</updated>
-    </task>
-    <task id="LOCAL-00253" summary="- Added stick platforms. &#10;- Fixed tools and sticks having the wrong tags.">
-      <option name="closed" value="true" />
-      <created>1760023980974</created>
-      <option name="number" value="00253" />
-      <option name="presentableId" value="LOCAL-00253" />
-      <option name="project" value="LOCAL" />
-      <updated>1760023980975</updated>
-    </task>
-    <task id="LOCAL-00254" summary="- Added platform orientations.">
-      <option name="closed" value="true" />
-      <created>1760040683946</created>
-      <option name="number" value="00254" />
-      <option name="presentableId" value="LOCAL-00254" />
-      <option name="project" value="LOCAL" />
-      <updated>1760040683947</updated>
-    </task>
-    <task id="LOCAL-00255" summary="- Made movement feel alot smoother.">
-      <option name="closed" value="true" />
-      <created>1760116284749</created>
-      <option name="number" value="00255" />
-      <option name="presentableId" value="LOCAL-00255" />
-      <option name="project" value="LOCAL" />
-      <updated>1760116284749</updated>
-    </task>
-    <task id="LOCAL-00256" summary="- Added ability to speed up or slow down time.">
-      <option name="closed" value="true" />
-      <created>1760121804483</created>
-      <option name="number" value="00256" />
-      <option name="presentableId" value="LOCAL-00256" />
-      <option name="project" value="LOCAL" />
-      <updated>1760121804483</updated>
-    </task>
-    <task id="LOCAL-00257" summary="- Added survival block-picking. &#10;- Added crouching. &#10;- Added crawling. &#10;- Corner manipulation now relies on crouching instead of sprinting.">
-      <option name="closed" value="true" />
-      <created>1760138368872</created>
-      <option name="number" value="00257" />
-      <option name="presentableId" value="LOCAL-00257" />
-      <option name="project" value="LOCAL" />
-      <updated>1760138368872</updated>
-    </task>
-    <task id="LOCAL-00258" summary="- Finished adding crawling.">
-      <option name="closed" value="true" />
-      <created>1760191655606</created>
-      <option name="number" value="00258" />
-      <option name="presentableId" value="LOCAL-00258" />
-      <option name="project" value="LOCAL" />
-      <updated>1760191655606</updated>
-    </task>
-    <task id="LOCAL-00259" summary="- Updated readme. &#10;- Fixed crash when resources folder was missing. &#10;- Music no longer plays if there's only 1 song to choose from. &#10;- Added gson dependency. &#10;- Added json config. &#10;- Made camera movement smoother. &#10;- Fixed issues with crouching &amp; crawling.&#10;- Crouching now slows you down slightly more. &#10;- Crouching now stops you from falling off edges.">
-      <option name="closed" value="true" />
-      <created>1760390241087</created>
-      <option name="number" value="00259" />
-      <option name="presentableId" value="LOCAL-00259" />
-      <option name="project" value="LOCAL" />
-      <updated>1760390241087</updated>
-    </task>
-    <task id="LOCAL-00260" summary="- Added recipe system. &#10;- Breaking leaves with an empty hand now puts a stick in your hand. &#10;- Breaking flint or obsidian with a stick-in-hand now creates a hammer / mace. &#10;- Fixed bug with placing liquids. &#10;- Cleaned up hand manager class. &#10;- Can no longer break blocks while holding buckets. &#10;- Fixed powder block conversions. &#10;- Fixed crouching stopping horizontal movement when in the air. &#10;- Can no longer crouch or crawl while flying.">
-      <option name="closed" value="true" />
-      <created>1760552749126</created>
-      <option name="number" value="00260" />
-      <option name="presentableId" value="LOCAL-00260" />
-      <option name="project" value="LOCAL" />
-      <updated>1760552749126</updated>
-    </task>
-    <task id="LOCAL-00261" summary="- Tools now break blocks quicker.">
-      <option name="closed" value="true" />
-      <created>1760620037122</created>
-      <option name="number" value="00261" />
-      <option name="presentableId" value="LOCAL-00261" />
-      <option name="project" value="LOCAL" />
-      <updated>1760620037122</updated>
-    </task>
-    <option name="localTasksCounter" value="262" />
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
-  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="- Updated to 0.6." />
-    <MESSAGE value="- Removed flowers tag from dead bushes. &#10;- Added dry mud. &#10;- Added clay. &#10;- Water now grows grass &amp; flowers when poured on grass blocks. &#10;- Water now converts dirt into mud when it flows on it. &#10;- Clay, gravel, mud, &amp; sand now generate underwater instead of dirt." />
-    <MESSAGE value="- Dry mud now generates around dead trees in deserts. &#10;- Dirt now generates around dead trees in forests. &#10;- Added new tags. &#10;- Plants now require specific blocks to survive, and convert to dead bushes when they die." />
-    <MESSAGE value="- Reduced voxel brightness. &#10;- Reduced sand saturation. &#10;- Improved voxel coloring from fog. &#10;- Capped SSS." />
-    <MESSAGE value="- Fixed hand-held blocks being inaccurately lit.&#10;- Fixed hand-held blocks not rendering. &#10;- Improved leaf AO.&#10;- Improved SSS with water. &#10;- Optimized voxel sampling. &#10;- Optimized lighting. &#10;- Optimized SSS &amp; AO. &#10;- Removed ability to remove corners of non-solid blocks. &#10;- Disabled reflections through transparent objects when the reflection strength is less than 25%. &#10;- Underwater now looks more watery. &#10;- MMB now picks blocks through water instead of picking the water." />
-    <MESSAGE value="- MMB now can pick liquids again if shift is held. &#10;- You can now replace liquids with solid blocks." />
-    <MESSAGE value="- Improved water reactions. &#10;- Added steam. &#10;- Added obsidian. &#10;- Kyanite spreading now only occurs upwards and is instantaneous." />
-    <MESSAGE value="- Removed unused textures." />
-    <MESSAGE value="- Sped up atlas generation. &#10;- Converted atlas to a 3d texture." />
-    <MESSAGE value="- Optimized AO greatly. &#10;- AO quality setting can now be changed. &#10;- AO now affects hand-held blocks.&#10;- You no longer move while holding F3." />
-    <MESSAGE value="- Added creative mode that can be toggled with F3 + C. &#10;- Creative mode now must be enabled to be able to fly or pick blocks. &#10;- Block picking now only replaces the block in your hand instead of the whole stack. &#10;- Implemented bucket behavior. &#10;- Removed crystals tag from obsidian. &#10;- Reduced cloud brightness. &#10;- Fire now renders on hand-held blocks. &#10;- Removed AO on hand-held blocks.&#10;- Fixed fire removing transparency.  &#10;- Fixed transparency not always rendering on blocks held in-hand." />
-    <MESSAGE value="- Blocks now take time to break." />
-    <MESSAGE value="- Re-enabled music player. &#10;- Improved water sounds." />
-    <MESSAGE value="- Sounds are now read in the jar again. &#10;- Fixed gravel sounds being named incorrectly. &#10;- No longer uses experimental java features.&#10;- Fixed scheduled ticker iterating from the first tick.  &#10;- Sources are now disposed of after being used. &#10;- Fixed rare crash when breaking blocks. &#10;- Fixed player sounds being at the wrong positions. &#10;- Fixed all sounds being 10% higher pitch and volume than intended." />
-    <MESSAGE value="- Updated to 0.7. &#10;- Updated preview image." />
-    <MESSAGE value="- Added the flint hammer. &#10;- Added the obsidian mace. &#10;- Added sticks. &#10;- Fixed F3 + Shift + Q / E not allowing to swap between subtypes in intervals less than 10." />
-    <MESSAGE value="- Added stick platforms. &#10;- Fixed tools and sticks having the wrong tags." />
-    <MESSAGE value="- Added platform orientations." />
-    <MESSAGE value="- Made movement feel alot smoother." />
-    <MESSAGE value="- Added ability to speed up or slow down time." />
-    <MESSAGE value="- Added survival block-picking. &#10;- Added crouching. &#10;- Added crawling. &#10;- Corner manipulation now relies on crouching instead of sprinting." />
-    <MESSAGE value="- Finished adding crawling." />
-    <MESSAGE value="- Updated readme. &#10;- Fixed crash when resources folder was missing. &#10;- Music no longer plays if there's only 1 song to choose from. &#10;- Added gson dependency. &#10;- Added json config. &#10;- Made camera movement smoother. &#10;- Fixed issues with crouching &amp; crawling.&#10;- Crouching now slows you down slightly more. &#10;- Crouching now stops you from falling off edges." />
-    <MESSAGE value="- Added recipe system. &#10;- Breaking leaves with an empty hand now puts a stick in your hand. &#10;- Breaking flint or obsidian with a stick-in-hand now creates a hammer / mace. &#10;- Fixed bug with placing liquids. &#10;- Cleaned up hand manager class. &#10;- Can no longer break blocks while holding buckets. &#10;- Fixed powder block conversions. &#10;- Fixed crouching stopping horizontal movement when in the air. &#10;- Can no longer crouch or crawl while flying." />
-    <MESSAGE value="- Tools now break blocks quicker." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Tools now break blocks quicker." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java</url>
-          <line>88</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="- Initial commit." />
+    <MESSAGE value="- Update .gitignore." />
+    <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
+    <MESSAGE value="- Rewrite." />
+    <MESSAGE value="- Thing." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Thing." />
   </component>
 </project>
