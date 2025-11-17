@@ -63,10 +63,10 @@ public class Engine {
                 main.input(window, now,  now - initialTime);
             }
 
+            long diffTimeMillis = now - updateTime;
+            main.update(window, diffTimeMillis, now);
+            updateTime = now;
             if (deltaUpdate >= 1) {
-                long diffTimeMillis = now - updateTime;
-                main.update(window, diffTimeMillis, now);
-                updateTime = now;
                 deltaUpdate--;
             }
 
