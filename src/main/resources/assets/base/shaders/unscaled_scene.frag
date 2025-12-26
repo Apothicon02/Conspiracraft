@@ -17,6 +17,7 @@ void main() {
     if (ui && uv.x >= -0.004f && uv.x <= 0.004f && uv.y >= -0.004385f && uv.y <= 0.004385f) {
         fragColor = vec4(0.9, 0.9, 1, 1);
     } else {
+        //fragColor = vec4(fromLinear(texture(coherent_noise, pos/1024).rgb), 1);
         fragColor = raytrace(camPos, ogDir, true, renderDistance);
     }
     //fragColor = vec4(float(clockARB() - startTime) * 0.0000005);
