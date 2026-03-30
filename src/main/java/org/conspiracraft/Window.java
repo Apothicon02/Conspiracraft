@@ -1,0 +1,285 @@
+package org.conspiracraft;
+
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.sdl.*;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.vulkan.*;
+import org.tinylog.Logger;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+
+import static org.lwjgl.sdl.SDLError.*;
+import static org.lwjgl.sdl.SDLEvents.*;
+import static org.lwjgl.sdl.SDLHints.SDL_SetHint;
+import static org.lwjgl.sdl.SDLInit.*;
+import static org.lwjgl.sdl.SDLKeyboard.*;
+import static org.lwjgl.sdl.SDLLog.*;
+import static org.lwjgl.sdl.SDLMouse.*;
+import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
+import static org.lwjgl.sdl.SDLVideo.*;
+import static org.lwjgl.sdl.SDLVulkan.*;
+import static org.lwjgl.system.MemoryUtil.memUTF8;
+import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_COLOR_SPACE_HDR10_HLG_EXT;
+import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
+import static org.lwjgl.vulkan.KHRSurface.*;
+import static org.lwjgl.vulkan.VK10.*;
+
+public class Window {
+    public static long window;
+    public static VkInstance vkInst;
+    public static long vkSurf;
+    public static int vkQueue;
+    public static VkPhysicalDevice physicalDevice;
+    public static VkDevice device;
+    public static long graphicsQueue;
+    public static VkSurfaceFormatKHR vkSurfFormat;
+
+    private int width = Settings.width;
+    private int height = Settings.height;
+    private final Matrix4f projectionMatrix = new Matrix4f();
+    public ByteBuffer keys;
+
+    public Window() {
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10)) {throw new IllegalStateException("Unable to initialize SDL");}
+        createVkInst();
+        createSDLWindow();
+        createVkSurf();
+        createVkPhysicalDeviceAndVkQueue();
+        createVkDeviceAndGraphicsQueue();
+        createSwapchain();
+    }
+
+    public void createSDLWindow() {
+        window = SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
+
+        SDL_SetWindowResizable(window, true);
+        SDL_SetWindowRelativeMouseMode(window, true);
+    }
+
+    public void createSwapchain() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, vkSurf, caps);
+
+            IntBuffer formatCount = stack.mallocInt(1);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, null);
+            VkSurfaceFormatKHR.Buffer formats = VkSurfaceFormatKHR.malloc(formatCount.get(0), stack);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, formats);
+            for (int i = 0; i < formats.capacity(); i++) {
+                VkSurfaceFormatKHR f = formats.get(i);
+                System.out.println(f.format() + "  " + f.colorSpace());
+            }
+
+            IntBuffer presentCount = stack.mallocInt(1);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, null);
+            IntBuffer presentModes = stack.mallocInt(presentCount.get(0));
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, presentModes);
+
+            VkSurfaceFormatKHR chosenFormat = null;
+            for (int i = 0; i < formats.capacity(); i++) {
+                VkSurfaceFormatKHR f = formats.get(i);
+                if (f.format() == VK_FORMAT_A2R10G10B10_UNORM_PACK32 &&
+                        f.colorSpace() == VK_COLOR_SPACE_HDR10_HLG_EXT) {
+                    chosenFormat = f;
+                    break;
+                }
+            }
+            if (chosenFormat == null) {
+                chosenFormat = formats.get(0); //fallback
+            }
+        }
+    }
+
+    public void createVkDeviceAndGraphicsQueue() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer priorities = stack.floats(1.0f);
+
+            VkDeviceQueueCreateInfo.Buffer queueInfo =
+                    VkDeviceQueueCreateInfo.calloc(1, stack)
+                            .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
+                            .queueFamilyIndex(vkQueue)
+                            .pQueuePriorities(priorities);
+
+            VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
+                    .pQueueCreateInfos(queueInfo);
+
+            PointerBuffer pDevice = stack.mallocPointer(1);
+            vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);
+
+            device = new VkDevice(pDevice.get(0), physicalDevice, deviceInfo);
+
+            // Retrieve the queue
+            PointerBuffer pQueue = stack.mallocPointer(1);
+            vkGetDeviceQueue(device, vkQueue, 0, pQueue);
+            graphicsQueue = pQueue.get(0);
+        }
+    }
+    public void createVkPhysicalDeviceAndVkQueue() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer deviceCount = stack.mallocInt(1);
+            vkEnumeratePhysicalDevices(vkInst, deviceCount, null);
+            if (deviceCount.get(0) == 0) {
+                throw new RuntimeException("No Vulkan physical devices found");
+            }
+
+            PointerBuffer devices = stack.mallocPointer(deviceCount.get(0));
+            vkEnumeratePhysicalDevices(vkInst, deviceCount, devices);
+            for (int d = 0; d < devices.capacity(); d++) {
+                VkPhysicalDevice device = new VkPhysicalDevice(devices.get(d), vkInst);
+
+                IntBuffer queueCount = stack.mallocInt(1);
+                vkGetPhysicalDeviceQueueFamilyProperties(device, queueCount, null);
+                VkQueueFamilyProperties.Buffer queues = VkQueueFamilyProperties.malloc(queueCount.get(0), stack);
+                vkGetPhysicalDeviceQueueFamilyProperties(device, queueCount, queues);
+                for (int q = 0; q < queues.capacity(); q++) {
+                    boolean graphics = (queues.get(q).queueFlags() & VK_QUEUE_GRAPHICS_BIT) != 0;
+
+                    IntBuffer presentSupport = stack.mallocInt(1);
+                    vkGetPhysicalDeviceSurfaceSupportKHR(device, q, vkSurf, presentSupport);
+
+                    boolean present = presentSupport.get(0) == VK_TRUE;
+
+                    if (graphics && present) {
+                        vkQueue = q;
+                        physicalDevice = device;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    public void createVkSurf() {
+        LongBuffer surface = MemoryUtil.memAllocLong(1);
+        if (!SDL_Vulkan_CreateSurface(window, vkInst, null, surface)) {
+            throw new RuntimeException("Failed to create surface: %s\n" + SDL_GetError());
+        }
+        vkSurf = surface.get(0);
+    }
+    public void createVkInst() {
+        PointerBuffer extBuffer = SDLVulkan.SDL_Vulkan_GetInstanceExtensions();
+        int extCount = extBuffer.remaining();
+        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+1);
+        for (int i = 0; i < extCount; i++) {
+            extensions.put(i, extBuffer.get(i));
+        }
+        extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
+                    .sType(VK13.VK_STRUCTURE_TYPE_APPLICATION_INFO)
+                    .pApplicationName(stack.UTF8("Conspiracraft"))
+                    .applicationVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
+                    .pEngineName(stack.UTF8("Conspiracraft Engine"))
+                    .engineVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
+                    .apiVersion(VK13.VK_API_VERSION_1_3);
+
+            VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
+                    .sType(VK13.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
+                    .pApplicationInfo(appInfo)
+                    .ppEnabledExtensionNames(extensions);
+
+            PointerBuffer pInstance = stack.mallocPointer(1);
+            int err = VK13.vkCreateInstance(createInfo, null, pInstance);
+            if (err != VK13.VK_SUCCESS) {
+                throw new RuntimeException("Failed to create Vulkan instance: " + err);
+            }
+
+            vkInst = new VkInstance(pInstance.get(0), createInfo);
+        }
+    }
+
+    public void cleanup() {
+        SDL_DestroyWindow(Window.window);
+        SDL_Quit();
+    }
+
+    public int getHeight() {
+        return height;
+    }
+    public int getWidth() {
+        return width;
+    }
+
+    public boolean isKeyPressed(int keyCode) {
+        return keys.get(keyCode) > 0;
+    }
+
+    public boolean leftButtonPressed = false;
+    public boolean middleButtonPressed = false;
+    public boolean rightButtonPressed = false;
+    public Vector2f scroll = new Vector2f(0);
+    public Vector2f displVec = new Vector2f(0);
+    public Vector2f currentPos = new Vector2f(0);
+
+    public void input() {
+        leftButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_LEFT) > 0;
+        rightButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_RIGHT) > 0;
+        middleButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_MIDDLE) > 0;
+        keys = SDL_GetKeyboardState();
+    }
+
+    public void pollEvents(SDL_Event event) {
+        displVec.x = 0;
+        displVec.y = 0;
+        scroll.set(0);
+        while (SDL_PollEvent(event)) {
+            switch (event.type()) {
+                case SDL_EVENT_QUIT:
+                    Main.isClosing = true;
+                    break;
+                case SDL_EVENT_WINDOW_RESIZED:
+                    resized(event.window().data1(), event.window().data2());
+                    break;
+                case SDL_EVENT_MOUSE_MOTION:
+                    displVec.y += event.motion().xrel();
+                    displVec.x += event.motion().yrel();
+                    currentPos.x = event.motion().x();
+                    currentPos.y = event.motion().y();
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    scroll.x = event.wheel().x();
+                    scroll.y = event.wheel().y();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void resized(int width, int height) {
+        this.width = width;
+        this.height = height;
+        try {
+
+        } catch (Exception excp) {
+            Logger.error("Error calling resize callback", excp);
+        }
+    }
+
+    public void update() {
+        SDL_GL_SwapWindow(window);
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
+    public Matrix4f updateProjectionMatrix() {
+        float aspectRatio = (float) width /height;
+        projectionMatrix.identity();
+        projectionMatrix.set(
+                1.f/Settings.fov, 0.f, 0.f, 0.f,
+                0.f, aspectRatio/Settings.fov, 0.f, 0.f,
+                0.f, 0.f, 0.f, -1.f,
+                0.f, 0.f, Settings.Z_NEAR, 0.f
+        );
+        return projectionMatrix;
+    }
+}
