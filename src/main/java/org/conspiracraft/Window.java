@@ -50,6 +50,7 @@ public class Window {
     public static long renderPass;
     public static long pipelineLayout;
     public static long graphicsPipeline;
+    public static LongBuffer swapchainFramebuffers;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -69,6 +70,29 @@ public class Window {
             createImageViews(stack);
             createRenderPass(stack);
             createGraphicsPipeline(stack);
+            createFramebuffers(stack);
+        }
+    }
+    public void createFramebuffers(MemoryStack stack) {
+        swapchainFramebuffers = stack.callocLong(imageViews.length);
+        for (int i = 0; i < imageViews.length; i++) {
+            LongBuffer attachments = stack.longs(imageViews[i]);
+
+            VkFramebufferCreateInfo framebufferInfo = VkFramebufferCreateInfo.calloc(stack);
+            framebufferInfo.sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
+            framebufferInfo.renderPass(renderPass);
+            framebufferInfo.attachmentCount(1);
+            framebufferInfo.pAttachments(attachments);
+            framebufferInfo.width(extent.width());
+            framebufferInfo.height(extent.height());
+            framebufferInfo.layers(1);
+
+            LongBuffer framebufferBuf = stack.mallocLong(1);
+            int err = vkCreateFramebuffer(device, framebufferInfo, null, framebufferBuf);
+            if (err != VK_SUCCESS) {
+                throw new RuntimeException("Failed to create framebuffer: " + err);
+            }
+            swapchainFramebuffers.put(i, framebufferBuf.get(0));
         }
     }
     public void createGraphicsPipeline(MemoryStack stack) {
@@ -509,6 +533,9 @@ public class Window {
     }
 
     public void cleanup() {
+        for (int i = 0; i < swapchainFramebuffers.capacity(); i++) {
+            vkDestroyFramebuffer(device, swapchainFramebuffers.get(i), null);
+        }
         vkDestroyPipeline(device, graphicsPipeline, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);

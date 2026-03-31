@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Created render pass.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Finished graphics pipeline.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
     </list>
@@ -315,7 +315,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774991301847</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="- Finished graphics pipeline.">
+      <option name="closed" value="true" />
+      <created>1774992069702</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1774992069702</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -336,7 +344,8 @@
     <MESSAGE value="- Now creates shader stages." />
     <MESSAGE value="- Now creates the pipeline layout." />
     <MESSAGE value="- Created render pass." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Created render pass." />
+    <MESSAGE value="- Finished graphics pipeline." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Finished graphics pipeline." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
