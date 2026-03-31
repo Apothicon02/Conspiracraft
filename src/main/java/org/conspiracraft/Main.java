@@ -13,5 +13,6 @@ public class Main {
         while (!isClosing) {
             window.update();
         }
+        window.cleanup();
     }
 }

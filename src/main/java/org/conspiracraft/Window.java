@@ -14,6 +14,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
+import static org.conspiracraft.Settings.hdr;
 import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
@@ -41,6 +42,8 @@ public class Window {
     public static long queueHandle;
     public static VkSurfaceFormatKHR vkSurfFormat;
     public static long swapchain;
+    public static long[] swapchainImages;
+    public static long[] imageViews;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -48,7 +51,7 @@ public class Window {
     public ByteBuffer keys;
 
     public Window() {
-        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10)) {throw new IllegalStateException("Unable to initialize SDL");}
+        if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             createVkInst(stack);
@@ -57,17 +60,34 @@ public class Window {
             createVkPhysicalDeviceAndVkQueue(stack);
             createVkDeviceAndGraphicsQueue(stack);
             createSwapchain(stack);
+            createImageViews(stack);
         }
     }
-
-    public void createSDLWindow() {
-        window = SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
-        if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
-
-        SDL_SetWindowResizable(window, true);
-        SDL_SetWindowRelativeMouseMode(window, true);
+    public void createImageViews(MemoryStack stack) {
+        imageViews = new long[swapchainImages.length];
+        for (int i = 0; i < swapchainImages.length; i++) {
+            VkImageViewCreateInfo createInfo = VkImageViewCreateInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO)
+                    .image(swapchainImages[i])
+                    .viewType(VK_IMAGE_VIEW_TYPE_2D)
+                    .format(vkSurfFormat.format());
+            createInfo.components()
+                    .r(VK_COMPONENT_SWIZZLE_IDENTITY)
+                    .g(VK_COMPONENT_SWIZZLE_IDENTITY)
+                    .b(VK_COMPONENT_SWIZZLE_IDENTITY)
+                    .a(VK_COMPONENT_SWIZZLE_IDENTITY);
+            createInfo.subresourceRange()
+                    .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                    .baseMipLevel(0)
+                    .levelCount(1)
+                    .baseArrayLayer(0)
+                    .layerCount(1);
+            LongBuffer pView = stack.mallocLong(1);
+            int err = vkCreateImageView(device, createInfo, null, pView);
+            if (err != VK_SUCCESS) throw new RuntimeException("Failed to create image view: " + err);
+            imageViews[i] = pView.get(0);
+        }
     }
-
     public void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, vkSurf, caps);
@@ -76,22 +96,24 @@ public class Window {
         vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, null);
         VkSurfaceFormatKHR.Buffer formats = VkSurfaceFormatKHR.malloc(formatCount.get(0), stack);
         vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, formats);
-        for (int i = 0; i < formats.capacity(); i++) {
-            VkSurfaceFormatKHR f = formats.get(i);
-            System.out.println(f.format() + "  " + f.colorSpace());
-        }
+//        for (int i = 0; i < formats.capacity(); i++) {
+//            VkSurfaceFormatKHR f = formats.get(i);
+//            System.out.println(f.format() + "  " + f.colorSpace());
+//        }
 
         IntBuffer presentCount = stack.mallocInt(1);
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, null);
         IntBuffer presentModes = stack.mallocInt(presentCount.get(0));
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, presentModes);
 
-        for (int i = 0; i < formats.capacity(); i++) {
-            VkSurfaceFormatKHR f = formats.get(i);
-            if (f.format() == VK_FORMAT_A2B10G10R10_UNORM_PACK32 &&
-                    f.colorSpace() == VK_COLOR_SPACE_HDR10_ST2084_EXT) {
-                vkSurfFormat = f;
-                break;
+        if (hdr) {
+            for (int i = 0; i < formats.capacity(); i++) {
+                VkSurfaceFormatKHR f = formats.get(i);
+                if (f.format() == VK_FORMAT_A2B10G10R10_UNORM_PACK32 &&
+                        f.colorSpace() == VK_COLOR_SPACE_HDR10_ST2084_EXT) {
+                    vkSurfFormat = f;
+                    break;
+                }
             }
         }
         if (vkSurfFormat == null) {
@@ -136,6 +158,8 @@ public class Window {
         vkGetSwapchainImagesKHR(device, swapchain, imgCount, null);
         LongBuffer images = stack.mallocLong(imgCount.get(0));
         vkGetSwapchainImagesKHR(device, swapchain, imgCount, images);
+        swapchainImages = new long[images.capacity()];
+        images.get(swapchainImages);
     }
 
     public void createVkDeviceAndGraphicsQueue(MemoryStack stack) {
@@ -194,7 +218,7 @@ public class Window {
             VkPhysicalDeviceProperties pdProperties;
             pdProperties = VkPhysicalDeviceProperties.malloc(stack);
             vkGetPhysicalDeviceProperties(pDevice, pdProperties);
-            System.out.println("Device name: " + pdProperties.deviceNameString());
+            //System.out.println("Device name: " + pdProperties.deviceNameString());
 
             IntBuffer queueCount = stack.mallocInt(1);
             vkGetPhysicalDeviceQueueFamilyProperties(pDevice, queueCount, null);
@@ -234,6 +258,13 @@ public class Window {
         }
         vkSurf = surface.get(0);
     }
+    public void createSDLWindow() {
+        window = SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
+
+        SDL_SetWindowResizable(window, true);
+        SDL_SetWindowRelativeMouseMode(window, true);
+    }
     public void createVkInst(MemoryStack stack) {
         PointerBuffer extBuffer = SDLVulkan.SDL_Vulkan_GetInstanceExtensions();
         int extCount = extBuffer.remaining();
@@ -267,6 +298,9 @@ public class Window {
     }
 
     public void cleanup() {
+        for (long i : imageViews) {
+            vkDestroyImageView(device, i, null);
+        }
         SDL_DestroyWindow(Window.window);
         SDL_Quit();
     }

@@ -4,140 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid13020.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid21064.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid22644.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid26416.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Constants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Updated preferred format &amp; color space.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/BitBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Camera.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ComputeProgram.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ConspiracraftMath.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Engine.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/FastNoiseLite.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/GLDebug.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/MouseInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/ShaderProgram.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Utils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/engine/Window.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Config.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/Renderer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/ScheduledTicker.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/AudioController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/BlockSFX.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/SFX.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Sounds.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/Source.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/audio/WaveData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/BlockBreaking.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Fluids.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tag.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/Tags.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockProperties.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/BlockTypes.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/CloudBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/FullBucketBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LeafBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockProperties.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/LightBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PlantBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PlantLightBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/PowderBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/blocks/types/WaterBlockType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/HandManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/Ingredient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/Player.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/Recipe.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/gameplay/StackManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noise.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/noise/Noises.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Chunk.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/Directions.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FeatureHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/FluidHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/GasHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/LightHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/World.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/WorldGen.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/cover/Mud.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/cover/Plains.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Blob.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/shapes/Pillar.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/DeadOakTree.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/JungleTree.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakShrub.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/OakTree.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmShrub.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PalmTree.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/PineTree.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/BlobCanopy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/Canopy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/JungleCanopy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PalmCanopy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/canopies/PineCanopy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/BendingTrunk.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/StraightTrunk.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/Trunk.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/game/world/trees/trunks/TwistingTrunk.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/air.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/grass.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/blocks/sun.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/blur_scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/final_scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/math.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/reflect_scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/scene.vert" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/test.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/unscaled_scene.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shaders/world_reader.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/bucket_pour_water.mp3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/buzz.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/chirp_1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/cloud.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/dirt_step3.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/flow.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/glass_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/glass_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/grass_step3.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/gravel_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/gravel_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/magma.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/mud_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/mud_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_place1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_place2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_scrape1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/rock_scrape2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sand_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sizzle1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/sizzle2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/splash1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/swim1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/wind.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/wood_step1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/sounds/wood_step2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/WorldGoal.pdn" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/atlas.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/cellular_noise.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/cloud_noise.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/coherent_noise.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/noodle_noise.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/spiral_noise.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/textures/white_noise.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,6 +59,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -216,28 +92,28 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.JavaColorSettingsPage&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [build].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.JavaColorSettingsPage"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
@@ -389,7 +265,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763392406939</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="- Updated preferred format &amp; color space.">
+      <option name="closed" value="true" />
+      <created>1774978657017</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1774978657018</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -404,7 +288,8 @@
     <MESSAGE value="- Thing." />
     <MESSAGE value="- Fixed inaccurate reflections on transparent objects." />
     <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Updated .gitignore. &#10;- Improved smoothness." />
+    <MESSAGE value="- Updated preferred format &amp; color space." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Updated preferred format &amp; color space." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
