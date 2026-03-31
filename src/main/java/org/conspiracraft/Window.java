@@ -24,8 +24,7 @@ import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
 import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVulkan.*;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
-import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_COLOR_SPACE_HDR10_HLG_EXT;
-import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
+import static org.lwjgl.vulkan.EXTSwapchainColorspace.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
@@ -89,8 +88,8 @@ public class Window {
 
         for (int i = 0; i < formats.capacity(); i++) {
             VkSurfaceFormatKHR f = formats.get(i);
-            if (f.format() == VK_FORMAT_A2R10G10B10_UNORM_PACK32 &&
-                    f.colorSpace() == VK_COLOR_SPACE_HDR10_HLG_EXT) {
+            if (f.format() == VK_FORMAT_A2B10G10R10_UNORM_PACK32 &&
+                    f.colorSpace() == VK_COLOR_SPACE_HDR10_ST2084_EXT) {
                 vkSurfFormat = f;
                 break;
             }
