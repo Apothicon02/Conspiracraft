@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added glsl -&gt; spir-v shader compiling.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Now creates shader stages.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Vertex.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/ShaderHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/ShaderHelper.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,7 +292,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774984638026</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="- Now creates shader stages.">
+      <option name="closed" value="true" />
+      <created>1774985960147</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1774985960147</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -310,7 +318,8 @@
     <MESSAGE value="- Updated preferred format &amp; color space." />
     <MESSAGE value="- Added hdr setting. &#10;- Created image views." />
     <MESSAGE value="- Added glsl -&gt; spir-v shader compiling." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added glsl -&gt; spir-v shader compiling." />
+    <MESSAGE value="- Now creates shader stages." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Now creates shader stages." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -7,7 +7,6 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.sdl.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.shaderc.GLSLang;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
@@ -44,9 +43,11 @@ public class Window {
     public static VkQueue queue;
     public static long queueHandle;
     public static VkSurfaceFormatKHR vkSurfFormat;
+    public static VkExtent2D extent;
     public static long swapchain;
     public static long[] swapchainImages;
     public static long[] imageViews;
+    public static long pipelineLayout;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -88,6 +89,122 @@ public class Window {
 
         vkDestroyShaderModule(device, fragShaderModule, null);
         vkDestroyShaderModule(device, vertShaderModule, null);
+
+        VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack);
+        dynamicState.sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
+        dynamicState.pDynamicStates(stack.ints(VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR));
+
+//        VkVertexInputBindingDescription.Buffer binding =
+//                VkVertexInputBindingDescription.calloc(1, stack)
+//                        .binding(0)
+//                        .stride(Vertex.size)
+//                        .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
+//
+//        VkVertexInputAttributeDescription.Buffer attributes =
+//                VkVertexInputAttributeDescription.calloc(3, stack);
+//
+//        attributes.get(0)
+//                .binding(0)
+//                .location(0)
+//                .format(VK_FORMAT_R32G32G32_SFLOAT)
+//                .offset(0);
+//
+//        attributes.get(1)
+//                .binding(0)
+//                .location(1)
+//                .format(VK_FORMAT_R32G32G32_SFLOAT)
+//                .offset(12);
+//
+//        attributes.get(2)
+//                .binding(0)
+//                .location(2)
+//                .format(VK_FORMAT_R32G32_SFLOAT)
+//                .offset(24);
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
+        vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
+        vertexInputInfo.pVertexBindingDescriptions(null);
+        vertexInputInfo.pVertexAttributeDescriptions(null);
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.calloc(stack);
+        inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
+        inputAssembly.topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        inputAssembly.primitiveRestartEnable(false);
+
+        VkViewport viewport = VkViewport.calloc(stack);
+        viewport.x(0.0f);
+        viewport.y(0.0f);
+        viewport.width((float) extent.width());
+        viewport.height((float) extent.height());
+        viewport.minDepth(0.0f);
+        viewport.maxDepth(1.0f);
+
+        VkRect2D scissor = VkRect2D.calloc(stack);
+        scissor.offset(VkOffset2D.calloc().set(0, 0));
+        scissor.extent(extent);
+
+        VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack);
+        viewportState.sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
+        viewportState.viewportCount(1);
+        viewportState.scissorCount(1);
+
+        VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack);
+        rasterizer.sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
+        rasterizer.depthClampEnable(true);
+        rasterizer.rasterizerDiscardEnable(false);
+        rasterizer.polygonMode(VK_POLYGON_MODE_FILL);
+        rasterizer.lineWidth(1.0f);
+        rasterizer.cullMode(VK_CULL_MODE_BACK_BIT);
+        rasterizer.frontFace(VK_FRONT_FACE_CLOCKWISE);
+        rasterizer.depthBiasEnable(false);
+//        rasterizer.depthBiasConstantFactor(0.f);
+//        rasterizer.depthBiasClamp(0.f);
+//        rasterizer.depthBiasSlopeFactor(0.f);
+
+        VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);
+        multisampling.sType(VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
+        multisampling.sampleShadingEnable(false);
+        multisampling.rasterizationSamples(VK_SAMPLE_COUNT_1_BIT);
+//        multisampling.minSampleShading(1.0f); // Optional
+//        multisampling.pSampleMask(null); // Optional
+//        multisampling.alphaToCoverageEnable(false); // Optional
+//        multisampling.alphaToOneEnable(false) // Optional
+
+        //VkPipelineDepthStencilStateCreateInfo
+
+        VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachment = VkPipelineColorBlendAttachmentState.calloc(1, stack);
+        colorBlendAttachment.colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+        colorBlendAttachment.blendEnable(false);
+//        colorBlendAttachment.srcColorBlendFactor(VK_BLEND_FACTOR_ONE); // Optional
+//        colorBlendAttachment.dstColorBlendFactor(VK_BLEND_FACTOR_ZERO); // Optional
+//        colorBlendAttachment.colorBlendOp(VK_BLEND_OP_ADD); // Optional
+//        colorBlendAttachment.srcAlphaBlendFactor(VK_BLEND_FACTOR_ONE); // Optional
+//        colorBlendAttachment.dstAlphaBlendFactor(VK_BLEND_FACTOR_ZERO); // Optional
+//        colorBlendAttachment.alphaBlendOp(VK_BLEND_OP_ADD); // Optional
+
+        VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack);
+        colorBlending.sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
+        colorBlending.logicOpEnable(false);
+        colorBlending.logicOp(VK_LOGIC_OP_COPY); // Optional
+        colorBlending.attachmentCount(1);
+        colorBlending.pAttachments(colorBlendAttachment);
+//        colorBlending.blendConstants(0, 0.0f); // Optional
+//        colorBlending.blendConstants(1, 0.0f); // Optional
+//        colorBlending.blendConstants(2, 0.0f); // Optional
+//        colorBlending.blendConstants(3, 0.0f); // Optional
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack);
+        pipelineLayoutInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
+//        pipelineLayoutInfo.setLayoutCount(0); // Optional
+//        pipelineLayoutInfo.pSetLayouts(null); // Optional
+//        pipelineLayoutInfo.pPushConstantRanges(null); // Optional
+
+        LongBuffer pPipelineLayout = stack.mallocLong(1);
+        int err = vkCreatePipelineLayout(device, pipelineLayoutInfo, null, pPipelineLayout);
+        if (err != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create pipeline layout: " + err);
+        }
+        pipelineLayout = pPipelineLayout.get(0);
     }
     public void createImageViews(MemoryStack stack) {
         imageViews = new long[swapchainImages.length];
@@ -154,7 +271,7 @@ public class Window {
                 break;
             }
         }
-        VkExtent2D extent = VkExtent2D.calloc(stack).width(width).height(height);
+        extent = VkExtent2D.calloc(stack).width(width).height(height);
         int imageCount = 2;
         int imgFormat = vkSurfFormat.format();
         int imgColorSpace = vkSurfFormat.colorSpace();
@@ -324,6 +441,7 @@ public class Window {
     }
 
     public void cleanup() {
+        vkDestroyPipelineLayout(device, pipelineLayout, null);
         for (long i : imageViews) {
             vkDestroyImageView(device, i, null);
         }
