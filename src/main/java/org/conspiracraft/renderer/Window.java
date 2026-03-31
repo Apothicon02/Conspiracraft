@@ -52,9 +52,10 @@ public class Window {
     public static long renderPass;
     public static long pipelineLayout;
     public static long graphicsPipeline;
-    public static LongBuffer swapchainFramebuffers;
+    public static long[] swapchainFramebuffers;
     public static long commandPool;
-    public static long[] commandBuffers;
+    public static VkCommandBuffer commandBuffer;
+    public static int imageIdx = 0;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -90,10 +91,7 @@ public class Window {
         if (vkAllocateCommandBuffers(device, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate command buffers!");
         }
-        commandBuffers = new long[commandBuffersBuf.capacity()];
-        for (int i = 0; i < commandBuffersBuf.capacity(); i++) {
-            commandBuffers[i] = commandBuffersBuf.get(i);
-        }
+        commandBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), device);
     }
     public void createCommandPool(MemoryStack stack) {
         QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
@@ -110,7 +108,7 @@ public class Window {
         commandPool = commandPoolBuf.get(0);
     }
     public void createFramebuffers(MemoryStack stack) {
-        swapchainFramebuffers = stack.callocLong(imageViews.length);
+        swapchainFramebuffers = new long[imageViews.length];
         for (int i = 0; i < imageViews.length; i++) {
             LongBuffer attachments = stack.longs(imageViews[i]);
 
@@ -128,7 +126,7 @@ public class Window {
             if (err != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create framebuffer: " + err);
             }
-            swapchainFramebuffers.put(i, framebufferBuf.get(0));
+            swapchainFramebuffers[i] = framebufferBuf.get(0);
         }
     }
     public void createGraphicsPipeline(MemoryStack stack) {
@@ -210,7 +208,7 @@ public class Window {
         viewport.maxDepth(1.0f);
 
         VkRect2D scissor = VkRect2D.calloc(stack);
-        scissor.offset(VkOffset2D.calloc().set(0, 0));
+        scissor.offset(VkOffset2D.calloc(stack).set(0, 0));
         scissor.extent(extent);
 
         VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack);
@@ -570,8 +568,8 @@ public class Window {
 
     public void cleanup() {
         vkDestroyCommandPool(device, commandPool, null);
-        for (int i = 0; i < swapchainFramebuffers.capacity(); i++) {
-            vkDestroyFramebuffer(device, swapchainFramebuffers.get(i), null);
+        for (int i = 0; i < swapchainFramebuffers.length; i++) {
+            vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
         }
         vkDestroyPipeline(device, graphicsPipeline, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
@@ -649,7 +647,7 @@ public class Window {
     }
 
     public void update() {
-        SDL_GL_SwapWindow(window);
+        Renderer.render();
     }
 
     public Matrix4f getProjectionMatrix() {
