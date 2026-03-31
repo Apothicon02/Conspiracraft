@@ -1,11 +1,34 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Utils;
+import org.conspiracraft.Window;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.shaderc.Shaderc;
+import org.lwjgl.vulkan.VkShaderModuleCreateInfo;
 
 import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
+
+import static org.lwjgl.vulkan.VK13.*;
 
 public class ShaderHelper {
+    public static long createShaderModule(ByteBuffer buffer) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.calloc(stack);
+            createInfo.sType(VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO);
+            createInfo.pCode(buffer);
+
+            LongBuffer pShaderModule = stack.mallocLong(1);
+
+            int err = vkCreateShaderModule(Window.device, createInfo, null, pShaderModule);
+            if (err != VK_SUCCESS) {
+                throw new RuntimeException("Failed to create shader module: " + err);
+            }
+
+            return pShaderModule.get(0);
+        }
+    }
+
     public static ByteBuffer compileGLSLString(String[] paths, int stage) {
         StringBuilder glsl = new StringBuilder("#version 450 \n");
         String shaderName = "";

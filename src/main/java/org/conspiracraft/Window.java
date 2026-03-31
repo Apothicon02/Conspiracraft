@@ -70,6 +70,24 @@ public class Window {
     public void createGraphicsPipeline(MemoryStack stack) {
         ByteBuffer vertShader = ShaderHelper.compileGLSLString(new String[]{"default.vert"}, Shaderc.shaderc_glsl_vertex_shader);
         ByteBuffer fragShader = ShaderHelper.compileGLSLString(new String[]{"default.frag"}, Shaderc.shaderc_glsl_fragment_shader);
+        long vertShaderModule = ShaderHelper.createShaderModule(vertShader);
+        long fragShaderModule = ShaderHelper.createShaderModule(fragShader);
+
+        VkPipelineShaderStageCreateInfo vertShaderStageInfo = VkPipelineShaderStageCreateInfo.calloc(stack);
+        vertShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+        vertShaderStageInfo.stage(VK_SHADER_STAGE_VERTEX_BIT);
+        vertShaderStageInfo.module(vertShaderModule);
+        vertShaderStageInfo.pName(stack.UTF8("main"));
+        VkPipelineShaderStageCreateInfo fragShaderStageInfo = VkPipelineShaderStageCreateInfo.calloc(stack);
+        fragShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+        fragShaderStageInfo.stage(VK_SHADER_STAGE_FRAGMENT_BIT);
+        fragShaderStageInfo.module(fragShaderModule);
+        fragShaderStageInfo.pName(stack.UTF8("main"));
+
+        VkPipelineShaderStageCreateInfo[] shaderStages = new VkPipelineShaderStageCreateInfo[]{vertShaderStageInfo, fragShaderStageInfo};
+
+        vkDestroyShaderModule(device, fragShaderModule, null);
+        vkDestroyShaderModule(device, vertShaderModule, null);
     }
     public void createImageViews(MemoryStack stack) {
         imageViews = new long[swapchainImages.length];
