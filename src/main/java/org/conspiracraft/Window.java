@@ -1,11 +1,14 @@
 package org.conspiracraft;
 
+import org.conspiracraft.renderer.ShaderHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.sdl.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.util.shaderc.GLSLang;
+import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
 
@@ -61,7 +64,12 @@ public class Window {
             createVkDeviceAndGraphicsQueue(stack);
             createSwapchain(stack);
             createImageViews(stack);
+            createGraphicsPipeline(stack);
         }
+    }
+    public void createGraphicsPipeline(MemoryStack stack) {
+        ByteBuffer vertShader = ShaderHelper.compileGLSLString(new String[]{"default.vert"}, Shaderc.shaderc_glsl_vertex_shader);
+        ByteBuffer fragShader = ShaderHelper.compileGLSLString(new String[]{"default.frag"}, Shaderc.shaderc_glsl_fragment_shader);
     }
     public void createImageViews(MemoryStack stack) {
         imageViews = new long[swapchainImages.length];
