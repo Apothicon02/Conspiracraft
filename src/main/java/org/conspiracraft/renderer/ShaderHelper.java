@@ -3,6 +3,7 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Utils;
 import org.conspiracraft.Window;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.VkShaderModuleCreateInfo;
 
@@ -46,8 +47,11 @@ public class ShaderHelper {
         }
 
         ByteBuffer spirv = Shaderc.shaderc_result_get_bytes(result);
+        ByteBuffer copy = MemoryUtil.memAlloc(spirv.remaining());
+        copy.put(spirv.duplicate().rewind());
+        copy.flip();
         Shaderc.shaderc_result_release(result);
         Shaderc.shaderc_compiler_release(compiler);
-        return spirv;
+        return copy;
     }
 }

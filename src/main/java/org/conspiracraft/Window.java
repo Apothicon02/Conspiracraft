@@ -47,6 +47,7 @@ public class Window {
     public static long swapchain;
     public static long[] swapchainImages;
     public static long[] imageViews;
+    public static long renderPass;
     public static long pipelineLayout;
 
     private int width = Settings.width;
@@ -65,6 +66,7 @@ public class Window {
             createVkDeviceAndGraphicsQueue(stack);
             createSwapchain(stack);
             createImageViews(stack);
+            createRenderPass(stack);
             createGraphicsPipeline(stack);
         }
     }
@@ -205,6 +207,37 @@ public class Window {
             throw new RuntimeException("Failed to create pipeline layout: " + err);
         }
         pipelineLayout = pPipelineLayout.get(0);
+    }
+    public void createRenderPass(MemoryStack stack) {
+        VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
+        colorAttachment.format(vkSurfFormat.format());
+        colorAttachment.samples(VK_SAMPLE_COUNT_1_BIT);
+        colorAttachment.loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR);
+        colorAttachment.storeOp(VK_ATTACHMENT_STORE_OP_STORE);
+        colorAttachment.stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+        colorAttachment.stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+        colorAttachment.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+        colorAttachment.finalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+        VkAttachmentReference.Buffer colorAttachmentRef = VkAttachmentReference.calloc(1, stack);
+        colorAttachmentRef.attachment(0);
+        colorAttachmentRef.layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+        VkSubpassDescription.Buffer subpass = VkSubpassDescription.calloc(1, stack);
+        subpass.pipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS);
+        subpass.colorAttachmentCount(1);
+        subpass.pColorAttachments(colorAttachmentRef);
+
+        VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack);
+        renderPassInfo.sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO);
+        renderPassInfo.pAttachments(colorAttachment);
+        renderPassInfo.pSubpasses(subpass);
+
+        LongBuffer renderPassBuf = stack.mallocLong(1);
+        if (vkCreateRenderPass(device, renderPassInfo, null, renderPassBuf) != VK_SUCCESS) {
+            throw new RuntimeException("failed to create render pass!");
+        }
+        renderPass = renderPassBuf.get(0);
     }
     public void createImageViews(MemoryStack stack) {
         imageViews = new long[swapchainImages.length];
@@ -441,6 +474,8 @@ public class Window {
     }
 
     public void cleanup() {
+        vkDestroyPipelineLayout(device, pipelineLayout, null);
+        vkDestroyRenderPass(device, renderPass, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
         for (long i : imageViews) {
             vkDestroyImageView(device, i, null);
