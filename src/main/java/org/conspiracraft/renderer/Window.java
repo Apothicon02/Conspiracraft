@@ -1,6 +1,8 @@
-package org.conspiracraft;
+package org.conspiracraft.renderer;
 
-import org.conspiracraft.renderer.ShaderHelper;
+import org.conspiracraft.Constants;
+import org.conspiracraft.Main;
+import org.conspiracraft.Settings;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
@@ -51,6 +53,8 @@ public class Window {
     public static long pipelineLayout;
     public static long graphicsPipeline;
     public static LongBuffer swapchainFramebuffers;
+    public static long commandPool;
+    public static long[] commandBuffers;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -71,7 +75,39 @@ public class Window {
             createRenderPass(stack);
             createGraphicsPipeline(stack);
             createFramebuffers(stack);
+            createCommandPool(stack);
+            createCommandBuffer(stack);
         }
+    }
+    public void createCommandBuffer(MemoryStack stack) {
+        VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
+        allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+        allocInfo.commandPool(commandPool);
+        allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+        allocInfo.commandBufferCount(1);
+
+        PointerBuffer commandBuffersBuf = stack.mallocPointer(1);
+        if (vkAllocateCommandBuffers(device, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate command buffers!");
+        }
+        commandBuffers = new long[commandBuffersBuf.capacity()];
+        for (int i = 0; i < commandBuffersBuf.capacity(); i++) {
+            commandBuffers[i] = commandBuffersBuf.get(i);
+        }
+    }
+    public void createCommandPool(MemoryStack stack) {
+        QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
+
+        VkCommandPoolCreateInfo poolInfo = VkCommandPoolCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO)
+                .flags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT)
+                .queueFamilyIndex(queueFamilyIndices.graphicsFamily.intValue());
+
+        LongBuffer commandPoolBuf = stack.mallocLong(1);
+        if (vkCreateCommandPool(device, poolInfo, null, commandPoolBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create command pool!");
+        }
+        commandPool = commandPoolBuf.get(0);
     }
     public void createFramebuffers(MemoryStack stack) {
         swapchainFramebuffers = stack.callocLong(imageViews.length);
@@ -494,7 +530,7 @@ public class Window {
         vkSurf = surface.get(0);
     }
     public void createSDLWindow() {
-        window = SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        window = SDLVideo.SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
         if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
 
         SDL_SetWindowResizable(window, true);
@@ -533,6 +569,7 @@ public class Window {
     }
 
     public void cleanup() {
+        vkDestroyCommandPool(device, commandPool, null);
         for (int i = 0; i < swapchainFramebuffers.capacity(); i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers.get(i), null);
         }

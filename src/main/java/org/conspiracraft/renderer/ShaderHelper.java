@@ -1,7 +1,6 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Utils;
-import org.conspiracraft.Window;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;

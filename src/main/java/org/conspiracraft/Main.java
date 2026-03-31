@@ -1,5 +1,7 @@
 package org.conspiracraft;
 
+import org.conspiracraft.renderer.Window;
+
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
     public static String resourcesPath = mainFolder+"resources/";
