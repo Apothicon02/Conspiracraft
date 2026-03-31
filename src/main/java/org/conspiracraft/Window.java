@@ -49,6 +49,7 @@ public class Window {
     public static long[] imageViews;
     public static long renderPass;
     public static long pipelineLayout;
+    public static long graphicsPipeline;
 
     private int width = Settings.width;
     private int height = Settings.height;
@@ -87,10 +88,17 @@ public class Window {
         fragShaderStageInfo.module(fragShaderModule);
         fragShaderStageInfo.pName(stack.UTF8("main"));
 
-        VkPipelineShaderStageCreateInfo[] shaderStages = new VkPipelineShaderStageCreateInfo[]{vertShaderStageInfo, fragShaderStageInfo};
-
-        vkDestroyShaderModule(device, fragShaderModule, null);
-        vkDestroyShaderModule(device, vertShaderModule, null);
+        VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
+        shaderStages.get(0)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
+                .stage(VK_SHADER_STAGE_VERTEX_BIT)
+                .module(vertShaderModule)
+                .pName(stack.UTF8("main"));
+        shaderStages.get(1)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
+                .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
+                .module(fragShaderModule)
+                .pName(stack.UTF8("main"));
 
         VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack);
         dynamicState.sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
@@ -207,6 +215,33 @@ public class Window {
             throw new RuntimeException("Failed to create pipeline layout: " + err);
         }
         pipelineLayout = pPipelineLayout.get(0);
+
+        VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
+                .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
+                .stageCount(2)
+                .pStages(shaderStages)
+                .pVertexInputState(vertexInputInfo)
+                .pInputAssemblyState(inputAssembly)
+                .pViewportState(viewportState)
+                .pRasterizationState(rasterizer)
+                .pMultisampleState(multisampling)
+                .pDepthStencilState(null)
+                .pColorBlendState(colorBlending)
+                .pDynamicState(dynamicState)
+                .layout(pipelineLayout)
+                .renderPass(renderPass)
+                .subpass(0)
+                .basePipelineHandle(VK_NULL_HANDLE) // Optional
+                .basePipelineIndex(-1); // Optional
+
+        LongBuffer pipelineBuf = stack.mallocLong(1);
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
+            throw new RuntimeException("failed to create graphics pipeline!");
+        }
+        graphicsPipeline = pipelineBuf.get(0);
+
+        vkDestroyShaderModule(device, fragShaderModule, null);
+        vkDestroyShaderModule(device, vertShaderModule, null);
     }
     public void createRenderPass(MemoryStack stack) {
         VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
@@ -474,6 +509,8 @@ public class Window {
     }
 
     public void cleanup() {
+        vkDestroyPipeline(device, graphicsPipeline, null);
+        vkDestroyPipelineLayout(device, pipelineLayout, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
         vkDestroyRenderPass(device, renderPass, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
