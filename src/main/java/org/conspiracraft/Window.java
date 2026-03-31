@@ -34,9 +34,10 @@ public class Window {
     public static long window;
     public static VkInstance vkInst;
     public static long vkSurf;
-    public static int vkQueue;
+    public static int vkQueueFamilyIdx;
     public static VkPhysicalDevice physicalDevice;
     public static VkDevice device;
+    public static VkQueue queue;
     public static long graphicsQueue;
     public static VkSurfaceFormatKHR vkSurfFormat;
 
@@ -104,7 +105,7 @@ public class Window {
             VkDeviceQueueCreateInfo.Buffer queueInfo =
                     VkDeviceQueueCreateInfo.calloc(1, stack)
                             .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
-                            .queueFamilyIndex(vkQueue)
+                            .queueFamilyIndex(vkQueueFamilyIdx)
                             .pQueuePriorities(priorities);
 
             VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
@@ -118,7 +119,7 @@ public class Window {
 
             // Retrieve the queue
             PointerBuffer pQueue = stack.mallocPointer(1);
-            vkGetDeviceQueue(device, vkQueue, 0, pQueue);
+            vkGetDeviceQueue(device, vkQueueFamilyIdx, 0, pQueue);
             graphicsQueue = pQueue.get(0);
         }
     }
@@ -130,30 +131,58 @@ public class Window {
                 throw new RuntimeException("No Vulkan physical devices found");
             }
 
+            int dGpuQueue = 0;
+            VkPhysicalDevice dGpu = null;
+            int iGpuQueue = 0;
+            VkPhysicalDevice iGpu = null;
+            int vGpuQueue = 0;
+            VkPhysicalDevice vGpu = null;
+            int oGpuQueue = 0;
+            VkPhysicalDevice oGpu = null;
+            int cpuQueue = 0;
+            VkPhysicalDevice cpu = null;
+
             PointerBuffer devices = stack.mallocPointer(deviceCount.get(0));
             vkEnumeratePhysicalDevices(vkInst, deviceCount, devices);
             for (int d = 0; d < devices.capacity(); d++) {
-                VkPhysicalDevice device = new VkPhysicalDevice(devices.get(d), vkInst);
+                VkPhysicalDevice pDevice = new VkPhysicalDevice(devices.get(d), vkInst);
+                VkPhysicalDeviceProperties pdProperties;
+                try (MemoryStack stack2 = MemoryStack.stackPush()) {
+                    pdProperties = VkPhysicalDeviceProperties.malloc(stack2);
+                    vkGetPhysicalDeviceProperties(pDevice, pdProperties);
+                    System.out.println("Device name: " + pdProperties.deviceNameString());
+                }
 
                 IntBuffer queueCount = stack.mallocInt(1);
-                vkGetPhysicalDeviceQueueFamilyProperties(device, queueCount, null);
+                vkGetPhysicalDeviceQueueFamilyProperties(pDevice, queueCount, null);
                 VkQueueFamilyProperties.Buffer queues = VkQueueFamilyProperties.malloc(queueCount.get(0), stack);
-                vkGetPhysicalDeviceQueueFamilyProperties(device, queueCount, queues);
+                vkGetPhysicalDeviceQueueFamilyProperties(pDevice, queueCount, queues);
                 for (int q = 0; q < queues.capacity(); q++) {
-                    boolean graphics = (queues.get(q).queueFlags() & VK_QUEUE_GRAPHICS_BIT) != 0;
+                    VkQueueFamilyProperties queueProperties = queues.get(q);
+                    boolean graphics = (queueProperties.queueFlags() & VK_QUEUE_GRAPHICS_BIT) != 0;
 
                     IntBuffer presentSupport = stack.mallocInt(1);
-                    vkGetPhysicalDeviceSurfaceSupportKHR(device, q, vkSurf, presentSupport);
+                    vkGetPhysicalDeviceSurfaceSupportKHR(pDevice, q, vkSurf, presentSupport);
 
                     boolean present = presentSupport.get(0) == VK_TRUE;
 
                     if (graphics && present) {
-                        vkQueue = q;
-                        physicalDevice = device;
+                        switch (pdProperties.deviceType()) {
+                            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU -> {dGpu = pDevice; dGpuQueue = q;}
+                            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU -> {iGpu = pDevice; iGpuQueue = q;}
+                            case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU -> {vGpu = pDevice; vGpuQueue = q;}
+                            case VK_PHYSICAL_DEVICE_TYPE_OTHER -> {oGpu = pDevice; oGpuQueue = q;}
+                            case VK_PHYSICAL_DEVICE_TYPE_CPU -> {cpu = pDevice; cpuQueue = q;}
+                        }
                         break;
                     }
                 }
             }
+            if (dGpu != null) {vkQueueFamilyIdx = dGpuQueue;physicalDevice = dGpu;} else
+            if (iGpu != null) {vkQueueFamilyIdx = iGpuQueue;physicalDevice = iGpu;} else
+            if (vGpu != null) {vkQueueFamilyIdx = vGpuQueue;physicalDevice = vGpu;} else
+            if (oGpu != null) {vkQueueFamilyIdx = oGpuQueue;physicalDevice = oGpu;} else
+            if (cpu != null) {vkQueueFamilyIdx = cpuQueue;physicalDevice = cpu;}
         }
     }
     public void createVkSurf() {
