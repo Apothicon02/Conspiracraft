@@ -18,7 +18,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.Settings.hdr;
+import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
@@ -31,6 +31,7 @@ import static org.lwjgl.sdl.SDLVulkan.*;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
@@ -42,10 +43,11 @@ public class Window {
     public static int vkQueueFamilyIdx;
     public static VkPhysicalDevice physicalDevice;
     public static VkDevice device;
-    public static VkQueue queue;
-    public static long queueHandle;
+    public static VkQueue graphicsQueue;
+    public static VkQueue presentQueue;
+    public static long graphicsQueueHandle;
+    public static long presentQueueHandle;
     public static VkSurfaceFormatKHR vkSurfFormat;
-    public static VkExtent2D extent;
     public static long swapchain;
     public static long[] swapchainImages;
     public static long[] imageViews;
@@ -55,10 +57,12 @@ public class Window {
     public static long[] swapchainFramebuffers;
     public static long commandPool;
     public static VkCommandBuffer commandBuffer;
-    public static int imageIdx = 0;
+    public static long imageAvailableSemaphore;
+    public static long renderFinishedSemaphore;
+    public static long inFlightFence;
+    public static int eWidth;
+    public static int eHeight;
 
-    private int width = Settings.width;
-    private int height = Settings.height;
     private final Matrix4f projectionMatrix = new Matrix4f();
     public ByteBuffer keys;
 
@@ -78,7 +82,27 @@ public class Window {
             createFramebuffers(stack);
             createCommandPool(stack);
             createCommandBuffer(stack);
+            createSyncObjects(stack);
         }
+    }
+    public void createSyncObjects(MemoryStack stack) {
+        VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack);
+        semaphoreInfo.sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
+        VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.calloc(stack);
+        fenceInfo.sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
+        fenceInfo.flags(VK_FENCE_CREATE_SIGNALED_BIT);
+
+        LongBuffer imageAvailableSemBuf = stack.mallocLong(1);
+        LongBuffer renderFinishedSemBuf = stack.mallocLong(1);
+        LongBuffer inFlightFenceBuf = stack.mallocLong(1);
+        if (vkCreateSemaphore(device, semaphoreInfo, null, imageAvailableSemBuf) != VK_SUCCESS ||
+                vkCreateSemaphore(device, semaphoreInfo, null, renderFinishedSemBuf) != VK_SUCCESS ||
+                vkCreateFence(device, fenceInfo, null, inFlightFenceBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create semaphores!");
+        }
+        imageAvailableSemaphore = imageAvailableSemBuf.get(0);
+        renderFinishedSemaphore = renderFinishedSemBuf.get(0);
+        inFlightFence = inFlightFenceBuf.get(0);
     }
     public void createCommandBuffer(MemoryStack stack) {
         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
@@ -94,12 +118,12 @@ public class Window {
         commandBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), device);
     }
     public void createCommandPool(MemoryStack stack) {
-        QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
+        //QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
 
         VkCommandPoolCreateInfo poolInfo = VkCommandPoolCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO)
                 .flags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT)
-                .queueFamilyIndex(queueFamilyIndices.graphicsFamily.intValue());
+                .queueFamilyIndex(vkQueueFamilyIdx);
 
         LongBuffer commandPoolBuf = stack.mallocLong(1);
         if (vkCreateCommandPool(device, poolInfo, null, commandPoolBuf) != VK_SUCCESS) {
@@ -110,15 +134,15 @@ public class Window {
     public void createFramebuffers(MemoryStack stack) {
         swapchainFramebuffers = new long[imageViews.length];
         for (int i = 0; i < imageViews.length; i++) {
-            LongBuffer attachments = stack.longs(imageViews[i]);
+            LongBuffer attachments = stack.mallocLong(1).put(imageViews[i]).flip();
 
             VkFramebufferCreateInfo framebufferInfo = VkFramebufferCreateInfo.calloc(stack);
             framebufferInfo.sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
             framebufferInfo.renderPass(renderPass);
             framebufferInfo.attachmentCount(1);
             framebufferInfo.pAttachments(attachments);
-            framebufferInfo.width(extent.width());
-            framebufferInfo.height(extent.height());
+            framebufferInfo.width(eWidth);
+            framebufferInfo.height(eHeight);
             framebufferInfo.layers(1);
 
             LongBuffer framebufferBuf = stack.mallocLong(1);
@@ -135,17 +159,6 @@ public class Window {
         long vertShaderModule = ShaderHelper.createShaderModule(vertShader);
         long fragShaderModule = ShaderHelper.createShaderModule(fragShader);
 
-        VkPipelineShaderStageCreateInfo vertShaderStageInfo = VkPipelineShaderStageCreateInfo.calloc(stack);
-        vertShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
-        vertShaderStageInfo.stage(VK_SHADER_STAGE_VERTEX_BIT);
-        vertShaderStageInfo.module(vertShaderModule);
-        vertShaderStageInfo.pName(stack.UTF8("main"));
-        VkPipelineShaderStageCreateInfo fragShaderStageInfo = VkPipelineShaderStageCreateInfo.calloc(stack);
-        fragShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
-        fragShaderStageInfo.stage(VK_SHADER_STAGE_FRAGMENT_BIT);
-        fragShaderStageInfo.module(fragShaderModule);
-        fragShaderStageInfo.pName(stack.UTF8("main"));
-
         VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
         shaderStages.get(0)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
@@ -158,9 +171,9 @@ public class Window {
                 .module(fragShaderModule)
                 .pName(stack.UTF8("main"));
 
-        VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack);
-        dynamicState.sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
-        dynamicState.pDynamicStates(stack.ints(VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR));
+        VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO)
+                .pDynamicStates(stack.mallocInt(2).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).flip());
 
 //        VkVertexInputBindingDescription.Buffer binding =
 //                VkVertexInputBindingDescription.calloc(1, stack)
@@ -202,32 +215,32 @@ public class Window {
         VkViewport viewport = VkViewport.calloc(stack);
         viewport.x(0.0f);
         viewport.y(0.0f);
-        viewport.width((float) extent.width());
-        viewport.height((float) extent.height());
+        viewport.width((float) eWidth);
+        viewport.height((float) eHeight);
         viewport.minDepth(0.0f);
         viewport.maxDepth(1.0f);
 
         VkRect2D scissor = VkRect2D.calloc(stack);
         scissor.offset(VkOffset2D.calloc(stack).set(0, 0));
-        scissor.extent(extent);
+        scissor.extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
 
-        VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack);
-        viewportState.sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
-        viewportState.viewportCount(1);
-        viewportState.scissorCount(1);
+        VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO)
+                .viewportCount(1)
+                .scissorCount(1);
 
-        VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack);
-        rasterizer.sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
-        rasterizer.depthClampEnable(true);
-        rasterizer.rasterizerDiscardEnable(false);
-        rasterizer.polygonMode(VK_POLYGON_MODE_FILL);
-        rasterizer.lineWidth(1.0f);
-        rasterizer.cullMode(VK_CULL_MODE_BACK_BIT);
-        rasterizer.frontFace(VK_FRONT_FACE_CLOCKWISE);
-        rasterizer.depthBiasEnable(false);
-//        rasterizer.depthBiasConstantFactor(0.f);
-//        rasterizer.depthBiasClamp(0.f);
-//        rasterizer.depthBiasSlopeFactor(0.f);
+        VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO)
+                .depthClampEnable(false)
+                .rasterizerDiscardEnable(false)
+                .polygonMode(VK_POLYGON_MODE_FILL)
+                .lineWidth(1.0f)
+                .cullMode(VK_CULL_MODE_BACK_BIT)
+                .frontFace(VK_FRONT_FACE_CLOCKWISE)
+                .depthBiasEnable(false);
+//                .depthBiasConstantFactor(0.f)
+//                .depthBiasClamp(0.f)
+//                .depthBiasSlopeFactor(0.f);
 
         VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);
         multisampling.sType(VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
@@ -321,10 +334,18 @@ public class Window {
         subpass.colorAttachmentCount(1);
         subpass.pColorAttachments(colorAttachmentRef);
 
-        VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack);
-        renderPassInfo.sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO);
-        renderPassInfo.pAttachments(colorAttachment);
-        renderPassInfo.pSubpasses(subpass);
+        VkSubpassDependency.Buffer dependency = VkSubpassDependency.calloc(1, stack)
+                .srcSubpass(VK_SUBPASS_EXTERNAL)
+                .dstSubpass(0)
+                .srcStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+                .srcAccessMask(0)
+                .dstStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+                .dstAccessMask(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+        VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO)
+                .pAttachments(colorAttachment)
+                .pSubpasses(subpass)
+                .pDependencies(dependency);
 
         LongBuffer renderPassBuf = stack.mallocLong(1);
         if (vkCreateRenderPass(device, renderPassInfo, null, renderPassBuf) != VK_SUCCESS) {
@@ -397,7 +418,6 @@ public class Window {
                 break;
             }
         }
-        extent = VkExtent2D.calloc(stack).width(width).height(height);
         int imageCount = 2;
         int imgFormat = vkSurfFormat.format();
         int imgColorSpace = vkSurfFormat.colorSpace();
@@ -407,7 +427,7 @@ public class Window {
                 .minImageCount(imageCount)
                 .imageFormat(imgFormat)
                 .imageColorSpace(imgColorSpace)
-                .imageExtent(extent)
+                .imageExtent(VkExtent2D.calloc(stack).width(Settings.width).height(Settings.height))
                 .imageArrayLayers(1)
                 .imageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
                 .imageSharingMode(VK_SHARING_MODE_EXCLUSIVE)
@@ -429,6 +449,8 @@ public class Window {
         vkGetSwapchainImagesKHR(device, swapchain, imgCount, images);
         swapchainImages = new long[images.capacity()];
         images.get(swapchainImages);
+        eWidth = caps.currentExtent().width();
+        eHeight = caps.currentExtent().height();
     }
 
     public void createVkDeviceAndGraphicsQueue(MemoryStack stack) {
@@ -455,12 +477,15 @@ public class Window {
         }
         device = new VkDevice(pDevice.get(0), physicalDevice, deviceInfo);
 
-        // Retrieve the queue
-        PointerBuffer pQueue = stack.mallocPointer(1);
-        vkGetDeviceQueue(device, vkQueueFamilyIdx, 0, pQueue);
-        queueHandle = pQueue.get(0);
+        PointerBuffer graphicsQueueBuf = stack.mallocPointer(1);
+        vkGetDeviceQueue(device, vkQueueFamilyIdx, 0, graphicsQueueBuf);
+        graphicsQueueHandle = graphicsQueueBuf.get(0);
+        graphicsQueue = new VkQueue(graphicsQueueHandle, device);
 
-        queue = new VkQueue(queueHandle, device);
+        PointerBuffer presentQueueBuf = stack.mallocPointer(1);
+        vkGetDeviceQueue(device, vkQueueFamilyIdx, 0, presentQueueBuf);
+        presentQueueHandle = presentQueueBuf.get(0);
+        presentQueue = new VkQueue(presentQueueHandle, device);
     }
     public void createVkPhysicalDeviceAndVkQueue(MemoryStack stack) {
         IntBuffer deviceCount = stack.mallocInt(1);
@@ -528,20 +553,22 @@ public class Window {
         vkSurf = surface.get(0);
     }
     public void createSDLWindow() {
-        window = SDLVideo.SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        window = SDLVideo.SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
         if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
 
         SDL_SetWindowResizable(window, true);
         SDL_SetWindowRelativeMouseMode(window, true);
+        SDL_PumpEvents();
     }
     public void createVkInst(MemoryStack stack) {
         PointerBuffer extBuffer = SDLVulkan.SDL_Vulkan_GetInstanceExtensions();
         int extCount = extBuffer.remaining();
-        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+1);
+        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+2);
         for (int i = 0; i < extCount; i++) {
             extensions.put(i, extBuffer.get(i));
         }
         extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
+        extensions.put(extCount+1, memUTF8(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME));
 
         VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
                 .sType(VK13.VK_STRUCTURE_TYPE_APPLICATION_INFO)
@@ -550,11 +577,13 @@ public class Window {
                 .pEngineName(stack.UTF8("Conspiracraft Engine"))
                 .engineVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
                 .apiVersion(VK13.VK_API_VERSION_1_3);
-
+        PointerBuffer layers = stack.mallocPointer(1);
+        layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation")); //disable when not in dev env
         VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
                 .sType(VK13.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
+                .ppEnabledLayerNames(layers)
                 .flags(VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR);
 
         PointerBuffer pInstance = stack.mallocPointer(1);
@@ -567,6 +596,9 @@ public class Window {
     }
 
     public void cleanup() {
+        vkDestroySemaphore(device, imageAvailableSemaphore, null);
+        vkDestroySemaphore(device, renderFinishedSemaphore, null);
+        vkDestroyFence(device, inFlightFence, null);
         vkDestroyCommandPool(device, commandPool, null);
         for (int i = 0; i < swapchainFramebuffers.length; i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
@@ -581,13 +613,6 @@ public class Window {
         }
         SDL_DestroyWindow(Window.window);
         SDL_Quit();
-    }
-
-    public int getHeight() {
-        return height;
-    }
-    public int getWidth() {
-        return width;
     }
 
     public boolean isKeyPressed(int keyCode) {
@@ -637,8 +662,8 @@ public class Window {
     }
 
     public void resized(int width, int height) {
-        this.width = width;
-        this.height = height;
+        Settings.width = width;
+        Settings.height = height;
         try {
 
         } catch (Exception excp) {
@@ -646,21 +671,21 @@ public class Window {
         }
     }
 
-    public void update() {
-        Renderer.render();
+    public void update(SDL_Event event) {
+        pollEvents(event);
     }
 
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
     }
     public Matrix4f updateProjectionMatrix() {
-        float aspectRatio = (float) width /height;
+        float aspectRatio = (float) eWidth / eHeight;
         projectionMatrix.identity();
         projectionMatrix.set(
                 1.f/Settings.fov, 0.f, 0.f, 0.f,
                 0.f, aspectRatio/Settings.fov, 0.f, 0.f,
                 0.f, 0.f, 0.f, -1.f,
-                0.f, 0.f, Settings.Z_NEAR, 0.f
+                0.f, 0.f, Constants.Z_NEAR, 0.f
         );
         return projectionMatrix;
     }

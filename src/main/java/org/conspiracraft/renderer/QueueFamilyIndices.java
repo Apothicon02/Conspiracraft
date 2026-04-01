@@ -23,7 +23,7 @@ public class QueueFamilyIndices {
         try (MemoryStack stack = MemoryStack.stackPush()) {
 
             // Query number of queue families
-            IntBuffer count = stack.ints(0);
+            IntBuffer count = stack.mallocInt(1).put(0).flip();
             vkGetPhysicalDeviceQueueFamilyProperties(device, count, null);
 
             VkQueueFamilyProperties.Buffer families =
@@ -41,7 +41,7 @@ public class QueueFamilyIndices {
                 }
 
                 // Present support
-                IntBuffer presentSupport = stack.ints(VK_FALSE);
+                IntBuffer presentSupport = stack.mallocInt(1).put(VK_FALSE).flip();
                 vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, presentSupport);
 
                 if (presentSupport.get(0) == VK_TRUE) {
