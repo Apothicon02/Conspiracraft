@@ -406,6 +406,16 @@ public class Window {
                 }
             }
         }
+        if (vkSurfFormat == null) { //sRGB if not hdr
+            for (int i = 0; i < formats.capacity(); i++) {
+                VkSurfaceFormatKHR f = formats.get(i);
+                if (f.format() == VK_FORMAT_A8B8G8R8_UNORM_PACK32 &&
+                        f.colorSpace() == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                    vkSurfFormat = f;
+                    break;
+                }
+            }
+        }
         if (vkSurfFormat == null) {
             vkSurfFormat = formats.get(0); //fallback
         }
