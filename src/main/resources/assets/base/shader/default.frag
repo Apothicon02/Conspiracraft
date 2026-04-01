@@ -86,7 +86,13 @@ void main() {
         hill += sqrt(sin(t * 3.14f * 2.0)+1)*20;
         if (mapPos.y < 80+hill) {
             vec3 normal = -mask*raySign;
-            outColor = vec4(vec3(dot(-normal, sun)*-0.0002f)+0.5f, 1);
+            if (mapPos.y < 128) {
+                normal = vec3(0, 1, 0);
+                outColor = vec4(0.3, 0.35, 1.f, 1.f);
+            } else {
+                outColor = vec4(0.55, 1, 0.5f, 1.f);
+            }
+            outColor *= vec4(vec3(dot(-normal, sun)*-0.0001f)+0.6f, 1);
             break;
         }
         mask = stepMask(sideDist);
