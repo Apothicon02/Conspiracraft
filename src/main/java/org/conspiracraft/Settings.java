@@ -5,6 +5,6 @@ public class Settings {
     public static int width = 1280;
     public static int height = 720;
     public static float fov = (float) Math.toRadians(73);
-    public static boolean hdr = false;
+    public static boolean hdr = true;
     public static int targetFps = 360;
 }

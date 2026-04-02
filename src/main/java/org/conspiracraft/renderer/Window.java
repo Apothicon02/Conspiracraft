@@ -61,7 +61,7 @@ public class Window {
     public static long[] swapchainImages;
     public static long[] imageViews;
     public static long renderPass;
-    public static LongBuffer descriptorSetLayouts;
+    public static long[] descriptorSetLayouts;
     public static long pipelineLayout;
     public static long graphicsPipeline;
     public static long[] swapchainFramebuffers;
@@ -72,12 +72,14 @@ public class Window {
     public static long[] inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
     public static int eWidth;
     public static int eHeight;
-    public static LongBuffer vertexBuffer;
-    public static LongBuffer vertexBufferMemory;
+    public static long[] vertexBuffer;
+    public static long[] vertexBufferMemory;
     public static int vertexBufferOffset;
-    public static LongBuffer[] uniformBuffers;
-    public static LongBuffer[] uniformBuffersMemory;
+    public static long[] uniformBuffers;
+    public static long[] uniformBuffersMemory;
     public static PointerBuffer[] uniformBuffersMapped;
+    public static long descriptorPool;
+    public static long[] descriptorSets;
 
     public Window() {
         if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
@@ -97,6 +99,8 @@ public class Window {
             createCommandPool(stack);
             createVertexBuffer(stack);
             createUniformBuffers(stack);
+            createDescriptorPool(stack);
+            createDescriptorSets(stack);
             createCommandBuffers(stack);
             createSyncObjects(stack);
         }
@@ -140,28 +144,71 @@ public class Window {
         }
     }
     public static DEFAULT_UBO defaultUBO;
+    public void createDescriptorSets(MemoryStack stack) {
+        LongBuffer layouts = stack.mallocLong(MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            layouts.put(i, descriptorSetLayouts[0]);
+        }
+        VkDescriptorSetAllocateInfo allocInfo = VkDescriptorSetAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
+                .descriptorPool(descriptorPool)
+                .pSetLayouts(layouts);
+        LongBuffer descriptorSetsBuf = stack.mallocLong(MAX_FRAMES_IN_FLIGHT);
+        if (vkAllocateDescriptorSets(device, allocInfo, descriptorSetsBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate descriptor sets!");
+        }
+        descriptorSets = new long[MAX_FRAMES_IN_FLIGHT];
+        for (int i = 0; i < descriptorSets.length; i++) {
+            descriptorSets[i] = descriptorSetsBuf.get(i);
+            VkDescriptorBufferInfo.Buffer bufferInfo = VkDescriptorBufferInfo.calloc(1, stack)
+                    .buffer(uniformBuffers[i])
+                    .offset(0)
+                    .range(defaultUBO.size());
+            VkWriteDescriptorSet.Buffer descriptorWrite = VkWriteDescriptorSet.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                    .dstSet(descriptorSets[i])
+                    .dstBinding(0)
+                    .dstArrayElement(0)
+                    .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                    .descriptorCount(1)
+                    .pBufferInfo(bufferInfo);
+            vkUpdateDescriptorSets(device, descriptorWrite, null);
+        }
+    }
+    public void createDescriptorPool(MemoryStack stack) {
+        VkDescriptorPoolSize.Buffer poolSize = VkDescriptorPoolSize.calloc(1, stack)
+                .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(MAX_FRAMES_IN_FLIGHT);
+        VkDescriptorPoolCreateInfo poolInfo = VkDescriptorPoolCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
+                .pPoolSizes(poolSize)
+                .maxSets(MAX_FRAMES_IN_FLIGHT);
+        LongBuffer descriptorPoolBuf = stack.mallocLong(1);
+        if (vkCreateDescriptorPool(device, poolInfo, null, descriptorPoolBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create descriptor pool!");
+        }
+        descriptorPool = descriptorPoolBuf.get(0);
+    }
     public void createUniformBuffers(MemoryStack stack) {
         defaultUBO = new DEFAULT_UBO();
         int bufferSize = defaultUBO.size();
-        uniformBuffers = new LongBuffer[MAX_FRAMES_IN_FLIGHT];
-        uniformBuffersMemory = new LongBuffer[MAX_FRAMES_IN_FLIGHT];
+        uniformBuffers = new long[MAX_FRAMES_IN_FLIGHT];
+        uniformBuffersMemory = new long[MAX_FRAMES_IN_FLIGHT];
         uniformBuffersMapped = new PointerBuffer[MAX_FRAMES_IN_FLIGHT];
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            uniformBuffers[i] = ByteBuffer.allocateDirect(8).asLongBuffer();
-            uniformBuffersMemory[i] = ByteBuffer.allocateDirect(8).asLongBuffer();
             uniformBuffersMapped[i] = PointerBuffer.allocateDirect(1);
 
-            createBuffer(stack, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
-            vkMapMemory(device, uniformBuffersMemory[i].get(0), 0, bufferSize, 0, uniformBuffersMapped[i]);
+            createBuffer(stack, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers, uniformBuffersMemory, i);
+            vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, uniformBuffersMapped[i]);
         }
     }
     public void createVertexBuffer(MemoryStack stack) {
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
-        vertexBuffer = ByteBuffer.allocateDirect(8).asLongBuffer();
-        vertexBufferMemory = ByteBuffer.allocateDirect(8).asLongBuffer();
-        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory);
+        vertexBuffer = new long[1];
+        vertexBufferMemory = new long[1];
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory, 0);
         PointerBuffer pointerBuf = stack.mallocPointer(1);
-        vkMapMemory(device, vertexBufferMemory.get(0), 0, bufferSize, 0, pointerBuf);
+        vkMapMemory(device, vertexBufferMemory[0], 0, bufferSize, 0, pointerBuf);
         Models.loadModels(pointerBuf.get(0));
     }
     public int findMemoryType(MemoryStack stack, int typeFilter, int properties) {
@@ -295,7 +342,7 @@ public class Window {
                 .polygonMode(VK_POLYGON_MODE_FILL)
                 .lineWidth(1.0f)
                 .cullMode(VK_CULL_MODE_BACK_BIT)
-                .frontFace(VK_FRONT_FACE_CLOCKWISE)
+                .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
                 .depthBiasEnable(false);
 //                .depthBiasConstantFactor(0.f)
 //                .depthBiasClamp(0.f)
@@ -335,8 +382,8 @@ public class Window {
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                .setLayoutCount(1)
-                .pSetLayouts(descriptorSetLayouts);
+                .setLayoutCount(descriptorSetLayouts.length)
+                .pSetLayouts(stack.longs(descriptorSetLayouts));
 //        pipelineLayoutInfo.pPushConstantRanges(null); // Optional
 
         LongBuffer pPipelineLayout = stack.mallocLong(1);
@@ -383,10 +430,11 @@ public class Window {
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
                 .pBindings(uboLayoutBinding);
-        descriptorSetLayouts = MemoryUtil.memAllocLong(1);
-        if (vkCreateDescriptorSetLayout(device, layoutInfo, null, descriptorSetLayouts) != VK_SUCCESS) {
+        LongBuffer descriptorSetLayoutsBuf = stack.callocLong(1);
+        if (vkCreateDescriptorSetLayout(device, layoutInfo, null, descriptorSetLayoutsBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create descriptor set layout!");
         }
+        descriptorSetLayouts = new long[]{descriptorSetLayoutsBuf.get(0)};
     }
     public void createRenderPass(MemoryStack stack) {
         VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
@@ -692,7 +740,7 @@ public class Window {
         vkInst = new VkInstance(pInstance.get(0), createInfo);
     }
 
-    public void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, LongBuffer buffer, LongBuffer memory) {
+    public void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, long[] buffer, long[] memory, int i) {
         VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
                 .size(bufferSize)
@@ -702,9 +750,9 @@ public class Window {
         if (vkCreateBuffer(device, bufferInfo, null, bufferBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create vertex buffer!");
         }
-        buffer.put(bufferBuf.get());
+        buffer[i] = bufferBuf.get(0);
         VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
-        vkGetBufferMemoryRequirements(device, buffer.get(0), memRequirements);
+        vkGetBufferMemoryRequirements(device, buffer[i], memRequirements);
 
         VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
@@ -714,8 +762,8 @@ public class Window {
         if (vkAllocateMemory(device, allocInfo, null, bufferMemoryBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate buffer memory!");
         }
-        memory.put(bufferMemoryBuf.get());
-        if (vkBindBufferMemory(device, buffer.get(0), memory.get(0), 0) != VK_SUCCESS) {
+        memory[i] = bufferMemoryBuf.get(0);
+        if (vkBindBufferMemory(device, buffer[i], memory[i], 0) != VK_SUCCESS) {
             throw new RuntimeException("Failed to bind buffer memory!");
         }
     }
@@ -732,13 +780,13 @@ public class Window {
     public void cleanup() {
         cleanupSwapchain();
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroyBuffer(device, uniformBuffers[i].get(0), null);
-            vkFreeMemory(device, uniformBuffersMemory[i].get(0), null);
+            vkDestroyBuffer(device, uniformBuffers[i], null);
+            vkFreeMemory(device, uniformBuffersMemory[i], null);
         }
-        vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.get(0), null);
-        memFree(descriptorSetLayouts);
-        vkDestroyBuffer(device, vertexBuffer.get(0), null);
-        vkFreeMemory(device, vertexBufferMemory.get(0), null);
+        vkDestroyDescriptorPool(device, descriptorPool, null);
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayouts[0], null);
+        vkDestroyBuffer(device, vertexBuffer[0], null);
+        vkFreeMemory(device, vertexBufferMemory[0], null);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
             vkDestroySemaphore(device, renderFinishedSemaphores[i], null);

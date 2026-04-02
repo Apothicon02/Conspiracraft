@@ -5,6 +5,8 @@ import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 import static org.conspiracraft.renderer.Renderer.currentFrame;
 import static org.conspiracraft.renderer.Window.uniformBuffersMapped;
@@ -40,28 +42,29 @@ public class DEFAULT_UBO extends UBO {
         }
     }
     public void update(MemoryStack stack) {
-        ((Matrix4f)uniformStorage[1]).set(new Matrix4f()); //view
-        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix()); //proj
+        ((Matrix4f)uniformStorage[1]).identity(); //view
+        ((Matrix4f)uniformStorage[2]).set(Main.window.getProjectionMatrix()); //proj
     }
     public void submit(MemoryStack stack) {
-        ByteBuffer buf = ByteBuffer.allocateDirect(size);
+        int offset = 0;
+        ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
         for (Object obj : uniforms()) {
             switch (obj) {
-                case Float v -> buf.putFloat(v);
-                case Integer v -> buf.putInt(v);
-                case Vector2f v -> v.get(buf);
-                case Vector3f v -> v.get(buf);
-                case Vector4f v -> v.get(buf);
-                case Vector2i v -> v.get(buf);
-                case Vector3i v -> v.get(buf);
-                case Vector4i v -> v.get(buf);
-                case Matrix2f v -> v.get(buf);
-                case Matrix3f v -> v.get(buf);
-                case Matrix4f v -> v.get(buf);
+                case Float v -> {buf.putFloat(offset, v);offset += FLOAT_SIZE;}
+                case Integer v -> {buf.putInt(offset, v);offset += FLOAT_SIZE;}
+                case Vector2f v -> {v.get(offset, buf);offset += VEC2_SIZE;}
+                case Vector3f v -> {v.get(offset, buf);offset += VEC3_SIZE;}
+                case Vector4f v -> {v.get(offset, buf);offset += VEC4_SIZE;}
+                case Vector2i v -> {v.get(offset, buf);offset += VEC2_SIZE;}
+                case Vector3i v -> {v.get(offset, buf);offset += VEC3_SIZE;}
+                case Vector4i v -> {v.get(offset, buf);offset += VEC4_SIZE;}
+                case Matrix2f v -> {v.get(offset, buf);offset += MAT2_SIZE;}
+                case Matrix3f v -> {v.get(offset, buf);offset += MAT3_SIZE;}
+                case Matrix4f v -> {v.get(offset, buf);offset += MAT4_SIZE;}
                 default -> throw new IllegalArgumentException("Cannot read uniform for object type: "+obj.getClass().getName());
             };
         }
-        buf.flip();
+        buf.rewind();
         memCopy(memAddress(buf), uniformBuffersMapped[currentFrame].get(0), buf.remaining());
     }
 }

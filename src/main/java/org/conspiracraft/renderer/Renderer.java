@@ -30,8 +30,9 @@ public class Renderer {
 
     public static void drawFrame(MemoryStack stack) {
         defaultUBO.update(stack);
-        ((Matrix4f)defaultUBO.uniforms()[0]).set(new Matrix4f()); //model transformation matrix
+        ((Matrix4f)defaultUBO.uniforms()[0]).identity().translate(1, 1, 1); //model transformation matrix
         defaultUBO.submit(stack);
+        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
     }
     public static void endRenderPass(MemoryStack stack) {
@@ -116,7 +117,7 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
-        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer.get(0)), stack.longs(0));
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
         return true;
     }
 }
