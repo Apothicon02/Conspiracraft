@@ -42,8 +42,8 @@ public class DEFAULT_UBO extends UBO {
         }
     }
     public void update(MemoryStack stack) {
-        ((Matrix4f)uniformStorage[1]).identity(); //view
-        ((Matrix4f)uniformStorage[2]).set(Main.window.getProjectionMatrix()); //proj
+        ((Matrix4f)uniformStorage[1]).identity().set(Main.player.getCameraMatrix()); //view
+        ((Matrix4f)uniformStorage[2]).set(Main.window.updateProjectionMatrix()); //proj
     }
     private int offset = 0;
     public void submit() {

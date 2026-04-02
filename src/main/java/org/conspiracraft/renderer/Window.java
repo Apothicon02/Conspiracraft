@@ -3,12 +3,11 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
+import org.conspiracraft.player.InputHandler;
 import org.conspiracraft.renderer.buffers.DEFAULT_UBO;
-import org.conspiracraft.renderer.buffers.UBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.sdl.*;
 import org.lwjgl.system.MemoryStack;
@@ -26,13 +25,12 @@ import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
-import static org.lwjgl.sdl.SDLKeyboard.*;
+import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLLog.*;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
 import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVulkan.*;
-import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
@@ -43,8 +41,6 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class Window {
     public static int MAX_FRAMES_IN_FLIGHT = 2;
-    private final Matrix4f projectionMatrix = new Matrix4f();
-    public ByteBuffer keys;
 
     public static long window;
     public static VkInstance vkInst;
@@ -342,7 +338,7 @@ public class Window {
                 .polygonMode(VK_POLYGON_MODE_FILL)
                 .lineWidth(1.0f)
                 .cullMode(VK_CULL_MODE_BACK_BIT)
-                .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
+                .frontFace(VK_FRONT_FACE_CLOCKWISE)
                 .depthBiasEnable(false);
 //                .depthBiasConstantFactor(0.f)
 //                .depthBiasClamp(0.f)
@@ -768,6 +764,12 @@ public class Window {
         }
     }
 
+    public void resized(int width, int height) {
+        Settings.width = width;
+        Settings.height = height;
+        recreateSwapchain();
+    }
+
     public void cleanupSwapchain() {
         for (int i = 0; i < swapchainFramebuffers.length; i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
@@ -802,28 +804,12 @@ public class Window {
         SDL_Quit();
     }
 
-    public boolean isKeyPressed(int keyCode) {
-        return keys.get(keyCode) > 0;
-    }
-
-    public boolean leftButtonPressed = false;
-    public boolean middleButtonPressed = false;
-    public boolean rightButtonPressed = false;
-    public Vector2f scroll = new Vector2f(0);
-    public Vector2f displVec = new Vector2f(0);
-    public Vector2f currentPos = new Vector2f(0);
-
-    public void input() {
-        leftButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_LEFT) > 0;
-        rightButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_RIGHT) > 0;
-        middleButtonPressed = (SDL_GetMouseState(null, null)&SDL_BUTTON_MIDDLE) > 0;
-        keys = SDL_GetKeyboardState();
-    }
-
+    public static boolean focused = false;
     public void pollEvents() {
-        displVec.x = 0;
-        displVec.y = 0;
-        scroll.set(0);
+        InputHandler inputHandler = Main.player.inputHandler;
+        inputHandler.displVec.x = 0;
+        inputHandler.displVec.y = 0;
+        inputHandler.scroll.set(0);
         while (SDL_PollEvent(events)) {
             switch (events.type()) {
                 case SDL_EVENT_QUIT:
@@ -833,40 +819,35 @@ public class Window {
                     resized(events.window().data1(), events.window().data2());
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
-                    displVec.y += events.motion().xrel();
-                    displVec.x += events.motion().yrel();
-                    currentPos.x = events.motion().x();
-                    currentPos.y = events.motion().y();
+                    inputHandler.displVec.y += events.motion().xrel();
+                    inputHandler.displVec.x += events.motion().yrel();
+                    inputHandler.currentPos.x = events.motion().x();
+                    inputHandler.currentPos.y = events.motion().y();
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
-                    scroll.x = events.wheel().x();
-                    scroll.y = events.wheel().y();
+                    inputHandler.scroll.x = events.wheel().x();
+                    inputHandler.scroll.y = events.wheel().y();
                     break;
                 default:
                     break;
             }
         }
+        long flags = SDL_GetWindowFlags(Window.window);
+        focused = (flags & SDL_WINDOW_INPUT_FOCUS) != 0;
+        if (focused) {inputHandler.setInputs();} else {inputHandler.resetInputs();}
     }
 
-    public void resized(int width, int height) {
-        Settings.width = width;
-        Settings.height = height;
-        recreateSwapchain();
-    }
-
-    public void update() {
-        pollEvents();
-    }
-
+    private final Matrix4f projectionMatrix = new Matrix4f();
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
     }
     public Matrix4f updateProjectionMatrix() {
-        float aspectRatio = (float) eWidth / eHeight;
+        float aspectRatio = (float) width /height;
         projectionMatrix.identity();
+        float FoV = (float)Math.toRadians(Main.player.camera.FOV);
         projectionMatrix.set(
-                1.f/Settings.fov, 0.f, 0.f, 0.f,
-                0.f, aspectRatio/Settings.fov, 0.f, 0.f,
+                1.f/FoV, 0.f, 0.f, 0.f,
+                0.f, aspectRatio/FoV, 0.f, 0.f,
                 0.f, 0.f, 0.f, -1.f,
                 0.f, 0.f, Constants.Z_NEAR, 0.f
         );

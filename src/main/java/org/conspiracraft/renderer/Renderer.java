@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -28,12 +29,15 @@ public class Renderer {
         }
     }
 
-    public static void drawFrame(MemoryStack stack) {
-        defaultUBO.update(stack);
-        ((Matrix4f)defaultUBO.uniforms()[0]).identity().translate(1, 1, 1); //model transformation matrix
+    public static void drawCube(Vector3f pos) {
+        ((Matrix4f)defaultUBO.uniforms()[0]).identity().translate(pos); //model transformation matrix
         defaultUBO.submit();
-        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
+    }
+    public static void drawFrame(MemoryStack stack) {
+        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
+        defaultUBO.update(stack);
+        drawCube(new Vector3f(-5, 0, -5));
     }
     public static void endRenderPass(MemoryStack stack) {
         vkCmdEndRenderPass(commandBuffers[currentFrame]);
@@ -92,7 +96,7 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         VkClearValue.Buffer clearValues = VkClearValue.calloc(1, stack);
-        clearValues.color().float32(0, 1.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 1.0f);
+        clearValues.color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
         VkRenderPassBeginInfo renderPassInfo = VkRenderPassBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO)
                 .renderPass(renderPass)
