@@ -11,13 +11,13 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.*;
-import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
+import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
@@ -469,7 +469,20 @@ public class Window {
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
     }
-
+    public void recreateSwapchain() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            long flags = SDL_GetWindowFlags(window);
+            while ((flags & SDL_WINDOW_MINIMIZED) != 0) {
+                flags = SDL_GetWindowFlags(window);
+                SDL_PollEvent(events);
+            }
+            vkDeviceWaitIdle(device);
+            cleanupSwapchain();
+            createSwapchain(stack);
+            createImageViews(stack);
+            createFramebuffers(stack);
+        }
+    }
     public void createVkDeviceAndGraphicsQueue(MemoryStack stack) {
         FloatBuffer priorities = stack.floats(1.0f);
 
@@ -591,7 +604,7 @@ public class Window {
                 .sType(VK13.VK_STRUCTURE_TYPE_APPLICATION_INFO)
                 .pApplicationName(stack.UTF8("Conspiracraft"))
                 .applicationVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
-                .pEngineName(stack.UTF8("Conspiracraft Engine"))
+                .pEngineName(stack.UTF8("ConspirEngine"))
                 .engineVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
                 .apiVersion(VK13.VK_API_VERSION_1_3);
         PointerBuffer layers = stack.mallocPointer(1);
@@ -612,24 +625,28 @@ public class Window {
         vkInst = new VkInstance(pInstance.get(0), createInfo);
     }
 
+    public void cleanupSwapchain() {
+        for (int i = 0; i < swapchainFramebuffers.length; i++) {
+            vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
+        }
+        for (long i : imageViews) {
+            vkDestroyImageView(device, i, null);
+        }
+        vkDestroySwapchainKHR(device, swapchain, null);
+    }
     public void cleanup() {
+        cleanupSwapchain();
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
             vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
             vkDestroyFence(device, inFlightFences[i], null);
         }
         vkDestroyCommandPool(device, commandPool, null);
-        for (int i = 0; i < swapchainFramebuffers.length; i++) {
-            vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
-        }
         vkDestroyPipeline(device, graphicsPipeline, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
         vkDestroyRenderPass(device, renderPass, null);
         vkDestroyPipelineLayout(device, pipelineLayout, null);
-        for (long i : imageViews) {
-            vkDestroyImageView(device, i, null);
-        }
         SDL_DestroyWindow(Window.window);
         SDL_Quit();
     }
@@ -652,27 +669,27 @@ public class Window {
         keys = SDL_GetKeyboardState();
     }
 
-    public void pollEvents(SDL_Event event) {
+    public void pollEvents() {
         displVec.x = 0;
         displVec.y = 0;
         scroll.set(0);
-        while (SDL_PollEvent(event)) {
-            switch (event.type()) {
+        while (SDL_PollEvent(events)) {
+            switch (events.type()) {
                 case SDL_EVENT_QUIT:
                     Main.isClosing = true;
                     break;
                 case SDL_EVENT_WINDOW_RESIZED:
-                    resized(event.window().data1(), event.window().data2());
+                    resized(events.window().data1(), events.window().data2());
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
-                    displVec.y += event.motion().xrel();
-                    displVec.x += event.motion().yrel();
-                    currentPos.x = event.motion().x();
-                    currentPos.y = event.motion().y();
+                    displVec.y += events.motion().xrel();
+                    displVec.x += events.motion().yrel();
+                    currentPos.x = events.motion().x();
+                    currentPos.y = events.motion().y();
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
-                    scroll.x = event.wheel().x();
-                    scroll.y = event.wheel().y();
+                    scroll.x = events.wheel().x();
+                    scroll.y = events.wheel().y();
                     break;
                 default:
                     break;
@@ -683,15 +700,11 @@ public class Window {
     public void resized(int width, int height) {
         Settings.width = width;
         Settings.height = height;
-        try {
-
-        } catch (Exception excp) {
-            Logger.error("Error calling resize callback", excp);
-        }
+        recreateSwapchain();
     }
 
-    public void update(SDL_Event event) {
-        pollEvents(event);
+    public void update() {
+        pollEvents();
     }
 
     public Matrix4f getProjectionMatrix() {

@@ -16,6 +16,7 @@ public class Main {
     public static String resourcesPath = mainFolder+"resources/";
 
     public static Window window;
+    public static SDL_Event events;
 
     public static boolean isClosing = false;
     public static List<Long> frameTimes = new ArrayList<>(List.of());
@@ -34,11 +35,11 @@ public class Main {
         }
 
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
-        SDL_Event event = new SDL_Event(eventContainer);
+        events = new SDL_Event(eventContainer);
         long updateTime = initialTime;
         window = new Window();
         while (!isClosing) {
-            window.update(event);
+            window.update();
             Renderer.render();
         }
         window.cleanup();

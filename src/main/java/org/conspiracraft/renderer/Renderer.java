@@ -1,5 +1,6 @@
 package org.conspiracraft.renderer;
 
+import org.conspiracraft.Main;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -15,12 +16,12 @@ public class Renderer {
     public static int currentFrame = 0;
 
     public static void render() {
-        currentFrame++;
-        if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            startRenderPass(stack);
-            drawFrame(stack);
-            endRenderPass(stack);
+            boolean started = startRenderPass(stack);
+            if (started) {
+                drawFrame(stack);
+                endRenderPass(stack);
+            }
         }
     }
 
@@ -48,18 +49,27 @@ public class Renderer {
                 .pSwapchains(swapchainBuf)
                 .pImageIndices(stack.mallocInt(1).put(imageIdx).flip())
                 .swapchainCount(swapchainBuf.remaining());
-        if (vkQueuePresentKHR(presentQueue, presentInfo) != VK_SUCCESS) {
+        int result = vkQueuePresentKHR(presentQueue, presentInfo);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            Main.window.recreateSwapchain();
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw new RuntimeException("Failed to queue present!");
         }
+        currentFrame++;
+        if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
     }
-    public static void startRenderPass(MemoryStack stack) {
+    public static boolean startRenderPass(MemoryStack stack) {
         vkWaitForFences(device, inFlightFences[currentFrame], false, Long.MAX_VALUE);
-        vkResetFences(device, inFlightFences[currentFrame]);
         IntBuffer imageIdxBuf = stack.mallocInt(1);
-        if (vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf) != VK_SUCCESS) {
+        int result = vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            Main.window.recreateSwapchain();
+            return false;
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             System.err.println("Failed to acquire next image!");
         }
         imageIdx = imageIdxBuf.get(0);
+        vkResetFences(device, inFlightFences[currentFrame]);
 
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
@@ -100,5 +110,6 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
+        return true;
     }
 }
