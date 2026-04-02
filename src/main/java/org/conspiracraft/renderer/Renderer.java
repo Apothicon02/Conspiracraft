@@ -1,6 +1,8 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.renderer.models.Models;
+import org.conspiracraft.renderer.models.Vertex;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -26,7 +28,8 @@ public class Renderer {
     }
 
     public static void drawFrame(MemoryStack stack) {
-        vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
+        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.size, 0);
     }
     public static void endRenderPass(MemoryStack stack) {
         vkCmdEndRenderPass(commandBuffers[currentFrame]);

@@ -4,11 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added frames-in-flight.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added render pass.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Model.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Vertex.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/cube.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Vertex.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +66,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -69,11 +81,13 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Apothicon02/Conspiracraft.git&quot;,
-    &quot;accountId&quot;: &quot;01d1672b-0a2d-4e22-8a6b-02970825e7ba&quot;
+    &quot;url&quot;: &quot;https://github.com/Apothicon02/Terraflat.git&quot;,
+    &quot;accountId&quot;: &quot;2d456709-eacc-4081-a0f2-70e4677dc448&quot;
   }
 }</component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\tyler\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Program Files\Java\jdk-25" gradleVersion="9.3.0" />
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 8
@@ -85,29 +99,33 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [build].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shader&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;application.passwordSafe&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shader" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
@@ -176,13 +194,6 @@
         <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -265,31 +276,87 @@
       <option name="project" value="LOCAL" />
       <updated>1763392406939</updated>
     </task>
-    <task id="LOCAL-00010" summary="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names.">
+    <task id="LOCAL-00010" summary="- Updated preferred format &amp; color space.">
       <option name="closed" value="true" />
-      <created>1774917375640</created>
+      <created>1774978657017</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1774917375640</updated>
+      <updated>1774978657018</updated>
     </task>
-    <task id="LOCAL-00011" summary="- Added preferred sdr format.">
+    <task id="LOCAL-00011" summary="- Added hdr setting. &#10;- Created image views.">
       <option name="closed" value="true" />
-      <created>1775074918741</created>
+      <created>1774981972415</created>
       <option name="number" value="00011" />
       <option name="presentableId" value="LOCAL-00011" />
       <option name="project" value="LOCAL" />
-      <updated>1775074918741</updated>
+      <updated>1774981972415</updated>
     </task>
-    <task id="LOCAL-00012" summary="- Added frames-in-flight.">
+    <task id="LOCAL-00012" summary="- Added glsl -&gt; spir-v shader compiling.">
       <option name="closed" value="true" />
-      <created>1775089573696</created>
+      <created>1774984638026</created>
       <option name="number" value="00012" />
       <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1775089573696</updated>
+      <updated>1774984638026</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="- Now creates shader stages.">
+      <option name="closed" value="true" />
+      <created>1774985960147</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1774985960147</updated>
+    </task>
+    <task id="LOCAL-00014" summary="- Now creates the pipeline layout.">
+      <option name="closed" value="true" />
+      <created>1774989943409</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1774989943409</updated>
+    </task>
+    <task id="LOCAL-00015" summary="- Created render pass.">
+      <option name="closed" value="true" />
+      <created>1774991301847</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1774991301847</updated>
+    </task>
+    <task id="LOCAL-00016" summary="- Finished graphics pipeline.">
+      <option name="closed" value="true" />
+      <created>1774992069702</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1774992069702</updated>
+    </task>
+    <task id="LOCAL-00017" summary="- Created framebuffers.">
+      <option name="closed" value="true" />
+      <created>1774992568868</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1774992568868</updated>
+    </task>
+    <task id="LOCAL-00018" summary="- Created command buffer.">
+      <option name="closed" value="true" />
+      <created>1774993754444</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1774993754444</updated>
+    </task>
+    <task id="LOCAL-00019" summary="- Added render pass.">
+      <option name="closed" value="true" />
+      <created>1774998963364</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1774998963364</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -304,21 +371,17 @@
     <MESSAGE value="- Thing." />
     <MESSAGE value="- Fixed inaccurate reflections on transparent objects." />
     <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
-    <MESSAGE value="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names." />
-    <MESSAGE value="- Added preferred sdr format." />
-    <MESSAGE value="- Added frames-in-flight." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added frames-in-flight." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java</url>
-          <line>128</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="- Updated preferred format &amp; color space." />
+    <MESSAGE value="- Added hdr setting. &#10;- Created image views." />
+    <MESSAGE value="- Added glsl -&gt; spir-v shader compiling." />
+    <MESSAGE value="- Now creates shader stages." />
+    <MESSAGE value="- Now creates the pipeline layout." />
+    <MESSAGE value="- Created render pass." />
+    <MESSAGE value="- Finished graphics pipeline." />
+    <MESSAGE value="- Created framebuffers." />
+    <MESSAGE value="- Created command buffer." />
+    <MESSAGE value="- Added render pass." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added render pass." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

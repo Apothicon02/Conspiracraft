@@ -3,6 +3,8 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
+import org.conspiracraft.renderer.models.Models;
+import org.conspiracraft.renderer.models.Vertex;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
@@ -66,6 +68,9 @@ public class Window {
     public static long[] inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
     public static int eWidth;
     public static int eHeight;
+    public static long vertexBuffer;
+    public static long vertexBufferMemory;
+    public static int vertexBufferOffset;
 
     public Window() {
         if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
@@ -82,6 +87,7 @@ public class Window {
             createGraphicsPipeline(stack);
             createFramebuffers(stack);
             createCommandPool(stack);
+            createVertexBuffer(stack);
             createCommandBuffers(stack);
             createSyncObjects(stack);
         }
@@ -123,6 +129,48 @@ public class Window {
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             commandBuffers[i] = new VkCommandBuffer(commandBuffersBuf.get(i), device);
         }
+    }
+    public void createVertexBuffer(MemoryStack stack) {
+        int bufferCapacity = Vertex.size*1000;//up to 1000 vertexes.
+        VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
+                .size(bufferCapacity)
+                .usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
+                .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+        LongBuffer vertexBufferBuf = stack.mallocLong(1);
+        if (vkCreateBuffer(device, bufferInfo, null, vertexBufferBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create vertex buffer!");
+        }
+        vertexBuffer = vertexBufferBuf.get();
+        VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
+        vkGetBufferMemoryRequirements(device, vertexBuffer, memRequirements);
+
+        VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
+                .allocationSize(memRequirements.size())
+                .memoryTypeIndex(findMemoryType(stack, memRequirements.memoryTypeBits(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+        LongBuffer vertexBufferMemoryBuf = stack.mallocLong(1);
+        if (vkAllocateMemory(device, allocInfo, null, vertexBufferMemoryBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate vertex buffer memory!");
+        }
+        vertexBufferMemory = vertexBufferMemoryBuf.get();
+        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+        PointerBuffer pointerBuf = stack.mallocPointer(1);
+        vkMapMemory(device, vertexBufferMemory, 0, bufferCapacity, 0, pointerBuf);
+        Models.loadModels(pointerBuf.get(0));
+    }
+    public int findMemoryType(MemoryStack stack, int typeFilter, int properties) {
+        VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.calloc(stack);
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties);
+        for (int i = 0; i < memProperties.memoryTypeCount(); i++) {
+            if ((typeFilter & (1 << i)) != 0) {
+                if ((memProperties.memoryTypes(i).propertyFlags() & properties) == properties) {
+                    return i;
+                }
+            }
+        }
+        throw new RuntimeException("Failed to find suitable memory type!");
     }
     public void createCommandPool(MemoryStack stack) {
         //QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
@@ -211,8 +259,8 @@ public class Window {
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
         vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
-        vertexInputInfo.pVertexBindingDescriptions(null);
-        vertexInputInfo.pVertexAttributeDescriptions(null);
+        vertexInputInfo.pVertexBindingDescriptions(Vertex.getBindingDescription());
+        vertexInputInfo.pVertexAttributeDescriptions(Vertex.getAttributeDescriptions());
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.calloc(stack);
         inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
@@ -636,6 +684,8 @@ public class Window {
     }
     public void cleanup() {
         cleanupSwapchain();
+        vkDestroyBuffer(device, vertexBuffer, null);
+        vkFreeMemory(device, vertexBufferMemory, null);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
             vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
