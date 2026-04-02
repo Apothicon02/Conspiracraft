@@ -3,6 +3,7 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Main;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -28,8 +29,10 @@ public class Renderer {
     }
 
     public static void drawFrame(MemoryStack stack) {
-        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
-        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.size, 0);
+        defaultUBO.update(stack);
+        ((Matrix4f)defaultUBO.uniforms()[0]).set(new Matrix4f()); //model transformation matrix
+        defaultUBO.submit(stack);
+        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
     }
     public static void endRenderPass(MemoryStack stack) {
         vkCmdEndRenderPass(commandBuffers[currentFrame]);
@@ -113,6 +116,7 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer.get(0)), stack.longs(0));
         return true;
     }
 }

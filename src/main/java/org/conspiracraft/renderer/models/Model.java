@@ -1,7 +1,5 @@
 package org.conspiracraft.renderer.models;
 
-import org.lwjgl.system.MemoryStack;
-
 import java.nio.ByteBuffer;
 
 import static org.conspiracraft.renderer.Window.*;
@@ -18,7 +16,7 @@ public class Model {
         this.positions = verts;
         this.normals = normals;
         vertexCount = (verts.length/3);
-        vertexData = memAlloc(vertexCount * Vertex.size);
+        vertexData = memAlloc(vertexCount * Vertex.SIZE);
         for (int i = 0; i < verts.length; i+=3) {
             vertexData.putFloat(positions[i]);
             vertexData.putFloat(positions[i+1]);

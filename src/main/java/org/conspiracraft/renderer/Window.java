@@ -3,6 +3,8 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
+import org.conspiracraft.renderer.buffers.DEFAULT_UBO;
+import org.conspiracraft.renderer.buffers.UBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.joml.Matrix4f;
@@ -30,6 +32,7 @@ import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
 import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVulkan.*;
+import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
@@ -58,6 +61,7 @@ public class Window {
     public static long[] swapchainImages;
     public static long[] imageViews;
     public static long renderPass;
+    public static LongBuffer descriptorSetLayouts;
     public static long pipelineLayout;
     public static long graphicsPipeline;
     public static long[] swapchainFramebuffers;
@@ -68,9 +72,12 @@ public class Window {
     public static long[] inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
     public static int eWidth;
     public static int eHeight;
-    public static long vertexBuffer;
-    public static long vertexBufferMemory;
+    public static LongBuffer vertexBuffer;
+    public static LongBuffer vertexBufferMemory;
     public static int vertexBufferOffset;
+    public static LongBuffer[] uniformBuffers;
+    public static LongBuffer[] uniformBuffersMemory;
+    public static PointerBuffer[] uniformBuffersMapped;
 
     public Window() {
         if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
@@ -84,10 +91,12 @@ public class Window {
             createSwapchain(stack);
             createImageViews(stack);
             createRenderPass(stack);
+            createDescriptorSetLayout(stack);
             createGraphicsPipeline(stack);
             createFramebuffers(stack);
             createCommandPool(stack);
             createVertexBuffer(stack);
+            createUniformBuffers(stack);
             createCommandBuffers(stack);
             createSyncObjects(stack);
         }
@@ -130,34 +139,29 @@ public class Window {
             commandBuffers[i] = new VkCommandBuffer(commandBuffersBuf.get(i), device);
         }
     }
+    public static DEFAULT_UBO defaultUBO;
+    public void createUniformBuffers(MemoryStack stack) {
+        defaultUBO = new DEFAULT_UBO();
+        int bufferSize = defaultUBO.size();
+        uniformBuffers = new LongBuffer[MAX_FRAMES_IN_FLIGHT];
+        uniformBuffersMemory = new LongBuffer[MAX_FRAMES_IN_FLIGHT];
+        uniformBuffersMapped = new PointerBuffer[MAX_FRAMES_IN_FLIGHT];
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            uniformBuffers[i] = ByteBuffer.allocateDirect(8).asLongBuffer();
+            uniformBuffersMemory[i] = ByteBuffer.allocateDirect(8).asLongBuffer();
+            uniformBuffersMapped[i] = PointerBuffer.allocateDirect(1);
+
+            createBuffer(stack, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+            vkMapMemory(device, uniformBuffersMemory[i].get(0), 0, bufferSize, 0, uniformBuffersMapped[i]);
+        }
+    }
     public void createVertexBuffer(MemoryStack stack) {
-        int bufferCapacity = Vertex.size*1000;//up to 1000 vertexes.
-        VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
-                .size(bufferCapacity)
-                .usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
-                .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
-        LongBuffer vertexBufferBuf = stack.mallocLong(1);
-        if (vkCreateBuffer(device, bufferInfo, null, vertexBufferBuf) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to create vertex buffer!");
-        }
-        vertexBuffer = vertexBufferBuf.get();
-        VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
-        vkGetBufferMemoryRequirements(device, vertexBuffer, memRequirements);
-
-        VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
-                .allocationSize(memRequirements.size())
-                .memoryTypeIndex(findMemoryType(stack, memRequirements.memoryTypeBits(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
-        LongBuffer vertexBufferMemoryBuf = stack.mallocLong(1);
-        if (vkAllocateMemory(device, allocInfo, null, vertexBufferMemoryBuf) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to allocate vertex buffer memory!");
-        }
-        vertexBufferMemory = vertexBufferMemoryBuf.get();
-        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
-
+        int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
+        vertexBuffer = ByteBuffer.allocateDirect(8).asLongBuffer();
+        vertexBufferMemory = ByteBuffer.allocateDirect(8).asLongBuffer();
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory);
         PointerBuffer pointerBuf = stack.mallocPointer(1);
-        vkMapMemory(device, vertexBufferMemory, 0, bufferCapacity, 0, pointerBuf);
+        vkMapMemory(device, vertexBufferMemory.get(0), 0, bufferSize, 0, pointerBuf);
         Models.loadModels(pointerBuf.get(0));
     }
     public int findMemoryType(MemoryStack stack, int typeFilter, int properties) {
@@ -318,21 +322,21 @@ public class Window {
 //        colorBlendAttachment.dstAlphaBlendFactor(VK_BLEND_FACTOR_ZERO); // Optional
 //        colorBlendAttachment.alphaBlendOp(VK_BLEND_OP_ADD); // Optional
 
-        VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack);
-        colorBlending.sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
-        colorBlending.logicOpEnable(false);
-        colorBlending.logicOp(VK_LOGIC_OP_COPY); // Optional
-        colorBlending.attachmentCount(1);
-        colorBlending.pAttachments(colorBlendAttachment);
+        VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO)
+                .logicOpEnable(false)
+                .logicOp(VK_LOGIC_OP_COPY)
+                .attachmentCount(1)
+                .pAttachments(colorBlendAttachment);
 //        colorBlending.blendConstants(0, 0.0f); // Optional
 //        colorBlending.blendConstants(1, 0.0f); // Optional
 //        colorBlending.blendConstants(2, 0.0f); // Optional
 //        colorBlending.blendConstants(3, 0.0f); // Optional
 
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack);
-        pipelineLayoutInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
-//        pipelineLayoutInfo.setLayoutCount(0); // Optional
-//        pipelineLayoutInfo.pSetLayouts(null); // Optional
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
+                .setLayoutCount(1)
+                .pSetLayouts(descriptorSetLayouts);
 //        pipelineLayoutInfo.pPushConstantRanges(null); // Optional
 
         LongBuffer pPipelineLayout = stack.mallocLong(1);
@@ -368,6 +372,21 @@ public class Window {
 
         vkDestroyShaderModule(device, fragShaderModule, null);
         vkDestroyShaderModule(device, vertShaderModule, null);
+    }
+    public void createDescriptorSetLayout(MemoryStack stack) {
+        VkDescriptorSetLayoutBinding.Buffer uboLayoutBinding = VkDescriptorSetLayoutBinding.calloc(1, stack)
+                .binding(0)
+                .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(1)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .pImmutableSamplers(null);
+        VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
+                .pBindings(uboLayoutBinding);
+        descriptorSetLayouts = MemoryUtil.memAllocLong(1);
+        if (vkCreateDescriptorSetLayout(device, layoutInfo, null, descriptorSetLayouts) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create descriptor set layout!");
+        }
     }
     public void createRenderPass(MemoryStack stack) {
         VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
@@ -673,6 +692,34 @@ public class Window {
         vkInst = new VkInstance(pInstance.get(0), createInfo);
     }
 
+    public void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, LongBuffer buffer, LongBuffer memory) {
+        VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
+                .size(bufferSize)
+                .usage(usage)
+                .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+        LongBuffer bufferBuf = stack.mallocLong(1);
+        if (vkCreateBuffer(device, bufferInfo, null, bufferBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create vertex buffer!");
+        }
+        buffer.put(bufferBuf.get());
+        VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
+        vkGetBufferMemoryRequirements(device, buffer.get(0), memRequirements);
+
+        VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
+                .allocationSize(memRequirements.size())
+                .memoryTypeIndex(findMemoryType(stack, memRequirements.memoryTypeBits(), properties));
+        LongBuffer bufferMemoryBuf = stack.mallocLong(1);
+        if (vkAllocateMemory(device, allocInfo, null, bufferMemoryBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate buffer memory!");
+        }
+        memory.put(bufferMemoryBuf.get());
+        if (vkBindBufferMemory(device, buffer.get(0), memory.get(0), 0) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to bind buffer memory!");
+        }
+    }
+
     public void cleanupSwapchain() {
         for (int i = 0; i < swapchainFramebuffers.length; i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
@@ -684,8 +731,14 @@ public class Window {
     }
     public void cleanup() {
         cleanupSwapchain();
-        vkDestroyBuffer(device, vertexBuffer, null);
-        vkFreeMemory(device, vertexBufferMemory, null);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroyBuffer(device, uniformBuffers[i].get(0), null);
+            vkFreeMemory(device, uniformBuffersMemory[i].get(0), null);
+        }
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.get(0), null);
+        memFree(descriptorSetLayouts);
+        vkDestroyBuffer(device, vertexBuffer.get(0), null);
+        vkFreeMemory(device, vertexBufferMemory.get(0), null);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
             vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
