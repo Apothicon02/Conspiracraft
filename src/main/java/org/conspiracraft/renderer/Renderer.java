@@ -31,7 +31,7 @@ public class Renderer {
     public static void drawFrame(MemoryStack stack) {
         defaultUBO.update(stack);
         ((Matrix4f)defaultUBO.uniforms()[0]).identity().translate(1, 1, 1); //model transformation matrix
-        defaultUBO.submit(stack);
+        defaultUBO.submit();
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
     }

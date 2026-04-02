@@ -1,12 +1,12 @@
 package org.conspiracraft.renderer.buffers;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.Utils.*;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 
 import static org.conspiracraft.renderer.Renderer.currentFrame;
 import static org.conspiracraft.renderer.Window.uniformBuffersMapped;
@@ -45,26 +45,34 @@ public class DEFAULT_UBO extends UBO {
         ((Matrix4f)uniformStorage[1]).identity(); //view
         ((Matrix4f)uniformStorage[2]).set(Main.window.getProjectionMatrix()); //proj
     }
-    public void submit(MemoryStack stack) {
-        int offset = 0;
+    private int offset = 0;
+    public void submit() {
+        offset = 0;
         ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
         for (Object obj : uniforms()) {
             switch (obj) {
-                case Float v -> {buf.putFloat(offset, v);offset += FLOAT_SIZE;}
-                case Integer v -> {buf.putInt(offset, v);offset += FLOAT_SIZE;}
-                case Vector2f v -> {v.get(offset, buf);offset += VEC2_SIZE;}
-                case Vector3f v -> {v.get(offset, buf);offset += VEC3_SIZE;}
-                case Vector4f v -> {v.get(offset, buf);offset += VEC4_SIZE;}
-                case Vector2i v -> {v.get(offset, buf);offset += VEC2_SIZE;}
-                case Vector3i v -> {v.get(offset, buf);offset += VEC3_SIZE;}
-                case Vector4i v -> {v.get(offset, buf);offset += VEC4_SIZE;}
-                case Matrix2f v -> {v.get(offset, buf);offset += MAT2_SIZE;}
-                case Matrix3f v -> {v.get(offset, buf);offset += MAT3_SIZE;}
-                case Matrix4f v -> {v.get(offset, buf);offset += MAT4_SIZE;}
+                case Float v -> buf.putFloat(align(FLOAT_ALIGN, FLOAT_SIZE), v);
+                case Integer v -> buf.putInt(align(FLOAT_ALIGN, FLOAT_SIZE), v);
+                case Vector2f v -> v.get(align(VEC2_ALIGN, VEC2_SIZE), buf);
+                case Vector3f v -> v.get(align(OTHER_ALIGN, VEC3_SIZE), buf);
+                case Vector4f v -> v.get(align(OTHER_ALIGN, VEC4_SIZE), buf);
+                case Vector2i v -> v.get(align(OTHER_ALIGN, VEC2_SIZE), buf);
+                case Vector3i v -> v.get(align(OTHER_ALIGN, VEC3_SIZE), buf);
+                case Vector4i v -> v.get(align(OTHER_ALIGN, VEC4_SIZE), buf);
+                case Matrix2f v -> v.get(align(OTHER_ALIGN, MAT2_SIZE), buf);
+                case Matrix3f v -> v.get(align(OTHER_ALIGN, MAT3_SIZE), buf);
+                case Matrix4f v -> v.get(align(OTHER_ALIGN, MAT4_SIZE), buf);
                 default -> throw new IllegalArgumentException("Cannot read uniform for object type: "+obj.getClass().getName());
             };
         }
         buf.rewind();
         memCopy(memAddress(buf), uniformBuffersMapped[currentFrame].get(0), buf.remaining());
+    }
+
+    private int align(int alignment, int size) {
+        int mask = alignment - 1;
+        int alignedOffset = (offset + mask) & ~mask;
+        offset = alignedOffset+size;
+        return alignedOffset;
     }
 }
