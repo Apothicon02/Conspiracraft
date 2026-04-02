@@ -37,6 +37,10 @@ import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class Window {
+    public static int MAX_FRAMES_IN_FLIGHT = 2;
+    private final Matrix4f projectionMatrix = new Matrix4f();
+    public ByteBuffer keys;
+
     public static long window;
     public static VkInstance vkInst;
     public static long vkSurf;
@@ -56,15 +60,12 @@ public class Window {
     public static long graphicsPipeline;
     public static long[] swapchainFramebuffers;
     public static long commandPool;
-    public static VkCommandBuffer commandBuffer;
-    public static long imageAvailableSemaphore;
-    public static long renderFinishedSemaphore;
-    public static long inFlightFence;
+    public static VkCommandBuffer[] commandBuffers;
+    public static long[] imageAvailableSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
+    public static long[] renderFinishedSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
+    public static long[] inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
     public static int eWidth;
     public static int eHeight;
-
-    private final Matrix4f projectionMatrix = new Matrix4f();
-    public ByteBuffer keys;
 
     public Window() {
         if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
@@ -81,7 +82,7 @@ public class Window {
             createGraphicsPipeline(stack);
             createFramebuffers(stack);
             createCommandPool(stack);
-            createCommandBuffer(stack);
+            createCommandBuffers(stack);
             createSyncObjects(stack);
         }
     }
@@ -92,30 +93,36 @@ public class Window {
         fenceInfo.sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
         fenceInfo.flags(VK_FENCE_CREATE_SIGNALED_BIT);
 
-        LongBuffer imageAvailableSemBuf = stack.mallocLong(1);
-        LongBuffer renderFinishedSemBuf = stack.mallocLong(1);
-        LongBuffer inFlightFenceBuf = stack.mallocLong(1);
-        if (vkCreateSemaphore(device, semaphoreInfo, null, imageAvailableSemBuf) != VK_SUCCESS ||
-                vkCreateSemaphore(device, semaphoreInfo, null, renderFinishedSemBuf) != VK_SUCCESS ||
-                vkCreateFence(device, fenceInfo, null, inFlightFenceBuf) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to create semaphores!");
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            LongBuffer imageAvailableSemBuf = stack.mallocLong(1);
+            LongBuffer renderFinishedSemBuf = stack.mallocLong(1);
+            LongBuffer inFlightFenceBuf = stack.mallocLong(1);
+            if (vkCreateSemaphore(device, semaphoreInfo, null, imageAvailableSemBuf) != VK_SUCCESS ||
+                    vkCreateSemaphore(device, semaphoreInfo, null, renderFinishedSemBuf) != VK_SUCCESS ||
+                    vkCreateFence(device, fenceInfo, null, inFlightFenceBuf) != VK_SUCCESS) {
+                throw new RuntimeException("Failed to create semaphores!");
+            }
+            imageAvailableSemaphores[i] = imageAvailableSemBuf.get(0);
+            renderFinishedSemaphores[i] = renderFinishedSemBuf.get(0);
+            inFlightFences[i] = inFlightFenceBuf.get(0);
         }
-        imageAvailableSemaphore = imageAvailableSemBuf.get(0);
-        renderFinishedSemaphore = renderFinishedSemBuf.get(0);
-        inFlightFence = inFlightFenceBuf.get(0);
     }
-    public void createCommandBuffer(MemoryStack stack) {
+    public void createCommandBuffers(MemoryStack stack) {
+        commandBuffers = new VkCommandBuffer[MAX_FRAMES_IN_FLIGHT];
+
         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
         allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
         allocInfo.commandPool(commandPool);
         allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-        allocInfo.commandBufferCount(1);
+        allocInfo.commandBufferCount(MAX_FRAMES_IN_FLIGHT);
 
-        PointerBuffer commandBuffersBuf = stack.mallocPointer(1);
+        PointerBuffer commandBuffersBuf = stack.mallocPointer(MAX_FRAMES_IN_FLIGHT);
         if (vkAllocateCommandBuffers(device, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate command buffers!");
         }
-        commandBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), device);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            commandBuffers[i] = new VkCommandBuffer(commandBuffersBuf.get(i), device);
+        }
     }
     public void createCommandPool(MemoryStack stack) {
         //QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
@@ -606,9 +613,11 @@ public class Window {
     }
 
     public void cleanup() {
-        vkDestroySemaphore(device, imageAvailableSemaphore, null);
-        vkDestroySemaphore(device, renderFinishedSemaphore, null);
-        vkDestroyFence(device, inFlightFence, null);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
+            vkDestroyFence(device, inFlightFences[i], null);
+        }
         vkDestroyCommandPool(device, commandPool, null);
         for (int i = 0; i < swapchainFramebuffers.length; i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);

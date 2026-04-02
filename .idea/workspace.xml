@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,12 +67,12 @@
     &quot;assignee&quot;: &quot;Apothicon02&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Apothicon02/Conspiracraft.git",
-    "accountId": "01d1672b-0a2d-4e22-8a6b-02970825e7ba"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Apothicon02/Conspiracraft.git&quot;,
+    &quot;accountId&quot;: &quot;01d1672b-0a2d-4e22-8a6b-02970825e7ba&quot;
   }
-}]]></component>
+}</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\tyler\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Program Files\Java\jdk-25" gradleVersion="9.3.0" />
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -272,7 +273,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774917375640</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="- Added preferred sdr format.">
+      <option name="closed" value="true" />
+      <created>1775074918741</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1775074918741</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -288,7 +297,8 @@
     <MESSAGE value="- Fixed inaccurate reflections on transparent objects." />
     <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
     <MESSAGE value="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names." />
+    <MESSAGE value="- Added preferred sdr format." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added preferred sdr format." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -12,8 +12,11 @@ import static org.lwjgl.vulkan.VK13.*;
 
 public class Renderer {
     public static int imageIdx = 0;
+    public static int currentFrame = 0;
 
     public static void render() {
+        currentFrame++;
+        if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
             startRenderPass(stack);
             drawFrame(stack);
@@ -22,26 +25,26 @@ public class Renderer {
     }
 
     public static void drawFrame(MemoryStack stack) {
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+        vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
     }
     public static void endRenderPass(MemoryStack stack) {
-        vkCmdEndRenderPass(commandBuffer);
-        vkEndCommandBuffer(commandBuffer);
+        vkCmdEndRenderPass(commandBuffers[currentFrame]);
+        vkEndCommandBuffer(commandBuffers[currentFrame]);
 
         VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
                 .waitSemaphoreCount(1)
-                .pWaitSemaphores(stack.mallocLong(1).put(imageAvailableSemaphore).flip())
+                .pWaitSemaphores(stack.mallocLong(1).put(imageAvailableSemaphores[currentFrame]).flip())
                 .pWaitDstStageMask(stack.mallocInt(1).put(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT).flip())
-                .pCommandBuffers(stack.pointers(commandBuffer))
-                .pSignalSemaphores(stack.mallocLong(1).put(renderFinishedSemaphore).flip());
-        if (vkQueueSubmit(graphicsQueue, submitInfo, inFlightFence) != VK_SUCCESS) {
+                .pCommandBuffers(stack.pointers(commandBuffers[currentFrame]))
+                .pSignalSemaphores(stack.mallocLong(1).put(renderFinishedSemaphores[currentFrame]).flip());
+        if (vkQueueSubmit(graphicsQueue, submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
             throw new RuntimeException("Failed to submit draw command buffer!");
         }
         LongBuffer swapchainBuf = stack.longs(1).put(swapchain).flip();
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                .pWaitSemaphores(stack.mallocLong(1).put(renderFinishedSemaphore).flip())
+                .pWaitSemaphores(stack.mallocLong(1).put(renderFinishedSemaphores[currentFrame]).flip())
                 .pSwapchains(swapchainBuf)
                 .pImageIndices(stack.mallocInt(1).put(imageIdx).flip())
                 .swapchainCount(swapchainBuf.remaining());
@@ -50,21 +53,21 @@ public class Renderer {
         }
     }
     public static void startRenderPass(MemoryStack stack) {
-        vkWaitForFences(device, inFlightFence, true, Long.MAX_VALUE);
-        vkResetFences(device, inFlightFence);
+        vkWaitForFences(device, inFlightFences[currentFrame], false, Long.MAX_VALUE);
+        vkResetFences(device, inFlightFences[currentFrame]);
         IntBuffer imageIdxBuf = stack.mallocInt(1);
-        if (vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphore, VK_NULL_HANDLE, imageIdxBuf) != VK_SUCCESS) {
+        if (vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf) != VK_SUCCESS) {
             System.err.println("Failed to acquire next image!");
         }
         imageIdx = imageIdxBuf.get(0);
 
-        vkResetCommandBuffer(commandBuffer, 0);
+        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
         VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
                 .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
                 .pInheritanceInfo(null);
-        if (vkBeginCommandBuffer(commandBuffer, beginInfo) != VK_SUCCESS) {
+        if (vkBeginCommandBuffer(commandBuffers[currentFrame], beginInfo) != VK_SUCCESS) {
             throw new RuntimeException("Failed to begin recording command buffer!");
         }
 
@@ -80,9 +83,9 @@ public class Renderer {
                 .renderArea(renderAreaData)
                 .clearValueCount(1)
                 .pClearValues(clearValues);
-        vkCmdBeginRenderPass(commandBuffer, renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffers[currentFrame], renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+        vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
         VkViewport.Buffer viewport = VkViewport.calloc(1, stack)
                 .x(0.0f)
@@ -91,11 +94,11 @@ public class Renderer {
                 .height(eHeight)
                 .minDepth(0.0f)
                 .maxDepth(1.0f);
-        vkCmdSetViewport(commandBuffer, 0, viewport);
+        vkCmdSetViewport(commandBuffers[currentFrame], 0, viewport);
 
         VkRect2D.Buffer scissor = VkRect2D.calloc(1, stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
-        vkCmdSetScissor(commandBuffer, 0, scissor);
+        vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
     }
 }
