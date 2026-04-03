@@ -4,6 +4,7 @@ import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.player.InputHandler;
+import org.conspiracraft.renderer.buffers.BufferHelper;
 import org.conspiracraft.renderer.buffers.DefaultUBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
@@ -219,12 +220,18 @@ public class Window {
     }
     public void createVertexBuffer(MemoryStack stack) {
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
+        long[] stagingBuffer = new long[1];
+        long[] stagingBufferMemory = new long[1];
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, 0);
+        PointerBuffer stagingPointerBuf = stack.mallocPointer(1);
+        vkMapMemory(device, stagingBufferMemory[0], 0, bufferSize, 0, stagingPointerBuf);
+        Models.loadModels(stagingPointerBuf.get(0));
+        vkUnmapMemory(device, stagingBufferMemory[0]);
+
         vertexBuffer = new long[1];
         vertexBufferMemory = new long[1];
-        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory, 0);
-        PointerBuffer pointerBuf = stack.mallocPointer(1);
-        vkMapMemory(device, vertexBufferMemory[0], 0, bufferSize, 0, pointerBuf);
-        Models.loadModels(pointerBuf.get(0));
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory, 0);
+        BufferHelper.copyBuffer(stack, stagingBuffer[0], vertexBuffer[0], bufferSize);
     }
     public int instanceBufferSize = 500000000;
     public long[] instanceStagingBufMemPointer;

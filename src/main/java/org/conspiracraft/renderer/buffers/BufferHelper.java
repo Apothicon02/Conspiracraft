@@ -1,6 +1,13 @@
 package org.conspiracraft.renderer.buffers;
 
 import org.joml.*;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.*;
+
+import static org.conspiracraft.renderer.Window.*;
+import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 
 public class BufferHelper {
@@ -34,5 +41,36 @@ public class BufferHelper {
             };
         }
         return size;
+    }
+
+    public static void copyBuffer(MemoryStack stack, long src, long dst, long size) {
+        VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
+                .commandPool(commandPool)
+                .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+                .commandBufferCount(1);
+        PointerBuffer commandBuffersBuf = stack.mallocPointer(1);
+        if (vkAllocateCommandBuffers(device, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate command buffer!");
+        }
+        VkCommandBuffer cmdBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), device);
+        VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
+                .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+        vkBeginCommandBuffer(cmdBuffer, beginInfo);
+
+        VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack)
+                .srcOffset(0) // Optional
+                .dstOffset(0) // Optional
+                .size(size);
+        vkCmdCopyBuffer(cmdBuffer, src, dst, copyRegion);
+
+        vkEndCommandBuffer(cmdBuffer);
+        VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
+                .pCommandBuffers(commandBuffersBuf);
+        vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
+        vkFreeCommandBuffers(device, commandPool, cmdBuffer);
     }
 }
