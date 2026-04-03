@@ -1,17 +1,17 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.renderer.buffers.PUSH_UBO;
+import org.conspiracraft.renderer.buffers.InstancingBuffer;
+import org.conspiracraft.renderer.buffers.PushUBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
@@ -33,18 +33,42 @@ public class Renderer {
         }
     }
 
-    public static PUSH_UBO pushUBO = new PUSH_UBO();
+    public static PushUBO pushUBO = new PushUBO();
     public static void drawFrame(MemoryStack stack) {
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         defaultUBO.update(stack);
         defaultUBO.submit();
-        drawCube(stack, new Matrix4f().translate(-5, 0, -5), new Vector4f(1));
         World.worldType.renderCelestialBodies(stack);
+        drawCube(stack, new Matrix4f().translate(-5, 2, -5), new Vector4f(1));
+        drawTestScene(stack);
     }
     public static void drawCube(MemoryStack stack, Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(stack, modelMatrix, color);
         pushUBO.submit();
         vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
+    }
+    public static void drawTestScene(MemoryStack stack) {
+        for (int x = 0; x < 128; x++) {
+            for (int z = 0; z < 128; z++) {
+                int y = (int) Math.abs(16-Math.min(16, new Vector2f(x, z).distance(new Vector2f(64, 128))/8));
+                drawCube(stack, new Matrix4f().translate(x, y, z), y < 1 ? new Vector4f(0.15f, 0.65f, 0.95f, 1.f) : new Vector4f(0.95f, 0.93f, 0.85f, 1.f));
+            }
+        }
+    }
+    public static InstancingBuffer instancedUBO = new InstancingBuffer();
+    public static void drawInstancedTestScene(MemoryStack stack) {
+        Object[] data = new Object[128*128*2];
+        int i = 0;
+        for (int x = 0; x < 128; x++) {
+            for (int z = 0; z < 128; z++) {
+                int y = (int) Math.abs(16-Math.min(16, new Vector2f(x, z).distance(new Vector2f(64, 128))/8));
+                data[i*2] = new Matrix4f().translate(x, y, z);
+                data[(i*2)+1] = y <= 1 ? new Vector4f(0.15f, 0.65f, 0.95f, 1.f) : new Vector4f(0.5f, 0.95f, 0.5f, 1.f);
+                i++;
+            }
+        }
+        instancedUBO.submit(data);
+        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, i/2, Models.CUBE.offset/Vertex.SIZE, 0);
     }
 
     public static void endRenderPass(MemoryStack stack) {

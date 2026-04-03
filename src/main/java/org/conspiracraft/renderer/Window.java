@@ -4,7 +4,7 @@ import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.player.InputHandler;
-import org.conspiracraft.renderer.buffers.DEFAULT_UBO;
+import org.conspiracraft.renderer.buffers.DefaultUBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.joml.Matrix4f;
@@ -20,13 +20,11 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.Constants.Z_NEAR;
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
-import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLLog.*;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
@@ -140,7 +138,7 @@ public class Window {
             commandBuffers[i] = new VkCommandBuffer(commandBuffersBuf.get(i), device);
         }
     }
-    public static DEFAULT_UBO defaultUBO = new DEFAULT_UBO();
+    public static DefaultUBO defaultUBO = new DefaultUBO();
     public void createDescriptorSets(MemoryStack stack) {
         LongBuffer layouts = stack.mallocLong(MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -377,7 +375,7 @@ public class Window {
 //        colorBlending.blendConstants(3, 0.0f); // Optional
 
         VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
                 .offset(0)
                 .size(defaultUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
