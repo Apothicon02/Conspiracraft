@@ -24,15 +24,11 @@ public class Models {
     public static FloatArrayList normals = new FloatArrayList();
     public static FloatArrayList vertPositions = new FloatArrayList();
     public static FloatArrayList vertNormals = new FloatArrayList();
-    public static FloatArrayList uvs = new FloatArrayList();
-    public static FloatArrayList vertUVs = new FloatArrayList();
     public static void clearArrays() {
         verts.clear();
         normals.clear();
         vertPositions.clear();
         vertNormals.clear();
-        uvs.clear();
-        vertUVs.clear();
     }
 
     public static Model loadObj(long mappedPtr, String name) {
@@ -48,16 +44,13 @@ public class Models {
                 normals.addLast(Float.parseFloat(parts[1]));
                 normals.addLast(Float.parseFloat(parts[2]));
                 normals.addLast(Float.parseFloat(parts[3]));
-            } else if (parts[0].equals("vt")) {
-                uvs.addLast(Float.parseFloat(parts[1]));
-                uvs.addLast(Float.parseFloat(parts[2]));
             } else if (parts[0].equals("f")) {
-                createVertex(parts[1].split("/"));
-                createVertex(parts[2].split("/"));
-                createVertex(parts[3].split("/"));
+                createVertex(parts[1].split("//"));
+                createVertex(parts[2].split("//"));
+                createVertex(parts[3].split("//"));
             }
         });
-        Model model = new Model(mappedPtr, vertPositions.toFloatArray(), vertNormals.toFloatArray(), vertUVs.toFloatArray());
+        Model model = new Model(mappedPtr, vertPositions.toFloatArray(), vertNormals.toFloatArray());
         models.addLast(model);
         return model;
     }
@@ -66,10 +59,7 @@ public class Models {
         vertPositions.addLast(verts.get(vertId));
         vertPositions.addLast(verts.get(1+vertId));
         vertPositions.addLast(verts.get(2+vertId));
-        int uvId = (Integer.parseInt(vertex[1]) - 1) * 2;
-        vertUVs.addLast(uvs.get(uvId));
-        vertUVs.addLast(uvs.get(1+uvId));
-        int normId = (Integer.parseInt(vertex[2])-1)*3;
+        int normId = (Integer.parseInt(vertex[1])-1)*3;
         vertNormals.addLast(normals.get(normId));
         vertNormals.addLast(normals.get(1+normId));
         vertNormals.addLast(normals.get(2+normId));

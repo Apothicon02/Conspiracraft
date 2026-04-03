@@ -319,32 +319,32 @@ public class Window {
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO)
                 .pDynamicStates(stack.mallocInt(2).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).flip());
 
-        VkVertexInputBindingDescription.Buffer binding =
-                VkVertexInputBindingDescription.calloc(1, stack)
-                        .binding(0)
-                        .stride(Vertex.SIZE)
-                        .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
-
-        VkVertexInputAttributeDescription.Buffer attributes =
-                VkVertexInputAttributeDescription.calloc(3, stack);
-
-        attributes.get(0)
-                .binding(0)
-                .location(0)
-                .format(VK_FORMAT_R32G32B32_SFLOAT)
-                .offset(0);
-
-        attributes.get(1)
-                .binding(0)
-                .location(1)
-                .format(VK_FORMAT_R32G32B32_SFLOAT)
-                .offset(12);
-
-        attributes.get(2)
-                .binding(0)
-                .location(2)
-                .format(VK_FORMAT_R32G32_SFLOAT)
-                .offset(24);
+//        VkVertexInputBindingDescription.Buffer binding =
+//                VkVertexInputBindingDescription.calloc(1, stack)
+//                        .binding(0)
+//                        .stride(Vertex.size)
+//                        .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
+//
+//        VkVertexInputAttributeDescription.Buffer attributes =
+//                VkVertexInputAttributeDescription.calloc(3, stack);
+//
+//        attributes.get(0)
+//                .binding(0)
+//                .location(0)
+//                .format(VK_FORMAT_R32G32G32_SFLOAT)
+//                .offset(0);
+//
+//        attributes.get(1)
+//                .binding(0)
+//                .location(1)
+//                .format(VK_FORMAT_R32G32G32_SFLOAT)
+//                .offset(12);
+//
+//        attributes.get(2)
+//                .binding(0)
+//                .location(2)
+//                .format(VK_FORMAT_R32G32_SFLOAT)
+//                .offset(24);
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
         vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
