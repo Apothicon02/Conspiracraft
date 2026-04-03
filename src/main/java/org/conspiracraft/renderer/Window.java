@@ -140,7 +140,7 @@ public class Window {
             commandBuffers[i] = new VkCommandBuffer(commandBuffersBuf.get(i), device);
         }
     }
-    public static DEFAULT_UBO defaultUBO;
+    public static DEFAULT_UBO defaultUBO = new DEFAULT_UBO();
     public void createDescriptorSets(MemoryStack stack) {
         LongBuffer layouts = stack.mallocLong(MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -187,7 +187,6 @@ public class Window {
         descriptorPool = descriptorPoolBuf.get(0);
     }
     public void createUniformBuffers(MemoryStack stack) {
-        defaultUBO = new DEFAULT_UBO();
         int bufferSize = defaultUBO.size();
         uniformBuffers = new long[MAX_FRAMES_IN_FLIGHT];
         uniformBuffersMemory = new long[MAX_FRAMES_IN_FLIGHT];
@@ -377,11 +376,15 @@ public class Window {
 //        colorBlending.blendConstants(2, 0.0f); // Optional
 //        colorBlending.blendConstants(3, 0.0f); // Optional
 
+        VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .offset(0)
+                .size(defaultUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
                 .setLayoutCount(descriptorSetLayouts.length)
-                .pSetLayouts(stack.longs(descriptorSetLayouts));
-//        pipelineLayoutInfo.pPushConstantRanges(null); // Optional
+                .pSetLayouts(stack.longs(descriptorSetLayouts))
+                .pPushConstantRanges(pushConstRanges);
 
         LongBuffer pPipelineLayout = stack.mallocLong(1);
         int err = vkCreatePipelineLayout(device, pipelineLayoutInfo, null, pPipelineLayout);

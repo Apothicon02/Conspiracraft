@@ -1,7 +1,5 @@
 package org.conspiracraft.renderer.buffers;
 
-import org.conspiracraft.Main;
-import org.conspiracraft.Utils.*;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -9,16 +7,17 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static org.conspiracraft.renderer.Renderer.currentFrame;
-import static org.conspiracraft.renderer.Window.uniformBuffersMapped;
-import static org.lwjgl.system.MemoryUtil.*;
+import static org.conspiracraft.renderer.Window.*;
+import static org.conspiracraft.renderer.buffers.UBO.*;
+import static org.lwjgl.vulkan.VK10.VK_SHADER_STAGE_VERTEX_BIT;
+import static org.lwjgl.vulkan.VK10.vkCmdPushConstants;
 
-public class DEFAULT_UBO extends UBO {
-
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f()};
-    @Override public Object[] uniforms() {return uniformStorage;}
+public class PUSH_UBO {
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f()};
+    public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
-    @Override public int size(){return size;}
-    public DEFAULT_UBO() {
+    public int size(){return size;}
+    public PUSH_UBO() {
         super();
         calculateSize();
     }
@@ -41,9 +40,9 @@ public class DEFAULT_UBO extends UBO {
             };
         }
     }
-    public void update(MemoryStack stack) {
-        ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix()); //view
-        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix()); //proj
+    public void update(MemoryStack stack, Matrix4f modelMatrix, Vector4f color) {
+        ((Matrix4f)uniformStorage[0]).set(modelMatrix); //model
+        ((Vector4f)uniformStorage[1]).set(color); //color
     }
     private int offset = 0;
     public void submit() {
@@ -66,7 +65,8 @@ public class DEFAULT_UBO extends UBO {
             };
         }
         buf.rewind();
-        memCopy(memAddress(buf), uniformBuffersMapped[currentFrame].get(0), buf.remaining());
+        vkCmdPushConstants(commandBuffers[currentFrame], pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT, 0, buf);
     }
 
     private int align(int alignment, int size) {

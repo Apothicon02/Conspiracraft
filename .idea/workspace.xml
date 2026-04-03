@@ -4,11 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved player movement.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/PUSH_UBO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/WorldType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/WorldTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/DEFAULT_UBO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/DEFAULT_UBO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/cube.obj" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/cube.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,6 +131,7 @@
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.renderer.buffers" />
       <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
     </key>
@@ -405,7 +414,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775176635370</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="- Fixed projection.">
+      <option name="closed" value="true" />
+      <created>1775179218935</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1775179218935</updated>
+    </task>
+    <task id="LOCAL-00028" summary="- Improved player movement.">
+      <option name="closed" value="true" />
+      <created>1775180790478</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1775180790478</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -413,7 +438,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Initial commit." />
     <MESSAGE value="- Update .gitignore." />
     <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
     <MESSAGE value="- Rewrite." />
@@ -437,7 +461,9 @@
     <MESSAGE value="- Added player. &#10;- Added camera. &#10;- Added input." />
     <MESSAGE value="- Added input handler." />
     <MESSAGE value="- Remade main loop." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Remade main loop." />
+    <MESSAGE value="- Fixed projection." />
+    <MESSAGE value="- Improved player movement." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved player movement." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

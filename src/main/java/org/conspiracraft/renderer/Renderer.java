@@ -1,13 +1,17 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.renderer.buffers.PUSH_UBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
@@ -29,16 +33,20 @@ public class Renderer {
         }
     }
 
-    public static void drawCube(Vector3f pos) {
-        ((Matrix4f)defaultUBO.uniforms()[0]).identity().translate(pos); //model transformation matrix
-        defaultUBO.submit();
-        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
-    }
+    public static PUSH_UBO pushUBO = new PUSH_UBO();
     public static void drawFrame(MemoryStack stack) {
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         defaultUBO.update(stack);
-        drawCube(new Vector3f(-5, 0, -5));
+        defaultUBO.submit();
+        drawCube(stack, new Matrix4f().translate(-5, 0, -5), new Vector4f(1));
+        World.worldType.renderCelestialBodies(stack);
     }
+    public static void drawCube(MemoryStack stack, Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(stack, modelMatrix, color);
+        pushUBO.submit();
+        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
+    }
+
     public static void endRenderPass(MemoryStack stack) {
         vkCmdEndRenderPass(commandBuffers[currentFrame]);
         vkEndCommandBuffer(commandBuffers[currentFrame]);
