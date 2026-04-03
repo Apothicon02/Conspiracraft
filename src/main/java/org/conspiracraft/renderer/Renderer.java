@@ -51,14 +51,14 @@ public class Renderer {
         defaultUBO.update(stack);
         defaultUBO.submit();
 
-        pushUBO.update(1); //draw instanced stuff
-        pushUBO.submit();
-        drawInstancedTestScene();
+//        pushUBO.update(1); //draw instanced stuff
+//        pushUBO.submit();
+//        drawInstancedTestScene();
 
         pushUBO.update(0); //draw non-instanced stuff
         pushUBO.submit();
         World.worldType.renderCelestialBodies(stack);
-        drawCube(new Matrix4f().translate(5, 5, 5), new Vector4f(1));
+        drawCube(new Matrix4f().translate(512, 15, 512), new Vector4f(1));
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);

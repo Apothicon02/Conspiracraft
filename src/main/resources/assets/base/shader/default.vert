@@ -14,15 +14,12 @@ layout(std430, set = 0, binding = 1) readonly buffer InstanceBuffer {
 } instances;
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
 
 layout(location = 0) out vec3 pos;
-layout(location = 1) out vec3 norm;
-layout(location = 2) out vec4 color;
+layout(location = 1) out vec4 color;
 
 void main() {
     pos = position;
-    norm = normal;
     mat4 model;
     if (push.instanced == 0) {
         model = push.model;

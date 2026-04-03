@@ -10,21 +10,15 @@ public class Model {
     public int vertexCount;
     public ByteBuffer vertexData;
     public float[] positions;
-    public float[] normals;
 
-    public Model(long mappedPtr, float[] verts, float[] normals) {
+    public Model(long mappedPtr, float[] verts) {
         this.positions = verts;
-        this.normals = normals;
         vertexCount = (verts.length/3);
         vertexData = memAlloc(vertexCount * Vertex.SIZE);
         for (int i = 0; i < verts.length; i+=3) {
             vertexData.putFloat(positions[i]);
             vertexData.putFloat(positions[i+1]);
             vertexData.putFloat(positions[i+2]);
-
-            vertexData.putFloat(normals[i]);
-            vertexData.putFloat(normals[i+1]);
-            vertexData.putFloat(normals[i+2]);
         }
         vertexData.flip();
 

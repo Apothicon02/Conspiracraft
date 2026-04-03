@@ -5,8 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added sun &amp; mun.">
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/BufferHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/BufferHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Vertex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Vertex.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -440,7 +444,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775229522241</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="- Vertex buffer now is staged.">
+      <option name="closed" value="true" />
+      <created>1775258644794</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1775258644794</updated>
+    </task>
+    <task id="LOCAL-00032" summary="- Undid some changes.">
+      <option name="closed" value="true" />
+      <created>1775258755360</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1775258755361</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -459,8 +479,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
-    <MESSAGE value="- Rewrite." />
     <MESSAGE value="- Thing." />
     <MESSAGE value="- Fixed inaccurate reflections on transparent objects." />
     <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
@@ -484,14 +502,16 @@
     <MESSAGE value="- Fixed projection." />
     <MESSAGE value="- Improved player movement." />
     <MESSAGE value="- Added sun &amp; mun." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added sun &amp; mun." />
+    <MESSAGE value="- Vertex buffer now is staged." />
+    <MESSAGE value="- Undid some changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Undid some changes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java</url>
-          <line>53</line>
+          <line>42</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
