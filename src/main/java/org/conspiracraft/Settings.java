@@ -6,5 +6,5 @@ public class Settings {
     public static int height = 720;
     public static float fov = 73;
     public static boolean hdr = true;
-    public static int targetFps = 360;
+    public static int targetFps = 420;
 }

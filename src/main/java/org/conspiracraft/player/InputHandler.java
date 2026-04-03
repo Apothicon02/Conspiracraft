@@ -34,7 +34,7 @@ public class InputHandler {
                     (float) Math.toRadians(displVec.y * (mouseSensitivity / 10)));
 
             if (keyRelease(SDL_SCANCODE_F)) {
-                System.out.print(avgMS+"fps\n");
+                System.out.print(String.format("%.2f", fps)+"fps / "+String.format("%.2f", ms)+"ms\n");
             }
 
             MemoryUtil.memCopy(MemoryUtil.memAddress(keys), MemoryUtil.memAddress(prevKeys), keys.capacity());
