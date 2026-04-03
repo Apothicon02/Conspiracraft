@@ -2,6 +2,7 @@ package org.conspiracraft.renderer.buffers;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.Utils.*;
+import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -14,7 +15,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class DEFAULT_UBO extends UBO {
 
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f()};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector3f()};
     @Override public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     @Override public int size(){return size;}
@@ -42,8 +43,9 @@ public class DEFAULT_UBO extends UBO {
         }
     }
     public void update(MemoryStack stack) {
-        ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix()); //view
-        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix()); //proj
+        ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix());
+        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
+        ((Vector3f)uniformStorage[2]).set(World.worldType.getSunPos());
     }
     private int offset = 0;
     public void submit() {

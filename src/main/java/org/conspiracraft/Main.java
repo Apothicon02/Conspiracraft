@@ -3,6 +3,7 @@ package org.conspiracraft;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.renderer.Renderer;
 import org.conspiracraft.renderer.Window;
+import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
 import java.nio.ByteBuffer;
@@ -25,6 +26,7 @@ public class Main {
     public static double ms = 0;
     public static double timeMul = 1;
     public static double interpolationTime = 0;
+    public static long timeNs = 0;
     static void main() {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
@@ -36,6 +38,7 @@ public class Main {
             long start = System.nanoTime();
             long elapsed = start-prevTime;
             prevTime = start;
+            timeNs += elapsed;
             window.pollEvents();
             player.inputHandler.update();
 
@@ -46,6 +49,7 @@ public class Main {
             while (timeAccum >= tickTime) {
                 ticksDone++;
                 timeAccum -= tickTime;
+                World.worldType.tick();
                 player.tick();
                 if (ticksDone >= 3) {
                     timeAccum = (tickTime-1);

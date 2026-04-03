@@ -5,6 +5,7 @@ layout(push_constant) uniform Push {
 layout(binding = 0) uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
+    vec3 sun;
 } ubo;
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;

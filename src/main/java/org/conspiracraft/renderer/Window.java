@@ -377,7 +377,7 @@ public class Window {
 //        colorBlending.blendConstants(3, 0.0f); // Optional
 
         VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
                 .offset(0)
                 .size(defaultUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
@@ -425,7 +425,7 @@ public class Window {
                 .binding(0)
                 .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
                 .descriptorCount(1)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
                 .pImmutableSamplers(null);
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
