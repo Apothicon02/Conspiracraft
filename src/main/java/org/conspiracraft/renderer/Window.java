@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
+import static org.conspiracraft.Constants.Z_NEAR;
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLError.*;
@@ -338,7 +339,7 @@ public class Window {
                 .polygonMode(VK_POLYGON_MODE_FILL)
                 .lineWidth(1.0f)
                 .cullMode(VK_CULL_MODE_BACK_BIT)
-                .frontFace(VK_FRONT_FACE_CLOCKWISE)
+                .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
                 .depthBiasEnable(false);
 //                .depthBiasConstantFactor(0.f)
 //                .depthBiasClamp(0.f)
@@ -847,7 +848,7 @@ public class Window {
         float FoV = (float)Math.toRadians(Main.player.camera.FOV);
         projectionMatrix.set(
                 1.f/FoV, 0.f, 0.f, 0.f,
-                0.f, aspectRatio/FoV, 0.f, 0.f,
+                0.f, -(aspectRatio/FoV), 0.f, 0.f,
                 0.f, 0.f, 0.f, -1.f,
                 0.f, 0.f, Constants.Z_NEAR, 0.f
         );

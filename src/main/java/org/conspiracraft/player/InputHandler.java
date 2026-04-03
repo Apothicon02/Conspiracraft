@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.renderer.Window;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
