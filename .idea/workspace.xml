@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added input handler." />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -392,7 +397,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775169026349</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="- Remade main loop.">
+      <option name="closed" value="true" />
+      <created>1775176635370</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1775176635370</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -423,7 +436,8 @@
     <MESSAGE value="- Fixed UBO alignment." />
     <MESSAGE value="- Added player. &#10;- Added camera. &#10;- Added input." />
     <MESSAGE value="- Added input handler." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added input handler." />
+    <MESSAGE value="- Remade main loop." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Remade main loop." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

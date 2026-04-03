@@ -17,7 +17,13 @@ public class Player {
     public float scale = 2f;
     public float baseEyeHeight = 1.625f*scale;
     public float eyeHeight = baseEyeHeight;
-    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false;
+    public float baseHeight = eyeHeight+(0.175f*scale);
+    public float height = baseHeight;
+    public float width = 0.2f*scale;
+    public float baseSpeed = Math.max(0.33f, 0.33f*scale);
+    public float speed = baseSpeed;
+    public float sprintSpeed = 1.5f;
+    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false;
 
     public Player() {
         inputHandler.init();
@@ -31,21 +37,25 @@ public class Player {
 
     public void movementTick() {
         movementInputs();
-        if (player.forward) {pos.add(0, 0, 1);}
-        if (player.backward) {pos.add(0, 0, -1);}
-        if (player.rightward) {pos.add(1, 0, 0);}
-        if (player.leftward) {pos.add(-1, 0, 0);}
-        if (player.upward) {pos.add(0, 1, 0);}
-        if (player.downward) {pos.add(0, -1, 0);}
+        Matrix4f cam = camera.getViewMatrixWithoutPitch().setTranslation(0, 0, 0).invert();
+        Vector3f movement = new Vector3f();
+        if (forward) {movement.add(cam.positiveZ(new Vector3f()).negate());}
+        if (backward) {movement.add(cam.positiveZ(new Vector3f()));}
+        if (rightward) {movement.add(cam.positiveX(new Vector3f()));}
+        if (leftward) {movement.add(cam.positiveX(new Vector3f()).negate());}
+        if (upward) {movement.add(0, 1, 0);}
+        if (downward) {movement.add(0, -1, 0);}
+        pos.add(movement.mul(speed*(sprinting?sprintSpeed:(downward?0.5f:1.f))));
     }
 
     public void movementInputs() {
-        player.forward = inputHandler.isKeyDown(SDL_SCANCODE_W);
-        player.backward = inputHandler.isKeyDown(SDL_SCANCODE_S);
-        player.rightward = inputHandler.isKeyDown(SDL_SCANCODE_D);
-        player.leftward = inputHandler.isKeyDown(SDL_SCANCODE_A);
-        player.upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
-        player.downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
+        forward = inputHandler.isKeyDown(SDL_SCANCODE_W);
+        backward = inputHandler.isKeyDown(SDL_SCANCODE_S);
+        rightward = inputHandler.isKeyDown(SDL_SCANCODE_D);
+        leftward = inputHandler.isKeyDown(SDL_SCANCODE_A);
+        upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
+        downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
+        sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
     }
 
     public void rotate(float pitch, float yaw) {
