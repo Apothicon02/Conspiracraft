@@ -70,6 +70,10 @@ public class Window {
     public static long[] vertexBuffer;
     public static long[] vertexBufferMemory;
     public static int vertexBufferOffset;
+    public static long[] instanceStagingBuffers;
+    public static long[] instanceStagingBuffersMemory;
+    public static long[] instanceBuffers;
+    public static long[] instanceBuffersMemory;
     public static long[] uniformBuffers;
     public static long[] uniformBuffersMemory;
     public static PointerBuffer[] uniformBuffersMapped;
@@ -93,6 +97,7 @@ public class Window {
             createFramebuffers(stack);
             createCommandPool(stack);
             createVertexBuffer(stack);
+            createInstanceBuffer(stack);
             createUniformBuffers(stack);
             createDescriptorPool(stack);
             createDescriptorSets(stack);
@@ -155,28 +160,45 @@ public class Window {
         descriptorSets = new long[MAX_FRAMES_IN_FLIGHT];
         for (int i = 0; i < descriptorSets.length; i++) {
             descriptorSets[i] = descriptorSetsBuf.get(i);
-            VkDescriptorBufferInfo.Buffer bufferInfo = VkDescriptorBufferInfo.calloc(1, stack)
+            VkDescriptorBufferInfo.Buffer uboInfo = VkDescriptorBufferInfo.calloc(1, stack)
                     .buffer(uniformBuffers[i])
                     .offset(0)
                     .range(defaultUBO.size());
-            VkWriteDescriptorSet.Buffer descriptorWrite = VkWriteDescriptorSet.calloc(1, stack)
+            VkDescriptorBufferInfo.Buffer instanceBufferInfo = VkDescriptorBufferInfo.calloc(1, stack)
+                    .buffer(instanceBuffers[i])
+                    .offset(0)
+                    .range(instanceBufferSize);
+            VkWriteDescriptorSet.Buffer descriptorWrites = VkWriteDescriptorSet.calloc(2, stack);
+            descriptorWrites.get(0)
                     .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
                     .dstSet(descriptorSets[i])
                     .dstBinding(0)
                     .dstArrayElement(0)
                     .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
                     .descriptorCount(1)
-                    .pBufferInfo(bufferInfo);
-            vkUpdateDescriptorSets(device, descriptorWrite, null);
+                    .pBufferInfo(uboInfo);
+            descriptorWrites.get(1)
+                    .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                    .dstSet(descriptorSets[i])
+                    .dstBinding(1)
+                    .dstArrayElement(0)
+                    .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                    .descriptorCount(1)
+                    .pBufferInfo(instanceBufferInfo);
+            vkUpdateDescriptorSets(device, descriptorWrites, null);
         }
     }
     public void createDescriptorPool(MemoryStack stack) {
-        VkDescriptorPoolSize.Buffer poolSize = VkDescriptorPoolSize.calloc(1, stack)
+        VkDescriptorPoolSize.Buffer poolSizes = VkDescriptorPoolSize.calloc(2, stack);
+        poolSizes.get(0)
                 .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(MAX_FRAMES_IN_FLIGHT);
+        poolSizes.get(1)
+                .type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                 .descriptorCount(MAX_FRAMES_IN_FLIGHT);
         VkDescriptorPoolCreateInfo poolInfo = VkDescriptorPoolCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
-                .pPoolSizes(poolSize)
+                .pPoolSizes(poolSizes)
                 .maxSets(MAX_FRAMES_IN_FLIGHT);
         LongBuffer descriptorPoolBuf = stack.mallocLong(1);
         if (vkCreateDescriptorPool(device, poolInfo, null, descriptorPoolBuf) != VK_SUCCESS) {
@@ -191,7 +213,6 @@ public class Window {
         uniformBuffersMapped = new PointerBuffer[MAX_FRAMES_IN_FLIGHT];
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             uniformBuffersMapped[i] = PointerBuffer.allocateDirect(1);
-
             createBuffer(stack, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers, uniformBuffersMemory, i);
             vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, uniformBuffersMapped[i]);
         }
@@ -204,6 +225,22 @@ public class Window {
         PointerBuffer pointerBuf = stack.mallocPointer(1);
         vkMapMemory(device, vertexBufferMemory[0], 0, bufferSize, 0, pointerBuf);
         Models.loadModels(pointerBuf.get(0));
+    }
+    public int instanceBufferSize = 500000000;
+    public long[] instanceStagingBufMemPointer;
+    public void createInstanceBuffer(MemoryStack stack) {
+        instanceStagingBuffers = new long[MAX_FRAMES_IN_FLIGHT];
+        instanceStagingBuffersMemory = new long[MAX_FRAMES_IN_FLIGHT];
+        instanceStagingBufMemPointer = new long[MAX_FRAMES_IN_FLIGHT];
+        instanceBuffers = new long[MAX_FRAMES_IN_FLIGHT];
+        instanceBuffersMemory = new long[MAX_FRAMES_IN_FLIGHT];
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            createBuffer(stack, instanceBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, instanceStagingBuffers, instanceStagingBuffersMemory, i);
+            PointerBuffer pointerBuf = stack.mallocPointer(1);
+            vkMapMemory(device, instanceStagingBuffersMemory[i], 0, instanceBufferSize, 0, pointerBuf);
+            instanceStagingBufMemPointer[i] = pointerBuf.get(0);
+            createBuffer(stack, instanceBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, instanceBuffers, instanceBuffersMemory, i);
+        }
     }
     public int findMemoryType(MemoryStack stack, int typeFilter, int properties) {
         VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.calloc(stack);
@@ -419,15 +456,21 @@ public class Window {
         vkDestroyShaderModule(device, vertShaderModule, null);
     }
     public void createDescriptorSetLayout(MemoryStack stack) {
-        VkDescriptorSetLayoutBinding.Buffer uboLayoutBinding = VkDescriptorSetLayoutBinding.calloc(1, stack)
+        VkDescriptorSetLayoutBinding.Buffer layoutBindings = VkDescriptorSetLayoutBinding.calloc(2, stack);
+        layoutBindings.get(0)
                 .binding(0)
                 .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
                 .descriptorCount(1)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-                .pImmutableSamplers(null);
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        layoutBindings.get(1)
+                .binding(1)
+                .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                .descriptorCount(1)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT);
+
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
-                .pBindings(uboLayoutBinding);
+                .pBindings(layoutBindings);
         LongBuffer descriptorSetLayoutsBuf = stack.callocLong(1);
         if (vkCreateDescriptorSetLayout(device, layoutInfo, null, descriptorSetLayoutsBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create descriptor set layout!");
@@ -791,6 +834,8 @@ public class Window {
         vkDestroyDescriptorSetLayout(device, descriptorSetLayouts[0], null);
         vkDestroyBuffer(device, vertexBuffer[0], null);
         vkFreeMemory(device, vertexBufferMemory[0], null);
+        vkDestroyBuffer(device, instanceBuffers[0], null);
+        vkFreeMemory(device, instanceBuffersMemory[0], null);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
             vkDestroySemaphore(device, renderFinishedSemaphores[i], null);

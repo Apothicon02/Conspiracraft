@@ -1,7 +1,6 @@
 package org.conspiracraft.renderer.buffers;
 
 import org.joml.*;
-import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,7 +12,7 @@ import static org.lwjgl.vulkan.VK10.VK_SHADER_STAGE_VERTEX_BIT;
 import static org.lwjgl.vulkan.VK10.vkCmdPushConstants;
 
 public class PushUBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f()};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0};
     public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     public int size(){return size;}
@@ -40,10 +39,11 @@ public class PushUBO {
             };
         }
     }
-    public void update(MemoryStack stack, Matrix4f modelMatrix, Vector4f color) {
+    public void update(Matrix4f modelMatrix, Vector4f color) {
         ((Matrix4f)uniformStorage[0]).set(modelMatrix); //model
         ((Vector4f)uniformStorage[1]).set(color); //color
     }
+    public void update(int instanced) {uniformStorage[2] = instanced;}
     private int offset = 0;
     public void submit() {
         offset = 0;

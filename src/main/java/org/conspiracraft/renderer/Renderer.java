@@ -1,34 +1,46 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.renderer.buffers.InstancingBuffer;
 import org.conspiracraft.renderer.buffers.PushUBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.SimplexNoise;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.renderer.Window.*;
+import static org.lwjgl.system.MemoryUtil.memAddress;
+import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK13.*;
 
 public class Renderer {
     public static int imageIdx = 0;
     public static int currentFrame = 0;
+    public static int frame = 0;
 
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            boolean started = startRenderPass(stack);
-            if (started) {
-                drawFrame(stack);
-                endRenderPass(stack);
+            boolean recordingCmds = startCommandBuffers(stack);
+            if (recordingCmds) {
+                if (frame < 2) {
+                    prepareInstancedTestScene();
+                    frame++;
+                }
+                boolean started = startRenderPass(stack);
+                if (started) {
+                    drawFrame(stack);
+                    endRenderPass(stack);
+                }
             }
         }
     }
@@ -38,37 +50,55 @@ public class Renderer {
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
         defaultUBO.update(stack);
         defaultUBO.submit();
+
+        pushUBO.update(1); //draw instanced stuff
+        pushUBO.submit();
+        drawInstancedTestScene();
+
+        pushUBO.update(0); //draw non-instanced stuff
+        pushUBO.submit();
         World.worldType.renderCelestialBodies(stack);
-        drawCube(stack, new Matrix4f().translate(-5, 2, -5), new Vector4f(1));
-        drawTestScene(stack);
+        drawCube(new Matrix4f().translate(5, 5, 5), new Vector4f(1));
     }
-    public static void drawCube(MemoryStack stack, Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(stack, modelMatrix, color);
+    public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
         pushUBO.submit();
         vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
     }
-    public static void drawTestScene(MemoryStack stack) {
-        for (int x = 0; x < 128; x++) {
-            for (int z = 0; z < 128; z++) {
-                int y = (int) Math.abs(16-Math.min(16, new Vector2f(x, z).distance(new Vector2f(64, 128))/8));
-                drawCube(stack, new Matrix4f().translate(x, y, z), y < 1 ? new Vector4f(0.15f, 0.65f, 0.95f, 1.f) : new Vector4f(0.95f, 0.93f, 0.85f, 1.f));
-            }
-        }
-    }
-    public static InstancingBuffer instancedUBO = new InstancingBuffer();
-    public static void drawInstancedTestScene(MemoryStack stack) {
-        Object[] data = new Object[128*128*2];
+    public static Matrix4f iPos = new Matrix4f();
+    public static Vector4f iColor = new Vector4f();
+    public static int instances = 2048*2048;
+    public static int size = 20*instances;
+    public static int sizeBytes = (20*instances)*4;
+    public static FloatBuffer testBuf = MemoryUtil.memAllocFloat(size);
+    public static VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
+    public static void prepareInstancedTestScene() {
         int i = 0;
-        for (int x = 0; x < 128; x++) {
-            for (int z = 0; z < 128; z++) {
-                int y = (int) Math.abs(16-Math.min(16, new Vector2f(x, z).distance(new Vector2f(64, 128))/8));
-                data[i*2] = new Matrix4f().translate(x, y, z);
-                data[(i*2)+1] = y <= 1 ? new Vector4f(0.15f, 0.65f, 0.95f, 1.f) : new Vector4f(0.5f, 0.95f, 0.5f, 1.f);
+        for (int x = 0; x < 2048; x++) {
+            for (int z = 0; z < 2048; z++) {
+                int y = (int) ((SimplexNoise.noise(x/100.f, z/100.f)*16)*Math.max(0.5f, 3*SimplexNoise.noise(x/1000.f, z/1000.f)));
+                if (y < 0) {
+                    y *= -0.2f;
+                }
+                iPos.setTranslation(x, y, z).get(i*20, testBuf);
+                (y < 1 ? iColor.set(0.15f, 0.65f, 0.95f, 1.f) : iColor.set(0.5f, 0.95f, 0.5f, 1.f)).get((i*20)+16, testBuf);
                 i++;
             }
         }
-        instancedUBO.submit(data);
-        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, i/2, Models.CUBE.offset/Vertex.SIZE, 0);
+        memCopy(memAddress(testBuf), Main.window.instanceStagingBufMemPointer[currentFrame], sizeBytes);
+        vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuffers[currentFrame], instanceBuffers[currentFrame], bufferCopy);
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(instanceBuffers[currentFrame])
+                .offset(0).size(sizeBytes);
+        vkCmdPipelineBarrier(commandBuffers[currentFrame], VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
+    }
+    public static void drawInstancedTestScene() {
+        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, instances, Models.CUBE.offset/Vertex.SIZE, 0);
     }
 
     public static void endRenderPass(MemoryStack stack) {
@@ -102,28 +132,6 @@ public class Renderer {
         if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
     }
     public static boolean startRenderPass(MemoryStack stack) {
-        vkWaitForFences(device, inFlightFences[currentFrame], false, Long.MAX_VALUE);
-        IntBuffer imageIdxBuf = stack.mallocInt(1);
-        int result = vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            Main.window.recreateSwapchain();
-            return false;
-        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            System.err.println("Failed to acquire next image!");
-        }
-        imageIdx = imageIdxBuf.get(0);
-        vkResetFences(device, inFlightFences[currentFrame]);
-
-        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-
-        VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
-                .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
-                .pInheritanceInfo(null);
-        if (vkBeginCommandBuffer(commandBuffers[currentFrame], beginInfo) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to begin recording command buffer!");
-        }
-
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
@@ -154,6 +162,30 @@ public class Renderer {
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
         vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
+        return true;
+    }
+    public static boolean startCommandBuffers(MemoryStack stack) {
+        vkWaitForFences(device, inFlightFences[currentFrame], false, Long.MAX_VALUE);
+        IntBuffer imageIdxBuf = stack.mallocInt(1);
+        int result = vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            Main.window.recreateSwapchain();
+            return false;
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            System.err.println("Failed to acquire next image!");
+        }
+        imageIdx = imageIdxBuf.get(0);
+        vkResetFences(device, inFlightFences[currentFrame]);
+
+        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+
+        VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
+                .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
+                .pInheritanceInfo(null);
+        if (vkBeginCommandBuffer(commandBuffers[currentFrame], beginInfo) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to begin recording command buffer!");
+        }
         return true;
     }
 }

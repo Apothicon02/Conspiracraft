@@ -4,7 +4,6 @@ import org.conspiracraft.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import static org.conspiracraft.Main.player;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -27,6 +26,7 @@ public class Player {
 
     public Player() {
         inputHandler.init();
+        pos.set(512, 16, 512);
     }
 
     public Vector3f oldCamTranslation = new Vector3f();
