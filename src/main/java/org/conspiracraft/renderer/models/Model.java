@@ -6,24 +6,37 @@ import static org.conspiracraft.renderer.Window.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Model {
-    public int offset;
+    public int vertexOffset;
     public int vertexCount;
     public ByteBuffer vertexData;
-    public float[] positions;
+    public int indexOffset;
+    public int indexCount;
+    public ByteBuffer indexData;
 
-    public Model(long mappedPtr, float[] verts) {
-        this.positions = verts;
+    public Model(long vertexPtr, long indexPtr, float[] verts, int[] indices) {
         vertexCount = (verts.length/3);
         vertexData = memAlloc(vertexCount * Vertex.SIZE);
         for (int i = 0; i < verts.length; i+=3) {
-            vertexData.putFloat(positions[i]);
-            vertexData.putFloat(positions[i+1]);
-            vertexData.putFloat(positions[i+2]);
+            vertexData.putFloat(verts[i]);
+            vertexData.putFloat(verts[i+1]);
+            vertexData.putFloat(verts[i+2]);
         }
         vertexData.flip();
 
-        offset = vertexBufferOffset;
-        memCopy(memAddress(vertexData), mappedPtr+vertexBufferOffset, vertexData.capacity());
+        vertexOffset = vertexBufferOffset;
+        memCopy(memAddress(vertexData), vertexPtr+vertexBufferOffset, vertexData.capacity());
         vertexBufferOffset+=vertexData.capacity();
+
+        indexCount = indices.length;
+        indexData = memAlloc(indexCount * 4); // 4 bytes per int
+
+        for (int i = 0; i < indices.length; i++) {
+            indexData.putInt(indices[i]);
+        }
+        indexData.flip();
+
+        indexOffset = indexBufferOffset;
+        memCopy(memAddress(indexData), indexPtr + indexBufferOffset, indexData.capacity());
+        indexBufferOffset += indexData.capacity();
     }
 }

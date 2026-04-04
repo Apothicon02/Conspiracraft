@@ -1,6 +1,7 @@
 package org.conspiracraft.renderer.models;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.renderer.Renderer;
 
 import java.io.BufferedReader;
@@ -13,18 +14,18 @@ public class Models {
 
     public static Model CUBE;
 
-    public static void loadModels(long mappedPtr) {
-        CUBE = loadObj(mappedPtr, "generic/model/cube");
+    public static void loadModels(long vertexPtr, long indexPtr) {
+        CUBE = loadObj(vertexPtr, indexPtr, "generic/model/cube");
     }
 
+    public static IntArrayList indices = new IntArrayList();
     public static FloatArrayList verts = new FloatArrayList();
-    public static FloatArrayList vertPositions = new FloatArrayList();
     public static void clearArrays() {
+        indices.clear();
         verts.clear();
-        vertPositions.clear();
     }
 
-    public static Model loadObj(long mappedPtr, String name) {
+    public static Model loadObj(long vertexPtr, long indexPtr, String name) {
         clearArrays();
         BufferedReader reader = new BufferedReader(new InputStreamReader(Renderer.class.getClassLoader().getResourceAsStream("assets/base/"+name+".obj")));
         reader.lines().forEach((String line) -> {
@@ -34,19 +35,13 @@ public class Models {
                 verts.addLast(Float.parseFloat(parts[2]));
                 verts.addLast(Float.parseFloat(parts[3]));
             } else if (parts[0].equals("f")) {
-                createVertex(parts[1].split("//"));
-                createVertex(parts[2].split("//"));
-                createVertex(parts[3].split("//"));
+                indices.addLast(Integer.parseInt(parts[1])-1);
+                indices.addLast(Integer.parseInt(parts[2])-1);
+                indices.addLast(Integer.parseInt(parts[3])-1);
             }
         });
-        Model model = new Model(mappedPtr, vertPositions.toFloatArray());
+        Model model = new Model(vertexPtr, indexPtr, verts.toFloatArray(), indices.toIntArray());
         models.addLast(model);
         return model;
-    }
-    public static void createVertex(String[] vertex) {
-        int vertId = (Integer.parseInt(vertex[0])-1)*3;
-        vertPositions.addLast(verts.get(vertId));
-        vertPositions.addLast(verts.get(1+vertId));
-        vertPositions.addLast(verts.get(2+vertId));
     }
 }

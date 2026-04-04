@@ -71,6 +71,9 @@ public class Window {
     public static long[] vertexBuffer;
     public static long[] vertexBufferMemory;
     public static int vertexBufferOffset;
+    public static long[] indexBuffer;
+    public static long[] indexBufferMemory;
+    public static int indexBufferOffset;
     public static long[] instanceStagingBuffers;
     public static long[] instanceStagingBuffersMemory;
     public static long[] instanceBuffers;
@@ -97,7 +100,7 @@ public class Window {
             createGraphicsPipeline(stack);
             createFramebuffers(stack);
             createCommandPool(stack);
-            createVertexBuffer(stack);
+            createVertexAndIndexBuffers(stack);
             createInstanceBuffer(stack);
             createUniformBuffers(stack);
             createDescriptorPool(stack);
@@ -218,20 +221,30 @@ public class Window {
             vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, uniformBuffersMapped[i]);
         }
     }
-    public void createVertexBuffer(MemoryStack stack) {
+    public void createVertexAndIndexBuffers(MemoryStack stack) {
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
-        long[] stagingBuffer = new long[1];
-        long[] stagingBufferMemory = new long[1];
-        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, 0);
-        PointerBuffer stagingPointerBuf = stack.mallocPointer(1);
-        vkMapMemory(device, stagingBufferMemory[0], 0, bufferSize, 0, stagingPointerBuf);
-        Models.loadModels(stagingPointerBuf.get(0));
-        vkUnmapMemory(device, stagingBufferMemory[0]);
+        long[] vertexStagingBuffer = new long[1];
+        long[] vertexStagingBufferMemory = new long[1];
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexStagingBuffer, vertexStagingBufferMemory, 0);
+        PointerBuffer vertexStagingPointerBuf = stack.mallocPointer(1);
+        vkMapMemory(device, vertexStagingBufferMemory[0], 0, bufferSize, 0, vertexStagingPointerBuf);
+        long[] indexStagingBuffer = new long[1];
+        long[] indexStagingBufferMemory = new long[1];
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, indexStagingBuffer, indexStagingBufferMemory, 0);
+        PointerBuffer indexStagingPointerBuf = stack.mallocPointer(1);
+        vkMapMemory(device, indexStagingBufferMemory[0], 0, bufferSize, 0, indexStagingPointerBuf);
+        Models.loadModels(vertexStagingPointerBuf.get(0), indexStagingPointerBuf.get(0));
+        vkUnmapMemory(device, vertexStagingBufferMemory[0]);
+        vkUnmapMemory(device, indexStagingBufferMemory[0]);
 
         vertexBuffer = new long[1];
         vertexBufferMemory = new long[1];
         createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory, 0);
-        BufferHelper.copyBuffer(stack, stagingBuffer[0], vertexBuffer[0], bufferSize);
+        BufferHelper.copyBuffer(stack, vertexStagingBuffer[0], vertexBuffer[0], bufferSize);
+        indexBuffer = new long[1];
+        indexBufferMemory = new long[1];
+        createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory, 0);
+        BufferHelper.copyBuffer(stack, indexStagingBuffer[0], indexBuffer[0], bufferSize);
     }
     public int instanceBufferSize = 500000000;
     public long[] instanceStagingBufMemPointer;

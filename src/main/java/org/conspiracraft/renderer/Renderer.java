@@ -2,6 +2,7 @@ package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.renderer.buffers.PushUBO;
+import org.conspiracraft.renderer.models.Index;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
 import org.conspiracraft.world.World;
@@ -51,9 +52,9 @@ public class Renderer {
         defaultUBO.update(stack);
         defaultUBO.submit();
 
-//        pushUBO.update(1); //draw instanced stuff
-//        pushUBO.submit();
-//        drawInstancedTestScene();
+        pushUBO.update(1); //draw instanced stuff
+        pushUBO.submit();
+        drawInstancedTestScene();
 
         pushUBO.update(0); //draw non-instanced stuff
         pushUBO.submit();
@@ -63,7 +64,7 @@ public class Renderer {
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
         pushUBO.submit();
-        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, 1, Models.CUBE.offset/Vertex.SIZE, 0);
+        vkCmdDrawIndexed(commandBuffers[currentFrame], Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
     public static Matrix4f iPos = new Matrix4f();
     public static Vector4f iColor = new Vector4f();
@@ -81,7 +82,7 @@ public class Renderer {
                     y *= -0.2f;
                 }
                 iPos.setTranslation(x, y, z).get(i*20, testBuf);
-                (y < 1 ? iColor.set(0.15f, 0.65f, 0.95f, 1.f) : iColor.set(0.5f, 0.95f, 0.5f, 1.f)).get((i*20)+16, testBuf);
+                (y < 1 ? iColor.set(0.15f, 0.65f, 0.95f, 1.f) : (y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : iColor.set(0.5f, 0.95f, 0.5f, 1.f))).get((i*20)+16, testBuf);
                 i++;
             }
         }
@@ -98,7 +99,7 @@ public class Renderer {
         vkCmdPipelineBarrier(commandBuffers[currentFrame], VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
     }
     public static void drawInstancedTestScene() {
-        vkCmdDraw(commandBuffers[currentFrame], Models.CUBE.vertexCount, instances, Models.CUBE.offset/Vertex.SIZE, 0);
+        vkCmdDrawIndexed(commandBuffers[currentFrame], Models.CUBE.indexCount, instances, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
 
     public static void endRenderPass(MemoryStack stack) {
@@ -162,6 +163,7 @@ public class Renderer {
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
         vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
+        vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer[0], 0, VK_INDEX_TYPE_UINT32);
         return true;
     }
     public static boolean startCommandBuffers(MemoryStack stack) {
