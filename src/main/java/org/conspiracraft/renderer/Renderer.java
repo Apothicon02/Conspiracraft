@@ -76,15 +76,17 @@ public class Renderer {
         int i = 0;
         for (int x = 0; x < 2048; x++) {
             for (int z = 0; z < 2048; z++) {
-                double mountainNoise = (1+Math.max(0, 2*SimplexNoise.noise(x/500.f, z/500.f)));
+                double mountainNoise = (1+Math.max(0, SimplexNoise.noise(x/500.f, z/500.f)));
                 double elevationNoise = SimplexNoise.noise(x/1000.f, z/1000.f)+0.5f;
-                double elevationMul = Math.max(0.f, mountainNoise*elevationNoise);
-                int y = (int) ((SimplexNoise.noise(x/100.f, z/100.f)*16)*elevationMul);
+                double elevationMul = mountainNoise*elevationNoise;
+                double detailNoise = (SimplexNoise.noise(x/100.f, z/100.f)*16);
+                int y = (int) (detailNoise*Math.max(0.f, elevationMul));
+                float waterTint = Math.min(0.f, y*0.05f);
                 if (y < 0) {
-                    y *= -0.2f;
+                    y *= -0.25f;
                 }
                 iPos.setTranslation(x, y, z).get(i*20, testBuf);
-                (y < 1 ? iColor.set(0.15f, 0.75f, 0.95f, 1.f) : (y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f))).get((i*20)+16, testBuf);
+                (y < 1 ? iColor.set(0.15f, 0.75f-waterTint, 0.95f, 1.f) : (y < 2 ? iColor.set(0.95f*0.97f, 0.93f*0.97f, 0.85f*0.97f, 1.f) : y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : (iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f)))).get((i*20)+16, testBuf);
                 i++;
             }
         }

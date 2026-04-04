@@ -15,6 +15,7 @@ void main() {
     } else {
         vec3 normal = -normalize(cross(dFdx(pos), dFdy(pos)));
         vec4 skylight = ubo.skylight;
-        outColor = inColor*((dot(normal, normalize(skylight.xyz))*0.225f)+(0.45f*skylight.a));
+        outColor = mix(vec4(1), inColor*((dot(normal, normalize(skylight.xyz))*0.38f)+(0.68f*skylight.a)), min(1, gl_FragCoord.z*10000));
+        outColor *= 0.66f; //exposure
     }
 }

@@ -22,7 +22,7 @@ public class Player {
     public float baseSpeed = Math.max(0.33f, 0.33f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
-    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false;
+    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false;
 
     public Player() {
         inputHandler.init();
@@ -45,7 +45,7 @@ public class Player {
         if (leftward) {movement.add(cam.positiveX(new Vector3f()).negate());}
         if (upward) {movement.add(0, 1, 0);}
         if (downward) {movement.add(0, -1, 0);}
-        pos.add(movement.mul(speed*(sprinting?sprintSpeed:(downward?0.5f:1.f))));
+        pos.add(movement.mul(speed*((sprinting||superSprinting)?(superSprinting ? sprintSpeed*10 : sprintSpeed):(downward?0.5f:1.f))));
     }
 
     public void movementInputs() {
@@ -56,6 +56,7 @@ public class Player {
         upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
         downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
         sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
+        superSprinting = inputHandler.isKeyDown(SDL_SCANCODE_CAPSLOCK);
     }
 
     public void rotate(float pitch, float yaw) {

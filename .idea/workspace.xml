@@ -4,18 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/textures/TextureHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Utils.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added depth testing.">
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/DefaultUBO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/DefaultUBO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/WorldType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/WorldType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -481,7 +474,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775264166152</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="- Added depth testing.">
+      <option name="closed" value="true" />
+      <created>1775313022651</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1775313022651</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -500,7 +501,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
     <MESSAGE value="- Updated preferred format &amp; color space." />
     <MESSAGE value="- Added hdr setting. &#10;- Created image views." />
     <MESSAGE value="- Added glsl -&gt; spir-v shader compiling." />
@@ -525,7 +525,8 @@
     <MESSAGE value="- Undid some changes." />
     <MESSAGE value="- Normals are now auto-generated." />
     <MESSAGE value="- Re-added vertex sharing." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Re-added vertex sharing." />
+    <MESSAGE value="- Added depth testing." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added depth testing." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
