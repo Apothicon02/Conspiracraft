@@ -6,7 +6,7 @@ layout(push_constant) uniform Push {
 layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
-    vec3 sun;
+    vec4 skylight;
 } ubo;
 struct InstanceData {mat4 model; vec4 color;};
 layout(std430, set = 0, binding = 1) readonly buffer InstanceBuffer {

@@ -1,14 +1,13 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.Utils;
 import org.conspiracraft.renderer.buffers.PushUBO;
 import org.conspiracraft.renderer.models.Index;
 import org.conspiracraft.renderer.models.Models;
-import org.conspiracraft.renderer.models.Vertex;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.SimplexNoise;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -77,12 +76,15 @@ public class Renderer {
         int i = 0;
         for (int x = 0; x < 2048; x++) {
             for (int z = 0; z < 2048; z++) {
-                int y = (int) ((SimplexNoise.noise(x/100.f, z/100.f)*16)*Math.max(0.5f, 3*SimplexNoise.noise(x/1000.f, z/1000.f)));
+                double mountainNoise = (1+Math.max(0, 2*SimplexNoise.noise(x/500.f, z/500.f)));
+                double elevationNoise = SimplexNoise.noise(x/1000.f, z/1000.f)+0.5f;
+                double elevationMul = Math.max(0.f, mountainNoise*elevationNoise);
+                int y = (int) ((SimplexNoise.noise(x/100.f, z/100.f)*16)*elevationMul);
                 if (y < 0) {
                     y *= -0.2f;
                 }
                 iPos.setTranslation(x, y, z).get(i*20, testBuf);
-                (y < 1 ? iColor.set(0.15f, 0.65f, 0.95f, 1.f) : (y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : iColor.set(0.5f, 0.95f, 0.5f, 1.f))).get((i*20)+16, testBuf);
+                (y < 1 ? iColor.set(0.15f, 0.75f, 0.95f, 1.f) : (y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f))).get((i*20)+16, testBuf);
                 i++;
             }
         }
@@ -136,8 +138,9 @@ public class Renderer {
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
-        VkClearValue.Buffer clearValues = VkClearValue.calloc(1, stack);
-        clearValues.color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
+        VkClearValue.Buffer clearValues = VkClearValue.calloc(2, stack);
+        clearValues.get(0).color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
+        clearValues.get(1).depthStencil().depth(0.f).stencil(0);
         VkRenderPassBeginInfo renderPassInfo = VkRenderPassBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO)
                 .renderPass(renderPass)

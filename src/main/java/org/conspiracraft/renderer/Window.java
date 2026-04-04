@@ -8,6 +8,7 @@ import org.conspiracraft.renderer.buffers.BufferHelper;
 import org.conspiracraft.renderer.buffers.DefaultUBO;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.renderer.models.Vertex;
+import org.conspiracraft.renderer.textures.TextureHelper;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.sdl.*;
@@ -98,6 +99,8 @@ public class Window {
             createRenderPass(stack);
             createDescriptorSetLayout(stack);
             createGraphicsPipeline(stack);
+            createDepthResources(stack);
+            createTextureImage(stack);
             createFramebuffers(stack);
             createCommandPool(stack);
             createVertexAndIndexBuffers(stack);
@@ -274,6 +277,19 @@ public class Window {
         }
         throw new RuntimeException("Failed to find suitable memory type!");
     }
+    public void createTextureImage(MemoryStack stack) {
+
+    }
+    public int depthFormat = VK_FORMAT_D32_SFLOAT;
+    public long depthImageView;
+    public LongBuffer depthImage;
+    public LongBuffer depthImageMemory;
+    public void createDepthResources(MemoryStack stack) {
+        depthImage = stack.mallocLong(1);
+        depthImageMemory = stack.mallocLong(1);
+        TextureHelper.createImage(stack, eWidth, eHeight, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+        depthImageView = TextureHelper.createImageView(stack, depthImage.get(0), depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+    }
     public void createCommandPool(MemoryStack stack) {
         //QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices.findQueueFamilies(physicalDevice, vkSurf);
 
@@ -291,12 +307,12 @@ public class Window {
     public void createFramebuffers(MemoryStack stack) {
         swapchainFramebuffers = new long[imageViews.length];
         for (int i = 0; i < imageViews.length; i++) {
-            LongBuffer attachments = stack.mallocLong(1).put(imageViews[i]).flip();
+            LongBuffer attachments = stack.mallocLong(2).put(imageViews[i]).put(depthImageView).flip();
 
             VkFramebufferCreateInfo framebufferInfo = VkFramebufferCreateInfo.calloc(stack);
             framebufferInfo.sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
             framebufferInfo.renderPass(renderPass);
-            framebufferInfo.attachmentCount(1);
+            framebufferInfo.attachmentCount(2);
             framebufferInfo.pAttachments(attachments);
             framebufferInfo.width(eWidth);
             framebufferInfo.height(eHeight);
@@ -448,6 +464,13 @@ public class Window {
         }
         pipelineLayout = pPipelineLayout.get(0);
 
+        VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
+                .depthTestEnable(true)
+                .depthWriteEnable(true)
+                .depthCompareOp(VK_COMPARE_OP_GREATER)
+                .depthBoundsTestEnable(false)
+                .stencilTestEnable(false);
         VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
                 .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
                 .stageCount(2)
@@ -457,7 +480,7 @@ public class Window {
                 .pViewportState(viewportState)
                 .pRasterizationState(rasterizer)
                 .pMultisampleState(multisampling)
-                .pDepthStencilState(null)
+                .pDepthStencilState(depthStencil)
                 .pColorBlendState(colorBlending)
                 .pDynamicState(dynamicState)
                 .layout(pipelineLayout)
@@ -498,24 +521,37 @@ public class Window {
         descriptorSetLayouts = new long[]{descriptorSetLayoutsBuf.get(0)};
     }
     public void createRenderPass(MemoryStack stack) {
-        VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
-        colorAttachment.format(vkSurfFormat.format());
-        colorAttachment.samples(VK_SAMPLE_COUNT_1_BIT);
-        colorAttachment.loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR);
-        colorAttachment.storeOp(VK_ATTACHMENT_STORE_OP_STORE);
-        colorAttachment.stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
-        colorAttachment.stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
-        colorAttachment.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-        colorAttachment.finalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VkAttachmentDescription.Buffer attachments = VkAttachmentDescription.calloc(2, stack);
+        attachments.get(0) //color
+                .format(vkSurfFormat.format())
+                .samples(VK_SAMPLE_COUNT_1_BIT)
+                .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                .storeOp(VK_ATTACHMENT_STORE_OP_STORE)
+                .stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE)
+                .stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE)
+                .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+                .finalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        attachments.get(1) //depth
+                .format(depthFormat)
+                .samples(VK_SAMPLE_COUNT_1_BIT)
+                .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                .storeOp(VK_ATTACHMENT_STORE_OP_STORE)
+                .stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE)
+                .stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE)
+                .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+                .finalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-        VkAttachmentReference.Buffer colorAttachmentRef = VkAttachmentReference.calloc(1, stack);
-        colorAttachmentRef.attachment(0);
-        colorAttachmentRef.layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-        VkSubpassDescription.Buffer subpass = VkSubpassDescription.calloc(1, stack);
-        subpass.pipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS);
-        subpass.colorAttachmentCount(1);
-        subpass.pColorAttachments(colorAttachmentRef);
+        VkAttachmentReference.Buffer colorAttachmentRef = VkAttachmentReference.calloc(1, stack)
+                .attachment(0)
+                .layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        VkAttachmentReference depthAttachmentRef = VkAttachmentReference.calloc(stack)
+                .attachment(1)
+                .layout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        VkSubpassDescription.Buffer subpass = VkSubpassDescription.calloc(1, stack)
+                .pipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS)
+                .colorAttachmentCount(1)
+                .pColorAttachments(colorAttachmentRef)
+                .pDepthStencilAttachment(depthAttachmentRef);
 
         VkSubpassDependency.Buffer dependency = VkSubpassDependency.calloc(1, stack)
                 .srcSubpass(VK_SUBPASS_EXTERNAL)
@@ -526,7 +562,7 @@ public class Window {
                 .dstAccessMask(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
         VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO)
-                .pAttachments(colorAttachment)
+                .pAttachments(attachments)
                 .pSubpasses(subpass)
                 .pDependencies(dependency);
 
@@ -656,6 +692,7 @@ public class Window {
             cleanupSwapchain();
             createSwapchain(stack);
             createImageViews(stack);
+            createDepthResources(stack);
             createFramebuffers(stack);
         }
     }
@@ -842,6 +879,9 @@ public class Window {
         for (long i : imageViews) {
             vkDestroyImageView(device, i, null);
         }
+        vkDestroyImageView(device, depthImageView, null);
+        vkDestroyImage(device, depthImage.get(0), null);
+        vkFreeMemory(device, depthImageMemory.get(0), null);
         vkDestroySwapchainKHR(device, swapchain, null);
     }
     public void cleanup() {

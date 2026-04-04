@@ -30,17 +30,17 @@ public class Earth extends WorldType {
         drawCube(munMatrix, munColor);
     }
     @Override
-    public Vector3f getSunPos() {return sunPos;}
+    public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 0.33f) : new Vector4f(sunPos, 1.f);}
     @Override
     public void tick() {
         prevSunPos.set(sunPos);
         sunPos.set(0, World.size*2, 0);
-        sunPos.rotateZ(timeNs/1000000000.f);
+        sunPos.rotateZ(timeNs/10000000000.f);
         sunPos.rotateX(0.5f);
         sunPos.set(sunPos.x+(World.size/2f), sunPos.y, sunPos.z+(World.size/2f)+128);
         prevMunPos.set(munPos);
         munPos.set(0, World.size*-2, 0);
-        munPos.rotateZ(timeNs/1000000000.f);
+        munPos.rotateZ(timeNs/10000000000.f);
         sunPos.rotateX(-0.2f);
         munPos.set(munPos.x+(World.size/2f), munPos.y, munPos.z+(World.size/2f)+128);
     }

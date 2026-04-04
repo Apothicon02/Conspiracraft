@@ -1,7 +1,7 @@
 layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
-    vec3 sun;
+    vec4 skylight;
 } ubo;
 
 layout(location = 0) in vec3 pos;
@@ -14,6 +14,7 @@ void main() {
         outColor = inColor;
     } else {
         vec3 normal = -normalize(cross(dFdx(pos), dFdy(pos)));
-        outColor = inColor*((dot(normal, normalize(ubo.sun))*0.225f)+0.45f);
+        vec4 skylight = ubo.skylight;
+        outColor = inColor*((dot(normal, normalize(skylight.xyz))*0.225f)+(0.45f*skylight.a));
     }
 }
