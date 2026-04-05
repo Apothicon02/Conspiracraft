@@ -7,6 +7,7 @@ layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
     vec4 skylight;
+    int hdr;
 } ubo;
 struct InstanceData {mat4 model; vec4 color;};
 layout(std430, set = 0, binding = 1) readonly buffer InstanceBuffer {
@@ -17,6 +18,7 @@ layout(location = 0) in vec3 position;
 
 layout(location = 0) out vec3 pos;
 layout(location = 1) out vec4 color;
+layout(location = 2) out vec4 worldPosOut;
 
 void main() {
     pos = position;
@@ -30,6 +32,7 @@ void main() {
         color = data.color;
     }
     vec4 worldPos = model*vec4(position, 1);
+    worldPosOut = worldPos;
     vec4 clipPos = ubo.proj*ubo.view*worldPos;
     gl_Position = clipPos;
 }

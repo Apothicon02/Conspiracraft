@@ -1,5 +1,6 @@
 package org.conspiracraft.renderer.buffers;
 
+import org.conspiracraft.renderer.Window;
 import org.joml.*;
 
 import java.nio.ByteBuffer;
@@ -40,8 +41,8 @@ public class PushUBO {
         }
     }
     public void update(Matrix4f modelMatrix, Vector4f color) {
-        ((Matrix4f)uniformStorage[0]).set(modelMatrix); //model
-        ((Vector4f)uniformStorage[1]).set(color); //color
+        ((Matrix4f)uniformStorage[0]).set(modelMatrix);
+        ((Vector4f)uniformStorage[1]).set(color);
     }
     public void update(int instanced) {uniformStorage[2] = instanced;}
     private int offset = 0;

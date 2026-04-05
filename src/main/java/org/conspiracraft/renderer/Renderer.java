@@ -30,16 +30,16 @@ public class Renderer {
 
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            boolean recordingCmds = startCommandBuffers(stack);
-            if (recordingCmds) {
+            if (startCommandBuffers(stack)) {
                 if (frame < 2) {
                     prepareInstancedTestScene();
                     frame++;
                 }
-                boolean started = startRenderPass(stack);
-                if (started) {
+                if (startRenderPass(stack)) {
                     drawFrame(stack);
                     endRenderPass(stack);
+                    currentFrame++;
+                    if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
                 }
             }
         }
@@ -133,8 +133,6 @@ public class Renderer {
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw new RuntimeException("Failed to queue present!");
         }
-        currentFrame++;
-        if (currentFrame >= MAX_FRAMES_IN_FLIGHT) {currentFrame = 0;}
     }
     public static boolean startRenderPass(MemoryStack stack) {
         VkRect2D renderAreaData = VkRect2D.calloc(stack)

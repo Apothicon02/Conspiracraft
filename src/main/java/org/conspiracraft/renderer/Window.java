@@ -29,7 +29,6 @@ import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
 import static org.lwjgl.sdl.SDLLog.*;
 import static org.lwjgl.sdl.SDLMouse.*;
-import static org.lwjgl.sdl.SDLPixels.SDL_COLORSPACE_HDR10;
 import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVulkan.*;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
@@ -54,7 +53,7 @@ public class Window {
     public static long graphicsQueueHandle;
     public static long presentQueueHandle;
     public static VkSurfaceFormatKHR vkSurfFormat;
-    public static long swapchain;
+    public static long swapchain = VK_NULL_HANDLE;
     public static long[] swapchainImages;
     public static long[] imageViews;
     public static long renderPass;
@@ -86,7 +85,7 @@ public class Window {
     public static long[] descriptorSets;
 
     public Window() {
-        if (!SDL_Init(hdr ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_COLORSPACE_HDR10) : (SDL_INIT_VIDEO | SDL_INIT_AUDIO))) {throw new IllegalStateException("Unable to initialize SDL");}
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {throw new IllegalStateException("Unable to initialize SDL");}
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             createVkInst(stack);
@@ -597,6 +596,7 @@ public class Window {
             imageViews[i] = pView.get(0);
         }
     }
+    public static boolean hdr = false;
     public void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, vkSurf, caps);
@@ -605,30 +605,28 @@ public class Window {
         vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, null);
         VkSurfaceFormatKHR.Buffer formats = VkSurfaceFormatKHR.malloc(formatCount.get(0), stack);
         vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurf, formatCount, formats);
-//        for (int i = 0; i < formats.capacity(); i++) {
-//            VkSurfaceFormatKHR f = formats.get(i);
-//            System.out.println(f.format() + "  " + f.colorSpace());
-//        }
 
         IntBuffer presentCount = stack.mallocInt(1);
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, null);
         IntBuffer presentModes = stack.mallocInt(presentCount.get(0));
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurf, presentCount, presentModes);
 
-        if (hdr) {
-            for (int i = 0; i < formats.capacity(); i++) {
-                VkSurfaceFormatKHR f = formats.get(i);
-                if (f.format() == VK_FORMAT_A2B10G10R10_UNORM_PACK32 &&
-                        f.colorSpace() == VK_COLOR_SPACE_HDR10_ST2084_EXT) {
-                    vkSurfFormat = f;
-                    break;
-                }
+        vkSurfFormat = null;
+        for (int i = 0; i < formats.capacity(); i++) { //prioritize hdr
+            hdr = true;
+            VkSurfaceFormatKHR f = formats.get(i);
+            System.out.print(f.format()+" "+f.colorSpace()+"\n");
+            if (f.format() == VK_FORMAT_R16G16B16A16_SFLOAT && //VK_FORMAT_A2B10G10R10_UNORM_PACK32
+                    f.colorSpace() == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT) { //VK_COLOR_SPACE_HDR10_ST2084_EXT
+                vkSurfFormat = f;
+                break;
             }
         }
         if (vkSurfFormat == null) { //sRGB if not hdr
+            hdr = false;
             for (int i = 0; i < formats.capacity(); i++) {
                 VkSurfaceFormatKHR f = formats.get(i);
-                if (f.format() == VK_FORMAT_A8B8G8R8_UNORM_PACK32 &&
+                if (f.format() == VK_FORMAT_B8G8R8A8_SRGB &&
                         f.colorSpace() == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                     vkSurfFormat = f;
                     break;
@@ -664,7 +662,7 @@ public class Window {
                 .compositeAlpha(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
                 .presentMode(chosenPresentMode)
                 .clipped(true)
-                .oldSwapchain(VK_NULL_HANDLE);
+                .oldSwapchain(swapchain);
         LongBuffer pSwapchain = stack.mallocLong(1);
         int err = vkCreateSwapchainKHR(device, swapInfo, null, pSwapchain);
         if (err != VK_SUCCESS) {
@@ -688,12 +686,15 @@ public class Window {
                 flags = SDL_GetWindowFlags(window);
                 SDL_PollEvent(events);
             }
-            vkDeviceWaitIdle(device);
             cleanupSwapchain();
+
             createSwapchain(stack);
             createImageViews(stack);
+            createRenderPass(stack);
+            createGraphicsPipeline(stack);
             createDepthResources(stack);
             createFramebuffers(stack);
+            createSyncObjects(stack);
         }
     }
     public void createVkDeviceAndGraphicsQueue(MemoryStack stack) {
@@ -873,19 +874,28 @@ public class Window {
     }
 
     public void cleanupSwapchain() {
+        vkDeviceWaitIdle(device);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
+            vkDestroyFence(device, inFlightFences[i], null);
+        }
         for (int i = 0; i < swapchainFramebuffers.length; i++) {
             vkDestroyFramebuffer(device, swapchainFramebuffers[i], null);
         }
+        vkDestroyRenderPass(device, renderPass, null);
+        vkDestroyPipeline(device, graphicsPipeline, null);
+        vkDestroyPipelineLayout(device, pipelineLayout, null);
         for (long i : imageViews) {
             vkDestroyImageView(device, i, null);
         }
         vkDestroyImageView(device, depthImageView, null);
         vkDestroyImage(device, depthImage.get(0), null);
         vkFreeMemory(device, depthImageMemory.get(0), null);
-        vkDestroySwapchainKHR(device, swapchain, null);
     }
     public void cleanup() {
         cleanupSwapchain();
+        vkDestroySwapchainKHR(device, swapchain, null);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device, uniformBuffers[i], null);
             vkFreeMemory(device, uniformBuffersMemory[i], null);
@@ -896,17 +906,7 @@ public class Window {
         vkFreeMemory(device, vertexBufferMemory[0], null);
         vkDestroyBuffer(device, instanceBuffers[0], null);
         vkFreeMemory(device, instanceBuffersMemory[0], null);
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroySemaphore(device, imageAvailableSemaphores[i], null);
-            vkDestroySemaphore(device, renderFinishedSemaphores[i], null);
-            vkDestroyFence(device, inFlightFences[i], null);
-        }
         vkDestroyCommandPool(device, commandPool, null);
-        vkDestroyPipeline(device, graphicsPipeline, null);
-        vkDestroyPipelineLayout(device, pipelineLayout, null);
-        vkDestroyPipelineLayout(device, pipelineLayout, null);
-        vkDestroyRenderPass(device, renderPass, null);
-        vkDestroyPipelineLayout(device, pipelineLayout, null);
         SDL_DestroyWindow(Window.window);
         SDL_Quit();
     }
@@ -935,6 +935,8 @@ public class Window {
                     inputHandler.scroll.x = events.wheel().x();
                     inputHandler.scroll.y = events.wheel().y();
                     break;
+                case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+                    recreateSwapchain();
                 default:
                     break;
             }
