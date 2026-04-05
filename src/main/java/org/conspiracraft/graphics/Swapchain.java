@@ -47,7 +47,7 @@ public class Swapchain {
         for (int i = 0; i < formats.capacity(); i++) { //prioritize hdr
             hdr = true;
             VkSurfaceFormatKHR f = formats.get(i);
-            System.out.print(f.format()+" "+f.colorSpace()+"\n");
+            //System.out.print(f.format()+" "+f.colorSpace()+"\n");
             if (f.format() == VK_FORMAT_R16G16B16A16_SFLOAT && //VK_FORMAT_A2B10G10R10_UNORM_PACK32
                     f.colorSpace() == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT) { //VK_COLOR_SPACE_HDR10_ST2084_EXT
                 vkSurfFormat = f;

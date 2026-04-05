@@ -1,22 +1,26 @@
-package org.conspiracraft.renderer.buffers;
+package org.conspiracraft.renderer.buffers.ubos;
 
+import org.conspiracraft.Main;
+import org.conspiracraft.graphics.Graphics;
+import org.conspiracraft.graphics.Swapchain;
+import org.conspiracraft.world.World;
 import org.joml.*;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.renderer.Renderer.currentFrame;
 import static org.conspiracraft.renderer.buffers.BufferHelper.*;
-import static org.lwjgl.vulkan.VK10.VK_SHADER_STAGE_VERTEX_BIT;
-import static org.lwjgl.vulkan.VK10.vkCmdPushConstants;
+import static org.lwjgl.system.MemoryUtil.*;
 
-public class PushUBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0};
-    public Object[] uniforms() {return uniformStorage;}
+public class DefaultUBO extends UBO {
+
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector4f(), 0};
+    @Override public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
-    public int size(){return size;}
-    public PushUBO() {
+    @Override public int size(){return size;}
+    public DefaultUBO() {
         super();
         calculateSize();
     }
@@ -39,11 +43,12 @@ public class PushUBO {
             };
         }
     }
-    public void update(Matrix4f modelMatrix, Vector4f color) {
-        ((Matrix4f)uniformStorage[0]).set(modelMatrix);
-        ((Vector4f)uniformStorage[1]).set(color);
+    public void update(MemoryStack stack) {
+        ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix());
+        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
+        ((Vector4f)uniformStorage[2]).set(World.worldType.getSkylight());
+        uniformStorage[3] = Swapchain.hdr ? 1 : 0;
     }
-    public void update(int instanced) {uniformStorage[2] = instanced;}
     private int offset = 0;
     public void submit() {
         offset = 0;
@@ -65,8 +70,7 @@ public class PushUBO {
             };
         }
         buf.rewind();
-        vkCmdPushConstants(commandBuffers[currentFrame], pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT, 0, buf);
+        memCopy(memAddress(buf), Graphics.uniformBuf.pointer[currentFrame].get(0), buf.remaining());
     }
 
     private int align(int alignment, int size) {

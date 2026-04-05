@@ -5,6 +5,8 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
+import java.nio.LongBuffer;
+
 import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.graphics.Device.*;
 import static org.lwjgl.vulkan.VK10.*;
@@ -73,5 +75,45 @@ public class BufferHelper {
         vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(graphicsQueue);
         vkFreeCommandBuffers(vkDevice, commandPool, cmdBuffer);
+    }
+
+    public static void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, long[] buffer, long[] memory, int i) {
+        VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
+                .size(bufferSize)
+                .usage(usage)
+                .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+        LongBuffer bufferBuf = stack.mallocLong(1);
+        if (vkCreateBuffer(vkDevice, bufferInfo, null, bufferBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create vertex buffer!");
+        }
+        buffer[i] = bufferBuf.get(0);
+        VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
+        vkGetBufferMemoryRequirements(vkDevice, buffer[i], memRequirements);
+
+        VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
+                .allocationSize(memRequirements.size())
+                .memoryTypeIndex(findMemoryType(stack, memRequirements.memoryTypeBits(), properties));
+        LongBuffer bufferMemoryBuf = stack.mallocLong(1);
+        if (vkAllocateMemory(vkDevice, allocInfo, null, bufferMemoryBuf) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to allocate buffer memory!");
+        }
+        memory[i] = bufferMemoryBuf.get(0);
+        if (vkBindBufferMemory(vkDevice, buffer[i], memory[i], 0) != VK_SUCCESS) {
+            throw new RuntimeException("Failed to bind buffer memory!");
+        }
+    }
+    public static int findMemoryType(MemoryStack stack, int typeFilter, int properties) {
+        VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.calloc(stack);
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties);
+        for (int i = 0; i < memProperties.memoryTypeCount(); i++) {
+            if ((typeFilter & (1 << i)) != 0) {
+                if ((memProperties.memoryTypes(i).propertyFlags() & properties) == properties) {
+                    return i;
+                }
+            }
+        }
+        throw new RuntimeException("Failed to find suitable memory type!");
     }
 }

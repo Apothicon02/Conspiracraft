@@ -1,9 +1,8 @@
 package org.conspiracraft.renderer;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.Utils;
-import org.conspiracraft.graphics.Graphics;
-import org.conspiracraft.renderer.buffers.PushUBO;
+import org.conspiracraft.graphics.Descriptors;
+import org.conspiracraft.renderer.buffers.ubos.PushUBO;
 import org.conspiracraft.renderer.models.Index;
 import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.world.World;
@@ -51,7 +50,7 @@ public class Renderer {
 
     public static PushUBO pushUBO = new PushUBO();
     public static void drawFrame(MemoryStack stack) {
-        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(descriptorSets[currentFrame]), null);
+        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[currentFrame]), null);
         defaultUBO.update(stack);
         defaultUBO.submit();
 
@@ -98,15 +97,15 @@ public class Renderer {
                 }
             }
         }
-        memCopy(memAddress(testBuf), Window.graphics.instanceStagingBufMemPointer[currentFrame], sizeBytes);
-        vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuffers[currentFrame], instanceBuffers[currentFrame], bufferCopy);
+        memCopy(memAddress(testBuf), instanceStagingBuf.pointer[currentFrame].get(0), sizeBytes);
+        vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuf.buffer[currentFrame], instanceBuf.buffer[currentFrame], bufferCopy);
         VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                .buffer(instanceBuffers[currentFrame])
+                .buffer(instanceBuf.buffer[currentFrame])
                 .offset(0).size(sizeBytes);
         vkCmdPipelineBarrier(commandBuffers[currentFrame], VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
     }
@@ -173,8 +172,8 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         vkCmdSetScissor(commandBuffers[currentFrame], 0, scissor);
-        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuffer), stack.longs(0));
-        vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer[0], 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+        vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         return true;
     }
     public static boolean startCommandBuffers(MemoryStack stack) {

@@ -1,4 +1,4 @@
-package org.conspiracraft.renderer.buffers;
+package org.conspiracraft.renderer.buffers.ubos;
 
 import org.lwjgl.system.MemoryStack;
 

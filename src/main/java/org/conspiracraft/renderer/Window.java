@@ -5,27 +5,14 @@ import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.player.InputHandler;
-import org.conspiracraft.renderer.buffers.BufferHelper;
-import org.conspiracraft.renderer.buffers.DefaultUBO;
-import org.conspiracraft.renderer.models.Models;
-import org.conspiracraft.renderer.models.Vertex;
-import org.conspiracraft.renderer.textures.TextureHelper;
 import org.joml.Matrix4f;
-import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.shaderc.Shaderc;
-import org.lwjgl.vulkan.*;
-
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
 import static org.lwjgl.sdl.SDLVideo.*;
-import static org.lwjgl.vulkan.KHRSwapchain.*;
-import static org.lwjgl.vulkan.VK10.*;
 
 public class Window {
     public static long window;
