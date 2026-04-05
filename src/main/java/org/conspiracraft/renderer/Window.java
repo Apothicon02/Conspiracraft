@@ -248,7 +248,7 @@ public class Window {
         createBuffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory, 0);
         BufferHelper.copyBuffer(stack, indexStagingBuffer[0], indexBuffer[0], bufferSize);
     }
-    public int instanceBufferSize = 500000000;
+    public int instanceBufferSize = 350000000;
     public long[] instanceStagingBufMemPointer;
     public void createInstanceBuffer(MemoryStack stack) {
         instanceStagingBuffers = new long[MAX_FRAMES_IN_FLIGHT];

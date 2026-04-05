@@ -8,6 +8,7 @@ import org.conspiracraft.renderer.models.Models;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.SimplexNoise;
+import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -67,27 +68,31 @@ public class Renderer {
     }
     public static Matrix4f iPos = new Matrix4f();
     public static Vector4f iColor = new Vector4f();
-    public static int instances = 2048*2048;
+    public static int instances = 1536*1536;
     public static int size = 20*instances;
     public static int sizeBytes = (20*instances)*4;
     public static FloatBuffer testBuf = MemoryUtil.memAllocFloat(size);
     public static VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
     public static void prepareInstancedTestScene() {
         int i = 0;
-        for (int x = 0; x < 2048; x++) {
-            for (int z = 0; z < 2048; z++) {
-                double mountainNoise = (1+Math.max(0, SimplexNoise.noise(x/500.f, z/500.f)));
-                double elevationNoise = SimplexNoise.noise(x/1000.f, z/1000.f)+0.5f;
-                double elevationMul = mountainNoise*elevationNoise;
-                double detailNoise = (SimplexNoise.noise(x/100.f, z/100.f)*16);
-                int y = (int) (detailNoise*Math.max(0.f, elevationMul));
-                float waterTint = Math.min(0.f, y*0.05f);
-                if (y < 0) {
-                    y *= -0.25f;
+        int max = 0;
+        for (int x = 0; x < 1536; x++) {
+            for (int z = 0; z < 1536; z++) {
+                if (new Vector2i(x, z).distance(new Vector2i(768, 768)) < 768) {
+                    max = Math.max(max, x);
+                    double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
+                    double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
+                    double elevationMul = mountainNoise * elevationNoise;
+                    double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
+                    int y = (int) (detailNoise * Math.max(0.f, elevationMul));
+                    float waterTint = Math.min(0.f, y * 0.05f);
+                    if (y < 0) {
+                        y *= -0.25f;
+                    }
+                    iPos.setTranslation(x, y, z).get(i * 20, testBuf);
+                    (y < 1 ? iColor.set(0.15f, 0.75f - waterTint, 0.95f, 1.f) : (y < 2 ? iColor.set(0.95f * 0.97f, 0.93f * 0.97f, 0.85f * 0.97f, 1.f) : y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : (iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f)))).get((i * 20) + 16, testBuf);
+                    i++;
                 }
-                iPos.setTranslation(x, y, z).get(i*20, testBuf);
-                (y < 1 ? iColor.set(0.15f, 0.75f-waterTint, 0.95f, 1.f) : (y < 2 ? iColor.set(0.95f*0.97f, 0.93f*0.97f, 0.85f*0.97f, 1.f) : y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : (iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f)))).get((i*20)+16, testBuf);
-                i++;
             }
         }
         memCopy(memAddress(testBuf), Main.window.instanceStagingBufMemPointer[currentFrame], sizeBytes);
@@ -139,7 +144,7 @@ public class Renderer {
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         VkClearValue.Buffer clearValues = VkClearValue.calloc(2, stack);
-        clearValues.get(0).color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
+        clearValues.get(0).color().float32(0, 10.0f).float32(1, 10.0f).float32(2, 10.0f).float32(3, 0.0f);
         clearValues.get(1).depthStencil().depth(0.f).stencil(0);
         VkRenderPassBeginInfo renderPassInfo = VkRenderPassBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO)
