@@ -1,13 +1,12 @@
 package org.conspiracraft.renderer.buffers;
 
-import org.conspiracraft.renderer.Window;
 import org.joml.*;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.renderer.Renderer.currentFrame;
-import static org.conspiracraft.renderer.Window.*;
 import static org.conspiracraft.renderer.buffers.BufferHelper.*;
 import static org.lwjgl.vulkan.VK10.VK_SHADER_STAGE_VERTEX_BIT;
 import static org.lwjgl.vulkan.VK10.vkCmdPushConstants;

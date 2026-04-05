@@ -2,7 +2,7 @@ package org.conspiracraft.renderer.models;
 
 import java.nio.ByteBuffer;
 
-import static org.conspiracraft.renderer.Window.*;
+import static org.conspiracraft.graphics.Graphics.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Model {

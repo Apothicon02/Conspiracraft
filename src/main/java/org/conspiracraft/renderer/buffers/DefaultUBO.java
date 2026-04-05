@@ -1,6 +1,8 @@
 package org.conspiracraft.renderer.buffers;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.graphics.Graphics;
+import org.conspiracraft.graphics.Swapchain;
 import org.conspiracraft.renderer.Window;
 import org.conspiracraft.world.World;
 import org.joml.*;
@@ -10,7 +12,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static org.conspiracraft.renderer.Renderer.currentFrame;
-import static org.conspiracraft.renderer.Window.uniformBuffersMapped;
 import static org.conspiracraft.renderer.buffers.BufferHelper.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -47,7 +48,7 @@ public class DefaultUBO extends UBO {
         ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix());
         ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
         ((Vector4f)uniformStorage[2]).set(World.worldType.getSkylight());
-        uniformStorage[3] = Window.hdr ? 1 : 0;
+        uniformStorage[3] = Swapchain.hdr ? 1 : 0;
     }
     private int offset = 0;
     public void submit() {
@@ -70,7 +71,7 @@ public class DefaultUBO extends UBO {
             };
         }
         buf.rewind();
-        memCopy(memAddress(buf), uniformBuffersMapped[currentFrame].get(0), buf.remaining());
+        memCopy(memAddress(buf), Graphics.uniformBuffersMapped[currentFrame].get(0), buf.remaining());
     }
 
     private int align(int alignment, int size) {

@@ -2,6 +2,7 @@ package org.conspiracraft.renderer;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.Utils;
+import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.renderer.buffers.PushUBO;
 import org.conspiracraft.renderer.models.Index;
 import org.conspiracraft.renderer.models.Models;
@@ -18,7 +19,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.renderer.Window.*;
+import static org.conspiracraft.graphics.Graphics.*;
+import static org.conspiracraft.graphics.Swapchain.*;
+import static org.conspiracraft.graphics.Device.*;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
@@ -95,7 +98,7 @@ public class Renderer {
                 }
             }
         }
-        memCopy(memAddress(testBuf), Main.window.instanceStagingBufMemPointer[currentFrame], sizeBytes);
+        memCopy(memAddress(testBuf), Window.graphics.instanceStagingBufMemPointer[currentFrame], sizeBytes);
         vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuffers[currentFrame], instanceBuffers[currentFrame], bufferCopy);
         VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
@@ -125,7 +128,7 @@ public class Renderer {
         if (vkQueueSubmit(graphicsQueue, submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
             throw new RuntimeException("Failed to submit draw command buffer!");
         }
-        LongBuffer swapchainBuf = stack.longs(1).put(swapchain).flip();
+        LongBuffer swapchainBuf = stack.longs(1).put(vkSwapchain).flip();
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
                 .pWaitSemaphores(stack.mallocLong(1).put(renderFinishedSemaphores[currentFrame]).flip())
@@ -134,7 +137,7 @@ public class Renderer {
                 .swapchainCount(swapchainBuf.remaining());
         int result = vkQueuePresentKHR(presentQueue, presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            Main.window.recreateSwapchain();
+            Window.graphics.recreateSwapchain();
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw new RuntimeException("Failed to queue present!");
         }
@@ -175,17 +178,17 @@ public class Renderer {
         return true;
     }
     public static boolean startCommandBuffers(MemoryStack stack) {
-        vkWaitForFences(device, inFlightFences[currentFrame], false, Long.MAX_VALUE);
+        vkWaitForFences(vkDevice, inFlightFences[currentFrame], false, Long.MAX_VALUE);
         IntBuffer imageIdxBuf = stack.mallocInt(1);
-        int result = vkAcquireNextImageKHR(device, swapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf);
+        int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, imageIdxBuf);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            Main.window.recreateSwapchain();
+            Window.graphics.recreateSwapchain();
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             System.err.println("Failed to acquire next image!");
         }
         imageIdx = imageIdxBuf.get(0);
-        vkResetFences(device, inFlightFences[currentFrame]);
+        vkResetFences(vkDevice, inFlightFences[currentFrame]);
 
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 

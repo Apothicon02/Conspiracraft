@@ -5,7 +5,7 @@ import org.lwjgl.vulkan.*;
 
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.renderer.Window.*;
+import static org.conspiracraft.graphics.Device.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class TextureHelper {
@@ -26,20 +26,20 @@ public class TextureHelper {
                 .usage(usage)
                 .sharingMode(VK_SHARING_MODE_EXCLUSIVE)
                 .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-        int error = vkCreateImage(device, imageInfo, null, imageBuf);
+        int error = vkCreateImage(vkDevice, imageInfo, null, imageBuf);
         if (error != VK_SUCCESS) {throw new RuntimeException("Failed to create image: "+error);}
         long image = imageBuf.get(0);
         VkMemoryRequirements memReq = VkMemoryRequirements.calloc(stack);
-        vkGetImageMemoryRequirements(device, image, memReq);
+        vkGetImageMemoryRequirements(vkDevice, image, memReq);
         VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
                 .allocationSize(memReq.size())
                 .memoryTypeIndex(findMemoryType(stack, memReq.memoryTypeBits(), memoryProperties));
-        error = vkAllocateMemory(device, allocInfo, null, imageMemoryBuf);
+        error = vkAllocateMemory(vkDevice, allocInfo, null, imageMemoryBuf);
         if (error != VK_SUCCESS) {throw new RuntimeException("Failed to allocate image memory: " + error);}
         long imageMemory = imageMemoryBuf.get(0);
 
-        vkBindImageMemory(device, image, imageMemory, 0);
+        vkBindImageMemory(vkDevice, image, imageMemory, 0);
     }
     public static long createImageView(MemoryStack stack, long image, int format, int aspectMask) {
         VkImageViewCreateInfo viewInfo = VkImageViewCreateInfo.calloc(stack)
@@ -59,7 +59,7 @@ public class TextureHelper {
                         .baseArrayLayer(0)
                         .layerCount(1));
         LongBuffer imageViewBuf = stack.mallocLong(1);
-        int err = vkCreateImageView(device, viewInfo, null, imageViewBuf);
+        int err = vkCreateImageView(vkDevice, viewInfo, null, imageViewBuf);
         if (err != VK_SUCCESS) {throw new RuntimeException("Failed to create image view: " + err);}
         return imageViewBuf.get(0);
     }

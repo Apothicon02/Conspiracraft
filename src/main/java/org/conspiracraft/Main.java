@@ -72,6 +72,6 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
-        window.cleanup();
+        Window.graphics.cleanup();
     }
 }

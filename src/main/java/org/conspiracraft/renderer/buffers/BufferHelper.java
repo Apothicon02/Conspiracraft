@@ -5,7 +5,8 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
-import static org.conspiracraft.renderer.Window.*;
+import static org.conspiracraft.graphics.Graphics.*;
+import static org.conspiracraft.graphics.Device.*;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
@@ -50,10 +51,10 @@ public class BufferHelper {
                 .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
                 .commandBufferCount(1);
         PointerBuffer commandBuffersBuf = stack.mallocPointer(1);
-        if (vkAllocateCommandBuffers(device, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(vkDevice, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate command buffer!");
         }
-        VkCommandBuffer cmdBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), device);
+        VkCommandBuffer cmdBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), vkDevice);
         VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
                 .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
@@ -71,6 +72,6 @@ public class BufferHelper {
                 .pCommandBuffers(commandBuffersBuf);
         vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(graphicsQueue);
-        vkFreeCommandBuffers(device, commandPool, cmdBuffer);
+        vkFreeCommandBuffers(vkDevice, commandPool, cmdBuffer);
     }
 }

@@ -1,6 +1,8 @@
 package org.conspiracraft.renderer;
 
 import org.conspiracraft.Utils;
+import org.conspiracraft.graphics.Device;
+import org.conspiracraft.graphics.Graphics;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
@@ -20,7 +22,7 @@ public class ShaderHelper {
 
             LongBuffer pShaderModule = stack.mallocLong(1);
 
-            int err = vkCreateShaderModule(Window.device, createInfo, null, pShaderModule);
+            int err = vkCreateShaderModule(Device.vkDevice, createInfo, null, pShaderModule);
             if (err != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create shader module: " + err);
             }
