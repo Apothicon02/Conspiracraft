@@ -3,33 +3,55 @@ package org.conspiracraft.renderer;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
-import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.player.InputHandler;
 import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryStack;
 
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
+import static org.lwjgl.sdl.SDLError.*;
 import static org.lwjgl.sdl.SDLEvents.*;
 import static org.lwjgl.sdl.SDLInit.*;
+import static org.lwjgl.sdl.SDLLog.*;
+import static org.lwjgl.sdl.SDLMouse.SDL_SetWindowRelativeMouseMode;
 import static org.lwjgl.sdl.SDLVideo.*;
 
 public class Window {
     public static long window;
-    public static Graphics graphics;
+    public static long context;
+    public boolean tenBitColorMode = true;
 
     public Window() {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {throw new IllegalStateException("Unable to initialize SDL");}
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            graphics = new Graphics();
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        if (tenBitColorMode) {
+            SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 10);
+            SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 10);
+            SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 10);
+            SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 2);
         }
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 0);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+        window = SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+        if (window == 0) {SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n"+SDL_GetError());SDL_Quit();}
+        context = SDL_GL_CreateContext(window);
+        SDL_SetWindowResizable(window, true);
+        SDL_SetWindowRelativeMouseMode(window, true);
+        SDL_GL_SetSwapInterval(0); //disable vsync
+        SDL_GL_MakeCurrent(Window.window, Window.context);
+        SDL_PumpEvents();
+    }
+
+    public void update() {
+        SDL_GL_SwapWindow(window);
     }
 
     public void resized(int width, int height) {
         Settings.width = width;
         Settings.height = height;
-        graphics.recreateSwapchain();
     }
 
     public static boolean focused = false;
@@ -56,8 +78,6 @@ public class Window {
                     inputHandler.scroll.x = events.wheel().x();
                     inputHandler.scroll.y = events.wheel().y();
                     break;
-                case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
-                    graphics.recreateSwapchain();
                 default:
                     break;
             }

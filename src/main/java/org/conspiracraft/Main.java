@@ -1,6 +1,8 @@
 package org.conspiracraft;
 
 import org.conspiracraft.player.Player;
+import org.conspiracraft.renderer.Models;
+import org.conspiracraft.renderer.OpenGL;
 import org.conspiracraft.renderer.Renderer;
 import org.conspiracraft.renderer.Window;
 import org.conspiracraft.world.World;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.conspiracraft.Settings.*;
+import static org.lwjgl.sdl.SDLInit.SDL_Quit;
+import static org.lwjgl.sdl.SDLVideo.SDL_DestroyWindow;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -31,6 +35,9 @@ public class Main {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();
+        OpenGL.initGL();
+        Models.loadModels();
+        Renderer.init();
         player = new Player();
         double timeAccum = 0;
         long prevTime = System.nanoTime();
@@ -58,6 +65,7 @@ public class Main {
             interpolationTime = timeAccum/tickTime;
 
             Renderer.render();
+            window.update();
 
             frameTimes.addLast(elapsed);
             if (frameTimes.size() > 60) {
@@ -72,6 +80,11 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
-        Window.graphics.cleanup();
+        cleanup();
+    }
+
+    public static void cleanup() {
+        SDL_DestroyWindow(Window.window);
+        SDL_Quit();
     }
 }
