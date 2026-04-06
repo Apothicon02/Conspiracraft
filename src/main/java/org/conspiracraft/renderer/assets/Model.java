@@ -1,4 +1,4 @@
-package org.conspiracraft.renderer;
+package org.conspiracraft.renderer.assets;
 
 public class Model {
     public int vaoId;

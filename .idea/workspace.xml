@@ -4,73 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Model.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Models.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/OpenGL.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/plane_db.obj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/quad.obj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/quad_unnormalized.obj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/torus.obj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/bucket_pour_water.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/buzz.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/chirp_1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/cloud.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step3.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/flow.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gears_turning.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/glass_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/glass_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step3.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gravel_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gravel_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/magma.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/metal_small_place1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/metal_small_place2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/mud_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/mud_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_place1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_place2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_scrape1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_scrape2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sand_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sand_step2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sizzle1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sizzle2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/splash1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/swim1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/vent.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wind.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wood_step1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wood_step2.wav" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Went back to opengl.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Framebuffer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/assets/Texture.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/assets/Texture3D.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/assets/Textures.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Swapchain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/QueueFamilyIndices.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/assets/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Models.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/assets/Models.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/ShaderHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/Buffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/BufferHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ShaderStorageBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/DefaultUBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/PushUBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/UBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/UniformBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Index.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Model.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Vertex.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/textures/TextureHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/cube.obj" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/cube.obj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,7 +114,7 @@
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/generic",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft/renderer/assets",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
@@ -181,6 +124,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\renderer\assets" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shader" />
     </key>
@@ -188,6 +132,7 @@
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.renderer.assets" />
       <recent name="org.conspiracraft.renderer" />
       <recent name="org.conspiracraft.renderer.buffers" />
       <recent name="org.apothicon.engine" />
@@ -587,7 +532,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775487225138</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="- Went back to opengl.">
+      <option name="closed" value="true" />
+      <created>1775497462098</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1775497462098</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -606,7 +559,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Created render pass." />
     <MESSAGE value="- Finished graphics pipeline." />
     <MESSAGE value="- Created framebuffers." />
     <MESSAGE value="- Created command buffer." />
@@ -631,7 +583,19 @@
     <MESSAGE value="- Tweaked fog. &#10;- Changed world to circular." />
     <MESSAGE value="- Generalized buffers." />
     <MESSAGE value="- Buffers are no longer duplicated." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Buffers are no longer duplicated." />
+    <MESSAGE value="- Went back to opengl." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Went back to opengl." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/OpenGL.java</url>
+          <line>30</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -1,7 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.player.Player;
-import org.conspiracraft.renderer.Models;
+import org.conspiracraft.renderer.assets.Models;
 import org.conspiracraft.renderer.OpenGL;
 import org.conspiracraft.renderer.Renderer;
 import org.conspiracraft.renderer.Window;

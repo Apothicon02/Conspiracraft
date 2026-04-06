@@ -1,7 +1,7 @@
-package org.conspiracraft.renderer;
+package org.conspiracraft.renderer.assets;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
+import org.conspiracraft.renderer.Renderer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
