@@ -111,7 +111,7 @@ public class Graphics {
     public static DefaultUBO defaultUBO = new DefaultUBO();
     public static Buffer uniformBuf;
     public void createUniformBuffers(MemoryStack stack) {
-        uniformBuf = new UniformBuffer(stack, MAX_FRAMES_IN_FLIGHT, defaultUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, defaultUBO);
+        uniformBuf = new UniformBuffer(stack, defaultUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, defaultUBO);
     }
     public static Buffer vertexStagingBuf;
     public static Buffer indexStagingBuf;
@@ -119,23 +119,23 @@ public class Graphics {
     public static Buffer indexBuf;
     public void createVertexAndIndexBuffers(MemoryStack stack) {
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
-        vertexStagingBuf = new Buffer(stack, 1, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        indexStagingBuf = new Buffer(stack, 1, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        Models.loadModels(vertexStagingBuf.pointer[0].get(0), indexStagingBuf.pointer[0].get(0));
+        vertexStagingBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        indexStagingBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        Models.loadModels(vertexStagingBuf.pointer.get(0), indexStagingBuf.pointer.get(0));
         vkUnmapMemory(vkDevice, vertexStagingBuf.memory[0]);
         vkUnmapMemory(vkDevice, indexStagingBuf.memory[0]);
 
-        vertexBuf = new Buffer(stack, 1, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        vertexBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         BufferHelper.copyBuffer(stack, vertexStagingBuf.buffer[0], vertexBuf.buffer[0], bufferSize);
-        indexBuf = new Buffer(stack, 1, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        indexBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         BufferHelper.copyBuffer(stack, indexStagingBuf.buffer[0], indexBuf.buffer[0], bufferSize);
     }
     public static Buffer instanceStagingBuf;
     public static Buffer instanceBuf;
     public void createInstanceBuffer(MemoryStack stack) {
         int instanceBufferSize = 350000000;
-        instanceStagingBuf = new Buffer(stack, MAX_FRAMES_IN_FLIGHT, instanceBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        instanceBuf = new ShaderStorageBuffer(stack, MAX_FRAMES_IN_FLIGHT, instanceBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_SHADER_STAGE_VERTEX_BIT);
+        instanceStagingBuf = new Buffer(stack, instanceBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        instanceBuf = new ShaderStorageBuffer(stack, instanceBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_SHADER_STAGE_VERTEX_BIT);
     }
     public int depthFormat = VK_FORMAT_D32_SFLOAT;
     public long depthImageView;
@@ -430,18 +430,11 @@ public class Graphics {
         cleanupSwapchain();
         vkDestroySwapchainKHR(vkDevice, swapchain.vkSwapchain, null);
         for (Buffer buffer : Buffer.buffers) {
-            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-                vkDestroyBuffer(vkDevice, buffer.buffer[i], null);
-                vkFreeMemory(vkDevice, buffer.memory[i], null);
-            }
+            vkDestroyBuffer(vkDevice, buffer.buffer[0], null);
+            vkFreeMemory(vkDevice, buffer.memory[0], null);
         }
         vkDestroyDescriptorPool(vkDevice, Descriptors.descriptorPool, null);
         vkDestroyDescriptorSetLayout(vkDevice, Descriptors.descriptorSetLayouts[0], null);
-        vkDestroyBuffer(vkDevice, vertexBuf.buffer[0], null);
-        vkDestroyBuffer(vkDevice, indexBuf.buffer[0], null);
-        vkFreeMemory(vkDevice, indexBuf.memory[0], null);
-        vkFreeMemory(vkDevice, vertexBuf.memory[0], null);
-        vkFreeMemory(vkDevice, instanceBuf.memory[0], null);
         vkDestroyCommandPool(vkDevice, commandPool, null);
         SDL_DestroyWindow(window);
         SDL_Quit();

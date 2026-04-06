@@ -70,7 +70,7 @@ public class DefaultUBO extends UBO {
             };
         }
         buf.rewind();
-        memCopy(memAddress(buf), Graphics.uniformBuf.pointer[currentFrame].get(0), buf.remaining());
+        memCopy(memAddress(buf), Graphics.uniformBuf.pointer.get(0), buf.remaining());
     }
 
     private int align(int alignment, int size) {

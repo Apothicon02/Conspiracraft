@@ -34,7 +34,7 @@ public class Renderer {
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
-                if (frame < 2) {
+                if (frame == 0) {
                     prepareInstancedTestScene();
                     frame++;
                 }
@@ -97,15 +97,15 @@ public class Renderer {
                 }
             }
         }
-        memCopy(memAddress(testBuf), instanceStagingBuf.pointer[currentFrame].get(0), sizeBytes);
-        vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuf.buffer[currentFrame], instanceBuf.buffer[currentFrame], bufferCopy);
+        memCopy(memAddress(testBuf), instanceStagingBuf.pointer.get(0), sizeBytes);
+        vkCmdCopyBuffer(commandBuffers[currentFrame], instanceStagingBuf.buffer[0], instanceBuf.buffer[0], bufferCopy);
         VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                .buffer(instanceBuf.buffer[currentFrame])
+                .buffer(instanceBuf.buffer[0])
                 .offset(0).size(sizeBytes);
         vkCmdPipelineBarrier(commandBuffers[currentFrame], VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
     }

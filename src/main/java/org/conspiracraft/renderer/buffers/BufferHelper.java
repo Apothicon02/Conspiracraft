@@ -53,9 +53,7 @@ public class BufferHelper {
                 .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
                 .commandBufferCount(1);
         PointerBuffer commandBuffersBuf = stack.mallocPointer(1);
-        if (vkAllocateCommandBuffers(vkDevice, allocInfo, commandBuffersBuf) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to allocate command buffer!");
-        }
+        if (vkAllocateCommandBuffers(vkDevice, allocInfo, commandBuffersBuf) != VK_SUCCESS) {throw new RuntimeException("Failed to allocate command buffer!");}
         VkCommandBuffer cmdBuffer = new VkCommandBuffer(commandBuffersBuf.get(0), vkDevice);
         VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
@@ -63,8 +61,6 @@ public class BufferHelper {
         vkBeginCommandBuffer(cmdBuffer, beginInfo);
 
         VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack)
-                .srcOffset(0) // Optional
-                .dstOffset(0) // Optional
                 .size(size);
         vkCmdCopyBuffer(cmdBuffer, src, dst, copyRegion);
 
@@ -77,7 +73,7 @@ public class BufferHelper {
         vkFreeCommandBuffers(vkDevice, commandPool, cmdBuffer);
     }
 
-    public static void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, long[] buffer, long[] memory, int i) {
+    public static void createBuffer(MemoryStack stack, int bufferSize, int usage, int properties, long[] buffer, long[] memory) {
         VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
                 .size(bufferSize)
@@ -87,9 +83,9 @@ public class BufferHelper {
         if (vkCreateBuffer(vkDevice, bufferInfo, null, bufferBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create vertex buffer!");
         }
-        buffer[i] = bufferBuf.get(0);
+        buffer[0] = bufferBuf.get(0);
         VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
-        vkGetBufferMemoryRequirements(vkDevice, buffer[i], memRequirements);
+        vkGetBufferMemoryRequirements(vkDevice, buffer[0], memRequirements);
 
         VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
@@ -99,8 +95,8 @@ public class BufferHelper {
         if (vkAllocateMemory(vkDevice, allocInfo, null, bufferMemoryBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate buffer memory!");
         }
-        memory[i] = bufferMemoryBuf.get(0);
-        if (vkBindBufferMemory(vkDevice, buffer[i], memory[i], 0) != VK_SUCCESS) {
+        memory[0] = bufferMemoryBuf.get(0);
+        if (vkBindBufferMemory(vkDevice, buffer[0], memory[0], 0) != VK_SUCCESS) {
             throw new RuntimeException("Failed to bind buffer memory!");
         }
     }

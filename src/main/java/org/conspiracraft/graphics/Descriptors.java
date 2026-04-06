@@ -41,7 +41,7 @@ public class Descriptors {
             int b = 0;
             for (UniformBuffer buf : UniformBuffer.buffers) {
                 VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
-                        .buffer(buf.buffer[i])
+                        .buffer(buf.buffer[0])
                         .offset(0)
                         .range(buf.size);
                 descriptorWrites.get(b)
@@ -56,7 +56,7 @@ public class Descriptors {
             }
             for (ShaderStorageBuffer buf : ShaderStorageBuffer.buffers) {
                 VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
-                        .buffer(buf.buffer[i])
+                        .buffer(buf.buffer[0])
                         .offset(0)
                         .range(buf.size);
                 descriptorWrites.get(b)

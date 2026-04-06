@@ -18,18 +18,15 @@ public class Buffer {
     public int size;
     public long[] buffer;
     public long[] memory;
-    public PointerBuffer[] pointer;
-    public Buffer(MemoryStack stack, int amount, int bufferSize, int usage, int properties) {
+    public PointerBuffer pointer;
+    public Buffer(MemoryStack stack, int bufferSize, int usage, int properties) {
         size = bufferSize;
-        buffer = new long[amount];
-        memory = new long[amount];
-        pointer = new PointerBuffer[amount];
-        for (int i = 0; i < amount; i++) {
-            pointer[i] = PointerBuffer.allocateDirect(1);
-            createBuffer(stack, bufferSize, usage, properties, buffer, memory, i);
-            if ((properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0) {
-                vkMapMemory(vkDevice, memory[i], 0, bufferSize, 0, pointer[i]);
-            }
+        buffer = new long[1];
+        memory = new long[1];
+        pointer = PointerBuffer.allocateDirect(1);
+        createBuffer(stack, bufferSize, usage, properties, buffer, memory);
+        if ((properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0) {
+            vkMapMemory(vkDevice, memory[0], 0, bufferSize, 0, pointer);
         }
         buffers.add(this);
         Graphics.recreateDescriptors(stack);
