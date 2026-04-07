@@ -18,12 +18,12 @@ import static org.lwjgl.sdl.SDLVideo.*;
 public class Window {
     public static long window;
     public static long context;
-    public boolean tenBitColorMode = true;
+    public boolean tenBitColorMode = false;
 
     public Window() {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {throw new IllegalStateException("Unable to initialize SDL");}
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         if (tenBitColorMode) {
             SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 10);

@@ -57,7 +57,7 @@ public class Framebuffer {
         if (attachments != null) {
             glDrawBuffers(attachments);
         }
-        glClearColor(0, 0, 0, 0);
+        glClearColor(1, 0, 0, 1);
         glClearDepthf(0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

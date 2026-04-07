@@ -13,8 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.conspiracraft.Settings.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.opengl.GL41.glClearDepthf;
 import static org.lwjgl.sdl.SDLInit.SDL_Quit;
-import static org.lwjgl.sdl.SDLVideo.SDL_DestroyWindow;
+import static org.lwjgl.sdl.SDLVideo.*;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -31,7 +36,7 @@ public class Main {
     public static double timeMul = 1;
     public static double interpolationTime = 0;
     public static long timeNs = 0;
-    static void main() {
+    static void main() throws Exception {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();
