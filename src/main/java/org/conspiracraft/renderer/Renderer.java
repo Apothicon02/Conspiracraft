@@ -38,6 +38,7 @@ public class Renderer {
                     prepareInstancedTestScene();
                     frame++;
                 }
+                vkDeviceWaitIdle(vkDevice);
                 if (startRenderPass(stack)) {
                     drawFrame(stack);
                     endRenderPass(stack);
@@ -183,9 +184,7 @@ public class Renderer {
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             Window.graphics.recreateSwapchain();
             return false;
-        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            System.err.println("Failed to acquire next image!");
-        }
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
         vkResetFences(vkDevice, inFlightFences[currentFrame]);
 
@@ -195,9 +194,7 @@ public class Renderer {
                 .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
                 .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
                 .pInheritanceInfo(null);
-        if (vkBeginCommandBuffer(commandBuffers[currentFrame], beginInfo) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to begin recording command buffer!");
-        }
+        if (vkBeginCommandBuffer(commandBuffers[currentFrame], beginInfo) != VK_SUCCESS) {throw new RuntimeException("Failed to begin recording command buffer!");}
         return true;
     }
 }
