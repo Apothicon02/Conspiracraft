@@ -1,8 +1,6 @@
-package org.conspiracraft.renderer;
+package org.conspiracraft.graphics;
 
 import org.conspiracraft.Utils;
-import org.conspiracraft.graphics.Device;
-import org.conspiracraft.graphics.Graphics;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
@@ -16,17 +14,13 @@ import static org.lwjgl.vulkan.VK13.*;
 public class ShaderHelper {
     public static long createShaderModule(ByteBuffer buffer) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.calloc(stack);
-            createInfo.sType(VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO);
-            createInfo.pCode(buffer);
-
+            VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO)
+                    .pCode(buffer);
             LongBuffer pShaderModule = stack.mallocLong(1);
 
             int err = vkCreateShaderModule(Device.vkDevice, createInfo, null, pShaderModule);
-            if (err != VK_SUCCESS) {
-                throw new RuntimeException("Failed to create shader module: " + err);
-            }
-
+            if (err != VK_SUCCESS) {throw new RuntimeException("Failed to create shader module: " + err);}
             return pShaderModule.get(0);
         }
     }
@@ -43,9 +37,7 @@ public class ShaderHelper {
         long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, shaderName, "main", 0);
         if (result == 0) throw new RuntimeException(shaderName + " compile returned null.");
         long status = Shaderc.shaderc_result_get_compilation_status(result);
-        if (status != Shaderc.shaderc_compilation_status_success) {
-            throw new RuntimeException("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));
-        }
+        if (status != Shaderc.shaderc_compilation_status_success) {throw new RuntimeException("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));}
 
         ByteBuffer spirv = Shaderc.shaderc_result_get_bytes(result);
         ByteBuffer copy = MemoryUtil.memAlloc(spirv.remaining());

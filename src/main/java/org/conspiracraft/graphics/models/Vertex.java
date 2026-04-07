@@ -1,4 +1,4 @@
-package org.conspiracraft.renderer.models;
+package org.conspiracraft.graphics.models;
 
 import org.joml.Vector3f;
 import org.lwjgl.vulkan.VkVertexInputAttributeDescription;

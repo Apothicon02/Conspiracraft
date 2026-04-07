@@ -2,15 +2,13 @@ package org.conspiracraft.graphics;
 
 import org.conspiracraft.Settings;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkExtent2D;
-import org.lwjgl.vulkan.VkSurfaceCapabilitiesKHR;
-import org.lwjgl.vulkan.VkSurfaceFormatKHR;
-import org.lwjgl.vulkan.VkSwapchainCreateInfoKHR;
+import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.*;
+import static org.conspiracraft.graphics.ImageHelper.createImageView;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -18,18 +16,31 @@ import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class Swapchain {
+    public static int FRAMES_IN_FLIGHT = 2;
     public static VkSurfaceFormatKHR vkSurfFormat;
     public static long vkSwapchain = VK_NULL_HANDLE;
-    public static long[] swapchainImages;
+    public static long[] images;
+    public static long[] depthImages;
     public static int eWidth;
     public static int eHeight;
     public static boolean hdr = false;
 
-    public Swapchain(MemoryStack stack) {
+    public static void init(MemoryStack stack) {
         createSwapchain(stack);
+        createImageViews(stack);
     }
 
-    public void createSwapchain(MemoryStack stack) {
+    public static long[] imageViews;
+    public static long[] depthImageViews;
+    public static void createImageViews(MemoryStack stack) {
+        imageViews = new long[images.length];
+        depthImageViews = new long[depthImages.length];
+        for (int i = 0; i < images.length; i++) {
+            imageViews[i] = createImageView(stack, false, images[i], vkSurfFormat.format(), 4);
+            depthImageViews[i] = createImageView(stack, false, depthImages[i], VK_FORMAT_D32_SFLOAT, 0);
+        }
+    }
+    public static void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, vkSurf, caps);
 
@@ -104,11 +115,16 @@ public class Swapchain {
 
         IntBuffer imgCount = stack.mallocInt(1);
         vkGetSwapchainImagesKHR(vkDevice, vkSwapchain, imgCount, null);
-        LongBuffer images = stack.mallocLong(imgCount.get(0));
-        vkGetSwapchainImagesKHR(vkDevice, vkSwapchain, imgCount, images);
-        swapchainImages = new long[images.capacity()];
-        images.get(swapchainImages);
+        LongBuffer imagesBuf = stack.mallocLong(imgCount.get(0));
+        vkGetSwapchainImagesKHR(vkDevice, vkSwapchain, imgCount, imagesBuf);
+        images = new long[imagesBuf.capacity()];
+        imagesBuf.get(images);
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
+
+        depthImages = new long[imagesBuf.capacity()];
+        for (int i = 0; i < images.length; i++) {
+            depthImages[i] = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        }
     }
 }
