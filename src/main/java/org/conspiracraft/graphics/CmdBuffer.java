@@ -7,11 +7,12 @@ import org.lwjgl.vulkan.VkCommandPoolCreateInfo;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
+import static org.conspiracraft.graphics.Swapchain.FRAMES_IN_FLIGHT;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class CmdBuffer {
     public static long cmdPool;
-    public static VkCommandBuffer cmdBuffer;
+    public static VkCommandBuffer[] cmdBuffer;
 
     public static void init(MemoryStack stack) {
         createCommandPool(stack);
@@ -19,7 +20,10 @@ public class CmdBuffer {
     }
 
     public static void createCommandBuffer(MemoryStack stack) {
-        cmdBuffer = CmdBufferHelper.createCmdBuffer(stack);
+        cmdBuffer = new VkCommandBuffer[FRAMES_IN_FLIGHT];
+        for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
+            cmdBuffer[i] = CmdBufferHelper.createCmdBuffer(stack);
+        }
     }
     public static void createCommandPool(MemoryStack stack) {
         VkCommandPoolCreateInfo cmdPoolCreateInfo = VkCommandPoolCreateInfo.calloc(stack)

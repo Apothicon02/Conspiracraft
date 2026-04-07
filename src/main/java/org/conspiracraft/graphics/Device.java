@@ -31,8 +31,8 @@ import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_KHR_PORTABILITY_ENUM
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK13.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
-import static org.lwjgl.vulkan.VK13.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
 
 public class Device {
     public static VkInstance vkInst;
@@ -41,9 +41,7 @@ public class Device {
     public static VkPhysicalDevice physicalDevice;
     public static VkDevice vkDevice;
     public static VkQueue graphicsQueue;
-    public static VkQueue presentQueue;
     public static long graphicsQueueHandle;
-    public static long presentQueueHandle;
 
     public static void init(MemoryStack stack) {
         createVkInst(stack);
@@ -59,8 +57,8 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
-        PointerBuffer deviceExtensions = stack.mallocPointer(1);
-        deviceExtensions.put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
+        PointerBuffer deviceExtensions = stack.mallocPointer(1)
+                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering = VkPhysicalDeviceDynamicRenderingFeatures.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
                 .dynamicRendering(true);
@@ -83,11 +81,6 @@ public class Device {
         vkGetDeviceQueue(vkDevice, vkQueueFamilyIdx, 0, graphicsQueueBuf);
         graphicsQueueHandle = graphicsQueueBuf.get(0);
         graphicsQueue = new VkQueue(graphicsQueueHandle, vkDevice);
-
-        PointerBuffer presentQueueBuf = stack.mallocPointer(1);
-        vkGetDeviceQueue(vkDevice, vkQueueFamilyIdx, 0, presentQueueBuf);
-        presentQueueHandle = presentQueueBuf.get(0);
-        presentQueue = new VkQueue(presentQueueHandle, vkDevice);
     }
     public static void createVkPhysicalDeviceAndVkQueue(MemoryStack stack) {
         IntBuffer deviceCount = stack.mallocInt(1);
@@ -156,28 +149,34 @@ public class Device {
         for (int i = 0; i < extCount; i++) {
             extensions.put(i, extBuffer.get(i));
         }
-        extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
-        extensions.put(extCount+1, memUTF8(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME));
+        extensions.put(extCount, memUTF8(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME));
+        extensions.put(extCount+1, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
 
         VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
-                .sType(VK13.VK_STRUCTURE_TYPE_APPLICATION_INFO)
+                .sType(VK14.VK_STRUCTURE_TYPE_APPLICATION_INFO)
                 .pApplicationName(stack.UTF8("Conspiracraft"))
-                .applicationVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
+                .applicationVersion(VK14.VK_MAKE_VERSION(1, 0, 0))
                 .pEngineName(stack.UTF8("ConspirEngine"))
-                .engineVersion(VK13.VK_MAKE_VERSION(1, 0, 0))
-                .apiVersion(VK13.VK_API_VERSION_1_3);
+                .engineVersion(VK14.VK_MAKE_VERSION(1, 0, 0))
+                .apiVersion(VK14.VK_API_VERSION_1_4);
         PointerBuffer layers = stack.mallocPointer(1);
         layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation")); //disable when not in dev env
         VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
-                .sType(VK13.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
+                .sType(VK14.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
                 .ppEnabledLayerNames(layers)
                 .flags(VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR);
+        System.out.println("Enabled instance extensions:");
+        for (int i = 0; i < extensions.capacity(); i++) {
+            long addr = extensions.get(i);
+            if (addr == 0) continue;
+            System.out.println("  " + MemoryUtil.memUTF8(addr));
+        }
 
         PointerBuffer pInstance = stack.mallocPointer(1);
-        int err = VK13.vkCreateInstance(createInfo, null, pInstance);
-        if (err != VK13.VK_SUCCESS) {throw new RuntimeException("Failed to create Vulkan instance: " + err);}
+        int err = VK14.vkCreateInstance(createInfo, null, pInstance);
+        if (err != VK14.VK_SUCCESS) {throw new RuntimeException("Failed to create Vulkan instance: " + err);}
         vkInst = new VkInstance(pInstance.get(0), createInfo);
     }
 }

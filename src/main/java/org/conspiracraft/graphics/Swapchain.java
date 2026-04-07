@@ -20,7 +20,9 @@ public class Swapchain {
     public static VkSurfaceFormatKHR vkSurfFormat;
     public static long vkSwapchain = VK_NULL_HANDLE;
     public static long[] images;
-    public static long[] depthImages;
+    public static long[] imageViews;
+    public static long depthImageView;
+    public static long depthImage;
     public static int eWidth;
     public static int eHeight;
     public static boolean hdr = false;
@@ -30,15 +32,12 @@ public class Swapchain {
         createImageViews(stack);
     }
 
-    public static long[] imageViews;
-    public static long[] depthImageViews;
     public static void createImageViews(MemoryStack stack) {
         imageViews = new long[images.length];
-        depthImageViews = new long[depthImages.length];
         for (int i = 0; i < images.length; i++) {
             imageViews[i] = createImageView(stack, false, images[i], vkSurfFormat.format(), 4);
-            depthImageViews[i] = createImageView(stack, false, depthImages[i], VK_FORMAT_D32_SFLOAT, 0);
         }
+        depthImageView = createImageView(stack, false, depthImage, VK_FORMAT_D32_SFLOAT, 0);
     }
     public static void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
@@ -122,9 +121,6 @@ public class Swapchain {
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
 
-        depthImages = new long[imagesBuf.capacity()];
-        for (int i = 0; i < images.length; i++) {
-            depthImages[i] = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        }
+        depthImage = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     }
 }

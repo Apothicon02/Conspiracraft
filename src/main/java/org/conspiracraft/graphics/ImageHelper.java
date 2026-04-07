@@ -87,7 +87,7 @@ public class ImageHelper {
     }
 
     public static void transitionImageLayout(MemoryStack stack, VkCommandBuffer cmdBuffer, int aspectMask, long image, int oldLayout, int newLayout, long srcAccessMask, long dstAccessMask, long srcStageMask, long dstStageMask) {
-        VkImageMemoryBarrier2 barrier = VkImageMemoryBarrier2.calloc(stack)
+        VkImageMemoryBarrier2.Buffer barrier = VkImageMemoryBarrier2.calloc(1, stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2)
                 .srcStageMask(srcStageMask)
                 .srcAccessMask(srcAccessMask)
@@ -106,7 +106,7 @@ public class ImageHelper {
                 .layerCount(1);
         VkDependencyInfo depInfo = VkDependencyInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
-                .pImageMemoryBarriers(VkImageMemoryBarrier2.calloc(1, stack).put(0, barrier));
+                .pImageMemoryBarriers(barrier);
         vkCmdPipelineBarrier2(cmdBuffer, depInfo);
     }
 }

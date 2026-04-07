@@ -4,44 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed white lines.">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid11676.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid18304.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid23932.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid24436.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid25436.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/CmdBuffer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/CmdBufferHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/ImageHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Model.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.vert" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Started rewrite.">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid10356.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid15060.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid20192.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid23892.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid29824.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/CmdBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/CmdBuffer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/ImageHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/ImageHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Swapchain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Swapchain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/QueueFamilyIndices.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Renderer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/ShaderHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/ShaderHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/Buffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/BufferHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ShaderStorageBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/DefaultUBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/PushUBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/UBO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/buffers/ubos/UniformBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Index.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Index.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Model.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Models.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Models.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/models/Vertex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Vertex.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/textures/TextureHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -343,7 +321,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775565803167</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="- Started rewrite.">
+      <option name="closed" value="true" />
+      <created>1775582615873</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1775582615873</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -362,7 +348,8 @@
     <MESSAGE value="- Added preferred sdr format." />
     <MESSAGE value="- Added frames-in-flight." />
     <MESSAGE value="- Fixed white lines." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed white lines." />
+    <MESSAGE value="- Started rewrite." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Started rewrite." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

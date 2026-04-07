@@ -13,6 +13,7 @@ public class Graphics {
             Swapchain.init(stack);
             Pipeline.init(stack);
             CmdBuffer.init(stack);
+            SyncObjects.init(stack);
         }
     }
 

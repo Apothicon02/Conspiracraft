@@ -46,18 +46,6 @@ public class Pipeline {
                 .topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
                 .primitiveRestartEnable(false);
 
-        VkViewport viewport = VkViewport.calloc(stack);
-        viewport.x(0.0f);
-        viewport.y(0.0f);
-        viewport.width((float) eWidth);
-        viewport.height((float) eHeight);
-        viewport.minDepth(0.0f);
-        viewport.maxDepth(1.0f);
-
-        VkRect2D scissor = VkRect2D.calloc(stack);
-        scissor.offset(VkOffset2D.calloc(stack).set(0, 0));
-        scissor.extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
-
         VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO)
                 .viewportCount(1)
@@ -108,7 +96,7 @@ public class Pipeline {
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
                 .depthTestEnable(true)
                 .depthWriteEnable(true)
-                .depthCompareOp(VK_COMPARE_OP_GREATER)
+                .depthCompareOp(VK_COMPARE_OP_GREATER_OR_EQUAL)
                 .depthBoundsTestEnable(false)
                 .stencilTestEnable(false);
         VkPipelineRenderingCreateInfo renderingInfo = VkPipelineRenderingCreateInfo.calloc(stack)
