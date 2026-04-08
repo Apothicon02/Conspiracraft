@@ -12,10 +12,6 @@ import static org.conspiracraft.graphics.Swapchain.*;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Pipeline {
-    public static void init(MemoryStack stack) {
-        createPipeline(stack);
-    }
-
     public static long pipelineLayout;
     public static Long graphicsPipeline;
     public static void recreatePipeline(MemoryStack stack) {

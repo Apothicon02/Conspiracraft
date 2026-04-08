@@ -23,11 +23,13 @@ public class Swapchain {
     public static long[] imageViews;
     public static long depthImageView;
     public static long depthImage;
+    public static long depthImageMemory;
     public static int eWidth;
     public static int eHeight;
     public static boolean hdr = false;
 
     public static void init(MemoryStack stack) {
+        Renderer.firstImages = true;
         createSwapchain(stack);
         createImageViews(stack);
     }
@@ -121,6 +123,8 @@ public class Swapchain {
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
 
-        depthImage = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        depthImage = depthImageInfo[0];
+        depthImageMemory = depthImageInfo[1];
     }
 }

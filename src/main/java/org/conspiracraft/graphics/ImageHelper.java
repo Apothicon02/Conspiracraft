@@ -41,7 +41,7 @@ public class ImageHelper {
         return pView.get(0);
     }
 
-    public static long createImage(MemoryStack stack, int width, int height, int format, int tiling, int usage, int memoryProperties) {
+    public static long[] createImage(MemoryStack stack, int width, int height, int format, int tiling, int usage, int memoryProperties) {
         VkImageCreateInfo imageInfo = VkImageCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO)
                 .imageType(VK_IMAGE_TYPE_2D)
@@ -70,7 +70,7 @@ public class ImageHelper {
         if (err != VK_SUCCESS) {throw new RuntimeException("Failed to allocate image memory: " + err);}
         long memory = memoryBuf.get(0);
         vkBindImageMemory(vkDevice, image, memory, 0);
-        return image;
+        return new long[]{image, memory};
     }
 
     public static int findMemoryType(MemoryStack stack, int typeFilter, int properties) {

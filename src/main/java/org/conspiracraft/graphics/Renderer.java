@@ -19,7 +19,7 @@ import static org.lwjgl.vulkan.VK14.*;
 public class Renderer {
     public static int imageIdx = 0;
     public static int frameIdx = 0;
-    public static boolean firstFrames = true;
+    public static boolean firstImages = true;
     public static VkCommandBuffer currentCmdBuffer;
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -35,10 +35,8 @@ public class Renderer {
                 submitCommandBuffers(stack);
 
                 frameIdx++;
-                if (frameIdx >= FRAMES_IN_FLIGHT) {
-                    frameIdx = 0;
-                    firstFrames = false;
-                }
+                if (frameIdx >= FRAMES_IN_FLIGHT) {frameIdx = 0;}
+                if (imageIdx >= Swapchain.images.length) {firstImages = false;}
             }
         }
     }
@@ -112,7 +110,7 @@ public class Renderer {
 
     public static VkRenderingAttachmentInfo.Buffer getColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer) {
         ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
-                firstFrames ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
                 VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(1, stack)
