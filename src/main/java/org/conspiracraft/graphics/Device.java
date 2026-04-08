@@ -163,12 +163,12 @@ public class Device {
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
                 .ppEnabledLayerNames(layers);
-        System.out.println("Enabled instance extensions:");
-        for (int i = 0; i < extensions.capacity(); i++) {
-            long addr = extensions.get(i);
-            if (addr == 0) continue;
-            System.out.println("  " + MemoryUtil.memUTF8(addr));
-        }
+//        System.out.println("Enabled instance extensions:");
+//        for (int i = 0; i < extensions.capacity(); i++) {
+//            long addr = extensions.get(i);
+//            if (addr == 0) continue;
+//            System.out.println("  " + MemoryUtil.memUTF8(addr));
+//        }
 
         PointerBuffer pInstance = stack.mallocPointer(1);
         int err = VK14.vkCreateInstance(createInfo, null, pInstance);

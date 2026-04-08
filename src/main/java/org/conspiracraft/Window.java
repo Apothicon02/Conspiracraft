@@ -1,6 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.graphics.Graphics;
+import org.conspiracraft.graphics.Pipeline;
 import org.conspiracraft.player.InputHandler;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
@@ -26,7 +27,7 @@ public class Window {
     public void resized(int width, int height) {
         Settings.width = width;
         Settings.height = height;
-        //graphics.recreateSwapchain();
+        Graphics.rebuild();
     }
 
     public static boolean focused = false;
@@ -54,7 +55,7 @@ public class Window {
                     inputHandler.scroll.y = events.wheel().y();
                     break;
                 case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
-                    //graphics.recreateSwapchain();
+                    Graphics.rebuild();
                     break;
                 default:
                     break;

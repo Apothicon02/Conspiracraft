@@ -1,9 +1,16 @@
+layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
+    mat4 view;
+    mat4 proj;
+    vec4 skylight;
+    int hdr;
+} ubo;
+layout(location = 0) in vec2 uv;
+
 layout(location = 0) out vec4 outColor;
 
-const int size = 1024;
+const int size = 2560;
 const int height = 320;
 const vec3 worldSize = vec3(size, height, size);
-const vec3 sun = vec3(2553, 166, 512);
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
@@ -26,12 +33,13 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
 }
 
 vec3 ogPos = vec3(0);
+vec3 ogDir = vec3(0);
 vec3 sunColor = vec3(0);
 vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
     float ogY = ogPos.y;
-    float sunHeight = sun.y/size;
+    float sunHeight = ubo.skylight.y/size;
     float scattering = gradient(lightPos.y, ogY-63, ogY+437, 1.5f, -0.5f);
-    float sunDist = (distance(lightPos.xz, sun.xz)/(size*1.5f));
+    float sunDist = (distance(lightPos.xz, ubo.skylight.xz)/(size*1.5f));
     float adjustedTime = clamp((sunDist*abs(1-clamp(sunHeight, 0.05f, 0.5f)))+scattering, 0.f, 1.f);
     float thickness = gradient(lightPos.y, 128, 1500-max(0, sunHeight*1000), 0.33+(sunHeight/2), 1);
     float sunSetness = min(1.f, max(abs(sunHeight*1.5f), adjustedTime));
@@ -62,42 +70,75 @@ vec3 stepMask(vec3 sideDist) {
     return vec3(mask);
 }
 
-void main() {
-    outColor = vec4(0);
+vec3 roundDir(vec3 dir) {
+    if (dir.x == 0.0f) {
+        dir.x = 0.001f;
+    }
+    if (dir.y == 0.0f) {
+        dir.y = 0.001f;
+    }
+    if (dir.z == 0.0f) {
+        dir.z = 0.001f;
+    }
+    return dir;
+}
+vec3 getDir(vec2 pos) {
+    vec2 modifiedUV = (uv * 2.0) - 1.0;
+    vec4 clipSpace = vec4((inverse(ubo.proj) * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
+    return roundDir(normalize((inverse(ubo.view)*clipSpace).xyz));
+}
 
-    vec2 uv = ((gl_FragCoord.xy/vec2(1920, 1080))*2)-1;
-    vec3 camPos = vec3(size/2, height/2, 0);
-    vec3 rayDir = normalize(vec3(uv, -1.0))*-1;
+void main() {
+    vec4 color = vec4(0);
+    vec3 camPos = inverse(ubo.view)[3].xyz;
+    vec3 rayDir = getDir(uv);
     vec3 rayPos = camPos;
     ogPos = rayPos;
+    ogDir = rayDir;
     vec3 mapPos = floor(rayPos);
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
     vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
-
+    vec3 normal = vec3(0);
     while (mapPos.x >= 0 && mapPos.x < size && mapPos.y >= 0 && mapPos.y < height && mapPos.z >= 0 && mapPos.z < size) {
-        float hillHeight = mix(2, 100, clamp(((mapPos.x+mapPos.z)/size)-0.3f, 0, 1));
+        float hillHeight = 256;
         float t = mapPos.x / hillHeight;
-        float hill = sqrt(sin(t * 3.14f * 2.0)+1)*20;
+        float hill = sqrt(sin(t * 3.14f * 2.0)+1)*10;
         t = mapPos.z / hillHeight;
-        hill += sqrt(sin(t * 3.14f * 2.0)+1)*20;
-        if (mapPos.y < 80+hill) {
-            vec3 normal = -mask*raySign;
-            if (mapPos.y < 128) {
+        hill += sqrt(sin(t * 3.14f * 2.0)+1)*10;
+        hill+=pow((mapPos.x-mapPos.z)/(size/16), 2);
+        if (mapPos.y < 47+hill) {
+            normal = -mask*raySign;
+            if (mapPos.y < 63) {
                 normal = vec3(0, 1, 0);
-                outColor = vec4(0.3, 0.35, 1.f, 1.f);
+                color = vec4(0.3, 0.35, 1.f, 1.f);
+            } else if (mapPos.y < 65) {
+                color = vec4(0.95, 0.93, 0.85f, 1.f);
             } else {
-                outColor = vec4(0.55, 1, 0.5f, 1.f);
+                color = vec4(0.5, 0.95, 0.5f, 1.f);
             }
-            outColor *= vec4(vec3(dot(-normal, sun)*-0.0001f)+0.6f, 1);
             break;
         }
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
         sideDist += mask * raySign * deltaDist;
     }
-    bool isSky = outColor.a < 1;
+    bool isSky = color.a < 1;
+    vec3 lightPos = mapPos;
+    if (isSky) {
+        lightPos = ogPos + ogDir * size;
+    } else {
+        vec4 skylight = ubo.skylight;
+        vec3 lighting = vec3(vec3(dot(normal, normalize(skylight.xyz))*0.38f)+(0.68f*skylight.a));
+        color.rgb *= lighting;
+    }
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, mapPos)/(size*0.66f)), 0.f, 1.f);
-    outColor = mix(outColor, getLightingColor(mapPos, vec4(0, 0, 0, 0.9f), isSky, fogginess, false), fogginess);
+    color.rgb = mix(color.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 0.9f), isSky, fogginess, false).rgb, fogginess);
+
+    color.rgb = pow(color.rgb, vec3(2.2)); //gamma
+    if (ubo.hdr == 1) {
+        color.rgb = (color.rgb*400)/80;//exposure
+    }
+    outColor = vec4(color.rgb, 1);
 }

@@ -24,8 +24,8 @@ public class Pipeline {
         }
     }
     public static void createPipeline(MemoryStack stack) {
-        long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"test.vert"}, Shaderc.shaderc_glsl_vertex_shader));
-        long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"test.frag"}, Shaderc.shaderc_glsl_fragment_shader));
+        long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"fullscreen.vert"}, Shaderc.shaderc_glsl_vertex_shader));
+        long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"dda.frag"}, Shaderc.shaderc_glsl_fragment_shader));
         VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
         shaderStages.get(0)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
@@ -64,7 +64,7 @@ public class Pipeline {
                 .polygonMode(VK_POLYGON_MODE_FILL)
                 .lineWidth(1.0f)
                 .cullMode(VK_CULL_MODE_BACK_BIT)
-                .frontFace(VK_FRONT_FACE_CLOCKWISE)
+                .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
                 .depthBiasEnable(false);
 
         VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);

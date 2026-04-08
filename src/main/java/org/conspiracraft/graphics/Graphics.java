@@ -23,6 +23,11 @@ public class Graphics {
             SyncObjects.init(stack);
         }
     }
+    public static void rebuild() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            Pipeline.recreatePipeline(stack);
+        }
+    }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}
 
