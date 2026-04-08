@@ -26,8 +26,6 @@ import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
-import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
@@ -145,12 +143,11 @@ public class Device {
     public static void createVkInst(MemoryStack stack) {
         PointerBuffer extBuffer = SDLVulkan.SDL_Vulkan_GetInstanceExtensions();
         int extCount = extBuffer.remaining();
-        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+2);
+        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+1);
         for (int i = 0; i < extCount; i++) {
             extensions.put(i, extBuffer.get(i));
         }
-        extensions.put(extCount, memUTF8(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME));
-        extensions.put(extCount+1, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
+        extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
 
         VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_APPLICATION_INFO)
@@ -165,8 +162,7 @@ public class Device {
                 .sType(VK14.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
-                .ppEnabledLayerNames(layers)
-                .flags(VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR);
+                .ppEnabledLayerNames(layers);
         System.out.println("Enabled instance extensions:");
         for (int i = 0; i < extensions.capacity(); i++) {
             long addr = extensions.get(i);
