@@ -1,17 +1,19 @@
+layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
+    mat4 view;
+    mat4 proj;
+    vec4 skylight;
+    int hdr;
+} ubo;
 vec2 positions[3] = vec2[](
-vec2(0.0, -0.5),
-vec2(0.5, 0.5),
-vec2(-0.5, 0.5)
-);
-vec4 colors[3] = vec4[](
-vec4(1.0, 0.0, 0.0, 1.0),
-vec4(0.0, 1.0, 0.0, 1.0),
-vec4(0.0, 0.0, 1.0, 1.0)
+    vec2(0.0, -3),
+    vec2(3, 3),
+    vec2(-3, 3)
 );
 
-layout(location = 0) out vec4 vertColor;
+layout(location = 0) out vec2 uv;
 
 void main() {
-    gl_Position = vec4(positions[gl_VertexIndex], 0.5, 1.0);
-    vertColor = colors[gl_VertexIndex];
+    vec2 pos = positions[gl_VertexIndex];
+    gl_Position = vec4(pos, 0, 1.0);
+    uv = (pos+1)/2;
 }

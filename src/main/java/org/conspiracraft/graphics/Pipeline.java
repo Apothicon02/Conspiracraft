@@ -7,6 +7,7 @@ import org.lwjgl.vulkan.*;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
+import static org.conspiracraft.graphics.Graphics.globalUBO;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.lwjgl.vulkan.VK14.*;
 
@@ -16,7 +17,12 @@ public class Pipeline {
     }
 
     public static long pipelineLayout;
-    public static long graphicsPipeline;
+    public static Long graphicsPipeline;
+    public static void recreatePipeline(MemoryStack stack) {
+        if (graphicsPipeline != null) {
+            createPipeline(stack);
+        }
+    }
     public static void createPipeline(MemoryStack stack) {
         long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"test.vert"}, Shaderc.shaderc_glsl_vertex_shader));
         long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"test.frag"}, Shaderc.shaderc_glsl_fragment_shader));
@@ -77,15 +83,15 @@ public class Pipeline {
                 .attachmentCount(1)
                 .pAttachments(colorBlendAttachment);
 
-//        VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
-//                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
-//                .offset(0);
-//                .size(defaultUBO.size());
+        VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .offset(0)
+                .size(globalUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
-//                .setLayoutCount(Descriptors.descriptorSetLayouts.length)
-//                .pSetLayouts(stack.longs(Descriptors.descriptorSetLayouts))
-//                .pPushConstantRanges(pushConstRanges);
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
+                .setLayoutCount(Descriptors.descriptorSetLayouts.length)
+                .pSetLayouts(stack.longs(Descriptors.descriptorSetLayouts))
+                .pPushConstantRanges(pushConstRanges);
 
         LongBuffer pPipelineLayout = stack.mallocLong(1);
         int err = vkCreatePipelineLayout(vkDevice, pipelineLayoutInfo, null, pPipelineLayout);

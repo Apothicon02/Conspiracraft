@@ -1,11 +1,14 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
 
-import static org.conspiracraft.graphics.CmdBuffer.cmdBuffer;
+import static org.conspiracraft.graphics.Graphics.globalUBO;
+import static org.conspiracraft.graphics.Pipeline.pipelineLayout;
+import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffer;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Pipeline.graphicsPipeline;
 import static org.conspiracraft.graphics.Swapchain.*;
@@ -21,6 +24,10 @@ public class Renderer {
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
+                vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
+                globalUBO.update(stack);
+                globalUBO.submit();
+
                 bindImageToDrawTo(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindImageDrawingTo(stack);
@@ -114,7 +121,7 @@ public class Renderer {
                 .imageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
                 .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
                 .storeOp(VK_ATTACHMENT_STORE_OP_STORE);
-        attachmentInfo.clearValue().color().float32(0, 0.5f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
+        attachmentInfo.clearValue().color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
         return attachmentInfo;
     }
     public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer) {

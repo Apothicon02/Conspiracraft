@@ -1,5 +1,6 @@
-package org.conspiracraft.graphics;
+package org.conspiracraft.graphics.buffers;
 
+import org.conspiracraft.graphics.Device;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandBuffer;
 import org.lwjgl.vulkan.VkCommandPoolCreateInfo;

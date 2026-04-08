@@ -1,4 +1,4 @@
-package org.conspiracraft.graphics;
+package org.conspiracraft.graphics.buffers;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -6,7 +6,7 @@ import org.lwjgl.vulkan.VkCommandBuffer;
 import org.lwjgl.vulkan.VkCommandBufferAllocateInfo;
 import org.lwjgl.vulkan.VkCommandBufferBeginInfo;
 
-import static org.conspiracraft.graphics.CmdBuffer.cmdPool;
+import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdPool;
 import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
