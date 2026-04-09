@@ -4,17 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed resizing.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ShaderStorageBuffer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/StagedBuffer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid5412.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/Buffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/Buffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/default.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/test.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -348,7 +352,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775671643813</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="- Updated dda shader.">
+      <option name="closed" value="true" />
+      <created>1775676836660</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1775676836660</updated>
+    </task>
+    <task id="LOCAL-00019" summary="- Fixed resizing.">
+      <option name="closed" value="true" />
+      <created>1775678815275</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1775678815275</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -371,7 +391,9 @@
     <MESSAGE value="- Progress." />
     <MESSAGE value="- Triangle!!!!" />
     <MESSAGE value="- Added global UBO." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added global UBO." />
+    <MESSAGE value="- Updated dda shader." />
+    <MESSAGE value="- Fixed resizing." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed resizing." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

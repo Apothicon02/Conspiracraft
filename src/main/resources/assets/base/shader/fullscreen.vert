@@ -1,9 +1,9 @@
-layout(set = 0, binding = 0) readonly uniform UniformBufferObject {
+layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
     vec4 skylight;
     int hdr;
-} ubo;
+} globalUbo;
 vec2 positions[3] = vec2[](
     vec2(0.0, -3),
     vec2(-3, 3),

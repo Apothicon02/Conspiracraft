@@ -1,9 +1,14 @@
 package org.conspiracraft.graphics;
 
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
+import org.conspiracraft.world.World;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 
+import java.lang.Math;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
@@ -13,6 +18,7 @@ import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Pipeline.graphicsPipeline;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
+import static org.conspiracraft.world.World.packPos;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK14.*;
 
@@ -20,10 +26,15 @@ public class Renderer {
     public static int imageIdx = 0;
     public static int frameIdx = 0;
     public static boolean firstImages = true;
+    public static boolean initialized = false;
     public static VkCommandBuffer currentCmdBuffer;
     public static void render() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
+                if (!initialized) {
+                    prepareTestScene();
+                    initialized = true;
+                }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
                 globalUBO.update(stack);
                 globalUBO.submit();
@@ -87,8 +98,8 @@ public class Renderer {
         vkCmdEndRendering(currentCmdBuffer);
         ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                0, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+                VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
+                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
     }
     public static void bindImageToDrawTo(MemoryStack stack) {
         VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer);
@@ -137,34 +148,35 @@ public class Renderer {
         return attachmentInfo;
     }
 
-//    public static Matrix4f iPos = new Matrix4f();
-//    public static Vector4f iColor = new Vector4f();
-//    public static int instances = 1536*1536;
-//    public static int size = 20*instances;
-//    public static int sizeBytes = (20*instances)*4;
-//    public static FloatBuffer testBuf = MemoryUtil.memAllocFloat(size);
-//    public static VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
-//    public static void prepareInstancedTestScene() {
-//        int i = 0;
-//        int max = 0;
-//        for (int x = 0; x < 1536; x++) {
-//            for (int z = 0; z < 1536; z++) {
-//                if (new Vector2i(x, z).distance(new Vector2i(768, 768)) < 768) {
-//                    max = Math.max(max, x);
-//                    double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
-//                    double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
-//                    double elevationMul = mountainNoise * elevationNoise;
-//                    double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
-//                    int y = (int) (detailNoise * Math.max(0.f, elevationMul));
-//                    float waterTint = Math.min(0.f, y * 0.05f);
-//                    if (y < 0) {
-//                        y *= -0.25f;
-//                    }
-//                    iPos.setTranslation(x, y, z).get(i * 20, testBuf);
-//                    (y < 1 ? iColor.set(0.15f, 0.75f - waterTint, 0.95f, 1.f) : (y < 2 ? iColor.set(0.95f * 0.97f, 0.93f * 0.97f, 0.85f * 0.97f, 1.f) : y < 3 ? iColor.set(0.95f, 0.93f, 0.85f, 1.f) : (iColor.set(0.5f, Utils.gradient(y, 3, 24, 0.6f, 0.95f), 0.5f, 1.f)))).get((i * 20) + 16, testBuf);
-//                    i++;
-//                }
-//            }
-//        }
-//    }
+    public static int size = World.size*World.height*World.size;
+    public static int sizeBytes = size*4;
+    public static VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
+    public static void prepareTestScene() {
+        long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get();
+        for (int x = 0; x < World.size; x++) {
+            for (int z = 0; z < World.size; z++) {
+                double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
+                double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
+                double elevationMul = mountainNoise * elevationNoise;
+                double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
+                int elevation = (int) (detailNoise * Math.max(0.f, elevationMul));
+                if (elevation < 0) {
+                    elevation *= -0.25f;
+                }
+                for (int y = elevation; y >= 0; y--) {
+                    MemoryUtil.memPutInt(basePtr+(packPos(x, y, z)*4L), y < 1 ? 1 : (y < 3 ? 2 : 3));
+                }
+            }
+        }
+        vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], bufferCopy);
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(Graphics.voxelSSBO.buffer.buffer[0])
+                .offset(0).size(sizeBytes);
+        vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
+    }
 }

@@ -9,8 +9,7 @@ import java.util.List;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.conspiracraft.graphics.buffers.BufferHelper.createBuffer;
-import static org.lwjgl.vulkan.VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-import static org.lwjgl.vulkan.VK10.vkMapMemory;
+import static org.lwjgl.vulkan.VK10.*;
 
 public class Buffer {
     public static List<Buffer> buffers = new ArrayList<>();
@@ -26,7 +25,8 @@ public class Buffer {
         pointer = PointerBuffer.allocateDirect(1);
         createBuffer(stack, bufferSize, usage, properties, buffer, memory);
         if ((properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0) {
-            vkMapMemory(vkDevice, memory[0], 0, bufferSize, 0, pointer);
+            int error = vkMapMemory(vkDevice, memory[0], 0, bufferSize, 0, pointer);
+            if (error != VK_SUCCESS) {throw new RuntimeException("vkMapMemory failed: " + error);}
         }
         buffers.addLast(this);
         Graphics.recreateDescriptors(stack);

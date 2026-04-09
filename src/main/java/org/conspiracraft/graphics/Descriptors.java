@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
 import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -54,21 +55,21 @@ public class Descriptors {
                         .pBufferInfo(bufInfo);
                 b++;
             }
-//            for (ShaderStorageBuffer buf : ShaderStorageBuffer.storageBuffers) {
-//                VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
-//                        .buffer(buf.buffer[0])
-//                        .offset(0)
-//                        .range(buf.size);
-//                descriptorWrites.get(b)
-//                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-//                        .dstSet(descriptorSets[i])
-//                        .dstBinding(b)
-//                        .dstArrayElement(0)
-//                        .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-//                        .descriptorCount(1)
-//                        .pBufferInfo(bufInfo);
-//                b++;
-//            }
+            for (ShaderStorageBuffer buf : ShaderStorageBuffer.storageBuffers) {
+                VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
+                        .buffer(buf.buffer.buffer[0])
+                        .offset(0)
+                        .range(buf.buffer.size);
+                descriptorWrites.get(b)
+                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                        .dstSet(descriptorSets[i])
+                        .dstBinding(b)
+                        .dstArrayElement(0)
+                        .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                        .descriptorCount(1)
+                        .pBufferInfo(bufInfo);
+                b++;
+            }
             vkUpdateDescriptorSets(vkDevice, descriptorWrites, null);
         }
     }
@@ -81,12 +82,12 @@ public class Descriptors {
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
-//        for (int i = 0; i < ShaderStorageBuffer.buffers.size(); i++) {
-//            poolSizes.get(b)
-//                    .type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-//                    .descriptorCount(FRAMES_IN_FLIGHT);
-//            b++;
-//        }
+        for (int i = 0; i < ShaderStorageBuffer.storageBuffers.size(); i++) {
+            poolSizes.get(b)
+                    .type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                    .descriptorCount(FRAMES_IN_FLIGHT);
+            b++;
+        }
         VkDescriptorPoolCreateInfo poolInfo = VkDescriptorPoolCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
                 .pPoolSizes(poolSizes)
@@ -108,14 +109,14 @@ public class Descriptors {
                     .stageFlags(UniformBuffer.uniformBuffers.get(i).stageFlags);
             b++;
         }
-//        for (int i = 0; i < ShaderStorageBuffer.buffers.size(); i++) {
-//            layoutBindings.get(b)
-//                    .binding(b)
-//                    .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-//                    .descriptorCount(1)
-//                    .stageFlags(ShaderStorageBuffer.buffers.get(i).stageFlags);
-//            b++;
-//        }
+        for (int i = 0; i < ShaderStorageBuffer.storageBuffers.size(); i++) {
+            layoutBindings.get(b)
+                    .binding(b)
+                    .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                    .descriptorCount(1)
+                    .stageFlags(ShaderStorageBuffer.storageBuffers.get(i).stageFlags);
+            b++;
+        }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
@@ -127,6 +128,6 @@ public class Descriptors {
         descriptorSetLayouts = new long[]{descriptorSetLayoutsBuf.get(0)};
     }
     public static int shaderBufferAmount() {
-        return UniformBuffer.buffers.size();//+ShaderStorageBuffer.buffers.size();
+        return UniformBuffer.uniformBuffers.size()+ShaderStorageBuffer.storageBuffers.size();
     }
 }
