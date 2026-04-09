@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
@@ -35,6 +36,9 @@ public class InputHandler {
 
             if (keyRelease(SDL_SCANCODE_F)) {
                 System.out.print(String.format("%.2f", fps)+"fps / "+String.format("%.2f", ms)+"ms\n");
+            }
+            if (keyRelease(SDL_SCANCODE_T)) {
+                Main.timeNs+=10000000000L;
             }
 
             MemoryUtil.memCopy(MemoryUtil.memAddress(keys), MemoryUtil.memAddress(prevKeys), keys.capacity());

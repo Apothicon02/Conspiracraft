@@ -2,6 +2,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
     vec4 skylight;
+    vec3 sun;
     int hdr;
 } globalUbo;
 layout(std430, set = 0, binding = 1) readonly buffer VoxelBuffer {
@@ -39,24 +40,39 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 sunColor = vec3(0);
+bool hasAtmosphere = true;
+vec3 sunsetColor = vec3(1, 0.65f, 0.25f); //vec3(0.65, 0.65f, 1)
+vec3 skyColor = vec3(0.36f, 0.54f, 1.2f); //vec3(0.56f, 0.56f, 0.7f)
+vec3 nightSkyColor = vec3(0.05f, 0.f, 0.225f); //vec3(0.56f, 0.56f, 0.7f)
+float skyWhiteline = 0.9f; //0.8
+float sunsetHeight = 1.5f; //1
+float skyDensity = 1.f; //0.66
+float sunBrightnessMul = 1.1f; //1
 vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
+    if (!hasAtmosphere) {
+        fogginess = 0.f;
+    }
     float ogY = ogPos.y;
-    float sunHeight = globalUbo.skylight.y/size;
+    float sunHeight = globalUbo.sun.y/size;
     float scattering = gradient(lightPos.y, ogY-63, ogY+437, 1.5f, -0.5f);
-    float sunDist = (distance(lightPos.xz, globalUbo.skylight.xz)/(size*1.5f));
+    float sunDist = (distance(lightPos.xz, globalUbo.sun.xz)/(size*1.5f));
     float adjustedTime = clamp((sunDist*abs(1-clamp(sunHeight, 0.05f, 0.5f)))+scattering, 0.f, 1.f);
     float thickness = gradient(lightPos.y, 128, 1500-max(0, sunHeight*1000), 0.33+(sunHeight/2), 1);
-    float sunSetness = min(1.f, max(abs(sunHeight*1.5f), adjustedTime));
+    float sunSetness = min(1.f, max(abs(sunHeight*sunsetHeight), adjustedTime));
     float whiteY = max(ogY, 200)-135.f;
-    float skyWhiteness = mix(max(0.33f, gradient(lightPos.y, (whiteY/4)+47, (whiteY/2)+436, 0, 0.9)), 0.9f, clamp(abs(1-sunSetness), 0, 1.f));
-    float sunBrightness = clamp(sunHeight+0.5, mix(0.f, 0.33f, skyWhiteness), 1.f);
-    lighting.rgb = max(vec3(0), lighting.rgb-(sunBrightness*lighting.a));
+    float skyWhiteness = mix(max(0.33f, gradient(lightPos.y, (whiteY/4)+47, (whiteY/2)+436, 0, skyWhiteline)), 0.9f, clamp(abs(1-sunSetness), 0, 1.f));
+    float sunBrightness = clamp(sunHeight+0.5, mix(-0.07f, 0.33f, skyWhiteness), 1);
     if (negateSun) {
         lighting.a = 0;
     }
-    float whiteness = isSky ? skyWhiteness : mix(0.9f, skyWhiteness, max(0, fogginess-0.8f)*5.f);
-    sunColor = mix(mix(vec3(1, 0.65f, 0.25f)*(1+((10*clamp(sunHeight, 0.f, 0.1f))*(15*min(0.5f, abs(1-sunBrightness))))), vec3(0.36f, 0.54f, 1.2f)*sunBrightness, sunSetness), vec3(sunBrightness), whiteness);
-    return vec4(max(lighting.rgb, min(mix(vec3(1), vec3(1, 0.95f, 0.85f), sunSetness/4), lighting.a*sunColor)).rgb, thickness);
+    float whiteness = (isSky ? skyWhiteness : mix(skyWhiteline, skyWhiteness, max(0, fogginess-0.8f)*5.f))*clamp(sunHeight+0.8f-(min(sunSetness, 0.2f)*4), 0.33f, 1);
+    sunColor = mix(mix(sunsetColor*(1+((10*clamp(sunHeight, 0.f, 0.1f))*(15*min(0.5f, abs(1-sunBrightness))))), mix(nightSkyColor, skyColor, clamp(sunHeight+0.5f, 0, 1))*sunBrightness, sunSetness), vec3(sunBrightness), whiteness);
+    sunColor = min(mix(vec3(1), vec3(1, 0.95f, 0.85f), sunSetness/4), lighting.a*sunColor);
+    if (!isSky && globalUbo.skylight.w >= 1.f) {
+        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
+    }
+    vec4 color = vec4(max(lighting.rgb, sunColor), thickness);
+    return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
 
 vec3 stepMask(vec3 sideDist) {
@@ -74,7 +90,7 @@ vec3 stepMask(vec3 sideDist) {
     return vec3(mask);
 }
 
-vec3 roundDir(vec3 dir) {
+vec3 roundVec(vec3 dir) {
     if (dir.x == 0.0f) {
         dir.x = 0.001f;
     }
@@ -89,11 +105,12 @@ vec3 roundDir(vec3 dir) {
 vec3 getDir(vec2 pos) {
     vec2 modifiedUV = (uv * 2.0) - 1.0;
     vec4 clipSpace = vec4((inverse(globalUbo.proj) * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
-    return roundDir(normalize((inverse(globalUbo.view)*clipSpace).xyz));
+    return roundVec(normalize((inverse(globalUbo.view)*clipSpace).xyz));
 }
 
 const float bevel = 0.125f;
 const float bevelMax = 1-bevel;
+const float bevelOffset = 0.5f+(bevel/2);
 
 void main() {
     vec4 color = vec4(0);
@@ -112,33 +129,33 @@ void main() {
         int voxel = voxelData.voxels[packPos(mapPos)];
         if (voxel > 0) {
             vec3 mini = ((mapPos-ogPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
-            float dist = max(mini.x, max(mini.y, mini.z))-0.00001f;
+            float dist = max(mini.x, max(mini.y, mini.z));
             vec3 exactPos = ogPos + ogDir * dist;
 
             normal = -mask*raySign; //flat normal
             if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
+                vec3 localPos = roundVec(fract(exactPos));
                 vec3 bevelPos = mapPos+0.5f;
-                vec3 localPos = fract(exactPos);
                 vec3 absFlatNorm = abs(normal);
                 if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
                     if (localPos.x > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(1, 0, 0))] == 0) { normal.x = 1; }
+                        if (voxelData.voxels[packPos(bevelPos+vec3(bevelOffset, 0, 0))] == 0) { normal.x = 1; }
                     } else if (localPos.x < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(1, 0, 0))] == 0) { normal.x = -1; }
+                        if (voxelData.voxels[packPos(bevelPos-vec3(bevelOffset, 0, 0))] == 0) { normal.x = -1; }
                     }
                 }
                 if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
                     if (localPos.z > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, 1))] == 0) { normal.z = 1; }
+                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, bevelOffset))] == 0) { normal.z = 1; }
                     } else if (localPos.z < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, 1))] == 0) { normal.z = -1; }
+                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, bevelOffset))] == 0) { normal.z = -1; }
                     }
                 }
                 if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
                     if (localPos.y > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 1, 0))] == 0) { normal.y = 1; }
+                        if (voxelData.voxels[packPos(bevelPos+vec3(0, bevelOffset, 0))] == 0) { normal.y = 1; }
                     } else if (localPos.y < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 1, 0))] == 0) { normal.y = -1; }
+                        if (voxelData.voxels[packPos(bevelPos-vec3(0, bevelOffset, 0))] == 0) { normal.y = -1; }
                     }
                 }
             }
@@ -162,7 +179,7 @@ void main() {
         lightPos = ogPos + ogDir * size;
     } else {
         vec4 skylight = globalUbo.skylight;
-        vec3 lighting = vec3(vec3(dot(normal, normalize(skylight.xyz))*0.38f)+(0.51f+(0.17f*skylight.a)));
+        vec3 lighting = (vec3(dot(normal, normalize(skylight.xyz))*0.38f/min(1, skylight.a*2))+(0.03f+(0.59f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         color.rgb *= lighting;
     }
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, mapPos)/(size*0.66f))-0.15f, 0.f, 1.f);

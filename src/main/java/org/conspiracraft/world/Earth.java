@@ -31,6 +31,8 @@ public class Earth extends WorldType {
     @Override
     public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 0.33f) : new Vector4f(sunPos, 1.f);}
     @Override
+    public Vector3f getSun() {return sunPos;}
+    @Override
     public void tick() {
         prevSunPos.set(sunPos);
         sunPos.set(0, World.size*2, 0);
