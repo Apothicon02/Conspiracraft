@@ -34,6 +34,22 @@ public class Renderer {
                 if (!initialized) {
                     prepareTestScene();
                     initialized = true;
+                } else {
+                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
+                    long offsetSize = (packPos(512, 196, 512)*4L);
+                    long offsetPtr = basePtr+offsetSize;
+                    VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(offsetSize).dstOffset(offsetSize).size(4);
+                    MemoryUtil.memPutInt(offsetPtr, 2);
+                    vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], bufferCopy);
+                    VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
+                            .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                            .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                            .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                            .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .buffer(Graphics.voxelSSBO.buffer.buffer[0])
+                            .offset(0).size(sizeBytes);
+                    vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
                 }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
                 globalUBO.update(stack);
@@ -150,9 +166,9 @@ public class Renderer {
 
     public static int size = World.size*World.height*World.size;
     public static int sizeBytes = size*4;
-    public static VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
     public static void prepareTestScene() {
-        long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get();
+        VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(sizeBytes);
+        long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
         for (int x = 0; x < World.size; x++) {
             for (int z = 0; z < World.size; z++) {
                 double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
@@ -163,8 +179,9 @@ public class Renderer {
                 if (elevation < 0) {
                     elevation *= -0.25f;
                 }
+                elevation += 63;
                 for (int y = elevation; y >= 0; y--) {
-                    MemoryUtil.memPutInt(basePtr+(packPos(x, y, z)*4L), y < 1 ? 1 : (y < 3 ? 2 : 3));
+                    MemoryUtil.memPutInt(basePtr+(packPos(x, y, z)*4L), y <= 63 ? 1 : (y < 66 ? 2 : 3));
                 }
             }
         }

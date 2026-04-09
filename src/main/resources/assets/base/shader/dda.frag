@@ -108,7 +108,37 @@ void main() {
     while (mapPos.x >= 0 && mapPos.x < size && mapPos.y >= 0 && mapPos.y < height && mapPos.z >= 0 && mapPos.z < size) {
         int voxel = voxelData.voxels[packPos(mapPos)];
         if (voxel > 0) {
-            normal = -mask*raySign;
+            vec3 mini = ((mapPos-ogPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
+            float dist = max(mini.x, max(mini.y, mini.z))-0.00001f;
+            vec3 exactPos = ogPos + ogDir * dist;
+
+            normal = -mask*raySign; //flat normal
+            if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
+                vec3 localPos = fract(exactPos);
+                vec3 absFlatNorm = abs(normal);
+                if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
+                    if (localPos.x > 0.875f) {
+                        if (voxelData.voxels[packPos(mapPos+vec3(1, 0, 0))] == 0) { normal.x = 1; }
+                    } else if (localPos.x < 0.125f) {
+                        if (voxelData.voxels[packPos(mapPos-vec3(1, 0, 0))] == 0) { normal.x = -1; }
+                    }
+                }
+                if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
+                    if (localPos.z > 0.875f) {
+                        if (voxelData.voxels[packPos(mapPos+vec3(0, 0, 1))] == 0) { normal.z = 1; }
+                    } else if (localPos.z < 0.125f) {
+                        if (voxelData.voxels[packPos(mapPos-vec3(0, 0, 1))] == 0) { normal.z = -1; }
+                    }
+                }
+                if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
+                    if (localPos.y > 0.875f) {
+                        if (voxelData.voxels[packPos(mapPos+vec3(0, 1, 0))] == 0) { normal.y = 1; }
+                    } else if (localPos.y < 0.125f) {
+                        if (voxelData.voxels[packPos(mapPos-vec3(0, 1, 0))] == 0) { normal.y = -1; }
+                    }
+                }
+            }
+
             if (voxel == 1) {
                 color = vec4(0.3, 0.35, 1.f, 1.f);
             } else if (voxel == 2) {
@@ -128,10 +158,10 @@ void main() {
         lightPos = ogPos + ogDir * size;
     } else {
         vec4 skylight = globalUbo.skylight;
-        vec3 lighting = vec3(vec3(dot(normal, normalize(skylight.xyz))*0.38f)+(0.68f*skylight.a));
+        vec3 lighting = vec3(vec3(dot(normal, normalize(skylight.xyz))*0.38f)+(0.51f+(0.17f*skylight.a)));
         color.rgb *= lighting;
     }
-    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, mapPos)/(size*0.66f)), 0.f, 1.f);
+    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, mapPos)/(size*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 0.9f), isSky, fogginess, false).rgb, fogginess);
 
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
