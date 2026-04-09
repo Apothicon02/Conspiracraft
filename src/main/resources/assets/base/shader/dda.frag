@@ -92,6 +92,9 @@ vec3 getDir(vec2 pos) {
     return roundDir(normalize((inverse(globalUbo.view)*clipSpace).xyz));
 }
 
+const float bevel = 0.125f;
+const float bevelMax = 1-bevel;
+
 void main() {
     vec4 color = vec4(0);
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
@@ -114,27 +117,28 @@ void main() {
 
             normal = -mask*raySign; //flat normal
             if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
+                vec3 bevelPos = mapPos+0.5f;
                 vec3 localPos = fract(exactPos);
                 vec3 absFlatNorm = abs(normal);
                 if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
-                    if (localPos.x > 0.875f) {
-                        if (voxelData.voxels[packPos(mapPos+vec3(1, 0, 0))] == 0) { normal.x = 1; }
-                    } else if (localPos.x < 0.125f) {
-                        if (voxelData.voxels[packPos(mapPos-vec3(1, 0, 0))] == 0) { normal.x = -1; }
+                    if (localPos.x > bevelMax) {
+                        if (voxelData.voxels[packPos(bevelPos+vec3(1, 0, 0))] == 0) { normal.x = 1; }
+                    } else if (localPos.x < bevel) {
+                        if (voxelData.voxels[packPos(bevelPos-vec3(1, 0, 0))] == 0) { normal.x = -1; }
                     }
                 }
                 if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
-                    if (localPos.z > 0.875f) {
-                        if (voxelData.voxels[packPos(mapPos+vec3(0, 0, 1))] == 0) { normal.z = 1; }
-                    } else if (localPos.z < 0.125f) {
-                        if (voxelData.voxels[packPos(mapPos-vec3(0, 0, 1))] == 0) { normal.z = -1; }
+                    if (localPos.z > bevelMax) {
+                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, 1))] == 0) { normal.z = 1; }
+                    } else if (localPos.z < bevel) {
+                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, 1))] == 0) { normal.z = -1; }
                     }
                 }
                 if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
-                    if (localPos.y > 0.875f) {
-                        if (voxelData.voxels[packPos(mapPos+vec3(0, 1, 0))] == 0) { normal.y = 1; }
-                    } else if (localPos.y < 0.125f) {
-                        if (voxelData.voxels[packPos(mapPos-vec3(0, 1, 0))] == 0) { normal.y = -1; }
+                    if (localPos.y > bevelMax) {
+                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 1, 0))] == 0) { normal.y = 1; }
+                    } else if (localPos.y < bevel) {
+                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 1, 0))] == 0) { normal.y = -1; }
                     }
                 }
             }
