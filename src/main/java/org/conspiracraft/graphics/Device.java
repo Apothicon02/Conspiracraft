@@ -64,9 +64,12 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES)
                 .synchronization2(true);
         sync2.pNext(dynamicRendering.address());
+        VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
+                .samplerAnisotropy(true);
         VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
                 .pQueueCreateInfos(queueInfo)
+                .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
                 .pNext(sync2.address());
 

@@ -2,8 +2,11 @@ package org.conspiracraft;
 
 import org.joml.Vector3f;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Utils {
@@ -14,6 +17,29 @@ public class Utils {
             data.append(s).append("\n");
         }
         return data.toString();
+    }
+    public static BufferedImage loadImage(String name) throws IOException {
+        InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("assets/base/"+name+".png");
+        BufferedInputStream bInputStream = new BufferedInputStream(inputStream);
+        ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
+        reader.setInput(ImageIO.createImageInputStream(bInputStream), true);
+        BufferedImage image = reader.read(0);
+        inputStream.close();
+        bInputStream.close();
+        return image;
+    }
+
+    public static ByteBuffer imageToBuffer(BufferedImage image) {
+        int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        ByteBuffer buffer = ByteBuffer.allocateDirect(pixels.length * 4);
+        for (int pixel : pixels) {
+            buffer.put((byte) ((pixel >> 16) & 0xFF));
+            buffer.put((byte) ((pixel >> 8) & 0xFF));
+            buffer.put((byte) (pixel & 0xFF));
+            buffer.put((byte) ((pixel >> 24) & 0xFF));
+        }
+        buffer.flip();
+        return buffer;
     }
     public static float mix(float min, float max, float factor) {
         return min * (1 - factor) + max * factor;

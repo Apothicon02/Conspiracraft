@@ -1,6 +1,7 @@
 package org.conspiracraft.graphics;
 
 import org.conspiracraft.Settings;
+import org.conspiracraft.graphics.textures.ImageHelper;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -8,7 +9,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.*;
-import static org.conspiracraft.graphics.ImageHelper.createImageView;
+import static org.conspiracraft.graphics.textures.ImageHelper.createImageView;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -123,7 +124,7 @@ public class Swapchain {
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
 
-        long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         depthImage = depthImageInfo[0];
         depthImageMemory = depthImageInfo[1];
     }

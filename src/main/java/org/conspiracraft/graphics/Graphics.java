@@ -4,6 +4,7 @@ import org.conspiracraft.graphics.buffers.CmdBuffer;
 import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
 import org.conspiracraft.graphics.buffers.ubos.GlobalUBO;
 import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
 import org.lwjgl.system.MemoryStack;
 
@@ -27,6 +28,7 @@ public class Graphics {
             Device.init(stack);
             Swapchain.init(stack);
             createBuffers(stack);
+            Textures.generate(stack);
             descriptors = new Descriptors(stack);
             CmdBuffer.init(stack);
             SyncObjects.init(stack);
@@ -38,7 +40,7 @@ public class Graphics {
     public static ShaderStorageBuffer voxelSSBO;
     public void createBuffers(MemoryStack stack) {
         globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, globalUBO);
-        voxelSSBO = new ShaderStorageBuffer(stack, World.size*World.height*World.size*4,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        voxelSSBO = new ShaderStorageBuffer(stack, World.size*World.height*World.size*4,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, false);
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}

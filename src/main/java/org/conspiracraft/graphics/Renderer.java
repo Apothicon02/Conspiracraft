@@ -1,14 +1,19 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
+import org.conspiracraft.graphics.textures.ImageHelper;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.Math;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
@@ -28,11 +33,22 @@ public class Renderer {
     public static boolean firstImages = true;
     public static boolean initialized = false;
     public static VkCommandBuffer currentCmdBuffer;
-    public static void render() {
+    public static void render() throws IOException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 if (!initialized) {
                     prepareTestScene();
+                    BufferedImage atlasImage = Utils.loadImage("generic/texture/atlas");
+                    for (int x = 0; x < Textures.atlas.width; x++) {
+                        for (int y = 0; y < 1024; y++) {
+                            Color color = new Color(atlasImage.getRGB(x, y), true);
+                            //collisionData[(x * 1024) + y] = color.getAlpha() != 0;
+                        }
+                    }
+                    ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
+
+//                    glBindTexture(GL_TEXTURE_3D, Textures.atlas.id);
+//                    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, Textures.atlas.width, Textures.atlas.height, ((Texture3D) Textures.atlas).depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(atlasImage));
                     initialized = true;
                 } else {
                     long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);

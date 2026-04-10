@@ -11,8 +11,8 @@ public class ShaderStorageBuffer extends StagedBuffer {
     public static List<ShaderStorageBuffer> storageBuffers = new ArrayList<>();
 
     public int stageFlags;
-    public ShaderStorageBuffer(MemoryStack stack, int bufferSize, int stageFlags) {
-        super(stack, bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT );
+    public ShaderStorageBuffer(MemoryStack stack, int bufferSize, int stageFlags, boolean temporary) {
+        super(stack, bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, temporary);
         this.stageFlags = stageFlags;
         storageBuffers.add(this);
     }

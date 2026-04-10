@@ -18,7 +18,7 @@ public class Buffer {
     public long[] buffer;
     public long[] memory;
     public PointerBuffer pointer;
-    public Buffer(MemoryStack stack, int bufferSize, int usage, int properties) {
+    public Buffer(MemoryStack stack, int bufferSize, int usage, int properties, boolean temporary) {
         size = bufferSize;
         buffer = new long[1];
         memory = new long[1];
@@ -28,7 +28,9 @@ public class Buffer {
             int error = vkMapMemory(vkDevice, memory[0], 0, bufferSize, 0, pointer);
             if (error != VK_SUCCESS) {throw new RuntimeException("vkMapMemory failed: " + error);}
         }
-        buffers.addLast(this);
-        Graphics.recreateDescriptors(stack);
+        if (!temporary) {
+            buffers.addLast(this);
+            Graphics.recreateDescriptors(stack);
+        }
     }
 }

@@ -1,16 +1,50 @@
-package org.conspiracraft.graphics;
+package org.conspiracraft.graphics.textures;
 
+import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.buffers.Buffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
+import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.physicalDevice;
 import static org.conspiracraft.graphics.Device.vkDevice;
+import static org.lwjgl.system.MemoryUtil.memAddress;
+import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK13.*;
 
 public class ImageHelper {
+    public static void fillImage(MemoryStack stack, Texture texture, ByteBuffer data) {
+        data.rewind();
+        Buffer stagingBuffer = new Buffer(stack, data.remaining(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+        memCopy(memAddress(data), stagingBuffer.pointer.get(0), data.remaining());
+
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+
+        VkBufferImageCopy.Buffer imageCopy = VkBufferImageCopy.calloc(1, stack)
+                .bufferOffset(0)
+                .bufferRowLength(0)
+                .bufferImageHeight(0)
+                .imageSubresource(s -> s
+                        .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                        .mipLevel(0)
+                        .baseArrayLayer(0)
+                        .layerCount(1))
+                .imageOffset(o -> o.set(0, 0, 0))
+                .imageExtent(e -> e.set(texture.width, texture.height, texture instanceof Texture3D texture3D ? texture3D.depth : 1));
+        vkCmdCopyBufferToImage(Renderer.currentCmdBuffer, stagingBuffer.buffer[0], texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
+
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
+                VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+    }
+
     public static long createImageView(MemoryStack stack, boolean threeDimensional, long image, int format, int channels) {
         VkImageViewCreateInfo createInfo = VkImageViewCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO)
@@ -41,12 +75,12 @@ public class ImageHelper {
         return pView.get(0);
     }
 
-    public static long[] createImage(MemoryStack stack, int width, int height, int format, int tiling, int usage, int memoryProperties) {
+    public static long[] createImage(MemoryStack stack, int width, int height, int depth, int format, int tiling, int usage, int memoryProperties) {
         VkImageCreateInfo imageInfo = VkImageCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO)
-                .imageType(VK_IMAGE_TYPE_2D)
+                .imageType(depth > 1 ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D)
                 .format(format)
-                .extent(e -> e.width(width).height(height).depth(1))
+                .extent(e -> e.width(width).height(height).depth(depth))
                 .mipLevels(1)
                 .arrayLayers(1)
                 .samples(VK_SAMPLE_COUNT_1_BIT)

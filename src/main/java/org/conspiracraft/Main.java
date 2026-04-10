@@ -5,6 +5,7 @@ import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class Main {
     public static double timeMul = 1;
     public static double interpolationTime = 0;
     public static long timeNs = 0;
-    static void main() {
+    static void main() throws IOException {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();

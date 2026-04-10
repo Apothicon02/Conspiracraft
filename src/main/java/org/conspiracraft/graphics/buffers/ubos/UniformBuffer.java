@@ -12,7 +12,7 @@ public class UniformBuffer extends Buffer {
     public UBO ubo;
     public int stageFlags;
     public UniformBuffer(MemoryStack stack, int bufferSize, int usage, int properties, int stageFlags, UBO ubo) {
-        super(stack, bufferSize, usage, properties);
+        super(stack, bufferSize, usage, properties, false);
         this.stageFlags = stageFlags;
         this.ubo = ubo;
         uniformBuffers.addLast(this);

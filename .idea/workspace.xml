@@ -5,9 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid18252.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid6876.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Texture.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Texture3D.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/texture/atlas.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/ImageHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/ImageHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Swapchain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Swapchain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/Buffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/Buffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ShaderStorageBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ShaderStorageBuffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/StagedBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/StagedBuffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/UniformBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/UniformBuffer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,31 +108,33 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Conspiracraft [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;vulkan&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shader&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
+    "Gradle.Conspiracraft [build].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.Terraflat [:Main.main()].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "vulkan",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft/graphics/textures",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\graphics\textures" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic\texture" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shader" />
       <recent name="C:\Users\tyler\IdeaProjects\Conspiracraft\src\main\resources\assets\base\shader" />
     </key>
@@ -124,11 +142,12 @@
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.conspiracraft.graphics.textures" />
       <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Main">
+  <component name="RunManager" selected="Gradle.Conspiracraft [build]">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.conspiracraft.Main" />
       <module name="Conspiracraft.main" />
@@ -365,7 +384,31 @@
       <option name="project" value="LOCAL" />
       <updated>1775743627005</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="- Added bevelled normals.">
+      <option name="closed" value="true" />
+      <created>1775764987105</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1775764987105</updated>
+    </task>
+    <task id="LOCAL-00022" summary="- Bevelled normals are now adjustable.">
+      <option name="closed" value="true" />
+      <created>1775766175021</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1775766175021</updated>
+    </task>
+    <task id="LOCAL-00023" summary="- Fixed night.">
+      <option name="closed" value="true" />
+      <created>1775769712505</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1775769712505</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -391,7 +434,10 @@
     <MESSAGE value="- Updated dda shader." />
     <MESSAGE value="- Fixed resizing." />
     <MESSAGE value="- Added ssbos." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added ssbos." />
+    <MESSAGE value="- Added bevelled normals." />
+    <MESSAGE value="- Bevelled normals are now adjustable." />
+    <MESSAGE value="- Fixed night." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed night." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
