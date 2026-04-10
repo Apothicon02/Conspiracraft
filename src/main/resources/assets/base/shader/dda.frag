@@ -5,20 +5,30 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
 } globalUbo;
+
 layout(std430, set = 0, binding = 1) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
-layout(location = 0) in vec2 uv;
-
-layout(location = 0) out vec4 outColor;
-
 const int size = 1024;
 const int height = 320;
 const vec3 worldSize = vec3(size, height, size);
-
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
+
+layout(set = 0, binding = 2) uniform sampler3D atlas;
+const int blockSize = 8;
+const int blockTexSize = blockSize;
+vec4 sampleAtlas(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
+//    if ((bX & 1) != 0) { x += blockSize; }
+//    if ((bY & 1) != 0) { y += blockSize; }
+//    if ((bZ & 1) != 0) { z += blockSize; }
+    return texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
+}
+
+layout(location = 0) in vec2 uv;
+
+layout(location = 0) out vec4 outColor;
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
@@ -128,11 +138,12 @@ void main() {
     while (mapPos.x >= 0 && mapPos.x < size && mapPos.y >= 0 && mapPos.y < height && mapPos.z >= 0 && mapPos.z < size) {
         int voxel = voxelData.voxels[packPos(mapPos)];
         if (voxel > 0) {
+            normal = -mask*raySign; //flat normal
             vec3 mini = ((mapPos-ogPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float dist = max(mini.x, max(mini.y, mini.z));
             vec3 exactPos = ogPos + ogDir * dist;
+            vec3 voxelPos = clamp(fract(exactPos-0.01f)*8, 0.01f, 7.99f);
 
-            normal = -mask*raySign; //flat normal
             if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
                 vec3 localPos = roundVec(fract(exactPos));
                 vec3 bevelPos = mapPos+0.5f;
@@ -160,12 +171,9 @@ void main() {
                 }
             }
 
+            color = vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(mapPos.x), int(mapPos.y), int(mapPos.z), voxel, 0).rgb, 1);
             if (voxel == 1) {
                 color = vec4(0.3, 0.35, 1.f, 1.f);
-            } else if (voxel == 2) {
-                color = vec4(0.95, 0.93, 0.85f, 1.f);
-            } else {
-                color = vec4(0.5, 0.95, 0.5f, 1.f);
             }
             break;
         }

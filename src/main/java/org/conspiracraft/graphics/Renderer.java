@@ -197,7 +197,7 @@ public class Renderer {
                 }
                 elevation += 63;
                 for (int y = elevation; y >= 0; y--) {
-                    MemoryUtil.memPutInt(basePtr+(packPos(x, y, z)*4L), y <= 63 ? 1 : (y < 66 ? 2 : 3));
+                    MemoryUtil.memPutInt(basePtr+(packPos(x, y, z)*4L), y <= 63 ? 1 : (y < 66 ? 23 : 2));
                 }
             }
         }
