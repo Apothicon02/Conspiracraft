@@ -83,7 +83,7 @@ public class Descriptors {
                         .dstSet(descriptorSets[i])
                         .dstBinding(b)
                         .dstArrayElement(0)
-                        .descriptorType(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
+                        .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                         .descriptorCount(1)
                         .pImageInfo(imageInfo);
                 b++;
@@ -108,7 +108,7 @@ public class Descriptors {
         }
         for (int i = 0; i < textures.size(); i++) {
             poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
+                    .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
@@ -144,7 +144,7 @@ public class Descriptors {
         for (int i = 0; i < textures.size(); i++) {
             layoutBindings.get(b)
                     .binding(b)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
+                    .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(1)
                     .stageFlags(VK_SHADER_STAGE_FRAGMENT_BIT);
             b++;
