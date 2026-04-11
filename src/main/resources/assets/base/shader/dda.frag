@@ -5,14 +5,20 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
 } globalUbo;
-
+struct ChunkStruct {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+};
 layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
-    int[] chunks;
+    ChunkStruct[] chunks;
 } chunkData;
 layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
-const int size = 4096;
+const int size = 1024;
 const int height = 320;
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
@@ -32,29 +38,24 @@ int getBlockData(int x, int y, int z) {
     if (chunkPos != prevBlockChunkPos) {
         prevBlockChunkPos = chunkPos;
         int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        blockPaletteInfo = ivec4(chunkData.chunks[condensedChunkPos*5], chunkData.chunks[(condensedChunkPos*5)+1], chunkData.chunks[(condensedChunkPos*5)+2], chunkData.chunks[(condensedChunkPos*5)+3]);
+        ChunkStruct str = chunkData.chunks[condensedChunkPos];// ivec4(chunkData.chunks[condensedChunkPos*5], chunkData.chunks[(condensedChunkPos*5)+1], chunkData.chunks[(condensedChunkPos*5)+2], chunkData.chunks[(condensedChunkPos*5)+3]);
+        blockPaletteInfo = ivec4(str.a, str.b, str.c, str.d);
         blockValuesPerInt = 32/blockPaletteInfo.z;
 
         int intIndex  = condensedLocalPos/blockValuesPerInt;
         int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
 
-        int paletteBase = blockPaletteInfo.x;
-        int packedBase  = blockPaletteInfo.x + blockPaletteInfo.y;
-        int idxPacked  = packedBase + intIndex;
-        if (idxPacked < 0 || idxPacked >= 250000000) return 0;
-
-        int key = (voxelData.voxels[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+        int index = blockPaletteInfo.x+blockPaletteInfo.y+intIndex;
+        if (index < 0 || index >= 250000000) return 0;
+        int key = (voxelData.voxels[index] >> bitIndex) & blockPaletteInfo.w;
         return voxelData.voxels[blockPaletteInfo.x+key];
     } else {
         int intIndex  = condensedLocalPos/blockValuesPerInt;
         int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
 
-        int paletteBase = blockPaletteInfo.x;
-        int packedBase  = blockPaletteInfo.x + blockPaletteInfo.y;
-        int idxPacked  = packedBase + intIndex;
-        if (idxPacked < 0 || idxPacked >= 250000000) return 0;
-
-        int key = (voxelData.voxels[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+        int index = blockPaletteInfo.x+blockPaletteInfo.y+intIndex;
+        if (index < 0 || index >= 250000000) return 0;
+        int key = (voxelData.voxels[index] >> bitIndex) & blockPaletteInfo.w;
         return voxelData.voxels[blockPaletteInfo.x+key];
     }
 }
