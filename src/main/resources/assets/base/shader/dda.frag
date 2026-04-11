@@ -30,8 +30,11 @@ const int heightChunks = height / chunkSize;
 const int lodSize = 4;
 const int sizeLods = size / lodSize;
 const int heightLods = height / lodSize;
+int packLodPos(int x, int y, int z) {
+    return x+y*sizeLods+z*sizeLods*heightLods;
+}
 int packLodPos(ivec3 pos) {
-    return pos.x+pos.y*sizeLods+pos.z*sizeLods*heightLods;
+    return packLodPos(pos.x, pos.y, pos.z);
 }
 int64_t getLod(ivec3 lodPos) {
     return int64_t(lodData.lods[packLodPos(lodPos)]);
@@ -269,14 +272,20 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
             if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) {
                 stage = 0;
             } else {
-                blockPos = lodWorldPos+blockRayPos;
-                ivec2 voxel = getBlock(blockPos);
-                if (voxel.x > 0) {
-                    normal = -blockMask*blockSign; //flat normal
-                    vec3 voxelPos = clamp(fract(calculateExactPos()-0.01f)*8, 0.01f, 7.99f);
-                    normal = bevelNormal(normal);
+                int bitIdx = (int(blockRayPos.x) % lodSize) + (int(blockRayPos.y) % lodSize) * lodSize + (int(blockRayPos.z) % lodSize) * lodSize * lodSize;
+                int64_t mask = int64_t(1) << bitIdx;
+                if ((lod & mask) != 0) {
+                    blockPos = lodWorldPos+blockRayPos;
+                    normal = -blockMask*blockSign;//flat normal
                     lightPos = blockPos;
-                    return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), voxel.x, voxel.y).rgb, 1);
+                    ivec2 voxel = getBlock(blockPos);
+                    if (voxel.x > 0) {
+                        normal = -blockMask*blockSign;//flat normal
+                        vec3 voxelPos = clamp(fract(calculateExactPos()-0.01f)*8, 0.01f, 7.99f);
+                        normal = bevelNormal(normal);
+                        lightPos = blockPos;
+                        return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), voxel.x, voxel.y).rgb, 1);
+                    }
                 }
             }
         }
