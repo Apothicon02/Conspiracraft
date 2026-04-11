@@ -106,8 +106,11 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
     return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
 }
 
+const int renderDistance = 2048;
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
+vec3 ogRayPos = vec3(0);
+vec3 ogRayDir = vec3(0);
 vec3 sunColor = vec3(0);
 bool hasAtmosphere = true;
 vec3 sunsetColor = vec3(1, 0.65f, 0.25f); //vec3(0.65, 0.65f, 1)
@@ -122,9 +125,10 @@ vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess,
         fogginess = 0.f;
     }
     float ogY = ogPos.y;
-    float sunHeight = globalUbo.sun.y/size;
+    vec3 relativeSun = vec3(ogPos.x, 0, ogPos.z)+(globalUbo.sun*(1000/worldSize));
+    float sunHeight = relativeSun.y/size;
     float scattering = gradient(lightPos.y, ogY-63, ogY+437, 1.5f, -0.5f);
-    float sunDist = (distance(lightPos.xz, globalUbo.sun.xz)/(size*1.5f));
+    float sunDist = (distance(lightPos.xz, relativeSun.xz)/1500);
     float adjustedTime = clamp((sunDist*abs(1-clamp(sunHeight, 0.05f, 0.5f)))+scattering, 0.f, 1.f);
     float thickness = gradient(lightPos.y, 128, 1500-max(0, sunHeight*1000), 0.33+(sunHeight/2), 1);
     float sunSetness = min(1.f, max(abs(sunHeight*sunsetHeight), adjustedTime));
@@ -216,14 +220,18 @@ vec3 getDir(vec2 pos) {
 vec3 blockSign = vec3(0);
 vec3 blockDist = vec3(0);
 vec3 calculateExactPos() {
-    vec3 mini = ((blockPos-ogPos) + 0.5 - 0.5*vec3(blockSign))*blockDist;
+    vec3 mini = ((blockPos-ogRayPos) + 0.5 - 0.5*vec3(blockSign))*blockDist;
     float dist = max(mini.x, max(mini.y, mini.z));
-    exactPos = ogPos + ogDir * dist;
+    exactPos = ogRayPos + ogRayDir * dist;
     return exactPos;
 }
 vec3 lightPos = vec3(0);
+vec3 flatNormal = vec3(0);
 vec3 normal = vec3(0);
-vec4 dda(vec3 rayPos, vec3 rayDir) {
+ivec2 block = ivec2(0);
+vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
+    ogRayPos = rayPos;
+    ogRayDir = rayDir;
     int stage = 2;
 
     vec3 chunkStartPos = rayPos/chunkSize;
@@ -248,7 +256,9 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
     vec3 blockRayPos = vec3(0);
     vec3 blockSideDist = vec3(0);
     vec3 blockMask = vec3(0);
-    while (true) {
+
+    exactPos = ogRayPos;
+    while (distance(exactPos, ogRayPos) < renderDistance) {
         bool stepAnything = true;
         if (stage == 2) {
             if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) {break;}
@@ -304,15 +314,13 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
                 int64_t mask = int64_t(1) << bitIdx;
                 if ((lod & mask) != 0) {
                     blockPos = lodWorldPos+blockRayPos;
-                    normal = -blockMask*blockSign;//flat normal
-                    lightPos = blockPos;
-                    ivec2 voxel = getBlock(blockPos);
-                    if (voxel.x > 0) {
-                        normal = -blockMask*blockSign;//flat normal
+                    block = getBlock(blockPos);
+                    if (block.x > 0) {
+                        flatNormal = -blockMask*blockSign;//flat normal
                         vec3 voxelPos = clamp(fract(calculateExactPos()-0.01f)*8, 0.01f, 7.99f);
-                        normal = bevelNormal(normal);
+                        normal = bevelNormal(flatNormal);
                         lightPos = blockPos;
-                        return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), voxel.x, voxel.y).rgb, 1);
+                        return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), block.x, block.y).rgb, 1);
                     }
                 }
             }
@@ -322,10 +330,12 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
                 chunkMask = stepMask(chunkSideDist);
                 chunkPos += chunkMask * chunkSign;
                 chunkSideDist += chunkMask * chunkSign * chunkDist;
+                exactPos = chunkPos*chunkSize;
             } if (stage == 1) {
                 lodMask = stepMask(lodSideDist);
                 lodRayPos += lodMask * lodSign;
                 lodSideDist += lodMask * lodSign * lodDist;
+                exactPos = chunkWorldPos+(lodRayPos*lodSize);
             } else if (stage == 0) {
                 blockMask = stepMask(blockSideDist);
                 blockRayPos += blockMask * blockSign;
@@ -340,17 +350,34 @@ void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
     ogDir = getDir(uv);
-    vec4 color = dda(ogPos, ogDir);
+    vec4 color = dda(ogPos, ogDir, true);
+    vec3 finalLightPos = lightPos;
     bool isSky = color.a < 1;
     if (isSky) {
-        lightPos = ogPos + ogDir * size;
+        finalLightPos = ogPos + ogDir * renderDistance;
     } else {
         vec4 skylight = globalUbo.skylight;
         vec3 lighting = (vec3(dot(normal, normalize(skylight.xyz))*0.38f/min(1, skylight.a*2))+(0.03f+(0.59f*skylight.a)))*(0.05f+(skylight.a*0.95f));
+        vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
+        vec3 primaryHitPos = exactPos+(flatNormal/64);
+        vec3 primaryFlatNormal = flatNormal;
+        ivec2 primaryBlock = block;
+        vec4 shadowColor = dda(primaryHitPos, sunDir, false);
+        if (shadowColor.a > 0.0f) {
+            lighting *= 0.5f;
+        }
+        vec3 reflectDir = reflect(ogDir, primaryFlatNormal);
+        if (primaryBlock.x == 1) {
+            vec4 reflectColor = dda(primaryHitPos, reflectDir, false);
+            if (reflectColor.a < 1.f) {
+                reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
+            }
+            color.rgb = mix(color.rgb, reflectColor.rgb, 0.85f);
+        }
         color.rgb *= lighting;
     }
-    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, lightPos)/(size*0.66f))-0.15f, 0.f, 1.f);
-    color.rgb = mix(color.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 0.9f), isSky, fogginess, false).rgb, fogginess);
+    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, finalLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+    color.rgb = mix(color.rgb, getLightingColor(finalLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
 
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
     if (globalUbo.hdr == 1) {
