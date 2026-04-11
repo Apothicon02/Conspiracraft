@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed lods.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Optimized dda.">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -472,7 +472,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775938260696</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="- Optimized dda.">
+      <option name="closed" value="true" />
+      <created>1775938702012</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1775938702012</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -480,7 +488,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
     <MESSAGE value="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names." />
     <MESSAGE value="- Added preferred sdr format." />
     <MESSAGE value="- Added frames-in-flight." />
@@ -505,7 +512,8 @@
     <MESSAGE value="- Extracted dda to its own method." />
     <MESSAGE value="- Wip lods." />
     <MESSAGE value="- Fixed lods." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed lods." />
+    <MESSAGE value="- Optimized dda." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Optimized dda." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

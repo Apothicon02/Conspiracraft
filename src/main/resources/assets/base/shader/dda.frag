@@ -6,10 +6,10 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
 } globalUbo;
 struct ChunkStruct {
-    int a;
-    int b;
-    int c;
-    int d;
+    int pointer;
+    int paletteSize;
+    int bitsPerValue;
+    int valueMask;
 };
 layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
     ChunkStruct[] chunks;
@@ -21,7 +21,7 @@ layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
 layout(std430, set = 0, binding = 3) readonly buffer LODBuffer {
     int64_t[] lods;
 } lodData;
-const int size = 1024;
+const int size = 4096;
 const int height = 320;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
@@ -43,35 +43,29 @@ int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
 ivec3 prevBlockChunkPos = ivec3(-1);
-ivec4 blockPaletteInfo = ivec4(-1);
+ChunkStruct chunk = ChunkStruct(0, 0, 0, 0);
 int blockValuesPerInt = -1;
+void updateChunkData(ivec3 chunkPos) {
+    prevBlockChunkPos = chunkPos;
+    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    chunk = chunkData.chunks[condensedChunkPos];
+    blockValuesPerInt = 32/chunk.bitsPerValue;
+}
+void updateChunkData(int x, int y, int z) {
+    updateChunkData(ivec3(x, y, z) >> 4);
+}
 int getBlockData(int x, int y, int z) {
-    ivec3 chunkPos = ivec3(x, y, z) >> 4;
+    updateChunkData(x, y, z);
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    if (chunkPos != prevBlockChunkPos) {
-        prevBlockChunkPos = chunkPos;
-        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        ChunkStruct str = chunkData.chunks[condensedChunkPos];
-        blockPaletteInfo = ivec4(str.a, str.b, str.c, str.d);
-        blockValuesPerInt = 32/blockPaletteInfo.z;
+    int intIndex  = condensedLocalPos/blockValuesPerInt;
+    int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * chunk.bitsPerValue;
 
-        int intIndex  = condensedLocalPos/blockValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
-
-        int index = blockPaletteInfo.x+blockPaletteInfo.y+intIndex;
-        if (index < 0 || index >= 250000000) return 0;
-        int key = (voxelData.voxels[index] >> bitIndex) & blockPaletteInfo.w;
-        return voxelData.voxels[blockPaletteInfo.x+key];
-    } else {
-        int intIndex  = condensedLocalPos/blockValuesPerInt;
-        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
-
-        int index = blockPaletteInfo.x+blockPaletteInfo.y+intIndex;
-        if (index < 0 || index >= 250000000) return 0;
-        int key = (voxelData.voxels[index] >> bitIndex) & blockPaletteInfo.w;
-        return voxelData.voxels[blockPaletteInfo.x+key];
-    }
+    int index = chunk.pointer+chunk.paletteSize+intIndex;
+    if (index < 0 || index >= 250000000) return 0;
+    
+    int key = (voxelData.voxels[index] >> bitIndex) & chunk.valueMask;
+    return voxelData.voxels[chunk.pointer+key];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -230,13 +224,23 @@ vec3 calculateExactPos() {
 vec3 lightPos = vec3(0);
 vec3 normal = vec3(0);
 vec4 dda(vec3 rayPos, vec3 rayDir) {
-    int stage = 0;
-    vec3 lodStartPos = rayPos/lodSize;
-    vec3 lodPos = floor(lodStartPos);
-    vec3 lodSign = sign(rayDir);
-    vec3 lodDist = 1.0/rayDir;
-    vec3 lodSideDist = ((lodPos - lodStartPos) + 0.5 + lodSign * 0.5) * lodDist;
-    vec3 lodMask = stepMask(lodSideDist);
+    int stage = 2;
+
+    vec3 chunkStartPos = rayPos/chunkSize;
+    vec3 chunkPos = floor(chunkStartPos);
+    vec3 chunkSign = sign(rayDir);
+    vec3 chunkDist = 1.0/rayDir;
+    vec3 chunkSideDist = ((chunkPos - chunkStartPos) + 0.5 + chunkSign * 0.5) * chunkDist;
+    vec3 chunkMask = stepMask(chunkSideDist);
+    vec3 chunkWorldPos = vec3(0);
+
+    vec3 lodStartPos = vec3(0);
+    vec3 lodRayPos = vec3(0);
+    vec3 lodPos = vec3(0);
+    vec3 lodSign = vec3(0);
+    vec3 lodDist = vec3(0);
+    vec3 lodSideDist = vec3(0);
+    vec3 lodMask = vec3(0);
     int64_t lod = 0;
     vec3 lodWorldPos = vec3(0);
 
@@ -246,31 +250,55 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
     vec3 blockMask = vec3(0);
     while (true) {
         bool stepAnything = true;
-        if (stage == 0) {
-            if (lodPos.x < 0 || lodPos.x >= sizeLods || lodPos.y < 0 || lodPos.y >= heightLods || lodPos.z < 0 || lodPos.z >= sizeLods) {break;}
-            lod = getLod(ivec3(lodPos));
-            if (lod != 0) {
+        if (stage == 2) {
+            if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) {break;}
+            updateChunkData(ivec3(chunkPos));
+            if (chunk.paletteSize > 1) {
                 stage = 1;
                 stepAnything = false;
 
-                lodWorldPos = lodPos*lodSize;
-                vec3 t0 = (lodWorldPos - rayPos) * (1.0 / rayDir);
-                vec3 t1 = (lodWorldPos + lodSize - rayPos) * (1.0 / rayDir);
-                vec3 tMin = min(t0, t1);
-                float tEnter = max(tMin.x, max(tMin.y, tMin.z));
-                vec3 intersect = rayPos + rayDir * tEnter;
-                blockStartPos = intersect - lodWorldPos;
+                chunkWorldPos = chunkPos*chunkSize;
+                vec3 minPos = (chunkWorldPos - rayPos) * (1.0 / rayDir);
+                vec3 maxPos = (chunkWorldPos + chunkSize - rayPos) * (1.0 / rayDir);
+                vec3 entranceDist = min(minPos, maxPos);
+                float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+                vec3 intersect = rayPos + rayDir * entrancePos;
+                lodStartPos = (intersect - chunkWorldPos)/lodSize;
 
-                blockRayPos = floor(clamp(blockStartPos, vec3(0.0001f), vec3(3.9999f)));
-                blockSign = sign(rayDir);
-                blockDist = 1.0/rayDir;
-                blockSideDist = ((blockRayPos - blockStartPos) + 0.5 + blockSign * 0.5) * blockDist;
-                blockMask = lodMask;
-                //return vec4(blockRayPos/4, 1);//vec4((lodWorldPos+blockRayPos)/worldSize, 1);
+                lodRayPos = floor(clamp(lodStartPos, vec3(0.0001f), vec3(3.9999f)));
+                lodSign = sign(rayDir);
+                lodDist = 1.0/rayDir;
+                lodSideDist = ((lodRayPos - lodStartPos) + 0.5 + lodSign * 0.5) * lodDist;
+                lodMask = chunkMask;
             }
         } else if (stage == 1) {
+            if (lodRayPos.x < 0 || lodRayPos.x >= lodSize || lodRayPos.y < 0 || lodRayPos.y >= lodSize || lodRayPos.z < 0 || lodRayPos.z >= lodSize) {
+                stage = 2;
+            } else {
+                lodPos = (chunkWorldPos/lodSize)+lodRayPos;
+                lod = getLod(ivec3(lodPos));
+                if (lod != 0) {
+                    stage = 0;
+                    stepAnything = false;
+
+                    lodWorldPos = lodPos*lodSize;
+                    vec3 minPos = (lodWorldPos - rayPos) * (1.0 / rayDir);
+                    vec3 maxPos = (lodWorldPos + lodSize - rayPos) * (1.0 / rayDir);
+                    vec3 entranceDist = min(minPos, maxPos);
+                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+                    vec3 intersect = rayPos + rayDir * entrancePos;
+                    blockStartPos = intersect - lodWorldPos;
+
+                    blockRayPos = floor(clamp(blockStartPos, vec3(0.0001f), vec3(3.9999f)));
+                    blockSign = sign(rayDir);
+                    blockDist = 1.0/rayDir;
+                    blockSideDist = ((blockRayPos - blockStartPos) + 0.5 + blockSign * 0.5) * blockDist;
+                    blockMask = lodMask;
+                }
+            }
+        } else if (stage == 0) {
             if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) {
-                stage = 0;
+                stage = 1;
             } else {
                 int bitIdx = (int(blockRayPos.x) % lodSize) + (int(blockRayPos.y) % lodSize) * lodSize + (int(blockRayPos.z) % lodSize) * lodSize * lodSize;
                 int64_t mask = int64_t(1) << bitIdx;
@@ -290,11 +318,15 @@ vec4 dda(vec3 rayPos, vec3 rayDir) {
             }
         }
         if (stepAnything) { //dont step if it just went to a finer detail
-            if (stage == 0) {
+            if (stage == 2) {
+                chunkMask = stepMask(chunkSideDist);
+                chunkPos += chunkMask * chunkSign;
+                chunkSideDist += chunkMask * chunkSign * chunkDist;
+            } if (stage == 1) {
                 lodMask = stepMask(lodSideDist);
-                lodPos += lodMask * lodSign;
+                lodRayPos += lodMask * lodSign;
                 lodSideDist += lodMask * lodSign * lodDist;
-            } else if (stage == 1) {
+            } else if (stage == 0) {
                 blockMask = stepMask(blockSideDist);
                 blockRayPos += blockMask * blockSign;
                 blockSideDist += blockMask * blockSign * blockDist;
