@@ -10,7 +10,6 @@ struct ChunkStruct {
     int b;
     int c;
     int d;
-    int e;
 };
 layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
     ChunkStruct[] chunks;
@@ -18,12 +17,12 @@ layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
 layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
+layout(r64ui, set = 0, binding = 4) uniform uimage3D lods;
 const int size = 1024;
 const int height = 320;
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
 const int heightChunks = height / chunkSize;
-const int subChunkSize = chunkSize/2;
 const vec3 worldSize = vec3(size, height, size);
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);

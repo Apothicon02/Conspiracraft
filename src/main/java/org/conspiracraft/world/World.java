@@ -8,16 +8,16 @@ public class World {
     public static byte chunkSize = 16;
     public static int sizeChunks = size / chunkSize;
     public static int heightChunks = height / chunkSize;
-    public static byte subChunkSize = (byte) (chunkSize/2);
+    public static byte lodSize = 4;
+    public static int sizeLods = size / lodSize;
+    public static int heightLods = height / lodSize;
     public static WorldType worldType = WorldTypes.EARTH;
 
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static boolean chunkEmptinessChanged = false;
     public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
-
-    public static int packPos(int x, int y, int z) {
-        return x+y*size+z*(size*height);
-    }
+    public static long[] lods = new long[sizeLods*sizeLods*heightLods];
+    public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
     public static int packChunkPos(Vector3i pos) {
         return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
     }
@@ -37,5 +37,14 @@ public class World {
         recentlyEditedLocalPos.set(x&15, y&15, z&15);
         recentlyEditedPos.set(x, y, z);
         recentlyEditedChunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
+
+        int lodIdx = packLodPos(x / lodSize, y / lodSize, z / lodSize);
+        int bitIdx  = lodIdx & 63;
+        long mask = 1L << bitIdx;
+        if (type > 0) {
+            lods[lodIdx] |= mask;
+        } else {
+            lods[lodIdx] &= ~mask;
+        }
     }
 }

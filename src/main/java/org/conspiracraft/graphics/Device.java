@@ -25,6 +25,8 @@ import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
+import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
+import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -55,15 +57,20 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
-        PointerBuffer deviceExtensions = stack.mallocPointer(1)
-                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
+        PointerBuffer deviceExtensions = stack.mallocPointer(2)
+                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+                .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME));
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering = VkPhysicalDeviceDynamicRenderingFeatures.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
                 .dynamicRendering(true);
+        VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
+                .shaderImageInt64Atomics(true)
+                .pNext(dynamicRendering.address());
         VkPhysicalDeviceSynchronization2Features sync2 = VkPhysicalDeviceSynchronization2Features.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES)
-                .synchronization2(true);
-        sync2.pNext(dynamicRendering.address());
+                .synchronization2(true)
+                .pNext(int64.address());
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true);
         VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)

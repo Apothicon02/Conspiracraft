@@ -14,7 +14,6 @@ public class Chunk {
     public int[] uncompressedBlocks;
     public final IntArrayList blockPalette = new IntArrayList();
     public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
-    private BitBuffer subChunks = new BitBuffer(8, 1);
 
     public Chunk(Vector3i chunkPos, int compressedChunkPos) {
         this.chunkPos = chunkPos;
@@ -22,13 +21,6 @@ public class Chunk {
         blockPalette.add(0);
     }
 
-
-    public static int condenseSubchunkPos(Vector3i pos) {
-        return (((pos.x*2)+pos.z)*2)+pos.y;
-    }
-    public static int condenseSubchunkPos(int x, int y, int z) {
-        return (((x*2)+z)*2)+y;
-    }
     public static int condenseLocalPos(int x, int y, int z) {
         return (((x*World.chunkSize)+z)*World.chunkSize)+y;
     }
@@ -60,7 +52,6 @@ public class Chunk {
             uncompressedBlocks = new int[totalBlocks];
             setChunkNonEmpty();
         }
-        subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
         uncompressedBlocks[condenseLocalPos(pos)] = packInts(type, subType);
     }
     public Vector2i getBlockUncompressed(int pos) {
@@ -104,12 +95,6 @@ public class Chunk {
     public int[] getBlockData() {
         return blockData.getData();
     }
-    public void setSubChunks(int[] subChunksData) {
-        subChunks.setData(subChunksData);
-    }
-    public int[] getSubChunks() {
-        return subChunks.getData();
-    }
     public void updateBlockPaletteKeySize() {
         int neededBitsPerValue = getNeededBitsPerValue(blockPalette.size());
         if (neededBitsPerValue != blockData.bitsPerValue) {
@@ -123,9 +108,7 @@ public class Chunk {
     public void setBlockKey(Vector3i pos, int key, Vector3i globalPos) {
         updateBlockPaletteKeySize();
         blockData.setValue(condenseLocalPos(pos), key);
-        if (blockPalette.get(key) != 0) {
-            subChunks.setValue(condenseSubchunkPos(pos.x >= World.subChunkSize ? 1 : 0, pos.y >= World.subChunkSize ? 1 : 0, pos.z >= World.subChunkSize ? 1 : 0), 1);
-        } else {
+        if (blockPalette.get(key) == 0) {
             boolean isEmpty = true;
             for (int x = 0; x < chunkSize && isEmpty; x++) {
                 for (int z = 0; z < chunkSize && isEmpty; z++) {

@@ -17,6 +17,7 @@ import org.lwjgl.vulkan.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
@@ -52,9 +53,9 @@ public class Renderer {
                         }
                     }
                     ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
-
-//                    glBindTexture(GL_TEXTURE_3D, Textures.atlas.id);
-//                    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, Textures.atlas.width, Textures.atlas.height, ((Texture3D) Textures.atlas).depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.imageToBuffer(atlasImage));
+                    ByteBuffer lodBuffer = MemoryUtil.memAlloc(lodTexByteSize);
+                    for (long lod : World.lods) {lodBuffer.putLong(lod);}
+                    ImageHelper.fillImage(stack, Textures.lods, lodBuffer);
                     initialized = true;
                 } else {
 //                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
@@ -189,10 +190,11 @@ public class Renderer {
         return attachmentInfo;
     }
 
+    public static int lodTexByteSize = World.lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte/6;
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
-    public static int chunkByteSize = 5*4;
+    public static int chunkByteSize = 4*4;
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static long[] chunkBlockAllocs;
@@ -228,7 +230,7 @@ public class Renderer {
                         chunkBlockAllocs[packedChunkPos] = alloc.get();
                         int pointer = (int) offset.get(0);
                         MemoryUtil.memCopy(MemoryUtil.memAddress(MemoryUtil.memAlloc(chunkByteSize).asIntBuffer()
-                                        .put(new int[]{pointer/4, paletteSize, bitsPerValue, valueMask, chunks[packedChunkPos].getSubChunks()[0]}).rewind()),
+                                        .put(new int[]{pointer/4, paletteSize, bitsPerValue, valueMask}).rewind()),
                                 chunkPtr+((long) packedChunkPos * chunkByteSize), chunkByteSize);
                         int[] palette = chunks[packedChunkPos].getBlockPalette();
                         int paletteSizeBytes = paletteSize*4;

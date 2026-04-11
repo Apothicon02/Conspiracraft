@@ -75,7 +75,7 @@ public class Descriptors {
             }
             for (Texture tex : Textures.textures) {
                 VkDescriptorImageInfo.Buffer imageInfo = VkDescriptorImageInfo.calloc(1, stack)
-                        .imageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+                        .imageLayout(tex.channels == 1 ?  VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
                         .imageView(tex.imageView)
                         .sampler(tex.sampler);
                 descriptorWrites.get(b)
@@ -83,7 +83,7 @@ public class Descriptors {
                         .dstSet(descriptorSets[i])
                         .dstBinding(b)
                         .dstArrayElement(0)
-                        .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                        .descriptorType(tex.channels == 1 ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                         .descriptorCount(1)
                         .pImageInfo(imageInfo);
                 b++;
@@ -106,9 +106,9 @@ public class Descriptors {
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
-        for (int i = 0; i < textures.size(); i++) {
+        for (Texture tex : Textures.textures) {
             poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .type(tex.channels == 1 ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
@@ -141,10 +141,10 @@ public class Descriptors {
                     .stageFlags(ShaderStorageBuffer.storageBuffers.get(i).stageFlags);
             b++;
         }
-        for (int i = 0; i < textures.size(); i++) {
+        for (Texture tex : Textures.textures) {
             layoutBindings.get(b)
                     .binding(b)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .descriptorType(tex.channels == 1 ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(1)
                     .stageFlags(VK_SHADER_STAGE_FRAGMENT_BIT);
             b++;
