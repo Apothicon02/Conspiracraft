@@ -40,7 +40,7 @@ public class ImageHelper {
         vkCmdCopyBufferToImage(Renderer.currentCmdBuffer, stagingBuffer.buffer[0], texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
 
         transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.channels == 1 ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }

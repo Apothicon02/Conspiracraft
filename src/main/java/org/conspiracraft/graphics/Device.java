@@ -72,7 +72,8 @@ public class Device {
                 .synchronization2(true)
                 .pNext(int64.address());
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
-                .samplerAnisotropy(true);
+                .samplerAnisotropy(true)
+                .shaderInt64(true);
         VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
                 .pQueueCreateInfos(queueInfo)

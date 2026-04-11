@@ -14,7 +14,6 @@ import static org.lwjgl.vulkan.VK14.*;
 public class Textures {
     public static List<Texture> textures = new ArrayList<>(List.of());
     public static Texture atlas = create(584, 64, 1024/64, 4);
-    public static Texture lods = create(World.sizeLods, World.heightLods, World.sizeLods, 1);
 
     public static Texture create(int width, int height, int channels) {
         Texture texture = new Texture(width, height, channels);
@@ -29,8 +28,8 @@ public class Textures {
 
     public static void generate(MemoryStack stack) {
         textures.forEach((texture) -> {
-            int texFormat = texture.channels == 4 ? VK_FORMAT_R8G8B8A8_SRGB : (texture.channels == 3 ? VK_FORMAT_R8G8B8_SRGB : (texture.channels == 2 ? VK_FORMAT_R8G8_SRGB : VK_FORMAT_R64_UINT));
-            long[] imageData = ImageHelper.createImage(stack, texture.width, texture.height, texture instanceof Texture3D tex3D ? tex3D.depth : 1, texFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | (texture.channels == 1 ? VK_IMAGE_USAGE_STORAGE_BIT : VK_IMAGE_USAGE_SAMPLED_BIT), VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            int texFormat = texture.channels == 4 ? VK_FORMAT_R8G8B8A8_SRGB : (texture.channels == 3 ? VK_FORMAT_R8G8B8_SRGB : (texture.channels == 2 ? VK_FORMAT_R8G8_SRGB : VK_FORMAT_R8_SRGB));
+            long[] imageData = ImageHelper.createImage(stack, texture.width, texture.height, texture instanceof Texture3D tex3D ? tex3D.depth : 1, texFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             texture.image = imageData[0];
             texture.memory = imageData[1];
             texture.imageView = ImageHelper.createImageView(stack, texture instanceof Texture3D, texture.image, texFormat, texture.channels);

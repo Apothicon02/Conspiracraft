@@ -22,6 +22,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
+import static org.conspiracraft.graphics.Graphics.lodSSBO;
 import static org.conspiracraft.graphics.Pipeline.pipelineLayout;
 import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffer;
 import static org.conspiracraft.graphics.Device.*;
@@ -46,16 +47,13 @@ public class Renderer {
                 if (!initialized) {
                     prepareTestScene();
                     BufferedImage atlasImage = Utils.loadImage("generic/texture/atlas");
-                    for (int x = 0; x < Textures.atlas.width; x++) {
-                        for (int y = 0; y < 1024; y++) {
-                            Color color = new Color(atlasImage.getRGB(x, y), true);
-                            //collisionData[(x * 1024) + y] = color.getAlpha() != 0;
-                        }
-                    }
+//                    for (int x = 0; x < Textures.atlas.width; x++) {
+//                        for (int y = 0; y < 1024; y++) {
+//                            Color color = new Color(atlasImage.getRGB(x, y), true);
+//                            collisionData[(x * 1024) + y] = color.getAlpha() != 0;
+//                        }
+//                    }
                     ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
-                    ByteBuffer lodBuffer = MemoryUtil.memAlloc(lodTexByteSize);
-                    for (long lod : World.lods) {lodBuffer.putLong(lod);}
-                    ImageHelper.fillImage(stack, Textures.lods, lodBuffer);
                     initialized = true;
                 } else {
 //                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
@@ -190,7 +188,7 @@ public class Renderer {
         return attachmentInfo;
     }
 
-    public static int lodTexByteSize = World.lods.length*8;
+    public static int lodSSBOSize = World.lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte/6;
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
@@ -246,11 +244,17 @@ public class Renderer {
                 }
             }
         }
+
+        long lodPtr = Graphics.lodSSBO.stagingBuffer.pointer.get(0);
+        MemoryUtil.memByteBuffer(lodPtr, lodSSBOSize).asLongBuffer().put(World.lods).rewind();
+
         VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, Graphics.chunkSSBO.stagingBuffer.buffer[0], Graphics.chunkSSBO.buffer.buffer[0], chunkBufferCopy);
         VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], voxelBufferCopy);
-        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(2);
+        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lodSSBOSize);
+        vkCmdCopyBuffer(currentCmdBuffer, Graphics.lodSSBO.stagingBuffer.buffer[0], Graphics.lodSSBO.buffer.buffer[0], lodBufferCopy);
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(3);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -267,6 +271,14 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(Graphics.voxelSSBO.buffer.buffer[0])
                 .offset(0).size(voxelSSBOSize);
+        barrierBuf.get(2)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(Graphics.lodSSBO.buffer.buffer[0])
+                .offset(0).size(lodSSBOSize);
         vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
     }
 }
