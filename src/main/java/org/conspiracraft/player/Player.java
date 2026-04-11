@@ -26,7 +26,7 @@ public class Player {
 
     public Player() {
         inputHandler.init();
-        pos.set(512, 196, 512);
+        pos.set(730, 80, 840);
     }
 
     public Vector3f oldCamTranslation = new Vector3f();

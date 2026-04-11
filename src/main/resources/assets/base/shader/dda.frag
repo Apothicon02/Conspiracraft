@@ -38,7 +38,7 @@ int getBlockData(int x, int y, int z) {
     if (chunkPos != prevBlockChunkPos) {
         prevBlockChunkPos = chunkPos;
         int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-        ChunkStruct str = chunkData.chunks[condensedChunkPos];// ivec4(chunkData.chunks[condensedChunkPos*5], chunkData.chunks[(condensedChunkPos*5)+1], chunkData.chunks[(condensedChunkPos*5)+2], chunkData.chunks[(condensedChunkPos*5)+3]);
+        ChunkStruct str = chunkData.chunks[condensedChunkPos];
         blockPaletteInfo = ivec4(str.a, str.b, str.c, str.d);
         blockValuesPerInt = 32/blockPaletteInfo.z;
 
