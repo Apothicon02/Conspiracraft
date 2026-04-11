@@ -39,7 +39,7 @@ public class World {
         recentlyEditedChunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
 
         int lodIdx = packLodPos(x / lodSize, y / lodSize, z / lodSize);
-        int bitIdx  = lodIdx & 63;
+        int bitIdx = (x%lodSize) + (y%lodSize) * lodSize + (z%lodSize) * lodSize * lodSize;
         long mask = 1L << bitIdx;
         if (type > 0) {
             lods[lodIdx] |= mask;

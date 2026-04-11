@@ -106,7 +106,7 @@ public class Descriptors {
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
-        for (Texture tex : Textures.textures) {
+        for (int i = 0; i < Textures.textures.size(); i++) {
             poolSizes.get(b)
                     .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(FRAMES_IN_FLIGHT);
@@ -141,7 +141,7 @@ public class Descriptors {
                     .stageFlags(ShaderStorageBuffer.storageBuffers.get(i).stageFlags);
             b++;
         }
-        for (Texture tex : Textures.textures) {
+        for (int i = 0; i < Textures.textures.size(); i++) {
             layoutBindings.get(b)
                     .binding(b)
                     .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)

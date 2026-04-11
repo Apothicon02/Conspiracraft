@@ -31,9 +31,9 @@ const int lodSize = 4;
 const int sizeLods = size / lodSize;
 const int heightLods = height / lodSize;
 int packLodPos(ivec3 pos) {
-    return 1;//pos.x+pos.y*sizeLods+pos.z*sizeLods*heightLods;
+    return pos.x+pos.y*sizeLods+pos.z*sizeLods*heightLods;
 }
-int64_t getLod(ivec3 lodPos) { //see if a struct is faster than ivec2
+int64_t getLod(ivec3 lodPos) {
     return int64_t(lodData.lods[packLodPos(lodPos)]);
 }
 int packPos(vec3 pos) {
@@ -227,38 +227,70 @@ vec3 calculateExactPos() {
 vec3 lightPos = vec3(0);
 vec3 normal = vec3(0);
 vec4 dda(vec3 rayPos, vec3 rayDir) {
-    bool steppingLod = true;
-    vec3 lodRayPos = rayPos/lodSize;
-    vec3 lodPos = floor(lodRayPos);
+    int stage = 0;
+    vec3 lodStartPos = rayPos/lodSize;
+    vec3 lodPos = floor(lodStartPos);
     vec3 lodSign = sign(rayDir);
     vec3 lodDist = 1.0/rayDir;
-    vec3 lodSideDist = ((lodPos - lodRayPos) + 0.5 + lodSign * 0.5) * lodDist;
+    vec3 lodSideDist = ((lodPos - lodStartPos) + 0.5 + lodSign * 0.5) * lodDist;
     vec3 lodMask = stepMask(lodSideDist);
+    int64_t lod = 0;
+    vec3 lodWorldPos = vec3(0);
 
-    blockPos = floor(rayPos);
-    blockSign = sign(rayDir);
-    blockDist = 1.0/rayDir;
-    vec3 blockSideDist = ((blockPos - rayPos) + 0.5 + blockSign * 0.5) * blockDist;
-    vec3 blockMask = stepMask(blockSideDist);
-    while (lodPos.x >= 0 && lodPos.x < sizeLods && lodPos.y >= 0 && lodPos.y < heightLods && lodPos.z >= 0 && lodPos.z < sizeLods) {
-        int64_t lod = getLod(ivec3(lodPos));
-        if (lod > 0) {
-            return vec4(0, 1, 0, 1);
+    vec3 blockStartPos = vec3(0);
+    vec3 blockRayPos = vec3(0);
+    vec3 blockSideDist = vec3(0);
+    vec3 blockMask = vec3(0);
+    while (true) {
+        bool stepAnything = true;
+        if (stage == 0) {
+            if (lodPos.x < 0 || lodPos.x >= sizeLods || lodPos.y < 0 || lodPos.y >= heightLods || lodPos.z < 0 || lodPos.z >= sizeLods) {break;}
+            lod = getLod(ivec3(lodPos));
+            if (lod != 0) {
+                stage = 1;
+                stepAnything = false;
+
+                lodWorldPos = lodPos*lodSize;
+                vec3 t0 = (lodWorldPos - rayPos) * (1.0 / rayDir);
+                vec3 t1 = (lodWorldPos + lodSize - rayPos) * (1.0 / rayDir);
+                vec3 tMin = min(t0, t1);
+                float tEnter = max(tMin.x, max(tMin.y, tMin.z));
+                vec3 intersect = rayPos + rayDir * tEnter;
+                blockStartPos = intersect - lodWorldPos;
+
+                blockRayPos = floor(clamp(blockStartPos, vec3(0.0001f), vec3(3.9999f)));
+                blockSign = sign(rayDir);
+                blockDist = 1.0/rayDir;
+                blockSideDist = ((blockRayPos - blockStartPos) + 0.5 + blockSign * 0.5) * blockDist;
+                blockMask = lodMask;
+                //return vec4(blockRayPos/4, 1);//vec4((lodWorldPos+blockRayPos)/worldSize, 1);
+            }
+        } else if (stage == 1) {
+            if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) {
+                stage = 0;
+            } else {
+                blockPos = lodWorldPos+blockRayPos;
+                ivec2 voxel = getBlock(blockPos);
+                if (voxel.x > 0) {
+                    normal = -blockMask*blockSign; //flat normal
+                    vec3 voxelPos = clamp(fract(calculateExactPos()-0.01f)*8, 0.01f, 7.99f);
+                    normal = bevelNormal(normal);
+                    lightPos = blockPos;
+                    return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), voxel.x, voxel.y).rgb, 1);
+                }
+            }
         }
-        blockMask = stepMask(blockSideDist);
-        blockPos += blockMask * blockSign;
-        blockSideDist += blockMask * blockSign * blockDist;
-//        ivec2 voxel = getBlock(blockPos);
-//        if (voxel.x > 0) {
-//            normal = -blockMask*blockSign; //flat normal
-//            vec3 voxelPos = clamp(fract(calculateExactPos()-0.01f)*8, 0.01f, 7.99f);
-//            //normal = bevelNormal(normal);
-//            lightPos = blockPos;
-//            return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(blockPos.x), int(blockPos.y), int(blockPos.z), voxel.x, voxel.y).rgb, 1);
-//        }
-//        blockMask = stepMask(blockSideDist);
-//        blockPos += blockMask * blockSign;
-//        blockSideDist += blockMask * blockSign * blockDist;
+        if (stepAnything) { //dont step if it just went to a finer detail
+            if (stage == 0) {
+                lodMask = stepMask(lodSideDist);
+                lodPos += lodMask * lodSign;
+                lodSideDist += lodMask * lodSign * lodDist;
+            } else if (stage == 1) {
+                blockMask = stepMask(blockSideDist);
+                blockRayPos += blockMask * blockSign;
+                blockSideDist += blockMask * blockSign * blockDist;
+            }
+        }
     }
     return vec4(0);
 }
