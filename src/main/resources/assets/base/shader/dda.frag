@@ -171,20 +171,14 @@ vec3 getDir(vec2 pos) {
 const float bevel = 0.125f;
 const float bevelMax = 1-bevel;
 const float bevelOffset = 0.5f+(bevel/2);
-
-void main() {
-    vec4 color = vec4(0);
-    vec3 camPos = inverse(globalUbo.view)[3].xyz;
-    vec3 rayDir = getDir(uv);
-    vec3 rayPos = camPos;
-    ogPos = rayPos;
-    ogDir = rayDir;
+vec3 lightPos = vec3(0);
+vec3 normal = vec3(0);
+vec4 ddaBlocks(vec3 rayPos, vec3 rayDir) {
     vec3 mapPos = floor(rayPos);
     vec3 raySign = sign(rayDir);
     vec3 deltaDist = 1.0/rayDir;
     vec3 sideDist = ((mapPos - rayPos) + 0.5 + raySign * 0.5) * deltaDist;
     vec3 mask = stepMask(sideDist);
-    vec3 normal = vec3(0);
     while (mapPos.x >= 0 && mapPos.x < size && mapPos.y >= 0 && mapPos.y < height && mapPos.z >= 0 && mapPos.z < size) {
         ivec2 voxel = getBlock(mapPos);
         if (voxel.x > 0) {
@@ -194,42 +188,49 @@ void main() {
             vec3 exactPos = ogPos + ogDir * dist;
             vec3 voxelPos = clamp(fract(exactPos-0.01f)*8, 0.01f, 7.99f);
 
-//            if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
-//                vec3 localPos = roundVec(fract(exactPos));
-//                vec3 bevelPos = mapPos+0.5f;
-//                vec3 absFlatNorm = abs(normal);
-//                if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
-//                    if (localPos.x > bevelMax) {
-//                        if (voxelData.voxels[packPos(bevelPos+vec3(bevelOffset, 0, 0))] == 0) { normal.x = 1; }
-//                    } else if (localPos.x < bevel) {
-//                        if (voxelData.voxels[packPos(bevelPos-vec3(bevelOffset, 0, 0))] == 0) { normal.x = -1; }
-//                    }
-//                }
-//                if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
-//                    if (localPos.z > bevelMax) {
-//                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, bevelOffset))] == 0) { normal.z = 1; }
-//                    } else if (localPos.z < bevel) {
-//                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, bevelOffset))] == 0) { normal.z = -1; }
-//                    }
-//                }
-//                if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
-//                    if (localPos.y > bevelMax) {
-//                        if (voxelData.voxels[packPos(bevelPos+vec3(0, bevelOffset, 0))] == 0) { normal.y = 1; }
-//                    } else if (localPos.y < bevel) {
-//                        if (voxelData.voxels[packPos(bevelPos-vec3(0, bevelOffset, 0))] == 0) { normal.y = -1; }
-//                    }
-//                }
-//            }
+            //            if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
+            //                vec3 localPos = roundVec(fract(exactPos));
+            //                vec3 bevelPos = mapPos+0.5f;
+            //                vec3 absFlatNorm = abs(normal);
+            //                if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
+            //                    if (localPos.x > bevelMax) {
+            //                        if (voxelData.voxels[packPos(bevelPos+vec3(bevelOffset, 0, 0))] == 0) { normal.x = 1; }
+            //                    } else if (localPos.x < bevel) {
+            //                        if (voxelData.voxels[packPos(bevelPos-vec3(bevelOffset, 0, 0))] == 0) { normal.x = -1; }
+            //                    }
+            //                }
+            //                if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
+            //                    if (localPos.z > bevelMax) {
+            //                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, bevelOffset))] == 0) { normal.z = 1; }
+            //                    } else if (localPos.z < bevel) {
+            //                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, bevelOffset))] == 0) { normal.z = -1; }
+            //                    }
+            //                }
+            //                if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
+            //                    if (localPos.y > bevelMax) {
+            //                        if (voxelData.voxels[packPos(bevelPos+vec3(0, bevelOffset, 0))] == 0) { normal.y = 1; }
+            //                    } else if (localPos.y < bevel) {
+            //                        if (voxelData.voxels[packPos(bevelPos-vec3(0, bevelOffset, 0))] == 0) { normal.y = -1; }
+            //                    }
+            //                }
+            //            }
 
-            color = vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(mapPos.x), int(mapPos.y), int(mapPos.z), voxel.x, voxel.y).rgb, 1);
-            break;
+            lightPos = mapPos;
+            return vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(mapPos.x), int(mapPos.y), int(mapPos.z), voxel.x, voxel.y).rgb, 1);
         }
         mask = stepMask(sideDist);
         mapPos += mask * raySign;
         sideDist += mask * raySign * deltaDist;
     }
+    return vec4(0);
+}
+
+void main() {
+    vec3 camPos = inverse(globalUbo.view)[3].xyz;
+    ogPos = camPos;
+    ogDir = getDir(uv);
+    vec4 color = ddaBlocks(ogPos, ogDir);
     bool isSky = color.a < 1;
-    vec3 lightPos = mapPos;
     if (isSky) {
         lightPos = ogPos + ogDir * size;
     } else {
@@ -237,7 +238,7 @@ void main() {
         vec3 lighting = (vec3(dot(normal, normalize(skylight.xyz))*0.38f/min(1, skylight.a*2))+(0.03f+(0.59f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         color.rgb *= lighting;
     }
-    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, mapPos)/(size*0.66f))-0.15f, 0.f, 1.f);
+    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, lightPos)/(size*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 0.9f), isSky, fogginess, false).rgb, fogginess);
 
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
