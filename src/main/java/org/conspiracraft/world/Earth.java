@@ -1,14 +1,14 @@
 package org.conspiracraft.world;
 
-import org.conspiracraft.Utils;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.conspiracraft.utils.Utils;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
+import java.lang.Math;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
+import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
     public static Random seededRand = new Random(35311350L);
@@ -44,5 +44,46 @@ public class Earth extends WorldType {
         munPos.rotateZ(timeNs/100000000000.f);
         sunPos.rotateX(-0.2f);
         munPos.set(munPos.x+(World.size/2f), munPos.y, munPos.z+(World.size/2f)+128);
+    }
+    @Override
+    public void generate() {
+        for (int x = 0; x < sizeChunks; x++) {
+            for (int z = 0; z < sizeChunks; z++) {
+                for (int y = 0; y < heightChunks; y++) {
+                    int packedChunkPos = packChunkPos(x, y, z);
+                    chunks[packedChunkPos] = new Chunk(new Vector3i(x, y, z), packedChunkPos);
+                }
+            }
+        }
+
+        for (int cX = 0; cX < World.sizeChunks; cX++) {
+            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+                for (int x = cX*chunkSize; x < (cX*chunkSize)+chunkSize; x++) {
+                    for (int z = cZ*chunkSize; z < (cZ*chunkSize)+chunkSize; z++) {
+                        int elevation = getElevation(x, z);
+                        for (int y = 63; y > elevation; y--) {
+                            World.setBlock(x, y, z, 1, 15);
+                        }
+                        World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
+                        int cY = elevation/chunkSize; //needs to use the minimum heightmap value for this column of chunks instead of elevation of this specific block to prevent underground gaps.
+                        for (int y = elevation-1; y >= cY*chunkSize; y--) {
+                            World.setBlock(x, y, z, elevation < 65 ? 24 : 3, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public int getElevation(int x, int z) {
+        double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
+        double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
+        double elevationMul = mountainNoise * elevationNoise;
+        double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
+        int elevation = (int) (detailNoise * Math.max(0.f, elevationMul));
+        if (elevation < 0) {
+            elevation *= -0.25f;
+        }
+        elevation += 62;
+        return elevation;
     }
 }

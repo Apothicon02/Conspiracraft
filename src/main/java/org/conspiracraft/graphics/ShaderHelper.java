@@ -1,6 +1,6 @@
 package org.conspiracraft.graphics;
 
-import org.conspiracraft.Utils;
+import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;

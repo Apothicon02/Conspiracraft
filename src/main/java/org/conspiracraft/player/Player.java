@@ -1,6 +1,6 @@
 package org.conspiracraft.player;
 
-import org.conspiracraft.Utils;
+import org.conspiracraft.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

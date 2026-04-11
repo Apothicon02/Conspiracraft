@@ -1,5 +1,6 @@
-package org.conspiracraft;
+package org.conspiracraft.utils;
 
+import org.conspiracraft.Main;
 import org.joml.Vector3f;
 
 import javax.imageio.ImageIO;

@@ -6,17 +6,67 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
 } globalUbo;
 
-layout(std430, set = 0, binding = 1) readonly buffer VoxelBuffer {
+layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
+    int[] chunks;
+} chunkData;
+layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
-const int size = 1024;
+const int size = 4096;
 const int height = 320;
+const int chunkSize = 16;
+const int sizeChunks = size / chunkSize;
+const int heightChunks = height / chunkSize;
+const int subChunkSize = chunkSize/2;
 const vec3 worldSize = vec3(size, height, size);
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
+ivec3 prevBlockChunkPos = ivec3(-1);
+ivec4 blockPaletteInfo = ivec4(-1);
+int blockValuesPerInt = -1;
+int getBlockData(int x, int y, int z) {
+    ivec3 chunkPos = ivec3(x, y, z) >> 4;
+    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
+    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    if (chunkPos != prevBlockChunkPos) {
+        prevBlockChunkPos = chunkPos;
+        int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+        blockPaletteInfo = ivec4(chunkData.chunks[condensedChunkPos*5], chunkData.chunks[(condensedChunkPos*5)+1], chunkData.chunks[(condensedChunkPos*5)+2], chunkData.chunks[(condensedChunkPos*5)+3]);
+        blockValuesPerInt = 32/blockPaletteInfo.z;
 
-layout(set = 0, binding = 2) uniform sampler3D atlas;
+        int intIndex  = condensedLocalPos/blockValuesPerInt;
+        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
+
+        int paletteBase = blockPaletteInfo.x;
+        int packedBase  = blockPaletteInfo.x + blockPaletteInfo.y;
+        int idxPacked  = packedBase + intIndex;
+        if (idxPacked < 0 || idxPacked >= 250000000) return 0;
+
+        int key = (voxelData.voxels[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+        return voxelData.voxels[blockPaletteInfo.x+key];
+    } else {
+        int intIndex  = condensedLocalPos/blockValuesPerInt;
+        int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * blockPaletteInfo.z;
+
+        int paletteBase = blockPaletteInfo.x;
+        int packedBase  = blockPaletteInfo.x + blockPaletteInfo.y;
+        int idxPacked  = packedBase + intIndex;
+        if (idxPacked < 0 || idxPacked >= 250000000) return 0;
+
+        int key = (voxelData.voxels[blockPaletteInfo.x+blockPaletteInfo.y+intIndex] >> bitIndex) & blockPaletteInfo.w;
+        return voxelData.voxels[blockPaletteInfo.x+key];
+    }
+}
+ivec2 getBlock(int x, int y, int z) {
+    int blockData = getBlockData(x, y, z);
+    int type = (blockData >> 16) & 0xFFFF;
+    return ivec2(type, min(16, blockData & 0xFFFF));
+}
+ivec2 getBlock(vec3 pos) {
+    return getBlock(int(pos.x), int(pos.y), int(pos.z));
+}
+layout(set = 0, binding = 3) uniform sampler3D atlas;
 const int blockSize = 8;
 const int blockTexSize = blockSize;
 vec4 sampleAtlas(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
@@ -136,45 +186,42 @@ void main() {
     vec3 mask = stepMask(sideDist);
     vec3 normal = vec3(0);
     while (mapPos.x >= 0 && mapPos.x < size && mapPos.y >= 0 && mapPos.y < height && mapPos.z >= 0 && mapPos.z < size) {
-        int voxel = voxelData.voxels[packPos(mapPos)];
-        if (voxel > 0) {
+        ivec2 voxel = getBlock(mapPos);
+        if (voxel.x > 0) {
             normal = -mask*raySign; //flat normal
             vec3 mini = ((mapPos-ogPos) + 0.5 - 0.5*vec3(raySign))*deltaDist;
             float dist = max(mini.x, max(mini.y, mini.z));
             vec3 exactPos = ogPos + ogDir * dist;
             vec3 voxelPos = clamp(fract(exactPos-0.01f)*8, 0.01f, 7.99f);
 
-            if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
-                vec3 localPos = roundVec(fract(exactPos));
-                vec3 bevelPos = mapPos+0.5f;
-                vec3 absFlatNorm = abs(normal);
-                if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
-                    if (localPos.x > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(bevelOffset, 0, 0))] == 0) { normal.x = 1; }
-                    } else if (localPos.x < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(bevelOffset, 0, 0))] == 0) { normal.x = -1; }
-                    }
-                }
-                if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
-                    if (localPos.z > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, bevelOffset))] == 0) { normal.z = 1; }
-                    } else if (localPos.z < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, bevelOffset))] == 0) { normal.z = -1; }
-                    }
-                }
-                if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
-                    if (localPos.y > bevelMax) {
-                        if (voxelData.voxels[packPos(bevelPos+vec3(0, bevelOffset, 0))] == 0) { normal.y = 1; }
-                    } else if (localPos.y < bevel) {
-                        if (voxelData.voxels[packPos(bevelPos-vec3(0, bevelOffset, 0))] == 0) { normal.y = -1; }
-                    }
-                }
-            }
+//            if (mapPos.x > 0 && mapPos.x < size-1 && mapPos.z > 0 && mapPos.z < size-1 && mapPos.y > 0 && mapPos.y < height-1) { //dont blend with voxels outside of world.
+//                vec3 localPos = roundVec(fract(exactPos));
+//                vec3 bevelPos = mapPos+0.5f;
+//                vec3 absFlatNorm = abs(normal);
+//                if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
+//                    if (localPos.x > bevelMax) {
+//                        if (voxelData.voxels[packPos(bevelPos+vec3(bevelOffset, 0, 0))] == 0) { normal.x = 1; }
+//                    } else if (localPos.x < bevel) {
+//                        if (voxelData.voxels[packPos(bevelPos-vec3(bevelOffset, 0, 0))] == 0) { normal.x = -1; }
+//                    }
+//                }
+//                if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
+//                    if (localPos.z > bevelMax) {
+//                        if (voxelData.voxels[packPos(bevelPos+vec3(0, 0, bevelOffset))] == 0) { normal.z = 1; }
+//                    } else if (localPos.z < bevel) {
+//                        if (voxelData.voxels[packPos(bevelPos-vec3(0, 0, bevelOffset))] == 0) { normal.z = -1; }
+//                    }
+//                }
+//                if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
+//                    if (localPos.y > bevelMax) {
+//                        if (voxelData.voxels[packPos(bevelPos+vec3(0, bevelOffset, 0))] == 0) { normal.y = 1; }
+//                    } else if (localPos.y < bevel) {
+//                        if (voxelData.voxels[packPos(bevelPos-vec3(0, bevelOffset, 0))] == 0) { normal.y = -1; }
+//                    }
+//                }
+//            }
 
-            color = vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(mapPos.x), int(mapPos.y), int(mapPos.z), voxel, 0).rgb, 1);
-            if (voxel == 1) {
-                color = vec4(0.3, 0.35, 1.f, 1.f);
-            }
+            color = vec4(sampleAtlas(int(voxelPos.x), int(voxelPos.y), int(voxelPos.z), int(mapPos.x), int(mapPos.y), int(mapPos.z), voxel.x, voxel.y).rgb, 1);
             break;
         }
         mask = stepMask(sideDist);

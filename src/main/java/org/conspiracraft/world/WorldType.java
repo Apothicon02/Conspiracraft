@@ -13,4 +13,5 @@ public class WorldType {
     public Vector4f getSkylight() {return null;}
     public Vector3f getSun() {return null;}
     public void tick() {}
+    public void generate() {}
 }

@@ -5,13 +5,13 @@ import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
 import org.conspiracraft.graphics.buffers.ubos.GlobalUBO;
 import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
 import org.conspiracraft.graphics.textures.Textures;
-import org.conspiracraft.world.World;
 import org.lwjgl.system.MemoryStack;
 
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Window.window;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Pipeline.*;
+import static org.conspiracraft.graphics.Renderer.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.lwjgl.sdl.SDLEvents.SDL_PollEvent;
@@ -38,9 +38,11 @@ public class Graphics {
     public static GlobalUBO globalUBO = new GlobalUBO();
     public static UniformBuffer globalUBOBuf;
     public static ShaderStorageBuffer voxelSSBO;
+    public static ShaderStorageBuffer chunkSSBO;
     public void createBuffers(MemoryStack stack) {
         globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, globalUBO);
-        voxelSSBO = new ShaderStorageBuffer(stack, World.size*World.height*World.size*4,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}

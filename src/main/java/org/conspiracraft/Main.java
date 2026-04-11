@@ -2,6 +2,7 @@ package org.conspiracraft;
 
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
