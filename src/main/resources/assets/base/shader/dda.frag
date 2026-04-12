@@ -21,7 +21,7 @@ layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
 layout(std430, set = 0, binding = 3) readonly buffer LODBuffer {
     int64_t[] lods;
 } lodData;
-const int size = 1024;
+const int size = 4096;
 const int height = 320;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
@@ -106,7 +106,7 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
     return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
 }
 
-const int renderDistance = min(size, 2048);
+const int renderDistance = min(size, 6144);
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 ogRayPos = vec3(0);
@@ -261,24 +261,28 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
     while (distance(exactPos, ogRayPos) < renderDistance) {
         bool stepAnything = true;
         if (stage == 3) {
-            if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) {break;}
-            updateChunkData(ivec3(chunkPos));
-            if (chunk.paletteSize > 1) {
-                stage = 2;
-                stepAnything = false;
+            if (chunkPos.y >= heightChunks && rayDir.y < 0) {
+                //no need to do any checks
+            } else {
+                if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) { break; }
+                updateChunkData(ivec3(chunkPos));
+                if (chunk.paletteSize > 1) {
+                    stage = 2;
+                    stepAnything = false;
 
-                chunkWorldPos = ivec3(chunkPos*chunkSize);
-                vec3 minPos = (chunkWorldPos - rayPos) * (1.0 / rayDir);
-                vec3 maxPos = (chunkWorldPos + chunkSize - rayPos) * (1.0 / rayDir);
-                vec3 entranceDist = min(minPos, maxPos);
-                float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-                vec3 intersect = rayPos + rayDir * entrancePos;
-                lodStartPos = clamp((intersect - chunkWorldPos)/lodSize, vec3(0.0001f), vec3(lodSize-0.0001f));
+                    chunkWorldPos = ivec3(chunkPos*chunkSize);
+                    vec3 minPos = (chunkWorldPos - rayPos) * (1.0 / rayDir);
+                    vec3 maxPos = (chunkWorldPos + chunkSize - rayPos) * (1.0 / rayDir);
+                    vec3 entranceDist = min(minPos, maxPos);
+                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+                    vec3 intersect = rayPos + rayDir * entrancePos;
+                    lodStartPos = clamp((intersect - chunkWorldPos)/lodSize, vec3(0.0001f), vec3(lodSize-0.0001f));
 
-                lodRayPos = ivec3(lodStartPos);
-                lodDist = 1.0/rayDir;
-                lodSideDist = ((lodRayPos - lodStartPos) + 0.5 + raySign * 0.5) * lodDist;
-                lodMask = chunkMask;
+                    lodRayPos = ivec3(lodStartPos);
+                    lodDist = 1.0/rayDir;
+                    lodSideDist = ((lodRayPos - lodStartPos) + 0.5 + raySign * 0.5) * lodDist;
+                    lodMask = chunkMask;
+                }
             }
         } else if (stage == 2) {
             if (lodRayPos.x < 0 || lodRayPos.x >= lodSize || lodRayPos.y < 0 || lodRayPos.y >= lodSize || lodRayPos.z < 0 || lodRayPos.z >= lodSize) {

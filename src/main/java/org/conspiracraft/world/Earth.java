@@ -102,7 +102,7 @@ public class Earth extends WorldType {
         if (elevation < 0) {
             elevation *= -0.25f;
         }
-        elevation += 62;
+        elevation += 124*(0.5F+Math.max(0, SimplexNoise.noise(x/2500.f, z/2500.f)+(0.1F*SimplexNoise.noise(x/75.f, z/75.f))));
         return (short)elevation;
     }
 }

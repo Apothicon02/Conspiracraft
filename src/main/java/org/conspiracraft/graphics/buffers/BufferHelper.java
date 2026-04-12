@@ -79,8 +79,9 @@ public class BufferHelper {
                 .usage(usage)
                 .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
         LongBuffer bufferBuf = stack.mallocLong(1);
-        if (vkCreateBuffer(vkDevice, bufferInfo, null, bufferBuf) != VK_SUCCESS) {
-            throw new RuntimeException("Failed to create vertex buffer!");
+        int error = vkCreateBuffer(vkDevice, bufferInfo, null, bufferBuf);
+        if (error != VK_SUCCESS) {
+            throw new RuntimeException("Failed to create vertex buffer: "+error);
         }
         buffer[0] = bufferBuf.get(0);
         VkMemoryRequirements memRequirements = VkMemoryRequirements.calloc(stack);
