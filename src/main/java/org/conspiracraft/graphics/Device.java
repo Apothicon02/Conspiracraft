@@ -60,17 +60,17 @@ public class Device {
         PointerBuffer deviceExtensions = stack.mallocPointer(2)
                 .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
                 .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME));
-        VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering = VkPhysicalDeviceDynamicRenderingFeatures.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
-                .dynamicRendering(true);
         VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
-                .shaderImageInt64Atomics(true)
-                .pNext(dynamicRendering.address());
+                .shaderImageInt64Atomics(true);
         VkPhysicalDeviceSynchronization2Features sync2 = VkPhysicalDeviceSynchronization2Features.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES)
                 .synchronization2(true)
                 .pNext(int64.address());
+        VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering = VkPhysicalDeviceDynamicRenderingFeatures.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
+                .dynamicRendering(true)
+                .pNext(sync2.address());
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
                 .shaderInt64(true);
@@ -79,7 +79,7 @@ public class Device {
                 .pQueueCreateInfos(queueInfo)
                 .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
-                .pNext(sync2.address());
+                .pNext(dynamicRendering.address());
 
         PointerBuffer pDevice = stack.mallocPointer(1);
         int deviceCreateErr = vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);
