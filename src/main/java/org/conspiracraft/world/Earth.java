@@ -47,6 +47,7 @@ public class Earth extends WorldType {
     }
     @Override
     public void generate() {
+        Random worldgenRandom = new Random(67);
         for (int x = 0; x < sizeChunks; x++) {
             for (int z = 0; z < sizeChunks; z++) {
                 for (int y = 0; y < heightChunks; y++) {
@@ -62,15 +63,18 @@ public class Earth extends WorldType {
                     for (int z = cZ*chunkSize; z < (cZ*chunkSize)+chunkSize; z++) {
                         int elevation = getElevation(x, z);
                         if (elevation <= 63) {
-                            World.setBlock(x, 63, z, 1, 15); //set to lower subtype
+                            World.setBlock(x, 63, z, 1, 12);
                             for (int y = 62; y > elevation; y--) {
                                 World.setBlock(x, y, z, 1, 15);
                             }
                         }
+                        if (elevation >= 66 && worldgenRandom.nextBoolean()) {
+                            World.setBlock(x, elevation + 1, z, worldgenRandom.nextFloat() < 0.15f ? 5 : 4, 0);//4 + worldgenRandom.nextInt(), worldgenRandom.nextInt(3));
+                        }
                         World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
                         int cY = elevation/chunkSize; //needs to use the minimum heightmap value for this column of chunks instead of elevation of this specific block to prevent underground gaps.
                         for (int y = elevation-1; y >= cY*chunkSize; y--) {
-                            World.setBlock(x, y, z, elevation < 65 ? 24 : 3, 0);
+                            World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
                         }
                     }
                 }

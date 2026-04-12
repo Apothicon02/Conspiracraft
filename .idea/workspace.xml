@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Generalized buffers.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,11 +61,10 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="2fd4fe311e6759cb12451c8a69331e99dcabcc17" />
+        <entry key="$PROJECT_DIR$" value="vulkan" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -73,10 +74,11 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Apothicon02/Terraflat.git&quot;,
-    &quot;accountId&quot;: &quot;2d456709-eacc-4081-a0f2-70e4677dc448&quot;
+    &quot;url&quot;: &quot;https://github.com/Apothicon02/Conspiracraft.git&quot;,
+    &quot;accountId&quot;: &quot;01d1672b-0a2d-4e22-8a6b-02970825e7ba&quot;
   }
 }</component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\tyler\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Program Files\Java\jdk-25" gradleVersion="9.3.0" />
   <component name="HighlightingSettingsPerFile">
     <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
   </component>
@@ -107,23 +109,26 @@
     "git-widget-placeholder": "vulkan",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/shader",
-    "nodejs_package_manager_path": "npm",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft/graphics/textures",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "application.passwordSafe"
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\graphics\textures" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic\texture" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shader" />
+      <recent name="C:\Users\tyler\IdeaProjects\Conspiracraft\src\main\resources\assets\base\shader" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="org.conspiracraft.renderer.buffers" />
+      <recent name="org.conspiracraft.utils" />
+      <recent name="org.conspiracraft.graphics.textures" />
       <recent name="org.apothicon.engine" />
       <recent name="org.apothicon.core.grids" />
     </key>
@@ -132,7 +137,6 @@
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.conspiracraft.Main" />
       <module name="Conspiracraft.main" />
-      <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.conspiracraft.*" />
@@ -187,10 +191,15 @@
       <list>
         <item itemvalue="Gradle.Conspiracraft [build]" />
         <item itemvalue="Application.Main" />
-        <item itemvalue="Gradle.Conspiracraft [build]" />
-        <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -273,291 +282,264 @@
       <option name="project" value="LOCAL" />
       <updated>1763392406939</updated>
     </task>
-    <task id="LOCAL-00010" summary="- Updated preferred format &amp; color space.">
+    <task id="LOCAL-00010" summary="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names.">
       <option name="closed" value="true" />
-      <created>1774978657017</created>
+      <created>1774917375640</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1774978657018</updated>
+      <updated>1774917375640</updated>
     </task>
-    <task id="LOCAL-00011" summary="- Added hdr setting. &#10;- Created image views.">
+    <task id="LOCAL-00011" summary="- Added preferred sdr format.">
       <option name="closed" value="true" />
-      <created>1774981972415</created>
+      <created>1775074918741</created>
       <option name="number" value="00011" />
       <option name="presentableId" value="LOCAL-00011" />
       <option name="project" value="LOCAL" />
-      <updated>1774981972415</updated>
+      <updated>1775074918741</updated>
     </task>
-    <task id="LOCAL-00012" summary="- Added glsl -&gt; spir-v shader compiling.">
+    <task id="LOCAL-00012" summary="- Added frames-in-flight.">
       <option name="closed" value="true" />
-      <created>1774984638026</created>
+      <created>1775089573696</created>
       <option name="number" value="00012" />
       <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1774984638026</updated>
+      <updated>1775089573696</updated>
     </task>
-    <task id="LOCAL-00013" summary="- Now creates shader stages.">
+    <task id="LOCAL-00013" summary="- Fixed white lines.">
       <option name="closed" value="true" />
-      <created>1774985960147</created>
+      <created>1775565803167</created>
       <option name="number" value="00013" />
       <option name="presentableId" value="LOCAL-00013" />
       <option name="project" value="LOCAL" />
-      <updated>1774985960147</updated>
+      <updated>1775565803167</updated>
     </task>
-    <task id="LOCAL-00014" summary="- Now creates the pipeline layout.">
+    <task id="LOCAL-00014" summary="- Started rewrite.">
       <option name="closed" value="true" />
-      <created>1774989943409</created>
+      <created>1775582615873</created>
       <option name="number" value="00014" />
       <option name="presentableId" value="LOCAL-00014" />
       <option name="project" value="LOCAL" />
-      <updated>1774989943409</updated>
+      <updated>1775582615873</updated>
     </task>
-    <task id="LOCAL-00015" summary="- Created render pass.">
+    <task id="LOCAL-00015" summary="- Progress.">
       <option name="closed" value="true" />
-      <created>1774991301847</created>
+      <created>1775606338810</created>
       <option name="number" value="00015" />
       <option name="presentableId" value="LOCAL-00015" />
       <option name="project" value="LOCAL" />
-      <updated>1774991301847</updated>
+      <updated>1775606338810</updated>
     </task>
-    <task id="LOCAL-00016" summary="- Finished graphics pipeline.">
+    <task id="LOCAL-00016" summary="- Triangle!!!!">
       <option name="closed" value="true" />
-      <created>1774992069702</created>
+      <created>1775667248740</created>
       <option name="number" value="00016" />
       <option name="presentableId" value="LOCAL-00016" />
       <option name="project" value="LOCAL" />
-      <updated>1774992069702</updated>
+      <updated>1775667248740</updated>
     </task>
-    <task id="LOCAL-00017" summary="- Created framebuffers.">
+    <task id="LOCAL-00017" summary="- Added global UBO.">
       <option name="closed" value="true" />
-      <created>1774992568868</created>
+      <created>1775671643813</created>
       <option name="number" value="00017" />
       <option name="presentableId" value="LOCAL-00017" />
       <option name="project" value="LOCAL" />
-      <updated>1774992568868</updated>
+      <updated>1775671643813</updated>
     </task>
-    <task id="LOCAL-00018" summary="- Created command buffer.">
+    <task id="LOCAL-00018" summary="- Updated dda shader.">
       <option name="closed" value="true" />
-      <created>1774993754444</created>
+      <created>1775676836660</created>
       <option name="number" value="00018" />
       <option name="presentableId" value="LOCAL-00018" />
       <option name="project" value="LOCAL" />
-      <updated>1774993754444</updated>
+      <updated>1775676836660</updated>
     </task>
-    <task id="LOCAL-00019" summary="- Added render pass.">
+    <task id="LOCAL-00019" summary="- Fixed resizing.">
       <option name="closed" value="true" />
-      <created>1774998963364</created>
+      <created>1775678815275</created>
       <option name="number" value="00019" />
       <option name="presentableId" value="LOCAL-00019" />
       <option name="project" value="LOCAL" />
-      <updated>1774998963364</updated>
+      <updated>1775678815275</updated>
     </task>
-    <task id="LOCAL-00020" summary="- Added model loading and rendering.">
+    <task id="LOCAL-00020" summary="- Added ssbos.">
       <option name="closed" value="true" />
-      <created>1775140545378</created>
+      <created>1775743627005</created>
       <option name="number" value="00020" />
       <option name="presentableId" value="LOCAL-00020" />
       <option name="project" value="LOCAL" />
-      <updated>1775140545378</updated>
+      <updated>1775743627005</updated>
     </task>
-    <task id="LOCAL-00021" summary="- Added UBOs.">
+    <task id="LOCAL-00021" summary="- Added bevelled normals.">
       <option name="closed" value="true" />
-      <created>1775148487777</created>
+      <created>1775764987105</created>
       <option name="number" value="00021" />
       <option name="presentableId" value="LOCAL-00021" />
       <option name="project" value="LOCAL" />
-      <updated>1775148487777</updated>
+      <updated>1775764987105</updated>
     </task>
-    <task id="LOCAL-00022" summary="- UBO progress.">
+    <task id="LOCAL-00022" summary="- Bevelled normals are now adjustable.">
       <option name="closed" value="true" />
-      <created>1775156205763</created>
+      <created>1775766175021</created>
       <option name="number" value="00022" />
       <option name="presentableId" value="LOCAL-00022" />
       <option name="project" value="LOCAL" />
-      <updated>1775156205763</updated>
+      <updated>1775766175021</updated>
     </task>
-    <task id="LOCAL-00023" summary="- Fixed UBO alignment.">
+    <task id="LOCAL-00023" summary="- Fixed night.">
       <option name="closed" value="true" />
-      <created>1775161513908</created>
+      <created>1775769712505</created>
       <option name="number" value="00023" />
       <option name="presentableId" value="LOCAL-00023" />
       <option name="project" value="LOCAL" />
-      <updated>1775161513908</updated>
+      <updated>1775769712505</updated>
     </task>
-    <task id="LOCAL-00024" summary="- Added player. &#10;- Added camera. &#10;- Added input.">
+    <task id="LOCAL-00024" summary="- Added texture loading.">
       <option name="closed" value="true" />
-      <created>1775169009421</created>
+      <created>1775847095278</created>
       <option name="number" value="00024" />
       <option name="presentableId" value="LOCAL-00024" />
       <option name="project" value="LOCAL" />
-      <updated>1775169009421</updated>
+      <updated>1775847095278</updated>
     </task>
-    <task id="LOCAL-00025" summary="- Added input handler.">
+    <task id="LOCAL-00025" summary="- DDA now samples atlas.">
       <option name="closed" value="true" />
-      <created>1775169026349</created>
+      <created>1775849719750</created>
       <option name="number" value="00025" />
       <option name="presentableId" value="LOCAL-00025" />
       <option name="project" value="LOCAL" />
-      <updated>1775169026349</updated>
+      <updated>1775849719750</updated>
     </task>
-    <task id="LOCAL-00026" summary="- Remade main loop.">
+    <task id="LOCAL-00026" summary="- Fixed validation error.">
       <option name="closed" value="true" />
-      <created>1775176635370</created>
+      <created>1775849784916</created>
       <option name="number" value="00026" />
       <option name="presentableId" value="LOCAL-00026" />
       <option name="project" value="LOCAL" />
-      <updated>1775176635370</updated>
+      <updated>1775849784916</updated>
     </task>
-    <task id="LOCAL-00027" summary="- Fixed projection.">
+    <task id="LOCAL-00027" summary="- Added palette-compressed chunks.">
       <option name="closed" value="true" />
-      <created>1775179218935</created>
+      <created>1775873874612</created>
       <option name="number" value="00027" />
       <option name="presentableId" value="LOCAL-00027" />
       <option name="project" value="LOCAL" />
-      <updated>1775179218935</updated>
+      <updated>1775873874612</updated>
     </task>
-    <task id="LOCAL-00028" summary="- Improved player movement.">
+    <task id="LOCAL-00028" summary="- Added chunk struct in fragment shader.">
       <option name="closed" value="true" />
-      <created>1775180790478</created>
+      <created>1775875141444</created>
       <option name="number" value="00028" />
       <option name="presentableId" value="LOCAL-00028" />
       <option name="project" value="LOCAL" />
-      <updated>1775180790478</updated>
+      <updated>1775875141444</updated>
     </task>
-    <task id="LOCAL-00029" summary="- Added sun &amp; mun.">
+    <task id="LOCAL-00029" summary="- Moved player pos.">
       <option name="closed" value="true" />
-      <created>1775228361612</created>
+      <created>1775875802451</created>
       <option name="number" value="00029" />
       <option name="presentableId" value="LOCAL-00029" />
       <option name="project" value="LOCAL" />
-      <updated>1775228361612</updated>
+      <updated>1775875802451</updated>
     </task>
-    <task id="LOCAL-00030" summary="- Added sun &amp; mun.">
+    <task id="LOCAL-00030" summary="- Added unused lod texture.">
       <option name="closed" value="true" />
-      <created>1775229522241</created>
+      <created>1775917635562</created>
       <option name="number" value="00030" />
       <option name="presentableId" value="LOCAL-00030" />
       <option name="project" value="LOCAL" />
-      <updated>1775229522241</updated>
+      <updated>1775917635562</updated>
     </task>
-    <task id="LOCAL-00031" summary="- Vertex buffer now is staged.">
+    <task id="LOCAL-00031" summary="- Extracted dda to its own method.">
       <option name="closed" value="true" />
-      <created>1775258644794</created>
+      <created>1775918031843</created>
       <option name="number" value="00031" />
       <option name="presentableId" value="LOCAL-00031" />
       <option name="project" value="LOCAL" />
-      <updated>1775258644794</updated>
+      <updated>1775918031843</updated>
     </task>
-    <task id="LOCAL-00032" summary="- Undid some changes.">
+    <task id="LOCAL-00032" summary="- Wip lods.">
       <option name="closed" value="true" />
-      <created>1775258755360</created>
+      <created>1775923529751</created>
       <option name="number" value="00032" />
       <option name="presentableId" value="LOCAL-00032" />
       <option name="project" value="LOCAL" />
-      <updated>1775258755361</updated>
+      <updated>1775923529751</updated>
     </task>
-    <task id="LOCAL-00033" summary="- Normals are now auto-generated.">
+    <task id="LOCAL-00033" summary="- Fixed lods.">
       <option name="closed" value="true" />
-      <created>1775260208569</created>
+      <created>1775938260696</created>
       <option name="number" value="00033" />
       <option name="presentableId" value="LOCAL-00033" />
       <option name="project" value="LOCAL" />
-      <updated>1775260208569</updated>
+      <updated>1775938260696</updated>
     </task>
-    <task id="LOCAL-00034" summary="- Re-added vertex sharing.">
+    <task id="LOCAL-00034" summary="- Optimized dda.">
       <option name="closed" value="true" />
-      <created>1775264166152</created>
+      <created>1775938702012</created>
       <option name="number" value="00034" />
       <option name="presentableId" value="LOCAL-00034" />
       <option name="project" value="LOCAL" />
-      <updated>1775264166152</updated>
+      <updated>1775938702012</updated>
     </task>
-    <task id="LOCAL-00035" summary="- Added depth testing.">
+    <task id="LOCAL-00035" summary="- Added chunk space-skipping.">
       <option name="closed" value="true" />
-      <created>1775313022651</created>
+      <created>1775941994129</created>
       <option name="number" value="00035" />
       <option name="presentableId" value="LOCAL-00035" />
       <option name="project" value="LOCAL" />
-      <updated>1775313022651</updated>
+      <updated>1775941994129</updated>
     </task>
-    <task id="LOCAL-00036" summary="- Tweaked test scene. &#10;- Added exposure multiplier.&#10;- Added super sprinting. &#10;- Added fog.">
-      <option name="closed" value="true" />
-      <created>1775320975647</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1775320975647</updated>
-    </task>
-    <task id="LOCAL-00037" summary="- Fixed moving window to other monitors.&#10;- Improved sdr support. &#10;- Added static exposure for hdr. &#10;- Added gamma.">
-      <option name="closed" value="true" />
-      <created>1775397934813</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1775397934813</updated>
-    </task>
-    <task id="LOCAL-00038" summary="- Tweaked fog. &#10;- Changed world to circular.">
-      <option name="closed" value="true" />
-      <created>1775407832061</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1775407832061</updated>
-    </task>
-    <task id="LOCAL-00039" summary="- Generalized buffers.">
-      <option name="closed" value="true" />
-      <created>1775430276561</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1775430276561</updated>
-    </task>
-    <option name="localTasksCounter" value="40" />
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Now creates the pipeline layout." />
-    <MESSAGE value="- Created render pass." />
-    <MESSAGE value="- Finished graphics pipeline." />
-    <MESSAGE value="- Created framebuffers." />
-    <MESSAGE value="- Created command buffer." />
-    <MESSAGE value="- Added render pass." />
-    <MESSAGE value="- Added model loading and rendering." />
-    <MESSAGE value="- Added UBOs." />
-    <MESSAGE value="- UBO progress." />
-    <MESSAGE value="- Fixed UBO alignment." />
-    <MESSAGE value="- Added player. &#10;- Added camera. &#10;- Added input." />
-    <MESSAGE value="- Added input handler." />
-    <MESSAGE value="- Remade main loop." />
-    <MESSAGE value="- Fixed projection." />
-    <MESSAGE value="- Improved player movement." />
-    <MESSAGE value="- Added sun &amp; mun." />
-    <MESSAGE value="- Vertex buffer now is staged." />
-    <MESSAGE value="- Undid some changes." />
-    <MESSAGE value="- Normals are now auto-generated." />
-    <MESSAGE value="- Re-added vertex sharing." />
-    <MESSAGE value="- Added depth testing." />
-    <MESSAGE value="- Tweaked test scene. &#10;- Added exposure multiplier.&#10;- Added super sprinting. &#10;- Added fog." />
-    <MESSAGE value="- Fixed moving window to other monitors.&#10;- Improved sdr support. &#10;- Added static exposure for hdr. &#10;- Added gamma." />
-    <MESSAGE value="- Tweaked fog. &#10;- Changed world to circular." />
-    <MESSAGE value="- Generalized buffers." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Generalized buffers." />
+    <MESSAGE value="- Added preferred sdr format." />
+    <MESSAGE value="- Added frames-in-flight." />
+    <MESSAGE value="- Fixed white lines." />
+    <MESSAGE value="- Started rewrite." />
+    <MESSAGE value="- Progress." />
+    <MESSAGE value="- Triangle!!!!" />
+    <MESSAGE value="- Added global UBO." />
+    <MESSAGE value="- Updated dda shader." />
+    <MESSAGE value="- Fixed resizing." />
+    <MESSAGE value="- Added ssbos." />
+    <MESSAGE value="- Added bevelled normals." />
+    <MESSAGE value="- Bevelled normals are now adjustable." />
+    <MESSAGE value="- Fixed night." />
+    <MESSAGE value="- Added texture loading." />
+    <MESSAGE value="- DDA now samples atlas." />
+    <MESSAGE value="- Fixed validation error." />
+    <MESSAGE value="- Added palette-compressed chunks." />
+    <MESSAGE value="- Added chunk struct in fragment shader." />
+    <MESSAGE value="- Moved player pos." />
+    <MESSAGE value="- Added unused lod texture." />
+    <MESSAGE value="- Extracted dda to its own method." />
+    <MESSAGE value="- Wip lods." />
+    <MESSAGE value="- Fixed lods." />
+    <MESSAGE value="- Optimized dda." />
+    <MESSAGE value="- Added chunk space-skipping." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added chunk space-skipping." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java</url>
+          <line>128</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
+          <line>239</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

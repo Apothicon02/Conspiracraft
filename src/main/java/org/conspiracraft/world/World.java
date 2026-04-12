@@ -3,7 +3,7 @@ package org.conspiracraft.world;
 import org.joml.Vector3i;
 
 public class World {
-    public static int size = 4096;
+    public static int size = 1024;
     public static int height = 320;
     public static byte chunkSize = 16;
     public static int sizeChunks = size / chunkSize;
