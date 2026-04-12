@@ -190,7 +190,7 @@ public class Renderer {
 
     public static int lodSSBOSize = World.lods.length*8;
     public static int gigabyte = 1000000000;
-    public static int voxelSSBOSize = gigabyte/6;
+    public static int voxelSSBOSize = gigabyte/2;
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
     public static int chunkByteSize = 4*4;
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;

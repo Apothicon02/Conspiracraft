@@ -4,13 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Generalized buffers.">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/texture/atlas.pdn" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/BufferHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/BufferHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/generic/texture/atlas.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/texture/atlas.png" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Improved worldgen. &#10;- Brightened grass &amp; dirt textures. &#10;- World no longer stops rendering when you go above Y320.">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -525,7 +520,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775430276561</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="- Improved worldgen. &#10;- Brightened grass &amp; dirt textures. &#10;- World no longer stops rendering when you go above Y320.">
+      <option name="closed" value="true" />
+      <created>1776027072524</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1776027072524</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -544,7 +547,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Now creates the pipeline layout." />
     <MESSAGE value="- Created render pass." />
     <MESSAGE value="- Finished graphics pipeline." />
     <MESSAGE value="- Created framebuffers." />
@@ -569,7 +571,8 @@
     <MESSAGE value="- Fixed moving window to other monitors.&#10;- Improved sdr support. &#10;- Added static exposure for hdr. &#10;- Added gamma." />
     <MESSAGE value="- Tweaked fog. &#10;- Changed world to circular." />
     <MESSAGE value="- Generalized buffers." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Generalized buffers." />
+    <MESSAGE value="- Improved worldgen. &#10;- Brightened grass &amp; dirt textures. &#10;- World no longer stops rendering when you go above Y320." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Improved worldgen. &#10;- Brightened grass &amp; dirt textures. &#10;- World no longer stops rendering when you go above Y320." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

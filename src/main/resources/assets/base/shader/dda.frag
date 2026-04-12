@@ -106,7 +106,7 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
     return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
 }
 
-const int renderDistance = min(size, 6144);
+const int renderDistance = min(size, 2048);
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 ogRayPos = vec3(0);
