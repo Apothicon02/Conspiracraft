@@ -170,7 +170,7 @@ const float bevelMax = 1-bevel;
 const float bevelOffset = 0.5f+(bevel/2);
 vec3 bevelNormal(vec3 normal) {
     if (blockPos.x > 0 && blockPos.x < size-1 && blockPos.z > 0 && blockPos.z < size-1 && blockPos.y > 0 && blockPos.y < height-1) { //dont blend with voxels outside of world.
-        vec3 localPos = roundVec(fract(hitPos-(flatNormal/16)));
+        vec3 localPos = roundVec(fract(hitPos-flatNormal));
         vec3 bevelPos = blockPos+0.5f;
         vec3 absFlatNorm = abs(normal);
         if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
@@ -273,7 +273,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 vec3 entranceDist = min(minPos, maxPos);
                 float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
                 vec3 intersect = rayPos + rayDir * entrancePos;
-                lodStartPos = clamp((intersect - chunkWorldPos)/lodSize, vec3(0.0001f), vec3(3.9999f));
+                lodStartPos = clamp((intersect - chunkWorldPos)/lodSize, vec3(0.0001f), vec3(lodSize-0.0001f));
 
                 lodRayPos = ivec3(lodStartPos);
                 lodDist = 1.0/rayDir;
@@ -296,7 +296,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                     vec3 entranceDist = min(minPos, maxPos);
                     float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
                     vec3 intersect = rayPos + rayDir * entrancePos;
-                    blockStartPos = clamp(intersect - lodWorldPos, vec3(0.0001f), vec3(3.9999f));
+                    blockStartPos = clamp(intersect - lodWorldPos, vec3(0.0001f), vec3(lodSize-0.0001f));
 
                     blockRayPos = ivec3(blockStartPos);
                     blockDist = 1.0/rayDir;
@@ -319,12 +319,12 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                         vec3 entranceDist = min(minPos, maxPos);
                         float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
                         vec3 intersect = rayPos + rayDir * entrancePos;
-                        flatNormal = -blockMask*raySign;
-                        voxelStartPos = clamp(((intersect - blockPos)*blockTexSize), vec3(0.0001f), vec3(7.9999f));
+                        voxelStartPos = clamp(((intersect - blockPos)*blockSize), vec3(0.0001f), vec3(blockSize-0.0001f));
 
                         vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
                         if (voxelColor.a > 0.f) {
-                            hitPos = blockPos+(voxelStartPos/blockTexSize)+(flatNormal/16);
+                            flatNormal = -blockMask*raySign;
+                            hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
                             normal = bevelNormal(flatNormal);
                             return vec4(voxelColor.rgb, 1.f);
                         } else {
@@ -340,15 +340,23 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 }
             }
         } else if (stage == 0) {
-            if (voxelRayPos.x < 0 || voxelRayPos.x >= blockTexSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockTexSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockTexSize) {
+            if (voxelRayPos.x < 0 || voxelRayPos.x >= blockSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockSize) {
                 stage = 1;
             } else {
                 vec4 voxelColor = sampleAtlas(voxelRayPos.x, voxelRayPos.y, voxelRayPos.z, blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
                 if (voxelColor.a > 0.f) {
                     flatNormal = -voxelMask*raySign;
                     normal = flatNormal;
-                    voxelPos = blockPos+(voxelRayPos/blockTexSize);
-                    hitPos = voxelPos+(flatNormal/16);
+
+                    const float voxelSize = 1.f/blockSize;
+                    voxelPos = blockPos+(voxelRayPos*voxelSize);
+                    vec3 minPos = (voxelPos - rayPos) * (1.0 / rayDir);
+                    vec3 maxPos = (voxelPos + voxelSize - rayPos) * (1.0 / rayDir);
+                    vec3 entranceDist = min(minPos, maxPos);
+                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+                    vec3 intersect = rayPos + rayDir * entrancePos;
+                    vec3 subvoxelPos = intersect-voxelPos;
+                    hitPos = voxelPos+subvoxelPos+(flatNormal*0.001f);
                     return vec4(voxelColor.rgb, 1.f);
                 }
             }
@@ -393,18 +401,18 @@ void main() {
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         vec3 primaryFlatNormal = flatNormal;
         ivec2 primaryBlock = block;
-//        vec4 shadowColor = dda(primaryHitPos, sunDir, false);
-//        if (shadowColor.a > 0.0f) {
-//            lighting *= 0.f;
-//        }
-//        vec3 reflectDir = reflect(ogDir, primaryFlatNormal);
-//        if (primaryBlock.x == 1) {
-//            vec4 reflectColor = dda(primaryHitPos, reflectDir, false);
-//            if (reflectColor.a < 1.f) {
-//                reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
-//            }
-//            color.rgb = mix(color.rgb, reflectColor.rgb, 0.85f);
-//        }
+        vec4 shadowColor = dda(primaryHitPos, sunDir, false);
+        if (shadowColor.a > 0.0f) {
+            lighting *= 0.66f;
+        }
+        vec3 reflectDir = reflect(ogDir, primaryFlatNormal);
+        if (primaryBlock.x == 1) {
+            vec4 reflectColor = dda(primaryHitPos, reflectDir, false);
+            if (reflectColor.a < 1.f) {
+                reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
+            }
+            color.rgb = mix(color.rgb, reflectColor.rgb, 0.85f);
+        }
         color.rgb *= lighting;
     }
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryHitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);

@@ -47,7 +47,6 @@ public class Earth extends WorldType {
     }
     @Override
     public void generate() {
-        Random worldgenRandom = new Random(67);
         for (int x = 0; x < sizeChunks; x++) {
             for (int z = 0; z < sizeChunks; z++) {
                 for (int y = 0; y < heightChunks; y++) {
@@ -56,23 +55,36 @@ public class Earth extends WorldType {
                 }
             }
         }
-
+        short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
         for (int cX = 0; cX < World.sizeChunks; cX++) {
             for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+                short minElevation = (short) (height-1);
+                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                        short elevation = getElevation(x, z);
+                        heightmap[packPos(x, z)] = elevation;
+                        minElevation = (short) Math.min(minElevation, elevation);
+                    }
+                }
+                chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
+            }
+        }
+        for (int cX = 0; cX < World.sizeChunks; cX++) {
+            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+                int cY = chunksMinElevations[packChunkPos(cX, cZ)]/chunkSize;
                 for (int x = cX*chunkSize; x < (cX*chunkSize)+chunkSize; x++) {
                     for (int z = cZ*chunkSize; z < (cZ*chunkSize)+chunkSize; z++) {
-                        int elevation = getElevation(x, z);
+                        int elevation = heightmap[packPos(x, z)];
                         if (elevation <= 63) {
                             World.setBlock(x, 63, z, 1, 12);
                             for (int y = 62; y > elevation; y--) {
                                 World.setBlock(x, y, z, 1, 15);
                             }
                         }
-                        if (elevation >= 66 && worldgenRandom.nextBoolean()) {
-                            World.setBlock(x, elevation + 1, z, worldgenRandom.nextFloat() < 0.15f ? 5 : 4, 0);//4 + worldgenRandom.nextInt(), worldgenRandom.nextInt(3));
+                        if (elevation >= 66 && seededRand.nextBoolean()) {
+                            World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
                         }
                         World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
-                        int cY = elevation/chunkSize; //needs to use the minimum heightmap value for this column of chunks instead of elevation of this specific block to prevent underground gaps.
                         for (int y = elevation-1; y >= cY*chunkSize; y--) {
                             World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
                         }
@@ -81,7 +93,7 @@ public class Earth extends WorldType {
             }
         }
     }
-    public int getElevation(int x, int z) {
+    public short getElevation(int x, int z) {
         double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
         double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
         double elevationMul = mountainNoise * elevationNoise;
@@ -91,6 +103,6 @@ public class Earth extends WorldType {
             elevation *= -0.25f;
         }
         elevation += 62;
-        return elevation;
+        return (short)elevation;
     }
 }

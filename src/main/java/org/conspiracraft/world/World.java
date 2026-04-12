@@ -13,6 +13,8 @@ public class World {
     public static int heightLods = height / lodSize;
     public static WorldType worldType = WorldTypes.EARTH;
 
+    public static short[] heightmap = new short[size*size];
+    public static int packPos(int x, int z) {return (x*size)+z;}
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static boolean chunkEmptinessChanged = false;
     public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
@@ -23,6 +25,9 @@ public class World {
     }
     public static int packChunkPos(int x, int y, int z) {
         return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
+    }
+    public static int packChunkPos(int x, int z) {
+        return (x*World.sizeChunks)+z;
     }
     public static Chunk recentlyEditedChunk = chunks[0];
     public static Vector3i recentlyEditedChunkPos = new Vector3i();
