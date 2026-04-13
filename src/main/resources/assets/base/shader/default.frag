@@ -4,6 +4,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec4 skylight;
     vec3 sun;
     int hdr;
+    double time;
 } globalUbo;
 layout(location = 0) in vec2 uv;
 

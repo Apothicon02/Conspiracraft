@@ -28,6 +28,7 @@ public class Main {
     public static double timeMul = 1;
     public static double interpolationTime = 0;
     public static long timeNs = 0;
+    public static double timeMs = 0;
     static void main() throws IOException {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
@@ -40,6 +41,7 @@ public class Main {
             long elapsed = start-prevTime;
             prevTime = start;
             timeNs += elapsed;
+            timeMs = timeNs/1000000d;
             window.pollEvents();
             player.inputHandler.update();
 

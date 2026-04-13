@@ -92,6 +92,14 @@ public class Earth extends WorldType {
                 }
             }
         }
+
+        for (int x = 950; x < 1050; x++) {
+            for (int z = 950; z < 1050; z++) {
+                for (int y = 150; y < 250; y++) {
+                    World.setBlock(x, y, z, 1, 15);
+                }
+            }
+        }
     }
     public short getElevation(int x, int z) {
         double mountainNoise = Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f));

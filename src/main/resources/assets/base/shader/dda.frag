@@ -4,6 +4,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec4 skylight;
     vec3 sun;
     int hdr;
+    float time;
 } globalUbo;
 struct ChunkStruct {
     int pointer;
@@ -83,6 +84,14 @@ vec4 sampleAtlas(int x, int y, int z, int bX, int bY, int bZ, int blockType, int
 //    if ((bY & 1) != 0) { y += blockSize; }
 //    if ((bZ & 1) != 0) { z += blockSize; }
     return texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
+}
+layout(set = 0, binding = 5) uniform sampler2D noises;
+float noise(vec2 coords) {
+    return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
+}
+float getCaustic(vec2 checkPos) {
+    float time = globalUbo.time/1000;
+    return noise((checkPos+time)*32);
 }
 
 layout(location = 0) in vec2 uv;
@@ -223,6 +232,7 @@ vec3 raySign = vec3(0);
 vec3 blockDist = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
+ivec3 voxelRayPos = ivec3(0);
 vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
     ogRayPos = rayPos;
     ogRayDir = rayDir;
@@ -251,7 +261,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
     vec3 blockMask = vec3(0);
 
     vec3 voxelStartPos = vec3(0);
-    ivec3 voxelRayPos = ivec3(0);
+    voxelRayPos = ivec3(0);
     vec3 voxelPos = vec3(0);
     vec3 voxelDist = vec3(0);
     vec3 voxelSideDist = vec3(0);
@@ -328,6 +338,7 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                         vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
                         if (voxelColor.a > 0.f) {
                             flatNormal = -blockMask*raySign;
+                            voxelRayPos = ivec3(voxelStartPos);
                             hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
                             normal = bevelNormal(flatNormal);
                             return vec4(voxelColor.rgb, 1.f);
@@ -390,6 +401,14 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
     return vec4(0);
 }
 
+vec3 frensel(float ang, vec3 reflectivity) {
+    return reflectivity+(vec3(1)-reflectivity)*pow(1-ang, 5);
+}
+vec3 scatterVec(vec3 vec) {
+    vec = fract(vec * 0.1031);
+    vec += dot(vec, vec + 33.33);
+    return fract((vec.xxy + vec.yzz) * vec.zyx);
+}
 void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
@@ -400,22 +419,49 @@ void main() {
     if (isSky) {
         primaryHitPos = ogPos + ogDir * renderDistance;
     } else {
-        vec4 skylight = globalUbo.skylight;
-        vec3 lighting = (vec3(dot(normal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
-        vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         vec3 primaryFlatNormal = flatNormal;
+        vec3 primaryNormal = normal;
+        ivec3 primaryBlockPos = blockPos;
+        ivec3 primaryVoxelRayPos = voxelRayPos;
         ivec2 primaryBlock = block;
+        vec3 absNorm = abs(primaryFlatNormal);
+        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(vec2(primaryBlockPos.xz)+(primaryVoxelRayPos.xz/8.f)) :
+            (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(vec2(primaryBlockPos.xy)+(primaryVoxelRayPos.xy/8.f)) :
+            getCaustic(vec2(primaryBlockPos.yz)+(primaryVoxelRayPos.yz/8.f)));
+        if (primaryBlock.x == 1 && abs(causticness) < 0.033f) {
+            color = vec4(1);
+        }
+        if (causticness > 0) {
+            causticness *= -2;
+        } else {
+            causticness *= 5;
+        }
+        float roughness = primaryBlock.x == 1 ? 0.1f : 0.f;
+        vec3 tiltedNormal = normal*causticness;
+        vec3 bentNormal = mix(normal, tiltedNormal, roughness*2);
+
+        vec4 skylight = globalUbo.skylight;
+        vec3 lighting = (vec3(dot(bentNormal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
+        vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         vec4 shadowColor = dda(primaryHitPos, sunDir, false);
         if (shadowColor.a > 0.0f) {
             lighting *= 0.66f;
         }
-        vec3 reflectDir = reflect(ogDir, primaryFlatNormal);
         if (primaryBlock.x == 1) {
+            vec3 idealReflectDir = reflect(ogDir, primaryNormal);
+            vec3 reflectDir = roundVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
+            vec3 viewDir = normalize(ogDir);
+            vec3 halfVec = normalize(viewDir-reflectDir);
+            float ang = max(dot(viewDir, halfVec), 0.f);
+            vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             vec4 reflectColor = dda(primaryHitPos, reflectDir, false);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
+            } else {
+                float fogginess = clamp(sqrt(distance(camPos, hitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+                reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(hitPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
-            color.rgb = mix(color.rgb, reflectColor.rgb, 0.85f);
+            color.rgb = mix(color.rgb, reflectColor.rgb, (frensel*0.75f)+0.25f);
         }
         color.rgb *= lighting;
     }

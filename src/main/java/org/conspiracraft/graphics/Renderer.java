@@ -54,6 +54,7 @@ public class Renderer {
 //                        }
 //                    }
                     ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
+                    ImageHelper.fillImage(stack, Textures.noises, Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise")));
                     initialized = true;
                 } else {
 //                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);

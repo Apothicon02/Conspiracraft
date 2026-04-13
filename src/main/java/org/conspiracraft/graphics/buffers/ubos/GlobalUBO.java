@@ -14,7 +14,7 @@ import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class GlobalUBO extends UBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector4f(), new Vector3f(), 0};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector4f(), new Vector3f(), 0, 0.f};
     @Override public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     @Override public int size(){return size;}
@@ -47,6 +47,7 @@ public class GlobalUBO extends UBO {
         ((Vector4f)uniformStorage[2]).set(World.worldType.getSkylight());
         ((Vector3f)uniformStorage[3]).set(World.worldType.getSun());
         uniformStorage[4] = Swapchain.hdr ? 1 : 0;
+        uniformStorage[5] = (float)(Main.timeMs);
     }
     private int offset = 0;
     public void submit() {

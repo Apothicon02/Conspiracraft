@@ -14,6 +14,7 @@ import static org.lwjgl.vulkan.VK14.*;
 public class Textures {
     public static List<Texture> textures = new ArrayList<>(List.of());
     public static Texture atlas = create(584, 64, 1024/64, 4);
+    public static Texture noises = create(2048, 2048, 4);
 
     public static Texture create(int width, int height, int channels) {
         Texture texture = new Texture(width, height, channels);
