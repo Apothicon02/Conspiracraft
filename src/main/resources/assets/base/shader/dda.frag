@@ -64,7 +64,7 @@ int getBlockData(int x, int y, int z) {
 
     int index = chunk.pointer+chunk.paletteSize+intIndex;
     if (index < 0 || index >= 250000000) return 0;
-    
+
     int key = (voxelData.voxels[index] >> bitIndex) & chunk.valueMask;
     return voxelData.voxels[chunk.pointer+key];
 }
@@ -79,10 +79,11 @@ ivec2 getBlock(vec3 pos) {
 layout(set = 0, binding = 4) uniform sampler3D atlas;
 const int blockSize = 8;
 const int blockTexSize = blockSize;
+const float voxelSize = 1.f/blockSize;
 vec4 sampleAtlas(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
-//    if ((bX & 1) != 0) { x += blockSize; }
-//    if ((bY & 1) != 0) { y += blockSize; }
-//    if ((bZ & 1) != 0) { z += blockSize; }
+    //    if ((bX & 1) != 0) { x += blockSize; }
+    //    if ((bY & 1) != 0) { y += blockSize; }
+    //    if ((bZ & 1) != 0) { z += blockSize; }
     return texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
 }
 layout(set = 0, binding = 5) uniform sampler2D noises;
@@ -227,13 +228,31 @@ vec3 getDir(vec2 pos) {
     vec4 clipSpace = vec4((inverse(globalUbo.proj) * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
     return roundVec(normalize((inverse(globalUbo.view)*clipSpace).xyz));
 }
+vec3 rayPos = vec3(0);
+vec3 rayDir = vec3(0);
+vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
+    vec3 minPos = (worldPos - rayPos) * (1.0 / rayDir);
+    vec3 maxPos = (worldPos + stageSize - rayPos) * (1.0 / rayDir);
+    vec3 entranceDist = min(minPos, maxPos);
+    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+    vec3 intersect = rayPos + rayDir * entrancePos;
+    return clamp((intersect - worldPos)/(stageSize/nextStageSize), vec3(0.0001f), vec3(nextStageSize-0.0001f));
+}
+vec3 uv3d(vec3 worldPos, float stageSize, int nextStageSize) { //same thing as above but not ivec3
+    vec3 minPos = (worldPos - rayPos) * (1.0 / rayDir);
+    vec3 maxPos = (worldPos + stageSize - rayPos) * (1.0 / rayDir);
+    vec3 entranceDist = min(minPos, maxPos);
+    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+    vec3 intersect = rayPos + rayDir * entrancePos;
+    return clamp((intersect - worldPos)/(stageSize/nextStageSize), vec3(0.0001f), vec3(nextStageSize-0.0001f));
+}
 
 vec3 raySign = vec3(0);
 vec3 blockDist = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 ivec3 voxelRayPos = ivec3(0);
-vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
+vec4 dda(bool textured) {
     ogRayPos = rayPos;
     ogRayDir = rayDir;
     raySign = sign(rayDir);
@@ -279,15 +298,8 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 if (chunk.paletteSize > 1) {
                     stage = 2;
                     stepAnything = false;
-
                     chunkWorldPos = ivec3(chunkPos*chunkSize);
-                    vec3 minPos = (chunkWorldPos - rayPos) * (1.0 / rayDir);
-                    vec3 maxPos = (chunkWorldPos + chunkSize - rayPos) * (1.0 / rayDir);
-                    vec3 entranceDist = min(minPos, maxPos);
-                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-                    vec3 intersect = rayPos + rayDir * entrancePos;
-                    lodStartPos = clamp((intersect - chunkWorldPos)/lodSize, vec3(0.0001f), vec3(lodSize-0.0001f));
-
+                    lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
                     lodRayPos = ivec3(lodStartPos);
                     lodDist = 1.0/rayDir;
                     lodSideDist = ((lodRayPos - lodStartPos) + 0.5 + raySign * 0.5) * lodDist;
@@ -295,23 +307,14 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 }
             }
         } else if (stage == 2) {
-            if (lodRayPos.x < 0 || lodRayPos.x >= lodSize || lodRayPos.y < 0 || lodRayPos.y >= lodSize || lodRayPos.z < 0 || lodRayPos.z >= lodSize) {
-                stage = 3;
-            } else {
+            if (lodRayPos.x < 0 || lodRayPos.x >= lodSize || lodRayPos.y < 0 || lodRayPos.y >= lodSize || lodRayPos.z < 0 || lodRayPos.z >= lodSize) { stage = 3; } else {
                 lodPos = (chunkWorldPos/lodSize)+lodRayPos;
                 lod = getLod(ivec3(lodPos));
                 if (lod != 0) {
                     stage = 1;
                     stepAnything = false;
-
                     lodWorldPos = ivec3(lodPos*lodSize);
-                    vec3 minPos = (lodWorldPos - rayPos) * (1.0 / rayDir);
-                    vec3 maxPos = (lodWorldPos + lodSize - rayPos) * (1.0 / rayDir);
-                    vec3 entranceDist = min(minPos, maxPos);
-                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-                    vec3 intersect = rayPos + rayDir * entrancePos;
-                    blockStartPos = clamp(intersect - lodWorldPos, vec3(0.0001f), vec3(lodSize-0.0001f));
-
+                    blockStartPos = uv3d(lodWorldPos, float(lodSize), lodSize);
                     blockRayPos = ivec3(blockStartPos);
                     blockDist = 1.0/rayDir;
                     blockSideDist = ((blockRayPos - blockStartPos) + 0.5 + raySign * 0.5) * blockDist;
@@ -319,22 +322,14 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 }
             }
         } else if (stage == 1) {
-            if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) {
-                stage = 2;
-            } else {
+            if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) { stage = 2; } else {
                 int bitIdx = (blockRayPos.x % lodSize) + (blockRayPos.y % lodSize) * lodSize + (blockRayPos.z % lodSize) * lodSize * lodSize;
                 int64_t mask = int64_t(1) << bitIdx;
                 if ((lod & mask) != 0) {
                     blockPos = lodWorldPos+blockRayPos;
                     block = getBlock(blockPos);
                     if (block.x > 0) {
-                        vec3 minPos = (blockPos - rayPos) * (1.0 / rayDir);
-                        vec3 maxPos = (blockPos + 1 - rayPos) * (1.0 / rayDir);
-                        vec3 entranceDist = min(minPos, maxPos);
-                        float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-                        vec3 intersect = rayPos + rayDir * entrancePos;
-                        voxelStartPos = clamp(((intersect - blockPos)*blockSize), vec3(0.0001f), vec3(blockSize-0.0001f));
-
+                        voxelStartPos = uv3d(blockPos, 1.f, blockSize);
                         vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
                         if (voxelColor.a > 0.f) {
                             flatNormal = -blockMask*raySign;
@@ -345,7 +340,6 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                         } else {
                             stage = 0;
                             stepAnything = false;
-
                             voxelRayPos = ivec3(voxelStartPos);
                             voxelDist = 1.0/rayDir;
                             voxelSideDist = ((voxelRayPos - voxelStartPos) + 0.5 + raySign * 0.5) * voxelDist;
@@ -355,22 +349,13 @@ vec4 dda(vec3 rayPos, vec3 rayDir, bool textured) {
                 }
             }
         } else if (stage == 0) {
-            if (voxelRayPos.x < 0 || voxelRayPos.x >= blockSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockSize) {
-                stage = 1;
-            } else {
+            if (voxelRayPos.x < 0 || voxelRayPos.x >= blockSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockSize) { stage = 1; } else {
                 vec4 voxelColor = sampleAtlas(voxelRayPos.x, voxelRayPos.y, voxelRayPos.z, blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
                 if (voxelColor.a > 0.f) {
                     flatNormal = -voxelMask*raySign;
                     normal = flatNormal;
-
-                    const float voxelSize = 1.f/blockSize;
                     voxelPos = blockPos+(voxelRayPos*voxelSize);
-                    vec3 minPos = (voxelPos - rayPos) * (1.0 / rayDir);
-                    vec3 maxPos = (voxelPos + voxelSize - rayPos) * (1.0 / rayDir);
-                    vec3 entranceDist = min(minPos, maxPos);
-                    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-                    vec3 intersect = rayPos + rayDir * entrancePos;
-                    vec3 subvoxelPos = intersect-voxelPos;
+                    vec3 subvoxelPos = uv3d(voxelPos, voxelSize, blockSize);
                     hitPos = voxelPos+subvoxelPos+(flatNormal*0.001f);
                     return vec4(voxelColor.rgb, 1.f);
                 }
@@ -413,7 +398,9 @@ void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
     ogDir = getDir(uv);
-    vec4 color = dda(ogPos, ogDir, true);
+    rayPos = ogPos;
+    rayDir = ogDir;
+    vec4 color = dda(true);
     vec3 primaryHitPos = hitPos;
     bool isSky = color.a < 1;
     if (isSky) {
@@ -426,8 +413,8 @@ void main() {
         ivec2 primaryBlock = block;
         vec3 absNorm = abs(primaryFlatNormal);
         float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(vec2(primaryBlockPos.xz)+(primaryVoxelRayPos.xz/8.f)) :
-            (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(vec2(primaryBlockPos.xy)+(primaryVoxelRayPos.xy/8.f)) :
-            getCaustic(vec2(primaryBlockPos.yz)+(primaryVoxelRayPos.yz/8.f)));
+        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(vec2(primaryBlockPos.xy)+(primaryVoxelRayPos.xy/8.f)) :
+        getCaustic(vec2(primaryBlockPos.yz)+(primaryVoxelRayPos.yz/8.f)));
         if (primaryBlock.x == 1 && abs(causticness) < 0.033f) {
             color = vec4(1);
         }
@@ -443,7 +430,9 @@ void main() {
         vec4 skylight = globalUbo.skylight;
         vec3 lighting = (vec3(dot(bentNormal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
-        vec4 shadowColor = dda(primaryHitPos, sunDir, false);
+        rayPos = primaryHitPos;
+        rayDir = sunDir;
+        vec4 shadowColor = dda(false);
         if (shadowColor.a > 0.0f) {
             lighting *= 0.66f;
         }
@@ -454,7 +443,9 @@ void main() {
             vec3 halfVec = normalize(viewDir-reflectDir);
             float ang = max(dot(viewDir, halfVec), 0.f);
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
-            vec4 reflectColor = dda(primaryHitPos, reflectDir, false);
+            rayPos = primaryHitPos;
+            rayDir = reflectDir;
+            vec4 reflectColor = dda(false);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {

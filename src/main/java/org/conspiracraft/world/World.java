@@ -4,6 +4,7 @@ import org.joml.Vector3i;
 
 public class World {
     public static int size = 2048;
+    public static int quarterSize = size/4;
     public static int height = 320;
     public static byte chunkSize = 16;
     public static int sizeChunks = size / chunkSize;
@@ -12,6 +13,9 @@ public class World {
     public static int sizeLods = size / lodSize;
     public static int heightLods = height / lodSize;
     public static WorldType worldType = WorldTypes.EARTH;
+    public static boolean inBounds(int x, int y, int z) {
+        return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
+    }
 
     public static short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}

@@ -1,6 +1,7 @@
 package org.conspiracraft.world;
 
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.shapes.Blob;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -93,13 +94,25 @@ public class Earth extends WorldType {
             }
         }
 
-        for (int x = 950; x < 1050; x++) {
-            for (int z = 950; z < 1050; z++) {
-                for (int y = 150; y < 250; y++) {
-                    World.setBlock(x, y, z, 1, 15);
-                }
-            }
-        }
+//        for (int x = 950; x < 1050; x++) {
+//            for (int z = 950; z < 1050; z++) {
+//                for (int y = 150; y < 250; y++) {
+//                    World.setBlock(x, y, z, 1, 15);
+//                }
+//            }
+//        }
+//        for (int x = 8; x < size-8; x++) {
+//            for (int z = 8; z < size-8; z++) {
+//                double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+//                double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+//                if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && seededRand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+//                    int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+//                    boolean isRainCloud = (new Vector2i(x, z).distance(size, size) / World.quarterSize < 1 && (seededRand.nextFloat() < 0.0005f));
+//                    int radius = (int) (((isRainCloud ? 6 : 0) + seededRand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))));
+//                    Blob.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
+//                }
+//            }
+//        }
     }
     public short getElevation(int x, int z) {
         double mountainNoise = Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f));
