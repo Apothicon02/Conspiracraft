@@ -81,9 +81,9 @@ public class Earth extends WorldType {
                                 World.setBlock(x, y, z, 1, 15);
                             }
                         }
-                        if (elevation >= 66 && seededRand.nextBoolean()) {
-                            World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
-                        }
+//                        if (elevation >= 66 && seededRand.nextBoolean()) {
+//                            World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
+//                        }
                         World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
                         for (int y = elevation-1; y >= cY*chunkSize; y--) {
                             World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
@@ -94,15 +94,104 @@ public class Earth extends WorldType {
         }
     }
     public short getElevation(int x, int z) {
-        double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
+        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f));
         double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
-        double elevationMul = mountainNoise * elevationNoise;
-        double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
-        int elevation = (int) (detailNoise * Math.max(0.f, elevationMul));
+        double elevationMul = (mountainNoise * elevationNoise)+0.25F;
+        double detailNoise = ((SimplexNoise.noise(x / 100.f, z / 100.f)+elevationNoise) * 16);
+        double elevation = detailNoise * Math.max(-0.5f, elevationMul*2);
         if (elevation < 0) {
             elevation *= -0.25f;
         }
-        elevation += 124*(0.5F+Math.max(0, SimplexNoise.noise(x/2500.f, z/2500.f)+(0.1F*SimplexNoise.noise(x/75.f, z/75.f))));
+        double continentNoise = -(Math.abs(elevationNoise-0.5f)-0.7f);
+        elevation += 66*Math.min(0, continentNoise);
+        elevation += 66;
         return (short)elevation;
     }
+//
+//    @Override
+//    public void generate() {
+//        for (int x = 0; x < sizeChunks; x++) {
+//            for (int z = 0; z < sizeChunks; z++) {
+//                for (int y = 0; y < heightChunks; y++) {
+//                    int packedChunkPos = packChunkPos(x, y, z);
+//                    chunks[packedChunkPos] = new Chunk(new Vector3i(x, y, z), packedChunkPos);
+//                }
+//            }
+//        }
+//        short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
+//        for (int cX = 0; cX < World.sizeChunks; cX++) {
+//            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+//                short minElevation = (short) (height-1);
+//                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                        short elevation = getElevation(x, z);
+//                        heightmap[packPos(x, z)] = elevation;
+//                        minElevation = (short) Math.min(minElevation, elevation);
+//                    }
+//                }
+//                chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
+//            }
+//        }
+//
+//        for (int cX = 0; cX < World.sizeChunks; cX++) {
+//            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+//                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                        int topBlock = 0;
+//                        for (int y = heightmap[packPos(x, z)]; y >= 0; y--) {
+//                            if (canPlace(x, y, z)) {
+//                                if (topBlock == 0) {
+//                                    topBlock = y;
+//                                    if (topBlock >= 66 && seededRand.nextFloat() < 0.1f) {
+//                                        World.setBlock(x, y + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
+//                                    }
+//                                    World.setBlock(x, y, z, topBlock < 66 ? 23 : 2, 0);
+//                                } else {
+//                                    World.setBlock(x, y, z, topBlock <= 66 ? 24 : 3, 0);
+//                                }
+//                            } else if (y == 63) {
+//                                World.setBlock(x, y, z, 1, 13);
+//                            } else if (y < 63) {
+//                                World.setBlock(x, y, z, 1, 15);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    public boolean canPlace(int x, int y, int z) {
+//        int yFactor = (int) Math.pow((Math.max(66, y)-66)/2.f, 1.1f);
+//        return getUnelevation(x+yFactor, z+yFactor) > y;
+//    }
+//    public short getElevation(int x, int z) {
+//        double elevation = 62+getContinentElevation(x, z);//Math.max(getContinentElevation(x, z), getIslandsElevation(x, z));
+//        //elevation = Math.min(elevation, getUnelevation(x, z));
+//        return (short)elevation;
+//    }
+//    public double getUnelevation(int x, int z) {
+//        double unelevationNoise = SimplexNoise.noise(x/350.f, z/350.f);
+//        double unelevation = (Math.clamp(unelevationNoise, 0.25f, 0.35f)-0.25f)*10;
+//        if (unelevation >= 0.9f) {
+//            unelevation += (1-Math.max(0.35f, unelevationNoise))*-0.035f;
+//        }
+//        unelevation *= 250;
+//        return height-unelevation;
+//    }
+//    public double getContinentElevation(int x, int z) {
+//        double elevationNoise = SimplexNoise.noise(x/500.f, z/500.f)+0.75f;
+//        elevationNoise *= 30;
+//        return elevationNoise;
+//    }
+//    public double getIslandsElevation(int x, int z) {
+//        double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
+//        double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
+//        double elevationMul = mountainNoise * elevationNoise;
+//        double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
+//        double elevation = detailNoise * Math.max(0.f, elevationMul);
+//        if (elevation < 0) {
+//            elevation *= -0.25f;
+//        }
+//        return elevation;
+//    }
 }

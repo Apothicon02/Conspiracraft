@@ -21,7 +21,7 @@ layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
 layout(std430, set = 0, binding = 3) readonly buffer LODBuffer {
     int64_t[] lods;
 } lodData;
-const int size = 4096;
+const int size = 2048;
 const int height = 320;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
