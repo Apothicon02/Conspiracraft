@@ -63,6 +63,8 @@ public class Graphics {
             Pipeline.recreatePipeline(stack);
             SyncObjects.init(stack);
             vkDestroySwapchainKHR(vkDevice, vkOldSwapchain, null);
+            Textures.resize(stack);
+            recreateDescriptors(stack);
         }
     }
 
@@ -77,7 +79,9 @@ public class Graphics {
             vkDestroySemaphore(vkDevice, renderFinishedSemaphores[i], null);
         }
         //pipeline
-        vkDestroyPipeline(vkDevice, graphicsPipeline, null);
+        for (long pipeline : graphicsPipelines) {
+            vkDestroyPipeline(vkDevice, pipeline, null);
+        }
         vkDestroyPipelineLayout(vkDevice, pipelineLayout, null);
         //swapchain
         for (long i : imageViews) {

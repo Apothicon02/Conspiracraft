@@ -459,9 +459,9 @@ void main() {
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryHitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(primaryHitPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
 
-    color.rgb = pow(color.rgb, vec3(2.2)); //gamma
-    if (globalUbo.hdr == 1) {
-        color.rgb = (color.rgb*400)/80;//exposure
-    }
+//    color.rgb = pow(color.rgb, vec3(2.2)); //gamma
+//    if (globalUbo.hdr == 1) {
+//        color.rgb = (color.rgb*400)/80;//exposure
+//    }
     outColor = vec4(color.rgb, 1);
 }

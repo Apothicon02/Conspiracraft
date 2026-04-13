@@ -1,6 +1,7 @@
 package org.conspiracraft.graphics;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
@@ -23,10 +24,9 @@ import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
 import static org.conspiracraft.graphics.Graphics.lodSSBO;
-import static org.conspiracraft.graphics.Pipeline.pipelineLayout;
+import static org.conspiracraft.graphics.Pipeline.*;
 import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffer;
 import static org.conspiracraft.graphics.Device.*;
-import static org.conspiracraft.graphics.Pipeline.graphicsPipeline;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.conspiracraft.world.World.*;
@@ -77,9 +77,12 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
-                bindImageToDrawTo(stack);
+                bindImageToDrawTo(stack, graphicsPipelines[1], Textures.dda);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-                unbindImageDrawingTo(stack);
+                unbindImageDrawingTo(stack, Textures.dda.image);
+                bindPresentImage(stack);
+                vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+                unbindPresentImage(stack);
 
                 submitCommandBuffers(stack);
 
@@ -135,15 +138,15 @@ public class Renderer {
             throw new RuntimeException("Failed to queue present!");
         }
     }
-    public static void unbindImageDrawingTo(MemoryStack stack) {
+    public static void unbindImageDrawingTo(MemoryStack stack, long image) {
         vkCmdEndRendering(currentCmdBuffer);
-        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
                 VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
     }
-    public static void bindImageToDrawTo(MemoryStack stack) {
-        VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer);
+    public static void bindImageToDrawTo(MemoryStack stack, long pipeline, Texture tex) {
+        VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer, tex.image, tex.imageView, tex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
@@ -155,19 +158,43 @@ public class Renderer {
                 .pColorAttachments(colorAttachment)
                 .pDepthAttachment(depthAttachment);
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
-        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
+        vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
+    }
+    public static void unbindPresentImage(MemoryStack stack) {
+        vkCmdEndRendering(currentCmdBuffer);
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
+                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
+    }
+    public static void bindPresentImage(MemoryStack stack) {
+        VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer);
+        VkRect2D renderAreaData = VkRect2D.calloc(stack)
+                .offset(VkOffset2D.calloc(stack).set(0, 0))
+                .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
+        VkRenderingInfo renderingInfo = VkRenderingInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_RENDERING_INFO)
+                .renderArea(renderAreaData)
+                .layerCount(1)
+                .pColorAttachments(colorAttachment)
+                .pDepthAttachment(depthAttachment);
+        vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
+        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipelines[0]);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
     }
 
-    public static VkRenderingAttachmentInfo.Buffer getColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer) {
-        ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
-                firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+    public static VkRenderingAttachmentInfo.Buffer getColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
+        ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+                prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(1, stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
-                .imageView(Swapchain.imageViews[imageIdx])
+                .imageView(imageView)
                 .imageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
                 .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
                 .storeOp(VK_ATTACHMENT_STORE_OP_STORE);

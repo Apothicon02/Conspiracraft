@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import kotlin.Pair;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.*;
@@ -13,27 +14,13 @@ import static org.lwjgl.vulkan.VK14.*;
 
 public class Pipeline {
     public static long pipelineLayout;
-    public static Long graphicsPipeline;
+    public static long[] graphicsPipelines;
     public static void recreatePipeline(MemoryStack stack) {
-        if (graphicsPipeline != null) {
+        if (graphicsPipelines != null) {
             createPipeline(stack);
         }
     }
     public static void createPipeline(MemoryStack stack) {
-        long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"fullscreen.vert"}, Shaderc.shaderc_glsl_vertex_shader));
-        long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{"dda.frag"}, Shaderc.shaderc_glsl_fragment_shader));
-        VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
-        shaderStages.get(0)
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
-                .stage(VK_SHADER_STAGE_VERTEX_BIT)
-                .module(vertShaderModule)
-                .pName(stack.UTF8("main"));
-        shaderStages.get(1)
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
-                .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
-                .module(fragShaderModule)
-                .pName(stack.UTF8("main"));
-
         VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO)
                 .pDynamicStates(stack.mallocInt(2).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).flip());
@@ -106,30 +93,49 @@ public class Pipeline {
                 .colorAttachmentCount(1)
                 .pColorAttachmentFormats(stack.ints(vkSurfFormat.format()))
                 .depthAttachmentFormat(VK_FORMAT_D32_SFLOAT);
-        VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
-                .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
-                .stageCount(2)
-                .pStages(shaderStages)
-                .pVertexInputState(vertexInputInfo)
-                .pInputAssemblyState(inputAssembly)
-                .pViewportState(viewportState)
-                .pRasterizationState(rasterizer)
-                .pMultisampleState(multisampling)
-                .pDepthStencilState(depthStencil)
-                .pColorBlendState(colorBlending)
-                .pDynamicState(dynamicState)
-                .layout(pipelineLayout)
-                .renderPass(VK_NULL_HANDLE)
-                .pNext(renderingInfo)
-                .subpass(0)
-                .basePipelineHandle(VK_NULL_HANDLE) // Optional
-                .basePipelineIndex(-1); // Optional
 
-        LongBuffer pipelineBuf = stack.mallocLong(1);
-        if (vkCreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {throw new RuntimeException("failed to create graphics pipeline!");}
-        graphicsPipeline = pipelineBuf.get(0);
+        Pair<String, String>[] shaders = new Pair[]{new Pair<>("fullscreen.vert", "present.frag"), new Pair<>("fullscreen.vert", "dda.frag")};
+        graphicsPipelines = new long[shaders.length];
+        for (int i = 0; i < graphicsPipelines.length; i++) {
+            long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{shaders[i].component1()}, Shaderc.shaderc_glsl_vertex_shader));
+            long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{shaders[i].component2()}, Shaderc.shaderc_glsl_fragment_shader));
+            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
+            shaderStages.get(0)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
+                    .stage(VK_SHADER_STAGE_VERTEX_BIT)
+                    .module(vertShaderModule)
+                    .pName(stack.UTF8("main"));
+            shaderStages.get(1)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
+                    .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
+                    .module(fragShaderModule)
+                    .pName(stack.UTF8("main"));
+            VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
+                    .stageCount(2)
+                    .pStages(shaderStages)
+                    .pVertexInputState(vertexInputInfo)
+                    .pInputAssemblyState(inputAssembly)
+                    .pViewportState(viewportState)
+                    .pRasterizationState(rasterizer)
+                    .pMultisampleState(multisampling)
+                    .pDepthStencilState(depthStencil)
+                    .pColorBlendState(colorBlending)
+                    .pDynamicState(dynamicState)
+                    .layout(pipelineLayout)
+                    .renderPass(VK_NULL_HANDLE)
+                    .pNext(renderingInfo)
+                    .subpass(0)
+                    .basePipelineHandle(VK_NULL_HANDLE) // Optional
+                    .basePipelineIndex(-1); // Optional
 
-        vkDestroyShaderModule(vkDevice, fragShaderModule, null);
-        vkDestroyShaderModule(vkDevice, vertShaderModule, null);
+            LongBuffer pipelineBuf = stack.mallocLong(1);
+            if (vkCreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
+                throw new RuntimeException("failed to create graphics pipeline!");
+            }
+            graphicsPipelines[i] = pipelineBuf.get(0);
+            vkDestroyShaderModule(vkDevice, fragShaderModule, null);
+            vkDestroyShaderModule(vkDevice, vertShaderModule, null);
+        }
     }
 }
