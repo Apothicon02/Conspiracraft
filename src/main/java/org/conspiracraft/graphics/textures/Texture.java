@@ -17,14 +17,16 @@ public class Texture {
     public long memory = -1;
     public long imageView = -1;
     public long sampler = -1;
-    public boolean attachment = false;
+    public int usage;
+    public boolean windowResizable;
 
-    public Texture(int width, int height, int channels, int format, boolean attachment) {
+    public Texture(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         this.width = width;
         this.height = height;
         this.channels = channels;
         this.format = format;
-        this.attachment = attachment;
+        this.usage = usage;
+        this.windowResizable = windowResizable;
     }
 
     private boolean layoutUnset = true;
@@ -38,7 +40,7 @@ public class Texture {
 
     public void create(MemoryStack stack) {
         int texFormat = format;
-        long[] imageData = ImageHelper.createImage(stack, width, height, this instanceof Texture3D tex3D ? tex3D.depth : 1, texFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        long[] imageData = ImageHelper.createImage(stack, width, height, this instanceof Texture3D tex3D ? tex3D.depth : 1, texFormat, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         image = imageData[0];
         memory = imageData[1];
         imageView = ImageHelper.createImageView(stack, this instanceof Texture3D, image, texFormat, channels);

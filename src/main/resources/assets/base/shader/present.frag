@@ -21,11 +21,32 @@ vec3 randomVec() {
     int y = int(mod(gl_FragCoord.y, 4.0));
     return SSAO_NOISE[x * 4 + y];
 }
-
+vec3 reconstructViewPos(vec2 uvPos, float depth) {
+    vec4 clip = vec4(uvPos*2.0f-1.0f, depth, 1.0f);
+    vec4 view = inverse(globalUbo.proj)*clip;
+    return view.xyz/view.w;
+}
+const int width = 1600;
+const int height = 890;
 void main() {
-    vec4 color = texture(ddaResult, vec2(uv));
-//    vec3 randVec = randomVec();
-//    color.rgb = vec3(color.a*1000);
+    vec2 uvPos = vec2(uv);
+    vec4 color = texture(ddaResult, uvPos);
+    vec3 viewPos = reconstructViewPos(uvPos, color.a);//color.a is depth
+    //color.rgb = (viewPos*0.002f)+0.5f;
+//    float depthC = texture(ddaResult, uvPos).a;
+//    float depthR = texture(ddaResult, uvPos + vec2(1.0/width, 0)).a;
+//    float depthU = texture(ddaResult, uvPos + vec2(0, 1.0/height)).a;
+//
+//    vec3 p  = reconstructViewPos(uvPos, depthC);
+//    vec3 px = reconstructViewPos(uvPos + vec2(1.0/width, 0), depthR);
+//    vec3 py = reconstructViewPos(uvPos + vec2(0, 1.0/height), depthU);
+//
+//    vec3 normal = normalize(cross(px - p, py - p));
+//    vec3 normal = imageLoad(normalTex, gl_FragCoord.xy).xyz;
+//    color.rgb = (normal+1)/2;
+
+    vec3 randVec = randomVec();
+
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
     if (globalUbo.hdr == 1) {
         color.rgb = (color.rgb*400)/80;//exposure
