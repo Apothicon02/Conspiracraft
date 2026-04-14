@@ -130,6 +130,7 @@ float getCaustic(vec2 checkPos) {
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outNormal;
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
     return toValue + invLerpValue * (fromValue - toValue);
@@ -464,6 +465,7 @@ void main() {
     rayPos = ogPos;
     rayDir = ogDir;
     vec4 color = dda(true);
+    vec3 primaryNormal = normal;
     vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
     bool isSky = color.a < 1;
     if (isSky) {
@@ -471,7 +473,6 @@ void main() {
     } else {
         color.rgb = mipmap(color.rgb);
         vec3 primaryFlatNormal = flatNormal;
-        vec3 primaryNormal = normal;
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
         ivec2 primaryBlock = block;
@@ -526,4 +527,5 @@ void main() {
     color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
     vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
     outColor = vec4(color.rgb, clipPos.z/clipPos.w);
+    outNormal = vec4(primaryNormal, fogginess);
 }

@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed textures having unnecessary usage flags.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Now supports having multiple color attachments in one pipeline.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Descriptors.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipeline.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -551,7 +546,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776203710301</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="- Now supports having multiple color attachments in one pipeline.">
+      <option name="closed" value="true" />
+      <created>1776205413363</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1776205413363</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -559,7 +562,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Updated dda shader." />
     <MESSAGE value="- Fixed resizing." />
     <MESSAGE value="- Added ssbos." />
     <MESSAGE value="- Added bevelled normals." />
@@ -584,7 +586,8 @@
     <MESSAGE value="- Fixed extreme lag in specific angles." />
     <MESSAGE value="- Fixed voxel hit pos inaccuracy." />
     <MESSAGE value="- Fixed textures having unnecessary usage flags." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed textures having unnecessary usage flags." />
+    <MESSAGE value="- Now supports having multiple color attachments in one pipeline." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Now supports having multiple color attachments in one pipeline." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

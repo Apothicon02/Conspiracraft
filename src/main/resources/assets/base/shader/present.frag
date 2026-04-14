@@ -6,7 +6,8 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
     double time;
 } globalUbo;
-layout(set = 0, binding = 6) uniform sampler2D ddaResult;
+layout(set = 0, binding = 6) uniform sampler2D ddaColors;
+layout(set = 0, binding = 7) uniform sampler2D ddaNormals;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
@@ -21,32 +22,43 @@ vec3 randomVec() {
     int y = int(mod(gl_FragCoord.y, 4.0));
     return SSAO_NOISE[x * 4 + y];
 }
+const float radius = 1.f;
+const int KERNEL_SIZE = 32; //reduce to something like 8 when taa is enabled.
+vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
+
 vec3 reconstructViewPos(vec2 uvPos, float depth) {
     vec4 clip = vec4(uvPos*2.0f-1.0f, depth, 1.0f);
     vec4 view = inverse(globalUbo.proj)*clip;
     return view.xyz/view.w;
 }
-const int width = 1600;
-const int height = 890;
-void main() {
-    vec2 uvPos = vec2(uv);
-    vec4 color = texture(ddaResult, uvPos);
-    vec3 viewPos = reconstructViewPos(uvPos, color.a);//color.a is depth
-    //color.rgb = (viewPos*0.002f)+0.5f;
-//    float depthC = texture(ddaResult, uvPos).a;
-//    float depthR = texture(ddaResult, uvPos + vec2(1.0/width, 0)).a;
-//    float depthU = texture(ddaResult, uvPos + vec2(0, 1.0/height)).a;
-//
-//    vec3 p  = reconstructViewPos(uvPos, depthC);
-//    vec3 px = reconstructViewPos(uvPos + vec2(1.0/width, 0), depthR);
-//    vec3 py = reconstructViewPos(uvPos + vec2(0, 1.0/height), depthU);
-//
-//    vec3 normal = normalize(cross(px - p, py - p));
-//    vec3 normal = imageLoad(normalTex, gl_FragCoord.xy).xyz;
-//    color.rgb = (normal+1)/2;
 
+float getAO(float depth, vec3 normal) {
+    vec3 posVS = reconstructViewPos(uv.xy, depth);
+    vec3 normalVS = normalize((globalUbo.view * vec4(normal, 0.f)).xyz);
     vec3 randVec = randomVec();
-
+    vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
+    vec3 bitangent = cross(normalVS, tangent);
+    mat3 TBN = mat3(tangent, bitangent, normalVS);
+    float occlusion = 0.f;
+    for (int i = 0; i < KERNEL_SIZE; i++) {
+        vec3 sampleVec = TBN * SSAO_KERNEL[i];
+        sampleVec = posVS + sampleVec * radius;
+        vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
+        offset.xyz /= offset.w;
+        vec2 sampleUV = offset.xy * 0.5 + 0.5;
+        if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
+            float sampleDepth = reconstructViewPos(sampleUV, texture(ddaColors, sampleUV).a).z;
+            float rangeCheck = smoothstep(0.f, 1.f, radius / abs(posVS.z - sampleDepth));
+            occlusion += (sampleDepth >= sampleVec.z ? 1.f : 0.f) * rangeCheck;
+        }
+    }
+    occlusion = 1.0 - (occlusion / KERNEL_SIZE);
+    return occlusion;
+}
+void main() {
+    vec4 color = texture(ddaColors, uv.xy);
+    vec4 normal = texture(ddaNormals, uv.xy);
+    color.rgb*=mix(getAO(color.a, normal.xyz), 1, normal.a); //normal.a is fogginess, color.a is depth
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
     if (globalUbo.hdr == 1) {
         color.rgb = (color.rgb*400)/80;//exposure
