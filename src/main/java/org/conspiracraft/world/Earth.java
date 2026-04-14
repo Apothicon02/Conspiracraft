@@ -93,8 +93,12 @@ public class Earth extends WorldType {
                             }
                         }
                         if (flat) {
-                            if (elevation >= 66 && seededRand.nextBoolean()) {
-                                World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
+                            if (elevation >= 66) {
+                                if (seededRand.nextBoolean() && seededRand.nextFloat() < SimplexNoise.noise(x/100.f, z/100.f)-0.2f) {
+                                    World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
+                                } else if (seededRand.nextFloat() < 0.003f) {
+                                    World.setBlock(x, elevation + 1, z, 18, seededRand.nextInt(3));
+                                }
                             }
                             World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
                             for (int y = elevation - 1; y >= cY * chunkSize; y--) {

@@ -388,8 +388,8 @@ vec4 dda(bool textured) {
                     flatNormal = -voxelMask*raySign;
                     normal = flatNormal;
                     voxelPos = blockPos+(voxelRayPos*voxelSize);
-                    vec3 subvoxelPos = uv3d(voxelPos, voxelSize, blockSize);
-                    hitPos = voxelPos+subvoxelPos+(flatNormal*0.001f);
+                    vec3 subvoxelPos = (uv3d(voxelPos, voxelSize, blockSize)/blockSize)*voxelSize;
+                    hitPos = voxelPos+(subvoxelPos/(blockSize*blockSize))+(flatNormal*0.001f);
                     return vec4(voxelColor.rgb, 1.f);
                 }
             }
@@ -456,6 +456,7 @@ vec3 mipmap(vec3 color) {
     }
     return color;
 }
+const float Z_NEAR = 0.01f;
 void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
@@ -463,10 +464,10 @@ void main() {
     rayPos = ogPos;
     rayDir = ogDir;
     vec4 color = dda(true);
-    vec3 primaryHitPos = hitPos;
+    vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
     bool isSky = color.a < 1;
     if (isSky) {
-        primaryHitPos = ogPos + ogDir * renderDistance;
+        primaryLightPos = ogPos + ogDir * renderDistance;
     } else {
         color.rgb = mipmap(color.rgb);
         vec3 primaryFlatNormal = flatNormal;
@@ -493,7 +494,7 @@ void main() {
         vec4 skylight = globalUbo.skylight;
         vec3 lighting = (vec3(dot(bentNormal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
-        rayPos = primaryHitPos;
+        rayPos = primaryLightPos;
         rayDir = sunDir;
         vec4 shadowColor = dda(false);
         if (shadowColor.a > 0.0f) {
@@ -506,21 +507,23 @@ void main() {
             vec3 halfVec = normalize(viewDir-reflectDir);
             float ang = max(dot(viewDir, halfVec), 0.f);
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
-            rayPos = primaryHitPos;
+            rayPos = primaryLightPos;
             rayDir = reflectDir;
             vec4 reflectColor = dda(false);
             if (reflectColor.a < 1.f) {
-                reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
+                reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
-                float fogginess = clamp(sqrt(distance(camPos, hitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
-                reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(hitPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
+                vec3 lightPos = hitPos+(flatNormal*voxelSize);
+                float fogginess = clamp(sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+                reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
             color.rgb = mix(color.rgb, reflectColor.rgb, (frensel*0.75f)+0.25f);
         }
         color.rgb *= lighting;
     }
-    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryHitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
-    color.rgb = mix(color.rgb, getLightingColor(primaryHitPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-    outColor = vec4(color.rgb, 1);
+    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+    color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
+    vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
+    outColor = vec4(color.rgb, clipPos.z/clipPos.w);
 }
