@@ -1,8 +1,6 @@
 package org.conspiracraft;
 
 import org.conspiracraft.graphics.Graphics;
-import org.conspiracraft.graphics.Pipeline;
-import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.player.InputHandler;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;

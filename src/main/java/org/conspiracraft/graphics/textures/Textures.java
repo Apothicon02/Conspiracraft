@@ -14,6 +14,7 @@ public class Textures {
     public static Texture atlas;
     public static Texture noises;
     public static Texture dda;
+    public static Texture ddaNormals;
 
     public static Texture create(int width, int height, int channels, int format, int usage, boolean attachmentTexture) {
         Texture texture = new Texture(width, height, channels, format, usage, attachmentTexture);
@@ -41,6 +42,7 @@ public class Textures {
         atlas = create(584, 64, 1024/64, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         noises = create(2048, 2048, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
         dda = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
+        ddaNormals = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         textures.forEach((tex) -> {tex.create(stack);});
     }
 }

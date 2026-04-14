@@ -17,7 +17,7 @@ import static org.lwjgl.vulkan.VK10.*;
 public class Descriptors {
     public Descriptors(MemoryStack stack) {
         createDescriptorSetLayout(stack);
-        Pipeline.createPipeline(stack);
+        Pipelines.createPipeline(stack);
         createDescriptorPool(stack);
         createDescriptorSets(stack);
     }

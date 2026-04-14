@@ -10,7 +10,7 @@ import org.lwjgl.system.MemoryStack;
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Window.window;
 import static org.conspiracraft.graphics.Device.*;
-import static org.conspiracraft.graphics.Pipeline.*;
+import static org.conspiracraft.graphics.Pipelines.*;
 import static org.conspiracraft.graphics.Renderer.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
@@ -60,7 +60,7 @@ public class Graphics {
 
             long vkOldSwapchain = vkSwapchain;
             Swapchain.init(stack);
-            Pipeline.recreatePipeline(stack);
+            Pipelines.recreatePipeline(stack);
             SyncObjects.init(stack);
             vkDestroySwapchainKHR(vkDevice, vkOldSwapchain, null);
             Textures.resize(stack);
@@ -79,8 +79,8 @@ public class Graphics {
             vkDestroySemaphore(vkDevice, renderFinishedSemaphores[i], null);
         }
         //pipeline
-        for (long pipeline : graphicsPipelines) {
-            vkDestroyPipeline(vkDevice, pipeline, null);
+        for (Pipeline pipeline : pipelines) {
+            vkDestroyPipeline(vkDevice, pipeline.vkPipeline, null);
         }
         vkDestroyPipelineLayout(vkDevice, pipelineLayout, null);
         //swapchain

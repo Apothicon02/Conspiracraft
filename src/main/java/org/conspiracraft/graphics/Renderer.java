@@ -15,16 +15,13 @@ import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
 import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import org.lwjgl.vulkan.*;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
-import static org.conspiracraft.graphics.Graphics.lodSSBO;
-import static org.conspiracraft.graphics.Pipeline.*;
+import static org.conspiracraft.graphics.Pipelines.*;
 import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffer;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
@@ -77,9 +74,9 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
-                bindImageToDrawTo(stack, graphicsPipelines[1], Textures.dda);
+                bindImagesToDrawTo(stack, pipelines[1].vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals});
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-                unbindImageDrawingTo(stack, Textures.dda.image);
+                unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image});
                 bindPresentImage(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindPresentImage(stack);
@@ -138,15 +135,17 @@ public class Renderer {
             throw new RuntimeException("Failed to queue present!");
         }
     }
-    public static void unbindImageDrawingTo(MemoryStack stack, long image) {
+    public static void unbindImagesDrawingTo(MemoryStack stack, long[] images) {
         vkCmdEndRendering(currentCmdBuffer);
-        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
-                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
+        for (long image : images) {
+            ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
+                    VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
+        }
     }
-    public static void bindImageToDrawTo(MemoryStack stack, long pipeline, Texture tex) {
-        VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer, tex.image, tex.imageView, tex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures) {
+        VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
@@ -155,12 +154,31 @@ public class Renderer {
                 .sType(VK_STRUCTURE_TYPE_RENDERING_INFO)
                 .renderArea(renderAreaData)
                 .layerCount(1)
-                .pColorAttachments(colorAttachment)
+                .pColorAttachments(colorAttachments)
                 .pDepthAttachment(depthAttachment);
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
+    }
+    public static VkRenderingAttachmentInfo.Buffer getColorAttachments(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture[] textures) {
+        VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(textures.length, stack);
+        for (int i = 0; i < textures.length; i++) {
+            Texture tex = textures[i];
+            int prevLayout = tex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+                    prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                    prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+            attachmentInfo.get(i)
+                    .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
+                    .imageView(tex.imageView)
+                    .imageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+                    .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                    .storeOp(VK_ATTACHMENT_STORE_OP_STORE);
+            attachmentInfo.clearValue().color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
+        }
+        return attachmentInfo;
     }
     public static void unbindPresentImage(MemoryStack stack) {
         vkCmdEndRendering(currentCmdBuffer);
@@ -182,7 +200,7 @@ public class Renderer {
                 .pColorAttachments(colorAttachment)
                 .pDepthAttachment(depthAttachment);
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
-        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipelines[0]);
+        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[0].vkPipeline);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
     }
