@@ -285,6 +285,7 @@ vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 ivec3 voxelRayPos = ivec3(0);
 vec4 dda(bool textured) {
+    rayDir = roundVec(rayDir);
     ogRayPos = rayPos;
     ogRayDir = rayDir;
     raySign = sign(rayDir);
