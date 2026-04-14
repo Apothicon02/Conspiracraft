@@ -1,5 +1,6 @@
 package org.conspiracraft.world;
 
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class World {
@@ -37,6 +38,16 @@ public class World {
     public static Vector3i recentlyEditedChunkPos = new Vector3i();
     public static Vector3i recentlyEditedLocalPos = new Vector3i();
     public static Vector3i recentlyEditedPos = new Vector3i();
+    public static Vector2i getBlock(int x, int y, int z) {
+        int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
+        if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {
+            recentlyEditedChunkPos.set(cX, cY, cZ);
+            recentlyEditedChunk = chunks[packChunkPos(cX, cY, cZ)];
+        }
+        recentlyEditedLocalPos.set(x&15, y&15, z&15);
+        recentlyEditedPos.set(x, y, z);
+        return recentlyEditedChunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
+    }
     public static void setBlock(int x, int y, int z, int type, int subType) {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
         if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {

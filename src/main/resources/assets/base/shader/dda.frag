@@ -77,14 +77,46 @@ ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
 layout(set = 0, binding = 4) uniform sampler3D atlas;
+vec4 fromLinear(vec4 linearRGB){
+    bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
+    vec4 higher = vec4(1.055)*pow(linearRGB, vec4(1.0/2.4)) - vec4(0.055);
+    vec4 lower = linearRGB * vec4(12.92);
+    return mix(higher, lower, cutoff);
+}
+vec4 toLinear(vec4 sRGB){
+    bvec4 cutoff = lessThan(sRGB, vec4(0.04045));
+    vec4 higher = pow((sRGB + vec4(0.055))/vec4(1.055), vec4(2.4));
+    vec4 lower = sRGB/vec4(12.92);
+    return mix(higher, lower, cutoff);
+}
+vec3 fromLinear(vec3 linearRGB){
+    bvec3 cutoff = lessThan(linearRGB, vec3(0.0031308));
+    vec3 higher = vec3(1.055)*pow(linearRGB, vec3(1.0/2.4)) - vec3(0.055);
+    vec3 lower = linearRGB * vec3(12.92);
+    return vec3(mix(higher, lower, cutoff));
+}
+vec3 toLinear(vec3 sRGB){
+    bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
+    vec3 higher = pow((sRGB + vec3(0.055))/vec3(1.055), vec3(2.4));
+    vec3 lower = sRGB/vec3(12.92);
+    return vec3(mix(higher, lower, cutoff));
+}
 const int blockSize = 8;
 const int blockTexSize = blockSize;
 const float voxelSize = 1.f/blockSize;
-vec4 sampleAtlas(int x, int y, int z, int bX, int bY, int bZ, int blockType, int blockSubtype) {
+vec4 sampleAtlas(int x, int y, int z, int blockType, int blockSubtype) {
     //    if ((bX & 1) != 0) { x += blockSize; }
     //    if ((bY & 1) != 0) { y += blockSize; }
     //    if ((bZ & 1) != 0) { z += blockSize; }
-    return texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
+    vec4 color = texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
+    return vec4(fromLinear(color.rgb), color.a);
+}
+vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
+    ivec3 pos = ivec3(x, y, z);
+    if (pos.x < 0) {pos.x+=blockSize;} else if (pos.x >= blockSize) {pos.x-=blockSize;}
+    if (pos.y < 0) {pos.y+=blockSize;} else if (pos.y >= blockSize) {pos.y-=blockSize;}
+    if (pos.z < 0) {pos.z+=blockSize;} else if (pos.z >= blockSize) {pos.z-=blockSize;}
+    return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
 layout(set = 0, binding = 5) uniform sampler2D noises;
 float noise(vec2 coords) {
@@ -330,7 +362,7 @@ vec4 dda(bool textured) {
                     block = getBlock(blockPos);
                     if (block.x > 0) {
                         voxelStartPos = uv3d(blockPos, 1.f, blockSize);
-                        vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
+                        vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
                         if (voxelColor.a > 0.f) {
                             flatNormal = -blockMask*raySign;
                             voxelRayPos = ivec3(voxelStartPos);
@@ -350,7 +382,7 @@ vec4 dda(bool textured) {
             }
         } else if (stage == 0) {
             if (voxelRayPos.x < 0 || voxelRayPos.x >= blockSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockSize) { stage = 1; } else {
-                vec4 voxelColor = sampleAtlas(voxelRayPos.x, voxelRayPos.y, voxelRayPos.z, blockPos.x, blockPos.y, blockPos.z, block.x, block.y);
+                vec4 voxelColor = sampleAtlas(voxelRayPos.x, voxelRayPos.y, voxelRayPos.z, block.x, block.y);
                 if (voxelColor.a > 0.f) {
                     flatNormal = -voxelMask*raySign;
                     normal = flatNormal;
@@ -394,6 +426,35 @@ vec3 scatterVec(vec3 vec) {
     vec += dot(vec, vec + 33.33);
     return fract((vec.xxy + vec.yzz) * vec.zyx);
 }
+vec3 mipmap(vec3 color) {
+    int inc = 3;
+    vec3 subbed = vec3(dot(-flatNormal.x, rayDir.x), dot(-flatNormal.y, rayDir.y), dot(-flatNormal.z, rayDir.z));
+    bool xHighest = subbed.x > subbed.y && subbed.x > subbed.z;
+    bool yHighest = subbed.y > subbed.x && subbed.y > subbed.z;
+    bool zHighest = subbed.z > subbed.x && subbed.z > subbed.y;
+    vec3 avgNColor = vec3(0);
+    float maxBrightness = 0;
+    float neighborsSolid = 0.f;
+    for (int x = xHighest ? voxelRayPos.x : voxelRayPos.x-inc; x <= voxelRayPos.x+inc; x+= xHighest ? 100 : inc) {
+        for (int y = yHighest ? voxelRayPos.y : voxelRayPos.y-inc; y <= voxelRayPos.y+inc; y+= yHighest ? 100 : inc) {
+            for (int z = zHighest ? voxelRayPos.z : voxelRayPos.z-inc; z <= voxelRayPos.z+inc; z+= zHighest ? 100 : inc) {
+                vec4 neighbor = sampleAtlasTiled(x, y, z, block.x, block.y);
+                if (neighbor.a >= 1.f) {
+                    float brightness = max(neighbor.r, max(neighbor.g, neighbor.b));
+                    maxBrightness = max(maxBrightness, brightness);
+                    avgNColor += (neighbor.rgb)*brightness;
+                    neighborsSolid+=1*brightness;
+                }
+            }
+        }
+    }
+    if (neighborsSolid > 0) {
+        avgNColor /= neighborsSolid;
+        float dist = min(1, distance(ogPos, blockPos+(voxelRayPos/float(blockSize)))/100);
+        color = mix(color, avgNColor, dist);//clamp(mix(color, avgNColor, clamp(dist-max(0, 4*(max(color.r, max(color.g, color.b))-0.5f)), 0, 1)), 0, 1);
+    }
+    return color;
+}
 void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
@@ -406,6 +467,7 @@ void main() {
     if (isSky) {
         primaryHitPos = ogPos + ogDir * renderDistance;
     } else {
+        color.rgb = mipmap(color.rgb);
         vec3 primaryFlatNormal = flatNormal;
         vec3 primaryNormal = normal;
         ivec3 primaryBlockPos = blockPos;
@@ -449,6 +511,7 @@ void main() {
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryHitPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
+                //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
                 float fogginess = clamp(sqrt(distance(camPos, hitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
                 reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(hitPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
@@ -458,10 +521,5 @@ void main() {
     }
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryHitPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(primaryHitPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-
-//    color.rgb = pow(color.rgb, vec3(2.2)); //gamma
-//    if (globalUbo.hdr == 1) {
-//        color.rgb = (color.rgb*400)/80;//exposure
-//    }
     outColor = vec4(color.rgb, 1);
 }

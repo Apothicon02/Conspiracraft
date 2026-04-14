@@ -76,18 +76,56 @@ public class Earth extends WorldType {
                 for (int x = cX*chunkSize; x < (cX*chunkSize)+chunkSize; x++) {
                     for (int z = cZ*chunkSize; z < (cZ*chunkSize)+chunkSize; z++) {
                         int elevation = heightmap[packPos(x, z)];
+                        int maxSteepness = 0;
+                        int minNeighborY = height - 1;
+                        for (int pos : new int[]{packPos(Math.min(size - 1, x + 3), z), packPos(Math.max(0, x - 3), z), packPos(x, Math.min(size - 1, z + 3)), packPos(x, Math.max(0, z - 3)),
+                                packPos(Math.max(0, x - 3), Math.max(0, z - 3)), packPos(Math.min(size - 1, x + 3), Math.max(0, z - 3)), packPos(Math.max(0, x - 3), Math.min(size - 1, z + 3)), packPos(Math.min(size - 1, x + 3), Math.min(size - 1, z + 3))}) {
+                            int nY = heightmap[pos];
+                            minNeighborY = Math.min(minNeighborY, nY);
+                            int steepness = Math.abs(elevation - nY);
+                            maxSteepness = Math.max(maxSteepness, steepness);
+                        }
+                        boolean flat = maxSteepness < 4;
                         if (elevation <= 63) {
                             World.setBlock(x, 63, z, 1, 12);
                             for (int y = 62; y > elevation; y--) {
                                 World.setBlock(x, y, z, 1, 15);
                             }
                         }
-//                        if (elevation >= 66 && seededRand.nextBoolean()) {
-//                            World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
-//                        }
-                        World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
-                        for (int y = elevation-1; y >= cY*chunkSize; y--) {
-                            World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
+                        if (flat) {
+                            if (elevation >= 66 && seededRand.nextBoolean()) {
+                                World.setBlock(x, elevation + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
+                            }
+                            World.setBlock(x, elevation, z, elevation < 66 ? 23 : 2, 0);
+                            for (int y = elevation - 1; y >= cY * chunkSize; y--) {
+                                World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
+                            }
+                        } else {
+                            for (int y = elevation; y >= cY * chunkSize; y--) {
+                                World.setBlock(x, y, z, 55, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        for (int cX = 0; cX < World.sizeChunks; cX++) {
+            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                        int elevation = heightmap[(x * size) + z];
+                        Vector2i blockOn = getBlock(x, elevation, z);
+                        float randomNumber = seededRand.nextFloat();
+                        if (blockOn.x == 55) {
+                            if (randomNumber < 0.05f) {
+                                Blob.generate(blockOn, x, elevation, z, (Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f)) < 0.05f ? 56 : 10), 0, (int) (2 + (seededRand.nextFloat() * 16)));
+                            }
+                        } else if (blockOn.x == 2) {
+                            if (randomNumber < 0.0004f) {
+                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (seededRand.nextFloat() * 7)));
+                            }
                         }
                     }
                 }
@@ -115,10 +153,10 @@ public class Earth extends WorldType {
 //        }
     }
     public short getElevation(int x, int z) {
-        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f));
-        double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
+        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 250.f, z / 250.f));
+        double elevationNoise = SimplexNoise.noise(x / 500.f, z / 500.f) + 0.5f;
         double elevationMul = (mountainNoise * elevationNoise)+0.25F;
-        double detailNoise = ((SimplexNoise.noise(x / 100.f, z / 100.f)+elevationNoise) * 16);
+        double detailNoise = ((SimplexNoise.noise(x / 75.f, z / 75.f)+elevationNoise) * 16);
         double elevation = detailNoise * Math.max(-0.5f, elevationMul*2);
         if (elevation < 0) {
             elevation *= -0.25f;
