@@ -126,6 +126,9 @@ float getCaustic(vec2 checkPos) {
     float time = globalUbo.time/1000;
     return noise((checkPos+time)*32);
 }
+layout(set = 0, binding = 9) uniform sampler2D rasterColors;
+layout(set = 0, binding = 10) uniform sampler2D rasterDepth;
+layout(set = 0, binding = 11) uniform sampler2D rasterNormals;
 
 layout(location = 0) in vec2 uv;
 
@@ -468,8 +471,23 @@ void main() {
     vec3 primaryNormal = normal;
     vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
     bool isSky = color.a < 1;
+    float depth = 0.f;
     if (isSky) {
         primaryLightPos = ogPos + ogDir * renderDistance;
+    } else {
+        vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
+        depth = clipPos.z/clipPos.w;
+    }
+    float rasterDepth = texture(rasterDepth, uv).r;
+    if (rasterDepth > depth) {
+        isSky = false;
+        depth = rasterDepth;
+        color = texture(rasterColors, uv);
+        primaryNormal = texture(rasterNormals, uv).xyz;
+        vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
+        vec4 view = inverse(globalUbo.proj)*clip;
+        view/=view.w;
+        primaryLightPos = (inverse(globalUbo.view)*view).xyz;
     } else {
         color.rgb = mipmap(color.rgb);
         vec3 primaryFlatNormal = flatNormal;
@@ -525,9 +543,8 @@ void main() {
     }
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-    vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
-    float depth = clipPos.z/clipPos.w;
-    gl_FragDepth = depth;
     outColor = vec4(color.rgb, 1);
+    //outColor = vec4(primaryLightPos.rgb/worldSize, 1);
+    gl_FragDepth = depth;
     outNormal = vec4(primaryNormal, fogginess);
 }

@@ -31,8 +31,8 @@ public class InputHandler {
     }
     public void update() {
         if (Window.focused) {
-            player.rotate((float) Math.toRadians(displVec.x * (mouseSensitivity / 10)),
-                    (float) Math.toRadians(displVec.y * (mouseSensitivity / 10)));
+            player.rotate((float) -Math.toRadians(displVec.x * (mouseSensitivity / 10)),
+                    (float) -Math.toRadians(displVec.y * (mouseSensitivity / 10)));
 
             if (keyRelease(SDL_SCANCODE_F)) {
                 System.out.print(String.format("%.2f", fps)+"fps / "+String.format("%.2f", ms)+"ms\n");

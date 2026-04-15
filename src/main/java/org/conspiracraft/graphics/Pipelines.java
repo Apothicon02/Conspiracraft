@@ -78,7 +78,7 @@ public class Pipelines {
                 .depthBoundsTestEnable(false)
                 .stencilTestEnable(false);
 
-        pipelines = new Pipeline[]{new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2)};
+        pipelines = new Pipeline[]{new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
         for (int i = 0; i < pipelines.length; i++) {
             Pipeline pipeline = pipelines[i];
             VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachments = VkPipelineColorBlendAttachmentState.calloc(pipeline.colorAttachments, stack);

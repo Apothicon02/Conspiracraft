@@ -39,8 +39,8 @@ public class Player {
         movementInputs();
         Matrix4f cam = camera.getViewMatrixWithoutPitch().setTranslation(0, 0, 0).invert();
         Vector3f movement = new Vector3f();
-        if (forward) {movement.add(cam.positiveZ(new Vector3f()).negate());}
-        if (backward) {movement.add(cam.positiveZ(new Vector3f()));}
+        if (forward) {movement.add(cam.positiveZ(new Vector3f()));}
+        if (backward) {movement.add(cam.positiveZ(new Vector3f()).negate());}
         if (rightward) {movement.add(cam.positiveX(new Vector3f()));}
         if (leftward) {movement.add(cam.positiveX(new Vector3f()).negate());}
         if (upward) {movement.add(0, 1, 0);}

@@ -76,6 +76,9 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
+                bindImagesToDrawTo(stack, pipelines[2].vkPipeline, new Texture[]{Textures.raster, Textures.rasterNormals}, Textures.rasterDepth);
+                vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+                unbindImagesDrawingTo(stack, new long[]{Textures.raster.image, Textures.rasterNormals.image}, Textures.rasterDepth.image);
                 bindImagesToDrawTo(stack, pipelines[1].vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image}, Textures.ddaDepth.image);
