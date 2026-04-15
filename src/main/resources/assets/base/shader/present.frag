@@ -7,7 +7,8 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     double time;
 } globalUbo;
 layout(set = 0, binding = 6) uniform sampler2D ddaColors;
-layout(set = 0, binding = 7) uniform sampler2D ddaNormals;
+layout(set = 0, binding = 7) uniform sampler2D ddaDepth;
+layout(set = 0, binding = 8) uniform sampler2D ddaNormals;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
@@ -34,7 +35,8 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 
 float getAO(float depth, vec3 normal) {
     vec3 posVS = reconstructViewPos(uv.xy, depth);
-    vec3 normalVS = normalize((globalUbo.view * vec4(normal, 0.f)).xyz);
+    vec3 normalVS = normalize((globalUbo.view * vec4(normal.rgb, 0.f)).xyz);
+    //posVS += (normalVS*min(1, -15*(clamp(depth*1500, 0, 0.1)-0.1))); //compensate for depth precision issues.
     vec3 randVec = randomVec();
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
@@ -47,18 +49,19 @@ float getAO(float depth, vec3 normal) {
         offset.xyz /= offset.w;
         vec2 sampleUV = offset.xy * 0.5 + 0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
-            float sampleDepth = reconstructViewPos(sampleUV, texture(ddaColors, sampleUV).a).z;
+            float sampleDepth = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r).z;
             float rangeCheck = smoothstep(0.f, 1.f, radius / abs(posVS.z - sampleDepth));
             occlusion += (sampleDepth >= sampleVec.z ? 1.f : 0.f) * rangeCheck;
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);
-    return occlusion;
+    return pow(occlusion, 2);
 }
 void main() {
     vec4 color = texture(ddaColors, uv.xy);
+    float depth = texture(ddaDepth, uv.xy).r;
     vec4 normal = texture(ddaNormals, uv.xy);
-    color.rgb*=mix(getAO(color.a, normal.xyz), 1, normal.a); //normal.a is fogginess, color.a is depth
+    color.rgb = color.rgb*=mix(getAO(depth, normal.xyz), 1, normal.a); //normal.a is fogginess
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
     if (globalUbo.hdr == 1) {
         color.rgb = (color.rgb*400)/80;//exposure

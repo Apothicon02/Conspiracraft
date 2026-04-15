@@ -526,6 +526,8 @@ void main() {
     float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
     color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
     vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
-    outColor = vec4(color.rgb, clipPos.z/clipPos.w);
+    float depth = clipPos.z/clipPos.w;
+    gl_FragDepth = depth;
+    outColor = vec4(color.rgb, 1);
     outNormal = vec4(primaryNormal, fogginess);
 }

@@ -13,17 +13,25 @@ import static org.lwjgl.vulkan.VK14.*;
 
 public class CmdBuffer {
     public static long cmdPool;
-    public static VkCommandBuffer[] cmdBuffer;
+    public static VkCommandBuffer[] cmdBuffers;
 
     public static void init(MemoryStack stack) {
         createCommandPool(stack);
         createCommandBuffer(stack);
     }
 
+    public static void recreate(MemoryStack stack) {
+        for (VkCommandBuffer cmdBuffer : cmdBuffers) {
+            vkFreeCommandBuffers(vkDevice, cmdPool, cmdBuffer);
+        }
+        createCommandPool(stack);
+        createCommandBuffer(stack);
+    }
+
     public static void createCommandBuffer(MemoryStack stack) {
-        cmdBuffer = new VkCommandBuffer[FRAMES_IN_FLIGHT];
+        cmdBuffers = new VkCommandBuffer[FRAMES_IN_FLIGHT];
         for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
-            cmdBuffer[i] = CmdBufferHelper.createCmdBuffer(stack);
+            cmdBuffers[i] = CmdBufferHelper.createCmdBuffer(stack);
         }
     }
     public static void createCommandPool(MemoryStack stack) {

@@ -65,6 +65,8 @@ public class Graphics {
             vkDestroySwapchainKHR(vkDevice, vkOldSwapchain, null);
             Textures.resize(stack);
             recreateDescriptors(stack);
+            CmdBuffer.recreate(stack);
+            SyncObjects.init(stack);
         }
     }
 

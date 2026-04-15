@@ -40,7 +40,7 @@ public class Swapchain {
         for (int i = 0; i < images.length; i++) {
             imageViews[i] = createImageView(stack, false, images[i], vkSurfFormat.format(), 4);
         }
-        depthImageView = createImageView(stack, false, depthImage, VK_FORMAT_D32_SFLOAT, 0);
+        depthImageView = createImageView(stack, false, depthImage, VK_FORMAT_D32_SFLOAT, 1);
     }
     public static void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);

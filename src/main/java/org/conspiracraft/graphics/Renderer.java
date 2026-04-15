@@ -22,7 +22,7 @@ import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Graphics.globalUBO;
 import static org.conspiracraft.graphics.Pipelines.*;
-import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffer;
+import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffers;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
@@ -37,10 +37,12 @@ public class Renderer {
     public static int frameIdx = 0;
     public static boolean firstImages = true;
     public static boolean initialized = false;
+    public static boolean clearedDepth = false;
     public static VkCommandBuffer currentCmdBuffer;
     public static void render() throws IOException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
+                clearedDepth = false;
                 if (!initialized) {
                     prepareTestScene();
                     BufferedImage atlasImage = Utils.loadImage("generic/texture/atlas");
@@ -74,9 +76,9 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
-                bindImagesToDrawTo(stack, pipelines[1].vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals});
+                bindImagesToDrawTo(stack, pipelines[1].vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-                unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image});
+                unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image}, Textures.ddaDepth.image);
                 bindPresentImage(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindPresentImage(stack);
@@ -106,7 +108,7 @@ public class Renderer {
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
 
-        currentCmdBuffer = cmdBuffer[frameIdx];
+        currentCmdBuffer = cmdBuffers[frameIdx];
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
         return true;
@@ -135,7 +137,7 @@ public class Renderer {
             throw new RuntimeException("Failed to queue present!");
         }
     }
-    public static void unbindImagesDrawingTo(MemoryStack stack, long[] images) {
+    public static void unbindImagesDrawingTo(MemoryStack stack, long[] images, long depthImage) {
         vkCmdEndRendering(currentCmdBuffer);
         for (long image : images) {
             ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
@@ -143,10 +145,14 @@ public class Renderer {
                     VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
                     VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
         }
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, depthImage,
+                VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
+                VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_NONE);
     }
-    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures) {
+    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex) {
         VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures);
-        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
@@ -189,7 +195,7 @@ public class Renderer {
     }
     public static void bindPresentImage(MemoryStack stack) {
         VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthImage, depthImageView, VK_IMAGE_LAYOUT_UNDEFINED);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
@@ -219,14 +225,21 @@ public class Renderer {
         attachmentInfo.clearValue().color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
         return attachmentInfo;
     }
-    public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer) {
-        ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, Swapchain.depthImage,
-                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+    public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
+        if (depthImage == image) {
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
+                    VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                    VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                    VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+        } else {
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
+                    prevLayout, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                    VK_ACCESS_2_NONE, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                    VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+        }
         VkRenderingAttachmentInfo attachmentInfo = VkRenderingAttachmentInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
-                .imageView(Swapchain.depthImageView)
+                .imageView(imageView)
                 .imageLayout(VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
                 .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
                 .storeOp(VK_ATTACHMENT_STORE_OP_STORE);

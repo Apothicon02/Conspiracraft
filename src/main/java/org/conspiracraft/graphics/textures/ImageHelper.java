@@ -63,8 +63,9 @@ public class ImageHelper {
                 }
             }
         }
+        int mask = format == VK_FORMAT_D32_SFLOAT ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
         createInfo.subresourceRange()
-                .aspectMask(channels == 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT)
+                .aspectMask(mask)
                 .baseMipLevel(0)
                 .levelCount(1)
                 .baseArrayLayer(0)
