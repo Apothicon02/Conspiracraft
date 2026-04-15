@@ -1,12 +1,17 @@
 package org.conspiracraft.graphics;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.graphics.buffers.ubos.PushUBO;
+import org.conspiracraft.graphics.models.Index;
+import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -39,6 +44,8 @@ public class Renderer {
     public static boolean initialized = false;
     public static boolean clearedDepth = false;
     public static VkCommandBuffer currentCmdBuffer;
+    public static PushUBO pushUBO = new PushUBO();
+    public static Pipeline currentPipeline;
     public static void render() throws IOException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
@@ -76,10 +83,15 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
-                bindImagesToDrawTo(stack, pipelines[2].vkPipeline, new Texture[]{Textures.raster, Textures.rasterNormals}, Textures.rasterDepth);
+                currentPipeline = pipelines[2];
+                bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.raster, Textures.rasterNormals}, Textures.rasterDepth);
+                pushUBO.update(0); //draw non-instanced stuff
+                pushUBO.submit();
+                worldType.renderCelestialBodies(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindImagesDrawingTo(stack, new long[]{Textures.raster.image, Textures.rasterNormals.image}, Textures.rasterDepth.image);
-                bindImagesToDrawTo(stack, pipelines[1].vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
+                currentPipeline = pipelines[1];
+                bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image}, Textures.ddaDepth.image);
                 bindPresentImage(stack);
@@ -95,6 +107,12 @@ public class Renderer {
         }
     }
 
+    public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
+        pushUBO.submit();
+        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        //vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/ Index.SIZE, 0, 0);
+    }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
         int waitResult = vkWaitForFences(vkDevice, inFlightFences[frameIdx], false, Long.MAX_VALUE);
@@ -209,7 +227,8 @@ public class Renderer {
                 .pColorAttachments(colorAttachment)
                 .pDepthAttachment(depthAttachment);
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
-        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[0].vkPipeline);
+        currentPipeline = pipelines[0];
+        vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline.vkPipeline);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
     }

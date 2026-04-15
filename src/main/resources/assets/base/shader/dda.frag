@@ -478,6 +478,7 @@ void main() {
         vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
         depth = clipPos.z/clipPos.w;
     }
+    bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
     if (rasterDepth > depth) {
         isSky = false;
@@ -488,6 +489,9 @@ void main() {
         vec4 view = inverse(globalUbo.proj)*clip;
         view/=view.w;
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
+        if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
+            celestial = true;
+        }
     } else {
         color.rgb = mipmap(color.rgb);
         vec3 primaryFlatNormal = flatNormal;
@@ -541,10 +545,14 @@ void main() {
         }
         color.rgb *= lighting;
     }
-    float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
-    color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
+    if (!celestial) {
+        float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+        color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
+        outNormal = vec4(primaryNormal, fogginess);
+    } else {
+        outNormal = vec4(primaryNormal, 1);
+    }
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(primaryLightPos.rgb/worldSize, 1);
     gl_FragDepth = depth;
-    outNormal = vec4(primaryNormal, fogginess);
 }

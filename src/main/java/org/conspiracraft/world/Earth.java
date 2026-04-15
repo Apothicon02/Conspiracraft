@@ -9,6 +9,7 @@ import java.lang.Math;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
+import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
@@ -24,10 +25,10 @@ public class Earth extends WorldType {
     public void renderCelestialBodies(MemoryStack stack) {
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(120);
         Vector4f sunColor = new Vector4f(1.25f, 1.2f, 0, 1);
-        //drawCube(sunMatrix, sunColor);
+        drawCube(sunMatrix, sunColor);
         Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(40);
         Vector4f munColor = new Vector4f(0.9f, 0.88f, 1.f, 1);
-        //drawCube(munMatrix, munColor);
+        drawCube(munMatrix, munColor);
     }
     @Override
     public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 0.33f) : new Vector4f(sunPos, 1.f);}

@@ -8,12 +8,12 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
 } globalUbo;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec3 pos;
+layout(location = 2) in vec4 inColor;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outNormal;
 
 void main() {
-    vec3 color = vec3(1, 1, 0);
-    outColor = vec4(color, 1);
+    outColor = inColor;
     outNormal = vec4(normalize(cross(dFdx(pos), dFdy(pos))), 0);
 }

@@ -6,25 +6,26 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
     double time;
 } globalUbo;
+layout(push_constant) uniform PushUBO {
+    mat4 model;
+    vec4 color;
+    int instanced;
+} pushUbo;
 vec3 positions[3] = vec3[](
-    vec3(100, 100, 0),
-    vec3(0, -100, 0),
-    vec3(-100, 100, 0)
-);
-const mat4 model = mat4(
-    10, 0, 0, 0,
-    0, 10, 0, 0,
-    0, 0, 10, 0,
-    0, 0, 0, 1
+    vec3(1, 1, 0),
+    vec3(0, -1, 0),
+    vec3(-1, 1, 0)
 );
 
 layout(location = 0) out vec2 uv;
 layout(location = 1) out vec3 pos;
+layout(location = 2) out vec4 color;
 
 void main() {
+    color = pushUbo.color;
     pos = positions[gl_VertexIndex];
     uv = (pos.xy+1)/2;
-    vec4 worldPos = model*vec4(pos, 1.0);
+    vec4 worldPos = pushUbo.model*vec4(pos, 1.0);
     vec4 clipPos = globalUbo.proj*globalUbo.view*(worldPos);
     gl_Position = clipPos;
 }
