@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +98,7 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Debug",
+    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
     "Gradle.Conspiracraft [build].executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Terraflat [:Main.main()].executor": "Run",
@@ -209,14 +210,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00003" summary="- Update .gitignore.">
-      <option name="closed" value="true" />
-      <created>1722559772024</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1722559772024</updated>
     </task>
     <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
       <option name="closed" value="true" />
@@ -602,7 +595,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776356635725</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="- Input is now blocked until renderer is initialized.">
+      <option name="closed" value="true" />
+      <created>1776359943973</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1776359943973</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -610,7 +611,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added palette-compressed chunks." />
     <MESSAGE value="- Added chunk struct in fragment shader." />
     <MESSAGE value="- Moved player pos." />
     <MESSAGE value="- Added unused lod texture." />
@@ -635,7 +635,8 @@
     <MESSAGE value="- Finished adding rasterized object rendering. &#10;- Added celestial objects." />
     <MESSAGE value="- Stars now twinkle out of existence in day." />
     <MESSAGE value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
+    <MESSAGE value="- Input is now blocked until renderer is initialized." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Input is now blocked until renderer is initialized." />
     <option name="LAST_CHUNK_COMMIT_MESSAGE" value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
   </component>
   <component name="XDebuggerManager">
@@ -650,11 +651,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
           <line>401</line>
           <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java</url>
-          <line>39</line>
-          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

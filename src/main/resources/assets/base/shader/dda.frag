@@ -387,7 +387,32 @@ vec4 dda(bool textured) {
             }
         } else if (stage == 0) {
             if (voxelRayPos.x < 0 || voxelRayPos.x >= blockSize || voxelRayPos.y < 0 || voxelRayPos.y >= blockSize || voxelRayPos.z < 0 || voxelRayPos.z >= blockSize) { stage = 1; } else {
-                vec4 voxelColor = sampleAtlas(voxelRayPos.x, voxelRayPos.y, voxelRayPos.z, block.x, block.y);
+                ivec3 offsetVoxelPos = voxelRayPos;
+                if (block.x == 4 && offsetVoxelPos.y > 2) {
+                    bool windDir = true;//timeOfDay > 0.f;
+                    float time = globalUbo.time/400000;
+                    float windStr = noise(((vec2(blockPos.x, blockPos.z)/12) + (time * 100)) * (16+(time/(time/32))))+0.5f;
+                    if (windStr > 0.8) {
+                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 5 ? 3 : (offsetVoxelPos.y > 4 ? 2 : 1)) * (windDir ? -1 : 1));
+                        if (block.y < 2) {
+                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 2 : 1);
+                        }
+                    } else if (windStr > 0.4) {
+                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 5 ? 3 : (offsetVoxelPos.y > 4 ? 2 : 1)) * (windDir ? -1 : 1));
+                        if (block.y < 2) {
+                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 1 : 0);
+                        }
+                    } else if (windStr > -0.2) {
+                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 4 ? 2 : 1) * (windDir ? -1 : 1));
+                        if (block.y < 2) {
+                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 1 : 0);
+                        }
+                    } else if (windStr > -0.8) {
+                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 4 ? 1 : 0) * (windDir ? -1 : 1));
+                    }
+                    offsetVoxelPos.xz = clamp(offsetVoxelPos.xz, 0, 7);
+                }
+                vec4 voxelColor = sampleAtlas(offsetVoxelPos.x, offsetVoxelPos.y, offsetVoxelPos.z, block.x, block.y);
                 if (voxelColor.a > 0.f) {
                     flatNormal = -voxelMask*raySign;
                     normal = flatNormal;
