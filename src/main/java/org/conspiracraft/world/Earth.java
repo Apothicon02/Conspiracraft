@@ -23,10 +23,10 @@ public class Earth extends WorldType {
     public static Vector3f munPos = new Vector3f(0, World.height*-2, 0);
     @Override
     public void renderCelestialBodies(MemoryStack stack) {
-        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(120);
+        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
         Vector4f sunColor = new Vector4f(1.25f, 1.2f, 0, 1);
         drawCube(sunMatrix, sunColor);
-        Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(40);
+        Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(300);
         Vector4f munColor = new Vector4f(0.9f, 0.88f, 1.f, 1);
         drawCube(munMatrix, munColor);
     }

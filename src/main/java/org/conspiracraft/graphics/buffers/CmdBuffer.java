@@ -15,11 +15,6 @@ public class CmdBuffer {
     public static long cmdPool;
     public static VkCommandBuffer[] cmdBuffers;
 
-    public static void init(MemoryStack stack) {
-        createCommandPool(stack);
-        createCommandBuffer(stack);
-    }
-
     public static void recreate(MemoryStack stack) {
         for (VkCommandBuffer cmdBuffer : cmdBuffers) {
             vkFreeCommandBuffers(vkDevice, cmdPool, cmdBuffer);

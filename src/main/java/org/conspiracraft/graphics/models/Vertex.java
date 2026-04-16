@@ -16,17 +16,12 @@ public record Vertex(Vector3f pos) {
         return bindingDescription;
     }
     public static VkVertexInputAttributeDescription.Buffer getAttributeDescriptions() {
-        VkVertexInputAttributeDescription.Buffer attributeDescriptions = VkVertexInputAttributeDescription.calloc(2);
+        VkVertexInputAttributeDescription.Buffer attributeDescriptions = VkVertexInputAttributeDescription.calloc(1);
         attributeDescriptions.get(0)
                 .location(0)
                 .binding(0)
                 .format(VK_FORMAT_R32G32B32_SFLOAT)
                 .offset(0);
-        attributeDescriptions.get(1)
-                .location(1)
-                .binding(0)
-                .format(VK_FORMAT_R32G32B32_SFLOAT)
-                .offset(12);
         return attributeDescriptions;
     }
 }

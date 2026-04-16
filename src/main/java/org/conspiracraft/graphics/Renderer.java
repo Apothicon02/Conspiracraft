@@ -11,6 +11,8 @@ import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.Random;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -22,10 +24,13 @@ import org.lwjgl.vulkan.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.graphics.Graphics.globalUBO;
+import static org.conspiracraft.Main.player;
+import static org.conspiracraft.graphics.Graphics.*;
+import static org.conspiracraft.graphics.Graphics.indexBuf;
 import static org.conspiracraft.graphics.Pipelines.*;
 import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffers;
 import static org.conspiracraft.graphics.Device.*;
@@ -85,10 +90,14 @@ public class Renderer {
 
                 currentPipeline = pipelines[2];
                 bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.raster, Textures.rasterNormals}, Textures.rasterDepth);
+                vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+                vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
                 pushUBO.update(0); //draw non-instanced stuff
                 pushUBO.submit();
+                drawStars(stack);
                 worldType.renderCelestialBodies(stack);
-                vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+                drawCube(player.getCameraMatrix().translate(2, 2, 2), new Vector4f(0.2f, 0.2f, 0.9f, 1.f));
+                drawCube(new Matrix4f().translate(730, 80, 840), new Vector4f(0.2f, 0.2f, 0.9f, 1.f));
                 unbindImagesDrawingTo(stack, new long[]{Textures.raster.image, Textures.rasterNormals.image}, Textures.rasterDepth.image);
                 currentPipeline = pipelines[1];
                 bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
@@ -107,11 +116,50 @@ public class Renderer {
         }
     }
 
+    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1, 0.95f, 0.4f), new Vector3f(0.72f, 0.05f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(0.04f, 0.3f, 1.f), new Vector3f(1, 1, 0.1f)};
+    public static int starDist = (World.size*2)+200;
+    public static void drawStars(MemoryStack stack) throws IOException {
+//        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
+//        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
+        Random starRand = new Random(911);
+        for (int i = 0; i < 1024; i++) {
+            Vector3f starPos = new Vector3f(0, starDist * 2, 0)
+                    .rotateX(starRand.nextFloat() * 10)
+                    .rotateY(starRand.nextFloat() * 10)
+                    .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
+            starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
+            float starSize = (starRand.nextFloat()*40)+40;
+            if (starSize > 0.01f) {
+                Matrix4f starMatrix = new Matrix4f()
+                        .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
+                        .setTranslation(starPos)
+                        .scale(starSize);
+                if (starMatrix.getTranslation(new Vector3f()).y > 63-player.pos.y()) {
+                    //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
+                    Vector3f color = starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)];
+//                    colorBuffer.put(color.x*12);
+//                    colorBuffer.put(color.y*12);
+//                    colorBuffer.put(color.z*12);
+//                    colorBuffer.put(2);
+                    drawCube(starMatrix, new Vector4f(color.x(), color.y(), color.z(), 1.f));
+                }
+            }
+        }
+//        modelBuffer.flip();
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelsSSBOId);
+//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, modelsSSBOId);
+//        glBufferData(GL_SHADER_STORAGE_BUFFER, modelBuffer, GL_DYNAMIC_DRAW);
+//        colorBuffer.flip();
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorsSSBOId);
+//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, colorsSSBOId);
+//        glBufferData(GL_SHADER_STORAGE_BUFFER, colorBuffer, GL_DYNAMIC_DRAW);
+//        drawCubes(1024);
+    }
+
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
         pushUBO.submit();
-        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        //vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/ Index.SIZE, 0, 0);
+        vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
@@ -215,7 +263,7 @@ public class Renderer {
                 VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
     }
     public static void bindPresentImage(MemoryStack stack) {
-        VkRenderingAttachmentInfo.Buffer colorAttachment = getColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VkRenderingAttachmentInfo.Buffer colorAttachment = getPresentColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthImage, depthImageView, VK_IMAGE_LAYOUT_UNDEFINED);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
@@ -233,11 +281,11 @@ public class Renderer {
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
     }
 
-    public static VkRenderingAttachmentInfo.Buffer getColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
+    public static VkRenderingAttachmentInfo.Buffer getPresentColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
         ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
                 prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+                VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(1, stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
                 .imageView(imageView)
