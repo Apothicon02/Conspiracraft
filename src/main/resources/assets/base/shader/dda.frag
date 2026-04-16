@@ -122,8 +122,8 @@ layout(set = 0, binding = 5) uniform sampler2D noises;
 float noise(vec2 coords) {
     return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
 }
-float getCaustic(vec2 checkPos) {
-    float time = globalUbo.time/1000;
+float getCaustic(bool animated, vec2 checkPos) {
+    float time = animated ? globalUbo.time/1000 : 0.f;
     return noise((checkPos+time)*32);
 }
 layout(set = 0, binding = 9) uniform sampler2D rasterColors;
@@ -211,7 +211,7 @@ vec3 exactPos = vec3(0);
 ivec3 blockPos = ivec3(0);
 vec3 hitPos = vec3(0);
 vec3 flatNormal = vec3(0);
-const float bevel = 0.125f;
+const float bevel = 0.25f;
 const float bevelMax = 1-bevel;
 const float bevelOffset = 0.5f+(bevel/2);
 vec3 bevelNormal(vec3 normal) {
@@ -480,28 +480,43 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
+    float reflectivity = block.x == 1 ? 1.f : 0.f;
+    float roughness = block.x == 1 ? 0.1f : 0.f;
     if (rasterDepth > depth) {
         isSky = false;
         depth = rasterDepth;
         color = texture(rasterColors, uv);
         primaryNormal = texture(rasterNormals, uv).xyz;
+        flatNormal = primaryNormal;
         vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
         vec4 view = inverse(globalUbo.proj)*clip;
         view/=view.w;
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
+        blockPos = ivec3(primaryLightPos);
+        block = ivec2(0);
+//        reflectivity = 0.5f;
+//        roughness = 0.25f;
+        voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
         if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
             celestial = true;
         }
     } else {
         color.rgb = mipmap(color.rgb);
+    }
+    if (!celestial) {
         vec3 primaryFlatNormal = flatNormal;
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
         ivec2 primaryBlock = block;
         vec3 absNorm = abs(primaryFlatNormal);
-        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(vec2(primaryBlockPos.xz)+(primaryVoxelRayPos.xz/8.f)) :
-        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(vec2(primaryBlockPos.xy)+(primaryVoxelRayPos.xy/8.f)) :
-        getCaustic(vec2(primaryBlockPos.yz)+(primaryVoxelRayPos.yz/8.f)));
+        vec3 causticPos = block.x == 1 ? vec3(primaryBlockPos) : primaryLightPos;
+        vec3 causticVoxelPos = primaryVoxelRayPos;
+        if (block.x != 1) {
+            causticVoxelPos = vec3(0);
+        }
+        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(block.x == 1, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
+        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(block.x == 1, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
+        getCaustic(block.x == 1, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
         if (primaryBlock.x == 1 && abs(causticness) < 0.033f) {
             color = vec4(1);
         }
@@ -510,9 +525,8 @@ void main() {
         } else {
             causticness *= 5;
         }
-        float roughness = primaryBlock.x == 1 ? 0.1f : 0.f;
-        vec3 tiltedNormal = normal*causticness;
-        vec3 bentNormal = mix(normal, tiltedNormal, roughness*2);
+        vec3 tiltedNormal = primaryNormal*causticness;
+        vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
         vec3 lighting = (vec3(dot(bentNormal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
@@ -523,7 +537,7 @@ void main() {
         if (shadowColor.a > 0.0f) {
             lighting *= 0.66f;
         }
-        if (primaryBlock.x == 1) {
+        if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryNormal);
             vec3 reflectDir = roundVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
             vec3 viewDir = normalize(ogDir);
@@ -541,11 +555,9 @@ void main() {
                 float fogginess = clamp(sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
                 reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
-            color.rgb = mix(color.rgb, reflectColor.rgb, (frensel*0.75f)+0.25f);
+            color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
         }
         color.rgb *= lighting;
-    }
-    if (!celestial) {
         float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
         outNormal = vec4(primaryNormal, fogginess);

@@ -10,10 +10,7 @@ import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
-import org.joml.Matrix4f;
-import org.joml.Random;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -24,9 +21,12 @@ import org.lwjgl.vulkan.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.Math;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
@@ -52,6 +52,7 @@ public class Renderer {
     public static VkCommandBuffer currentCmdBuffer;
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
+    public static List<Matrix4f> cubes = new ArrayList<>();
     public static void render() throws IOException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
@@ -98,8 +99,9 @@ public class Renderer {
                 //drawClouds();
                 drawStars();
                 worldType.renderCelestialBodies(stack);
-                drawCube(player.getCameraMatrix().translate(2, 2, 2), new Vector4f(0.2f, 0.2f, 0.9f, 1.f));
-                drawCube(new Matrix4f().translate(730, 80, 840), new Vector4f(0.2f, 0.2f, 0.9f, 1.f));
+                for (Matrix4f cube : cubes) {
+                    drawCube(cube, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
+                }
                 unbindImagesDrawingTo(stack, new long[]{Textures.raster.image, Textures.rasterNormals.image}, Textures.rasterDepth.image);
                 currentPipeline = pipelines[1];
                 bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);

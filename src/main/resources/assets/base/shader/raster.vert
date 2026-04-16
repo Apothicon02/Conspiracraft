@@ -12,11 +12,6 @@ layout(push_constant) uniform PushUBO {
     int instanced;
 } pushUbo;
 layout(location = 0) in vec3 position;
-vec3 positions[3] = vec3[](
-    vec3(1, 1, 0),
-    vec3(0, -1, 0),
-    vec3(-1, 1, 0)
-);
 
 layout(location = 0) out vec2 uv;
 layout(location = 1) out vec3 pos;
@@ -24,7 +19,7 @@ layout(location = 2) out vec4 color;
 
 void main() {
     color = pushUbo.color;
-    pos = position;//positions[gl_VertexIndex];
+    pos = position;
     uv = (pos.xy+1)/2;
     vec4 worldPos = pushUbo.model*vec4(pos, 1.0);
     vec4 clipPos = globalUbo.proj*globalUbo.view*(worldPos);

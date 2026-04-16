@@ -2,7 +2,10 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
+import org.conspiracraft.graphics.Renderer;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -39,6 +42,17 @@ public class InputHandler {
             }
             if (keyRelease(SDL_SCANCODE_T)) {
                 Main.timeNs+=10000000000L;
+            }
+            if (keyRelease(SDL_SCANCODE_B)) {
+                float r = 0.f;
+                if (isKeyDown(SDL_SCANCODE_R)) {
+                    r = (float) Math.toRadians(45);
+                }
+                if (isKeyDown(SDL_SCANCODE_F3)) {
+                    Renderer.cubes.removeLast();
+                } else {
+                    Renderer.cubes.addLast(new Matrix4f().translate(new Vector3f(player.pos).floor().add(0, 2, 0)).rotateXYZ(r, r, 0));
+                }
             }
 
             MemoryUtil.memCopy(MemoryUtil.memAddress(keys), MemoryUtil.memAddress(prevKeys), keys.capacity());
