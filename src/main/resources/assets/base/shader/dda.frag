@@ -367,7 +367,7 @@ vec4 dda(bool textured) {
                     block = getBlock(blockPos);
                     if (block.x > 0) {
                         voxelStartPos = uv3d(blockPos, 1.f, blockSize);
-                        vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
+                        vec4 voxelColor = block.x == 4 ? vec4(0) : sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
                         if (voxelColor.a > 0.f) {
                             flatNormal = -blockMask*raySign;
                             voxelRayPos = ivec3(voxelStartPos);
@@ -554,11 +554,17 @@ void main() {
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
-        vec3 lighting = (vec3(dot(bentNormal, normalize(skylight.xyz))*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
+        float normDot = dot(bentNormal, normalize(skylight.xyz));
+        vec3 lighting = (vec3(normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryLightPos;
         rayDir = sunDir;
-        vec4 shadowColor = dda(false);
+        vec4 shadowColor = vec4(0);
+        if (normDot < 0.f) {
+            shadowColor.a = 1.f;
+        } else {
+            shadowColor = dda(false);
+        }
         if (shadowColor.a > 0.0f) {
             lighting *= 0.66f;
         }

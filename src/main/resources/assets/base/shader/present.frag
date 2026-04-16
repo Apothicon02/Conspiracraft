@@ -49,7 +49,7 @@ float getAO(float depth, vec3 normal) {
         sampleVec = posVS + sampleVec * AO_RADIUS;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
-        vec2 sampleUV = offset.xy * 0.5 + 0.5;
+        vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
             float rangeCheck = smoothstep(0.f, 1.f, (AO_RADIUS/AO_STRENGTH)/length(sampleVS-posVS));
@@ -63,7 +63,7 @@ void main() {
     vec4 color = texture(ddaColors, uv.xy);
     float depth = texture(ddaDepth, uv.xy).r;
     vec4 normal = texture(ddaNormals, uv.xy);
-    color.rgb = color.rgb*=mix(getAO(depth, normal.xyz), 1, normal.a); //normal.a is fogginess
+    color.rgb = vec3(getAO(depth, normal.xyz));//color.rgb*=mix(getAO(depth, normal.xyz), 1, normal.a); //normal.a is fogginess
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
     if (globalUbo.hdr == 1) {
         color.rgb = (color.rgb*400)/80;//exposure

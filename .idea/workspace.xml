@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added grass blades. &#10;- AO is stronger.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
@@ -210,22 +211,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
-      <option name="closed" value="true" />
-      <created>1722613150852</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1722613150852</updated>
-    </task>
-    <task id="LOCAL-00005" summary="- Rewrite.">
-      <option name="closed" value="true" />
-      <created>1722638056821</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1722638056821</updated>
     </task>
     <task id="LOCAL-00006" summary="- Thing.">
       <option name="closed" value="true" />
@@ -603,7 +588,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776359943973</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="- Added grass blades. &#10;- AO is stronger.">
+      <option name="closed" value="true" />
+      <created>1776361248395</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1776361248395</updated>
+    </task>
+    <task id="LOCAL-00054" summary="- Added grass blades. &#10;- AO is stronger.">
+      <option name="closed" value="true" />
+      <created>1776361254379</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1776361254379</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -611,7 +612,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added chunk struct in fragment shader." />
     <MESSAGE value="- Moved player pos." />
     <MESSAGE value="- Added unused lod texture." />
     <MESSAGE value="- Extracted dda to its own method." />
@@ -636,7 +636,8 @@
     <MESSAGE value="- Stars now twinkle out of existence in day." />
     <MESSAGE value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
     <MESSAGE value="- Input is now blocked until renderer is initialized." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Input is now blocked until renderer is initialized." />
+    <MESSAGE value="- Added grass blades. &#10;- AO is stronger." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added grass blades. &#10;- AO is stronger." />
     <option name="LAST_CHUNK_COMMIT_MESSAGE" value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
   </component>
   <component name="XDebuggerManager">

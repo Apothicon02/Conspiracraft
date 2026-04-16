@@ -33,6 +33,7 @@ public class InputHandler {
     public void init() {
         keys = SDL_GetKeyboardState();
         prevKeys = MemoryUtil.memAlloc(keys.capacity());
+        resetInputs();
     }
     public boolean isFullscreen = false;
     public void update() {
