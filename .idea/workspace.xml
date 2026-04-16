@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/CmdBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/CmdBuffer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Model.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Vertex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Vertex.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -601,7 +593,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776296159098</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="- Finished adding rasterized object rendering. &#10;- Added celestial objects.">
+      <option name="closed" value="true" />
+      <created>1776299924124</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1776299924124</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -609,7 +609,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added texture loading." />
     <MESSAGE value="- DDA now samples atlas." />
     <MESSAGE value="- Fixed validation error." />
     <MESSAGE value="- Added palette-compressed chunks." />
@@ -634,7 +633,8 @@
     <MESSAGE value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
     <MESSAGE value="- Fixed SSAO issue. &#10;- Added rasterization shaders &amp; pipeline." />
     <MESSAGE value="- Rasterization progress." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Rasterization progress." />
+    <MESSAGE value="- Finished adding rasterized object rendering. &#10;- Added celestial objects." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Finished adding rasterized object rendering. &#10;- Added celestial objects." />
     <option name="LAST_CHUNK_COMMIT_MESSAGE" value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
   </component>
   <component name="XDebuggerManager">
@@ -647,7 +647,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
-          <line>368</line>
+          <line>397</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
