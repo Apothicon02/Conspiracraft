@@ -494,6 +494,7 @@ void main() {
     rayDir = ogDir;
     vec4 color = dda(true);
     vec3 primaryNormal = normal;
+    vec3 primaryFlatNormal = flatNormal;
     vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
     bool isSky = color.a < 1;
     float depth = 0.f;
@@ -512,7 +513,7 @@ void main() {
         depth = rasterDepth;
         color = texture(rasterColors, uv);
         primaryNormal = texture(rasterNormals, uv).xyz;
-        flatNormal = primaryNormal;
+        primaryFlatNormal = primaryNormal;
         vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
         vec4 view = inverse(globalUbo.proj)*clip;
         view/=view.w;
@@ -529,7 +530,6 @@ void main() {
         color.rgb = mipmap(color.rgb);
     }
     if (!celestial) {
-        vec3 primaryFlatNormal = flatNormal;
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
         ivec2 primaryBlock = block;
@@ -582,7 +582,7 @@ void main() {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
-                vec3 lightPos = hitPos+(flatNormal*voxelSize);
+                vec3 lightPos = hitPos+(primaryFlatNormal*voxelSize);
                 float fogginess = clamp(sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
                 reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
@@ -591,9 +591,9 @@ void main() {
         color.rgb *= lighting;
         float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-        outNormal = vec4(primaryNormal, fogginess);
+        outNormal = vec4(primaryFlatNormal, fogginess);
     } else {
-        outNormal = vec4(primaryNormal, 1);
+        outNormal = vec4(primaryFlatNormal, 1);
     }
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(primaryLightPos.rgb/worldSize, 1);

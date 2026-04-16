@@ -28,17 +28,17 @@ const float AO_STRENGTH = 1.5f;
 const int KERNEL_SIZE = 32; //reduce to something like 8 when taa is enabled.
 vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
 const float Z_NEAR = 0.01f;
+//const float ASPECT = 1.7977529f;
+//const float FOCAL_LENGTH = 1.3514224f;
 vec3 reconstructViewPos(vec2 uvPos, float depth) {
     vec4 clip = vec4((uvPos*2)-1, depth, 1.f);
     vec4 view = inverse(globalUbo.proj)*clip;
     return view.xyz/view.w;
 }
 
-const vec3 viewDir = vec3(0, 0, 1);
 float getAO(float depth, vec3 normal) {
     vec3 posVS = reconstructViewPos(uv.xy, depth);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.rgb, 0.f)).xyz);
-    //posVS += (normalVS*min(1, -15*(clamp(depth*1500, 0, 0.1)-0.1))); //compensate for depth precision issues.
     vec3 randVec = randomVec();
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
@@ -53,7 +53,9 @@ float getAO(float depth, vec3 normal) {
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
             float rangeCheck = smoothstep(0.f, 1.f, (AO_RADIUS/AO_STRENGTH)/length(sampleVS-posVS));
-            occlusion += (dot(sampleVS - posVS, viewDir) < dot(sampleVec - posVS, viewDir) ? 1.f : 0.f) * rangeCheck * AO_STRENGTH;
+            vec3 viewDirVS = normalize(posVS);
+            bool occluded = dot(sampleVS - posVS, viewDirVS) < dot(sampleVec - posVS, viewDirVS);
+            occlusion += (occluded ? 1.f : 0.f) * rangeCheck * AO_STRENGTH;
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);

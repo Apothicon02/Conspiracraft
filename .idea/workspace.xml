@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added grass blades. &#10;- AO is stronger.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
     </list>
@@ -211,14 +209,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00006" summary="- Thing.">
-      <option name="closed" value="true" />
-      <created>1724971018346</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1724971018346</updated>
     </task>
     <task id="LOCAL-00007" summary="- Thing.">
       <option name="closed" value="true" />
@@ -604,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776361254379</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="- Shadows are no longer cast when a face is facing away from the sun.">
+      <option name="closed" value="true" />
+      <created>1776363402704</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1776363402704</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -612,7 +610,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Moved player pos." />
     <MESSAGE value="- Added unused lod texture." />
     <MESSAGE value="- Extracted dda to its own method." />
     <MESSAGE value="- Wip lods." />
@@ -637,7 +634,8 @@
     <MESSAGE value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
     <MESSAGE value="- Input is now blocked until renderer is initialized." />
     <MESSAGE value="- Added grass blades. &#10;- AO is stronger." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added grass blades. &#10;- AO is stronger." />
+    <MESSAGE value="- Shadows are no longer cast when a face is facing away from the sun." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Shadows are no longer cast when a face is facing away from the sun." />
     <option name="LAST_CHUNK_COMMIT_MESSAGE" value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
   </component>
   <component name="XDebuggerManager">
