@@ -114,8 +114,10 @@ public class Renderer {
                 submitCommandBuffers(stack);
 
                 frameIdx++;
+                if (imageIdx >= Swapchain.images.length-1) {
+                    firstImages = false;
+                }
                 if (frameIdx >= FRAMES_IN_FLIGHT) {frameIdx = 0;}
-                if (imageIdx >= Swapchain.images.length) {firstImages = false;}
             }
         }
     }

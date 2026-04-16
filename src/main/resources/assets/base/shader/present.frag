@@ -24,7 +24,7 @@ vec3 randomVec() {
     return SSAO_NOISE[x * 4 + y];
 }
 const float AO_RADIUS = 1.f;
-const float AO_STRENGTH = 8.f;
+const float AO_STRENGTH = 3.f;
 const int KERNEL_SIZE = 32; //reduce to something like 8 when taa is enabled.
 vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
 const float Z_NEAR = 0.01f;
@@ -53,7 +53,7 @@ float getAO(float depth, vec3 normal) {
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
             float rangeCheck = smoothstep(0.f, 1.f, (AO_RADIUS/length(sampleVS-posVS))-AO_RADIUS);
-            occlusion += (dot(sampleVS - posVS, viewDir) < dot(sampleVec - posVS, viewDir) ? 1.f : 0.f) * rangeCheck;
+            occlusion += (dot(sampleVS - posVS, viewDir) < dot(sampleVec - posVS, viewDir) ? 1.f : 0.f) * rangeCheck * AO_STRENGTH;
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);

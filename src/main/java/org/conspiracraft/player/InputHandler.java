@@ -15,6 +15,8 @@ import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLScancode.*;
+import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowPosition;
+import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowSize;
 
 public class InputHandler {
     public InputHandler() {}
@@ -32,11 +34,25 @@ public class InputHandler {
         keys = SDL_GetKeyboardState();
         prevKeys = MemoryUtil.memAlloc(keys.capacity());
     }
+    public boolean isFullscreen = false;
     public void update() {
-        if (Window.focused) {
+        if (Window.focused && Renderer.initialized) {
             player.rotate((float) -Math.toRadians(displVec.x * (mouseSensitivity / 10)),
                     (float) -Math.toRadians(displVec.y * (mouseSensitivity / 10)));
 
+            if (keyRelease(SDL_SCANCODE_F11)) {
+                if (!isFullscreen) {
+                    isFullscreen = true;
+                    SDL_SetWindowPosition(Window.window, 0, 0);
+                    SDL_SetWindowSize(Window.window, 2560, 1440);
+                    window.resized(2560, 1440);
+                } else {
+                    isFullscreen = false;
+                    SDL_SetWindowPosition(Window.window, 0, 32);
+                    SDL_SetWindowSize(Window.window, (int) (2560 * 0.8f), (int) (1440 * 0.8f));
+                    window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
+                }
+            }
             if (keyRelease(SDL_SCANCODE_F)) {
                 System.out.print(String.format("%.2f", fps)+"fps / "+String.format("%.2f", ms)+"ms\n");
             }
