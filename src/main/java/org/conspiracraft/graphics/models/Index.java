@@ -1,5 +1,5 @@
 package org.conspiracraft.graphics.models;
 
 public class Index {
-    public static int SIZE = 12;
+    public static int SIZE = 4;
 }

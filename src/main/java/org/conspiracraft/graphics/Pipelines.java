@@ -47,7 +47,7 @@ public class Pipelines {
                 .rasterizerDiscardEnable(false)
                 .polygonMode(VK_POLYGON_MODE_FILL)
                 .lineWidth(1.0f)
-                .cullMode(VK_CULL_MODE_BACK_BIT)
+                .cullMode(VK_CULL_MODE_NONE)
                 .frontFace(VK_FRONT_FACE_CLOCKWISE)
                 .depthBiasEnable(false);
 
@@ -79,7 +79,7 @@ public class Pipelines {
                 .depthBoundsTestEnable(false)
                 .stencilTestEnable(false);
 
-        pipelines = new Pipeline[]{new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
+        pipelines = new Pipeline[]{new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1), new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
         for (int i = 0; i < pipelines.length; i++) {
             Pipeline pipeline = pipelines[i];
             VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachments = VkPipelineColorBlendAttachmentState.calloc(pipeline.colorAttachments, stack);

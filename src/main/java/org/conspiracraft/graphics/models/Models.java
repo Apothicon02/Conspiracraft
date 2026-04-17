@@ -13,9 +13,11 @@ public class Models {
     public static List<Model> models = new ArrayList<>(List.of());
 
     public static Model CUBE;
+    public static Model QUAD;
 
     public static void loadModels(long vertexPtr, long indexPtr) {
         CUBE = loadObj(vertexPtr, indexPtr, "generic/model/cube");
+        QUAD = loadObj(vertexPtr, indexPtr, "generic/model/quad");
     }
 
     public static IntArrayList indices = new IntArrayList();

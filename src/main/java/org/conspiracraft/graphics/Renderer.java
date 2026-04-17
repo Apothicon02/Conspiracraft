@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Index;
 import org.conspiracraft.graphics.models.Models;
+import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
@@ -22,7 +23,6 @@ import org.lwjgl.vulkan.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Math;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -90,23 +90,11 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.submit();
 
-                currentPipeline = pipelines[2];
-                bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.raster, Textures.rasterNormals}, Textures.rasterDepth);
-                vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
-                vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
-                pushUBO.update(0); //draw non-instanced stuff
-                pushUBO.submit();
-                //drawClouds();
-                drawStars();
-                worldType.renderCelestialBodies(stack);
-                for (Matrix4f cube : cubes) {
-                    drawCube(cube, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
-                }
-                unbindImagesDrawingTo(stack, new long[]{Textures.raster.image, Textures.rasterNormals.image}, Textures.rasterDepth.image);
-                currentPipeline = pipelines[1];
-                bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.dda, Textures.ddaNormals}, Textures.ddaDepth);
-                vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-                unbindImagesDrawingTo(stack, new long[]{Textures.dda.image, Textures.ddaNormals.image}, Textures.ddaDepth.image);
+                drawRaster(stack);
+                drawDDA(stack);
+                drawSSAO(stack);
+                drawGUI(stack);
+
                 bindPresentImage(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
                 unbindPresentImage(stack);
@@ -120,6 +108,41 @@ public class Renderer {
                 if (frameIdx >= FRAMES_IN_FLIGHT) {frameIdx = 0;}
             }
         }
+    }
+
+    public static void drawRaster(MemoryStack stack){
+        currentPipeline = pipelines[4];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2);
+        vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+        vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
+        pushUBO.update(0); //draw non-instanced stuff
+        pushUBO.submit();
+        //drawClouds();
+        drawStars();
+        worldType.renderCelestialBodies(stack);
+        for (Matrix4f cube : cubes) {
+            drawCube(cube, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
+        }
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
+    }
+    public static void drawDDA(MemoryStack stack) {
+        currentPipeline = pipelines[3];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
+        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
+    }
+    public static void drawSSAO(MemoryStack stack) {
+        currentPipeline = pipelines[2];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2);
+        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
+    }
+    public static void drawGUI(MemoryStack stack) {
+        currentPipeline = pipelines[1];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth1);
+        //vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(1.f, 1.f, 1.f, 1.f));
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth1.image);
     }
 
     public static void drawClouds() {
@@ -194,6 +217,11 @@ public class Renderer {
         pushUBO.submit();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
+    public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
+        pushUBO.submit();
+        vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
+    }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
         int waitResult = vkWaitForFences(vkDevice, inFlightFences[frameIdx], false, Long.MAX_VALUE);
@@ -244,13 +272,13 @@ public class Renderer {
         for (long image : images) {
             ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
                     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                    VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
-                    VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
+                    VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
+                    VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
         }
         ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, depthImage,
                 VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
-                VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_NONE);
+                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
+                VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
     public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex) {
         VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures);
