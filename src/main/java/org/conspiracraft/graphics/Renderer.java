@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Index;
@@ -68,6 +69,7 @@ public class Renderer {
 //                    }
                     ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
                     ImageHelper.fillImage(stack, Textures.noises, Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise")));
+                    GUI.fillTexture();
                     initialized = true;
                 } else {
 //                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
@@ -140,8 +142,8 @@ public class Renderer {
     public static void drawGUI(MemoryStack stack) {
         currentPipeline = pipelines[1];
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth1);
-        //vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(1.f, 1.f, 1.f, 1.f));
+        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(1.f, 1.f, 1.f, 0.f));
+        GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth1.image);
     }
 
@@ -221,6 +223,11 @@ public class Renderer {
         pushUBO.update(modelMatrix, color);
         pushUBO.submit();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
+    }
+    public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
+        pushUBO.submit();
+        vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD_CENTERED.indexCount, 1, Models.QUAD_CENTERED.indexOffset/Index.SIZE, Models.QUAD_CENTERED.vertexOffset/Vertex.SIZE, 0);
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {

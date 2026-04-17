@@ -42,6 +42,31 @@ public class Utils {
         buffer.flip();
         return buffer;
     }
+    public static void imageToBuffer(ByteBuffer buffer, int width, int height, BufferedImage image) {
+        int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        int padColumnsBytes = (width-image.getWidth())*4;
+        for (int y = 0; y < image.getHeight(); y++) {
+            int rowStart = y * image.getWidth();
+            for (int x = 0; x < image.getWidth(); x++) {
+                int pixel = pixels[rowStart+x];
+                buffer.put((byte) ((pixel >> 16) & 0xFF));
+                buffer.put((byte) ((pixel >> 8) & 0xFF));
+                buffer.put((byte) (pixel & 0xFF));
+                buffer.put((byte) ((pixel >> 24) & 0xFF));
+            }
+            for (int i = 0; i < padColumnsBytes; i++) {
+                buffer.put((byte)0);
+            }
+        }
+        int widthBytes = width*4;
+        int padRows = height-image.getHeight();
+        for (int row =  0; row < padRows; row++) {
+            for (int i = 0; i < widthBytes; i++) {
+                buffer.put((byte) 0);
+            }
+        }
+        buffer.flip();
+    }
     public static float mix(float min, float max, float factor) {
         return min * (1 - factor) + max * factor;
     }

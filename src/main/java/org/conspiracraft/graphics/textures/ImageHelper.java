@@ -44,6 +44,30 @@ public class ImageHelper {
                 VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
+    public static void fillImage(MemoryStack stack, Texture texture, Buffer stagingBuffer) {
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+
+        VkBufferImageCopy.Buffer imageCopy = VkBufferImageCopy.calloc(1, stack)
+                .bufferOffset(0)
+                .bufferRowLength(0)
+                .bufferImageHeight(0)
+                .imageSubresource(s -> s
+                        .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                        .mipLevel(0)
+                        .baseArrayLayer(0)
+                        .layerCount(1))
+                .imageOffset(o -> o.set(0, 0, 0))
+                .imageExtent(e -> e.set(texture.width, texture.height, texture instanceof Texture3D texture3D ? texture3D.depth : 1));
+        vkCmdCopyBufferToImage(Renderer.currentCmdBuffer, stagingBuffer.buffer[0], texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
+
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
+                VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+    }
 
     public static long createImageView(MemoryStack stack, boolean threeDimensional, long image, int format, int channels) {
         VkImageViewCreateInfo createInfo = VkImageViewCreateInfo.calloc(stack)
