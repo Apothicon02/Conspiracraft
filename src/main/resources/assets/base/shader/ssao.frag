@@ -59,7 +59,7 @@ float getAO(float depth, vec3 normal) {
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);
-    return pow(occlusion, AO_STRENGTH);
+    return clamp(pow(occlusion, AO_STRENGTH), 0.25f, 1);
 }
 void main() {
     vec4 color = texture(ddaColors, uv.xy);

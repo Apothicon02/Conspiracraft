@@ -19,9 +19,9 @@ layout(location = 2) out vec4 color;
 
 void main() {
     color = pushUbo.color;
-    pos = position;
     uv = (pos.xy+1)/2;
-    vec4 worldPos = pushUbo.model*vec4(pos, 1.f);
+    vec4 worldPos = pushUbo.model*vec4(position, 1.f);
+    pos = worldPos.xyz;
     vec4 clipPos = globalUbo.proj*globalUbo.view*(worldPos);
     gl_Position = clipPos;
 }

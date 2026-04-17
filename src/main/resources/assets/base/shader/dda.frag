@@ -520,8 +520,8 @@ void main() {
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
         blockPos = ivec3(primaryLightPos);
         block = ivec2(0);
-//        reflectivity = 0.5f;
-//        roughness = 0.25f;
+        reflectivity = 0.5f;
+        roughness = 0.25f;
         voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
         if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
             celestial = true;
@@ -560,7 +560,7 @@ void main() {
         rayPos = primaryLightPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (normDot < 0.f) {
+        if (dot(primaryFlatNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
         } else {
             shadowColor = dda(false);

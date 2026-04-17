@@ -4,19 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Separated ssao into its own pass.">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/model/quad.obj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.vert" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/ssao.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Index.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Index.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Models.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/models/Models.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Separated ssao into its own pass. &#10;- Added unused gui pass.">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/ssao.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/ssao.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -219,14 +212,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00008" summary="- Fixed inaccurate reflections on transparent objects.">
-      <option name="closed" value="true" />
-      <created>1763228774007</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1763228774007</updated>
     </task>
     <task id="LOCAL-00009" summary="- Updated .gitignore. &#10;- Improved smoothness.">
       <option name="closed" value="true" />
@@ -612,7 +597,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776378659919</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="- Separated ssao into its own pass. &#10;- Added unused gui pass.">
+      <option name="closed" value="true" />
+      <created>1776388630931</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1776388630931</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -620,7 +613,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Extracted dda to its own method." />
     <MESSAGE value="- Wip lods." />
     <MESSAGE value="- Fixed lods." />
     <MESSAGE value="- Optimized dda." />
@@ -645,8 +637,8 @@
     <MESSAGE value="- Added grass blades. &#10;- AO is stronger." />
     <MESSAGE value="- Shadows are no longer cast when a face is facing away from the sun." />
     <MESSAGE value="- DDA now outputs flat normals." />
-    <option name="LAST_COMMIT_MESSAGE" value="- DDA now outputs flat normals." />
-    <option name="LAST_CHUNK_COMMIT_MESSAGE" value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
+    <MESSAGE value="- Separated ssao into its own pass. &#10;- Added unused gui pass." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Separated ssao into its own pass. &#10;- Added unused gui pass." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
