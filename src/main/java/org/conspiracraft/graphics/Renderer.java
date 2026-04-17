@@ -121,7 +121,7 @@ public class Renderer {
         drawStars();
         worldType.renderCelestialBodies(stack);
         for (Matrix4f cube : cubes) {
-            drawCube(cube, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
+            drawCube(cube, new Vector4f(0.95f, 0.05f, 0.95f, 1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }

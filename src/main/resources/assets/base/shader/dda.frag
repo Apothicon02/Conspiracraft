@@ -244,19 +244,11 @@ vec3 bevelNormal(vec3 normal) {
     return normal;
 }
 
-vec3 stepMask(vec3 blockSideDist) {
-    bvec3 b1 = lessThan(blockSideDist.xyz, blockSideDist.yzx);
-    bvec3 b2 = lessThanEqual(blockSideDist.xyz, blockSideDist.zxy);
-    bvec3 blockMask = bvec3(
-    b1.x && b2.x,
-    b1.y && b2.y,
-    b1.z && b2.z
-    );
-    if(!any(blockMask)) {
-        blockMask.z = true;
-    }
-
-    return vec3(blockMask);
+vec3 stepMask(vec3 sideDist) {
+    int axis = sideDist.x < sideDist.y ? ((sideDist.x < sideDist.z) ? 0 : 2) : ((sideDist.y < sideDist.z) ? 1 : 2);
+    vec3 mask = vec3(0);
+    mask[axis] = 1.0;
+    return mask;
 }
 
 vec3 getDir(vec2 pos) {
@@ -507,7 +499,7 @@ void main() {
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
     float reflectivity = block.x == 1 ? 1.f : 0.f;
-    float roughness = block.x == 1 ? 0.1f : 0.f;
+    float roughness = block.x == 1 ? 0.2f : 0.f;
     if (rasterDepth > depth) {
         isSky = false;
         depth = rasterDepth;
@@ -520,8 +512,8 @@ void main() {
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
         blockPos = ivec3(primaryLightPos);
         block = ivec2(0);
-        reflectivity = 0.5f;
-        roughness = 0.25f;
+        reflectivity = 1.f;
+        roughness = 0.2f;
         voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
         if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
             celestial = true;

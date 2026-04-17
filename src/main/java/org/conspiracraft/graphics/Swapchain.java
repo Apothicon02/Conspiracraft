@@ -123,6 +123,8 @@ public class Swapchain {
         imagesBuf.get(images);
         eWidth = caps.currentExtent().width();
         eHeight = caps.currentExtent().height();
+        Settings.width = eWidth;
+        Settings.height = eHeight;
 
         long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         depthImage = depthImageInfo[0];
