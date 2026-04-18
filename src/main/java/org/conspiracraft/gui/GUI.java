@@ -266,10 +266,18 @@ public class GUI {
                 Main.player.inv.selectedContainerSlot = new Vector2i((int) (clampedPos.x() * invWidth), (int) (clampedPos.y() * 4));
                 selSlot = Main.player.inv.selectedContainerSlot;
             }
+            for (int slotId : Main.player.inv.selectedSlots) {
+                color = new Vector4f(0.85f, 0.85f, 0.85f, 1.f);
+                Vector2i pos = new Vector2i(slotId % invWidth, slotId / invWidth);
+                if (pos.x() != selSlot.x() || pos.y() != selSlot.y()) { //don't draw in the selected slot, as that would just get overlapped.
+                    drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, pos.x(), pos.y(), enlargedSlotSize, enlargedSlotSize);
+                }
+            }
         } else {
             Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
             selSlot = Main.player.inv.selectedSlot;
         }
+        color = new Vector4f(1.f);
         if (selSlot != null) {
             if (selSlot.x() < 0 || selSlot.y() < 0) {
                 selSlot.set(-1, -1);

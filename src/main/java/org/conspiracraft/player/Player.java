@@ -1,7 +1,9 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Source;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -13,6 +15,7 @@ public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
     public Vector3f pos = new Vector3f();
+    public Vector3f vel = new Vector3f();
     public Inventory inv = new Inventory();
     public Vector3f selectedBlock = new Vector3f();
     public Vector3f prevSelectedBlock = new Vector3f();
@@ -47,6 +50,7 @@ public class Player {
     public void tick() {
         oldCamTranslation.set(getCameraTranslation());
         movementTick();
+        doSounds();
     }
 
     public void movementTick() {
@@ -63,14 +67,34 @@ public class Player {
     }
 
     public void movementInputs() {
-        forward = inputHandler.isKeyDown(SDL_SCANCODE_W);
-        backward = inputHandler.isKeyDown(SDL_SCANCODE_S);
-        rightward = inputHandler.isKeyDown(SDL_SCANCODE_D);
-        leftward = inputHandler.isKeyDown(SDL_SCANCODE_A);
-        upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
-        downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
-        sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
-        superSprinting = inputHandler.isKeyDown(SDL_SCANCODE_CAPSLOCK);
+        if (GUI.inventoryOpen || GUI.pauseMenuOpen) {
+            forward = false;
+            backward = false;
+            rightward = false;
+            leftward = false;
+            upward = false;
+            downward = false;
+            sprinting = false;
+            superSprinting = false;
+        } else {
+            forward = inputHandler.isKeyDown(SDL_SCANCODE_W);
+            backward = inputHandler.isKeyDown(SDL_SCANCODE_S);
+            rightward = inputHandler.isKeyDown(SDL_SCANCODE_D);
+            leftward = inputHandler.isKeyDown(SDL_SCANCODE_A);
+            upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
+            downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
+            sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
+            superSprinting = inputHandler.isKeyDown(SDL_SCANCODE_CAPSLOCK);
+        }
+    }
+
+    public void doSounds() {
+        Matrix4f cam = getCameraMatrix();
+        Vector3f forward = new Vector3f();
+        Vector3f up = new Vector3f();
+        cam.positiveZ(forward).negate();
+        cam.positiveY(up);
+        AudioController.setListenerData(new Vector3f(pos.x(), pos.y()+eyeHeight, pos.z()), vel, new float[]{forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z()});
     }
 
     public void rotate(float pitch, float yaw) {
