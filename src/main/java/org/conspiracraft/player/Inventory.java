@@ -2,7 +2,6 @@ package org.conspiracraft.player;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import kotlin.Pair;
-import org.conspiracraft.Window;
 import org.conspiracraft.items.*;
 import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
@@ -12,151 +11,202 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.*;
 
 import static org.lwjgl.sdl.SDLScancode.*;
 
 public class Inventory {
     public static int invWidth = 14;
+    public static int invHeight = 4;
 
-    public Item[] items = new Item[invWidth*4];
+    public Item[] items = new Item[invWidth * invHeight];
     public Item cursorItem = null;
+    public ArrayList<Integer> selectedSlots = new ArrayList<>();
     public Vector2i selectedSlot = new Vector2i(0);
     public Vector2i selectedContainerSlot = new Vector2i(0);
     public int prevRMBDeposit = -1;
-    public int interactCD = 0;
-
+    public int prevInteract = 0;
+    public long prevInteractTime = 0;
+    public static int interactionChainDelayLimit = 200; //max time in ms between chained events like clicking twice for double click
     public void tick() {
-        if (interactCD > 0) {
-            interactCD--;
-        }
         if (!Main.player.inputHandler.rightButtonPressed) {
             prevRMBDeposit = -1;
         }
-        if (interactCD <= 0) {
-            Integer selSlotId = selectedSlot == null || selectedSlot.x() < 0 || selectedSlot.y() < 0 ? null : selectedSlot.x+(selectedSlot.y*invWidth);
-            Integer containerSlotId = selectedContainerSlot == null || selectedContainerSlot.x() < 0 || selectedContainerSlot.y() < 0 ? null : selectedContainerSlot.x+(selectedContainerSlot.y*invWidth);
-            Item selItem = getSelectedItem(true);
-            if (cursorItem == null) {
-                if (selItem != null) {
-                    Item newSelItem = selItem.clone();
-                    if (Main.player.inputHandler.leftButtonClick) {
-                        cursorItem = newSelItem.clone();
-                        newSelItem = null;
-                        interactCD = 5;
-                    } else if (Main.player.inputHandler.rightButtonClick) {
-                        cursorItem = newSelItem.clone();
-                        float splitAmt = cursorItem.amount / 2.f;
-                        int existAmt = (int) Math.floor(splitAmt);
-                        if (existAmt <= 0) {
-                            newSelItem = null;
-                        } else {
-                            newSelItem.amount = existAmt;
-                        }
-                        cursorItem.amount = (int) Math.ceil(splitAmt);
-                        interactCD = 5;
-                    }
-                    if (selSlotId != null) {
-                        setItem(selSlotId, newSelItem);
-                        if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LEFT) && cursorItem != null) {
-                            if (!Main.player.creative || !Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LCTRL)) {
-                                addToInventory(cursorItem, selectedSlot.y() > 0);
-                            }
-                            cursorItem = null;
-                        }
-                    }
-                    if (containerSlotId != null) {
-                        if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT) && cursorItem != null) {
-                            addToInventory(cursorItem, true);
-                            cursorItem = null;
+        if (!Main.player.inputHandler.leftButtonPressed && !selectedSlots.isEmpty()) {
+            int amtPerSlot = cursorItem.amount / selectedSlots.size();
+            int amtPut = 0;
+            for (int slotId : selectedSlots) {
+                Item item = items[slotId];
+                if (item == null) {
+                    item = cursorItem.clone().amount(amtPerSlot);
+                    amtPut += amtPerSlot;
+                } else {
+                    int transfer = Math.min(item.type.maxStackSize, item.amount + amtPerSlot);
+                    item.amount = transfer;
+                    amtPut += transfer;
+                }
+                items[slotId] = item;
+            }
+            cursorItem.amount -= amtPut;
+            if (cursorItem.amount <= 0) {
+                cursorItem = null;
+            }
+            selectedSlots.clear();
+        } else if (Main.player.inputHandler.leftButtonClick && prevInteract == 0 && Main.timeMsLong-prevInteractTime < interactionChainDelayLimit) { //if double-clicked
+            prevInteract = -1;
+            if (cursorItem == null) { //pickup item hovering over if none is being carried by cursor
+                cursorItem = getItem(selectedSlot);
+                setItem(selectedSlot, null);
+            }
+            if (cursorItem != null) {
+                List<Pair<Integer, Item>> sortedItems = new ArrayList<>();
+                for (int x = 0; x < invWidth; x++) {
+                    for (int y = 0; y < invHeight; y++) {
+                        Item item = getItem(x, y);
+                        if (item != null && item.type == cursorItem.type) {
+                            sortedItems.addLast(new Pair<>((y * invWidth) + x, item));
                         }
                     }
                 }
-            } else if (Main.player.inputHandler.leftButtonClick) {
-                if (selItem != null) {
-                    if (cursorItem.type != selItem.type) { //swap item with slot
-                        Item oldCursorItem = cursorItem.clone();
-                        cursorItem = selItem.clone();
+                sortedItems.sort(Comparator.comparingInt(pair -> pair.component2().amount));
+                for (Pair<Integer, Item> pair : sortedItems) {
+                    Item item = pair.component2();
+                    if (cursorItem.amount >= cursorItem.type.maxStackSize) {break;}
+                    int space = cursorItem.type.maxStackSize - cursorItem.amount;
+                    int move = Math.min(space, item.amount);
+                    item.amount -= move;
+                    cursorItem.amount += move;
+                    if (item.amount <= 0) {
+                        setItem(pair.component1(), null);
+                    }
+                }
+            }
+        } else {
+            Integer selSlotId = selectedSlot == null || selectedSlot.x() < 0 || selectedSlot.y() < 0 ? null : selectedSlot.x + (selectedSlot.y * invWidth);
+            if (selSlotId == null || prevRMBDeposit != selSlotId) {
+                Integer containerSlotId = selectedContainerSlot == null || selectedContainerSlot.x() < 0 || selectedContainerSlot.y() < 0 ? null : selectedContainerSlot.x + (selectedContainerSlot.y * invWidth);
+                Item selItem = getSelectedItem(true);
+                if (cursorItem == null) {
+                    if (selItem != null) {
+                        Item newSelItem = selItem.clone();
+                        if (Main.player.inputHandler.leftButtonClick) {
+                            cursorItem = newSelItem.clone();
+                            newSelItem = null;
+                            prevInteract = 0;
+                            prevInteractTime = Main.timeMsLong;
+                        } else if (Main.player.inputHandler.rightButtonClick) {
+                            cursorItem = newSelItem.clone();
+                            float splitAmt = cursorItem.amount / 2.f;
+                            int existAmt = (int) Math.floor(splitAmt);
+                            if (existAmt <= 0) {
+                                newSelItem = null;
+                            } else {
+                                newSelItem.amount = existAmt;
+                            }
+                            cursorItem.amount = (int) Math.ceil(splitAmt);
+                        }
                         if (selSlotId != null) {
-                            setItem(selSlotId, oldCursorItem);
+                            setItem(selSlotId, newSelItem);
+                            if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LEFT) && cursorItem != null) {
+                                if (!Main.player.creative || !Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LCTRL)) {
+                                    addToInventory(cursorItem, selectedSlot.y() > 0);
+                                }
+                                cursorItem = null;
+                            }
+                        }
+                        if (containerSlotId != null) {
+                            if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT) && cursorItem != null) {
+                                addToInventory(cursorItem, true);
+                                cursorItem = null;
+                            }
+                        }
+                    }
+                } else if (Main.player.inputHandler.leftButtonClick) {
+                    if (selItem != null) {
+                        if (cursorItem.type != selItem.type) { //swap item with slot
+                            Item oldCursorItem = cursorItem.clone();
+                            cursorItem = selItem.clone();
+                            if (selSlotId != null) {
+                                setItem(selSlotId, oldCursorItem);
+                            }
+                        } else if (selSlotId != null) { //dump contents into slot
+                            if (addToSlot(selSlotId, cursorItem, cursorItem.amount) == null) {
+                                cursorItem = null;
+                            }
+                        } else {
+                            //World.dropItem(cursorItem);
+                            cursorItem = null;
                         }
                     } else if (selSlotId != null) { //dump contents into slot
                         if (addToSlot(selSlotId, cursorItem, cursorItem.amount) == null) {
                             cursorItem = null;
                         }
                     } else {
-                        //World.dropItem(cursorItem);
+                        if (containerSlotId == null) { //only drop if not over container
+                            //World.dropItem(cursorItem);
+                        }
                         cursorItem = null;
                     }
-                } else if (selSlotId != null) { //dump contents into slot
-                    if (addToSlot(selSlotId, cursorItem, cursorItem.amount) == null) {
-                        cursorItem = null;
+                    prevInteract = 0;
+                    prevInteractTime = Main.timeMsLong;
+                } else if (Main.player.inputHandler.middleButtonClick) {
+                    ItemType product = Recipes.recipes.get(new Pair<>(cursorItem.type, selItem.type));
+                    if (product == null) {
+                        product = Recipes.recipes.get(new Pair<>(selItem.type, cursorItem.type));
                     }
-                } else {
-                    if (containerSlotId == null) { //only drop if not over container
-                        //World.dropItem(cursorItem);
-                    }
-                    cursorItem = null;
-                }
-                interactCD = 5;
-            } else if (Main.player.inputHandler.middleButtonClick) {
-                ItemType product = Recipes.recipes.get(new Pair<>(cursorItem.type, selItem.type));
-                if (product == null) {
-                    product = Recipes.recipes.get(new Pair<>(selItem.type, cursorItem.type));
-                }
-                boolean useCursorItem = true;
-                if (product == null) {
-                    for (ItemTag tag : cursorItem.type.tags) {
-                        if (tag.tagged.contains(cursorItem.type)) {
-                            for (ItemTag selTag : selItem.type.tags) {
-                                if (selTag.tagged.contains(selItem.type)) {
-                                    product = Recipes.tagRecipes.get(new Pair<>(tag, selTag));
-                                    if (product != null) {
-                                        useCursorItem = false;
-                                        break;
+                    boolean useCursorItem = true;
+                    if (product == null) {
+                        for (ItemTag tag : cursorItem.type.tags) {
+                            if (tag.tagged.contains(cursorItem.type)) {
+                                for (ItemTag selTag : selItem.type.tags) {
+                                    if (selTag.tagged.contains(selItem.type)) {
+                                        product = Recipes.tagRecipes.get(new Pair<>(tag, selTag));
+                                        if (product != null) {
+                                            useCursorItem = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                if (product != null) {
-                    if (!useCursorItem || selItem.amount <= cursorItem.amount) {
-                        selItem.type(product);
-                        if (useCursorItem) {
-                            cursorItem.amount(cursorItem.amount - selItem.amount);
-                            if (cursorItem.amount <= 0) {
-                                cursorItem = null;
+                    if (product != null) {
+                        if (!useCursorItem || selItem.amount <= cursorItem.amount) {
+                            selItem.type(product);
+                            if (useCursorItem) {
+                                cursorItem.amount(cursorItem.amount - selItem.amount);
+                                if (cursorItem.amount <= 0) {
+                                    cursorItem = null;
+                                }
                             }
+                            selItem.playSound(Main.player.pos);
+                        } else {
+                            cursorItem.type(product);
+                            selItem.amount(selItem.amount - cursorItem.amount);
+                            if (selItem.amount <= 0) {
+                                selItem = null;
+                            }
+                            cursorItem.playSound(Main.player.pos);
                         }
-                        selItem.playSound(Main.player.pos);
-                    } else {
-                        cursorItem.type(product);
-                        selItem.amount(selItem.amount-cursorItem.amount);
-                        if (selItem.amount <= 0) {
-                            selItem = null;
-                        }
-                        cursorItem.playSound(Main.player.pos);
                     }
                 }
-                interactCD = 5;
             }
         }
         if (cursorItem != null) {
             if (cursorItem == null || cursorItem.amount <= 0 || cursorItem.type == ItemTypes.AIR) {
                 cursorItem = null;
-            } else if (interactCD <= 0 && selectedSlot != null) {
-                int slotId = selectedSlot.x+(selectedSlot.y*invWidth);
-                if (Main.player.inputHandler.leftButtonPressed) { //split evenly across several slots
-//                    if (addToSlot(slotId, cursorItem, cursorItem.amount, false) == null) {
-//                        cursorItem = null;
-//                    }
-//                    interactCD = 20;
+            } else if (selectedSlot != null) {
+                int slotId = selectedSlot.x + (selectedSlot.y * invWidth);
+                if (Main.player.inputHandler.leftButtonPressed) {
+                    Item item = getItem(slotId);
+                    if (Main.timeMsLong-prevInteractTime >= interactionChainDelayLimit && !selectedSlots.contains(slotId) && (item == null || item.type == cursorItem.type)) {
+                        selectedSlots.add(slotId);
+                    }
                 } else if (Main.player.inputHandler.rightButtonPressed && prevRMBDeposit != slotId) {
                     if (addToSlot(slotId, cursorItem, 1) == null) {
                         cursorItem = null;
                     }
-                    interactCD = 20;
+                    prevRMBDeposit = slotId;
                 }
             }
         }
@@ -185,12 +235,12 @@ public class Inventory {
         setItem(0, 2, new Item().type(ItemTypes.MARBLE).amount(64));
     }
 
-    public static Path invPath = Path.of(Main.mainFolder+"world0/inv.data");
+    public static Path invPath = Path.of(Main.mainFolder + "world0/inv.data");
 
     public void load() throws IOException {
         int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(invPath.toFile()).readAllBytes()));
         int slot = 0;
-        for (int i = 0; i < data.length;) {
+        for (int i = 0; i < data.length; ) {
             int itemDataLength = data[i++];
             if (itemDataLength > 0) {
                 items[slot++] = Item.load(data, i);
@@ -200,6 +250,7 @@ public class Inventory {
             }
         }
     }
+
     public void save() throws IOException {
         IntArrayList data = new IntArrayList();
         int i = 0;
@@ -231,21 +282,26 @@ public class Inventory {
     }
 
     public Item getContainerItem(Vector2i xy) {
-        return xy == null ? null : getContainerItem((xy.y*invWidth)+xy.x);
+        return xy == null ? null : getContainerItem((xy.y * invWidth) + xy.x);
     }
+
     public Item getContainerItem(int index) {
         ItemType type = ItemTypes.itemTypeMap.get(index);
         return type == null ? null : type.createItem().amount(type.maxStackSize);
     }
+
     public Item getItem(int index) {
         return items[index];
     }
+
     public Item getItem(int x, int y) {
-        return getItem((y*invWidth)+x);
+        return getItem((y * invWidth) + x);
     }
+
     public Item getItem(Vector2i xy) {
-        return xy == null ? null : getItem((xy.y*invWidth)+xy.x);
+        return xy == null ? null : getItem((xy.y * invWidth) + xy.x);
     }
+
     public void setItem(int slotId, Item item) {
         Item existing = items[slotId];
         if (item != null) {
@@ -258,11 +314,13 @@ public class Inventory {
         }
         items[slotId] = item;
     }
+
     public void setItem(Vector2i xy, Item item) {
-        setItem((xy.y*invWidth)+xy.x, item);
+        setItem((xy.y * invWidth) + xy.x, item);
     }
+
     public void setItem(int x, int y, Item item) {
-        setItem((y*invWidth)+x, item);
+        setItem((y * invWidth) + x, item);
     }
 
     public void addToInventory(ArrayList<Item> items) {
@@ -277,7 +335,7 @@ public class Inventory {
         loop:
         for (int y = hotbarFirst ? 0 : 3; hotbarFirst ? (y < 4) : (y >= 0); y += (hotbarFirst ? 1 : -1)) { //first try merging with existing stacks
             for (int x = 0; x < invWidth; x++) {
-                int i = (y*invWidth)+x;
+                int i = (y * invWidth) + x;
                 Item slotItem = getItem(i);
                 if (slotItem != null && slotItem.type == item.type) {
                     item = addToSlot(i, item, item.amount);
@@ -291,7 +349,7 @@ public class Inventory {
             loop:
             for (int y = hotbarFirst ? 0 : 3; hotbarFirst ? (y < 4) : (y >= 0); y += (hotbarFirst ? 1 : -1)) { //then try adding to an empty slot
                 for (int x = 0; x < invWidth; x++) {
-                    int i = (y*invWidth)+x;
+                    int i = (y * invWidth) + x;
                     Item slotItem = getItem(i);
                     if (slotItem == null || slotItem.type == ItemTypes.AIR) {
                         setItem(i, item.clone());
@@ -329,24 +387,25 @@ public class Inventory {
         Item[] newItems = new Item[items.length];
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < invWidth; x++) {
-                int row = y+1;
+                int row = y + 1;
                 if (row >= 4) {
                     row = 0;
                 }
-                newItems[(y*invWidth)+x] = getItem(x, row);
+                newItems[(y * invWidth) + x] = getItem(x, row);
             }
         }
         items = newItems;
     }
+
     public void scrollDown() {
         Item[] newItems = new Item[items.length];
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < invWidth; x++) {
-                int row = y-1;
+                int row = y - 1;
                 if (row < 0) {
                     row = 3;
                 }
-                newItems[(y*invWidth)+x] = getItem(x, row);
+                newItems[(y * invWidth) + x] = getItem(x, row);
             }
         }
         items = newItems;

@@ -121,9 +121,9 @@ public class InputHandler {
     public void setInputs() {
         keys = SDL_GetKeyboardState();
         mouse = SDL_GetMouseState(null, null);
-        boolean leftButtonNowPressed = (mouse & SDL_BUTTON_LEFT) > 0;
-        boolean rightButtonNowPressed = (mouse & SDL_BUTTON_RIGHT) > 0;
-        boolean middleButtonNowPressed = (mouse & SDL_BUTTON_MIDDLE) > 0;
+        boolean leftButtonNowPressed = (mouse & SDL_BUTTON_LMASK) > 0;
+        boolean rightButtonNowPressed = (mouse & SDL_BUTTON_RMASK) > 0;
+        boolean middleButtonNowPressed = (mouse & SDL_BUTTON_MMASK) > 0;
         leftButtonClick = (!leftButtonNowPressed && leftButtonPressed);
         rightButtonClick = (!rightButtonNowPressed && rightButtonPressed);
         middleButtonClick = (!middleButtonNowPressed && middleButtonPressed);

@@ -1,6 +1,7 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.audio.Source;
 import org.conspiracraft.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -13,9 +14,11 @@ public class Player {
     public Camera camera = new Camera();
     public Vector3f pos = new Vector3f();
     public Inventory inv = new Inventory();
+    public Vector3f selectedBlock = new Vector3f();
+    public Vector3f prevSelectedBlock = new Vector3f();
 
     public boolean chiselMode = false;
-    public boolean creative = false;
+    public boolean creative = true;
     public float bobbing = 0f;
     public float scale = 2f;
     public float baseEyeHeight = 1.625f*scale;
@@ -26,9 +29,13 @@ public class Player {
     public float baseSpeed = Math.max(0.33f, 0.33f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
-    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false;
+    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
 
-    public Player() {}
+    public final Source breakingSource;
+
+    public Player() {
+        breakingSource = new Source(pos, 1, 1, 0, 1);
+    }
     public static void create() {
         Main.player = new Player();
         Main.player.inputHandler.init();

@@ -234,6 +234,21 @@ public class GUI {
             drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
             drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
             drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
+            pushUBO.updateLayer(0); //gui
+            drawText(false, hotbarPosX, hotbarPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Inventory".toCharArray());
+            pushUBO.updateLayer(1); //inventory
+            pushUBO.updateAtlasOffset(new Vector2i(0));
+            if (Main.player.creative) {
+                color = new Vector4f(1);
+                drawQuad(false, false, hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY);
+                drawQuad(false, false, hotbarPosX, containerPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+                pushUBO.updateLayer(0); //gui
+                drawText(false, hotbarPosX, containerPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Creative Supplies".toCharArray());
+                pushUBO.updateLayer(1); //inventory
+                pushUBO.updateAtlasOffset(new Vector2i(0));
+            }
         }
         color = new Vector4f(1.f);
         drawQuad(false, false, hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY); //hotbar
@@ -283,6 +298,47 @@ public class GUI {
                         }
                     }
                 }
+            }
+        }
+
+        if (GUI.inventoryOpen && Main.player.creative) {
+            boolean isFirstSlot = true;
+            int itemId = 0;
+            done:
+            for (int y = 0; y < 4; y++) {
+                for (int x = 0; x < invWidth; x++) {
+                    ItemType itemType = ItemTypes.itemTypeMap.get(itemId);
+                    pushUBO.updateTex(isFirstSlot ? 0 : 1); //use item atlas unless first slot then use gui atlas
+                    if (isFirstSlot) {
+                        pushUBO.updateLayer(4); //trash
+                        pushUBO.updateAtlasOffset(new Vector2i(0));
+                    } else {
+                        pushUBO.updateLayer(0); //items
+                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
+                    }
+                    int offX = 3 + (x * slotSize);
+                    int offY = 3 + (y * slotSizeY);
+                    drawSlot(hotbarPosX, containerPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+                    itemId++;
+                    if (itemId >= ItemTypes.itemTypeMap.size()) {
+                        break done;
+                    }
+                    isFirstSlot = false;
+                }
+            }
+        }
+        pushUBO.updateTex(1); //use item atlas
+        if (Main.player.inv.cursorItem != null) { //cursor item
+            ItemType itemType = Main.player.inv.cursorItem.type;
+            pushUBO.updateAtlasOffset(itemType.atlasOffset);
+            float offX = Main.player.inputHandler.currentPos.x() / width;
+            float offY = Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height;
+            drawQuad(true, true, offX, offY, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+            if (Main.player.inv.cursorItem.amount > 1) {
+                pushUBO.updateTex(0); //use gui atlas
+                char[] chars = String.valueOf(Main.player.inv.cursorItem.amount).toCharArray();
+                float startOffset = 16 - (chars.length * charWidth);
+                drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars);
             }
         }
     }

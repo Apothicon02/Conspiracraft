@@ -58,6 +58,9 @@ public class World {
         recentlyEditedPos.set(x, y, z);
         return recentlyEditedChunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
     }
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
+        setBlock(x, y, z, type, subType);
+    }
     public static void setBlock(int x, int y, int z, int type, int subType) {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
         if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {

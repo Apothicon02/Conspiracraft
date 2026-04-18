@@ -4,91 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Big progress in porting gui. &#10;- Added audio.">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/block/texture/torch.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/acacia_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/birch_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/blue_stained_glass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/cherry_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/glass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/lime_stained_glass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/magenta_stained_glass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/mahogany_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/oak_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/palm_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/red_stained_glass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/redwood_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/screw.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/spruce_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/steel_frame.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/steel_rod.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/component/texture/willow_plank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/food/texture/apple.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/food/texture/cherry.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/food/texture/orange.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/machine/texture/powered_vent.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/misc/texture/air.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/misc/texture/debug.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/plant/texture/grass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/plant/texture/hydrangea.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/plant/texture/porecap.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/plant/texture/rose.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/acacia_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/argon_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/birch_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/carbon_dioxide_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/cherry_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/clay.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/copper.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/dirt.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/flint.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/gold.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/grassy_dirt.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/gravel.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/helium_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/hydrogen_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/iron.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/kyanite.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/magma.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/mahogany_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/marble.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/martian_regolith.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/mud.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/neon_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/nitrogen_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/oak_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/oxygen_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/palm_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/red_gravel.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/red_sand.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/red_sandstone.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/redwood_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/regolith.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/sand.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/sandstone.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/spruce_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/stick.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/stone.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/terracotta.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/water_ice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/willow_log.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/resource/texture/zinc.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/tool/steel/texture/hatchet.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/tool/steel/texture/hoe.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/tool/steel/texture/pick.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/tool/steel/texture/scythe.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/item/tool/steel/texture/spade.png" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/PushUBO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/PushUBO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/textures/Textures.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemTypes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/HandManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/HandManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Inventory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Inventory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,14 +215,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00015" summary="- Progress.">
-      <option name="closed" value="true" />
-      <created>1775606338810</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1775606338810</updated>
     </task>
     <task id="LOCAL-00016" summary="- Triangle!!!!">
       <option name="closed" value="true" />
@@ -685,7 +600,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776519047304</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="- Added item rendering.">
+      <option name="closed" value="true" />
+      <created>1776528202699</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1776528202701</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -693,7 +616,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added support for multiple shader programs. &#10;- Added support for multiple images to render to." />
     <MESSAGE value="- Added mipmapping. &#10;- Improved worldgen." />
     <MESSAGE value="- Fixed extreme lag in specific angles." />
     <MESSAGE value="- Fixed voxel hit pos inaccuracy." />
@@ -718,7 +640,8 @@
     <MESSAGE value="- Gui shader can now use textures." />
     <MESSAGE value="- Ported lots of stuff." />
     <MESSAGE value="- Big progress in porting gui. &#10;- Added audio." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Big progress in porting gui. &#10;- Added audio." />
+    <MESSAGE value="- Added item rendering." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added item rendering." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
