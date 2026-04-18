@@ -1,0 +1,73 @@
+package org.conspiracraft.audio;
+
+import org.joml.Vector3f;
+import org.lwjgl.openal.AL10;
+
+public class Source {
+    public int sourceID;
+    public int soundPlaying = -1;
+    public float baseGain;
+    public float basePitch;
+    float threshold = 0;
+
+    public Source(Vector3f pos, float gain, float pitch, float threshold, int loop) {
+        this.threshold = threshold;
+        sourceID = AL10.alGenSources();
+        AL10.alSourcei(sourceID, AL10.AL_LOOPING, loop);
+        AL10.alSourcef(sourceID, AL10.AL_GAIN, gain);
+        AL10.alSourcef(sourceID, AL10.AL_PITCH, pitch);
+        AL10.alSourcef(sourceID, AL10.AL_REFERENCE_DISTANCE, 3);
+        AL10.alSourcef(sourceID, AL10.AL_MIN_GAIN, 0);
+        baseGain = gain;
+        basePitch = pitch;
+        AL10.alSource3f(sourceID, AL10.AL_POSITION, pos.x, pos.y, pos.z);
+    }
+
+    public boolean isPlaying() {
+        return AL10.alGetSourcef(sourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
+    }
+
+    public void play(SFX sfx, boolean force) {
+        if (force || !isPlaying()) {
+            soundPlaying = sfx.id;
+            AL10.alSourceStop(sourceID);
+            AL10.alSourcei(sourceID, AL10.AL_BUFFER, sfx.id);
+            AL10.alSourcePlay(sourceID);
+        }
+    }
+    public void play(SFX sfx) {
+        play(sfx, false);
+    }
+
+    public void stop() {
+        soundPlaying = -1;
+        AL10.alSourceStop(sourceID);
+    }
+
+    public void setGain(float newGain) {
+        baseGain = newGain;
+        AL10.alSourcef(sourceID, AL10.AL_GAIN, Math.abs(baseGain));
+
+    }
+    public void setPitch(float newPitch, float speed) {
+        speed = (float) Math.sqrt(Math.max(1, speed)-1);
+        basePitch = newPitch;
+        if (basePitch < 0) {
+            AL10.alSourcef(sourceID, AL10.AL_PITCH, speed*Math.abs(basePitch));
+        } else {
+            AL10.alSourcef(sourceID, AL10.AL_PITCH, basePitch+speed);
+        }
+    }
+    public void setPos(Vector3f pos) {
+        AL10.alSource3f(sourceID, AL10.AL_POSITION, pos.x, pos.y, pos.z);
+    }
+    public void setVel(Vector3f vel) {
+        AL10.alSource3f(sourceID, AL10.AL_VELOCITY, vel.x, vel.y, vel.z);
+        float speed = Math.max(1+threshold, Math.max(Math.abs(vel.x), Math.max(Math.abs(vel.y), Math.abs(vel.z))))-(1+threshold);
+        setPitch(basePitch, speed);
+    }
+
+    public void delete() {
+        AL10.alDeleteSources(sourceID);
+    }
+}

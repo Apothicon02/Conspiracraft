@@ -29,6 +29,8 @@ public class Main {
     public static double interpolationTime = 0;
     public static long timeNs = 0;
     public static double timeMs = 0;
+    public static long timeMsLong = 0;
+    public static long currentTick = 0;
     static void main() throws IOException {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
@@ -42,6 +44,7 @@ public class Main {
             prevTime = start;
             timeNs += elapsed;
             timeMs = timeNs/1000000d;
+            timeMsLong = (long)timeMs;
             window.pollEvents();
             player.inputHandler.update();
 
@@ -51,6 +54,7 @@ public class Main {
             timeAccum += elapsed;
             while (timeAccum >= tickTime) {
                 ticksDone++;
+                currentTick++;
                 timeAccum -= tickTime;
                 World.worldType.tick();
                 player.tick();

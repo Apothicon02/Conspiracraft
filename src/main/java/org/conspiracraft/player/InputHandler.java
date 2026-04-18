@@ -27,6 +27,9 @@ public class InputHandler {
     public boolean leftButtonPressed = false;
     public boolean middleButtonPressed = false;
     public boolean rightButtonPressed = false;
+    public boolean leftButtonClick = false;
+    public boolean middleButtonClick = false;
+    public boolean rightButtonClick = false;
     public Vector2f scroll = new Vector2f(0);
     public Vector2f displVec = new Vector2f(0);
     public Vector2f currentPos = new Vector2f(0);
@@ -40,6 +43,7 @@ public class InputHandler {
         if (Window.focused && Renderer.initialized) {
             player.rotate((float) -Math.toRadians(displVec.x * (mouseSensitivity / 10)),
                     (float) -Math.toRadians(displVec.y * (mouseSensitivity / 10)));
+            HandManager.useHands(window);
 
             if (keyRelease(SDL_SCANCODE_F11)) {
                 if (!isFullscreen) {

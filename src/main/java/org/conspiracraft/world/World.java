@@ -1,5 +1,9 @@
 package org.conspiracraft.world;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.conspiracraft.blocks.entities.BlockEntity;
+import org.conspiracraft.items.Item;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -15,10 +19,11 @@ public class World {
     public static int sizeLods = size / lodSize;
     public static int heightLods = height / lodSize;
     public static WorldType worldType = WorldTypes.EARTH;
+    public static ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
+    public static Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
     public static boolean inBounds(int x, int y, int z) {
         return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
     }
-
     public static short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
@@ -39,6 +44,10 @@ public class World {
     public static Vector3i recentlyEditedChunkPos = new Vector3i();
     public static Vector3i recentlyEditedLocalPos = new Vector3i();
     public static Vector3i recentlyEditedPos = new Vector3i();
+    public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
+    public static Vector2i getBlock(float x, float y, float z) {
+        return getBlock((int)x, (int)y, (int)z);
+    }
     public static Vector2i getBlock(int x, int y, int z) {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
         if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {

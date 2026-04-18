@@ -11,7 +11,10 @@ public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
     public Vector3f pos = new Vector3f();
+    public Inventory inv = new Inventory();
 
+    public boolean chiselMode = false;
+    public boolean creative = false;
     public float bobbing = 0f;
     public float scale = 2f;
     public float baseEyeHeight = 1.625f*scale;
