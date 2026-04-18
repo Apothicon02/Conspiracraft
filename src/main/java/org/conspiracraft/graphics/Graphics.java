@@ -87,6 +87,7 @@ public class Graphics {
             CmdBuffer.recreate(stack);
             SyncObjects.init(stack);
             Renderer.frameIdx = 0;
+            firstImages = true;
         }
     }
 

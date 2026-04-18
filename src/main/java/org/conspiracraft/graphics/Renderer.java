@@ -241,10 +241,6 @@ public class Renderer {
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
-        if (imagesInFlight[imageIdx] != VK_NULL_HANDLE) {
-            vkWaitForFences(vkDevice, imagesInFlight[imageIdx], true, Long.MAX_VALUE);
-        }
-        imagesInFlight[imageIdx] = inFlightFences[frameIdx];
         vkResetFences(vkDevice, inFlightFences[frameIdx]);
 
         currentCmdBuffer = cmdBuffers[frameIdx];
@@ -260,12 +256,12 @@ public class Renderer {
                 .pWaitSemaphores(stack.longs(imageAvailableSemaphores[frameIdx]))
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
-                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[frameIdx]));
+                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx]));
         vkQueueSubmit(graphicsQueue, submitInfo, inFlightFences[frameIdx]);
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                .pWaitSemaphores(stack.longs(renderFinishedSemaphores[frameIdx]))
+                .pWaitSemaphores(stack.longs(renderFinishedSemaphores[imageIdx]))
                 .swapchainCount(1)
                 .pSwapchains(stack.longs(vkSwapchain))
                 .pImageIndices(stack.ints(imageIdx));

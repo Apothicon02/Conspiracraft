@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed some stuff being done twice.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" afterDir="false" />
     </list>
@@ -211,14 +212,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00019" summary="- Fixed resizing.">
-      <option name="closed" value="true" />
-      <created>1775678815275</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1775678815275</updated>
     </task>
     <task id="LOCAL-00020" summary="- Added ssbos.">
       <option name="closed" value="true" />
@@ -604,15 +597,33 @@
       <option name="project" value="LOCAL" />
       <updated>1776542044177</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="- Added imagesinflight.">
+      <option name="closed" value="true" />
+      <created>1776543884465</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1776543884465</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed textures having unnecessary usage flags." />
     <MESSAGE value="- Now supports having multiple color attachments in one pipeline." />
     <MESSAGE value="- Added SSAO." />
     <MESSAGE value="- Added dda depth buffer. &#10;- SSAO now uses 32-bit depth instead of 16-bit. &#10;- Added temporary trees." />
@@ -637,7 +648,8 @@
     <MESSAGE value="- Finished adding inventory." />
     <MESSAGE value="- Visualized item stack spreading. &#10;- Fixed listener data never being updated. &#10;- Disabled movement input when inventory or pause menu open." />
     <MESSAGE value="- Fixed some stuff being done twice." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed some stuff being done twice." />
+    <MESSAGE value="- Added imagesinflight." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added imagesinflight." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -649,7 +661,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
-          <line>438</line>
+          <line>434</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
