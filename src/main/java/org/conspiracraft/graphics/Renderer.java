@@ -235,8 +235,6 @@ public class Renderer {
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for fences: "+waitResult);}
         vkResetFences(vkDevice, inFlightFences[frameIdx]);
 
-        vkResetFences(vkDevice, inFlightFences[frameIdx]);
-
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {

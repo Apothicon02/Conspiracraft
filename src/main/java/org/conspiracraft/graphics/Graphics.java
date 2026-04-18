@@ -79,22 +79,18 @@ public class Graphics {
                 flags = SDL_GetWindowFlags(window);
                 SDL_PollEvent(events);
             }
-            cleanupSwapchain();
-
-            long vkOldSwapchain = vkSwapchain;
-            Swapchain.init(stack);
+            vkDeviceWaitIdle(vkDevice);
+            Swapchain.recreate(stack);
             Pipelines.recreatePipeline(stack);
-            SyncObjects.init(stack);
-            vkDestroySwapchainKHR(vkDevice, vkOldSwapchain, null);
             Textures.resize(stack);
             recreateDescriptors(stack);
             CmdBuffer.recreate(stack);
             SyncObjects.init(stack);
+            Renderer.frameIdx = 0;
         }
     }
 
     public static void cleanupSwapchain() {
-        vkDeviceWaitIdle(vkDevice);
         //sync objects
         for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(vkDevice, imageAvailableSemaphores[i], null);

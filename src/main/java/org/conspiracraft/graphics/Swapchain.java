@@ -35,6 +35,13 @@ public class Swapchain {
         createImageViews(stack);
     }
 
+    public static void recreate(MemoryStack stack) {
+        long vkOldSwapchain = vkSwapchain;
+        Graphics.cleanupSwapchain();
+        Swapchain.init(stack);
+        vkDestroySwapchainKHR(vkDevice, vkOldSwapchain, null);
+    }
+
     public static void createImageViews(MemoryStack stack) {
         imageViews = new long[images.length];
         for (int i = 0; i < images.length; i++) {
