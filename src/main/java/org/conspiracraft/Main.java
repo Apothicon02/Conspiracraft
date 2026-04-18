@@ -1,5 +1,6 @@
 package org.conspiracraft;
 
+import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
@@ -22,6 +23,7 @@ public class Main {
     public static Player player;
 
     public static boolean isClosing = false;
+    public static boolean isSaving = false;
     public static List<Long> frameTimes = new ArrayList<>(List.of());
     public static double fps = 0;
     public static double ms = 0;
@@ -35,6 +37,7 @@ public class Main {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();
+        AudioController.init();
         player = new Player();
         double timeAccum = 0;
         long prevTime = System.nanoTime();
@@ -42,7 +45,7 @@ public class Main {
             long start = System.nanoTime();
             long elapsed = start-prevTime;
             prevTime = start;
-            timeNs += elapsed;
+            timeNs += (long) (elapsed*timeMul);
             timeMs = timeNs/1000000d;
             timeMsLong = (long)timeMs;
             window.pollEvents();
@@ -65,6 +68,7 @@ public class Main {
             interpolationTime = timeAccum/tickTime;
 
             Renderer.render();
+            AudioController.tick();
 
             frameTimes.addLast(elapsed);
             if (frameTimes.size() > 60) {

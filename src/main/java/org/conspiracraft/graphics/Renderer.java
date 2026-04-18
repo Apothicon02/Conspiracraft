@@ -1,6 +1,6 @@
 package org.conspiracraft.graphics;
 
-import org.conspiracraft.GUI;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Index;

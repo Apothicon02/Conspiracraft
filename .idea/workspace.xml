@@ -4,50 +4,68 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Gui shader can now use textures.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/ScheduledTicker.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/AudioController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/BlockSFX.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/SFX.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/Sounds.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/Source.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/audio/WaveData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/BlockTag.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/BlockTags.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/Recipes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/drops/BlockDrops.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/drops/LootTables.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/entities/BlockEntity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/entities/BlockEntityTypes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/entities/PoweredVentBlockEntity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/BlockProperties.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/BlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/BlockTypes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/CloudBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/FullBucketBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/LeafBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/LightBlockProperties.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/LightBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/PlantBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/PlantLightBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/blocks/types/PowderBlockType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/Item.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemSFX.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemTag.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemTags.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/ItemTypes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/items/Recipes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/HandManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Inventory.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/AudioChannelButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/AudioSettingsButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/BackButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/Button.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/ControlsSettingsButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/DynamicFoVButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/GraphicsSettingsButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/MuteButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/QuitToDesktopButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/QuitToMenuButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/SaveWorldButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/SettingsButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/ShadowsButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/TAAButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/UpscaleButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/sliders/FoVSlider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/sliders/SensitivitySlider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/sliders/Slider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/sliders/VolumeSlider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/bucket_pour_water.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/buzz.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/chirp_1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/cloud.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/dirt_step3.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/flow.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gears_turning.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/glass_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/glass_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/grass_step3.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gravel_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/gravel_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/magma.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/metal_small_place1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/metal_small_place2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/mud_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/mud_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_place1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_place2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_scrape1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/rock_scrape2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sand_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sand_step2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sizzle1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/sizzle2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/splash1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/swim1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/vent.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wind.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wood_step1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/base/generic/sound/wood_step2.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/GUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/Settings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/utils/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +166,7 @@
     "git-widget-placeholder": "vulkan",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/java/org/conspiracraft",
+    "last_opened_file_path": "C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/generic",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
@@ -157,11 +175,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\gui" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\gui" />
       <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic\model" />
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\shader" />
-      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic\texture" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
@@ -251,14 +269,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00013" summary="- Fixed white lines.">
-      <option name="closed" value="true" />
-      <created>1775565803167</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1775565803167</updated>
     </task>
     <task id="LOCAL-00014" summary="- Started rewrite.">
       <option name="closed" value="true" />
@@ -644,7 +654,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776472617372</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="- Ported lots of stuff.">
+      <option name="closed" value="true" />
+      <created>1776475008677</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1776475008677</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -652,7 +670,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added voxel dda." />
     <MESSAGE value="- Added clouds. &#10;- Tidied up dda.frag." />
     <MESSAGE value="- Added support for multiple shader programs. &#10;- Added support for multiple images to render to." />
     <MESSAGE value="- Added mipmapping. &#10;- Improved worldgen." />
@@ -677,7 +694,8 @@
     <MESSAGE value="- Fixed rasterized normals." />
     <MESSAGE value="- Added gui texture." />
     <MESSAGE value="- Gui shader can now use textures." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Gui shader can now use textures." />
+    <MESSAGE value="- Ported lots of stuff." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Ported lots of stuff." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

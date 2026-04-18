@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.graphics.buffers.CmdBuffer;
@@ -116,6 +117,7 @@ public class Graphics {
         vkFreeMemory(vkDevice, depthImageMemory, null);
     }
     public void cleanup() {
+        AudioController.cleanup();
         SDL_DestroyWindow(window);
         SDL_Quit();
     }
