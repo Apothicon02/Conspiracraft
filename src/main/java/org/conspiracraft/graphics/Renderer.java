@@ -142,7 +142,7 @@ public class Renderer {
     public static void drawGUI(MemoryStack stack) {
         currentPipeline = pipelines[1];
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth1);
-        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(1.f, 1.f, 1.f, 0.f));
+        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth1.image);
     }

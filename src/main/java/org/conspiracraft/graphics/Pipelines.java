@@ -57,7 +57,7 @@ public class Pipelines {
         multisampling.rasterizationSamples(VK_SAMPLE_COUNT_1_BIT);
 
         VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
                 .offset(0)
                 .size(globalUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)

@@ -7,6 +7,7 @@ import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.utils.Utils;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.width;
+import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.vulkan.VK10.*;
@@ -45,6 +47,7 @@ public class GUI {
     public static void draw() {
         update();
         //Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(1), new Vector4f(0.5f, 1.f, 0.5f, 1.f));
+        pushUBO.updateLayer(1); //inventory
         drawQuad(false, false, hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY); //hotbar
     }
 
@@ -53,7 +56,8 @@ public class GUI {
         float yScale = (scaleY / guiScale) * aspectRatio;
         float xOffset = ((x * 2) - 1) + (centeredX ? 0 : xScale);
         float yOffset = ((y * -2) + 1) - (centeredY ? 0 : yScale);
-//        Vector2i offset = new Vector2i((int) ((x - (centeredX ? xScale / 2 : 0)) * width), (int) ((y + (centeredY ? yScale / 2 : 0)) * height));
+        //Vector2i offset = new Vector2i((int) ((x - (centeredX ? xScale / 2 : 0)) * width), (int) ((y + (centeredY ? yScale / 2 : 0)) * height));
+        pushUBO.updateSize(new Vector2i(scaleX, scaleY));
 //        glUniform2i(Renderer.gui.uniforms.get("offset"), offset.x(), offset.y());
 //        glUniform2i(Renderer.gui.uniforms.get("size"), scaleX, scaleY);
 //        Vector2i scale = new Vector2i((int) (xScale * width), (int) (yScale * height));
@@ -67,7 +71,7 @@ public class GUI {
 //            drawingSlider.width = scaleX;
 //            sliders.add(drawingSlider);
 //        }
-        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), new Vector4f(0.5f, 1.f, 0.5f, 1.f));
+        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), new Vector4f(1.f));
     }
 
     public static int charWidth = 6;

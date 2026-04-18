@@ -10,6 +10,9 @@ layout(push_constant) uniform PushUBO {
     mat4 model;
     vec4 color;
     int instanced;
+    ivec2 atlasOffset;
+    ivec2 size;
+    int layer;
 } pushUbo;
 layout(location = 0) in vec3 position;
 
