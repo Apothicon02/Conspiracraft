@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Fixed some stuff being done twice.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/HandManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/HandManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/InputHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Inventory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Inventory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -215,30 +211,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00016" summary="- Triangle!!!!">
-      <option name="closed" value="true" />
-      <created>1775667248740</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1775667248740</updated>
-    </task>
-    <task id="LOCAL-00017" summary="- Added global UBO.">
-      <option name="closed" value="true" />
-      <created>1775671643813</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1775671643813</updated>
-    </task>
-    <task id="LOCAL-00018" summary="- Updated dda shader.">
-      <option name="closed" value="true" />
-      <created>1775676836660</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1775676836660</updated>
     </task>
     <task id="LOCAL-00019" summary="- Fixed resizing.">
       <option name="closed" value="true" />
@@ -608,7 +580,31 @@
       <option name="project" value="LOCAL" />
       <updated>1776528202701</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="- Finished adding inventory.">
+      <option name="closed" value="true" />
+      <created>1776535778379</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1776535778379</updated>
+    </task>
+    <task id="LOCAL-00066" summary="- Visualized item stack spreading. &#10;- Fixed listener data never being updated. &#10;- Disabled movement input when inventory or pause menu open.">
+      <option name="closed" value="true" />
+      <created>1776537616992</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1776537616993</updated>
+    </task>
+    <task id="LOCAL-00067" summary="- Fixed some stuff being done twice.">
+      <option name="closed" value="true" />
+      <created>1776542044177</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1776542044177</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -616,9 +612,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added mipmapping. &#10;- Improved worldgen." />
-    <MESSAGE value="- Fixed extreme lag in specific angles." />
-    <MESSAGE value="- Fixed voxel hit pos inaccuracy." />
     <MESSAGE value="- Fixed textures having unnecessary usage flags." />
     <MESSAGE value="- Now supports having multiple color attachments in one pipeline." />
     <MESSAGE value="- Added SSAO." />
@@ -641,7 +634,10 @@
     <MESSAGE value="- Ported lots of stuff." />
     <MESSAGE value="- Big progress in porting gui. &#10;- Added audio." />
     <MESSAGE value="- Added item rendering." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added item rendering." />
+    <MESSAGE value="- Finished adding inventory." />
+    <MESSAGE value="- Visualized item stack spreading. &#10;- Fixed listener data never being updated. &#10;- Disabled movement input when inventory or pause menu open." />
+    <MESSAGE value="- Fixed some stuff being done twice." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed some stuff being done twice." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -653,8 +649,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
-          <line>436</line>
+          <line>438</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Pipelines.java</url>
+          <line>136</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

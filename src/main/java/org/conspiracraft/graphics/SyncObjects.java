@@ -5,6 +5,7 @@ import org.lwjgl.vulkan.VkFenceCreateInfo;
 import org.lwjgl.vulkan.VkSemaphoreCreateInfo;
 
 import java.nio.LongBuffer;
+import java.util.Arrays;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.conspiracraft.graphics.Swapchain.FRAMES_IN_FLIGHT;
@@ -14,6 +15,7 @@ public class SyncObjects {
     public static long[] imageAvailableSemaphores;
     public static long[] renderFinishedSemaphores;
     public static long[] inFlightFences;
+    public static long[] imagesInFlight;
 
     public static void init(MemoryStack stack) {
         createSyncObjects(stack);
@@ -21,8 +23,9 @@ public class SyncObjects {
 
     public static void createSyncObjects(MemoryStack stack) {
         imageAvailableSemaphores = new long[FRAMES_IN_FLIGHT];
-        renderFinishedSemaphores = new long[Swapchain.images.length];
+        renderFinishedSemaphores = new long[FRAMES_IN_FLIGHT];
         inFlightFences = new long[FRAMES_IN_FLIGHT];
+        imagesInFlight = new long[Swapchain.images.length];
 
         VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack);
         semaphoreInfo.sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);

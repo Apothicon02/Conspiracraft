@@ -231,9 +231,8 @@ public class Renderer {
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
-        int waitResult = vkWaitForFences(vkDevice, inFlightFences[frameIdx], false, Long.MAX_VALUE);
+        int waitResult = vkWaitForFences(vkDevice, inFlightFences[frameIdx], true, Long.MAX_VALUE);
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for fences: "+waitResult);}
-        vkResetFences(vkDevice, inFlightFences[frameIdx]);
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
@@ -242,6 +241,11 @@ public class Renderer {
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
+        if (imagesInFlight[imageIdx] != VK_NULL_HANDLE) {
+            vkWaitForFences(vkDevice, imagesInFlight[imageIdx], true, Long.MAX_VALUE);
+        }
+        imagesInFlight[imageIdx] = inFlightFences[frameIdx];
+        vkResetFences(vkDevice, inFlightFences[frameIdx]);
 
         currentCmdBuffer = cmdBuffers[frameIdx];
         vkResetCommandBuffer(currentCmdBuffer, 0);
@@ -256,12 +260,12 @@ public class Renderer {
                 .pWaitSemaphores(stack.longs(imageAvailableSemaphores[frameIdx]))
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
-                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx]));
+                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[frameIdx]));
         vkQueueSubmit(graphicsQueue, submitInfo, inFlightFences[frameIdx]);
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                .pWaitSemaphores(stack.longs(renderFinishedSemaphores[imageIdx]))
+                .pWaitSemaphores(stack.longs(renderFinishedSemaphores[frameIdx]))
                 .swapchainCount(1)
                 .pSwapchains(stack.longs(vkSwapchain))
                 .pImageIndices(stack.ints(imageIdx));
