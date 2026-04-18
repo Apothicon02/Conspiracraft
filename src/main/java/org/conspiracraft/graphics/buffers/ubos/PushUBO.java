@@ -11,7 +11,7 @@ import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class PushUBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, 0};
     public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     private int offset = 0;
@@ -57,6 +57,7 @@ public class PushUBO {
     public void updateAtlasOffset(Vector2i atlasOffset) {uniformStorage[3] = atlasOffset;}
     public void updateSize(Vector2i size) {uniformStorage[4] = size;}
     public void updateLayer(int layer) {uniformStorage[5] = layer;}
+    public void updateTex(int tex) {uniformStorage[6] = tex;}
     public void submit() {
         offset = 0;
         ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());

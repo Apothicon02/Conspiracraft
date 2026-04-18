@@ -13,9 +13,11 @@ layout(push_constant) uniform PushUBO {
     ivec2 atlasOffset;
     ivec2 size;
     int layer;
+    int tex;
 } pushUbo;
 layout(set = 0, binding = 9) uniform sampler2D colors;
 layout(set = 0, binding = 12) uniform sampler3D gui;
+layout(set = 0, binding = 13) uniform sampler2D items;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
 
@@ -33,7 +35,8 @@ void main() {
     if (pushUbo.color.a == -1.f) {
         outColor = bgColor;
     } else {
-        vec4 guiColor = texelFetch(gui, ivec3(pushUbo.atlasOffset.x+(localUV.x*pushUbo.size.x), pushUbo.atlasOffset.y+(localUV.y*pushUbo.size.y), pushUbo.layer), 0);
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(localUV.x*pushUbo.size.x), pushUbo.atlasOffset.y+(localUV.y*pushUbo.size.y));
+        vec4 guiColor = pushUbo.tex == 0 ? texelFetch(gui, ivec3(coords, pushUbo.layer), 0) : texelFetch(items, coords, 0);
         guiColor.rgb = fromLinear(guiColor.rgb);
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {

@@ -13,6 +13,7 @@ layout(push_constant) uniform PushUBO {
     ivec2 atlasOffset;
     ivec2 size;
     int layer;
+    int tex;
 } pushUbo;
 layout(location = 0) in vec3 position;
 

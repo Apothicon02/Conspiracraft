@@ -10,6 +10,9 @@ import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.buttons.*;
 import org.conspiracraft.gui.sliders.*;
+import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemType;
+import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.player.HandManager;
 import org.conspiracraft.utils.Utils;
 import org.joml.*;
@@ -78,7 +81,7 @@ public class GUI {
         boolean shouldSetObjectOnPrev = true;
         Vector2i cursorPos = new Vector2i(cursorPxX(), cursorPxY());
         color = new Vector4f(1);
-        //glUniform1i(Renderer.gui.uniforms.get("tex"), 0); //use gui atlas
+        pushUBO.updateTex(0); //use gui atlas
         pushUBO.updateLayer(5); //button
         for (Button button : buttons) {
             if (cursorPos.x() > button.bounds.x() && cursorPos.x() < button.bounds.z() && cursorPos.y() > button.bounds.y() && cursorPos.y() < button.bounds.w()) {
@@ -125,7 +128,7 @@ public class GUI {
     }
     public static Vector4f menuBgColor = new Vector4f(1.f);
     public static void drawAlwaysVisible() {
-        //glUniform1i(Renderer.gui.uniforms.get("tex"), 0); //use gui atlas
+        pushUBO.updateTex(0); //use gui atlas
         if (Main.isSaving || pauseMenuOpen) {
             color = new Vector4f(1.f);
             Vector2i border = new Vector2i((int) ((32 * (width / 3840f)) / guiScaleMul), (int) ((32 * (height / 2180f)) / guiScaleMul));
@@ -215,7 +218,7 @@ public class GUI {
     public static void drawDebug() {
         color = new Vector4f(1.f, 1.f, 1.f, 0.5f);
         pushUBO.updateLayer(0); //text
-        //glUniform1i(Renderer.gui.uniforms.get("tex"), 0); //use gui atlas
+        pushUBO.updateTex(0); //use gui atlas
         drawText(false, 0, 1, pauseMenuOpen ? 6 : 2, (pauseMenuOpen ? -6 : -2) - charHeight, (String.format("%.2f", fps) + "fps ").toCharArray());
         if (showDebug && !pauseMenuOpen) {
             drawText(false, 0, 1, 2, -2 - (charHeight * 2), (String.format("%.2f", ms) + "ms").toCharArray());
@@ -225,6 +228,7 @@ public class GUI {
     public static void drawInventory() {
         pushUBO.updateAtlasOffset(new Vector2i(0));
         pushUBO.updateLayer(1); //inventory
+        pushUBO.updateTex(0); //use gui atlas
         if (GUI.inventoryOpen) {
             color = new Vector4f(0.85f);
             drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
@@ -256,6 +260,29 @@ public class GUI {
                 selSlot.set(-1, -1);
             } else {
                 drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
+            }
+        }
+
+        pushUBO.updateLayer(0); //items
+        for (int y = 0; y < (GUI.inventoryOpen ? 4 : 1); y++) {
+            for (int x = 0; x < invWidth; x++) {
+                Item item = Main.player.inv.getItem(x, y);
+                if (item != null) {
+                    ItemType itemType = item.type;
+                    if (itemType != ItemTypes.AIR) {
+                        pushUBO.updateTex(1); //use item atlas
+                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
+                        int offX = 3 + (x * slotSize);
+                        int offY = 3 + (y * slotSizeY);
+                        drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+                        if (item.amount > 1) {
+                            pushUBO.updateTex(0); //use gui atlas
+                            char[] chars = String.valueOf(item.amount).toCharArray();
+                            float startOffset = 16 - (chars.length * charWidth);
+                            drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars);
+                        }
+                    }
+                }
             }
         }
     }
@@ -423,8 +450,9 @@ public class GUI {
             loadImage(stagingBuffer, "texture/trash");
             loadImage(stagingBuffer, "texture/button");
 
-            //ItemTypes.fillTexture();
             ImageHelper.fillImage(stack, Textures.gui, stagingBuffer);
+
+            ItemTypes.fillTexture(stack);
         }
     }
 

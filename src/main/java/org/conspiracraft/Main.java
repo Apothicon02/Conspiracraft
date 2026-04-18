@@ -38,7 +38,7 @@ public class Main {
         events = new SDL_Event(eventContainer);
         window = new Window();
         AudioController.init();
-        player = new Player();
+        Player.create();
         double timeAccum = 0;
         long prevTime = System.nanoTime();
         while (!isClosing) {

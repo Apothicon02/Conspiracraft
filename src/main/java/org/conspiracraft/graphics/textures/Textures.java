@@ -20,6 +20,7 @@ public class Textures {
     public static Texture depth2;
     public static Texture norms2;
     public static Texture gui;
+    public static Texture items;
 
     public static Texture create(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         Texture texture = new Texture(width, height, channels, format, usage, windowResizable);
@@ -53,6 +54,7 @@ public class Textures {
         depth2 = create(Settings.width, Settings.height, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, true);
         norms2 = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         gui = create(3840, 2160, 6, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        items = create(4096, 16, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
         textures.forEach((tex) -> {tex.create(stack);});
     }
 }

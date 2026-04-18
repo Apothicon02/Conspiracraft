@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -27,9 +28,12 @@ public class Player {
     public float sprintSpeed = 1.5f;
     public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false;
 
-    public Player() {
-        inputHandler.init();
-        pos.set(730, 90, 840);
+    public Player() {}
+    public static void create() {
+        Main.player = new Player();
+        Main.player.inputHandler.init();
+        Main.player.pos.set(730, 90, 840);
+        Main.player.inv.init();
     }
 
     public Vector3f oldCamTranslation = new Vector3f();

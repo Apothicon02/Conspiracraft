@@ -3,14 +3,22 @@ package org.conspiracraft.items;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.graphics.buffers.Buffer;
+import org.conspiracraft.graphics.textures.ImageHelper;
+import org.conspiracraft.graphics.textures.Texture3D;
+import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.utils.Utils;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import static org.lwjgl.system.MemoryUtil.memAddress;
+import static org.lwjgl.system.MemoryUtil.memCopy;
+import static org.lwjgl.vulkan.VK10.*;
 
 public class ItemTypes {
     public static int itemTexSize = 16;
@@ -104,30 +112,26 @@ public class ItemTypes {
         itemTypeMap.put(itemTypeMap.size(), type);
         return type;
     }
+    public static void fillTexture(MemoryStack stack) throws IOException {
+        int texSize = Textures.items.width*Textures.items.height;
+        Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
 
-    public static ByteBuffer[] itemTextures;
-    public static ExecutorService pool;
-//    public static void fillTexture() {
-//        glBindTexture(GL_TEXTURE_3D, Textures.items.id);
-//        int texSize = Textures.items.width*Textures.items.height*((Texture3D)(Textures.items)).depth;
-//        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, Textures.items.width, Textures.items.height, ((Texture3D)(Textures.items)).depth, 0, GL_RGBA, GL_FLOAT, 0);
-//        itemTextures = new ByteBuffer[texSize/itemTexSize];
-//
-//        pool = Executors.newFixedThreadPool(1);
-//        pool.submit(() -> { try {
-//                int xOffset = 0;
-//                int yOffset = 0;
-//                int i = 0;
-//                for (ItemType itemType : itemTypeMap.values()) {
-//                    itemTextures[i++] = Utils.imageToBuffer(Utils.loadImage("item/"+itemType.name));
-//                    itemType.atlasOffset(xOffset, yOffset);
-//                    xOffset += itemTexSize;
-//                    if (xOffset >= 4096-itemTexSize) {
-//                        xOffset = 0;
-//                        yOffset += itemTexSize;
-//                    }
-//                }
-//            } catch (IOException e) {throw new RuntimeException(e);}});
-//        pool.shutdown();
-//    }
+        int xOffset = 0;
+        int yOffset = 0;
+        for (ItemType itemType : itemTypeMap.values()) {
+            ByteBuffer itemBuf = Utils.imageToBuffer(Utils.loadImage("item/"+itemType.name));
+            for (long row = 0; row < itemTexSize; row++) {
+                memCopy(memAddress(itemBuf) + row * itemTexSize * 4L,
+                        stagingBuffer.pointer.get(0) + (((yOffset + row) * Textures.items.width + xOffset) * 4L),
+                        itemTexSize * 4L);
+            }
+            itemType.atlasOffset(xOffset, yOffset);
+            xOffset += itemTexSize;
+            if (xOffset + itemTexSize > Textures.items.width) {
+                xOffset = 0;
+                yOffset += itemTexSize;
+            }
+        }
+        ImageHelper.fillImage(stack, Textures.items, stagingBuffer);
+    }
 }
