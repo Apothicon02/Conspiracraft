@@ -1,13 +1,21 @@
 package org.conspiracraft.graphics;
 
+import org.lwjgl.util.shaderc.Shaderc;
+
 public class Pipeline {
-    public String vert;
-    public String frag;
+    public String vertName;
+    public String fragName;
+    public long vert;
+    public long frag;
     public int colorAttachments;
     public long vkPipeline = -1;
     public Pipeline(String vert, String frag, int colorAttachments) {
-        this.vert = vert;
-        this.frag = frag;
+        vertName = vert;
+        fragName = frag;
         this.colorAttachments = colorAttachments;
+    }
+    public void compile() {
+        this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{vertName}, Shaderc.shaderc_glsl_vertex_shader));
+        this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{fragName}, Shaderc.shaderc_glsl_fragment_shader));
     }
 }

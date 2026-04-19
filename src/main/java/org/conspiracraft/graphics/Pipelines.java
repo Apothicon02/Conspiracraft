@@ -2,11 +2,13 @@ package org.conspiracraft.graphics;
 
 import org.conspiracraft.graphics.models.Vertex;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.conspiracraft.graphics.Graphics.globalUBO;
@@ -16,12 +18,30 @@ import static org.lwjgl.vulkan.VK14.*;
 public class Pipelines {
     public static long pipelineLayout;
     public static Pipeline[] pipelines;
-    public static void recreatePipeline(MemoryStack stack) {
-        if (pipelines != null) {
-            createPipeline(stack);
-        }
+    private static ExecutorService pool;
+    public static void init(MemoryStack stack) {
+        pipelines = new Pipeline[]{
+                new Pipeline("fullscreen.vert", "present.frag", 1),
+                new Pipeline("gui.vert", "gui.frag", 1), new Pipeline("fullscreen.vert", "ssao.frag", 1),
+                new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
+        pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
+        pool.submit(() -> createPipelineCache(stack));
+        for (Pipeline pipeline : pipelines) {pool.submit(pipeline::compile);}
+        pool.shutdown();
+    }
+    public static long pipelineCache;
+    public static void createPipelineCache(MemoryStack stack) {
+        VkPipelineCacheCreateInfo cacheInfo = VkPipelineCacheCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO)
+                .pInitialData(null);
+        LongBuffer pCache = stack.mallocLong(1);
+        int err = vkCreatePipelineCache(vkDevice, cacheInfo, null, pCache);
+        if (err != VK_SUCCESS) {throw new RuntimeException("Failed to create pipeline cache: " + err);}
+        pipelineCache = pCache.get(0);
     }
     public static void createPipeline(MemoryStack stack) {
+        if (!pool.isTerminated()) {try {pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);} catch (InterruptedException e) {throw new RuntimeException(e);}}
+
         VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO)
                 .pDynamicStates(stack.mallocInt(2).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).flip());
@@ -79,7 +99,6 @@ public class Pipelines {
                 .depthBoundsTestEnable(false)
                 .stencilTestEnable(false);
 
-        pipelines = new Pipeline[]{new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1), new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
         for (int i = 0; i < pipelines.length; i++) {
             Pipeline pipeline = pipelines[i];
             VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachments = VkPipelineColorBlendAttachmentState.calloc(pipeline.colorAttachments, stack);
@@ -101,18 +120,16 @@ public class Pipelines {
                     .logicOp(VK_LOGIC_OP_COPY)
                     .attachmentCount(pipeline.colorAttachments)
                     .pAttachments(colorBlendAttachments);
-            long vertShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{pipeline.vert}, Shaderc.shaderc_glsl_vertex_shader));
-            long fragShaderModule = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{pipeline.frag}, Shaderc.shaderc_glsl_fragment_shader));
             VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
             shaderStages.get(0)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
                     .stage(VK_SHADER_STAGE_VERTEX_BIT)
-                    .module(vertShaderModule)
+                    .module(pipeline.vert)
                     .pName(stack.UTF8("main"));
             shaderStages.get(1)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
                     .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
-                    .module(fragShaderModule)
+                    .module(pipeline.frag)
                     .pName(stack.UTF8("main"));
             VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
                     .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
@@ -134,12 +151,10 @@ public class Pipelines {
                     .basePipelineIndex(-1); // Optional
 
             LongBuffer pipelineBuf = stack.mallocLong(1);
-            if (vkCreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
+            if (vkCreateGraphicsPipelines(vkDevice, pipelineCache, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
                 throw new RuntimeException("failed to create graphics pipeline!");
             }
             pipeline.vkPipeline = pipelineBuf.get(0);
-            vkDestroyShaderModule(vkDevice, fragShaderModule, null);
-            vkDestroyShaderModule(vkDevice, vertShaderModule, null);
         }
     }
 }

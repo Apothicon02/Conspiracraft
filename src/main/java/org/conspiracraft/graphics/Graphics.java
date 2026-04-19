@@ -34,6 +34,7 @@ public class Graphics {
             CmdBuffer.createCommandPool(stack);
             createBuffers(stack);
             Textures.generate(stack);
+            Pipelines.init(stack);
             descriptors = new Descriptors(stack);
             CmdBuffer.createCommandBuffer(stack);
             SyncObjects.init(stack);
@@ -80,7 +81,6 @@ public class Graphics {
             }
             vkDeviceWaitIdle(vkDevice);
             Swapchain.recreate(stack);
-            Pipelines.recreatePipeline(stack);
             Textures.resize(stack);
             recreateDescriptors(stack);
             CmdBuffer.recreate(stack);

@@ -17,10 +17,7 @@ public class Window {
 
     public Window() {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {throw new IllegalStateException("Unable to initialize SDL");}
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            graphics = new Graphics();
-        }
+        graphics = new Graphics();
     }
 
     public void resized(int width, int height) {
