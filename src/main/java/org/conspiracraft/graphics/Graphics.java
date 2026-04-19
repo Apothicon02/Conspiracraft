@@ -22,7 +22,6 @@ import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.lwjgl.sdl.SDLEvents.SDL_PollEvent;
 import static org.lwjgl.sdl.SDLInit.SDL_Quit;
 import static org.lwjgl.sdl.SDLVideo.*;
-import static org.lwjgl.vulkan.KHRSwapchain.vkDestroySwapchainKHR;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Graphics {
@@ -86,7 +85,7 @@ public class Graphics {
             recreateDescriptors(stack);
             CmdBuffer.recreate(stack);
             SyncObjects.init(stack);
-            Renderer.frameIdx = 0;
+            frameIdx = 0;
             firstImages = true;
         }
     }

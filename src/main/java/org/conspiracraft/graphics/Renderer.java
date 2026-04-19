@@ -237,7 +237,6 @@ public class Renderer {
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            Graphics.rebuild();
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
@@ -266,9 +265,7 @@ public class Renderer {
                 .pSwapchains(stack.longs(vkSwapchain))
                 .pImageIndices(stack.ints(imageIdx));
         int result = vkQueuePresentKHR(graphicsQueue, presentInfo);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            Graphics.rebuild();
-        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        if (result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw new RuntimeException("Failed to queue present!");
         }
     }
