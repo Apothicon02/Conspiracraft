@@ -21,7 +21,8 @@ public class EntityTypes {
 
     public static EntityType
             MUN = create(new EntityType("celestial/texture/mun")),
-            COW = create(new EntityType("animal/texture/cow"));
+            COW = create(new EntityType("animal/texture/cow")),
+            SHEEP = create(new EntityType("animal/texture/sheep"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);

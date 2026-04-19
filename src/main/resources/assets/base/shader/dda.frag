@@ -499,6 +499,7 @@ void main() {
         isSky = false;
         depth = rasterDepth;
         color = texture(rasterColors, uv);
+        color.rgb = fromLinear(color.rgb);
         primaryNormal = texture(rasterNormals, uv).xyz;
         primaryFlatNormal = primaryNormal;
         vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
