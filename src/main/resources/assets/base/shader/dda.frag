@@ -160,36 +160,31 @@ vec3 ogRayDir = vec3(0);
 vec3 sunColor = vec3(0);
 bool hasAtmosphere = true;
 vec3 sunsetColor = vec3(1, 0.65f, 0.25f); //vec3(0.65, 0.65f, 1)
+vec3 deepSunsetColor = vec3(1, 0.3f, 0.25f); //vec3(0.65, 0.65f, 1)
 vec3 skyColor = vec3(0.36f, 0.54f, 1.2f); //vec3(0.56f, 0.56f, 0.7f)
 vec3 nightSkyColor = vec3(0.05f, 0.f, 0.225f); //vec3(0.56f, 0.56f, 0.7f)
 float skyWhiteline = 0.9f; //0.8
-float sunsetHeight = 1.5f; //1
 float skyDensity = 1.f; //0.66
 float sunBrightnessMul = 1.1f; //1
 vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
-    if (!hasAtmosphere) {
-        fogginess = 0.f;
-    }
-    float ogY = ogPos.y;
+    if (!hasAtmosphere) { fogginess = 0.f; }
     vec3 relativeSun = vec3(ogPos.x, 0, ogPos.z)+(globalUbo.sun*(1000/worldSize));
-    float sunHeight = relativeSun.y/size;
-    float scattering = gradient(lightPos.y, ogY-63, ogY+437, 1.5f, -0.5f);
+    float sunHeight = relativeSun.y/(size*2);
+    float scattering = gradient(lightPos.y, 0, 1500, 1.5f, -0.5f);
     float sunDist = (distance(lightPos.xz, relativeSun.xz)/1500);
     float adjustedTime = clamp((sunDist*abs(1-clamp(sunHeight, 0.05f, 0.5f)))+scattering, 0.f, 1.f);
-    float thickness = gradient(lightPos.y, 128, 1500-max(0, sunHeight*1000), 0.33+(sunHeight/2), 1);
-    float sunSetness = min(1.f, max(abs(sunHeight*sunsetHeight), adjustedTime));
-    float whiteY = max(ogY, 200)-135.f;
-    float skyWhiteness = mix(max(0.33f, gradient(lightPos.y, (whiteY/4)+47, (whiteY/2)+436, 0, skyWhiteline)), 0.9f, clamp(abs(1-sunSetness), 0, 1.f));
+    float sunSetness = min(1.f, max(abs(sunHeight), adjustedTime));
+    float skyWhiteness = mix(max(0.33f, gradient(lightPos.y, 63, 437, 0, skyWhiteline)), 0.9f, clamp(abs(1-sunSetness), 0, 1.f));
     float sunBrightness = clamp(sunHeight+0.5, mix(-0.07f, 0.33f, skyWhiteness), 1);
-    if (negateSun) {
-        lighting.a = 0;
-    }
+    if (negateSun) { lighting.a = 0; }
     float whiteness = (isSky ? skyWhiteness : mix(skyWhiteline, skyWhiteness, max(0, fogginess-0.8f)*5.f))*clamp(sunHeight+0.8f-(min(sunSetness, 0.2f)*4), 0.33f, 1);
-    sunColor = mix(mix(sunsetColor*(1+((10*clamp(sunHeight, 0.f, 0.1f))*(15*min(0.5f, abs(1-sunBrightness))))), mix(nightSkyColor, skyColor, clamp(sunHeight+0.5f, 0, 1))*sunBrightness, sunSetness), vec3(sunBrightness), whiteness);
+    float lowSunHeight = 10*clamp(sunHeight, 0.f, 0.1f);
+    sunColor = mix(mix(mix(deepSunsetColor, sunsetColor, min(1, lowSunHeight*2))*(1+(lowSunHeight*(15*min(0.5f, abs(1-sunBrightness))))), mix(nightSkyColor, skyColor, clamp(sunHeight+0.1f, 0, 1))*sunBrightness, sunSetness), vec3(sunBrightness), whiteness);
     sunColor = min(mix(vec3(1), vec3(1, 0.95f, 0.85f), sunSetness/4), lighting.a*sunColor);
     if (!isSky && globalUbo.skylight.w >= 1.f) {
         sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
     }
+    float thickness = gradient(lightPos.y, 128, 1500-max(0, sunHeight*1000), 0.33+(sunHeight/2), 1);
     vec4 color = vec4(max(lighting.rgb, sunColor), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
@@ -546,7 +541,7 @@ void main() {
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
-        float normDot = dot(bentNormal, normalize(skylight.xyz));
+        float normDot = (dot(bentNormal, normalize(skylight.xyz))/2)+0.5f;
         vec3 lighting = (vec3(normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryLightPos;
@@ -575,13 +570,13 @@ void main() {
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
                 vec3 lightPos = hitPos+(primaryFlatNormal*voxelSize);
-                float fogginess = clamp(sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+                float fogginess = clamp((sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f)*gradient(lightPos.y, 63, 80, 1, 1+abs(noise(lightPos.xz)/3)), 0.f, 1.f);
                 reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
             color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
         }
         color.rgb *= lighting;
-        float fogginess = isSky ? 1.f : clamp(sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f, 0.f, 1.f);
+        float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
         outNormal = vec4(primaryFlatNormal, fogginess);
     } else {

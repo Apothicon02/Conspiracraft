@@ -60,7 +60,7 @@ void main() {
         }
         uv = abs(uv);
 
-        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x)+(pushUbo.layer*8), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
         outColor = texelFetch(entities, coords, 0)*inColor;
     }
 }

@@ -127,9 +127,10 @@ public class Renderer {
         //drawClouds();
         drawStars();
         worldType.renderCelestialBodies(stack);
+        pushUBO.updateLayer(0);
         for (Matrix4f cube : cubes) {
-            pushUBO.updateLayer(1);
-            drawCube(cube.rotateY((float)(Math.random()*0.002f)), new Vector4f(1.f));
+            pushUBO.updateAtlasOffset(EntityTypes.COW.atlasOffset);
+            drawCube(cube, new Vector4f(1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }

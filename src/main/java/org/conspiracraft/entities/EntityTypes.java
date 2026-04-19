@@ -20,7 +20,7 @@ public class EntityTypes {
     public static Map<Integer, EntityType> entityTypeMap = new HashMap<>(Map.of());
 
     public static EntityType
-            SUN = create(new EntityType("celestial/texture/sun")),
+            MUN = create(new EntityType("celestial/texture/mun")),
             COW = create(new EntityType("animal/texture/cow"));
 
     private static EntityType create(EntityType type) {

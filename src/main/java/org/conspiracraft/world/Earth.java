@@ -1,5 +1,6 @@
 package org.conspiracraft.world;
 
+import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
@@ -25,10 +26,12 @@ public class Earth extends WorldType {
     public static Vector3f munPos = new Vector3f(0, World.height*-2, 0);
     @Override
     public void renderCelestialBodies(MemoryStack stack) {
-        pushUBO.updateLayer(0);
+        pushUBO.updateLayer(-1);
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
         Vector4f sunColor = new Vector4f(1.25f, 1.2f, 0, 1);
         drawCube(sunMatrix, sunColor);
+        pushUBO.updateLayer(0);
+        pushUBO.updateAtlasOffset(EntityTypes.MUN.atlasOffset);
         Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(300);
         Vector4f munColor = new Vector4f(0.9f, 0.88f, 1.f, 1);
         drawCube(munMatrix, munColor);
@@ -43,11 +46,13 @@ public class Earth extends WorldType {
         sunPos.set(0, World.size*2, 0);
         sunPos.rotateZ(timeNs/100000000000.f);
         sunPos.rotateX(0.5f);
+        sunPos.rotateY(2.f);
         sunPos.set(sunPos.x+(World.size/2f), sunPos.y, sunPos.z+(World.size/2f)+128);
         prevMunPos.set(munPos);
         munPos.set(0, World.size*-2, 0);
         munPos.rotateZ(timeNs/100000000000.f);
-        sunPos.rotateX(-0.2f);
+        munPos.rotateX(-0.2f);
+        munPos.rotateY(-1.5f);
         munPos.set(munPos.x+(World.size/2f), munPos.y, munPos.z+(World.size/2f)+128);
     }
     @Override
