@@ -16,13 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.lwjgl.system.MemoryUtil.memAddress;
-import static org.lwjgl.system.MemoryUtil.memCopy;
+import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class ItemTypes {
     public static int itemTexSize = 16;
-    public static int itemTexByteSize = (itemTexSize*itemTexSize)*4;
     public static Map<Integer, ItemType> itemTypeMap = new HashMap<>(Map.of());
 
     public static int getId(ItemType type) {
@@ -125,6 +123,7 @@ public class ItemTypes {
                         stagingBuffer.pointer.get(0) + (((yOffset + row) * Textures.items.width + xOffset) * 4L),
                         itemTexSize * 4L);
             }
+            memFree(itemBuf);
             itemType.atlasOffset(xOffset, yOffset);
             xOffset += itemTexSize;
             if (xOffset + itemTexSize > Textures.items.width) {

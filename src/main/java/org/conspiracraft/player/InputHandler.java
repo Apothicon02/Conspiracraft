@@ -110,7 +110,7 @@ public class InputHandler {
                     if (isKeyDown(SDL_SCANCODE_F3)) {
                         Renderer.cubes.removeLast();
                     } else {
-                        Renderer.cubes.addLast(new Matrix4f().translate(new Vector3f(player.pos).floor().add(0, 2, 0)).rotateXYZ(r, r, 0));
+                        Renderer.cubes.addLast(new Matrix4f().translate(new Vector3f(player.pos).add(0, 2, 0)).rotateXYZ(r, r, 0));
                     }
                 }
             }

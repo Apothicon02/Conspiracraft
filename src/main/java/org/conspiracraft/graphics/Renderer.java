@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -7,6 +8,7 @@ import org.conspiracraft.graphics.models.Index;
 import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.graphics.textures.Texture;
+import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
@@ -24,6 +26,7 @@ import org.lwjgl.vulkan.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Math;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.conspiracraft.world.Earth.sunPos;
 import static org.conspiracraft.world.World.*;
+import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.util.vma.Vma.vmaCreateVirtualBlock;
 import static org.lwjgl.util.vma.Vma.vmaVirtualAllocate;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
@@ -67,9 +71,14 @@ public class Renderer {
 //                            collisionData[(x * 1024) + y] = color.getAlpha() != 0;
 //                        }
 //                    }
-                    ImageHelper.fillImage(stack, Textures.atlas, Utils.imageToBuffer(atlasImage));
-                    ImageHelper.fillImage(stack, Textures.noises, Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise")));
+                    ByteBuffer atlasBuffer = Utils.imageToBuffer(atlasImage);
+                    ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
+                    memFree(atlasBuffer);
+                    ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
+                    ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
+                    memFree(noisesBuffer);
                     GUI.fillTexture();
+                    EntityTypes.fillTexture(stack);
                     initialized = true;
                 } else {
 //                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
@@ -112,12 +121,15 @@ public class Renderer {
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
-        pushUBO.submit();
+        pushUBO.updateAtlasOffset(new Vector2i(0));
+        pushUBO.updateSize(new Vector2i(8));
+        pushUBO.updateLayer(-1);
         //drawClouds();
         drawStars();
         worldType.renderCelestialBodies(stack);
         for (Matrix4f cube : cubes) {
-            drawCube(cube, new Vector4f(0.95f, 0.05f, 0.95f, 1.f));
+            pushUBO.updateLayer(1);
+            drawCube(cube.rotateY((float)(Math.random()*0.002f)), new Vector4f(1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }

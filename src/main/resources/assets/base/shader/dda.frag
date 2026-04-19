@@ -512,8 +512,8 @@ void main() {
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
         blockPos = ivec3(primaryLightPos);
         block = ivec2(0);
-        reflectivity = 1.f;
-        roughness = 0.2f;
+        reflectivity = 0.f;
+        roughness = 0.0f;
         voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
         if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
             celestial = true;

@@ -25,19 +25,15 @@ public class ShaderHelper {
         }
     }
 
-    public static ByteBuffer compileGLSLString(String[] paths, int stage) {
+    public static ByteBuffer compileGLSLString(String path, int stage) {
         StringBuilder glsl = new StringBuilder("#version 450 \n");
-        String shaderName = "";
-        for (String str : paths) {
-            shaderName += str;
-            glsl.append(Utils.readFile("assets/base/shader/" + str));
-        }
+        glsl.append(Utils.readFile("assets/base/shader/" + path));
         long compiler = Shaderc.shaderc_compiler_initialize();
-        if (compiler == 0) {throw new IllegalStateException("Failed to create shaderc compiler");}
-        long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, shaderName, "main", 0);
-        if (result == 0) throw new RuntimeException(shaderName + " compile returned null.");
+        if (compiler == 0) {System.out.print("Failed to create shaderc compiler");}
+        long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, path, "main", 0);
+        if (result == 0) {System.out.print(path + " compile returned null.");}
         long status = Shaderc.shaderc_result_get_compilation_status(result);
-        if (status != Shaderc.shaderc_compilation_status_success) {throw new RuntimeException("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));}
+        if (status != Shaderc.shaderc_compilation_status_success) {System.out.print("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));}
 
         ByteBuffer spirv = Shaderc.shaderc_result_get_bytes(result);
         ByteBuffer copy = MemoryUtil.memAlloc(spirv.remaining());

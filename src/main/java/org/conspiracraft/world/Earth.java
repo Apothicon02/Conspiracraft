@@ -1,5 +1,6 @@
 package org.conspiracraft.world;
 
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
 import org.joml.*;
@@ -10,6 +11,7 @@ import java.util.Random;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.graphics.Renderer.drawCube;
+import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
@@ -23,6 +25,7 @@ public class Earth extends WorldType {
     public static Vector3f munPos = new Vector3f(0, World.height*-2, 0);
     @Override
     public void renderCelestialBodies(MemoryStack stack) {
+        pushUBO.updateLayer(0);
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
         Vector4f sunColor = new Vector4f(1.25f, 1.2f, 0, 1);
         drawCube(sunMatrix, sunColor);
@@ -130,7 +133,9 @@ public class Earth extends WorldType {
                                 Blob.generate(blockOn, x, elevation, z, (Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f)) < 0.05f ? 56 : 10), 0, (int) (2 + (seededRand.nextFloat() * 16)));
                             }
                         } else if (blockOn.x == 2) {
-                            if (randomNumber < 0.0004f) {
+                            if (randomNumber < 0.0001f && getBlock(x, elevation+1, z).x() == 0) {
+                                Renderer.cubes.addLast(new Matrix4f().translate(x, elevation+1, z).rotateY(seededRand.nextFloat(6.3f)));
+                            } else if (randomNumber < 0.0004f) {
                                 Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (seededRand.nextFloat() * 7)));
                             } else if (randomNumber < 0.0008f || randomNumber < SimplexNoise.noise(x / 200.f, z / 200.f)/50) {
                                 for (int y = elevation - 1; y < elevation+10; y++) {

@@ -15,7 +15,7 @@ public class Pipeline {
         this.colorAttachments = colorAttachments;
     }
     public void compile() {
-        this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{vertName}, Shaderc.shaderc_glsl_vertex_shader));
-        this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(new String[]{fragName}, Shaderc.shaderc_glsl_fragment_shader));
+        this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));
+        this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(fragName, Shaderc.shaderc_glsl_fragment_shader));
     }
 }
