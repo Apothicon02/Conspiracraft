@@ -225,8 +225,14 @@ public class Renderer {
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
-        int waitResult = vkWaitForFences(vkDevice, inFlightFences[frameIdx], true, Long.MAX_VALUE);
-        if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for fences: "+waitResult);}
+        VkSemaphoreWaitInfo semaphoreWaitInfo = VkSemaphoreWaitInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO)
+                .flags(0)
+                .semaphoreCount(1)
+                .pSemaphores(stack.longs(SyncObjects.timelineSemaphore))
+                .pValues(stack.longs(timeline));
+        int waitResult = vkWaitSemaphores(vkDevice, semaphoreWaitInfo, Long.MAX_VALUE);
+        if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for timeline semaphore: "+waitResult);}
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
@@ -235,7 +241,6 @@ public class Renderer {
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);
-        vkResetFences(vkDevice, inFlightFences[frameIdx]);
 
         currentCmdBuffer = cmdBuffers[frameIdx];
         vkResetCommandBuffer(currentCmdBuffer, 0);
@@ -244,14 +249,20 @@ public class Renderer {
     }
     public static void submitCommandBuffers(MemoryStack stack) {
         vkEndCommandBuffer(currentCmdBuffer);
+        timeline++;
+        VkTimelineSemaphoreSubmitInfo timelineInfo = VkTimelineSemaphoreSubmitInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO)
+                .pWaitSemaphoreValues(stack.longs())
+                .pSignalSemaphoreValues(stack.longs(0L, timeline));
         VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
+                .pNext(timelineInfo.address())
                 .waitSemaphoreCount(1)
                 .pWaitSemaphores(stack.longs(imageAvailableSemaphores[frameIdx]))
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
-                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx]));
-        vkQueueSubmit(graphicsQueue, submitInfo, inFlightFences[frameIdx]);
+                .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx], timelineSemaphore));
+        vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)

@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Greatly sped up launch &amp; resize times.">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid20736.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Device.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Graphics.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/SyncObjects.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,14 +213,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00022" summary="- Bevelled normals are now adjustable.">
-      <option name="closed" value="true" />
-      <created>1775766175021</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1775766175021</updated>
     </task>
     <task id="LOCAL-00023" summary="- Fixed night.">
       <option name="closed" value="true" />
@@ -603,7 +598,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776559518825</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="- Greatly sped up launch &amp; resize times.">
+      <option name="closed" value="true" />
+      <created>1776609581533</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1776609581533</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +625,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Added dda depth buffer. &#10;- SSAO now uses 32-bit depth instead of 16-bit. &#10;- Added temporary trees." />
     <MESSAGE value="- Added dda depth buffer.&#10;- SSAO now uses 32-bit depth instead of 16-bit.&#10;- Added temporary trees." />
     <MESSAGE value="- Fixed SSAO issue. &#10;- Added rasterization shaders &amp; pipeline." />
     <MESSAGE value="- Rasterization progress." />
@@ -647,7 +649,8 @@
     <MESSAGE value="- Added imagesinflight." />
     <MESSAGE value="- Undid some changes." />
     <MESSAGE value="- No longer resizes based on vulkan command results." />
-    <option name="LAST_COMMIT_MESSAGE" value="- No longer resizes based on vulkan command results." />
+    <MESSAGE value="- Greatly sped up launch &amp; resize times." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Greatly sped up launch &amp; resize times." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -656,11 +659,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java</url>
           <line>128</line>
           <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/Renderer.java</url>
-          <line>430</line>
-          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

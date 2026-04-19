@@ -31,6 +31,7 @@ import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPA
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
 
@@ -60,6 +61,7 @@ public class Device {
         PointerBuffer deviceExtensions = stack.mallocPointer(2)
                 .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
                 .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME));
+
         VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
                 .shaderImageInt64Atomics(true);
@@ -71,6 +73,11 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
                 .dynamicRendering(true)
                 .pNext(sync2.address());
+        VkPhysicalDeviceTimelineSemaphoreFeatures timeline = VkPhysicalDeviceTimelineSemaphoreFeatures.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES)
+                .timelineSemaphore(true)
+                .pNext(dynamicRendering.address());;
+
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
                 .shaderInt64(true)
@@ -80,7 +87,7 @@ public class Device {
                 .pQueueCreateInfos(queueInfo)
                 .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
-                .pNext(dynamicRendering.address());
+                .pNext(timeline.address());
 
         PointerBuffer pDevice = stack.mallocPointer(1);
         int deviceCreateErr = vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);

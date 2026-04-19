@@ -94,8 +94,8 @@ public class Graphics {
         //sync objects
         for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(vkDevice, imageAvailableSemaphores[i], null);
-            vkDestroyFence(vkDevice, inFlightFences[i], null);
         }
+        vkDestroySemaphore(vkDevice, timelineSemaphore, null);
         for (int i = 0; i < Swapchain.images.length; i++) {
             vkDestroySemaphore(vkDevice, renderFinishedSemaphores[i], null);
         }
