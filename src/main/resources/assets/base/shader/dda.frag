@@ -568,7 +568,7 @@ void main() {
         rayPos = primaryLightPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (dot(primaryFlatNormal, normalize(skylight.xyz)) < 0.f) {
+        if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
             //shadowColor = dda(false);
