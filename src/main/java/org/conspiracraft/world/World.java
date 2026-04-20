@@ -15,6 +15,9 @@ public class World {
     public static byte chunkSize = 16;
     public static int sizeChunks = size / chunkSize;
     public static int heightChunks = height / chunkSize;
+    public static byte regionSize = 4;
+    public static int sizeRegions = sizeChunks / regionSize;
+    public static int heightRegions = heightChunks / regionSize;
     public static byte lodSize = 4;
     public static int sizeLods = size / lodSize;
     public static int heightLods = height / lodSize;
@@ -29,6 +32,8 @@ public class World {
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static boolean chunkEmptinessChanged = false;
     public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
+    public static long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
+    public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static long[] lods = new long[sizeLods*sizeLods*heightLods];
     public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
     public static int packChunkPos(Vector3i pos) {
@@ -78,6 +83,15 @@ public class World {
             lods[lodIdx] |= mask;
         } else {
             lods[lodIdx] &= ~mask;
+        }
+
+        int regionIdx = packRegionPos(cX / regionSize, cY / regionSize, cZ / regionSize);
+        bitIdx = (cX%regionSize) + (cY%regionSize) * regionSize + (cZ%regionSize) * regionSize * regionSize;
+        mask = 1L << bitIdx;
+        if (recentlyEditedChunk.blockPalette.size() > 1 || recentlyEditedChunk.blockPalette.getFirst() != 0) {
+            regions[regionIdx] |= mask;
+        } else {
+            regions[regionIdx] &= ~mask;
         }
     }
 }

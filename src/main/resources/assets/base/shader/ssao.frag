@@ -7,9 +7,9 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
     float time;
 } globalUbo;
-layout(set = 0, binding = 6) uniform sampler2D ddaColors;
-layout(set = 0, binding = 7) uniform sampler2D ddaDepth;
-layout(set = 0, binding = 8) uniform sampler2D ddaNormals;
+layout(set = 0, binding = 7) uniform sampler2D ddaColors;
+layout(set = 0, binding = 8) uniform sampler2D ddaDepth;
+layout(set = 0, binding = 9) uniform sampler2D ddaNormals;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;

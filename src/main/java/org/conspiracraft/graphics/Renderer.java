@@ -125,13 +125,13 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(8));
         pushUBO.updateLayer(-1);
         //drawClouds();
-        drawStars();
+        //drawStars();
         worldType.renderCelestialBodies(stack);
         pushUBO.updateLayer(0);
-        for (Matrix4f cube : cubes) {
-            pushUBO.updateAtlasOffset(EntityTypes.SHEEP.atlasOffset);
-            drawCube(cube, new Vector4f(1.f));
-        }
+//        for (Matrix4f cube : cubes) {
+//            pushUBO.updateAtlasOffset(EntityTypes.SHEEP.atlasOffset);
+//            drawCube(cube, new Vector4f(1.f));
+//        }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
     public static void drawDDA(MemoryStack stack) {
@@ -403,6 +403,7 @@ public class Renderer {
         return attachmentInfo;
     }
 
+    public static int regionSSBOSize = World.regions.length*8;
     public static int lodSSBOSize = World.lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte/2;
@@ -460,17 +461,29 @@ public class Renderer {
             }
         }
 
+        long regionPtr = Graphics.regionSSBO.stagingBuffer.pointer.get(0);
+        MemoryUtil.memByteBuffer(regionPtr, regionSSBOSize).asLongBuffer().put(regions).rewind();
         long lodPtr = Graphics.lodSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memByteBuffer(lodPtr, lodSSBOSize).asLongBuffer().put(World.lods).rewind();
+        MemoryUtil.memByteBuffer(lodPtr, lodSSBOSize).asLongBuffer().put(lods).rewind();
 
+        VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(regionSSBOSize);
+        vkCmdCopyBuffer(currentCmdBuffer, Graphics.regionSSBO.stagingBuffer.buffer[0], Graphics.regionSSBO.buffer.buffer[0], regionBufferCopy);
         VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, Graphics.chunkSSBO.stagingBuffer.buffer[0], Graphics.chunkSSBO.buffer.buffer[0], chunkBufferCopy);
         VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], voxelBufferCopy);
         VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lodSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, Graphics.lodSSBO.stagingBuffer.buffer[0], Graphics.lodSSBO.buffer.buffer[0], lodBufferCopy);
-        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(3);
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(4);
         barrierBuf.get(0)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(Graphics.regionSSBO.buffer.buffer[0])
+                .offset(0).size(regionSSBOSize);
+        barrierBuf.get(1)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
@@ -478,7 +491,7 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(Graphics.chunkSSBO.buffer.buffer[0])
                 .offset(0).size(chunkSSBOSize);
-        barrierBuf.get(1)
+        barrierBuf.get(2)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
@@ -486,7 +499,7 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(Graphics.voxelSSBO.buffer.buffer[0])
                 .offset(0).size(voxelSSBOSize);
-        barrierBuf.get(2)
+        barrierBuf.get(3)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)

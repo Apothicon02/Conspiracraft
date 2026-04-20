@@ -13,14 +13,17 @@ struct ChunkStruct {
     int bitsPerValue;
     int valueMask;
 };
-layout(std430, set = 0, binding = 1) readonly buffer ChunksBuffer {
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+layout(std430, set = 0, binding = 1) readonly buffer RegionBuffer {
+    int64_t[] regions;
+} regionData;
+layout(std430, set = 0, binding = 2) readonly buffer ChunksBuffer {
     ChunkStruct[] chunks;
 } chunkData;
-layout(std430, set = 0, binding = 2) readonly buffer VoxelBuffer {
+layout(std430, set = 0, binding = 3) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
-#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-layout(std430, set = 0, binding = 3) readonly buffer LODBuffer {
+layout(std430, set = 0, binding = 4) readonly buffer LODBuffer {
     int64_t[] lods;
 } lodData;
 const int size = 2048;
@@ -29,6 +32,9 @@ const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
 const int heightChunks = height / chunkSize;
+const int regionSize = 4;
+const int sizeRegions = sizeChunks / regionSize;
+const int heightRegions = heightChunks / regionSize;
 const int lodSize = 4;
 const int sizeLods = size / lodSize;
 const int heightLods = height / lodSize;
@@ -40,6 +46,15 @@ int packLodPos(ivec3 pos) {
 }
 int64_t getLod(ivec3 lodPos) {
     return int64_t(lodData.lods[packLodPos(lodPos)]);
+}
+int packRegionPos(int x, int y, int z) {
+    return x+y*sizeRegions+z*sizeRegions*heightRegions;
+}
+int packRegionPos(ivec3 pos) {
+    return packRegionPos(pos.x, pos.y, pos.z);
+}
+int64_t getRegion(ivec3 chunkPos) {
+    return int64_t(regionData.regions[packRegionPos(chunkPos)]);
 }
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
@@ -77,7 +92,7 @@ ivec2 getBlock(int x, int y, int z) {
 ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
-layout(set = 0, binding = 4) uniform sampler3D atlas;
+layout(set = 0, binding = 5) uniform sampler3D atlas;
 vec4 fromLinear(vec4 linearRGB){
     bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
     vec4 higher = vec4(1.055)*pow(linearRGB, vec4(1.0/2.4)) - vec4(0.055);
@@ -119,7 +134,7 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     if (pos.z < 0) {pos.z+=blockSize;} else if (pos.z >= blockSize) {pos.z-=blockSize;}
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
-layout(set = 0, binding = 5) uniform sampler2D noises;
+layout(set = 0, binding = 6) uniform sampler2D noises;
 float noise(vec2 coords) {
     return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
 }
@@ -127,9 +142,9 @@ float getCaustic(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/1000 : 0.f;
     return noise((checkPos+time)*32);
 }
-layout(set = 0, binding = 9) uniform sampler2D rasterColors;
-layout(set = 0, binding = 10) uniform sampler2D rasterDepth;
-layout(set = 0, binding = 11) uniform sampler2D rasterNormals;
+layout(set = 0, binding = 10) uniform sampler2D rasterColors;
+layout(set = 0, binding = 11) uniform sampler2D rasterDepth;
+layout(set = 0, binding = 12) uniform sampler2D rasterNormals;
 
 layout(location = 0) in vec2 uv;
 
@@ -320,8 +335,12 @@ vec4 dda(bool detailed) {
                 //no need to do any checks
             } else {
                 if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) { break; }
-                updateChunkData(ivec3(chunkPos));
-                if (chunk.paletteSize > 1) {
+                int64_t region = getRegion(ivec3(chunkPos/regionSize));
+                ivec3 chunkRayPos = ivec3(chunkPos) % regionSize;
+                int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
+                int64_t mask = int64_t(1) << bitIdx;
+                if ((region & mask) != 0) {
+                    updateChunkData(ivec3(chunkPos));
                     stage = 2;
                     stepAnything = false;
                     chunkWorldPos = ivec3(chunkPos*chunkSize);
@@ -552,7 +571,7 @@ void main() {
         if (dot(primaryFlatNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
-            shadowColor = dda(false);
+            //shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
             shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.1f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
@@ -567,7 +586,7 @@ void main() {
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             rayPos = primaryLightPos;
             rayDir = reflectDir;
-            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
+            vec4 reflectColor = vec4(0);//globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {

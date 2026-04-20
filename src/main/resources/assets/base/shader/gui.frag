@@ -16,9 +16,9 @@ layout(push_constant) uniform PushUBO {
     int layer;
     int tex;
 } pushUbo;
-layout(set = 0, binding = 9) uniform sampler2D colors;
-layout(set = 0, binding = 12) uniform sampler3D gui;
-layout(set = 0, binding = 13) uniform sampler2D items;
+layout(set = 0, binding = 10) uniform sampler2D colors;
+layout(set = 0, binding = 13) uniform sampler3D gui;
+layout(set = 0, binding = 14) uniform sampler2D items;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
 
