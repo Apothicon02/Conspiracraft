@@ -57,6 +57,7 @@ public class Earth extends WorldType {
     }
     @Override
     public void generate() {
+        long start = System.currentTimeMillis();
         for (int x = 0; x < sizeChunks; x++) {
             for (int z = 0; z < sizeChunks; z++) {
                 for (int y = 0; y < heightChunks; y++) {
@@ -173,6 +174,7 @@ public class Earth extends WorldType {
 //                }
 //            }
 //        }
+        System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. ");
     }
     public short getElevation(int x, int z) {
         double mountainNoise = Math.max(0, SimplexNoise.noise(x / 250.f, z / 250.f));

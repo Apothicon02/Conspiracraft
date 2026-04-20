@@ -276,6 +276,7 @@ vec3 blockDist = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 ivec3 voxelRayPos = ivec3(0);
+int64_t lod = 0;
 vec4 dda(bool detailed) {
     rayDir = roundVec(rayDir);
     ogRayPos = rayPos;
@@ -296,7 +297,6 @@ vec4 dda(bool detailed) {
     vec3 lodDist = vec3(0);
     vec3 lodSideDist = vec3(0);
     vec3 lodMask = vec3(0);
-    int64_t lod = 0;
     ivec3 lodWorldPos = ivec3(0);
 
     vec3 blockStartPos = vec3(0);
@@ -555,7 +555,7 @@ void main() {
             shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
-            shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.05f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
+            shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.1f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
             lighting *= shadowFactor;//mix(0.25f, 0.66f, min(1, distance(primaryLightPos, hitPos)/50.f));
         }
         if (reflectivity > 0.f) {
