@@ -1,10 +1,11 @@
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
+    ivec4 renderToggles;
     vec4 skylight;
     vec3 sun;
     int hdr;
-    double time;
+    float time;
 } globalUbo;
 vec2 positions[3] = vec2[](
     vec2(0.0, -3),

@@ -163,6 +163,7 @@ public class GUI {
             drawButton(true, 0.5f, 0.5f, -35.5f, (-charHeight)-1, (Settings.shadowsEnabled ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new TAAButton();
             drawButton(true, 0.5f, 0.5f, 35.5f, (-charHeight)-1, (Settings.taaEnabled ? "   TAA   " : "  No AA  ").toCharArray(), menuBgColor, new Vector4f(1.f));
+            drawingButton = new ReflectionsButton();
             drawButton(true, 0.5f, 0.5f, 0, (charHeight*-3)-2, (Settings.reflectionsEnabled ? "Reflections Enabled" : "Reflections Disabled").toCharArray(), menuBgColor, new Vector4f(1.f));
         } else if (controlsSettingMenuOpen) {
             menuBgColor = new Vector4f(0.75f, 1.f, 0.75f, 1.f);

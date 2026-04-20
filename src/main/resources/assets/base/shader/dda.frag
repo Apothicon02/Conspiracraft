@@ -1,6 +1,7 @@
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
+    ivec4 renderToggles;
     vec4 skylight;
     vec3 sun;
     int hdr;
@@ -152,7 +153,7 @@ float gradient(float y, float fromY, float toY, float fromValue, float toValue) 
     return clampedLerp(toValue, fromValue, inverseLerp(y, fromY, toY));
 }
 
-const int renderDistance = min(size, 2048);
+const int renderDistance = int(min(size, 2048)*0.75f);
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 ogRayPos = vec3(0);
@@ -311,7 +312,8 @@ vec4 dda(bool textured) {
     vec3 voxelMask = vec3(0);
 
     exactPos = ogRayPos;
-    while (distance(exactPos, ogRayPos) < renderDistance) {
+    float maxDist = renderDistance*renderDistance;
+    while (abs(dot(exactPos-ogRayPos, ogRayPos-exactPos)) < maxDist) {
         bool stepAnything = true;
         if (stage == 3) {
             if (chunkPos.y >= heightChunks && rayDir.y < 0) {
@@ -550,7 +552,7 @@ void main() {
         vec4 shadowColor = vec4(0);
         if (dot(primaryFlatNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
-        } else {
+        } else if (globalUbo.renderToggles.x > 0) {
             shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
@@ -565,7 +567,7 @@ void main() {
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             rayPos = primaryLightPos;
             rayDir = reflectDir;
-            vec4 reflectColor = dda(false);
+            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
@@ -584,6 +586,5 @@ void main() {
         outNormal = vec4(primaryFlatNormal, 1);
     }
     outColor = vec4(color.rgb, 1);
-    //outColor = vec4(primaryLightPos.rgb/worldSize, 1);
     gl_FragDepth = depth;
 }

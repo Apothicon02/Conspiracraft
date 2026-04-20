@@ -1,10 +1,11 @@
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
+    ivec4 renderToggles;
     vec4 skylight;
     vec3 sun;
     int hdr;
-    double time;
+    float time;
 } globalUbo;
 layout(push_constant) uniform PushUBO {
     mat4 model;

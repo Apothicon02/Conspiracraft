@@ -1,10 +1,11 @@
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
+    ivec4 renderToggles;
     vec4 skylight;
     vec3 sun;
     int hdr;
-    double time;
+    float time;
 } globalUbo;
 layout(set = 0, binding = 6) uniform sampler2D ddaColors;
 layout(set = 0, binding = 7) uniform sampler2D ddaDepth;

@@ -42,7 +42,8 @@ public class Player {
     public static void create() {
         Main.player = new Player();
         Main.player.inputHandler.init();
-        Main.player.pos.set(730, 90, 840);
+        Main.player.pos.set(108, 72, 1742);
+        Main.player.rotate(0, 4.f);
         Main.player.inv.init();
     }
 
