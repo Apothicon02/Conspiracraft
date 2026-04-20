@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Dda micro-optimization.">
+      <change afterPath="$PROJECT_DIR$/hs_err_pid12504.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid21804.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hs_err_pid3560.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -210,14 +214,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00027" summary="- Added palette-compressed chunks.">
-      <option name="closed" value="true" />
-      <created>1775873874612</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1775873874612</updated>
     </task>
     <task id="LOCAL-00028" summary="- Added chunk struct in fragment shader.">
       <option name="closed" value="true" />
@@ -603,7 +599,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776695942687</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary="- Dda micro-optimization.">
+      <option name="closed" value="true" />
+      <created>1776698017188</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1776698017188</updated>
+    </task>
+    <option name="localTasksCounter" value="77" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +626,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Stars now twinkle out of existence in day." />
     <MESSAGE value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
     <MESSAGE value="- Input is now blocked until renderer is initialized." />
     <MESSAGE value="- Added grass blades. &#10;- AO is stronger." />
@@ -647,7 +650,8 @@
     <MESSAGE value="- Added textured cube rendering." />
     <MESSAGE value="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets." />
     <MESSAGE value="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance." />
+    <MESSAGE value="- Dda micro-optimization." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Dda micro-optimization." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

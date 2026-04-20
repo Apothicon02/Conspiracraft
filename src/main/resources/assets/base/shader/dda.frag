@@ -276,7 +276,7 @@ vec3 blockDist = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 ivec3 voxelRayPos = ivec3(0);
-vec4 dda(bool textured) {
+vec4 dda(bool detailed) {
     rayDir = roundVec(rayDir);
     ogRayPos = rayPos;
     ogRayDir = rayDir;
@@ -354,23 +354,21 @@ vec4 dda(bool textured) {
                 if ((lod & mask) != 0) {
                     blockPos = lodWorldPos+blockRayPos;
                     block = getBlock(blockPos);
-                    if (block.x > 0) {
-                        voxelStartPos = uv3d(blockPos, 1.f, blockSize);
-                        vec4 voxelColor = block.x == 4 ? vec4(0) : sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
-                        if (voxelColor.a > 0.f) {
-                            flatNormal = -blockMask*raySign;
-                            voxelRayPos = ivec3(voxelStartPos);
-                            hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
-                            normal = bevelNormal(flatNormal);
-                            return vec4(voxelColor.rgb, 1.f);
-                        } else {
-                            stage = 0;
-                            stepAnything = false;
-                            voxelRayPos = ivec3(voxelStartPos);
-                            voxelDist = 1.0/rayDir;
-                            voxelSideDist = ((voxelRayPos - voxelStartPos) + 0.5 + raySign * 0.5) * voxelDist;
-                            voxelMask = blockMask;
-                        }
+                    voxelStartPos = uv3d(blockPos, 1.f, blockSize);
+                    vec4 voxelColor = block.x == 4 ? vec4(0) : sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
+                    if (voxelColor.a > 0.f) {
+                        flatNormal = -blockMask*raySign;
+                        voxelRayPos = ivec3(voxelStartPos);
+                        hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
+                        normal = bevelNormal(flatNormal);
+                        return vec4(voxelColor.rgb, 1.f);
+                    } else {// if (steps < maxVoxelSteps) {
+                        stage = 0;
+                        stepAnything = false;
+                        voxelRayPos = ivec3(voxelStartPos);
+                        voxelDist = 1.0/rayDir;
+                        voxelSideDist = ((voxelRayPos - voxelStartPos) + 0.5 + raySign * 0.5) * voxelDist;
+                        voxelMask = blockMask;
                     }
                 }
             }
@@ -519,6 +517,7 @@ void main() {
     } else {
         color.rgb = mipmap(color.rgb);
     }
+    float shadowFactor = 1.f;
     if (!celestial) {
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
@@ -556,7 +555,8 @@ void main() {
             shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
-            lighting *= 0.66f;
+            shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.05f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
+            lighting *= shadowFactor;//mix(0.25f, 0.66f, min(1, distance(primaryLightPos, hitPos)/50.f));
         }
         if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryNormal);
@@ -567,7 +567,7 @@ void main() {
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             rayPos = primaryLightPos;
             rayDir = reflectDir;
-            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
+            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
@@ -581,10 +581,11 @@ void main() {
         color.rgb *= lighting;
         float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-        outNormal = vec4(primaryFlatNormal, fogginess);
+        outNormal = vec4(primaryFlatNormal, clamp(fogginess+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
         outNormal = vec4(primaryFlatNormal, 1);
     }
     outColor = vec4(color.rgb, 1);
+    //outColor = vec4(vec3(shadowFactor), 1);
     gl_FragDepth = depth;
 }

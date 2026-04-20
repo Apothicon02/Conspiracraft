@@ -96,7 +96,7 @@ public class Earth extends WorldType {
                         }
                         boolean flat = maxSteepness < 4;
                         if (elevation <= 63) {
-                            World.setBlock(x, 63, z, 1, 12);
+                            World.setBlock(x, 63, z, 1, 14);
                             for (int y = 62; y > elevation; y--) {
                                 World.setBlock(x, y, z, 1, 15);
                             }
@@ -179,7 +179,7 @@ public class Earth extends WorldType {
         double elevationNoise = SimplexNoise.noise(x / 500.f, z / 500.f) + 0.5f;
         double elevationMul = (mountainNoise * elevationNoise)+0.25F;
         double detailNoise = ((SimplexNoise.noise(x / 75.f, z / 75.f)+elevationNoise) * 16);
-        double elevation = detailNoise * Math.max(-0.5f, elevationMul*2);
+        double elevation = detailNoise * Math.max(-0.5f, elevationMul*(2.f+(5*SimplexNoise.noise(x/750.f, z/750.f))));
         if (elevation < 0) {
             elevation *= -0.25f;
         }
