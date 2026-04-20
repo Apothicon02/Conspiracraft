@@ -349,7 +349,7 @@ vec4 dda(bool textured) {
             }
         } else if (stage == 1) {
             if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) { stage = 2; } else {
-                int bitIdx = (blockRayPos.x % lodSize) + (blockRayPos.y % lodSize) * lodSize + (blockRayPos.z % lodSize) * lodSize * lodSize;
+                int bitIdx = (blockRayPos.x & (lodSize-1)) + (blockRayPos.y & (lodSize-1)) * lodSize + (blockRayPos.z & (lodSize-1)) * lodSize * lodSize;
                 int64_t mask = int64_t(1) << bitIdx;
                 if ((lod & mask) != 0) {
                     blockPos = lodWorldPos+blockRayPos;

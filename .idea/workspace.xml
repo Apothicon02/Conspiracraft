@@ -4,21 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets.">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid9980.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/buttons/ReflectionsButton.java" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/GlobalUBO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/graphics/buffers/ubos/GlobalUBO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/gui/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/fullscreen.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/gui.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/present.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/raster.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/ssao.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/ssao.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,14 +210,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00026" summary="- Fixed validation error.">
-      <option name="closed" value="true" />
-      <created>1775849784916</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1775849784916</updated>
     </task>
     <task id="LOCAL-00027" summary="- Added palette-compressed chunks.">
       <option name="closed" value="true" />
@@ -615,7 +595,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776641137244</updated>
     </task>
-    <option name="localTasksCounter" value="75" />
+    <task id="LOCAL-00075" summary="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance.">
+      <option name="closed" value="true" />
+      <created>1776695942686</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1776695942687</updated>
+    </task>
+    <option name="localTasksCounter" value="76" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -634,7 +622,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Finished adding rasterized object rendering. &#10;- Added celestial objects." />
     <MESSAGE value="- Stars now twinkle out of existence in day." />
     <MESSAGE value="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded." />
     <MESSAGE value="- Input is now blocked until renderer is initialized." />
@@ -659,7 +646,8 @@
     <MESSAGE value="- Replaced fences with a timeline semaphore." />
     <MESSAGE value="- Added textured cube rendering." />
     <MESSAGE value="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets." />
+    <MESSAGE value="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
