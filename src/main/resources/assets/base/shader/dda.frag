@@ -299,7 +299,7 @@ vec4 dda(bool detailed) {
     int stage = 4;
 
     vec3 regionStartPos = rayPos/regionSize;
-    vec3 regionPos = floor(regionStartPos);
+    ivec3 regionPos = ivec3(regionStartPos);
     vec3 regionDist = 1.0/rayDir;
     vec3 regionSideDist = ((regionPos - regionStartPos) + 0.5 + raySign * 0.5) * regionDist;
     vec3 regionMask = stepMask(regionSideDist);
@@ -335,19 +335,18 @@ vec4 dda(bool detailed) {
 
     exactPos = ogRayPos;
     float maxDist = renderDistance*renderDistance;
-    while (abs(dot(exactPos-ogRayPos, ogRayPos-exactPos)) < maxDist) {
+    while (abs(dot(exactPos-ogPos, ogPos-exactPos)) < maxDist) {
         bool stepAnything = true;
         if (stage == 4) {
             if (regionPos.y >= heightRegions && rayDir.y < 0) {
                 //no need to do any checks
             } else {
                 if (regionPos.x < 0 || regionPos.x >= sizeRegions || regionPos.y < 0 || regionPos.y >= heightRegions || regionPos.z < 0 || regionPos.z >= sizeRegions) { break; }
-                region = getRegion(ivec3(regionPos));
+                region = getRegion(regionPos);
                 if (region != 0) {
-                    //return vec4(regionPos/vec3(sizeRegions, heightRegions, sizeRegions), 1);
                     stage = 3;
                     stepAnything = false;
-                    regionWorldPos = ivec3(regionPos*regionSize);
+                    regionWorldPos = regionPos*regionSize;
                     chunkStartPos = uv3d(regionWorldPos, float(regionSize), regionSize)/chunkSize;
                     chunkRayPos = ivec3(chunkStartPos);
                     //return vec4(vec3(chunkRayPos)/regionSizeChunks, 1);
