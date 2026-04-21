@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Minor dda optimizations.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
-    </list>
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Another micro optimization." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -210,14 +207,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00034" summary="- Optimized dda.">
-      <option name="closed" value="true" />
-      <created>1775938702012</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1775938702012</updated>
     </task>
     <task id="LOCAL-00035" summary="- Added chunk space-skipping.">
       <option name="closed" value="true" />
@@ -603,7 +592,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776797972817</updated>
     </task>
-    <option name="localTasksCounter" value="83" />
+    <task id="LOCAL-00083" summary="- Another micro optimization.">
+      <option name="closed" value="true" />
+      <created>1776798550394</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1776798550394</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -622,7 +619,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Fixed mesh normals being model-space. &#10;- AO cant darken things to less than 0.25x now." />
     <MESSAGE value="- Fixed rasterized normals." />
     <MESSAGE value="- Added gui texture." />
     <MESSAGE value="- Gui shader can now use textures." />
@@ -647,7 +643,8 @@
     <MESSAGE value="- Shaders no longer use int64s." />
     <MESSAGE value="- Big optimize." />
     <MESSAGE value="- Minor dda optimizations." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Minor dda optimizations." />
+    <MESSAGE value="- Another micro optimization." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Another micro optimization." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

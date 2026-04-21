@@ -317,13 +317,13 @@ vec4 dda(bool detailed) {
 
     vec3 voxelStartPos = vec3(0);
     vec3 voxelPos = vec3(0);
-    while (abs(dot(chunkPos-ogChunkPos, ogChunkPos-chunkPos)) < maxChunkDist) {
+    while (true) {
         bool stepAnything = true;
         if (stage == 3) {
             if (ddaPos.y >= heightChunks && rayDir.y < 0) {
                 //no need to do any checks
             } else {
-                if (ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
+                if (abs(dot(chunkPos-ogChunkPos, ogChunkPos-chunkPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
                 region = getRegion(ddaPos/regionSize);
                 ivec3 chunkRayPos = ddaPos % regionSize;
                 int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;

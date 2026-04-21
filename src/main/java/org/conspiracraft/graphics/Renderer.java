@@ -125,7 +125,7 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(8));
         pushUBO.updateLayer(-1);
         //drawClouds();
-        //drawStars();
+        drawStars();
         worldType.renderCelestialBodies(stack);
         pushUBO.updateLayer(0);
 //        for (Matrix4f cube : cubes) {
