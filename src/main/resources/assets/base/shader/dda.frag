@@ -13,9 +13,12 @@ struct ChunkStruct {
     int bitsPerValue;
     int valueMask;
 };
-#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+struct LongStruct {
+    int first;
+    int second;
+};
 layout(std430, set = 0, binding = 1) readonly buffer RegionBuffer {
-    int64_t[] regions;
+    LongStruct[] regions;
 } regionData;
 layout(std430, set = 0, binding = 2) readonly buffer ChunksBuffer {
     ChunkStruct[] chunks;
@@ -24,7 +27,7 @@ layout(std430, set = 0, binding = 3) readonly buffer VoxelBuffer {
     int[] voxels;
 } voxelData;
 layout(std430, set = 0, binding = 4) readonly buffer LODBuffer {
-    int64_t[] lods;
+    LongStruct[] lods;
 } lodData;
 const int size = 2048;
 const int height = 320;
@@ -44,8 +47,8 @@ int packLodPos(int x, int y, int z) {
 int packLodPos(ivec3 pos) {
     return packLodPos(pos.x, pos.y, pos.z);
 }
-int64_t getLod(ivec3 lodPos) {
-    return int64_t(lodData.lods[packLodPos(lodPos)]);
+LongStruct getLod(ivec3 lodPos) {
+    return lodData.lods[packLodPos(lodPos)];
 }
 int packRegionPos(int x, int y, int z) {
     return x+y*sizeRegions+z*sizeRegions*heightRegions;
@@ -53,8 +56,8 @@ int packRegionPos(int x, int y, int z) {
 int packRegionPos(ivec3 pos) {
     return packRegionPos(pos.x, pos.y, pos.z);
 }
-int64_t getRegion(ivec3 chunkPos) {
-    return int64_t(regionData.regions[packRegionPos(chunkPos)]);
+LongStruct getRegion(ivec3 regionPos) {
+    return regionData.regions[packRegionPos(regionPos)];
 }
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
@@ -289,7 +292,7 @@ vec3 blockDist = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 ivec3 voxelRayPos = ivec3(0);
-int64_t lod = 0;
+LongStruct lod = LongStruct(0, 0);
 vec4 dda(bool detailed) {
     rayDir = roundVec(rayDir);
     ogRayPos = rayPos;
@@ -297,7 +300,7 @@ vec4 dda(bool detailed) {
     raySign = sign(rayDir);
     int stage = 3;
 
-    int64_t region = 0;
+    LongStruct region = LongStruct(0, 0);
 
     vec3 chunkStartPos = rayPos/chunkSize;
     vec3 chunkPos = floor(chunkStartPos);
@@ -338,8 +341,13 @@ vec4 dda(bool detailed) {
                 region = getRegion(ivec3(chunkPos/regionSize));
                 ivec3 chunkRayPos = ivec3(chunkPos) % regionSize;
                 int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
-                int64_t mask = int64_t(1) << bitIdx;
-                if ((region & mask) != 0) {
+                int regionToUse = region.first;
+                if (bitIdx >= 32) {
+                    bitIdx-=32;
+                    regionToUse = region.second;
+                }
+                int mask = 1 << bitIdx;
+                if ((regionToUse & mask) != 0) {
                     updateChunkData(ivec3(chunkPos));
                     stage = 2;
                     stepAnything = false;
@@ -355,7 +363,7 @@ vec4 dda(bool detailed) {
             if (lodRayPos.x < 0 || lodRayPos.x >= lodSize || lodRayPos.y < 0 || lodRayPos.y >= lodSize || lodRayPos.z < 0 || lodRayPos.z >= lodSize) { stage = 3; } else {
                 lodPos = (chunkWorldPos/lodSize)+lodRayPos;
                 lod = getLod(ivec3(lodPos));
-                if (lod != 0) {
+                if (lod != LongStruct(0, 0)) {
                     stage = 1;
                     stepAnything = false;
                     lodWorldPos = ivec3(lodPos*lodSize);
@@ -369,8 +377,13 @@ vec4 dda(bool detailed) {
         } else if (stage == 1) {
             if (blockRayPos.x < 0 || blockRayPos.x >= lodSize || blockRayPos.y < 0 || blockRayPos.y >= lodSize || blockRayPos.z < 0 || blockRayPos.z >= lodSize) { stage = 2; } else {
                 int bitIdx = (blockRayPos.x & (lodSize-1)) + (blockRayPos.y & (lodSize-1)) * lodSize + (blockRayPos.z & (lodSize-1)) * lodSize * lodSize;
-                int64_t mask = int64_t(1) << bitIdx;
-                if ((lod & mask) != 0) {
+                int lodToUse = lod.first;
+                if (bitIdx >= 32) {
+                    bitIdx-=32;
+                    lodToUse = lod.second;
+                }
+                int mask = 1 << bitIdx;
+                if ((lodToUse & mask) != 0) {
                     blockPos = lodWorldPos+blockRayPos;
                     block = getBlock(blockPos);
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
