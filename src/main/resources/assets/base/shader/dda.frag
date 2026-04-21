@@ -258,9 +258,7 @@ vec3 bevelNormal(vec3 normal) {
 
 vec3 ddaMask = vec3(0);
 void stepMask(vec3 sideDist) {
-    int axis = sideDist.x < sideDist.y ? ((sideDist.x < sideDist.z) ? 0 : 2) : ((sideDist.y < sideDist.z) ? 1 : 2);
-    ddaMask = vec3(0);
-    ddaMask[axis] = 1.0;
+    ddaMask = step(sideDist, vec3(min(min(sideDist.x, sideDist.y), sideDist.z) + 0.000000001));
 }
 
 vec3 getDir(vec2 pos) {
@@ -270,21 +268,17 @@ vec3 getDir(vec2 pos) {
 }
 vec3 rayPos = vec3(0);
 vec3 rayDir = vec3(0);
-vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
-    vec3 minPos = (worldPos - rayPos) * (1.0 / rayDir);
-    vec3 maxPos = (worldPos + stageSize - rayPos) * (1.0 / rayDir);
-    vec3 entranceDist = min(minPos, maxPos);
-    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
+vec3 rayDirDivved = vec3(0);
+vec3 uv3d(vec3 worldPos, float stageSize, int nextStageSize) {
+    vec3 minPos = (worldPos - rayPos) * rayDirDivved;
+    vec3 maxPos = minPos + stageSize * rayDirDivved;
+    vec3 entranceMin = min(minPos, maxPos);
+    float entrancePos = max(0.f, max(entranceMin.x, max(entranceMin.y, entranceMin.z)));
     vec3 intersect = rayPos + rayDir * entrancePos;
-    return clamp((intersect - worldPos)/(stageSize/nextStageSize), vec3(0.0001f), vec3(nextStageSize-0.0001f));
+    return min((intersect - worldPos)/(stageSize/nextStageSize), vec3(nextStageSize-0.0001f));
 }
-vec3 uv3d(vec3 worldPos, float stageSize, int nextStageSize) { //same thing as above but not ivec3
-    vec3 minPos = (worldPos - rayPos) * (1.0 / rayDir);
-    vec3 maxPos = (worldPos + stageSize - rayPos) * (1.0 / rayDir);
-    vec3 entranceDist = min(minPos, maxPos);
-    float entrancePos = max(0.f, max(entranceDist.x, max(entranceDist.y, entranceDist.z)));
-    vec3 intersect = rayPos + rayDir * entrancePos;
-    return clamp((intersect - worldPos)/(stageSize/nextStageSize), vec3(0.0001f), vec3(nextStageSize-0.0001f));
+vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
+    return uv3d(vec3(worldPos), stageSize, nextStageSize);
 }
 
 vec3 ogChunkPos = vec3(0);
@@ -294,6 +288,7 @@ ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
 vec4 dda(bool detailed) {
     rayDir = roundVec(rayDir);
+    rayDirDivved = 1.f/rayDir;
     ogRayPos = rayPos;
     ogRayDir = rayDir;
     raySign = sign(rayDir);
