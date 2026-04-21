@@ -135,7 +135,7 @@ public class Earth extends WorldType {
                         Vector2i blockOn = getBlock(x, elevation, z);
                         float randomNumber = seededRand.nextFloat();
                         if (blockOn.x == 55) {
-                            if (randomNumber < 0.05f) {
+                            if (randomNumber < 0.2f) {
                                 Blob.generate(blockOn, x, elevation, z, (Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f)) < 0.05f ? 56 : 10), 0, (int) (2 + (seededRand.nextFloat() * 16)));
                             }
                         } else if (blockOn.x == 2) {
