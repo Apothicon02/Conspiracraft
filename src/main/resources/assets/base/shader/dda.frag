@@ -32,9 +32,10 @@ const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
 const int heightChunks = height / chunkSize;
-const int regionSize = 4;
-const int sizeRegions = sizeChunks / regionSize;
-const int heightRegions = heightChunks / regionSize;
+const int regionSizeChunks = 4;
+const int regionSize = chunkSize*regionSizeChunks;
+const int sizeRegions = sizeChunks / regionSizeChunks;
+const int heightRegions = heightChunks / regionSizeChunks;
 const int lodSize = 4;
 const int sizeLods = size / lodSize;
 const int heightLods = height / lodSize;
@@ -59,11 +60,9 @@ int64_t getRegion(ivec3 chunkPos) {
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
-ivec3 prevBlockChunkPos = ivec3(-1);
 ChunkStruct chunk = ChunkStruct(0, 0, 0, 0);
 int blockValuesPerInt = -1;
 void updateChunkData(ivec3 chunkPos) {
-    prevBlockChunkPos = chunkPos;
     int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
     chunk = chunkData.chunks[condensedChunkPos];
     blockValuesPerInt = 32/chunk.bitsPerValue;
@@ -297,14 +296,22 @@ vec4 dda(bool detailed) {
     ogRayPos = rayPos;
     ogRayDir = rayDir;
     raySign = sign(rayDir);
-    int stage = 3;
+    int stage = 4;
 
-    vec3 chunkStartPos = rayPos/chunkSize;
-    vec3 chunkPos = floor(chunkStartPos);
-    vec3 chunkDist = 1.0/rayDir;
-    vec3 chunkSideDist = ((chunkPos - chunkStartPos) + 0.5 + raySign * 0.5) * chunkDist;
-    vec3 chunkMask = stepMask(chunkSideDist);
+    vec3 regionStartPos = rayPos/regionSize;
+    vec3 regionPos = floor(regionStartPos);
+    vec3 regionDist = 1.0/rayDir;
+    vec3 regionSideDist = ((regionPos - regionStartPos) + 0.5 + raySign * 0.5) * regionDist;
+    vec3 regionMask = stepMask(regionSideDist);
+    ivec3 regionWorldPos = ivec3(0);
+    int64_t region = int64_t(0);
+
+    vec3 chunkStartPos = vec3(0);
+    ivec3 chunkRayPos = ivec3(0);
     ivec3 chunkWorldPos = ivec3(0);
+    vec3 chunkDist = vec3(0);
+    vec3 chunkSideDist = vec3(0);
+    vec3 chunkMask = vec3(0);
 
     vec3 lodStartPos = vec3(0);
     ivec3 lodRayPos = ivec3(0);
@@ -330,20 +337,34 @@ vec4 dda(bool detailed) {
     float maxDist = renderDistance*renderDistance;
     while (abs(dot(exactPos-ogRayPos, ogRayPos-exactPos)) < maxDist) {
         bool stepAnything = true;
-        if (stage == 3) {
-            if (chunkPos.y >= heightChunks && rayDir.y < 0) {
+        if (stage == 4) {
+            if (regionPos.y >= heightRegions && rayDir.y < 0) {
                 //no need to do any checks
             } else {
-                if (chunkPos.x < 0 || chunkPos.x >= sizeChunks || chunkPos.y < 0 || chunkPos.y >= heightChunks || chunkPos.z < 0 || chunkPos.z >= sizeChunks) { break; }
-                int64_t region = getRegion(ivec3(chunkPos/regionSize));
-                ivec3 chunkRayPos = ivec3(chunkPos) % regionSize;
-                int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
+                if (regionPos.x < 0 || regionPos.x >= sizeRegions || regionPos.y < 0 || regionPos.y >= heightRegions || regionPos.z < 0 || regionPos.z >= sizeRegions) { break; }
+                region = getRegion(ivec3(regionPos));
+                if (region != 0) {
+                    //return vec4(regionPos/vec3(sizeRegions, heightRegions, sizeRegions), 1);
+                    stage = 3;
+                    stepAnything = false;
+                    regionWorldPos = ivec3(regionPos*regionSize);
+                    chunkStartPos = uv3d(regionWorldPos, float(regionSize), regionSize)/chunkSize;
+                    chunkRayPos = ivec3(chunkStartPos);
+                    //return vec4(vec3(chunkRayPos)/regionSizeChunks, 1);
+                    chunkDist = 1.0/rayDir;
+                    chunkSideDist = ((chunkRayPos - chunkStartPos) + 0.5 + raySign * 0.5) * chunkDist;
+                    chunkMask = regionMask;
+                }
+            }
+        } else if (stage == 3) {
+            if (chunkRayPos.x < 0 || chunkRayPos.x >= regionSizeChunks || chunkRayPos.y < 0 || chunkRayPos.y >= regionSizeChunks || chunkRayPos.z < 0 || chunkRayPos.z >= regionSizeChunks) { stage = 4; } else {
+                int bitIdx = (chunkRayPos.x & (regionSizeChunks-1)) + (chunkRayPos.y & (regionSizeChunks-1)) * regionSizeChunks + (chunkRayPos.z & (regionSizeChunks-1)) * regionSizeChunks * regionSizeChunks;
                 int64_t mask = int64_t(1) << bitIdx;
                 if ((region & mask) != 0) {
-                    updateChunkData(ivec3(chunkPos));
+                    chunkWorldPos = regionWorldPos+(chunkRayPos*chunkSize);
+                    updateChunkData(ivec3(chunkWorldPos));
                     stage = 2;
                     stepAnything = false;
-                    chunkWorldPos = ivec3(chunkPos*chunkSize);
                     lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
                     lodRayPos = ivec3(lodStartPos);
                     lodDist = 1.0/rayDir;
@@ -430,11 +451,16 @@ vec4 dda(bool detailed) {
             }
         }
         if (stepAnything) { //dont step if it just went to a finer detail
-            if (stage == 3) {
+            if (stage == 4) {
+                regionMask = stepMask(regionSideDist);
+                regionPos += ivec3(regionMask * raySign);
+                regionSideDist += regionMask * raySign * regionDist;
+                exactPos = regionPos*regionSize;
+            } else if (stage == 3) {
                 chunkMask = stepMask(chunkSideDist);
-                chunkPos += chunkMask * raySign;
+                chunkRayPos += ivec3(chunkMask * raySign);
                 chunkSideDist += chunkMask * raySign * chunkDist;
-                exactPos = chunkPos*chunkSize;
+                exactPos = regionWorldPos+(chunkRayPos*chunkSize);
             } if (stage == 2) {
                 lodMask = stepMask(lodSideDist);
                 lodRayPos += ivec3(lodMask * raySign);
@@ -571,11 +597,11 @@ void main() {
         if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
-            //shadowColor = dda(false);
+            shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
             shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.1f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
-            lighting *= shadowFactor;//mix(0.25f, 0.66f, min(1, distance(primaryLightPos, hitPos)/50.f));
+            lighting *= shadowFactor;
         }
         if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryNormal);
@@ -586,7 +612,7 @@ void main() {
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             rayPos = primaryLightPos;
             rayDir = reflectDir;
-            vec4 reflectColor = vec4(0);//globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
+            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
