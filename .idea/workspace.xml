@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/hs_err_pid3692.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hs_err_pid7792.log" afterDir="false" />
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Minor dda optimizations.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/base/shader/dda.frag" afterDir="false" />
     </list>
@@ -212,22 +210,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
-    </task>
-    <task id="LOCAL-00032" summary="- Wip lods.">
-      <option name="closed" value="true" />
-      <created>1775923529751</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1775923529751</updated>
-    </task>
-    <task id="LOCAL-00033" summary="- Fixed lods.">
-      <option name="closed" value="true" />
-      <created>1775938260696</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1775938260696</updated>
     </task>
     <task id="LOCAL-00034" summary="- Optimized dda.">
       <option name="closed" value="true" />
@@ -605,7 +587,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776783931570</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="- Big optimize.">
+      <option name="closed" value="true" />
+      <created>1776794457940</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1776794457940</updated>
+    </task>
+    <task id="LOCAL-00082" summary="- Minor dda optimizations.">
+      <option name="closed" value="true" />
+      <created>1776797972817</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1776797972817</updated>
+    </task>
+    <option name="localTasksCounter" value="83" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -624,8 +622,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- DDA now outputs flat normals." />
-    <MESSAGE value="- Separated ssao into its own pass. &#10;- Added unused gui pass." />
     <MESSAGE value="- Fixed mesh normals being model-space. &#10;- AO cant darken things to less than 0.25x now." />
     <MESSAGE value="- Fixed rasterized normals." />
     <MESSAGE value="- Added gui texture." />
@@ -649,7 +645,9 @@
     <MESSAGE value="- Increased minimum shadow brightness." />
     <MESSAGE value="- Removed region dda." />
     <MESSAGE value="- Shaders no longer use int64s." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Shaders no longer use int64s." />
+    <MESSAGE value="- Big optimize." />
+    <MESSAGE value="- Minor dda optimizations." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Minor dda optimizations." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

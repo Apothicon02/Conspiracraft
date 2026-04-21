@@ -343,7 +343,6 @@ vec4 dda(bool detailed) {
                     chunkWorldPos = ddaPos*chunkSize;
                     lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
                     ddaPos = ivec3(lodStartPos);
-                    dist = 1.0/rayDir;
                     sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
                 }
             }
@@ -364,7 +363,6 @@ vec4 dda(bool detailed) {
                     lodWorldPos = ivec3(lodPos*lodSize);
                     blockStartPos = uv3d(lodWorldPos, float(lodSize), lodSize);
                     ddaPos = ivec3(blockStartPos);
-                    dist = 1.0/rayDir;
                     sideDist = ((ddaPos - blockStartPos) + 0.5 + raySign * 0.5) * dist;
                 }
             }
@@ -399,7 +397,6 @@ vec4 dda(bool detailed) {
                         blockSideDist = sideDist;
 
                         ddaPos = ivec3(voxelStartPos);
-                        dist = 1.0/rayDir;
                         sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
                     }
                 }
