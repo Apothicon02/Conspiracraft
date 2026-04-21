@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Finished adding region dda level.">
+    <list default="true" id="cb61832c-be72-4e0b-85d2-92e687650687" name="Changes" comment="- Increased minimum shadow brightness.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/player/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/conspiracraft/world/Earth.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -76,6 +78,9 @@
   }
 }</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\tyler\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Program Files\Java\jdk-25" gradleVersion="9.3.0" />
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../../../../Program Files/Java/jdk-21/lib/src.zip!/java.desktop/java/awt/geom/AffineTransform.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 8
@@ -87,45 +92,53 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor": "Run",
-    "Gradle.Conspiracraft [build].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.Terraflat [:Main.main()].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tyler/IdeaProjects/Conspiracraft/src/main/resources/assets/base/shader",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Gradle.C:/Users/Tyler/Documents/Github/Terraflat [Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [:org.conspiracraft.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Conspiracraft [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Terraflat [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tyler/Documents/Github/Conspiracraft/src/main/resources/assets/base/entity/animal/texture&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\tyler\IdeaProjects\Conspiracraft\src\main\resources\assets\base\shader" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\entity\animal\texture" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\resources\assets\base\generic" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft\gui" />
+      <recent name="C:\Users\Tyler\Documents\Github\Conspiracraft\src\main\java\org\conspiracraft" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tyler\Documents\Github\Terraflat\src\main\java\org\terraflat\engine" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="org.apothicon.engine" />
-      <recent name="org.apothicon.core.grids" />
+      <recent name="org.conspiracraft.gui.buttons" />
+      <recent name="org.conspiracraft.player" />
+      <recent name="org.conspiracraft" />
+      <recent name="org.conspiracraft.utils" />
+      <recent name="org.conspiracraft.graphics.textures" />
     </key>
   </component>
   <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.conspiracraft.Main" />
       <module name="Conspiracraft.main" />
+      <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.conspiracraft.*" />
@@ -199,148 +212,443 @@
       <option name="presentableId" value="Default" />
       <updated>1722266644812</updated>
     </task>
-    <task id="LOCAL-00001" summary="- Initial commit.">
+    <task id="LOCAL-00030" summary="- Added unused lod texture.">
       <option name="closed" value="true" />
-      <created>1722308629838</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
+      <created>1775917635562</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
       <option name="project" value="LOCAL" />
-      <updated>1722308629838</updated>
+      <updated>1775917635562</updated>
     </task>
-    <task id="LOCAL-00002" summary="- Initial commit.">
+    <task id="LOCAL-00031" summary="- Extracted dda to its own method.">
       <option name="closed" value="true" />
-      <created>1722559709809</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
+      <created>1775918031843</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
       <option name="project" value="LOCAL" />
-      <updated>1722559709809</updated>
+      <updated>1775918031843</updated>
     </task>
-    <task id="LOCAL-00003" summary="- Update .gitignore.">
+    <task id="LOCAL-00032" summary="- Wip lods.">
       <option name="closed" value="true" />
-      <created>1722559772024</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
+      <created>1775923529751</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
       <option name="project" value="LOCAL" />
-      <updated>1722559772024</updated>
+      <updated>1775923529751</updated>
     </task>
-    <task id="LOCAL-00004" summary="- Grids can now rotate. &#10;- Grids now contain a map of all their elements.">
+    <task id="LOCAL-00033" summary="- Fixed lods.">
       <option name="closed" value="true" />
-      <created>1722613150852</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
+      <created>1775938260696</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
       <option name="project" value="LOCAL" />
-      <updated>1722613150852</updated>
+      <updated>1775938260696</updated>
     </task>
-    <task id="LOCAL-00005" summary="- Rewrite.">
+    <task id="LOCAL-00034" summary="- Optimized dda.">
       <option name="closed" value="true" />
-      <created>1722638056821</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
+      <created>1775938702012</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
       <option name="project" value="LOCAL" />
-      <updated>1722638056821</updated>
+      <updated>1775938702012</updated>
     </task>
-    <task id="LOCAL-00006" summary="- Thing.">
+    <task id="LOCAL-00035" summary="- Added chunk space-skipping.">
       <option name="closed" value="true" />
-      <created>1724971018346</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
+      <created>1775941994129</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
       <option name="project" value="LOCAL" />
-      <updated>1724971018346</updated>
+      <updated>1775941994129</updated>
     </task>
-    <task id="LOCAL-00007" summary="- Thing.">
+    <task id="LOCAL-00036" summary="- Added voxel dda.">
       <option name="closed" value="true" />
-      <created>1725040805492</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
+      <created>1776004788070</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
       <option name="project" value="LOCAL" />
-      <updated>1725040805493</updated>
+      <updated>1776004788071</updated>
     </task>
-    <task id="LOCAL-00008" summary="- Fixed inaccurate reflections on transparent objects.">
+    <task id="LOCAL-00037" summary="- Added clouds. &#10;- Tidied up dda.frag.">
       <option name="closed" value="true" />
-      <created>1763228774007</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
+      <created>1776105488211</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
       <option name="project" value="LOCAL" />
-      <updated>1763228774007</updated>
+      <updated>1776105488211</updated>
     </task>
-    <task id="LOCAL-00009" summary="- Updated .gitignore. &#10;- Improved smoothness.">
+    <task id="LOCAL-00038" summary="- Added support for multiple shader programs. &#10;- Added support for multiple images to render to.">
       <option name="closed" value="true" />
-      <created>1763392406939</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
+      <created>1776116528634</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
       <option name="project" value="LOCAL" />
-      <updated>1763392406939</updated>
+      <updated>1776116528634</updated>
     </task>
-    <task id="LOCAL-00010" summary="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names.">
+    <task id="LOCAL-00039" summary="- Added mipmapping. &#10;- Improved worldgen.">
       <option name="closed" value="true" />
-      <created>1774917375640</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
+      <created>1776186616574</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
       <option name="project" value="LOCAL" />
-      <updated>1774917375640</updated>
+      <updated>1776186616574</updated>
     </task>
-    <task id="LOCAL-00011" summary="- Added preferred sdr format.">
+    <task id="LOCAL-00040" summary="- Fixed extreme lag in specific angles.">
       <option name="closed" value="true" />
-      <created>1775074918741</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
+      <created>1776187233124</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
       <option name="project" value="LOCAL" />
-      <updated>1775074918741</updated>
+      <updated>1776187233124</updated>
     </task>
-    <task id="LOCAL-00012" summary="- Added frames-in-flight.">
+    <task id="LOCAL-00041" summary="- Fixed voxel hit pos inaccuracy.">
       <option name="closed" value="true" />
-      <created>1775089573696</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
+      <created>1776201795440</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
       <option name="project" value="LOCAL" />
-      <updated>1775089573696</updated>
+      <updated>1776201795440</updated>
     </task>
-    <task id="LOCAL-00013" summary="- Fixed bevels not existing.">
+    <task id="LOCAL-00042" summary="- Fixed textures having unnecessary usage flags.">
       <option name="closed" value="true" />
-      <created>1776714892792</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
+      <created>1776203710301</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
       <option name="project" value="LOCAL" />
-      <updated>1776714892792</updated>
+      <updated>1776203710301</updated>
     </task>
-    <task id="LOCAL-00014" summary="- Fixed textures not being applied to rasterized objects.">
+    <task id="LOCAL-00043" summary="- Now supports having multiple color attachments in one pipeline.">
       <option name="closed" value="true" />
-      <created>1776714961901</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
+      <created>1776205413363</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
       <option name="project" value="LOCAL" />
-      <updated>1776714961901</updated>
+      <updated>1776205413363</updated>
     </task>
-    <task id="LOCAL-00015" summary="- Finished adding region dda level.">
+    <task id="LOCAL-00044" summary="- Added SSAO.">
       <option name="closed" value="true" />
-      <created>1776730264935</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
+      <created>1776208452226</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
       <option name="project" value="LOCAL" />
-      <updated>1776730264935</updated>
+      <updated>1776208452226</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00045" summary="- Added dda depth buffer. &#10;- SSAO now uses 32-bit depth instead of 16-bit. &#10;- Added temporary trees.">
+      <option name="closed" value="true" />
+      <created>1776266207813</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1776266207813</updated>
+    </task>
+    <task id="LOCAL-00046" summary="- Fixed SSAO issue. &#10;- Added rasterization shaders &amp; pipeline.">
+      <option name="closed" value="true" />
+      <created>1776286558789</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1776286558789</updated>
+    </task>
+    <task id="LOCAL-00047" summary="- Fixed SSAO issue. &#10;- Added rasterization shaders &amp; pipeline.">
+      <option name="closed" value="true" />
+      <created>1776286592125</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1776286592125</updated>
+    </task>
+    <task id="LOCAL-00048" summary="- Rasterization progress.">
+      <option name="closed" value="true" />
+      <created>1776296159098</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1776296159098</updated>
+    </task>
+    <task id="LOCAL-00049" summary="- Finished adding rasterized object rendering. &#10;- Added celestial objects.">
+      <option name="closed" value="true" />
+      <created>1776299924124</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1776299924124</updated>
+    </task>
+    <task id="LOCAL-00050" summary="- Stars now twinkle out of existence in day.">
+      <option name="closed" value="true" />
+      <created>1776300723349</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1776300723349</updated>
+    </task>
+    <task id="LOCAL-00051" summary="- Fixed SSAO range check. &#10;- Rasterized objects are now shaded.">
+      <option name="closed" value="true" />
+      <created>1776356635725</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1776356635725</updated>
+    </task>
+    <task id="LOCAL-00052" summary="- Input is now blocked until renderer is initialized.">
+      <option name="closed" value="true" />
+      <created>1776359943973</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1776359943973</updated>
+    </task>
+    <task id="LOCAL-00053" summary="- Added grass blades. &#10;- AO is stronger.">
+      <option name="closed" value="true" />
+      <created>1776361248395</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1776361248395</updated>
+    </task>
+    <task id="LOCAL-00054" summary="- Added grass blades. &#10;- AO is stronger.">
+      <option name="closed" value="true" />
+      <created>1776361254379</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1776361254379</updated>
+    </task>
+    <task id="LOCAL-00055" summary="- Shadows are no longer cast when a face is facing away from the sun.">
+      <option name="closed" value="true" />
+      <created>1776363402704</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1776363402704</updated>
+    </task>
+    <task id="LOCAL-00056" summary="- DDA now outputs flat normals.">
+      <option name="closed" value="true" />
+      <created>1776378659918</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1776378659919</updated>
+    </task>
+    <task id="LOCAL-00057" summary="- Separated ssao into its own pass. &#10;- Added unused gui pass.">
+      <option name="closed" value="true" />
+      <created>1776388630931</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1776388630931</updated>
+    </task>
+    <task id="LOCAL-00058" summary="- Fixed mesh normals being model-space. &#10;- AO cant darken things to less than 0.25x now.">
+      <option name="closed" value="true" />
+      <created>1776399184787</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1776399184787</updated>
+    </task>
+    <task id="LOCAL-00059" summary="- Fixed rasterized normals.">
+      <option name="closed" value="true" />
+      <created>1776442533621</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1776442533621</updated>
+    </task>
+    <task id="LOCAL-00060" summary="- Added gui texture.">
+      <option name="closed" value="true" />
+      <created>1776456652891</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1776456652891</updated>
+    </task>
+    <task id="LOCAL-00061" summary="- Gui shader can now use textures.">
+      <option name="closed" value="true" />
+      <created>1776472617372</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1776472617372</updated>
+    </task>
+    <task id="LOCAL-00062" summary="- Ported lots of stuff.">
+      <option name="closed" value="true" />
+      <created>1776475008677</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1776475008677</updated>
+    </task>
+    <task id="LOCAL-00063" summary="- Big progress in porting gui. &#10;- Added audio.">
+      <option name="closed" value="true" />
+      <created>1776519047304</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1776519047304</updated>
+    </task>
+    <task id="LOCAL-00064" summary="- Added item rendering.">
+      <option name="closed" value="true" />
+      <created>1776528202699</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1776528202701</updated>
+    </task>
+    <task id="LOCAL-00065" summary="- Finished adding inventory.">
+      <option name="closed" value="true" />
+      <created>1776535778379</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1776535778379</updated>
+    </task>
+    <task id="LOCAL-00066" summary="- Visualized item stack spreading. &#10;- Fixed listener data never being updated. &#10;- Disabled movement input when inventory or pause menu open.">
+      <option name="closed" value="true" />
+      <created>1776537616992</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1776537616993</updated>
+    </task>
+    <task id="LOCAL-00067" summary="- Fixed some stuff being done twice.">
+      <option name="closed" value="true" />
+      <created>1776542044177</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1776542044177</updated>
+    </task>
+    <task id="LOCAL-00068" summary="- Added imagesinflight.">
+      <option name="closed" value="true" />
+      <created>1776543884465</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1776543884465</updated>
+    </task>
+    <task id="LOCAL-00069" summary="- Undid some changes.">
+      <option name="closed" value="true" />
+      <created>1776544650312</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1776544650312</updated>
+    </task>
+    <task id="LOCAL-00070" summary="- No longer resizes based on vulkan command results.">
+      <option name="closed" value="true" />
+      <created>1776559518824</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1776559518825</updated>
+    </task>
+    <task id="LOCAL-00071" summary="- Greatly sped up launch &amp; resize times.">
+      <option name="closed" value="true" />
+      <created>1776609581533</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1776609581533</updated>
+    </task>
+    <task id="LOCAL-00072" summary="- Replaced fences with a timeline semaphore.">
+      <option name="closed" value="true" />
+      <created>1776611861899</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1776611861899</updated>
+    </task>
+    <task id="LOCAL-00073" summary="- Added textured cube rendering.">
+      <option name="closed" value="true" />
+      <created>1776630104728</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1776630104728</updated>
+    </task>
+    <task id="LOCAL-00074" summary="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets.">
+      <option name="closed" value="true" />
+      <created>1776641137244</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1776641137244</updated>
+    </task>
+    <task id="LOCAL-00075" summary="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance.">
+      <option name="closed" value="true" />
+      <created>1776695942686</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1776695942687</updated>
+    </task>
+    <task id="LOCAL-00076" summary="- Dda micro-optimization.">
+      <option name="closed" value="true" />
+      <created>1776698017188</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1776698017188</updated>
+    </task>
+    <task id="LOCAL-00077" summary="- Added elevational shadow ray intensity">
+      <option name="closed" value="true" />
+      <created>1776702459013</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1776702459013</updated>
+    </task>
+    <task id="LOCAL-00078" summary="- Increased minimum shadow brightness.">
+      <option name="closed" value="true" />
+      <created>1776703769693</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1776703769693</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="- Initial commit." />
-    <MESSAGE value="- Update .gitignore." />
-    <MESSAGE value="- Grids can now rotate. &#10;- Grids now contain a map of all their elements." />
-    <MESSAGE value="- Rewrite." />
-    <MESSAGE value="- Thing." />
-    <MESSAGE value="- Fixed inaccurate reflections on transparent objects." />
-    <MESSAGE value="- Updated .gitignore. &#10;- Improved smoothness." />
-    <MESSAGE value="- Now prioritizes dGpu &gt; iGpu &gt; vGpu &gt; oGpu &gt; cpu. &#10;- Now prints device names." />
-    <MESSAGE value="- Added preferred sdr format." />
-    <MESSAGE value="- Added frames-in-flight." />
-    <MESSAGE value="- Fixed bevels not existing." />
-    <MESSAGE value="- Fixed textures not being applied to rasterized objects." />
-    <MESSAGE value="- Finished adding region dda level." />
-    <option name="LAST_COMMIT_MESSAGE" value="- Finished adding region dda level." />
+    <MESSAGE value="- Added grass blades. &#10;- AO is stronger." />
+    <MESSAGE value="- Shadows are no longer cast when a face is facing away from the sun." />
+    <MESSAGE value="- DDA now outputs flat normals." />
+    <MESSAGE value="- Separated ssao into its own pass. &#10;- Added unused gui pass." />
+    <MESSAGE value="- Fixed mesh normals being model-space. &#10;- AO cant darken things to less than 0.25x now." />
+    <MESSAGE value="- Fixed rasterized normals." />
+    <MESSAGE value="- Added gui texture." />
+    <MESSAGE value="- Gui shader can now use textures." />
+    <MESSAGE value="- Ported lots of stuff." />
+    <MESSAGE value="- Big progress in porting gui. &#10;- Added audio." />
+    <MESSAGE value="- Added item rendering." />
+    <MESSAGE value="- Finished adding inventory." />
+    <MESSAGE value="- Visualized item stack spreading. &#10;- Fixed listener data never being updated. &#10;- Disabled movement input when inventory or pause menu open." />
+    <MESSAGE value="- Fixed some stuff being done twice." />
+    <MESSAGE value="- Added imagesinflight." />
+    <MESSAGE value="- Undid some changes." />
+    <MESSAGE value="- No longer resizes based on vulkan command results." />
+    <MESSAGE value="- Greatly sped up launch &amp; resize times." />
+    <MESSAGE value="- Replaced fences with a timeline semaphore." />
+    <MESSAGE value="- Added textured cube rendering." />
+    <MESSAGE value="- Added mun texture. &#10;- Cows no longer spin. &#10;- Removed sun texture. &#10;- Improved sunsets." />
+    <MESSAGE value="- Added render toggles to global ubo. &#10;- Reflection button now works. &#10;- Reduced render distance." />
+    <MESSAGE value="- Dda micro-optimization." />
+    <MESSAGE value="- Added elevational shadow ray intensity" />
+    <MESSAGE value="- Increased minimum shadow brightness." />
+    <option name="LAST_COMMIT_MESSAGE" value="- Increased minimum shadow brightness." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -349,11 +657,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/Window.java</url>
           <line>128</line>
           <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/conspiracraft/renderer/OpenGL.java</url>
-          <line>30</line>
-          <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
