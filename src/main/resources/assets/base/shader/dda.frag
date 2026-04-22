@@ -281,6 +281,7 @@ vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
     return uv3d(vec3(worldPos), stageSize, nextStageSize);
 }
 
+bool reverseNormShading = false;
 vec3 ogChunkPos = vec3(0);
 vec3 raySign = vec3(0);
 vec3 normal = vec3(0);
@@ -323,7 +324,7 @@ vec4 dda(bool detailed) {
             if (ddaPos.y >= heightChunks && rayDir.y < 0) {
                 //no need to do any checks
             } else {
-                if (abs(dot(chunkPos-ogChunkPos, ogChunkPos-chunkPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
+                if (abs(dot(ddaPos-ogChunkPos, ogChunkPos-ddaPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
                 region = getRegion(ddaPos/regionSize);
                 ivec3 chunkRayPos = ddaPos % regionSize;
                 int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
@@ -383,12 +384,15 @@ vec4 dda(bool detailed) {
                     blockPos = lodWorldPos+ddaPos;
                     block = getBlock(blockPos);
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
-                    vec4 voxelColor = block.x == 4 ? vec4(0) : sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
+                    vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
                     if (voxelColor.a > 0.f) {
                         flatNormal = -ddaMask*raySign;
                         ddaPos = ivec3(voxelStartPos);
                         hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
                         normal = bevelNormal(flatNormal);
+                        if (voxelColor.a < 1.f) {
+                            reverseNormShading = true;
+                        }
                         return vec4(voxelColor.rgb, 1.f);
                     } else {
                         stage = 0;
@@ -407,32 +411,7 @@ vec4 dda(bool detailed) {
                 ddaPos = blockRayPos;
                 sideDist = blockSideDist;
             } else {
-                ivec3 offsetVoxelPos = ddaPos;
-                if (block.x == 4 && offsetVoxelPos.y > 2) {
-                    bool windDir = true;//timeOfDay > 0.f;
-                    float time = globalUbo.time/400000;
-                    float windStr = noise(((vec2(blockPos.x, blockPos.z)/12) + (time * 100)) * (16+(time/(time/32))))+0.5f;
-                    if (windStr > 0.8) {
-                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 5 ? 3 : (offsetVoxelPos.y > 4 ? 2 : 1)) * (windDir ? -1 : 1));
-                        if (block.y < 2) {
-                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 2 : 1);
-                        }
-                    } else if (windStr > 0.4) {
-                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 5 ? 3 : (offsetVoxelPos.y > 4 ? 2 : 1)) * (windDir ? -1 : 1));
-                        if (block.y < 2) {
-                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 1 : 0);
-                        }
-                    } else if (windStr > -0.2) {
-                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 4 ? 2 : 1) * (windDir ? -1 : 1));
-                        if (block.y < 2) {
-                            offsetVoxelPos.z = offsetVoxelPos.z+(offsetVoxelPos.y > 4 ? 1 : 0);
-                        }
-                    } else if (windStr > -0.8) {
-                        offsetVoxelPos.x = offsetVoxelPos.x+((offsetVoxelPos.y > 4 ? 1 : 0) * (windDir ? -1 : 1));
-                    }
-                    offsetVoxelPos.xz = clamp(offsetVoxelPos.xz, 0, 7);
-                }
-                vec4 voxelColor = sampleAtlas(offsetVoxelPos.x, offsetVoxelPos.y, offsetVoxelPos.z, block.x, block.y);
+                vec4 voxelColor = sampleAtlas(ddaPos.x, ddaPos.y, ddaPos.z, block.x, block.y);
                 if (voxelColor.a > 0.f) {
                     flatNormal = -ddaMask*raySign;
                     normal = flatNormal;
@@ -564,7 +543,7 @@ void main() {
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
-        float normDot = (dot(bentNormal, normalize(skylight.xyz))/2)+0.5f;
+        float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         vec3 lighting = (vec3(normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryLightPos;
@@ -576,7 +555,7 @@ void main() {
             shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
-            shadowFactor = gradient(hitPos.y, 63, 256, 0.8f, mix(0.66f, 0.1f, min(1.f, distance(primaryLightPos, ogPos)/150.f)));
+            shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
             lighting *= shadowFactor;
         }
         if (reflectivity > 0.f) {
@@ -602,7 +581,7 @@ void main() {
         color.rgb *= lighting;
         float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-        outNormal = vec4(primaryFlatNormal, clamp(fogginess+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
+        outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
         outNormal = vec4(primaryFlatNormal, 1);
     }

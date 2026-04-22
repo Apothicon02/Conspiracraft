@@ -4,6 +4,7 @@ import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
+import org.conspiracraft.world.shapes.Cube;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -44,13 +45,13 @@ public class Earth extends WorldType {
     public void tick() {
         prevSunPos.set(sunPos);
         sunPos.set(0, World.size*2, 0);
-        sunPos.rotateZ(1.2f+(timeNs/100000000000.f));
+        sunPos.rotateZ(timeNs/100000000000.f);
         sunPos.rotateX(0.5f);
         sunPos.rotateY(2.f);
         sunPos.set(sunPos.x+(World.size/2f), sunPos.y, sunPos.z+(World.size/2f)+128);
         prevMunPos.set(munPos);
         munPos.set(0, World.size*-2, 0);
-        munPos.rotateZ(1.2f+(timeNs/100000000000.f));
+        munPos.rotateZ(timeNs/100000000000.f);
         munPos.rotateX(-0.2f);
         munPos.rotateY(-1.5f);
         munPos.set(munPos.x+(World.size/2f), munPos.y, munPos.z+(World.size/2f)+128);
@@ -95,7 +96,7 @@ public class Earth extends WorldType {
                             int steepness = Math.abs(elevation - nY);
                             maxSteepness = Math.max(maxSteepness, steepness);
                         }
-                        boolean flat = maxSteepness < 4;
+                        boolean flat = maxSteepness < 6;
                         if (elevation <= 63) {
                             World.setBlock(x, 63, z, 1, 14);
                             for (int y = 62; y > elevation; y--) {
@@ -108,7 +109,7 @@ public class Earth extends WorldType {
                                     World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
                                 } else if (seededRand.nextFloat() < 0.003f) {
                                     World.setBlock(x, elevation + 1, z, 18, seededRand.nextInt(3));
-                                } else if (seededRand.nextBoolean()) {
+                                } else if (seededRand.nextFloat() < 0.1f) {
                                     World.setBlock(x, elevation + 1, z, 4, seededRand.nextInt(3));
                                 }
                             }
@@ -134,10 +135,19 @@ public class Earth extends WorldType {
                         int elevation = heightmap[(x * size) + z];
                         Vector2i blockOn = getBlock(x, elevation, z);
                         float randomNumber = seededRand.nextFloat();
-                        if (blockOn.x == 55) {
-                            if (randomNumber < 0.2f) {
-                                Blob.generate(blockOn, x, elevation, z, (Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f)) < 0.05f ? 56 : 10), 0, (int) (2 + (seededRand.nextFloat() * 16)));
-                            }
+                        double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
+                        double eleFactor = elevation+(rockNoise*50);
+                        boolean snowy = eleFactor > 136;
+                        if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136+Math.abs(randomNumber*250))) {
+                            Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (seededRand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 4)))));
+                        } else if (snowy) {
+                            setBlock(x, elevation, z, 54, 0);
+                            setBlock(x, elevation-1, z, 54, 0);
+                            setBlock(x, elevation-2, z, 54, 0);
+                            setBlock(x, elevation-3, z, 54, 0);
+                            setBlock(x, elevation-4, z, 54, 0);
+                            setBlock(x, elevation-5, z, 54, 0);
+                            setBlock(x, elevation-6, z, 54, 0);
                         } else if (blockOn.x == 2) {
                             if (randomNumber < 0.0001f && getBlock(x, elevation+1, z).x() == 0) {
                                 Renderer.cubes.addLast(new Matrix4f().translate(x, elevation+1, z).rotateY(seededRand.nextFloat(6.3f)));
@@ -162,33 +172,37 @@ public class Earth extends WorldType {
 //                }
 //            }
 //        }
-//        for (int x = 8; x < size-8; x++) {
-//            for (int z = 8; z < size-8; z++) {
-//                double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
-//                double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
-//                if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && seededRand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
-//                    int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
-//                    boolean isRainCloud = (new Vector2i(x, z).distance(size, size) / World.quarterSize < 1 && (seededRand.nextFloat() < 0.0005f));
-//                    int radius = (int) (((isRainCloud ? 6 : 0) + seededRand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))));
-//                    Blob.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
-//                }
-//            }
-//        }
+        for (int x = 8; x < size-8; x++) {
+            for (int z = 8; z < size-8; z++) {
+                double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+                double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+                if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && seededRand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+                    int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+                    boolean isRainCloud = seededRand.nextFloat() < 0.0005f;
+                    int radius = (int) ((((isRainCloud ? 6 : 0) + seededRand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+                    if (radius > 0) {
+                        Cube.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
+                    }
+                }
+            }
+        }
         System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. ");
     }
     public short getElevation(int x, int z) {
-        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 250.f, z / 250.f));
+        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 400.f, z / 400.f));
         double elevationNoise = SimplexNoise.noise(x / 500.f, z / 500.f) + 0.5f;
         double elevationMul = (mountainNoise * elevationNoise)+0.25F;
         double detailNoise = ((SimplexNoise.noise(x / 75.f, z / 75.f)+elevationNoise) * 16);
-        double elevation = detailNoise * Math.max(-0.5f, elevationMul*(2.f+(5*SimplexNoise.noise(x/750.f, z/750.f))));
+        double elevation = detailNoise * Math.max(-0.5f, elevationMul*(2.f+(3*SimplexNoise.noise(x/1250.f, z/1250.f))));
         if (elevation < 0) {
             elevation *= -0.25f;
         }
-        double continentNoise = -(Math.abs(elevationNoise-0.5f)-0.7f);
+        double centDist = new Vector2i(x, z).distance(2048, 2048);
+        double riverness = (0.5f-Math.abs(Math.max(-1.f, Math.min(0, centDist-1024)/150)+0.5f))*3;
+        double continentNoise = (-(Math.abs(elevationNoise-0.5f)-0.7f))-riverness;
         elevation += 66*Math.min(0, continentNoise);
         elevation += 66;
-        return (short)elevation;
+        return (short)Math.max(16, elevation);
     }
 //
 //    @Override
