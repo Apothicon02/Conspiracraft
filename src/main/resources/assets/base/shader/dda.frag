@@ -287,7 +287,7 @@ vec3 raySign = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
-vec4 dda(bool detailed) {
+vec4 dda(bool shadow) {
     rayDir = roundVec(rayDir);
     rayDirDivved = 1.f/rayDir;
     ogRayPos = rayPos;
@@ -479,7 +479,7 @@ void main() {
     ogDir = getDir(uv);
     rayPos = ogPos;
     rayDir = ogDir;
-    vec4 color = dda(true);
+    vec4 color = dda(false);
     vec3 primaryNormal = normal;
     vec3 primaryFlatNormal = flatNormal;
     vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
@@ -567,7 +567,7 @@ void main() {
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
             rayPos = primaryLightPos;
             rayDir = reflectDir;
-            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(true) : vec4(0);
+            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
             if (reflectColor.a < 1.f) {
                 reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {

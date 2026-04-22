@@ -1,6 +1,7 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.gui.GUI;
@@ -23,16 +24,18 @@ public class Player {
     public boolean chiselMode = false;
     public boolean creative = true;
     public float bobbing = 0f;
-    public float scale = 2f;
-    public float baseEyeHeight = 1.625f*scale;
+    public float grav = 0.1f;
+    public float jumpStrength = 0.6f;
+    public float scale = 1.f;
+    public float baseEyeHeight = 0.8125f*scale;
     public float eyeHeight = baseEyeHeight;
-    public float baseHeight = eyeHeight+(0.175f*scale);
+    public float baseHeight = eyeHeight+(0.0875f*scale);
     public float height = baseHeight;
     public float width = 0.2f*scale;
     public float baseSpeed = Math.max(0.33f, 0.33f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
-    public boolean forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
+    public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
 
     public final Source breakingSource;
 
@@ -61,9 +64,27 @@ public class Player {
         if (backward) {movement.add(cam.positiveZ(new Vector3f()).negate());}
         if (rightward) {movement.add(cam.positiveX(new Vector3f()));}
         if (leftward) {movement.add(cam.positiveX(new Vector3f()).negate());}
-        if (upward) {movement.add(0, 1, 0);}
-        if (downward) {movement.add(0, -1, 0);}
-        pos.add(movement.mul(speed*((sprinting||superSprinting)?(superSprinting ? sprintSpeed*10 : sprintSpeed):(downward?0.5f:1.f))));
+        if (flying) {
+            if (upward) {movement.add(0, 1, 0);}
+            if (downward) {movement.add(0, -1, 0);}
+        }
+        if (movement.length() > 0) {movement.normalize();}
+        movement.mul(speed*((sprinting||superSprinting)?(superSprinting ? sprintSpeed*10 : sprintSpeed):(downward?0.65f:1.f)));
+        if (!flying) {
+            boolean onSolid = PhysicsHelper.colliding(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width));
+            if (!onSolid) {
+                vel.y -= grav;
+            } else {
+                if (vel.y < 0) {
+                    vel.y = 0;
+                }
+                if (upward) {
+                    vel.y = Math.max(jumpStrength, vel.y());
+                }
+            }
+        }
+        movement.add(vel);
+        pos.set(PhysicsHelper.moveTo(new Vector3f(pos), new Vector3f(width, height, width), new Vector3f(pos).add(movement)));
     }
 
     public void movementInputs() {
