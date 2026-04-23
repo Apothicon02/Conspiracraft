@@ -8,7 +8,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class World {
-    public static int size = 2048;
+    public static int size = 4096;
     public static int halfSize = size/2;
     public static int quarterSize = size/4;
     public static int height = 320;
