@@ -96,7 +96,7 @@ public class Earth extends WorldType {
                             int steepness = Math.abs(elevation - nY);
                             maxSteepness = Math.max(maxSteepness, steepness);
                         }
-                        boolean flat = maxSteepness < 6;
+                        boolean flat = maxSteepness < 5;
                         if (elevation <= 63) {
                             World.setBlock(x, 63, z, 1, 14);
                             for (int y = 62; y > elevation; y--) {
@@ -104,7 +104,7 @@ public class Earth extends WorldType {
                             }
                         }
                         if (flat) {
-                            if (elevation >= 66) {
+                            if (World.getBlock(x, elevation, z).x == 2) {
                                 if (seededRand.nextBoolean() && seededRand.nextFloat() < SimplexNoise.noise(x/100.f, z/100.f)-0.2f) {
                                     World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
                                 } else if (seededRand.nextFloat() < 0.003f) {
@@ -139,7 +139,7 @@ public class Earth extends WorldType {
                         double eleFactor = elevation+(rockNoise*50);
                         boolean snowy = eleFactor > 136;
                         if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136+Math.abs(randomNumber*250))) {
-                            Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (seededRand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 4)))));
+                            Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (seededRand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
                         } else if (snowy) {
                             setBlock(x, elevation, z, 54, 0);
                             setBlock(x, elevation-1, z, 54, 0);
@@ -193,15 +193,13 @@ public class Earth extends WorldType {
         double elevationNoise = SimplexNoise.noise(x / 500.f, z / 500.f) + 0.5f;
         double elevationMul = (mountainNoise * elevationNoise)+0.25F;
         double detailNoise = ((SimplexNoise.noise(x / 75.f, z / 75.f)+elevationNoise) * 16);
-        double elevation = detailNoise * Math.max(-0.5f, elevationMul*(2.f+(3*SimplexNoise.noise(x/1250.f, z/1250.f))));
-        if (elevation < 0) {
-            elevation *= -0.25f;
-        }
+        double elevation = Math.abs(detailNoise * Math.max(-0.5f, elevationMul*(2.f+(3*SimplexNoise.noise(x/1250.f, z/1250.f)))));
         double centDist = new Vector2i(x, z).distance(2048, 2048);
         double riverness = (0.5f-Math.abs(Math.max(-1.f, Math.min(0, centDist-1024)/150)+0.5f))*3;
         double continentNoise = (-(Math.abs(elevationNoise-0.5f)-0.7f))-riverness;
         elevation += 66*Math.min(0, continentNoise);
-        elevation += 66;
+        double hilLElevation = Math.max(0, SimplexNoise.noise(x / 800.f, z / 800.f)-0.25f)*150;
+        elevation += 66+hilLElevation;
         return (short)Math.max(16, elevation);
     }
 //

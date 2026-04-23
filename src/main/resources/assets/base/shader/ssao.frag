@@ -41,9 +41,9 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
     return view.xyz/view.w;
 }
 
-float getAO(float depth, vec3 normal) {
+float getAO(float depth, vec3 normal, float bias) {
     vec3 posVS = reconstructViewPos(uv.xy, depth);
-    vec3 normalVS = normalize((globalUbo.view * vec4(normal.rgb, 0.f)).xyz);
+    vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 randVec = randomVec();
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
@@ -60,7 +60,7 @@ float getAO(float depth, vec3 normal) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
             float rangeCheck = smoothstep(0.f, 1.f, (radius/AO_STRENGTH)/length(sampleVS-posVS));
             vec3 viewDirVS = normalize(posVS);
-            bool occluded = dot(sampleVS - posVS, viewDirVS) < dot(sampleVec - posVS, viewDirVS);
+            bool occluded = dot(sampleVS - posVS, viewDirVS)+bias < dot(sampleVec - posVS, viewDirVS);
             occlusion += (occluded ? 1.f : 0.f) * rangeCheck * AO_STRENGTH;
         }
     }
@@ -71,5 +71,5 @@ void main() {
     vec4 color = texture(ddaColors, uv.xy);
     float depth = texture(ddaDepth, uv.xy).r;
     vec4 normal = texture(ddaNormals, uv.xy);
-    outColor = vec4(color.rgb*mix(getAO(depth, normal.xyz), 1, normal.a), 1); //normal.a is fogginess
+    outColor = vec4(color.rgb*mix(getAO(depth, normal.xyz, mix(0.f, 0.1f, normal.a)), 1, normal.a), 1); //normal.a is fogginess
 }

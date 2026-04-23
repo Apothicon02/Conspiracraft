@@ -45,10 +45,10 @@ public class World {
     public static int packChunkPos(int x, int z) {
         return (x*World.sizeChunks)+z;
     }
-    public static Chunk recentlyEditedChunk = chunks[0];
-    public static Vector3i recentlyEditedChunkPos = new Vector3i();
-    public static Vector3i recentlyEditedLocalPos = new Vector3i();
-    public static Vector3i recentlyEditedPos = new Vector3i();
+    public static Chunk recentlyEditedChunk = null;
+    public static Vector3i recentlyEditedChunkPos = new Vector3i(-1);
+    public static Vector3i recentlyEditedLocalPos = new Vector3i(-1);
+    public static Vector3i recentlyEditedPos = new Vector3i(-1);
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
     public static Vector2i getBlock(float x, float y, float z) {
         return getBlock((int)x, (int)y, (int)z);
