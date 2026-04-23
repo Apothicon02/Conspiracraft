@@ -135,6 +135,16 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     if (pos.z < 0) {pos.z+=blockSize;} else if (pos.z >= blockSize) {pos.z-=blockSize;}
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
+vec4 getBlockAndVoxel(float x, float y, float z) {
+    int blockData = getBlockData(int(x), int(y), int(z));
+    int type = (blockData >> 16) & 0xFFFF;
+    ivec2 block = ivec2(type, min(16, blockData & 0xFFFF));
+    ivec3 voxelPos = ivec3(fract(vec3(x, y, z))*8);
+    return sampleAtlas(voxelPos.x, voxelPos.y, voxelPos.z, block.x, block.y);
+}
+vec4 getBlockAndVoxel(vec3 pos) {
+    return getBlockAndVoxel(pos.x, pos.y, pos.z);
+}
 layout(set = 0, binding = 6) uniform sampler2D noises;
 float noise(vec2 coords) {
     return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
@@ -220,6 +230,9 @@ vec3 roundVec(vec3 dir) {
     return dir;
 }
 
+bool blockBevelled(ivec2 block) {
+    return !(block.x == 0 || block.x == 1 || block.x == 4 || block.x == 5 || block.x == 6 || block.x == 14 || block.x == 18 || block.x == 26 || block.x == 48 || block.x == 49 || block.x == 58 || block.x == 59 || block.x == 60);
+}
 ivec3 blockPos = ivec3(0);
 vec3 hitPos = vec3(0);
 vec3 flatNormal = vec3(0);
@@ -233,23 +246,23 @@ vec3 bevelNormal(vec3 normal) {
         vec3 absFlatNorm = abs(normal);
         if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
             if (localPos.x > bevelMax) {
-                if (getBlock(bevelPos+vec3(bevelOffset, 0, 0)).x == 0) { normal.x = 1; }
+                if (getBlockAndVoxel(bevelPos+vec3(bevelOffset, 0, 0)).a == 0) { normal.x = 1; }
             } else if (localPos.x < bevel) {
-                if (getBlock(bevelPos-vec3(bevelOffset, 0, 0)).x == 0) { normal.x = -1; }
+                if (getBlockAndVoxel(bevelPos-vec3(bevelOffset, 0, 0)).a == 0) { normal.x = -1; }
             }
         }
         if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
             if (localPos.z > bevelMax) {
-                if (getBlock(bevelPos+vec3(0, 0, bevelOffset)).x == 0) { normal.z = 1; }
+                if (getBlockAndVoxel(bevelPos+vec3(0, 0, bevelOffset)).a == 0) { normal.z = 1; }
             } else if (localPos.z < bevel) {
-                if (getBlock(bevelPos-vec3(0, 0, bevelOffset)).x == 0) { normal.z = -1; }
+                if (getBlockAndVoxel(bevelPos-vec3(0, 0, bevelOffset)).a == 0) { normal.z = -1; }
             }
         }
         if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
             if (localPos.y > bevelMax) {
-                if (getBlock(bevelPos+vec3(0, bevelOffset, 0)).x == 0) { normal.y = 1; }
+                if (getBlockAndVoxel(bevelPos+vec3(0, bevelOffset, 0)).a == 0) { normal.y = 1; }
             } else if (localPos.y < bevel) {
-                if (getBlock(bevelPos-vec3(0, bevelOffset, 0)).x == 0) { normal.y = -1; }
+                if (getBlockAndVoxel(bevelPos-vec3(0, bevelOffset, 0)).a == 0) { normal.y = -1; }
             }
         }
     }
@@ -388,8 +401,8 @@ vec4 dda(bool shadow) {
                     if (voxelColor.a > 0.f) {
                         flatNormal = -ddaMask*raySign;
                         ddaPos = ivec3(voxelStartPos);
-                        hitPos = blockPos+(voxelStartPos/blockSize)+(flatNormal*0.001f);
-                        normal = bevelNormal(flatNormal);
+                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
+                        normal = blockBevelled(block) ? bevelNormal(flatNormal) : flatNormal;
                         if (voxelColor.a < 1.f) {
                             reverseNormShading = true;
                         }
@@ -415,9 +428,9 @@ vec4 dda(bool shadow) {
                 if (voxelColor.a > 0.f) {
                     flatNormal = -ddaMask*raySign;
                     normal = flatNormal;
-                    voxelPos = blockPos+(ddaPos*voxelSize);
+                    voxelPos = blockPos+(ddaPos*voxelSize)+(flatNormal*0.001f);
                     vec3 subvoxelPos = (uv3d(voxelPos, voxelSize, blockSize)/blockSize)*voxelSize;
-                    hitPos = voxelPos+(subvoxelPos/(blockSize*blockSize))+(flatNormal*0.001f);
+                    hitPos = voxelPos+(subvoxelPos);
                     return vec4(voxelColor.rgb, 1.f);
                 }
             }
@@ -482,7 +495,7 @@ void main() {
     vec4 color = dda(false);
     vec3 primaryNormal = normal;
     vec3 primaryFlatNormal = flatNormal;
-    vec3 primaryLightPos = hitPos+(flatNormal*voxelSize);
+    vec3 primaryLightPos = hitPos;
     bool isSky = color.a < 1;
     float depth = 0.f;
     if (isSky) {
@@ -549,9 +562,10 @@ void main() {
         rayPos = primaryLightPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
-            shadowColor.a = 1.f;
-        } else if (globalUbo.renderToggles.x > 0) {
+//        if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
+//            shadowColor.a = 1.f;
+//        } else
+        if (globalUbo.renderToggles.x > 0) {
             shadowColor = dda(false);
         }
         if (shadowColor.a > 0.0f) {
