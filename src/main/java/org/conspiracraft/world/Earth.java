@@ -92,15 +92,17 @@ public class Earth extends WorldType {
                         if (mountainness < 0.f) {mountainness *= -0.2;}
                         double elevationNoise = (noisePipeline.evaluateNoise((x-size)/333.d, (z-size)/333.d)+ (noisePipeline.evaluateNoise((x-size)/125.d, (z-size)/125.d)*0.33f));
                         double elevation = elevationNoise*(125*mountainness);
-                        double centerElevation = (0.5f-(Math.clamp(centDist, 0.45f, 0.95f)-0.45f))*2;
+                        double seaElevation = (0.2f-(Math.clamp(centDist, 0.75f, 0.95f)-0.75f))*5;
+                        double midElevation = (0.15f-(Math.clamp(centDist, 0.2f, 0.35f)-0.2f))*6.667f;
                         double baseHilliness = SimplexNoise.noise((x+size) / 500.f, (z+size) / 500.f);
                         if (baseHilliness < 0.f) {baseHilliness *= -0.5;}
-                        double hilliness = (Math.max(0, baseHilliness)*35)*centerElevation;
+                        double hilliness = (Math.max(0, baseHilliness)*35)*seaElevation*midElevation;
                         //riverness *= 1-centerElevation;
                         double detailNoise = SimplexNoise.noise(x/100.f, z/100.f);
-                        short finalElevation = (short)(10+(centerElevation*132)+Math.abs(detailNoise*2)+hilliness+elevation);
+                        short finalElevation = (short)(10+(seaElevation*56)+(midElevation*40)+Math.max(0, detailNoise)+hilliness+elevation);
                         double snowiness = Utils.gradient(finalElevation, 96, 128, 0, 1);
-                        biomes[x*size+z] = (byte) ((elevationNoise*ogMoutainness)+(detailNoise*0.05f) > snowiness ? 2 : (centDist+(elevationNoise*0.05f) < 0.2f ? 1 : 0));
+                        double centBiomeFactor = centDist+(elevationNoise*0.05f);
+                        biomes[x*size+z] = (byte) ((elevationNoise*ogMoutainness)+(detailNoise*0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0));
                         heightmap[packPos(x, z)] = finalElevation;
                         minElevation = (short) Math.min(minElevation, finalElevation);
                     }
@@ -132,16 +134,16 @@ public class Earth extends WorldType {
                             }
                         }
                         if (flat) {
-                            if (biome != 2) {
-                                    if (seededRand.nextBoolean() && seededRand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
-                                        World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
-                                    } else if (seededRand.nextFloat() < 0.003f) {
-                                        World.setBlock(x, elevation + 1, z, 18, seededRand.nextInt(3));
-                                    } else if (seededRand.nextFloat() < 0.1f) {
-                                        World.setBlock(x, elevation + 1, z, 4, (biome == 1 ? 4 : 0) + seededRand.nextInt(3));
-                                    }
+                            if (biome == 0 || biome == 1) {
+                                if (seededRand.nextBoolean() && seededRand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
+                                    World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
+                                } else if (seededRand.nextFloat() < 0.003f) {
+                                    World.setBlock(x, elevation + 1, z, 18, seededRand.nextInt(3));
+                                } else if (seededRand.nextFloat() < 0.1f) {
+                                    World.setBlock(x, elevation + 1, z, 4, (biome == 1 ? 4 : 0) + seededRand.nextInt(3));
+                                }
                             }
-                            World.setBlock(x, elevation, z, biome == 2 ? 54 : (elevation < 66 ? 23 : 2), elevation >= 66 && biome == 1 ? 1 : 0);
+                            World.setBlock(x, elevation, z, biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2), elevation >= 66 && biome == 1 ? 1 : 0);
                             for (int y = elevation - 1; y >= cY * chunkSize; y--) {
                                 World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
                             }
