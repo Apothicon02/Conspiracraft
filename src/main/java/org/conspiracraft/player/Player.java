@@ -69,7 +69,9 @@ public class Player {
             if (downward) {movement.add(0, -1, 0);}
         }
         if (movement.length() > 0) {movement.normalize();}
-        movement.mul(speed*((sprinting||superSprinting)?(superSprinting ? sprintSpeed*10 : sprintSpeed):(downward?0.65f:1.f)));
+        movement.mul(speed*(downward?0.65f:1.f));
+        movement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
+        movement.mul(superSprinting ? 10.f : 1.f);
         if (!flying) {
             boolean onSolid = PhysicsHelper.colliding(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width));
             if (!onSolid) {
