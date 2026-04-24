@@ -58,7 +58,7 @@ public class Renderer {
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
     public static List<Matrix4f> cubes = new ArrayList<>();
-    public static void render() throws IOException {
+    public static void render() throws Exception {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
@@ -412,7 +412,7 @@ public class Renderer {
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static long[] chunkBlockAllocs;
-    public static void prepareTestScene() {
+    public static void prepareTestScene() throws InterruptedException {
         worldType.generate();
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(voxelSSBOSize);

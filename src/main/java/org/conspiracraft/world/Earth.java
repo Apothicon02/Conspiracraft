@@ -1,12 +1,8 @@
 package org.conspiracraft.world;
 
-import de.articdive.jnoise.core.api.functions.Interpolation;
-import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
-import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
-import de.articdive.jnoise.modules.octavation.OctavationModule;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
 import org.conspiracraft.entities.EntityTypes;
@@ -18,7 +14,11 @@ import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
+import java.lang.Runtime;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.graphics.Renderer.drawCube;
@@ -26,10 +26,6 @@ import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
-    public static Random seededRand = new Random(35311350L);
-    public Random rand() {
-        return seededRand;
-    }
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0);
     public static Vector3f sunPos = new Vector3f(0, World.height*2, 0);
     public static Vector3f prevMunPos = new Vector3f(0, World.height*-2, 0);
@@ -53,22 +49,25 @@ public class Earth extends WorldType {
     @Override
     public void tick() {
         prevSunPos.set(sunPos);
-        sunPos.set(0, World.size*2, 0);
+        sunPos.set(0, size*2, 0);
         sunPos.rotateZ(timeNs/100000000000.f);
         sunPos.rotateX(0.5f);
         sunPos.rotateY(2.f);
-        sunPos.set(sunPos.x+(World.size/2f), sunPos.y, sunPos.z+(World.size/2f)+128);
+        sunPos.set(sunPos.x+(size/2f), sunPos.y, sunPos.z+(size/2f)+128);
         prevMunPos.set(munPos);
-        munPos.set(0, World.size*-2, 0);
+        munPos.set(0, size*-2, 0);
         munPos.rotateZ(timeNs/100000000000.f);
         munPos.rotateX(-0.2f);
         munPos.rotateY(-1.5f);
-        munPos.set(munPos.x+(World.size/2f), munPos.y, munPos.z+(World.size/2f)+128);
+        munPos.set(munPos.x+(size/2f), munPos.y, munPos.z+(size/2f)+128);
     }
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
+
+    static final int[] xOffset = { 3, -3, 0, 0, 3, -3, -3, 3 };
+    static final int[] zOffset = { 0, 0, 3, -3, 3, -3, 3, -3 };
     @Override
-    public void generate() {
+    public void generate() throws InterruptedException {
         long start = System.currentTimeMillis();
         for (int x = 0; x < sizeChunks; x++) {
             for (int z = 0; z < sizeChunks; z++) {
@@ -78,114 +77,158 @@ public class Earth extends WorldType {
                 }
             }
         }
+        long startTime = System.currentTimeMillis();
         byte[] biomes = new byte[size*size];
         short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
-        for (int cX = 0; cX < World.sizeChunks; cX++) {
-            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
-                short minElevation = (short) (height-1);
-                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                        double centDist = Math.clamp(Math.max(Math.abs(x-2048), Math.abs(z-2048)), 0, 2048)/2048.f;
-                        double ogMoutainness = SimplexNoise.noise(x / 375.f, z / 375.f);
-                        //double riverness = Math.min(0, Math.abs(ogMoutainness)-0.25f)*50;
-                        double mountainness = ogMoutainness;
-                        if (mountainness < 0.f) {mountainness *= -0.2;}
-                        double elevationNoise = (noisePipeline.evaluateNoise((x-size)/333.d, (z-size)/333.d)+ (noisePipeline.evaluateNoise((x-size)/125.d, (z-size)/125.d)*0.33f));
-                        double elevation = elevationNoise*(125*mountainness);
-                        double seaElevation = (0.2f-(Math.clamp(centDist, 0.75f, 0.95f)-0.75f))*5;
-                        double midElevation = (0.15f-(Math.clamp(centDist, 0.2f, 0.35f)-0.2f))*6.667f;
-                        double baseHilliness = SimplexNoise.noise((x+size) / 500.f, (z+size) / 500.f);
-                        if (baseHilliness < 0.f) {baseHilliness *= -0.5;}
-                        double hilliness = (Math.max(0, baseHilliness)*35)*seaElevation*midElevation;
-                        //riverness *= 1-centerElevation;
-                        double detailNoise = SimplexNoise.noise(x/100.f, z/100.f);
-                        short finalElevation = (short)(10+(seaElevation*56)+(midElevation*40)+Math.max(0, detailNoise)+hilliness+elevation);
-                        double snowiness = Utils.gradient(finalElevation, 96, 128, 0, 1);
-                        double centBiomeFactor = centDist+(elevationNoise*0.05f);
-                        biomes[x*size+z] = (byte) ((elevationNoise*ogMoutainness)+(detailNoise*0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0));
-                        heightmap[packPos(x, z)] = finalElevation;
-                        minElevation = (short) Math.min(minElevation, finalElevation);
-                    }
-                }
-                chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
-            }
-        }
-        for (int cX = 0; cX < World.sizeChunks; cX++) {
-            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
-                int cY = chunksMinElevations[packChunkPos(cX, cZ)]/chunkSize;
-                for (int x = cX*chunkSize; x < (cX*chunkSize)+chunkSize; x++) {
-                    for (int z = cZ*chunkSize; z < (cZ*chunkSize)+chunkSize; z++) {
-                        byte biome = biomes[x*size+z];
-                        int elevation = heightmap[packPos(x, z)];
-                        int maxSteepness = 0;
-                        int minNeighborY = height - 1;
-                        for (int pos : new int[]{packPos(Math.min(size - 1, x + 3), z), packPos(Math.max(0, x - 3), z), packPos(x, Math.min(size - 1, z + 3)), packPos(x, Math.max(0, z - 3)),
-                                packPos(Math.max(0, x - 3), Math.max(0, z - 3)), packPos(Math.min(size - 1, x + 3), Math.max(0, z - 3)), packPos(Math.max(0, x - 3), Math.min(size - 1, z + 3)), packPos(Math.min(size - 1, x + 3), Math.min(size - 1, z + 3))}) {
-                            int nY = heightmap[pos];
-                            minNeighborY = Math.min(minNeighborY, nY);
-                            int steepness = Math.abs(elevation - nY);
-                            maxSteepness = Math.max(maxSteepness, steepness);
-                        }
-                        boolean flat = maxSteepness < 4;
-                        if (elevation <= 63) {
-                            World.setBlock(x, 63, z, 1, 14);
-                            for (int y = 62; y > elevation; y--) {
-                                World.setBlock(x, y, z, 1, 15);
+        int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        int heightmapInterval = sizeChunks/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            int startX = thread * heightmapInterval;
+            int endX  = Math.min(startX + heightmapInterval, sizeChunks);
+            pool.submit(() -> {
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        short minElevation = (short) (height - 1);
+                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
+                                double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
+                                //double riverness = Math.min(0, Math.abs(ogMoutainness)-0.25f)*50;
+                                double mountainness = ogMoutainness;
+                                if (mountainness < 0.f) {
+                                    mountainness *= -0.15;
+                                }
+                                double elevationNoise = (noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) + (noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f));
+                                double elevation = elevationNoise * (125 * mountainness);
+                                double seaElevation = (0.2f - (Math.clamp(centDist, 0.75f, 0.95f) - 0.75f)) * 5;
+                                double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
+                                double baseHilliness = SimplexNoise.noise((x + size) / 500.f, (z + size) / 500.f);
+                                if (baseHilliness < 0.f) {
+                                    baseHilliness *= -0.5;
+                                }
+                                double hilliness = (Math.max(0, baseHilliness) * 35) * seaElevation * midElevation;
+                                //riverness *= 1-centerElevation;
+                                double detailNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                short finalElevation = (short) (10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
+                                double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
+                                double centBiomeFactor = centDist + (elevationNoise * 0.05f);
+                                biomes[x * size + z] = (byte) ((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0));
+                                heightmap[packPos(x, z)] = finalElevation;
+                                minElevation = (short) Math.min(minElevation, finalElevation);
                             }
                         }
-                        if (flat) {
-                            if (biome == 0 || biome == 1) {
-                                if (seededRand.nextBoolean() && seededRand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
-                                    World.setBlock(x, elevation + 1, z, 5, seededRand.nextInt(3));
-                                } else if (seededRand.nextFloat() < 0.003f) {
-                                    World.setBlock(x, elevation + 1, z, 18, seededRand.nextInt(3));
-                                } else if (seededRand.nextFloat() < 0.1f) {
-                                    World.setBlock(x, elevation + 1, z, 4, (biome == 1 ? 4 : 0) + seededRand.nextInt(3));
+                        chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate heightmap from noise. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        int surfaceInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            int startX = thread * surfaceInterval;
+            int endX  = Math.min(startX + surfaceInterval, sizeChunks);
+            pool.submit(() -> {
+                Random rand = new Random();
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        int cY = chunksMinElevations[packChunkPos(cX, cZ)] / chunkSize;
+                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                byte biome = biomes[x * size + z];
+                                int elevation = heightmap[packPos(x, z)];
+                                int maxSteepness = 0;
+                                for (int i = 0; i < xOffset.length; i++) {
+                                    int nY = heightmap[packPos(x+xOffset[i], z+zOffset[i])];
+                                    int steepness = Math.abs(elevation - nY);
+                                    maxSteepness = Math.max(maxSteepness, steepness);
+                                }
+                                boolean flat = maxSteepness < 4;
+                                if (elevation <= 63) {
+                                    World.setBlock(x, 63, z, 1, 14);
+                                    for (int y = 62; y > elevation; y--) {
+                                        World.setBlock(x, y, z, 1, 15);
+                                    }
+                                }
+                                if (flat) {
+                                    int blockType = biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2);
+                                    int blockSubtype = elevation >= 66 && biome == 1 ? 1 : 0;
+                                    if (blockType == 2) {
+                                        if (rand.nextBoolean() && rand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
+                                            World.setBlock(x, elevation + 1, z, 5, rand.nextInt(3));
+                                        } else if (rand.nextFloat() < 0.003f) {
+                                            World.setBlock(x, elevation + 1, z, 18, rand.nextInt(3));
+                                        } else if (rand.nextFloat() < 0.1f) {
+                                            World.setBlock(x, elevation + 1, z, 4, (biome == 1 ? 4 : 0) + rand.nextInt(3));
+                                        }
+                                    }
+                                    World.setBlock(x, elevation, z, blockType, blockSubtype);
+                                    for (int y = elevation - 1; y >= cY * chunkSize; y--) {
+                                        World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
+                                    }
+                                } else {
+                                    for (int y = elevation; y >= cY * chunkSize; y--) {
+                                        World.setBlock(x, y, z, 55, 0);
+                                    }
                                 }
                             }
-                            World.setBlock(x, elevation, z, biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2), elevation >= 66 && biome == 1 ? 1 : 0);
-                            for (int y = elevation - 1; y >= cY * chunkSize; y--) {
-                                World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
-                            }
-                        } else {
-                            for (int y = elevation; y >= cY * chunkSize; y--) {
-                                World.setBlock(x, y, z, 55, 0);
-                            }
                         }
                     }
                 }
-            }
+            });
         }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
 
-
-        for (int cX = 0; cX < World.sizeChunks; cX++) {
-            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
-                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                        int elevation = heightmap[(x * size) + z];
-                        Vector2i blockOn = getBlock(x, elevation, z);
-                        float randomNumber = seededRand.nextFloat();
-                        double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
-                        double eleFactor = elevation+(rockNoise*50);
-                        boolean snowy = eleFactor > 136;
-                        if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136+Math.abs(randomNumber*250))) {
-                            Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (seededRand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
-                        } else if (!snowy && blockOn.x == 2) {
-                            if (randomNumber < 0.0001f && getBlock(x, elevation+1, z).x() == 0) {
-                                Renderer.cubes.addLast(new Matrix4f().translate(x, elevation+1, z).rotateY(seededRand.nextFloat(6.3f)));
-                            } else if (randomNumber < 0.0004f) {
-                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (seededRand.nextFloat() * 7)));
-                            } else if (randomNumber < 0.0008f || randomNumber < SimplexNoise.noise(x / 200.f, z / 200.f)/50) {
-                                for (int y = elevation - 1; y < elevation+10; y++) {
-                                    World.setBlock(x, y, z, 16, 0);
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        int featuresInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            int startX = thread * featuresInterval;
+            int endX  = Math.min(startX + featuresInterval, sizeChunks);
+            pool.submit(() -> {
+                Random rand = new Random();
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                int elevation = heightmap[(x * size) + z];
+                                Vector2i blockOn = getBlock(x, elevation, z);
+                                float randomNumber = rand.nextFloat();
+                                double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
+                                double eleFactor = elevation + (rockNoise * 50);
+                                boolean snowy = eleFactor > 136;
+                                if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136 + Math.abs(randomNumber * 250))) {
+                                    Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
+                                } else if (!snowy && blockOn.x == 2) {
+                                    if (randomNumber < 0.0001f && getBlock(x, elevation + 1, z).x() == 0) {
+                                        Renderer.cubes.addLast(new Matrix4f().translate(x, elevation + 1, z).rotateY(rand.nextFloat(6.3f)));
+                                    } else if (randomNumber < 0.0004f) {
+                                        Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                    } else if (randomNumber < 0.0008f || randomNumber < SimplexNoise.noise(x / 200.f, z / 200.f) / 50) {
+                                        for (int y = elevation - 1; y < elevation + 10; y++) {
+                                            World.setBlock(x, y, z, 16, 0);
+                                        }
+                                        Blob.generate(blockOn, x, elevation + 10, z, 17, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                    }
                                 }
-                                Blob.generate(blockOn, x, elevation+10, z, 17, 0, (int) (2 + (seededRand.nextFloat() * 7)));
                             }
                         }
                     }
                 }
-            }
+            });
         }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
 
 //        for (int x = 950; x < 1050; x++) {
 //            for (int z = 950; z < 1050; z++) {
@@ -194,21 +237,41 @@ public class Earth extends WorldType {
 //                }
 //            }
 //        }
-        for (int x = 8; x < size-8; x++) {
-            for (int z = 8; z < size-8; z++) {
-                double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
-                double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
-                if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && seededRand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
-                    int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
-                    boolean isRainCloud = seededRand.nextFloat() < 0.0005f;
-                    int radius = (int) ((((isRainCloud ? 6 : 0) + seededRand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
-                    if (radius > 0) {
-                        Cube.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        int cloudInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            int startX = thread * cloudInterval;
+            int endX = Math.min(startX + cloudInterval, sizeChunks);
+            pool.submit(() -> {
+                Random rand = new Random();
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
+                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
+                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+                                        if (radius > 0) {
+                                            Cube.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }
+            });
         }
-        System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. ");
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
+        System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. \n");
     }
     public short getOldElevation(int x, int z) {
         double mountainNoise = Math.max(0, SimplexNoise.noise(x / 400.f, z / 400.f));
@@ -236,8 +299,8 @@ public class Earth extends WorldType {
 //            }
 //        }
 //        short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
-//        for (int cX = 0; cX < World.sizeChunks; cX++) {
-//            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+//        for (int cX = 0; cX < sizeChunks; cX++) {
+//            for (int cZ = 0; cZ < sizeChunks; cZ++) {
 //                short minElevation = (short) (height-1);
 //                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
 //                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
@@ -250,8 +313,8 @@ public class Earth extends WorldType {
 //            }
 //        }
 //
-//        for (int cX = 0; cX < World.sizeChunks; cX++) {
-//            for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
+//        for (int cX = 0; cX < sizeChunks; cX++) {
+//            for (int cZ = 0; cZ < sizeChunks; cZ++) {
 //                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
 //                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
 //                        int topBlock = 0;

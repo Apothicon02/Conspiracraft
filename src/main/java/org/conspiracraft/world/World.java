@@ -29,6 +29,7 @@ public class World {
     }
     public static short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}
+    public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static boolean chunkEmptinessChanged = false;
     public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
@@ -45,36 +46,25 @@ public class World {
     public static int packChunkPos(int x, int z) {
         return (x*World.sizeChunks)+z;
     }
-    public static Chunk recentlyEditedChunk = null;
-    public static Vector3i recentlyEditedChunkPos = new Vector3i(-1);
-    public static Vector3i recentlyEditedLocalPos = new Vector3i(-1);
-    public static Vector3i recentlyEditedPos = new Vector3i(-1);
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
     public static Vector2i getBlock(float x, float y, float z) {
         return getBlock((int)x, (int)y, (int)z);
     }
     public static Vector2i getBlock(int x, int y, int z) {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
-        if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {
-            recentlyEditedChunkPos.set(cX, cY, cZ);
-            recentlyEditedChunk = chunks[packChunkPos(cX, cY, cZ)];
-        }
-        recentlyEditedLocalPos.set(x&15, y&15, z&15);
-        recentlyEditedPos.set(x, y, z);
-        return recentlyEditedChunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
+        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
+        return chunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
     }
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
         setBlock(x, y, z, type, subType);
     }
     public static void setBlock(int x, int y, int z, int type, int subType) {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
-        if (cX != recentlyEditedChunkPos.x() || cY != recentlyEditedChunkPos.y() || cZ != recentlyEditedChunkPos.z()) {
-            recentlyEditedChunkPos.set(cX, cY, cZ);
-            recentlyEditedChunk = chunks[packChunkPos(cX, cY, cZ)];
-        }
-        recentlyEditedLocalPos.set(x&15, y&15, z&15);
-        recentlyEditedPos.set(x, y, z);
-        recentlyEditedChunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
+        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
+        Vector3i recentlyEditedPos = new Vector3i(x, y, z);
+        chunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
 
         int lodIdx = packLodPos(x / lodSize, y / lodSize, z / lodSize);
         int bitIdx = (x%lodSize) + (y%lodSize) * lodSize + (z%lodSize) * lodSize * lodSize;
@@ -88,7 +78,7 @@ public class World {
         int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
         bitIdx = (cX%regionSizeChunks) + (cY%regionSizeChunks) * regionSizeChunks + (cZ%regionSizeChunks) * regionSizeChunks * regionSizeChunks;
         mask = 1L << bitIdx;
-        if (recentlyEditedChunk.blockPalette.size() > 1 || recentlyEditedChunk.blockPalette.getFirst() != 0) {
+        if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
             regions[regionIdx] |= mask;
         } else {
             regions[regionIdx] &= ~mask;

@@ -6,12 +6,9 @@ import org.lwjgl.system.MemoryStack;
 import java.util.Random;
 
 public class WorldType {
-    public Random rand() {
-        return null;
-    }
     public void renderCelestialBodies(MemoryStack stack) {}
     public Vector4f getSkylight() {return null;}
     public Vector3f getSun() {return null;}
     public void tick() {}
-    public void generate() {}
+    public void generate() throws InterruptedException {}
 }

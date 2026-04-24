@@ -33,7 +33,7 @@ public class Main {
     public static double timeMs = 0;
     public static long timeMsLong = 0;
     public static long currentTick = 0;
-    static void main() throws IOException {
+    static void main() throws Exception {
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();
