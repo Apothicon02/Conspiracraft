@@ -15,7 +15,7 @@ public class Chunk {
     public int[] uncompressedBlocks;
     public IntArrayList blockPalette;
     public BitBuffer blockData;
-    public static boolean unedited = true;
+    public boolean unedited = true;
 
     public Chunk(Vector3i chunkPos, int compressedChunkPos) {
         this.chunkPos = chunkPos;

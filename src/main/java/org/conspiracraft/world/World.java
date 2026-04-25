@@ -87,7 +87,7 @@ public class World {
         int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
         bitIdx = (cX%regionSizeChunks) + (cY%regionSizeChunks) * regionSizeChunks + (cZ%regionSizeChunks) * regionSizeChunks * regionSizeChunks;
         mask = 1L << bitIdx;
-        if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
+        if (generating ? (!chunk.unedited) : (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0)) {
             regions[regionIdx] |= mask;
         } else {
             regions[regionIdx] &= ~mask;
