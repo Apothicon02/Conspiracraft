@@ -15,6 +15,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.Random;
@@ -87,6 +88,7 @@ public class Earth extends WorldType {
     @Override
     public void generate() throws InterruptedException {
         long start = System.currentTimeMillis();
+        generating = true;
         for (int x = 0; x < sizeChunks; x++) {
             for (int z = 0; z < sizeChunks; z++) {
                 for (int y = 0; y < heightChunks; y++) {
@@ -333,6 +335,8 @@ public class Earth extends WorldType {
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
+        generating = false;
+        System.out.print("Must append these entries to default palette: "+Arrays.toString(worldgeneratedBlocks.toArray()) +"\n");
         System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. \n");
     }
     public short getOldElevation(int x, int z) {

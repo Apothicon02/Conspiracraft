@@ -6,19 +6,22 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import static org.conspiracraft.world.World.chunkSize;
+import static org.conspiracraft.world.World.worldgeneratedBlocks;
 
 public class Chunk {
     public final Vector3i chunkPos;
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public int[] uncompressedBlocks;
-    public final IntArrayList blockPalette = new IntArrayList();
-    public BitBuffer blockData = new BitBuffer(totalBlocks, 0);
+    public IntArrayList blockPalette;
+    public BitBuffer blockData;
+    public static boolean unedited = true;
 
     public Chunk(Vector3i chunkPos, int compressedChunkPos) {
         this.chunkPos = chunkPos;
         condensedChunkPos = compressedChunkPos;
-        blockPalette.add(0);
+        blockPalette = new IntArrayList(new int[]{0});
+        blockData = new BitBuffer(totalBlocks, 0);
     }
 
     public static int condenseLocalPos(int x, int y, int z) {
@@ -134,8 +137,20 @@ public class Chunk {
         int index = getBlockKey(pos);
         return unpackInt(blockPalette.get(index));
     }
+    public static final IntArrayList defaultBlockPalette = new IntArrayList(new int[]{0, 65550, 65551, 3604480, 1507328, 1572864, 262145, 131072, 196608, 262144, 262146, 1179650, 327680, 327681, 327682, 1179648, 1179649, 3538944, 131073, 262149, 262150, 262148, 655360, 3670016, 3145728, 1048576, 1114112, 2031616, 2097152});
     public void setBlock(Vector3i pos, int type, int subType, Vector3i globalPos) {
         int block = packInts(type, subType);
+//        if (World.generating) {
+//            if (!defaultBlockPalette.contains(block)) {
+//                worldgeneratedBlocks.addIfAbsent(block);
+//            }
+//        }
+        if (unedited) {
+            unedited = false;
+            if (World.generating) {
+                blockPalette = new IntArrayList(defaultBlockPalette);
+            }
+        }
         int key = blockPalette.indexOf(block);
         if (key > -1) {
             setBlockKey(pos, key, globalPos);

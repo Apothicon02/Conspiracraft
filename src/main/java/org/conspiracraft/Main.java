@@ -7,7 +7,6 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;

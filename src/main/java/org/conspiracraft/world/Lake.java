@@ -10,7 +10,4 @@ public class Lake {
     public Lake(Vector3i pos) {
         this.pos = pos;
     }
-    public void visited(BitSet visited) {
-        this.visited = visited;
-    }
 }

@@ -1,11 +1,15 @@
 package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.items.Item;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class World {
     public static int size = 4096;
@@ -21,6 +25,8 @@ public class World {
     public static byte lodSize = 4;
     public static int sizeLods = size / lodSize;
     public static int heightLods = height / lodSize;
+    public static boolean generating = false;
+    public static CopyOnWriteArrayList<Integer> worldgeneratedBlocks = new CopyOnWriteArrayList<>();
     public static WorldType worldType = WorldTypes.EARTH;
     public static ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
