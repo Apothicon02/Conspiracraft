@@ -115,30 +115,40 @@ public class Earth extends WorldType {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
+                                double undesertness = (Math.clamp(new Vector2i(0).distance(x, z), 1000, 1200)-1000) / 200.f;
+                                double desertness = 1-undesertness;
                                 double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
                                 //double riverness = Math.min(0, Math.abs(ogMoutainness)-0.25f)*50;
                                 double mountainness = ogMoutainness;
                                 if (mountainness < 0.f) {
-                                    mountainness *= -0.15;
+                                    mountainness *= Utils.mix(-0.2f, -0.15f, undesertness);
+                                } else {
+                                    mountainness *= Math.max(undesertness, 0.4f);
                                 }
-                                double elevationNoise = (noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) + (noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f));
-                                double elevation = elevationNoise * (125 * mountainness);
-                                double seaElevation = (0.2f - (Math.clamp(centDist, 0.75f, 0.95f) - 0.75f)) * 5;
+                                double elevationNoise = ((noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
+                                        ((noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f)))*undesertness);
+                                if (desertness > 0.f) {
+                                    elevationNoise += noisePipeline.evaluateNoise((x - size) / 525.d, (z - size) / 525.d)*desertness;
+                                }
+                                double elevation = elevationNoise * (125 * Math.max((1-undesertness)/3, mountainness));
+                                double seaElevation = ((0.2f+(desertness*0.175f)) - (Math.clamp(centDist, 0.75f, 0.95f) - 0.75f)) * 5;
                                 double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
                                 double baseHilliness = SimplexNoise.noise((x + size) / 500.f, (z + size) / 500.f);
                                 if (baseHilliness < 0.f) {
                                     baseHilliness *= -0.5;
                                 }
-                                double hilliness = (Math.max(0, baseHilliness) * 35) * seaElevation * midElevation;
+                                double hilliness = (Math.max(0, baseHilliness) * 35) * seaElevation * midElevation * undesertness;
                                 //riverness *= 1-centerElevation;
                                 double detailNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
-                                short finalElevation = (short) (10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
+                                double islandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
+                                double islands = 0;//((60+Math.abs(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*desertness;
+                                short finalElevation = (short) Math.max(islands, 10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
-                                biomes[x * size + z] = (byte) ((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0));
+                                biomes[x * size + z] = (byte) (undesertness+Math.abs(detailNoise * 0.25f) < 1 ? 4 : ((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0)));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
-                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f) {
+                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.03f, undesertness)) {
                                     lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
                                 }
                             }
@@ -170,7 +180,7 @@ public class Earth extends WorldType {
                             for (int z = 0; z < size; z++) {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
-                                    biomes[x * size + z] = -1;
+                                    biomes[packedPos] = -1;
                                     int lakeBed = heightmap[packedPos];
                                     if (lake.pos.y() <= lakeBed+1) {
                                         heightmap[packedPos]++;
@@ -208,10 +218,15 @@ public class Earth extends WorldType {
                                 byte biome = biomes[x * size + z];
                                 int elevation = heightmap[packPos(x, z)];
                                 int maxSteepness = 0;
-                                for (int i = 0; i < xOffset.length; i++) {
-                                    int nY = heightmap[packPos(x+xOffset[i], z+zOffset[i])];
-                                    int steepness = Math.abs(elevation - nY);
-                                    maxSteepness = Math.max(maxSteepness, steepness);
+                                if (biome != 4) {
+                                    for (int i = 0; i < xOffset.length; i++) {
+                                        int packedPos = packPos(x + xOffset[i], z + zOffset[i]);
+                                        if (packedPos >= 0 && packedPos < heightmap.length) {
+                                            int nY = heightmap[packedPos];
+                                            int steepness = Math.abs(elevation - nY);
+                                            maxSteepness = Math.max(maxSteepness, steepness);
+                                        }
+                                    }
                                 }
                                 boolean flat = maxSteepness < 4;
                                 if (elevation <= 63) {
@@ -221,7 +236,8 @@ public class Earth extends WorldType {
                                     }
                                 }
                                 if (flat) {
-                                    int blockType = biome == -1 ? 23 : (biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2));
+                                    int sand = (elevation < 64 ? 73 : 23);
+                                    int blockType = biome == -1 ? 73 : (biome == 4 ? sand : (biome == 2 || biome == 3 ? 54 : (elevation < 66 ? sand : 2)));
                                     int blockSubtype = elevation >= 66 && biome == 1 ? 1 : 0;
                                     if (blockType == 2) {
                                         if (rand.nextBoolean() && rand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
@@ -234,7 +250,7 @@ public class Earth extends WorldType {
                                     }
                                     World.setBlock(x, elevation, z, blockType, blockSubtype);
                                     for (int y = elevation - 1; y >= cY * chunkSize; y--) {
-                                        World.setBlock(x, y, z, blockType == 23 ? 24 : 3, 0);
+                                        World.setBlock(x, y, z, (blockType == 23 || blockType == 73) ? 24 : 3, 0);
                                     }
                                 } else {
                                     for (int y = elevation; y >= cY * chunkSize; y--) {

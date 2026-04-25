@@ -118,6 +118,9 @@ public class Utils {
     public static float mix(float min, float max, float factor) {
         return min * (1 - factor) + max * factor;
     }
+    public static double mix(double min, double max, double factor) {
+        return min * (1 - factor) + max * factor;
+    }
     public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
         return new Vector3f(mix(old.x, current.x, (float) Main.interpolationTime), mix(old.y, current.y, (float) Main.interpolationTime), mix(old.z, current.z, (float) Main.interpolationTime));
     }

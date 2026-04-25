@@ -69,6 +69,9 @@ public class World {
         setBlock(x, y, z, type, subType);
     }
     public static void setBlock(int x, int y, int z, int type, int subType) {
+        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
+            System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
+        }
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
         Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
         Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);

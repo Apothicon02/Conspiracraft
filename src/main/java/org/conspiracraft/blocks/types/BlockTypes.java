@@ -118,9 +118,10 @@ public class BlockTypes {
             REGOLITH = create(List.of(BlockTags.sediment), new PowderBlockType(GRAVEL.blockProperties.copy().blockSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1,
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
             MARTIAN_REGOLITH = create(List.of(BlockTags.sediment), new PowderBlockType(REGOLITH.blockProperties.copy())),
-            RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand), new PowderBlockType(SAND.blockProperties.copy())),
+            RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand), new PowderBlockType(SAND.blockProperties.copy())), //70
             RED_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(SANDSTONE.blockProperties.copy())),
-            RED_GRAVEL = create(List.of(BlockTags.sediment), new PowderBlockType(GRAVEL.blockProperties.copy()));
+            RED_GRAVEL = create(List.of(BlockTags.sediment), new PowderBlockType(GRAVEL.blockProperties.copy())),
+            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand), new PowderBlockType(SAND.blockProperties.copy()));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

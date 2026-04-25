@@ -45,7 +45,7 @@ public class Player {
     public static void create() {
         Main.player = new Player();
         Main.player.inputHandler.init();
-        Main.player.pos.set(1500, 318, 1500);
+        Main.player.pos.set(500, 318, 500);
         Main.player.inv.init();
     }
 
