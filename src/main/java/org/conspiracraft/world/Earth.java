@@ -15,7 +15,10 @@ import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
+import java.util.BitSet;
+import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +67,21 @@ public class Earth extends WorldType {
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
 
+    public static boolean fillLake(int x, int y, int z, Lake lake) {
+        int packedPos = packPos(x, z);
+        if (!inBounds(6, x, y, z) || lake.pos.distance(x, y, z) > 300) {
+            return false;
+        }
+        if (!lake.visited.get(packedPos)) {
+            lake.visited.set(packedPos,  true);
+            if (heightmap[packPos(x + 1, z)] < y) {if (!fillLake(x + 1, y, z, lake)) {return false;}}
+            if (heightmap[packPos(x - 1, z)] < y) {if (!fillLake(x - 1, y, z, lake)) {return false;}}
+            if (heightmap[packPos(x, z + 1)] < y) {if (!fillLake(x, y, z + 1, lake)) {return false;}}
+            if (heightmap[packPos(x, z - 1)] < y) {if (!fillLake(x, y, z - 1, lake)) {return false;}}
+        }
+        return true;
+    }
+
     static final int[] xOffset = { 3, -3, 0, 0, 3, -3, -3, 3 };
     static final int[] zOffset = { 0, 0, 3, -3, 3, -3, 3, -3 };
     @Override
@@ -80,6 +98,7 @@ public class Earth extends WorldType {
         long startTime = System.currentTimeMillis();
         byte[] biomes = new byte[size*size];
         short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
+        Queue<Lake> lakes = new ConcurrentLinkedQueue<>();
         int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         ExecutorService pool = Executors.newFixedThreadPool(threads);
         int heightmapInterval = sizeChunks/threads;
@@ -87,6 +106,7 @@ public class Earth extends WorldType {
             int startX = thread * heightmapInterval;
             int endX  = Math.min(startX + heightmapInterval, sizeChunks);
             pool.submit(() -> {
+                Random rand = new Random();
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         short minElevation = (short) (height - 1);
@@ -116,6 +136,9 @@ public class Earth extends WorldType {
                                 biomes[x * size + z] = (byte) ((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
+                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f) {
+                                    lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
+                                }
                             }
                         }
                         chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
@@ -126,6 +149,45 @@ public class Earth extends WorldType {
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate heightmap from noise. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), lakes.size());
+        pool = Executors.newFixedThreadPool(threads);
+        int lakeInterval = lakes.size()/threads;
+        for (int thread = 0; thread < threads; thread++) { //multithreading may break if lakes overlap, but not sure.
+            int iterations = Math.min(lakeInterval, lakes.size());
+            pool.submit(() -> {
+                BitSet threadBitSet = new BitSet(size*size);
+                for (int i = 0; i < iterations; i++) {
+                    Lake lake = lakes.poll();
+                    threadBitSet.clear();
+                    lake.visited = threadBitSet;
+                    boolean filledLake = fillLake(lake.pos.x(), lake.pos.y(), lake.pos.z(), lake);
+                    if (filledLake) {
+                        for (int x = 0; x < size; x++) {
+                            for (int z = 0; z < size; z++) {
+                                int packedPos = packPos(x, z);
+                                if (lake.visited.get(packedPos)) {
+                                    biomes[x * size + z] = -1;
+                                    int lakeBed = heightmap[packedPos];
+                                    if (lake.pos.y() <= lakeBed+1) {
+                                        heightmap[packedPos]++;
+                                    } else {
+                                        setBlock(x, lake.pos.y(), z, 1, 14);
+                                        for (int y = lake.pos.y()-1; y > lakeBed; y--) {
+                                            setBlock(x, y, z, 1, 15);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lakes. \n");
 
         startTime = System.currentTimeMillis();
         threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
@@ -157,7 +219,7 @@ public class Earth extends WorldType {
                                     }
                                 }
                                 if (flat) {
-                                    int blockType = biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2);
+                                    int blockType = biome == -1 ? 23 : (biome == 2 || biome == 3 ? 54 : (elevation < 66 ? 23 : 2));
                                     int blockSubtype = elevation >= 66 && biome == 1 ? 1 : 0;
                                     if (blockType == 2) {
                                         if (rand.nextBoolean() && rand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
@@ -170,7 +232,7 @@ public class Earth extends WorldType {
                                     }
                                     World.setBlock(x, elevation, z, blockType, blockSubtype);
                                     for (int y = elevation - 1; y >= cY * chunkSize; y--) {
-                                        World.setBlock(x, y, z, elevation <= 66 ? 24 : 3, 0);
+                                        World.setBlock(x, y, z, blockType == 23 ? 24 : 3, 0);
                                     }
                                 } else {
                                     for (int y = elevation; y >= cY * chunkSize; y--) {

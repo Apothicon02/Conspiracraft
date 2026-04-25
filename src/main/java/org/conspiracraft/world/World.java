@@ -27,6 +27,9 @@ public class World {
     public static boolean inBounds(int x, int y, int z) {
         return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
     }
+    public static boolean inBounds(int padding, int x, int y, int z) {
+        return !(x < padding || x >= size-padding || y < padding || y >= height-padding || z < padding || z >= size-padding);
+    }
     public static short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
