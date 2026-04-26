@@ -149,7 +149,7 @@ public class Earth extends WorldType {
                                 short finalElevation = (short) Math.max(islands, 10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
-                                biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? 4 : islandness > 0 ? 5 : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0))));
+                                biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? Biomes.DESERT.id : islandness > 0 ? Biomes.TROPICAL_ISLAND.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? Biomes.SNOWY_TAIGA.id : centBiomeFactor < 0.4f ? Biomes.TAIGA.id : Biomes.TEMPERATE.id))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.1f, undesertness)) {
@@ -184,7 +184,7 @@ public class Earth extends WorldType {
                             for (int z = 0; z < size; z++) {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
-                                    biomes[packedPos] = -1;
+                                    biomes[packedPos] = Biomes.LAKE.id;
                                     int lakeBed = heightmap[packedPos];
                                     if (lake.pos.y() <= lakeBed+1) {
                                         heightmap[packedPos]++;
@@ -222,7 +222,7 @@ public class Earth extends WorldType {
                                 byte biome = biomes[x * size + z];
                                 int elevation = heightmap[packPos(x, z)];
                                 int maxSteepness = 0;
-                                if (biome != 4) {
+                                if (biome != Biomes.DESERT.id) {
                                     for (int i = 0; i < xOffset.length; i++) {
                                         int packedPos = packPos(x + xOffset[i], z + zOffset[i]);
                                         if (packedPos >= 0 && packedPos < heightmap.length) {
@@ -241,15 +241,15 @@ public class Earth extends WorldType {
                                 }
                                 if (flat) {
                                     int sand = (elevation < 64 ? 73 : 23);
-                                    int blockType = biome == -1 ? 73 : (biome == 4 ? sand : (biome == 2 || biome == 3 ? 54 : (elevation < 66 ? sand : 2)));
-                                    int blockSubtype = elevation >= 66 && biome == 1 ? 1 : 0;
+                                    int blockType = biome == Biomes.LAKE.id ? 73 : (biome == Biomes.DESERT.id ? sand : (biome == Biomes.SNOWY_PEAK.id || biome == Biomes.SNOWY_TAIGA.id ? 54 : (elevation < 66 ? sand : 2)));
+                                    int blockSubtype = elevation >= 66 && biome == Biomes.TAIGA.id ? 1 : 0;
                                     if (blockType == 2) {
                                         if (rand.nextBoolean() && rand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
                                             World.setBlock(x, elevation + 1, z, 5, rand.nextInt(3));
                                         } else if (rand.nextFloat() < 0.003f) {
                                             World.setBlock(x, elevation + 1, z, 18, rand.nextInt(3));
                                         } else if (rand.nextFloat() < 0.1f) {
-                                            World.setBlock(x, elevation + 1, z, 4, (biome == 1 ? 4 : 0) + rand.nextInt(3));
+                                            World.setBlock(x, elevation + 1, z, 4, (biome == Biomes.TAIGA.id ? 4 : 0) + rand.nextInt(3));
                                         }
                                     }
                                     World.setBlock(x, elevation, z, blockType, blockSubtype);
@@ -297,7 +297,7 @@ public class Earth extends WorldType {
                                 if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136 + Math.abs(randomNumber * 250))) {
                                     Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
                                 } else if (!snowy && blockOn.x == 2) {
-                                    if (biome == 5) {
+                                    if (biome == Biomes.TROPICAL_ISLAND.id) {
                                         if (randomNumber < 0.0067f) {
                                             PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
@@ -315,13 +315,13 @@ public class Earth extends WorldType {
                                             Blob.generate(blockOn, x, elevation + 10, z, 17, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         }
                                     }
-                                } else if (blockOn.x == 73 || (biome == 5 && blockOn.x == 2)) {
+                                } else if (blockOn.x == 73 || (biome == Biomes.TROPICAL_ISLAND.id && blockOn.x == 2)) {
                                     if (blockIn.x() != 1) {
                                         if (randomNumber < 0.0067f) {
                                             PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         }
                                     }
-                                } else if (blockOn.x == 23 && biome == 4) {
+                                } else if (blockOn.x == 23 && biome == Biomes.DESERT.id) {
                                     if (randomNumber < 0.002f) {
                                         double deadBushChance = Math.random();
                                         if (deadBushChance < 0.03) {
