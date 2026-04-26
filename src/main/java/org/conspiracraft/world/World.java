@@ -26,12 +26,14 @@ public class World {
     public static int sizeLods = size / lodSize;
     public static int heightLods = height / lodSize;
     public static boolean generating = false;
-    public static CopyOnWriteArrayList<Integer> worldgeneratedBlocks = new CopyOnWriteArrayList<>();
     public static WorldType worldType = WorldTypes.EARTH;
     public static ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
     public static boolean inBounds(int x, int y, int z) {
         return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
+    }
+    public static boolean inBounds(Vector3i pos) {
+        return inBounds(pos.x(), pos.y(), pos.z());
     }
     public static boolean inBounds(int padding, int x, int y, int z) {
         return !(x < padding || x >= size-padding || y < padding || y >= height-padding || z < padding || z >= size-padding);
@@ -90,7 +92,7 @@ public class World {
         int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
         bitIdx = (cX%regionSizeChunks) + (cY%regionSizeChunks) * regionSizeChunks + (cZ%regionSizeChunks) * regionSizeChunks * regionSizeChunks;
         mask = 1L << bitIdx;
-        if (generating ? (!chunk.unedited) : (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0)) {
+        if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
             regions[regionIdx] |= mask;
         } else {
             regions[regionIdx] &= ~mask;

@@ -3,6 +3,8 @@ package org.conspiracraft.world.shapes;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 
+import static org.conspiracraft.world.World.getBlock;
+
 public class Blob {
     public static void generate(Vector2i blockOn, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
         for (int lX = x - radius; lX <= x + radius; lX++) {
@@ -14,7 +16,20 @@ public class Blob {
                         int zDist = lZ - z;
                         int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                         if (dist <= radius * 3) {
-                            World.setBlock(lX, lY, lZ, blockType, blockSubType);
+                            boolean canReplace = true;
+                            if (replace.length > 0) {
+                                canReplace = false;
+                                int replacing = getBlock(lX, lY, lZ).x;
+                                for (int replaceable : replace) {
+                                    if (replaceable == replacing) {
+                                        canReplace = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (canReplace) {
+                                World.setBlock(lX, lY, lZ, blockType, blockSubType);
+                            }
                         }
                     }
                 }

@@ -10,12 +10,14 @@ import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cube;
+import org.conspiracraft.world.shapes.Pillar;
+import org.conspiracraft.world.trees.DeadOakTree;
+import org.conspiracraft.world.trees.PalmTree;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.Random;
@@ -115,7 +117,9 @@ public class Earth extends WorldType {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
-                                double undesertness = (Math.clamp(new Vector2i(0).distance(x, z), 1000, 1200)-1000) / 200.f;
+                                double desertDist = new Vector2i(0).distance(x, z);
+                                double undesertness = (Math.clamp(desertDist, 1000, 1200)-1000) / 200.f;
+                                double islandness = 1-((Math.clamp(Math.min(new Vector2i(-750, 1250).distance(x, z), new Vector2i(1250, -750).distance(x, z)), 1000, 1200)-1000) / 200.f);
                                 double desertness = 1-undesertness;
                                 double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
                                 //double riverness = Math.min(0, Math.abs(ogMoutainness)-0.25f)*50;
@@ -141,14 +145,14 @@ public class Earth extends WorldType {
                                 //riverness *= 1-centerElevation;
                                 double detailNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                 double islandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
-                                double islands = 0;//((60+Math.abs(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*desertness;
+                                double islands = ((60+Math.abs(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*islandness;
                                 short finalElevation = (short) Math.max(islands, 10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
-                                biomes[x * size + z] = (byte) (undesertness+Math.abs(detailNoise * 0.25f) < 1 ? 4 : ((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0)));
+                                biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? 4 : islandness > 0 ? 5 : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? 2 : (centBiomeFactor < 0.2f ? 3 : centBiomeFactor < 0.4f ? 1 : 0))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
-                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.03f, undesertness)) {
+                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.1f, undesertness)) {
                                     lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
                                 }
                             }
@@ -281,23 +285,66 @@ public class Earth extends WorldType {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 int elevation = heightmap[(x * size) + z];
+                                byte biome = biomes[x * size + z];
                                 Vector2i blockOn = getBlock(x, elevation, z);
+                                Vector2i blockIn = getBlock(x, elevation+1, z);
                                 float randomNumber = rand.nextFloat();
+                                float featureNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
+                                float featureNoiseSmall = SimplexNoise.noise(x / 100.f, z / 100.f);
                                 double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
                                 double eleFactor = elevation + (rockNoise * 50);
                                 boolean snowy = eleFactor > 136;
                                 if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136 + Math.abs(randomNumber * 250))) {
                                     Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
                                 } else if (!snowy && blockOn.x == 2) {
-                                    if (randomNumber < 0.0001f && getBlock(x, elevation + 1, z).x() == 0) {
-                                        Renderer.cubes.addLast(new Matrix4f().translate(x, elevation + 1, z).rotateY(rand.nextFloat(6.3f)));
-                                    } else if (randomNumber < 0.0004f) {
-                                        Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                    } else if (randomNumber < 0.0008f || randomNumber < SimplexNoise.noise(x / 200.f, z / 200.f) / 50) {
-                                        for (int y = elevation - 1; y < elevation + 10; y++) {
-                                            World.setBlock(x, y, z, 16, 0);
+                                    if (biome == 5) {
+                                        if (randomNumber < 0.0067f) {
+                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
+                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
                                         }
-                                        Blob.generate(blockOn, x, elevation + 10, z, 17, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                    } else {
+                                        if (randomNumber < 0.0001f && getBlock(x, elevation + 1, z).x() == 0) {
+                                            Renderer.cubes.addLast(new Matrix4f().translate(x, elevation + 1, z).rotateY(rand.nextFloat(6.3f)));
+                                        } else if (randomNumber < 0.0004f) {
+                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        } else if (randomNumber < 0.0008f || randomNumber < featureNoise / 50) {
+                                            for (int y = elevation - 1; y < elevation + 10; y++) {
+                                                World.setBlock(x, y, z, 16, 0);
+                                            }
+                                            Blob.generate(blockOn, x, elevation + 10, z, 17, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        }
+                                    }
+                                } else if (blockOn.x == 73 || (biome == 5 && blockOn.x == 2)) {
+                                    if (blockIn.x() != 1) {
+                                        if (randomNumber < 0.0067f) {
+                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        }
+                                    }
+                                } else if (blockOn.x == 23 && biome == 4) {
+                                    if (randomNumber < 0.002f) {
+                                        double deadBushChance = Math.random();
+                                        if (deadBushChance < 0.03) {
+                                            int variant = deadBushChance < 0.015 ? 0 : 1;
+                                            Blob.generate(blockOn, x, elevation - 3 + variant, z + variant, 24, 0, 3 + variant);
+                                            Blob.generate(blockOn, x, elevation, z + variant, 24, 0, 2 + variant);
+                                            Blob.generate(blockOn, x, elevation + 2 + variant, z + variant, 24, 0, 1);
+                                            Blob.generate(blockOn, x, elevation + 4 + variant, z + 1 + variant, 24, 0, 1);
+                                            variant *= 2;
+                                            Blob.generate(blockOn, x, elevation + 7 + variant, z + 1 + variant, 24, 0, 2 + variant);
+                                            Blob.generate(blockOn, x - 1 - variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
+                                            Blob.generate(blockOn, x + 1 + variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
+                                        } else if (deadBushChance < 0.2) {
+                                            if (deadBushChance > 0.19) {
+                                                int maxHeight = (int) (Math.random() * 6) + 12;
+                                                DeadOakTree.generate(blockOn, x, elevation, z, maxHeight, 16, 0);
+                                                Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((Math.random() + 1) * 3)), new int[]{2, 23}, true);
+                                            } else {
+                                                setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                            }
+                                        } else {
+                                            Pillar.generate(blockOn, x, elevation + 1, z, (int) (Math.random() * 6) + 2, 29, 0);
+                                        }
                                     }
                                 }
                             }
@@ -352,7 +399,6 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
         generating = false;
-        System.out.print("Must append these entries to default palette: "+Arrays.toString(worldgeneratedBlocks.toArray()) +"\n");
         System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. \n");
     }
     public short getOldElevation(int x, int z) {

@@ -2,6 +2,7 @@ package org.conspiracraft.utils;
 
 import org.conspiracraft.Main;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -135,6 +136,9 @@ public class Utils {
         return sum / numbers.size();
     }
 
+    public static Vector3i addVec(Vector3i vec, int x, int y, int z) {
+        return new Vector3i(vec.x+x, vec.y+y, vec.z+z);
+    }
     public static double gradient(int y, int fromY, int toY, float toValue, float fromValue) {
         return clampedLerp(fromValue, toValue, inverseLerp(y, fromY, toY));
     }

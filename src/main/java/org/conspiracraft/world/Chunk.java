@@ -6,7 +6,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import static org.conspiracraft.world.World.chunkSize;
-import static org.conspiracraft.world.World.worldgeneratedBlocks;
 
 public class Chunk {
     public final Vector3i chunkPos;
@@ -15,7 +14,6 @@ public class Chunk {
     public int[] uncompressedBlocks;
     public IntArrayList blockPalette;
     public BitBuffer blockData;
-    public boolean unedited = true;
 
     public Chunk(Vector3i chunkPos, int compressedChunkPos) {
         this.chunkPos = chunkPos;
@@ -108,9 +106,9 @@ public class Chunk {
             blockData = newData;
         }
     }
-    public void setBlockKey(Vector3i pos, int key, Vector3i globalPos) {
+    public void setBlockKey(int pos, int key) {
         updateBlockPaletteKeySize();
-        blockData.setValue(condenseLocalPos(pos), key);
+        blockData.setValue(pos, key);
         if (blockPalette.get(key) == 0) {
             boolean isEmpty = true;
             for (int x = 0; x < chunkSize && isEmpty; x++) {
@@ -130,6 +128,9 @@ public class Chunk {
             }
         }
     }
+    public void setBlockKey(Vector3i pos, int keys) {
+        setBlockKey(condenseLocalPos(pos), keys);
+    }
     public int getBlockKey(int pos) {
         return blockData.getValue(pos);
     }
@@ -137,27 +138,15 @@ public class Chunk {
         int index = getBlockKey(pos);
         return unpackInt(blockPalette.get(index));
     }
-    public static final IntArrayList defaultBlockPalette = new IntArrayList(new int[]{0, 65550, 65551, 3604480, 1507328, 1572864, 262145, 131072, 196608, 262144, 262146, 1179650, 327680, 327681, 327682, 1179648, 1179649, 3538944, 131073, 262149, 262150, 262148, 655360, 3670016, 3145728, 1048576, 1114112, 2031616, 2097152});
     public void setBlock(Vector3i pos, int type, int subType, Vector3i globalPos) {
         int block = packInts(type, subType);
-//        if (World.generating) {
-//            if (!defaultBlockPalette.contains(block)) {
-//                worldgeneratedBlocks.addIfAbsent(block);
-//            }
-//        }
-        if (unedited) {
-            unedited = false;
-            if (World.generating) {
-                blockPalette = new IntArrayList(defaultBlockPalette);
-            }
-        }
         int key = blockPalette.indexOf(block);
         if (key > -1) {
-            setBlockKey(pos, key, globalPos);
+            setBlockKey(pos, key);
         } else {
             setChunkNonEmpty();
             blockPalette.addLast(block);
-            setBlockKey(pos, blockPalette.size()-1, globalPos);
+            setBlockKey(pos, blockPalette.size()-1);
         }
     }
     //Blocks end
