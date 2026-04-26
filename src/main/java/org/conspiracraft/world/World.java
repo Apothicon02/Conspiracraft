@@ -65,7 +65,9 @@ public class World {
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
         Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
         Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
-        return chunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
+        synchronized (chunk) {
+            return chunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
+        }
     }
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
         setBlock(x, y, z, type, subType);
@@ -78,24 +80,26 @@ public class World {
         Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
         Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
         Vector3i recentlyEditedPos = new Vector3i(x, y, z);
-        chunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
+        synchronized (chunk) {
+            chunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
 
-        int lodIdx = packLodPos(x / lodSize, y / lodSize, z / lodSize);
-        int bitIdx = (x%lodSize) + (y%lodSize) * lodSize + (z%lodSize) * lodSize * lodSize;
-        long mask = 1L << bitIdx;
-        if (type > 0) {
-            lods[lodIdx] |= mask;
-        } else {
-            lods[lodIdx] &= ~mask;
-        }
+            int lodIdx = packLodPos(x / lodSize, y / lodSize, z / lodSize);
+            int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
+            long mask = 1L << bitIdx;
+            if (type > 0) {
+                lods[lodIdx] |= mask;
+            } else {
+                lods[lodIdx] &= ~mask;
+            }
 
-        int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
-        bitIdx = (cX%regionSizeChunks) + (cY%regionSizeChunks) * regionSizeChunks + (cZ%regionSizeChunks) * regionSizeChunks * regionSizeChunks;
-        mask = 1L << bitIdx;
-        if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
-            regions[regionIdx] |= mask;
-        } else {
-            regions[regionIdx] &= ~mask;
+            int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
+            bitIdx = (cX % regionSizeChunks) + (cY % regionSizeChunks) * regionSizeChunks + (cZ % regionSizeChunks) * regionSizeChunks * regionSizeChunks;
+            mask = 1L << bitIdx;
+            if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
+                regions[regionIdx] |= mask;
+            } else {
+                regions[regionIdx] &= ~mask;
+            }
         }
     }
 }

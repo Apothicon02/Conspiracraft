@@ -116,6 +116,9 @@ public class Utils {
         }
         return intArr;
     }
+    public static float furthestFromZero(float first, float second) {
+        return Math.abs(first) > Math.abs(second) ? first : second;
+    }
     public static float mix(float min, float max, float factor) {
         return min * (1 - factor) + max * factor;
     }

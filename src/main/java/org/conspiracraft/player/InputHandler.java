@@ -114,6 +114,7 @@ public class InputHandler {
                     }
                 }
             }
+            Main.player.movementInputs();
 
             MemoryUtil.memCopy(MemoryUtil.memAddress(keys), MemoryUtil.memAddress(prevKeys), keys.capacity());
         }

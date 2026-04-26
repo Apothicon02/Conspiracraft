@@ -4,9 +4,13 @@ import org.conspiracraft.Main;
 import org.conspiracraft.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Source;
+import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import static org.lwjgl.sdl.SDLScancode.*;
@@ -16,6 +20,7 @@ public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
     public Vector3f pos = new Vector3f();
+    public Vector3f movement = new Vector3f();
     public Vector3f vel = new Vector3f();
     public Inventory inv = new Inventory();
     public Vector3f selectedBlock = new Vector3f();
@@ -32,9 +37,10 @@ public class Player {
     public float baseHeight = eyeHeight+(0.0875f*scale);
     public float height = baseHeight;
     public float width = 0.2f*scale;
-    public float baseSpeed = Math.max(0.33f, 0.33f*scale);
+    public float baseSpeed = Math.max(0.425f, 0.425f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
+    public float airSpeed = 0.33f;
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
 
     public final Source breakingSource;
@@ -56,26 +62,57 @@ public class Player {
         doSounds();
     }
 
+    public float friction = 0.75f;
     public void movementTick() {
-        movementInputs();
         Matrix4f cam = camera.getViewMatrixWithoutPitch().setTranslation(0, 0, 0).invert();
-        Vector3f movement = new Vector3f();
-        if (forward) {movement.add(cam.positiveZ(new Vector3f()));}
-        if (backward) {movement.add(cam.positiveZ(new Vector3f()).negate());}
-        if (rightward) {movement.add(cam.positiveX(new Vector3f()));}
-        if (leftward) {movement.add(cam.positiveX(new Vector3f()).negate());}
+        Vector3f newMovement = new Vector3f();
+        if (forward) {newMovement.add(cam.positiveZ(new Vector3f()));}
+        if (backward) {newMovement.add(cam.positiveZ(new Vector3f()).negate());}
+        if (rightward) {newMovement.add(cam.positiveX(new Vector3f()));}
+        if (leftward) {newMovement.add(cam.positiveX(new Vector3f()).negate());}
         if (flying) {
-            if (upward) {movement.add(0, 1, 0);}
-            if (downward) {movement.add(0, -1, 0);}
+            if (upward) {newMovement.add(0, 1, 0);}
+            if (downward) {newMovement.add(0, -1, 0);}
         }
-        if (movement.length() > 0) {movement.normalize();}
-        movement.mul(speed*(downward?0.65f:1.f));
-        movement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
-        movement.mul(superSprinting ? 10.f : 1.f);
+        if (newMovement.length() > 0) {newMovement.normalize();}
+        newMovement.mul(speed*(downward?0.65f:1.f));
+        newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
+        newMovement.mul(superSprinting ? 10.f : 1.f);
+        Vector2i blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
+        Vector2i blockOn = World.getBlock(pos.x(), pos.y()-1.05f, pos.z());
+        boolean canMove = flying || BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable || blockIn.x() == 1;
+        float modifiedGrav = grav;
+        friction = 0.99f; //1-airFriction=maxFriction
+        if (!flying) {
+            if (blockIn.x() == BlockTypes.getId(BlockTypes.WATER)) {
+                modifiedGrav *= 0.2f;
+                friction *= 0.9f;
+                newMovement.mul(0.5f);
+            } else if (BlockTags.leaves.tagged.contains(blockIn.x())) {
+                if (blockIn.y() == 0) {
+                    friction *= 0.5f;
+                    newMovement.mul(0.5f);
+                } else {
+                    friction *= 0.9f;
+                    newMovement.mul(0.9f);
+                }
+            } else if (canMove) {
+                friction *= 0.75f;
+            } else {
+                newMovement.mul(airSpeed);
+            }
+        } else {
+            friction *= 0.5f;
+        }
+        movement.mul(friction);
+        if (canMove) {
+            movement.set(Utils.furthestFromZero(newMovement.x(), movement.x()), Utils.furthestFromZero(newMovement.y(), movement.y()), Utils.furthestFromZero(newMovement.z(), movement.z()));
+        }
+        vel.mul(friction);
         if (!flying) {
             boolean onSolid = PhysicsHelper.colliding(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width));
             if (!onSolid) {
-                vel.y -= grav;
+                vel.y -= modifiedGrav;
             } else {
                 if (vel.y < 0) {
                     vel.y = 0;
@@ -85,8 +122,8 @@ public class Player {
                 }
             }
         }
-        movement.add(vel);
-        pos.set(PhysicsHelper.moveTo(new Vector3f(pos), new Vector3f(width, height, width), new Vector3f(pos).add(movement)));
+        vel.max(new Vector3f(-3)).min((new Vector3f(3)));
+        pos.set(PhysicsHelper.moveTo(new Vector3f(pos), new Vector3f(width, height, width), new Vector3f(pos).add(movement).add(vel)));
     }
 
     public void movementInputs() {
@@ -100,6 +137,9 @@ public class Player {
             sprinting = false;
             superSprinting = false;
         } else {
+            if (inputHandler.keyRelease(SDL_SCANCODE_X)) {
+                flying = !flying;
+            }
             forward = inputHandler.isKeyDown(SDL_SCANCODE_W);
             backward = inputHandler.isKeyDown(SDL_SCANCODE_S);
             rightward = inputHandler.isKeyDown(SDL_SCANCODE_D);

@@ -11,8 +11,7 @@ public class Chunk {
     public final Vector3i chunkPos;
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
-    public int[] uncompressedBlocks;
-    public IntArrayList blockPalette;
+    public final IntArrayList blockPalette;
     public BitBuffer blockData;
 
     public Chunk(Vector3i chunkPos, int compressedChunkPos) {
@@ -48,16 +47,6 @@ public class Chunk {
         }
     }
     //Blocks start
-    public void setBlockUncompressed(Vector3i pos, int type, int subType) {
-        if (uncompressedBlocks == null) {
-            uncompressedBlocks = new int[totalBlocks];
-            setChunkNonEmpty();
-        }
-        uncompressedBlocks[condenseLocalPos(pos)] = packInts(type, subType);
-    }
-    public Vector2i getBlockUncompressed(int pos) {
-        return uncompressedBlocks == null ? new Vector2i(0) : unpackInt(uncompressedBlocks[pos]);
-    }
 
     public int bitsPerBlock() {
         return blockData.bitsPerValue;
@@ -107,24 +96,26 @@ public class Chunk {
         }
     }
     public void setBlockKey(int pos, int key) {
-        updateBlockPaletteKeySize();
-        blockData.setValue(pos, key);
-        if (blockPalette.get(key) == 0) {
-            boolean isEmpty = true;
-            for (int x = 0; x < chunkSize && isEmpty; x++) {
-                for (int z = 0; z < chunkSize && isEmpty; z++) {
-                    for (int y = 0; y < chunkSize; y++) {
-                        if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
-                            isEmpty = false;
-                            break;
+        synchronized (blockPalette) {
+            updateBlockPaletteKeySize();
+            blockData.setValue(pos, key);
+            if (blockPalette.get(key) == 0) {
+                boolean isEmpty = true;
+                for (int x = 0; x < chunkSize && isEmpty; x++) {
+                    for (int z = 0; z < chunkSize && isEmpty; z++) {
+                        for (int y = 0; y < chunkSize; y++) {
+                            if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
+                                isEmpty = false;
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            if (isEmpty) {
-                blockPalette.clear();
-                blockPalette.add(0);
-                setChunkNonEmpty();
+                if (isEmpty) {
+                    blockPalette.clear();
+                    blockPalette.add(0);
+                    setChunkNonEmpty();
+                }
             }
         }
     }
@@ -146,7 +137,7 @@ public class Chunk {
         } else {
             setChunkNonEmpty();
             blockPalette.addLast(block);
-            setBlockKey(pos, blockPalette.size()-1);
+            setBlockKey(pos, blockPalette.size() - 1);
         }
     }
     //Blocks end
