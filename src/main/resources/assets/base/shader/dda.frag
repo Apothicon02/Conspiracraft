@@ -230,44 +230,10 @@ vec3 roundVec(vec3 dir) {
     return dir;
 }
 
-bool blockBevelled(ivec2 block) {
-    return !(block.x == 0 || block.x == 1 || block.x == 4 || block.x == 5 || block.x == 6 || block.x == 14 || block.x == 18 || block.x == 26 || block.x == 48 || block.x == 49 || block.x == 58 || block.x == 59 || block.x == 60);
-}
 ivec3 blockPos = ivec3(0);
 vec3 hitPos = vec3(0);
+vec3 shadowPos = vec3(0);
 vec3 flatNormal = vec3(0);
-const float bevel = 0.25f;
-const float bevelMax = 1-bevel;
-const float bevelOffset = 0.5f+(bevel/2);
-vec3 bevelNormal(vec3 normal) {
-    if (blockPos.x > 0 && blockPos.x < size-1 && blockPos.z > 0 && blockPos.z < size-1 && blockPos.y > 0 && blockPos.y < height-1) { //dont blend with voxels outside of world.
-        vec3 localPos = roundVec(fract(hitPos-flatNormal));
-        vec3 bevelPos = blockPos+0.5f;
-        vec3 absFlatNorm = abs(normal);
-        if (absFlatNorm.x < max(absFlatNorm.y, absFlatNorm.z)) {
-            if (localPos.x > bevelMax) {
-                if (getBlockAndVoxel(bevelPos+vec3(bevelOffset, 0, 0)).a == 0) { normal.x = 1; }
-            } else if (localPos.x < bevel) {
-                if (getBlockAndVoxel(bevelPos-vec3(bevelOffset, 0, 0)).a == 0) { normal.x = -1; }
-            }
-        }
-        if (absFlatNorm.z < max(absFlatNorm.x, absFlatNorm.y)) {
-            if (localPos.z > bevelMax) {
-                if (getBlockAndVoxel(bevelPos+vec3(0, 0, bevelOffset)).a == 0) { normal.z = 1; }
-            } else if (localPos.z < bevel) {
-                if (getBlockAndVoxel(bevelPos-vec3(0, 0, bevelOffset)).a == 0) { normal.z = -1; }
-            }
-        }
-        if (absFlatNorm.y < max(absFlatNorm.x, absFlatNorm.z)) {
-            if (localPos.y > bevelMax) {
-                if (getBlockAndVoxel(bevelPos+vec3(0, bevelOffset, 0)).a == 0) { normal.y = 1; }
-            } else if (localPos.y < bevel) {
-                if (getBlockAndVoxel(bevelPos-vec3(0, bevelOffset, 0)).a == 0) { normal.y = -1; }
-            }
-        }
-    }
-    return normal;
-}
 
 vec3 ddaMask = vec3(0);
 void stepMask(vec3 sideDist) {
@@ -402,7 +368,11 @@ vec4 dda(bool shadow) {
                         flatNormal = -ddaMask*raySign;
                         ddaPos = ivec3(voxelStartPos);
                         hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
-                        normal = blockBevelled(block) ? bevelNormal(flatNormal) : flatNormal;
+                        normal = flatNormal;
+                        shadowPos = (hitPos-(flatNormal*0.002f))+vec3(0, voxelSize, 0);
+                        if (getBlockAndVoxel(shadowPos+vec3(0, voxelSize, 0)).a < 0.95f) {
+                            normal = vec3(0, 1, 0);
+                        }
                         if (voxelColor.a < 1.f) {
                             reverseNormShading = true;
                         }
@@ -431,6 +401,7 @@ vec4 dda(bool shadow) {
                     voxelPos = blockPos+(ddaPos*voxelSize)+(flatNormal*0.001f);
                     vec3 subvoxelPos = (uv3d(voxelPos, voxelSize, blockSize)/blockSize)*voxelSize;
                     hitPos = voxelPos+(subvoxelPos);
+                    shadowPos = hitPos;
                     return vec4(voxelColor.rgb, 1.f);
                 }
             }
@@ -496,6 +467,7 @@ void main() {
     vec3 primaryNormal = normal;
     vec3 primaryFlatNormal = flatNormal;
     vec3 primaryLightPos = hitPos;
+    vec3 primaryShadowPos = shadowPos;
     bool isSky = color.a < 1;
     float depth = 0.f;
     if (isSky) {
@@ -559,10 +531,10 @@ void main() {
         float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         vec3 lighting = (vec3(normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
-        rayPos = primaryLightPos;
+        rayPos = primaryShadowPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (dot(primaryFlatNormal, normalize(skylight.xyz)) < 0.f) {
+        if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
             shadowColor = dda(false);
