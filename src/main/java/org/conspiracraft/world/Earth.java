@@ -386,6 +386,9 @@ public class Earth extends WorldType {
                                         int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
                                         if (radius > 0) {
                                             Cube.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
+                                            Cube.generate(new Vector2i(0), size-x, cloudHeight+75, z, 31, 0, radius, true);
+                                            Cube.generate(new Vector2i(0), x, cloudHeight+150, size-z, 31, 0, radius, true);
+                                            Cube.generate(new Vector2i(0), size-x, cloudHeight+200, size-z, 31, 0, radius+1, true);
                                         }
                                     }
                                 }

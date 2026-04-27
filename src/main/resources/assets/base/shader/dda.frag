@@ -30,7 +30,7 @@ layout(std430, set = 0, binding = 4) readonly buffer LODBuffer {
     LongStruct[] lods;
 } lodData;
 const int size = 4096;
-const int height = 320;
+const int height = 640;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
@@ -136,6 +136,7 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
 vec4 getBlockAndVoxel(float x, float y, float z) {
+    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
     int blockData = getBlockData(int(x), int(y), int(z));
     int type = (blockData >> 16) & 0xFFFF;
     ivec2 block = ivec2(type, min(16, blockData & 0xFFFF));
@@ -300,10 +301,11 @@ vec4 dda(bool shadow) {
     while (true) {
         bool stepAnything = true;
         if (stage == 3) {
+            if (abs(dot(ddaPos-ogChunkPos, ogChunkPos-ddaPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
             if (ddaPos.y >= heightChunks && rayDir.y < 0) {
                 //no need to do any checks
             } else {
-                if (abs(dot(ddaPos-ogChunkPos, ogChunkPos-ddaPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
+                if (ddaPos.y < 0 || ddaPos.y >= heightChunks) { break; }
                 region = getRegion(ddaPos/regionSize);
                 ivec3 chunkRayPos = ddaPos % regionSize;
                 int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;

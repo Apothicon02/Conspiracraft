@@ -15,7 +15,7 @@ public class World {
     public static int size = 4096;
     public static int halfSize = size/2;
     public static int quarterSize = size/4;
-    public static int height = 320;
+    public static int height = 640;
     public static byte chunkSize = 16;
     public static int sizeChunks = size / chunkSize;
     public static int heightChunks = height / chunkSize;

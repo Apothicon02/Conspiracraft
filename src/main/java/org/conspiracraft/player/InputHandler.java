@@ -1,10 +1,12 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -103,6 +105,9 @@ public class InputHandler {
                     Main.timeNs += 10000000000L;
                 }
                 if (keyRelease(SDL_SCANCODE_B)) {
+                    World.setBlock((int) player.pos.x(), (int) (player.pos.y()-1), (int) player.pos.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
+                }
+                if (keyRelease(SDL_SCANCODE_A)) {
                     float r = 0.f;
                     if (isKeyDown(SDL_SCANCODE_R)) {
                         r = (float) Math.toRadians(45);

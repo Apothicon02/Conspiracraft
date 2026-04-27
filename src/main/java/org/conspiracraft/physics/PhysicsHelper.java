@@ -32,9 +32,9 @@ public class PhysicsHelper {
         if (vel.y() < 0) {regionAABB.yMin+=vel.y();} else {regionAABB.yMax+=vel.y();}
         if (vel.z() < 0) {regionAABB.zMin+=vel.z();} else {regionAABB.zMax+=vel.z();}
         ArrayList<AABB> voxelAABBs = new ArrayList<>();
-        for (float x = regionAABB.xMin; x < regionAABB.xMax; x+=1) {
-            for (float y = regionAABB.yMin; y < regionAABB.yMax; y+=1) {
-                for (float z = regionAABB.zMin; z < regionAABB.zMax; z+=1) {
+        for (float x = Math.max(0, regionAABB.xMin); x < Math.min(World.size-1, regionAABB.xMax); x+=1) {
+            for (float y = Math.max(0, regionAABB.yMin); y < Math.min(World.height-1, regionAABB.yMax); y+=1) {
+                for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isSolid) {
                         voxelAABBs.add(new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1)));
