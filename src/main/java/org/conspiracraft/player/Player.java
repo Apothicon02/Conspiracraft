@@ -1,7 +1,8 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.PhysicsHelper;
+import org.conspiracraft.physics.AABB;
+import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.BlockTags;
@@ -123,7 +124,12 @@ public class Player {
             }
         }
         vel.max(new Vector3f(-3)).min((new Vector3f(3)));
-        pos.set(PhysicsHelper.moveTo(new Vector3f(pos), new Vector3f(width, height, width), new Vector3f(pos).add(movement).add(vel)));
+        AABB playerAABB = new AABB(
+                pos.x()-width, pos.x()+width,
+                pos.y()-height, pos.y()+height,
+                pos.z()-width, pos.z()+width);
+        PhysicsHelper.move(playerAABB, new Vector3f(movement).add(vel), vel);
+        pos.set(playerAABB.xMin+width, playerAABB.yMin+height, playerAABB.zMin+width);
     }
 
     public void movementInputs() {
