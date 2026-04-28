@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.conspiracraft.Main.player;
@@ -43,8 +44,7 @@ import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.conspiracraft.world.Earth.sunPos;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.system.MemoryUtil.memFree;
-import static org.lwjgl.util.vma.Vma.vmaCreateVirtualBlock;
-import static org.lwjgl.util.vma.Vma.vmaVirtualAllocate;
+import static org.lwjgl.util.vma.Vma.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK14.*;
 
@@ -58,20 +58,14 @@ public class Renderer {
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
     public static List<Matrix4f> cubes = new ArrayList<>();
+    //public static LinkedList<Integer> chunkVoxelPointerChanges = new LinkedList<>();
     public static void render() throws Exception {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
                 if (!initialized) {
                     prepareTestScene();
-                    BufferedImage atlasImage = Utils.loadImage("generic/texture/atlas");
-//                    for (int x = 0; x < Textures.atlas.width; x++) {
-//                        for (int y = 0; y < 1024; y++) {
-//                            Color color = new Color(atlasImage.getRGB(x, y), true);
-//                            collisionData[(x * 1024) + y] = color.getAlpha() != 0;
-//                        }
-//                    }
-                    ByteBuffer atlasBuffer = Utils.imageToBuffer(atlasImage);
+                    ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
                     ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
                     memFree(atlasBuffer);
                     ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
@@ -81,21 +75,33 @@ public class Renderer {
                     EntityTypes.fillTexture(stack);
                     initialized = true;
                 } else {
-//                    long basePtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
-//                    long offsetSize = (packPos(512, 196, 512)*4L);
-//                    long offsetPtr = basePtr+offsetSize;
-//                    VkBufferCopy.Buffer bufferCopy = VkBufferCopy.calloc(1).srcOffset(offsetSize).dstOffset(offsetSize).size(4);
-//                    MemoryUtil.memPutInt(offsetPtr, 2);
-//                    vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], bufferCopy);
-//                    VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1)
-//                            .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-//                            .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-//                            .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
-//                            .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-//                            .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-//                            .buffer(Graphics.voxelSSBO.buffer.buffer[0])
-//                            .offset(0).size(defaultSSBOSize);
-//                    vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, 0, null, barrierBuf, null);
+                    while (!updateQueue.isEmpty()) {
+                        int packedChunkPos = updateQueue.pollFirst();
+                        updateChunk(packedChunkPos);
+                        updateSet.remove(packedChunkPos);
+                    }
+                    VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
+                    vkCmdCopyBuffer(currentCmdBuffer, Graphics.chunkSSBO.stagingBuffer.buffer[0], Graphics.chunkSSBO.buffer.buffer[0], chunkBufferCopy);
+                    VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
+                    vkCmdCopyBuffer(currentCmdBuffer, Graphics.voxelSSBO.stagingBuffer.buffer[0], Graphics.voxelSSBO.buffer.buffer[0], voxelBufferCopy);
+                    VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(2);
+                    barrierBuf.get(0)
+                            .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                            .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                            .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                            .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .buffer(Graphics.chunkSSBO.buffer.buffer[0])
+                            .offset(0).size(chunkSSBOSize);
+                    barrierBuf.get(1)
+                            .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                            .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                            .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                            .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                            .buffer(Graphics.voxelSSBO.buffer.buffer[0])
+                            .offset(0).size(voxelSSBOSize);
+                    vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
                 }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
                 globalUBO.update(stack);
@@ -115,6 +121,44 @@ public class Renderer {
         }
     }
 
+    public static void updateChunk(int packedChunkPos) {
+        long chunkPtr = Graphics.chunkSSBO.stagingBuffer.pointer.get(0);
+        long voxelPtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
+        if (initialized) {
+            vmaVirtualFree(blocks.get(0), chunkBlockAllocs[packedChunkPos]);
+            //chunkVoxelPointerChanges.addLast(packedChunkPos*4);
+        }
+        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        int paletteSize = chunks[packedChunkPos].getBlockPaletteSize();
+        int bitsPerValue = chunks[packedChunkPos].bitsPerBlock();
+        int valueMask = chunks[packedChunkPos].blockValueMask();
+        int[] compressedBlocks = chunks[packedChunkPos].getBlockData();
+        if (compressedBlocks == null) {
+            allocCreateInfo.size((paletteSize) * 4L);
+        } else {
+            allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+        }
+
+        PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
+        LongBuffer offset = BufferUtils.createLongBuffer(1);
+        long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
+        if (res == VK_SUCCESS) {
+            chunkBlockAllocs[packedChunkPos] = alloc.get();
+            int pointer = (int) offset.get(0);
+            MemoryUtil.memIntBuffer(chunkPtr+((long)packedChunkPos*chunkByteSize), 4)
+                    .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue).put(3, valueMask);
+            MemoryUtil.memIntBuffer(voxelPtr+pointer, paletteSize)
+                    .put(0, chunks[packedChunkPos].getBlockPalette());
+            if (compressedBlocks != null) {
+                MemoryUtil.memIntBuffer(voxelPtr+pointer+(paletteSize*4L), compressedBlocks.length)
+                        .put(0, compressedBlocks);
+            }
+        } else {
+            System.out.print("blocksSSBO ran out of space! \n");
+            Main.isClosing = true;
+        }
+    }
+    
     public static void drawRaster(MemoryStack stack){
         currentPipeline = pipelines[4];
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2);
@@ -417,46 +461,13 @@ public class Renderer {
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(voxelSSBOSize);
         vmaCreateVirtualBlock(blockCreateInfo, blocks);
-        long chunkPtr = Graphics.chunkSSBO.stagingBuffer.pointer.get(0);
-        long voxelPtr = Graphics.voxelSSBO.stagingBuffer.pointer.get(0);
         chunkBlockAllocs = new long[chunkArrSize];
 
-        outerLoop:
         for (int chunkX = 0; chunkX < sizeChunks; chunkX++) {
             for (int chunkZ = 0; chunkZ < sizeChunks; chunkZ++) {
                 for (int chunkY = 0; chunkY < heightChunks; chunkY++) {
-                    VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
                     int packedChunkPos = World.packChunkPos(chunkX, chunkY, chunkZ);
-                    int paletteSize = chunks[packedChunkPos].getBlockPaletteSize();
-                    int bitsPerValue = chunks[packedChunkPos].bitsPerBlock();
-                    int valueMask = chunks[packedChunkPos].blockValueMask();
-                    int[] compressedBlocks = chunks[packedChunkPos].getBlockData();
-                    if (compressedBlocks == null) {
-                        allocCreateInfo.size((paletteSize) * 4L);
-                    } else {
-                        allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
-                    }
-
-                    PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
-                    LongBuffer offset = BufferUtils.createLongBuffer(1);
-                    long res = vmaVirtualAllocate(blocks.get(0), allocCreateInfo, alloc, offset);
-                    if (res == VK_SUCCESS) {
-                        chunkBlockAllocs[packedChunkPos] = alloc.get();
-                        int pointer = (int) offset.get(0);
-                        MemoryUtil.memCopy(MemoryUtil.memAddress(MemoryUtil.memAlloc(chunkByteSize).asIntBuffer()
-                                        .put(new int[]{pointer/4, paletteSize, bitsPerValue, valueMask}).rewind()),
-                                chunkPtr+((long) packedChunkPos * chunkByteSize), chunkByteSize);
-                        int[] palette = chunks[packedChunkPos].getBlockPalette();
-                        int paletteSizeBytes = paletteSize*4;
-                        MemoryUtil.memCopy(MemoryUtil.memAddress(MemoryUtil.memAlloc(paletteSizeBytes).asIntBuffer().put(palette).rewind()), voxelPtr+pointer, paletteSizeBytes);
-                        if (compressedBlocks != null) {
-                            MemoryUtil.memCopy(MemoryUtil.memAddress(MemoryUtil.memAlloc(compressedBlocks.length*4).asIntBuffer().put(compressedBlocks).rewind()), voxelPtr+pointer+paletteSizeBytes, compressedBlocks.length*4L);
-                        }
-                    } else {
-                        System.out.print("blocksSSBO ran out of space! \n");
-                        Main.isClosing = true;
-                        break outerLoop;
-                    }
+                    updateChunk(packedChunkPos);
                 }
             }
         }

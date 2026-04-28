@@ -32,7 +32,7 @@ public class Player {
     public float bobbing = 0f;
     public float grav = 0.1f;
     public float jumpStrength = 0.6f;
-    public float scale = 1.f;
+    public float scale = 2.f;
     public float baseEyeHeight = 0.8125f*scale;
     public float eyeHeight = baseEyeHeight;
     public float baseHeight = eyeHeight+(0.0875f*scale);
@@ -80,7 +80,7 @@ public class Player {
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 10.f : 1.f);
         Vector2i blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
-        Vector2i blockOn = World.getBlock(pos.x(), pos.y()-1.05f, pos.z());
+        Vector2i blockOn = World.getBlock(pos.x(), pos.y()-scale-0.05f, pos.z());
         boolean canMove = flying || BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable || blockIn.x() == 1;
         float modifiedGrav = grav;
         friction = 0.99f; //1-airFriction=maxFriction

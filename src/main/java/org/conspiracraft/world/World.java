@@ -8,6 +8,9 @@ import org.conspiracraft.items.Item;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -69,6 +72,8 @@ public class World {
             return chunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
         }
     }
+    public static ArrayDeque<Integer> updateQueue = new ArrayDeque<>();
+    public static HashSet<Integer> updateSet = new HashSet<>();
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
         setBlock(x, y, z, type, subType);
     }
@@ -77,9 +82,14 @@ public class World {
             System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
         }
         int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
-        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        int packedChunkPos = packChunkPos(cX, cY, cZ);
+        Chunk chunk = chunks[packedChunkPos];
         Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
         Vector3i recentlyEditedPos = new Vector3i(x, y, z);
+        if (!generating && !updateSet.contains(packedChunkPos)) {
+            updateSet.add(packedChunkPos);
+            updateQueue.addLast(packedChunkPos);
+        }
         synchronized (chunk) {
             chunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
 
