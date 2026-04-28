@@ -10,6 +10,7 @@ import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.system.MemoryUtil;
 
@@ -18,6 +19,7 @@ import java.nio.ByteBuffer;
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.mouseSensitivity;
+import static org.conspiracraft.world.World.chunkSize;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLScancode.*;
@@ -106,8 +108,15 @@ public class InputHandler {
                     Main.timeNs += 10000000000L;
                 }
                 if (keyRelease(SDL_SCANCODE_B)) {
-                    for (int y = World.height-1; y >= 0; y--) {
-                        World.setBlock((int) player.pos.x(), y, (int) player.pos.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
+                    Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);
+                    for (int z = startPos.z(); z < startPos.z()+chunkSize; z++) {
+                        for (int x = startPos.x(); x < startPos.x() + chunkSize; x++) {
+                            for (int y = startPos.y(); y < startPos.y() + chunkSize; y++) {
+                                if ((z == startPos.z() || z == startPos.z()+chunkSize-1) || (x == startPos.x() || x == startPos.x()+chunkSize-1) || (y == startPos.y() || y == startPos.y()+chunkSize-1)) {
+                                    World.setBlock(x, y, z, 1, 15);
+                                }
+                            }
+                        }
                     }
                 }
                 if (keyRelease(SDL_SCANCODE_A)) {

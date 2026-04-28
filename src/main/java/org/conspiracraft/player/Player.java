@@ -37,7 +37,7 @@ public class Player {
     public float eyeHeight = baseEyeHeight;
     public float baseHeight = eyeHeight+(0.0875f*scale);
     public float height = baseHeight;
-    public float width = 0.2f*scale;
+    public float width = 0.4f*scale;
     public float baseSpeed = Math.max(0.425f, 0.425f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
