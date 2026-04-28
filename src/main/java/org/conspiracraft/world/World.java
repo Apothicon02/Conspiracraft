@@ -49,8 +49,10 @@ public class World {
     public static int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
     public static long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
+    public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
     public static long[] lods = new long[sizeLods*sizeLods*heightLods];
     public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
+    public static int packLodPos(Vector3i pos) {return pos.x()+pos.y()*sizeLods+pos.z()*sizeLods*heightLods;}
     public static int packChunkPos(Vector3i pos) {
         return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
     }
@@ -72,8 +74,8 @@ public class World {
             return chunk.getBlock(Chunk.condenseLocalPos(recentlyEditedLocalPos));
         }
     }
-    public static ArrayDeque<Integer> updateQueue = new ArrayDeque<>();
-    public static HashSet<Integer> updateSet = new HashSet<>();
+    public static ArrayDeque<Vector3i> updateQueue = new ArrayDeque<>();
+    public static HashSet<Vector3i> updateSet = new HashSet<>();
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
         setBlock(x, y, z, type, subType);
     }
@@ -81,14 +83,13 @@ public class World {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
         }
-        int cX = x/chunkSize, cY = y/chunkSize, cZ = z/chunkSize;
-        int packedChunkPos = packChunkPos(cX, cY, cZ);
-        Chunk chunk = chunks[packedChunkPos];
+        Vector3i chunkPos = new Vector3i(x/chunkSize, y/chunkSize, z/chunkSize);
+        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
         Vector3i recentlyEditedLocalPos = new Vector3i(x&15, y&15, z&15);
         Vector3i recentlyEditedPos = new Vector3i(x, y, z);
-        if (!generating && !updateSet.contains(packedChunkPos)) {
-            updateSet.add(packedChunkPos);
-            updateQueue.addLast(packedChunkPos);
+        if (!generating && !updateSet.contains(chunkPos)) {
+            updateSet.add(chunkPos);
+            updateQueue.addLast(chunkPos);
         }
         synchronized (chunk) {
             chunk.setBlock(recentlyEditedLocalPos, type, subType, recentlyEditedPos);
@@ -102,8 +103,8 @@ public class World {
                 lods[lodIdx] &= ~mask;
             }
 
-            int regionIdx = packRegionPos(cX / regionSizeChunks, cY / regionSizeChunks, cZ / regionSizeChunks);
-            bitIdx = (cX % regionSizeChunks) + (cY % regionSizeChunks) * regionSizeChunks + (cZ % regionSizeChunks) * regionSizeChunks * regionSizeChunks;
+            int regionIdx = packRegionPos(chunkPos.x() / regionSizeChunks, chunkPos.y() / regionSizeChunks, chunkPos.z() / regionSizeChunks);
+            bitIdx = (chunkPos.x() % regionSizeChunks) + (chunkPos.y() % regionSizeChunks) * regionSizeChunks + (chunkPos.z() % regionSizeChunks) * regionSizeChunks * regionSizeChunks;
             mask = 1L << bitIdx;
             if (chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0) {
                 regions[regionIdx] |= mask;

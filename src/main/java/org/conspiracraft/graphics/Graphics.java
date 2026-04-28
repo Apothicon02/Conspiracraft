@@ -67,10 +67,10 @@ public class Graphics {
 
         globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, globalUBO);
 
-        regionSSBO = new ShaderStorageBuffer(stack, regionSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        regionSSBO = new ShaderStorageBuffer(stack, regionSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
         chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT, false);
         voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        lodSSBO = new ShaderStorageBuffer(stack, lodSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}

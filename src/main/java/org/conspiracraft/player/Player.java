@@ -79,8 +79,9 @@ public class Player {
         newMovement.mul(speed*(downward?0.65f:1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 10.f : 1.f);
-        Vector2i blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
-        Vector2i blockOn = World.getBlock(pos.x(), pos.y()-scale-0.05f, pos.z());
+        boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
+        Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
+        Vector2i blockOn = inBounds ? World.getBlock(pos.x(), pos.y()-scale-0.05f, pos.z()) : new Vector2i(0);
         boolean canMove = flying || BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable || blockIn.x() == 1;
         float modifiedGrav = grav;
         friction = 0.99f; //1-airFriction=maxFriction

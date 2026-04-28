@@ -16,6 +16,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 
 import static org.conspiracraft.Main.*;
+import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLMouse.*;
@@ -105,7 +106,9 @@ public class InputHandler {
                     Main.timeNs += 10000000000L;
                 }
                 if (keyRelease(SDL_SCANCODE_B)) {
-                    World.setBlock((int) player.pos.x(), (int) (player.pos.y()-1), (int) player.pos.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
+                    for (int y = World.height-1; y >= 0; y--) {
+                        World.setBlock((int) player.pos.x(), y, (int) player.pos.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
+                    }
                 }
                 if (keyRelease(SDL_SCANCODE_A)) {
                     float r = 0.f;
