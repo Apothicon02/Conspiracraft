@@ -119,6 +119,12 @@ public class GUI {
         update();
         if (showUI) {
             if (!GUI.pauseMenuOpen) {
+                pushUBO.updateTex(0); //use gui atlas
+                pushUBO.updateLayer(3); //frame
+                pushUBO.updateSize(new Vector2i(1));
+                pushUBO.updateAtlasOffset(new Vector2i(0));
+                color = new Vector4f(1.f);
+                drawQuad(true, true, 0.5f, 0.5f, 1, 1); //crosshair
                 drawInventory();
             }
             drawDebug();

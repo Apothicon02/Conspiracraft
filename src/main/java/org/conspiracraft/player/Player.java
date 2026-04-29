@@ -168,7 +168,7 @@ public class Player {
     }
 
     public void rotate(float pitch, float yaw) {
-        camera.rotate(pitch, yaw);
+        camera.rotate((float) -Math.toRadians(pitch), (float) -Math.toRadians(yaw));
     }
     public Vector3f getCameraTranslation() {
         Vector3f translation = new Vector3f();

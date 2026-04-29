@@ -116,6 +116,31 @@ public class Utils {
         }
         return intArr;
     }
+    public static Vector3f unzeroVec(Vector3f dir) {
+        if (dir.x() == 0.0f) {
+            dir.x = 0.001f;
+        }
+        if (dir.y() == 0.0f) {
+            dir.y = 0.001f;
+        }
+        if (dir.z() == 0.0f) {
+            dir.z = 0.001f;
+        }
+        return dir;
+    }
+    public static float step(float edge, float f) {
+        return f >= edge ? 1.f : 0.f;
+    }
+    public static Vector3f step(Vector3f edge, float f) {
+        return new Vector3f(step(edge.x(), f), step(edge.y(), f), step(edge.z(), f));
+    }
+    public static float sign(float f) {
+        float signum = Math.signum(f);
+        return signum == -0.0f ? 0.0f : signum;
+    }
+    public static Vector3f sign(Vector3f vec) {
+        return new Vector3f(sign(vec.x()), sign(vec.y()), sign(vec.z()));
+    }
     public static float furthestFromZero(float first, float second) {
         return Math.abs(first) > Math.abs(second) ? first : second;
     }

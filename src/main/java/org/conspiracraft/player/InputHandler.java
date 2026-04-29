@@ -6,18 +6,18 @@ import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.physics.DDAResult;
+import org.conspiracraft.physics.PhysicsHelper;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.*;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.system.MemoryUtil;
 
+import java.lang.Math;
 import java.nio.ByteBuffer;
 
 import static org.conspiracraft.Main.*;
-import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.conspiracraft.world.World.chunkSize;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
@@ -80,10 +80,20 @@ public class InputHandler {
                     }
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
-                    player.rotate((float) -Math.toRadians(displVec.x * (mouseSensitivity / 10)),
-                            (float) -Math.toRadians(displVec.y * (mouseSensitivity / 10)));
+                    player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
+                    if (leftButtonClick) {
+                        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 10);
+                        if (ddaResult.hitAnything) {
+                            World.setBlock(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z(), 0, 0);
+                        }
+                    } else if (rightButtonClick) {
+                        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 10);
+                        if (ddaResult.hitAnything) {
+                            World.setBlock(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
+                        }
+                    }
                 }
-                HandManager.useHands(window);
+                //HandManager.useHands(window);
 
                 if (keyRelease(SDL_SCANCODE_F11)) {
                     if (!isFullscreen) {

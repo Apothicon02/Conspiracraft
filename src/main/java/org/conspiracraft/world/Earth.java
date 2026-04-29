@@ -304,9 +304,7 @@ public class Earth extends WorldType {
                                             PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
                                         }
                                     } else {
-                                        if (randomNumber < 0.0001f && getBlock(x, elevation + 1, z).x() == 0) {
-                                            Renderer.cubes.addLast(new Matrix4f().translate(x, elevation + 1, z).rotateY(rand.nextFloat(6.3f)));
-                                        } else if (randomNumber < 0.0004f) {
+                                        if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         } else if (randomNumber < 0.0008f || randomNumber < featureNoise / 50) {
                                             for (int y = elevation - 1; y < elevation + 10; y++) {

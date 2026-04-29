@@ -218,7 +218,7 @@ vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess,
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
 
-vec3 roundVec(vec3 dir) {
+vec3 unzeroVec(vec3 dir) {
     if (dir.x == 0.0f) {
         dir.x = 0.001f;
     }
@@ -244,7 +244,7 @@ void stepMask(vec3 sideDist) {
 vec3 getDir(vec2 pos) {
     vec2 modifiedUV = (uv * 2.0) - 1.0;
     vec4 clipSpace = vec4((inverse(globalUbo.proj) * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
-    return roundVec(normalize((inverse(globalUbo.view)*clipSpace).xyz));
+    return unzeroVec(normalize((inverse(globalUbo.view)*clipSpace).xyz));
 }
 vec3 rayPos = vec3(0);
 vec3 rayDir = vec3(0);
@@ -268,7 +268,7 @@ vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
 vec4 dda(bool shadow) {
-    rayDir = roundVec(rayDir);
+    rayDir = unzeroVec(rayDir);
     rayDirDivved = 1.f/rayDir;
     ogRayPos = rayPos;
     ogRayDir = rayDir;
@@ -427,7 +427,7 @@ vec3 scatterVec(vec3 vec) {
 }
 ivec3 voxelRayPos = ivec3(0);
 vec3 mipmap(vec3 color) {
-    vec3 localPos = roundVec(abs(fract(hitPos)-vec3(0, 1, 0)));
+    vec3 localPos = unzeroVec(abs(fract(hitPos)-vec3(0, 1, 0)));
     voxelRayPos = ivec3(localPos*blockSize);
     int inc = 3;
     vec3 subbed = vec3(dot(-flatNormal.x, rayDir.x), dot(-flatNormal.y, rayDir.y), dot(-flatNormal.z, rayDir.z));
@@ -493,6 +493,7 @@ void main() {
         vec4 view = inverse(globalUbo.proj)*clip;
         view/=view.w;
         primaryLightPos = (inverse(globalUbo.view)*view).xyz;
+        primaryShadowPos = primaryLightPos;
         blockPos = ivec3(primaryLightPos);
         block = ivec2(0);
         reflectivity = 0.f;
@@ -536,7 +537,7 @@ void main() {
         rayPos = primaryShadowPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (dot(primaryNormal, normalize(skylight.xyz)) < 0.f) {
+        if (block.x > 0 && dot(primaryNormal, normalize(skylight.xyz)) <= 0.f) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
             shadowColor = dda(false);
@@ -547,7 +548,7 @@ void main() {
         }
         if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryNormal);
-            vec3 reflectDir = roundVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
+            vec3 reflectDir = unzeroVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
             vec3 viewDir = normalize(ogDir);
             vec3 halfVec = normalize(viewDir-reflectDir);
             float ang = max(dot(viewDir, halfVec), 0.f);

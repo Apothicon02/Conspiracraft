@@ -2,11 +2,16 @@ package org.conspiracraft.physics;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.ArrayList;
+
+import static org.conspiracraft.Main.player;
+import static org.conspiracraft.utils.Utils.sign;
 
 public class PhysicsHelper {
     public static float voxelSize = 0.125f;
@@ -22,6 +27,36 @@ public class PhysicsHelper {
             }
         }
         return false;
+    }
+    public static DDAResult dda(Vector3f pos, Vector3f ogDir, float maxDist) {
+        Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
+        Vector3i prevDDAPos = new Vector3i(ddaPos);
+        Vector3f dir = Utils.unzeroVec(ogDir.normalize());
+        Vector3f raySign = sign(dir);
+        Vector3f dist = new Vector3f(1.0f).div(new Vector3f(dir).absolute());
+        Vector3f sideDist = new Vector3f();
+        sideDist.x = (raySign.x > 0 ? (ddaPos.x + 1 - pos.x) : (pos.x - ddaPos.x)) * dist.x;
+        sideDist.y = (raySign.y > 0 ? (ddaPos.y + 1 - pos.y) : (pos.y - ddaPos.y)) * dist.y;
+        sideDist.z = (raySign.z > 0 ? (ddaPos.z + 1 - pos.z) : (pos.z - ddaPos.z)) * dist.z;
+        Vector3f mask = new Vector3f(0);
+
+        float travelled = 0;
+        for (int i = 0; i < maxDist*2; i++) {
+            if (!World.inBounds(ddaPos.x(), ddaPos.y(), ddaPos.z())) {return new DDAResult(prevDDAPos, ddaPos, false);}
+            if (!BlockTypes.blockTypeMap.get(World.getBlock(ddaPos).x()).blockProperties.isFluidReplaceable) {return new DDAResult(prevDDAPos, ddaPos, true);}
+            mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
+            prevDDAPos.set(ddaPos);
+
+            int axis = (int) (mask.x() * 0 + mask.y() * 1 + mask.z() * 2);
+            travelled = sideDist.get(axis);
+            sideDist.setComponent(axis, travelled + dist.get(axis));
+            ddaPos.setComponent(axis, ddaPos.get(axis) + (int) raySign.get(axis));
+
+            if (travelled > maxDist) {
+                return new DDAResult(prevDDAPos, ddaPos, false);
+            }
+        }
+        return null;
     }
     public static void move(AABB objAABB, Vector3f vel, Vector3f velMutable) {
         AABB regionAABB = new AABB(
