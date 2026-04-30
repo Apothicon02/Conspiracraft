@@ -32,13 +32,13 @@ public class Player {
     public float bobbing = 0f;
     public float grav = 0.1f;
     public float jumpStrength = 0.6f;
-    public float scale = 2.f;
-    public float baseEyeHeight = 0.8125f*scale;
+    public float scale = 1.5f;
+    public float baseEyeHeight = 0.925f*scale;
     public float eyeHeight = baseEyeHeight;
     public float baseHeight = eyeHeight+(0.0875f*scale);
     public float height = baseHeight;
-    public float width = 0.4f*scale;
-    public float baseSpeed = Math.max(0.425f, 0.425f*scale);
+    public float width = 0.42f*scale;
+    public float baseSpeed = Math.max(0.23f, 0.23f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.5f;
     public float airSpeed = 0.33f;

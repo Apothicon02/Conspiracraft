@@ -1,5 +1,7 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.physics.DDAResult;
+import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -40,6 +42,14 @@ public class HandManager {
             if (hotbarSlot < 0) {
                 hotbarSlot = Inventory.invWidth-1;
             }
+        }
+        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 20);
+        if (ddaResult != null && ddaResult.hitAnything) {
+            player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
+            player.prevSelectedBlock.set(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z());
+        } else {
+            player.selectedBlock.zero();
+            player.prevSelectedBlock.zero();
         }
         Item selectedItem = player.inv.getItem(player.inv.selectedSlot);
         Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();

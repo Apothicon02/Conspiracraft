@@ -21,6 +21,8 @@ import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.conspiracraft.world.World.chunkSize;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
+import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
+import static org.lwjgl.sdl.SDLKeycode.SDL_KMOD_CAPS;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowPosition;
@@ -29,6 +31,7 @@ import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowSize;
 public class InputHandler {
     public InputHandler() {}
 
+    public int keyMods;
     public ByteBuffer keys;
     public ByteBuffer prevKeys;
     public int mouse;
@@ -72,6 +75,7 @@ public class InputHandler {
                     }
                 }
             } else {
+                keyMods = SDL_GetModState();
                 if (GUI.pauseMenuOpen || GUI.inventoryOpen) {
                     SDL_SetWindowRelativeMouseMode(Window.window, false);
                     //player.clearVars();
@@ -81,19 +85,9 @@ public class InputHandler {
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
-                    if (leftButtonClick) {
-                        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 10);
-                        if (ddaResult.hitAnything) {
-                            World.setBlock(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z(), 0, 0);
-                        }
-                    } else if (rightButtonClick) {
-                        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 10);
-                        if (ddaResult.hitAnything) {
-                            World.setBlock(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z(), BlockTypes.getId(BlockTypes.OAK_PLANK), 0);
-                        }
-                    }
+                    player.chiselMode = (keyMods & SDL_KMOD_CAPS) > 0;;
+                    HandManager.useHands(window);
                 }
-                //HandManager.useHands(window);
 
                 if (keyRelease(SDL_SCANCODE_F11)) {
                     if (!isFullscreen) {

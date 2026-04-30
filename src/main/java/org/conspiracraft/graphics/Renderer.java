@@ -12,6 +12,7 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
@@ -108,10 +109,11 @@ public class Renderer {
             //chunkVoxelPointerChanges.addLast(packedChunkPos*4);
         }
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
-        int paletteSize = chunks[packedChunkPos].getBlockPaletteSize();
-        int bitsPerValue = chunks[packedChunkPos].bitsPerBlock();
-        int valueMask = chunks[packedChunkPos].blockValueMask();
-        int[] compressedBlocks = chunks[packedChunkPos].getBlockData();
+        Chunk chunk = chunks[packedChunkPos];
+        int paletteSize = chunk.getBlockPaletteSize();
+        int bitsPerValue = chunk.bitsPerBlock();
+        int valueMask = chunk.blockValueMask();
+        int[] compressedBlocks = chunk.getBlockData();
         if (compressedBlocks == null) {
             allocCreateInfo.size((paletteSize) * 4L);
         } else {
@@ -128,7 +130,7 @@ public class Renderer {
             MemoryUtil.memIntBuffer(chunkPtr+chunkBufOffset, 4)
                     .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue).put(3, valueMask);
             MemoryUtil.memIntBuffer(voxelPtr+pointer, paletteSize)
-                    .put(0, chunks[packedChunkPos].getBlockPalette());
+                    .put(0, chunk.getBlockPalette());
             if (compressedBlocks != null) {
                 MemoryUtil.memIntBuffer(voxelPtr+pointer+(paletteSize*4L), compressedBlocks.length)
                         .put(0, compressedBlocks);
