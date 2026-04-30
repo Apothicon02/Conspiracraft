@@ -129,14 +129,14 @@ public class InputHandler {
                         }
                     }
                 }
-                if (keyRelease(SDL_SCANCODE_A)) {
+                if (isKeyDown(SDL_SCANCODE_F3)) {
                     float r = 0.f;
                     if (isKeyDown(SDL_SCANCODE_R)) {
                         r = (float) Math.toRadians(45);
                     }
-                    if (isKeyDown(SDL_SCANCODE_F3)) {
+                    if (keyRelease(SDL_SCANCODE_X)) {
                         Renderer.cubes.removeLast();
-                    } else {
+                    } else if (keyRelease(SDL_SCANCODE_V)) {
                         Renderer.cubes.addLast(new Matrix4f().translate(new Vector3f(player.pos).add(0, 2, 0)).rotateXYZ(r, r, 0));
                     }
                 }

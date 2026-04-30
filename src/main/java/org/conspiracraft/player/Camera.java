@@ -15,6 +15,14 @@ public class Camera {
         Matrix4f viewMatrix = getViewMatrix();
         return new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22());
     }
+    public Vector3f getForwardWithoutPitch() {
+        Matrix4f viewMatrix = getViewMatrixWithoutPitch();
+        return new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22());
+    }
+    public Vector3f getRightWithoutPitch() {
+        Matrix4f viewMatrix = getViewMatrixWithoutPitch();
+        return new Vector3f(viewMatrix.m00(), viewMatrix.m01(), viewMatrix.m02());
+    }
     public void rotate(float x, float y) {
         pitch.rotateX(-x);
         viewMatrix.rotateY(-y);

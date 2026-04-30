@@ -65,12 +65,13 @@ public class Player {
 
     public float friction = 0.75f;
     public void movementTick() {
-        Matrix4f cam = camera.getViewMatrixWithoutPitch().setTranslation(0, 0, 0).invert();
+        Vector3f forwardDir = camera.getForwardWithoutPitch();
+        Vector3f rightDir = camera.getRightWithoutPitch();
         Vector3f newMovement = new Vector3f();
-        if (forward) {newMovement.add(cam.positiveZ(new Vector3f()));}
-        if (backward) {newMovement.add(cam.positiveZ(new Vector3f()).negate());}
-        if (rightward) {newMovement.add(cam.positiveX(new Vector3f()));}
-        if (leftward) {newMovement.add(cam.positiveX(new Vector3f()).negate());}
+        if (forward) {newMovement.add(forwardDir);}
+        if (backward) {newMovement.add(forwardDir.negate());}
+        if (rightward) {newMovement.add(rightDir);}
+        if (leftward) {newMovement.add(rightDir.negate());}
         if (flying) {
             if (upward) {newMovement.add(0, 1, 0);}
             if (downward) {newMovement.add(0, -1, 0);}
