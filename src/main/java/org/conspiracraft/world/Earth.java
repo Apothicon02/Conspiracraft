@@ -244,11 +244,12 @@ public class Earth extends WorldType {
                                     int blockType = biome == Biomes.LAKE.id ? 73 : (biome == Biomes.DESERT.id ? sand : (biome == Biomes.SNOWY_PEAK.id || biome == Biomes.SNOWY_TAIGA.id ? 54 : (elevation < 66 ? sand : 2)));
                                     int blockSubtype = elevation >= 66 && biome == Biomes.TAIGA.id ? 1 : 0;
                                     if (blockType == 2) {
-                                        if (rand.nextBoolean() && rand.nextFloat() < SimplexNoise.noise(x / 100.f, z / 100.f) - 0.2f) {
+                                        float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                        if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f) {
                                             World.setBlock(x, elevation + 1, z, 5, rand.nextInt(3));
                                         } else if (rand.nextFloat() < 0.003f) {
                                             World.setBlock(x, elevation + 1, z, 18, rand.nextInt(3));
-                                        } else if (rand.nextFloat() < 0.1f) {
+                                        } else if (rand.nextFloat() < 0.3f && rand.nextFloat() > foliageNoise) {
                                             World.setBlock(x, elevation + 1, z, 4, (biome == Biomes.TAIGA.id ? 4 : 0) + rand.nextInt(3));
                                         }
                                     }

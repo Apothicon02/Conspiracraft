@@ -27,20 +27,19 @@ public class Player {
     public Vector3f selectedBlock = new Vector3f();
     public Vector3f prevSelectedBlock = new Vector3f();
 
-    public boolean chiselMode = false;
     public boolean creative = true;
     public float bobbing = 0f;
     public float grav = 0.1f;
     public float jumpStrength = 0.6f;
-    public float scale = 1.5f;
-    public float baseEyeHeight = 0.925f*scale;
+    public float scale = 1;
+    public float baseEyeHeight = 1.41f*scale;
     public float eyeHeight = baseEyeHeight;
-    public float baseHeight = eyeHeight+(0.0875f*scale);
+    public float baseHeight = eyeHeight+(0.09f*scale);
     public float height = baseHeight;
     public float width = 0.42f*scale;
-    public float baseSpeed = Math.max(0.23f, 0.23f*scale);
+    public float baseSpeed = Math.max(0.33f, 0.33f*scale);
     public float speed = baseSpeed;
-    public float sprintSpeed = 1.5f;
+    public float sprintSpeed = 1.75f;
     public float airSpeed = 0.33f;
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
 
@@ -82,7 +81,7 @@ public class Player {
         newMovement.mul(superSprinting ? 10.f : 1.f);
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
-        Vector2i blockOn = inBounds ? World.getBlock(pos.x(), pos.y()-scale-0.05f, pos.z()) : new Vector2i(0);
+        Vector2i blockOn = inBounds ? World.getBlock(pos.x(), pos.y()-height-0.075f, pos.z()) : new Vector2i(0);
         boolean canMove = flying || BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable || blockIn.x() == 1;
         float modifiedGrav = grav;
         friction = 0.99f; //1-airFriction=maxFriction
@@ -130,7 +129,11 @@ public class Player {
                 pos.x()-width, pos.x()+width,
                 pos.y()-height, pos.y()+height,
                 pos.z()-width, pos.z()+width);
-        PhysicsHelper.move(playerAABB, new Vector3f(movement).add(vel), vel);
+        Vector3f totalVel = new Vector3f(movement).add(vel);
+        PhysicsHelper.moveWithStepping(playerAABB, totalVel);
+        if (totalVel.x() == 0) {movement.x = 0; vel.x = 0;}
+        if (totalVel.y() == 0) {movement.y = 0; vel.y = 0;}
+        if (totalVel.z() == 0) {movement.z = 0; vel.z = 0;}
         pos.set(playerAABB.xMin+width, playerAABB.yMin+height, playerAABB.zMin+width);
     }
 

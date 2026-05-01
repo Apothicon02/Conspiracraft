@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.utils.Vector3b;
 import org.conspiracraft.world.World;
 import org.joml.*;
 
@@ -58,7 +59,18 @@ public class PhysicsHelper {
         }
         return null;
     }
-    public static void move(AABB objAABB, Vector3f vel, Vector3f velMutable) {
+    public static void moveWithStepping(AABB objAABB, Vector3f vel) {
+        Vector3f velAttempt = new Vector3f(vel);
+        move(objAABB, vel);
+        if (vel.x() != velAttempt.x() || vel.z() != velAttempt.z()) { //if obstructed horizontally
+            vel.set(velAttempt);
+            move(objAABB, new Vector3f(0, 1.f, 0));
+            move(objAABB, vel);
+            move(objAABB, new Vector3f(0, -1.f, 0));
+        }
+    }
+
+    public static void move(AABB objAABB, Vector3f vel) {
         AABB regionAABB = new AABB(
                 objAABB.xMin-1, objAABB.xMax+1,
                 objAABB.yMin-1, objAABB.yMax+1,
@@ -78,7 +90,6 @@ public class PhysicsHelper {
             }
         }
 
-        AABB ogObjAABB = objAABB.copy();
         Vector3f moveVec = new Vector3f(vel);
         for (AABB aabb : voxelAABBs) {
             moveVec.x = objAABB.clipX(aabb, moveVec.x());
@@ -92,8 +103,8 @@ public class PhysicsHelper {
             moveVec.z = objAABB.clipZ(aabb, moveVec.z());
         }
         objAABB.move(0, 0, moveVec.z());
-        if (moveVec.x() != vel.x() || Math.abs(objAABB.xMin-ogObjAABB.xMin) < 0.01f) {velMutable.x = 0; Main.player.movement.x = 0;}
-        if (moveVec.y() != vel.y() || Math.abs(objAABB.yMin-ogObjAABB.yMin) < 0.01f) {velMutable.y = 0; Main.player.movement.y = 0;}
-        if (moveVec.z() != vel.z() || Math.abs(objAABB.zMin-ogObjAABB.zMin) < 0.01f) {velMutable.z = 0; Main.player.movement.z = 0;}
+        if (moveVec.x() != vel.x()) {vel.x = 0;}
+        if (moveVec.y() != vel.y()) {vel.y = 0;}
+        if (moveVec.z() != vel.z()) {vel.z = 0;} // || Math.abs(objAABB.zMin-ogObjAABB.zMin) < 0.01f
     }
 }

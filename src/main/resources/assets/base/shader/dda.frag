@@ -537,14 +537,16 @@ void main() {
         rayPos = primaryShadowPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (block.x > 0 && dot(primaryNormal, normalize(skylight.xyz)) <= 0.f) {
-            shadowColor.a = 1.f;
-        } else if (globalUbo.renderToggles.x > 0) {
-            shadowColor = dda(false);
-        }
-        if (shadowColor.a > 0.0f) {
-            shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-            lighting *= shadowFactor;
+        if (!(block.x == 4 && skylight.y > height*3)) {
+            if (block.x > 0 && dot(primaryNormal, normalize(skylight.xyz)) <= 0.f) {
+                shadowColor.a = 1.f;
+            } else if (globalUbo.renderToggles.x > 0) {
+                shadowColor = dda(true);
+            }
+            if (shadowColor.a > 0.0f) {
+                shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
+                lighting *= shadowFactor;
+            }
         }
         if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryNormal);

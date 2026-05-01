@@ -15,6 +15,15 @@ public class AABB {
     public AABB copy() {
         return new AABB(xMin, xMax, yMin, yMax, zMin, zMax);
     }
+    public AABB set(AABB source) {
+        this.xMin = source.xMin;
+        this.xMax = source.xMax;
+        this.yMin = source.yMin;
+        this.yMax = source.yMax;
+        this.zMin = source.zMin;
+        this.zMax = source.zMax;
+        return this;
+    }
     public AABB expand(float x, float y, float z) {
         if (x > 0) {xMax += x;} else {xMin += x;}
         if (y > 0) {yMax += y;} else {yMin += y;}

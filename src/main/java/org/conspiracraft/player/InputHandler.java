@@ -85,7 +85,6 @@ public class InputHandler {
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
-                    player.chiselMode = (keyMods & SDL_KMOD_CAPS) > 0;;
                     HandManager.useHands(window);
                 }
 

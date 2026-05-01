@@ -53,9 +53,6 @@ public class HandManager {
         }
         Item selectedItem = player.inv.getItem(player.inv.selectedSlot);
         Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();
-        if (BlockTags.smallBlock.tagged.contains(blockToPlace.x())) {
-            player.chiselMode = true;
-        }
         boolean lmbDown = player.inputHandler.leftButtonPressed;
         boolean mmbDown = player.inputHandler.middleButtonPressed;
         boolean rmbDown = player.inputHandler.rightButtonPressed;
@@ -118,19 +115,7 @@ public class HandManager {
                                         blockStartedBreaking.set(0, 0, 0, 0);
                                         player.breakingSource.stop();
                                         //World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                        if (player.chiselMode) {
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                        } else {
-                                            Vector3i roundedPos = new Vector3i((int)(pos.x()/2), (int)(pos.y()/2), (int)(pos.z()/2)).mul(2);
-                                            World.setBlock(roundedPos.x(), roundedPos.y(), roundedPos.z(), 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x()+1, roundedPos.y(), roundedPos.z(), 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x(), roundedPos.y()+1, roundedPos.z(), 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x(), roundedPos.y(), roundedPos.z()+1, 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x()+1, roundedPos.y(), roundedPos.z()+1, 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x()+1, roundedPos.y()+1, roundedPos.z(), 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x(), roundedPos.y()+1, roundedPos.z()+1, 0, 0, true, false, 1, false);
-                                            World.setBlock(roundedPos.x()+1, roundedPos.y()+1, roundedPos.z()+1, 0, 0, true, false, 1, false);
-                                        }
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
                                         //BlockBreaking.blockBroken(blockBreaking, handBlock);
                                     }
                                 }
@@ -143,19 +128,7 @@ public class HandManager {
                                 Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
                                 BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
                                 if (oldType.isFluidReplaceable) {
-                                    if (player.chiselMode) {
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                    } else {
-                                        Vector3i roundedPos = new Vector3i((int)(pos.x()/2), (int)(pos.y()/2), (int)(pos.z()/2)).mul(2);
-                                        World.setBlock(roundedPos.x(), roundedPos.y(), roundedPos.z(), blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x()+1, roundedPos.y(), roundedPos.z(), blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x(), roundedPos.y()+1, roundedPos.z(), blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x(), roundedPos.y(), roundedPos.z()+1, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x()+1, roundedPos.y(), roundedPos.z()+1, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x()+1, roundedPos.y()+1, roundedPos.z(), blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x(), roundedPos.y()+1, roundedPos.z()+1, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                        World.setBlock(roundedPos.x()+1, roundedPos.y()+1, roundedPos.z()+1, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                    }
+                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockToPlace.x, blockToPlace.y, true, false, 1, false);
                                     if (!player.creative) {
                                         //StackManager.removeFirstEntryInStack();
                                     }
