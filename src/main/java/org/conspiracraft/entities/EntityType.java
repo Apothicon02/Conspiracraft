@@ -5,6 +5,7 @@ import org.joml.Vector2i;
 public class EntityType {
     public String name;
     public Vector2i atlasOffset = null;
+    public float size = 1.f;
     public EntityType(String name) {
         this.name = name;
     }

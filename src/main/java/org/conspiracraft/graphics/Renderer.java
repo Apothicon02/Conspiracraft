@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
@@ -54,7 +55,6 @@ public class Renderer {
     public static VkCommandBuffer currentCmdBuffer;
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
-    public static List<Matrix4f> cubes = new ArrayList<>();
     //public static LinkedList<Integer> chunkVoxelPointerChanges = new LinkedList<>();
     public static void render() throws Exception {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -185,9 +185,9 @@ public class Renderer {
         drawStars();
         worldType.renderCelestialBodies(stack);
         pushUBO.updateLayer(0);
-        for (Matrix4f cube : cubes) {
-            pushUBO.updateAtlasOffset(EntityTypes.COW.atlasOffset);
-            drawCube(cube, new Vector4f(1.f));
+        for (Entity entity : entities) {
+            pushUBO.updateAtlasOffset(entity.type.atlasOffset);
+            drawCube(entity.matrix, new Vector4f(1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }

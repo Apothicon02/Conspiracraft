@@ -11,4 +11,5 @@ public class WorldType {
     public Vector3f getSun() {return null;}
     public void tick() {}
     public void generate() throws InterruptedException {}
+    public float gravity() {return 0.1f;}
 }

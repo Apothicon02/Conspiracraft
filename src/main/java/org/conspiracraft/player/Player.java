@@ -29,7 +29,6 @@ public class Player {
 
     public boolean creative = true;
     public float bobbing = 0f;
-    public float grav = 0.1f;
     public float jumpStrength = 0.6f;
     public float scale = 1;
     public float baseEyeHeight = 0.86f*scale;
@@ -82,7 +81,7 @@ public class Player {
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
         Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width)) : new Vector2i(0);
         boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
-        float modifiedGrav = grav;
+        float modifiedGrav = World.worldType.gravity();
         friction = 0.99f; //1-airFriction=maxFriction
         if (!flying) {
             if (blockIn.x() == BlockTypes.getId(BlockTypes.WATER)) {

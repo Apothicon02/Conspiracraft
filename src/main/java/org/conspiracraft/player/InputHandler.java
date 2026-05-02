@@ -1,14 +1,12 @@
 package org.conspiracraft.player;
 
-import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.entities.Entity;
+import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
-import org.conspiracraft.physics.DDAResult;
-import org.conspiracraft.physics.PhysicsHelper;
-import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
@@ -20,9 +18,9 @@ import java.nio.ByteBuffer;
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.conspiracraft.world.World.chunkSize;
+import static org.conspiracraft.world.World.entities;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
-import static org.lwjgl.sdl.SDLKeycode.SDL_KMOD_CAPS;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowPosition;
@@ -128,9 +126,13 @@ public class InputHandler {
                         r = (float) Math.toRadians(45);
                     }
                     if (keyRelease(SDL_SCANCODE_X)) {
-                        Renderer.cubes.removeLast();
+                        entities.removeLast();
                     } else if (keyRelease(SDL_SCANCODE_V)) {
-                        Renderer.cubes.addLast(new Matrix4f().translate(new Vector3f(player.pos).add(0, 2, 0)).rotateXYZ(r, r, 0));
+                        Entity entity = new Entity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
+                                new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)).rotateXYZ(r, r, 0),
+                                (float)(Math.random()*-0.1f));
+                        entity.vel = player.camera.getForward().mul(2);
+                        entities.addLast(entity);
                     }
                 }
             }

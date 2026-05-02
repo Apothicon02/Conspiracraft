@@ -484,6 +484,7 @@ void main() {
     float roughness = block.x == 1 ? 0.2f : 0.f;
     if (rasterDepth > depth) {
         isSky = false;
+        reverseNormShading = false;
         depth = rasterDepth;
         color = texture(rasterColors, uv);
         color.rgb = fromLinear(color.rgb);
