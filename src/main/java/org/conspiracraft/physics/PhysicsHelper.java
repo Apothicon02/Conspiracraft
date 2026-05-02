@@ -1,6 +1,8 @@
 package org.conspiracraft.physics;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.entities.Entity;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.*;
@@ -9,30 +11,21 @@ import java.lang.Math;
 import java.util.ArrayList;
 
 import static org.conspiracraft.utils.Utils.sign;
+import static org.conspiracraft.world.World.entities;
 
 public class PhysicsHelper {
     public static float voxelSize = 0.125f;
-    public static boolean colliding(float startX, float startY, float startZ, Vector3f size) {
-        for (float x = startX-size.x(); x <= startX+size.x(); x += voxelSize) {
-            for (float y = startY-size.y(); y <= startY+size.y(); y += voxelSize) {
-                for (float z = startZ - size.z(); z <= startZ+size.z(); z += voxelSize) {
-                    Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isCollidable) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-    public static Vector2i getAnyBlock(float startX, float startY, float startZ, Vector3f size) {
+    public static Vector2i getAnyBlock(AABB aabb) {
         Vector2i block = new Vector2i();
-        for (float x = startX-size.x(); x <= startX+size.x(); x += voxelSize) {
-            for (float y = startY-size.y(); y <= startY+size.y(); y += voxelSize) {
-                for (float z = startZ - size.z(); z <= startZ+size.z(); z += voxelSize) {
+        for (float x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
+            for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
+                for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isCollidable) {
-                        return blockIn;
+                        AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
+                        if (blockAABB.intersects(aabb)) {
+                            return blockIn;
+                        }
                     } else if (blockIn.x() > block.x()) {
                         block.set(blockIn); //return non-collidable block if none are collidable
                     }
@@ -40,6 +33,14 @@ public class PhysicsHelper {
             }
         }
         return block;
+    }
+    public static Entity getAnyEntity(AABB aabb) {
+        for (Entity entity : entities) {
+            if (aabb.intersects(entity.aabb)) {
+                return entity;
+            }
+        }
+        return null;
     }
     public static DDAResult dda(Vector3f pos, Vector3f ogDir, float maxDist) {
         Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
@@ -72,17 +73,23 @@ public class PhysicsHelper {
         return null;
     }
     public static void moveWithStepping(AABB objAABB, Vector3f vel) {
+        moveWithStepping(objAABB, vel, new ArrayList<>());
+    }
+    public static void moveWithStepping(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs) {
         Vector3f ogVel = new Vector3f(vel);
-        move(objAABB, vel);
+        move(objAABB, vel, new ArrayList<>(aabbs));
         if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
             vel.set(ogVel);
-            move(objAABB, new Vector3f(0, 1.f, 0));
-            move(objAABB, vel);
-            move(objAABB, new Vector3f(0, -1.f, 0));
+            move(objAABB, new Vector3f(0, 1.f, 0), new ArrayList<>(aabbs));
+            move(objAABB, vel, new ArrayList<>(aabbs));
+            move(objAABB, new Vector3f(0, -1.f, 0), new ArrayList<>(aabbs));
         }
     }
 
     public static void move(AABB objAABB, Vector3f vel) {
+        move(objAABB, vel, new ArrayList<>());
+    }
+    public static void move(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs) {
         AABB regionAABB = new AABB(
                 objAABB.xMin-1, objAABB.xMax+1,
                 objAABB.yMin-1, objAABB.yMax+1,
@@ -90,28 +97,27 @@ public class PhysicsHelper {
         if (vel.x() < 0) {regionAABB.xMin+=vel.x();} else {regionAABB.xMax+=vel.x();}
         if (vel.y() < 0) {regionAABB.yMin+=vel.y();} else {regionAABB.yMax+=vel.y();}
         if (vel.z() < 0) {regionAABB.zMin+=vel.z();} else {regionAABB.zMax+=vel.z();}
-        ArrayList<AABB> voxelAABBs = new ArrayList<>();
         for (float x = Math.max(0, regionAABB.xMin); x < Math.min(World.size-1, regionAABB.xMax); x+=1) {
             for (float y = Math.max(0, regionAABB.yMin); y < Math.min(World.height-1, regionAABB.yMax); y+=1) {
                 for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isSolid) {
-                        voxelAABBs.add(new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1)));
+                        aabbs.add(new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1)));
                     }
                 }
             }
         }
 
         Vector3f moveVec = new Vector3f(vel);
-        for (AABB aabb : voxelAABBs) {
+        for (AABB aabb : aabbs) {
             moveVec.x = objAABB.clipX(aabb, moveVec.x());
         }
         objAABB.move(moveVec.x(), 0, 0);
-        for (AABB aabb : voxelAABBs) {
+        for (AABB aabb : aabbs) {
             moveVec.y = objAABB.clipY(aabb, moveVec.y());
         }
         objAABB.move(0, moveVec.y(), 0);
-        for (AABB aabb : voxelAABBs) {
+        for (AABB aabb : aabbs) {
             moveVec.z = objAABB.clipZ(aabb, moveVec.z());
         }
         objAABB.move(0, 0, moveVec.z());

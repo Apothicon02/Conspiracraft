@@ -1,6 +1,7 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.entities.Entity;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
@@ -14,6 +15,9 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+
+import static org.conspiracraft.physics.PhysicsHelper.getAnyEntity;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -26,6 +30,7 @@ public class Player {
     public Inventory inv = new Inventory();
     public Vector3f selectedBlock = new Vector3f();
     public Vector3f prevSelectedBlock = new Vector3f();
+    public AABB playerAABB = new AABB(0, 0, 0,0,0, 0);
 
     public boolean creative = true;
     public float bobbing = 0f;
@@ -40,6 +45,8 @@ public class Player {
     public float speed = baseSpeed;
     public float sprintSpeed = 1.75f;
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
+    public static Entity entityOn = null;
+    public static Vector3f prevEntityOnPos = new Vector3f();
 
     public final Source breakingSource;
 
@@ -79,8 +86,15 @@ public class Player {
         newMovement.mul(superSprinting ? 10.f : 1.f);
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
-        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width)) : new Vector2i(0);
+        AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin-0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
+        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0);
         boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
+        if (!onSolid) {
+            entityOn = getAnyEntity(footAABB);
+            if (entityOn != null) {
+                onSolid = true;
+            }
+        }
         float modifiedGrav = World.worldType.gravity();
         friction = 0.99f; //1-airFriction=maxFriction
         if (!flying) {
@@ -118,15 +132,30 @@ public class Player {
             }
         }
         vel.max(new Vector3f(-3)).min((new Vector3f(3)));
-        AABB playerAABB = new AABB(
+        Vector3f entityMoveFactor = new Vector3f();
+        if (entityOn != null) {
+            Vector3f entityOnPos = new Vector3f();
+            entityOn.matrix.getTranslation(entityOnPos);
+            if (prevEntityOnPos != null) {
+                entityMoveFactor.set(new Vector3f(entityOnPos).sub(prevEntityOnPos));
+            }
+            prevEntityOnPos = entityOnPos;
+        } else {
+            prevEntityOnPos = null;
+        }
+        playerAABB.set(
                 pos.x()-width, pos.x()+width,
                 pos.y()-height, pos.y()+height,
                 pos.z()-width, pos.z()+width);
-        Vector3f totalVel = new Vector3f(movement).add(vel);
+        Vector3f totalVel = new Vector3f(movement).add(vel).add(entityMoveFactor);
+        ArrayList<AABB> aabbs = new ArrayList<>();
+        for (Entity entity : World.entities) {
+            aabbs.add(entity.aabb);
+        }
         if (sprinting && !flying) {
-            PhysicsHelper.moveWithStepping(playerAABB, totalVel);
+            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs);
         } else {
-            PhysicsHelper.move(playerAABB, totalVel);
+            PhysicsHelper.move(playerAABB, totalVel, aabbs);
         }
         if (totalVel.x() == 0) {movement.x = 0; vel.x = 0;}
         if (totalVel.y() == 0) {movement.y = 0; vel.y = 0;}

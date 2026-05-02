@@ -187,7 +187,11 @@ public class Renderer {
         pushUBO.updateLayer(0);
         for (Entity entity : entities) {
             pushUBO.updateAtlasOffset(entity.type.atlasOffset);
-            drawCube(entity.matrix, new Vector4f(1.f));
+            Matrix4f interpolatedMatrix = new Matrix4f(entity.matrix);
+            Vector3f pos = new Vector3f();
+            entity.matrix.getTranslation(pos);
+            interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(entity.prevPos, pos));
+            drawCube(interpolatedMatrix, new Vector4f(1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }

@@ -1,7 +1,5 @@
 package org.conspiracraft.physics;
 
-import org.conspiracraft.utils.Vector3b;
-
 public class AABB {
     public float xMin, xMax, yMin, yMax, zMin, zMax;
     public AABB(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
@@ -22,6 +20,15 @@ public class AABB {
         this.yMax = source.yMax;
         this.zMin = source.zMin;
         this.zMax = source.zMax;
+        return this;
+    }
+    public AABB set(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
+        this.zMin = zMin;
+        this.zMax = zMax;
         return this;
     }
     public AABB expand(float x, float y, float z) {
