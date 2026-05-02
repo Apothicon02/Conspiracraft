@@ -1,17 +1,13 @@
 package org.conspiracraft.physics;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.utils.Vector3b;
 import org.conspiracraft.world.World;
 import org.joml.*;
 
 import java.lang.Math;
 import java.util.ArrayList;
 
-import static org.conspiracraft.Main.player;
 import static org.conspiracraft.utils.Utils.sign;
 
 public class PhysicsHelper {
@@ -21,13 +17,29 @@ public class PhysicsHelper {
             for (float y = startY-size.y(); y <= startY+size.y(); y += voxelSize) {
                 for (float z = startZ - size.z(); z <= startZ+size.z(); z += voxelSize) {
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isSolid) {
+                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isCollidable) {
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+    public static Vector2i getAnyBlock(float startX, float startY, float startZ, Vector3f size) {
+        Vector2i block = new Vector2i();
+        for (float x = startX-size.x(); x <= startX+size.x(); x += voxelSize) {
+            for (float y = startY-size.y(); y <= startY+size.y(); y += voxelSize) {
+                for (float z = startZ - size.z(); z <= startZ+size.z(); z += voxelSize) {
+                    Vector2i blockIn = World.getBlock(x, y, z);
+                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isCollidable) {
+                        return blockIn;
+                    } else if (blockIn.x() > block.x()) {
+                        block.set(blockIn); //return non-collidable block if none are collidable
+                    }
+                }
+            }
+        }
+        return block;
     }
     public static DDAResult dda(Vector3f pos, Vector3f ogDir, float maxDist) {
         Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
@@ -60,10 +72,10 @@ public class PhysicsHelper {
         return null;
     }
     public static void moveWithStepping(AABB objAABB, Vector3f vel) {
-        Vector3f velAttempt = new Vector3f(vel);
+        Vector3f ogVel = new Vector3f(vel);
         move(objAABB, vel);
-        if (vel.x() != velAttempt.x() || vel.z() != velAttempt.z()) { //if obstructed horizontally
-            vel.set(velAttempt);
+        if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
+            vel.set(ogVel);
             move(objAABB, new Vector3f(0, 1.f, 0));
             move(objAABB, vel);
             move(objAABB, new Vector3f(0, -1.f, 0));

@@ -141,6 +141,9 @@ public class Utils {
     public static Vector3f sign(Vector3f vec) {
         return new Vector3f(sign(vec.x()), sign(vec.y()), sign(vec.z()));
     }
+    public static float furthestFromZeroMix(float first, float second, float mix) {
+        return mix(first, Math.abs(first) > Math.abs(second) ? first : second, mix);
+    }
     public static float furthestFromZero(float first, float second) {
         return Math.abs(first) > Math.abs(second) ? first : second;
     }

@@ -32,15 +32,14 @@ public class Player {
     public float grav = 0.1f;
     public float jumpStrength = 0.6f;
     public float scale = 1;
-    public float baseEyeHeight = 1.41f*scale;
+    public float baseEyeHeight = 0.86f*scale;
     public float eyeHeight = baseEyeHeight;
-    public float baseHeight = eyeHeight+(0.09f*scale);
+    public float baseHeight = eyeHeight+(0.04f*scale);
     public float height = baseHeight;
     public float width = 0.42f*scale;
-    public float baseSpeed = Math.max(0.33f, 0.33f*scale);
+    public float baseSpeed = Math.max(0.22f, 0.22f*scale);
     public float speed = baseSpeed;
     public float sprintSpeed = 1.75f;
-    public float airSpeed = 0.33f;
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
 
     public final Source breakingSource;
@@ -81,8 +80,8 @@ public class Player {
         newMovement.mul(superSprinting ? 10.f : 1.f);
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
-        Vector2i blockOn = inBounds ? World.getBlock(pos.x(), pos.y()-height-0.075f, pos.z()) : new Vector2i(0);
-        boolean canMove = flying || BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable || blockIn.x() == 1;
+        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width)) : new Vector2i(0);
+        boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
         float modifiedGrav = grav;
         friction = 0.99f; //1-airFriction=maxFriction
         if (!flying) {
@@ -98,21 +97,16 @@ public class Player {
                     friction *= 0.9f;
                     newMovement.mul(0.9f);
                 }
-            } else if (canMove) {
+            } else if (onSolid) {
                 friction *= 0.75f;
-            } else {
-                newMovement.mul(airSpeed);
             }
         } else {
             friction *= 0.5f;
         }
         movement.mul(friction);
-        if (canMove) {
-            movement.set(Utils.furthestFromZero(newMovement.x(), movement.x()), Utils.furthestFromZero(newMovement.y(), movement.y()), Utils.furthestFromZero(newMovement.z(), movement.z()));
-        }
+        movement.set(Utils.furthestFromZero(newMovement.x(), movement.x()), Utils.furthestFromZero(newMovement.y(), movement.y()), Utils.furthestFromZero(newMovement.z(), movement.z()));
         vel.mul(friction);
         if (!flying) {
-            boolean onSolid = PhysicsHelper.colliding(pos.x(), (pos.y() - height) - 0.075f, pos.z(), new Vector3f(width, 0.075f, width));
             if (!onSolid) {
                 vel.y -= modifiedGrav;
             } else {
@@ -130,7 +124,11 @@ public class Player {
                 pos.y()-height, pos.y()+height,
                 pos.z()-width, pos.z()+width);
         Vector3f totalVel = new Vector3f(movement).add(vel);
-        PhysicsHelper.moveWithStepping(playerAABB, totalVel);
+        if (sprinting && !flying) {
+            PhysicsHelper.moveWithStepping(playerAABB, totalVel);
+        } else {
+            PhysicsHelper.move(playerAABB, totalVel);
+        }
         if (totalVel.x() == 0) {movement.x = 0; vel.x = 0;}
         if (totalVel.y() == 0) {movement.y = 0; vel.y = 0;}
         if (totalVel.z() == 0) {movement.z = 0; vel.z = 0;}
