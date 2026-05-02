@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
@@ -128,7 +129,7 @@ public class InputHandler {
                     if (keyRelease(SDL_SCANCODE_X)) {
                         entities.removeLast();
                     } else if (keyRelease(SDL_SCANCODE_V)) {
-                        Entity entity = new Entity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
+                        AnimalEntity entity = new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)).rotateXYZ(r, r, 0),
                                 (float)(Math.random()*-0.1f));
                         entity.vel = player.camera.getForward().mul(2);

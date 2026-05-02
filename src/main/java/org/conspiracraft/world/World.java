@@ -119,24 +119,7 @@ public class World {
     public static List<Entity> entities = new ArrayList<>();
     public static void tick() {
         for (Entity entity : entities) {
-            Vector3f scale = new Vector3f();
-            entity.matrix.getScale(scale);
-            Vector3f halfScale = new Vector3f(scale).div(2);
-            Vector3f pos = new Vector3f(entity.aabb.xMin+halfScale.x(), entity.aabb.yMin+halfScale.y(), entity.aabb.zMin+halfScale.z());
-            boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
-            Vector2i blockOn = inBounds ?
-                    PhysicsHelper.getAnyBlock(pos.x(), (pos.y() - halfScale.y()) - 0.075f, pos.z(), new Vector3f(halfScale.x(), 0.075f, halfScale.z())) :
-                    new Vector2i(0);
-            boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
-            float friction = 0.99f; //1-airFriction=maxFriction
-            if (onSolid) {friction *= 0.75f;}
-            entity.vel.mul(friction);
-            float modifiedGrav = World.worldType.gravity();
-            if (!onSolid) {
-                entity.vel.y -= modifiedGrav;
-            }
-            PhysicsHelper.move(entity.aabb, entity.vel);
-            entity.matrix.setTranslation(entity.aabb.xMin, entity.aabb.yMin, entity.aabb.zMin+scale.z());
+            entity.tick();
         }
     }
 }
