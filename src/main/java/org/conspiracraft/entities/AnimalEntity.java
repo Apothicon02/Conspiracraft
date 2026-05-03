@@ -17,6 +17,7 @@ public class AnimalEntity extends Entity {
         super(type, matrix, scaleOffset);
     }
 
+    public final static Vector3f up = new Vector3f(0, 1, 0);
     @Override
     public void tick() {
         matrix.getTranslation(prevPos);
@@ -32,7 +33,7 @@ public class AnimalEntity extends Entity {
         if (onSolid) {
             friction *= 0.75f;
             if (Math.random() < 0.05f) {
-                vel.add(new Vector3f((float) (Math.random()-0.5f), 0, (float) (Math.random()-0.5f)).div(2));
+                vel.add(new Vector3f((float) (Math.random()-0.5f), 0, (float) (Math.random()-0.5f)));
             }
         }
         vel.mul(friction);
@@ -41,6 +42,7 @@ public class AnimalEntity extends Entity {
             vel.y -= modifiedGrav;
         }
         PhysicsHelper.moveWithStepping(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
-        matrix.setTranslation(aabb.xMin, aabb.yMin, aabb.zMin+scale.z());
+        Vector3f dir = new Vector3f(vel).normalize().negate();
+        matrix.identity().lookAlong(dir, up).invert().setTranslation(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z()).scale(scale);
     }
 }

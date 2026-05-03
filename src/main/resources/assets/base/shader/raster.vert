@@ -23,7 +23,7 @@ layout(location = 1) out vec3 pos;
 layout(location = 2) out vec4 color;
 
 void main() {
-    localPos = (position-vec3(0, 1, 0))*vec3(1, -1, 1);
+    localPos = -(position-0.5f);
     color = pushUbo.color;
     mat4 untranslatedModel = pushUbo.model;
     untranslatedModel[3] = vec4(0, 0, 0, 1);

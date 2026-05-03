@@ -34,6 +34,7 @@ public class Entity {
         matrix.getTranslation(prevPos);
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
+        matrix.identity();
         Vector3f halfScale = new Vector3f(scale).div(2);
         Vector3f pos = new Vector3f(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
@@ -50,6 +51,6 @@ public class Entity {
             vel.y -= modifiedGrav;
         }
         PhysicsHelper.move(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
-        matrix.setTranslation(aabb.xMin, aabb.yMin, aabb.zMin+scale.z());
+        matrix.setTranslation(aabb.xMin+scale.x(), aabb.yMin+scale.y(), aabb.zMin+scale.z());
     }
 }
