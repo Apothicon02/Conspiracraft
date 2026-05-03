@@ -94,6 +94,7 @@ ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
 layout(set = 0, binding = 5) uniform sampler3D atlas;
+const float alphaMax = 0.95f;
 vec4 fromLinear(vec4 linearRGB){
     bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
     vec4 higher = vec4(1.055)*pow(linearRGB, vec4(1.0/2.4)) - vec4(0.055);
@@ -261,6 +262,31 @@ vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
     return uv3d(vec3(worldPos), stageSize, nextStageSize);
 }
 
+vec3 firstTintAddition = vec3(0);
+vec4 prevTintAddition = vec4(0);
+vec4 tint = vec4(1);
+vec3 tintNormal = vec3(0);
+void addTint(vec4 voxelColor, vec3 normal, bool shadow) {
+    if (tintNormal == vec3(0)) {
+        tintNormal = normal;
+    }
+    if (prevTintAddition != voxelColor) {
+        float brightness = dot((tint.a < 1 ? -1 : 1) * normal, globalUbo.skylight.xyz+vec3(0, height, 0))*-0.0001f;
+        float tintMul = clamp(0.875f+brightness, 0.75f, 1.f);
+        prevTintAddition = voxelColor;
+        if (firstTintAddition == vec3(0)) {
+            firstTintAddition = voxelColor.rgb*tintMul;
+        }
+        vec3 shadeTintFactor = (shadow ? vec3(1-voxelColor.r, 1-voxelColor.g, 1-voxelColor.b)*(tint.a == 1 ? 1.5f : 1.f) : vec3(1));
+        tint.rgb -= shadeTintFactor * abs(1-voxelColor.rgb)*tintMul*tint.rgb;
+        tint.a -= max(shadeTintFactor.r, max(shadeTintFactor.g, shadeTintFactor.b)) * voxelColor.a*tint.a;
+    }
+}
+
+ivec3 firstVoxelRayPos = ivec3(0);
+ivec3 firstBlockPos = ivec3(0);
+vec3 firstHitPos = vec3(0);
+ivec2 firstBlock = ivec2(0);
 bool reverseNormShading = false;
 vec3 ogChunkPos = vec3(0);
 vec3 raySign = vec3(0);
@@ -366,19 +392,27 @@ vec4 dda(bool shadow) {
                     block = getBlock(blockPos);
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
                     vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
-                    if (voxelColor.a > 0.f) {
+                    if (voxelColor.a > 0) {
                         flatNormal = -ddaMask*raySign;
-                        ddaPos = ivec3(voxelStartPos);
-                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
                         normal = flatNormal;
-                        shadowPos = (hitPos-(flatNormal*0.002f))+vec3(0, voxelSize, 0);
-                        if (getBlockAndVoxel(shadowPos+vec3(0, voxelSize, 0)).a < 0.95f) {
-                            normal = vec3(0, 1, 0);
+                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
+                        if (firstBlock.x == 0) {
+                            firstBlockPos = blockPos;
+                            firstBlock = block;
+                            firstHitPos = hitPos;
                         }
-                        if (voxelColor.a < 1.f) {
-                            reverseNormShading = true;
+                        if (voxelColor.a > alphaMax) {
+                            shadowPos = (hitPos-(flatNormal*0.002f))+vec3(0, voxelSize, 0);
+                            if (getBlockAndVoxel(shadowPos+vec3(0, voxelSize, 0)).a < alphaMax) {
+                                normal = vec3(0, 1, 0);
+                            }
+                            if (voxelColor.a < 1.f) {
+                                reverseNormShading = true;
+                            }
+                            return vec4(voxelColor.rgb, 1.f);
+                        } else {
+                            addTint(voxelColor, normal, shadow);
                         }
-                        return vec4(voxelColor.rgb, 1.f);
                     } else {
                         stage = 0;
                         stepAnything = false;
@@ -397,14 +431,26 @@ vec4 dda(bool shadow) {
                 sideDist = blockSideDist;
             } else {
                 vec4 voxelColor = sampleAtlas(ddaPos.x, ddaPos.y, ddaPos.z, block.x, block.y);
-                if (voxelColor.a > 0.f) {
+                if (voxelColor.a > 0) {
                     flatNormal = -ddaMask*raySign;
                     normal = flatNormal;
                     voxelPos = blockPos+(ddaPos*voxelSize)+(flatNormal*0.001f);
                     vec3 subvoxelPos = (uv3d(voxelPos, voxelSize, blockSize)/blockSize)*voxelSize;
                     hitPos = voxelPos+(subvoxelPos);
-                    shadowPos = hitPos;
-                    return vec4(voxelColor.rgb, 1.f);
+                    if (firstBlock.x == 0) {
+                        firstVoxelRayPos = ivec3(voxelPos*blockSize);
+                        firstBlock = block;
+                        firstHitPos = hitPos;
+                    }
+                    if (voxelColor.a > alphaMax) {
+                        shadowPos = hitPos;
+                        return vec4(voxelColor.rgb, 1.f);
+                    } else {
+                        addTint(voxelColor, normal, shadow);
+                        stage = 1;
+                        ddaPos = blockRayPos;
+                        sideDist = blockSideDist;
+                    }
                 }
             }
         }
@@ -469,6 +515,7 @@ void main() {
     vec3 primaryNormal = normal;
     vec3 primaryFlatNormal = flatNormal;
     vec3 primaryLightPos = hitPos;
+    vec3 primaryTintLightPos = firstHitPos;
     vec3 primaryShadowPos = shadowPos;
     bool isSky = color.a < 1;
     float depth = 0.f;
@@ -480,8 +527,8 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = block.x == 1 ? 1.f : 0.f;
-    float roughness = block.x == 1 ? 0.2f : 0.f;
+    float reflectivity = tint.a < 1 ? 1.f : 0.f;
+    float roughness = block.x == 1 ? 0.2f : (tint.a < 1 ? 0.05f : 0.f);
     if (rasterDepth > depth) {
         isSky = false;
         reverseNormShading = false;
@@ -506,29 +553,34 @@ void main() {
     } else {
         color.rgb = mipmap(color.rgb);
     }
+    vec3 primaryFirstBlockPos = firstBlockPos;
+    vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
+    vec3 primaryTintNormal = tintNormal;
+    vec4 primaryTint = tint;
     float shadowFactor = 1.f;
     if (!celestial) {
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
-        ivec2 primaryBlock = block;
-        vec3 absNorm = abs(primaryFlatNormal);
-        vec3 causticPos = block.x == 1 ? vec3(primaryBlockPos) : primaryLightPos;
-        vec3 causticVoxelPos = primaryVoxelRayPos;
-        if (block.x != 1) {
+        vec3 causticPos = firstBlock.x == 1 ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
+        vec3 causticVoxelPos = primaryTint.a < 1 ? primaryFirstVoxelRayPos : primaryVoxelRayPos;
+        if (firstBlock.x != 1) {
             causticVoxelPos = vec3(0);
         }
-        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(block.x == 1, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
-        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(block.x == 1, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
-        getCaustic(block.x == 1, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
-        if (primaryBlock.x == 1 && abs(causticness) < 0.033f) {
+        vec3 absNorm = abs(tint.a < 1 ? primaryTintNormal : primaryFlatNormal);
+        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(firstBlock.x == 1, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
+        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(firstBlock.x == 1, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
+        getCaustic(firstBlock.x == 1, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
+        if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
             color = vec4(1);
+            tint = vec4(1);
+            primaryTint = vec4(1);
         }
         if (causticness > 0) {
             causticness *= -2;
         } else {
             causticness *= 5;
         }
-        vec3 tiltedNormal = primaryNormal*causticness;
+        vec3 tiltedNormal = (tint.a < 1 ? primaryTintNormal : primaryNormal)*causticness;
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
@@ -550,17 +602,18 @@ void main() {
             }
         }
         if (reflectivity > 0.f) {
-            vec3 idealReflectDir = reflect(ogDir, primaryNormal);
+            vec3 idealReflectDir = reflect(ogDir, primaryTint.a < 1 ? primaryTintNormal : primaryNormal);
             vec3 reflectDir = unzeroVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
             vec3 viewDir = normalize(ogDir);
             vec3 halfVec = normalize(viewDir-reflectDir);
             float ang = max(dot(viewDir, halfVec), 0.f);
             vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
-            rayPos = primaryLightPos;
+            vec3 reflectPos = primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos;
+            rayPos = reflectPos;
             rayDir = reflectDir;
             vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
             if (reflectColor.a < 1.f) {
-                reflectColor = getLightingColor(primaryLightPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
+                reflectColor = getLightingColor(reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, 1, false);
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
                 vec3 lightPos = hitPos+(primaryFlatNormal*voxelSize);
@@ -576,6 +629,12 @@ void main() {
     } else {
         outNormal = vec4(primaryFlatNormal, 1);
     }
+    primaryTint.rgb = mix(primaryTint.rgb, firstTintAddition, 0.5f);
+    float fogginess = clamp((sqrt(distance(camPos, primaryTintLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryTintLightPos.y, 63, 80, 1, 1+abs(noise(primaryTintLightPos.xz)*0.67f)), 0.f, 1.f);
+    primaryTint.rgb = mix(primaryTint.rgb, getLightingColor(primaryTintLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
+    float tintAmt = abs(1-primaryTint.a);
+    color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);
+    outNormal.a = mix(outNormal.a, 1, tintAmt);
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(vec3(shadowFactor), 1);
     gl_FragDepth = depth;

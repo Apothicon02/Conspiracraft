@@ -186,12 +186,12 @@ public class Earth extends WorldType {
                                 if (lake.visited.get(packedPos)) {
                                     biomes[packedPos] = Biomes.LAKE.id;
                                     int lakeBed = heightmap[packedPos];
-                                    if (lake.pos.y() <= lakeBed+1) {
-                                        heightmap[packedPos]++;
-                                    } else {
-                                        setBlock(x, lake.pos.y(), z, 1, 14);
-                                        for (int y = lake.pos.y()-1; y > lakeBed; y--) {
-                                            setBlock(x, y, z, 1, 15);
+                                    if (lake.pos.y() > lakeBed+1) {
+                                        if (getBlock(x, lake.pos.y()-1, z).x() == 0) {
+                                            setBlock(x, lake.pos.y()-1, z, 1, 14);
+                                            for (int y = lake.pos.y()-2; y > lakeBed; y--) {
+                                                setBlock(x, y, z, 1, 15);
+                                            }
                                         }
                                     }
                                 }
