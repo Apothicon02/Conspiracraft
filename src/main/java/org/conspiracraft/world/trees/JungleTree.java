@@ -1,0 +1,52 @@
+package org.conspiracraft.world.trees;
+
+import kotlin.Pair;
+import org.conspiracraft.world.trees.canopies.JungleCanopy;
+import org.conspiracraft.world.trees.trunks.TwistingTrunk;
+import org.joml.Vector2i;
+import org.joml.Vector3i;
+import org.joml.Vector4i;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import static org.conspiracraft.world.World.*;
+
+public class JungleTree {
+    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
+        if (blockOn.x == 2) {
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, overgrown, 1);
+            boolean colliding = false;
+            Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
+            int minCollisionY = y+5;
+            outerLoop:
+            for (Vector3i canopyPos : generatedTrunk.getSecond()) {
+                Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
+                for (Vector3i pos : canopy.keySet()) {
+                    if (pos.y > minCollisionY && inBounds(pos) && !blocks.containsKey(pos) && getBlock(pos.x, pos.y, pos.z).x != 0) {
+                        colliding = true;
+                        break outerLoop;
+                    }
+                }
+                blocks.putAll(canopy);
+            }
+            if (!colliding) {
+                blocks.forEach((pos, block) -> {
+                    if (inBounds(pos)) {
+                        setBlock(pos.x, pos.y, pos.z, block.x, block.y);
+                        int condensedPos = packPos(pos.x, pos.z);
+                        int surfaceY = heightmap[condensedPos];
+                        heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                        for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
+                            //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
+                        }
+                    }
+                });
+            }
+            return !colliding;
+        }
+        return false;
+    }
+}

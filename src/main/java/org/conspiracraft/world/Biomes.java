@@ -8,6 +8,7 @@ public class Biomes {
     public static Biome LAKE = create();
     public static Biome TEMPERATE = create();
     public static Biome TAIGA = create();
+    public static Biome CHERRY_GROVE = create();
     public static Biome SNOWY_PEAK = create();
     public static Biome SNOWY_TAIGA = create();
     public static Biome DESERT = create();

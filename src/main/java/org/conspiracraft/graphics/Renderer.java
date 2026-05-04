@@ -247,7 +247,7 @@ public class Renderer {
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
-        Random starRand = new Random(911);
+        Random starRand = new Random(seed);
         for (int i = 0; i < 1024; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)

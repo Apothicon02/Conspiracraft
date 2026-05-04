@@ -3,12 +3,9 @@ package org.conspiracraft.world;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.blocks.entities.BlockEntity;
-import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.physics.PhysicsHelper;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.ArrayDeque;
@@ -17,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class World {
+    public static int seed = 67;
     public static int size = 4096;
     public static int halfSize = size/2;
     public static int quarterSize = size/4;

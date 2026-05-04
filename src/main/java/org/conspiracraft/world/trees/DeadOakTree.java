@@ -8,14 +8,15 @@ import org.joml.Vector4i;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static org.conspiracraft.world.World.*;
 
 public class DeadOakTree {
-    public static void generate(Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType) {
+    public static void generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType) {
         if (blockOn.x == 2 || blockOn.x == 23) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(x, y, z, maxHeight, logType, logSubType, true, 8);
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, true, 8);
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             blocks.forEach((pos, block) -> {
                 if (inBounds(pos)) {

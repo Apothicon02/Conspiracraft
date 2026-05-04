@@ -6,10 +6,11 @@ import org.joml.Vector3i;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class TwistingTrunk extends Trunk {
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(int oX, int oY, int oZ, int trunkHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
         Set<Vector3i> canopies = new HashSet<>();
 
@@ -23,9 +24,9 @@ public class TwistingTrunk extends Trunk {
             twistable--;
             boolean branch = false;
             Vector3i dir = new Vector3i(0, 0, 0);
-            if (height > oY+2 && twistable <= 0 && Math.random()*10 < 4) {
-                int xOff = (int) ((Math.random()*20)-10);
-                int zOff = (int) ((Math.random()*20)-10);
+            if (height > oY+2 && twistable <= 0 && random.nextFloat()*10 < 4) {
+                int xOff = (int) ((random.nextFloat()*20)-10);
+                int zOff = (int) ((random.nextFloat()*20)-10);
                 boolean xPositive = xOff >= prevXPositive;
                 boolean zPositive = zOff >= prevZPositive;
                 if (xPositive) {
@@ -52,7 +53,7 @@ public class TwistingTrunk extends Trunk {
             if (branch && pos.y >= minBranch) {
                 canopies.add(makeBranch(map, pos, dir, blockType, blockSubType));
                 if (overgrown) {
-                    canopies.add(makeBranch(map, pos, new Vector3i(dir.x * (Math.random() >= 0.5f ? 1 : 0), +2, dir.z * (Math.random() >= 0.5f ? 1 : 0)), blockType, blockSubType));
+                    canopies.add(makeBranch(map, pos, new Vector3i(dir.x * (random.nextFloat() >= 0.5f ? 1 : 0), +2, dir.z * (random.nextFloat() >= 0.5f ? 1 : 0)), blockType, blockSubType));
                 }
             }
             if (pos.y == maxHeight) {

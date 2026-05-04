@@ -5,14 +5,12 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
+import org.conspiracraft.blocks.types.BlockType;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.EntityTypes;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.shapes.Blob;
-import org.conspiracraft.world.shapes.Cube;
-import org.conspiracraft.world.shapes.Pillar;
-import org.conspiracraft.world.trees.DeadOakTree;
-import org.conspiracraft.world.trees.PalmTree;
+import org.conspiracraft.world.shapes.*;
+import org.conspiracraft.world.trees.*;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -110,7 +108,7 @@ public class Earth extends WorldType {
             int startX = thread * heightmapInterval;
             int endX  = Math.min(startX + heightmapInterval, sizeChunks);
             pool.submit(() -> {
-                Random rand = new Random();
+                Random rand = new Random(World.seed);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         short minElevation = (short) (height - 1);
@@ -149,7 +147,7 @@ public class Earth extends WorldType {
                                 short finalElevation = (short) Math.max(islands, 10 + (seaElevation * 56) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation);
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
-                                biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? Biomes.DESERT.id : islandness > 0 ? Biomes.TROPICAL_ISLAND.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? Biomes.SNOWY_TAIGA.id : centBiomeFactor < 0.4f ? Biomes.TAIGA.id : Biomes.TEMPERATE.id))));
+                                biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? Biomes.DESERT.id : islandness > 0 ? Biomes.TROPICAL_ISLAND.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? Biomes.SNOWY_TAIGA.id : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? Biomes.TAIGA.id : Biomes.TEMPERATE.id))))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.1f, undesertness)) {
@@ -213,7 +211,7 @@ public class Earth extends WorldType {
             int startX = thread * surfaceInterval;
             int endX  = Math.min(startX + surfaceInterval, sizeChunks);
             pool.submit(() -> {
-                Random rand = new Random();
+                Random rand = new Random(World.seed);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         int cY = chunksMinElevations[packChunkPos(cX, cZ)] / chunkSize;
@@ -242,7 +240,7 @@ public class Earth extends WorldType {
                                 if (flat) {
                                     int sand = (elevation < 64 ? 73 : 23);
                                     int blockType = biome == Biomes.LAKE.id ? 73 : (biome == Biomes.DESERT.id ? sand : (biome == Biomes.SNOWY_PEAK.id || biome == Biomes.SNOWY_TAIGA.id ? 54 : (elevation < 66 ? sand : 2)));
-                                    int blockSubtype = elevation >= 66 && biome == Biomes.TAIGA.id ? 1 : 0;
+                                    int blockSubtype = elevation >= 66 && (biome == Biomes.TAIGA.id || biome == Biomes.CHERRY_GROVE.id) ? 1 : 0;
                                     if (blockType == 2) {
                                         float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                         if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f) {
@@ -250,7 +248,7 @@ public class Earth extends WorldType {
                                         } else if (rand.nextFloat() < 0.003f) {
                                             World.setBlock(x, elevation + 1, z, 18, rand.nextInt(3));
                                         } else if (rand.nextFloat() < 0.3f && rand.nextFloat() > foliageNoise) {
-                                            World.setBlock(x, elevation + 1, z, 4, (biome == Biomes.TAIGA.id ? 4 : 0) + rand.nextInt(3));
+                                            World.setBlock(x, elevation + 1, z, 4, ((biome == Biomes.TAIGA.id || biome == Biomes.CHERRY_GROVE.id) ? 4 : 0) + rand.nextInt(3));
                                         }
                                     }
                                     World.setBlock(x, elevation, z, blockType, blockSubtype);
@@ -280,7 +278,7 @@ public class Earth extends WorldType {
             int startX = thread * featuresInterval;
             int endX  = Math.min(startX + featuresInterval, sizeChunks);
             pool.submit(() -> {
-                Random rand = new Random();
+                Random rand = new Random(World.seed);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
@@ -300,29 +298,48 @@ public class Earth extends WorldType {
                                 } else if (!snowy && blockOn.x == 2) {
                                     if (biome == Biomes.TROPICAL_ISLAND.id) {
                                         if (randomNumber < 0.0067f) {
-                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
-                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                        }
+                                    } else if (biome == Biomes.TAIGA.id) {
+                                        if (randomNumber < 0.0004f) {
+                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        } else if (randomNumber < 0.00045f || randomNumber < featureNoise / 50) {
+                                            int maxHeight = rand.nextInt(19) + 5;
+                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                        } else if (randomNumber < 0.0015f) {
+                                            int maxHeight = rand.nextInt(6) + 12;
+                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                        }
+                                    } else if (biome == Biomes.CHERRY_GROVE.id) {
+                                        if (randomNumber < 0.0004f) {
+                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        } else if (randomNumber < 0.005f) {
+                                            int maxHeight = rand.nextInt(16) + 12;
+                                            int radius = rand.nextInt(2) + 3;
+                                            boolean overgrown = rand.nextInt(4) == 0;
+                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.getId(BlockTypes.CHERRY_LOG), 0, BlockTypes.getId(BlockTypes.CHERRY_LEAVES), 0, overgrown);
                                         }
                                     } else {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         } else if (randomNumber < 0.0008f || randomNumber < featureNoise / 50) {
-                                            for (int y = elevation - 1; y < elevation + 10; y++) {
-                                                World.setBlock(x, y, z, 16, 0);
-                                            }
-                                            Blob.generate(blockOn, x, elevation + 10, z, 17, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            int maxHeight = rand.nextInt(6) + 12;
+                                            int leavesHeight = rand.nextInt(3) + 3;
+                                            int radius = rand.nextInt(4) + 6;
+                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
                                         }
                                     }
-                                } else if (blockOn.x == 73 || (biome == Biomes.TROPICAL_ISLAND.id && blockOn.x == 2)) {
+                                } else if ((blockOn.x == 73 && (biome == Biomes.DESERT.id || biome == Biomes.TEMPERATE.id)) || (biome == Biomes.TROPICAL_ISLAND.id && blockOn.x == 2)) {
                                     if (blockIn.x() != 1) {
                                         if (randomNumber < 0.0067f) {
-                                            PalmTree.generate(blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         }
                                     }
                                 } else if (blockOn.x == 23 && biome == Biomes.DESERT.id) {
                                     if (randomNumber < 0.002f) {
-                                        double deadBushChance = Math.random();
+                                        double deadBushChance = rand.nextFloat();
                                         if (deadBushChance < 0.03) {
                                             int variant = deadBushChance < 0.015 ? 0 : 1;
                                             Blob.generate(blockOn, x, elevation - 3 + variant, z + variant, 24, 0, 3 + variant);
@@ -335,14 +352,14 @@ public class Earth extends WorldType {
                                             Blob.generate(blockOn, x + 1 + variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
                                         } else if (deadBushChance < 0.2) {
                                             if (deadBushChance > 0.19) {
-                                                int maxHeight = (int) (Math.random() * 6) + 12;
-                                                DeadOakTree.generate(blockOn, x, elevation, z, maxHeight, 16, 0);
-                                                Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((Math.random() + 1) * 3)), new int[]{2, 23}, true);
+                                                int maxHeight = (int) (rand.nextFloat() * 6) + 12;
+                                                DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
+                                                Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
                                             } else {
                                                 setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
                                             }
                                         } else {
-                                            Pillar.generate(blockOn, x, elevation + 1, z, (int) (Math.random() * 6) + 2, 29, 0);
+                                            Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, 29, 0);
                                         }
                                     }
                                 }
@@ -371,7 +388,7 @@ public class Earth extends WorldType {
             int startX = thread * cloudInterval;
             int endX = Math.min(startX + cloudInterval, sizeChunks);
             pool.submit(() -> {
-                Random rand = new Random();
+                Random rand = new Random(World.seed);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks

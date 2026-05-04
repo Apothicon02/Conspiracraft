@@ -52,9 +52,8 @@ public class PalmCanopy extends Canopy {
         addToMap(map, Utils.addVec(pos, northSouth*7, -6, eastWest*7), random, trunkDist, origin, treeOrigin);
     }
     
-    public static Map<Vector3i, Vector2i> generateCanopy(Map<Vector3i, Vector2i> blocks, int x, int y, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
+    public static Map<Vector3i, Vector2i> generateCanopy(Random random, Map<Vector3i, Vector2i> blocks, int x, int y, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
         Vector3i origin = new Vector3i(x, y, z);
-        Random random = new Random();
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
 
         if (origin.y()-treeOrigin.y() > 12) {
