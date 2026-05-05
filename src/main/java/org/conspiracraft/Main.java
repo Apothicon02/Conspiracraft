@@ -8,6 +8,8 @@ import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public class Main {
         events = new SDL_Event(eventContainer);
         window = new Window();
         AudioController.init();
+        Files.createDirectories(Path.of(mainFolder));
+        Settings.load();
         Player.create();
         double timeAccum = 0;
         long prevTime = System.nanoTime();
@@ -83,6 +87,7 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
+        Settings.save();
         Window.graphics.cleanup();
     }
 }

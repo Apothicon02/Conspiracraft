@@ -28,6 +28,17 @@ float randomFloat(int y) {
     int x = int(mod(gl_FragCoord.x, 4.0));
     return SSAO_NOISE[x * 4 + y].x;
 }
+//uint pcg(uint v) {
+//    uint state = v * uint(747796405) + uint(2891336453);
+//    uint word = ((state >> ((state >> uint(28)) + uint(4))) ^ state) * uint(277803737);
+//    return (word >> uint(22)) ^ word;
+//}
+//float randomFloat(uint p) {
+//    return ((float(pcg(p)) / float(uint(0xffffffff)))-0.5f)*2;
+//}
+//vec3 randomVec() {
+//    return vec3(randomFloat((uint(gl_FragCoord.x)%4u)), randomFloat(uint(gl_FragCoord.y)%4u), 0);
+//}
 const float AO_RADIUS = 1.f;
 const float AO_STRENGTH = 3.f;
 const int KERNEL_SIZE = 32; //reduce to something like 8 when taa is enabled.
@@ -43,6 +54,8 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 
 float getAO(float depth, vec3 normal, float bias) {
     vec3 posVS = reconstructViewPos(uv.xy, depth);
+    //    mat3 normalMatrix = transpose(inverse(mat3(globalUbo.view)));
+    //    vec3 normalVS = normalize(normalMatrix * normal);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 randVec = randomVec();
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
@@ -50,7 +63,7 @@ float getAO(float depth, vec3 normal, float bias) {
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        float radius = (randomFloat(i).x > -0.5f ? 0.125f : AO_RADIUS);
+        float radius = randomFloat(i) > -0.5f ? 0.125f : AO_RADIUS;//float radius = randomFloat(i) > -0.5f ? 0.125f : AO_RADIUS;
         vec3 sampleVec = TBN * SSAO_KERNEL[i];
         sampleVec = posVS + sampleVec * radius;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
