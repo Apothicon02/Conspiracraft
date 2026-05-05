@@ -1,6 +1,8 @@
 package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
+import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.world.trees.canopies.BlobCanopy;
 import org.conspiracraft.world.trees.canopies.SquareCanopy;
 import org.conspiracraft.world.trees.trunks.ThickTrunk;
 import org.joml.Vector2i;
@@ -12,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class RedwoodTree {
     public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int branchChance) {
@@ -20,16 +23,12 @@ public class RedwoodTree {
             boolean colliding = false;
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             int minCollisionY = y+5;
-            outerLoop:
             for (Vector3i canopyPos : generatedTrunk.getSecond()) {
                 Map<Vector3i, Vector2i> canopy = SquareCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, leavesHeight);
-                for (Vector3i pos : canopy.keySet()) {
-                    if (pos.y > minCollisionY && inBounds(pos) && !blocks.containsKey(pos) && getBlock(pos.x, pos.y, pos.z).x != 0) {
-                        colliding = true;
-                        break outerLoop;
-                    }
+                if (!integrateCanopy(canopy, blocks, minCollisionY)) {
+                    colliding = true;
+                    break;
                 }
-                blocks.putAll(canopy);
             }
             if (!colliding) {
                 blocks.forEach((pos, block) -> {

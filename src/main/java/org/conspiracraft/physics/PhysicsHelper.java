@@ -61,7 +61,7 @@ public class PhysicsHelper {
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
 
-            int axis = (int) (mask.x() * 0 + mask.y() * 1 + mask.z() * 2);
+            int axis = (int) (mask.y() + (mask.z() * 2));
             travelled = sideDist.get(axis);
             sideDist.setComponent(axis, travelled + dist.get(axis));
             ddaPos.setComponent(axis, ddaPos.get(axis) + (int) raySign.get(axis));

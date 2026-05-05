@@ -2,11 +2,10 @@ package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
 import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.world.trees.canopies.JungleCanopy;
-import org.conspiracraft.world.trees.trunks.TwistingTrunk;
+import org.conspiracraft.world.trees.canopies.BlobCanopy;
+import org.conspiracraft.world.trees.trunks.ThickTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import org.joml.Vector4i;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,15 +15,19 @@ import java.util.Set;
 import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
-public class JungleTree {
-    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
+public class GiantOakTree {
+    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int branchChance) {
         if (blockOn.x == 2) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, overgrown, 1);
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ThickTrunk.generateTrunk(random, x, y, z, maxHeight, false, branchChance, logType, logSubType);
             boolean colliding = false;
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             int minCollisionY = y+5;
             for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-                Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
+                int eRadius = radius;
+                if (canopyPos.y() < y+(leavesHeight*2)) {
+                    eRadius /= 8;
+                }
+                Map<Vector3i, Vector2i> canopy = BlobCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
                 if (!integrateCanopy(canopy, blocks, minCollisionY)) {
                     colliding = true;
                     break;

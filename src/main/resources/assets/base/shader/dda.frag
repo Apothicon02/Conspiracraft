@@ -617,20 +617,20 @@ void main() {
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
                 vec3 lightPos = hitPos+(primaryFlatNormal*voxelSize);
-                float fogginess = clamp((sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.15f)*gradient(lightPos.y, 63, 80, 1, 1+abs(noise(lightPos.xz)/3)), 0.f, 1.f);
+                float fogginess = clamp((sqrt(distance(camPos, lightPos)/(renderDistance*0.66f))-0.25f)*gradient(lightPos.y, 63, 80, 1, 1+abs(noise(lightPos.xz)/3)), 0.f, 1.f);
                 reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(lightPos, vec4(0, 0, 0, 1.f), false, fogginess, false).rgb, fogginess);
             }
             color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
         }
         color.rgb *= lighting;
-        float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
+        float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
         color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
         outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
         outNormal = vec4(primaryFlatNormal, 1);
     }
     primaryTint.rgb = mix(primaryTint.rgb, firstTintAddition, 0.5f);
-    float fogginess = clamp((sqrt(distance(camPos, primaryTintLightPos)/(renderDistance*0.66f))-0.15f)*gradient(primaryTintLightPos.y, 63, 80, 1, 1+abs(noise(primaryTintLightPos.xz)*0.67f)), 0.f, 1.f);
+    float fogginess = clamp((sqrt(distance(camPos, primaryTintLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryTintLightPos.y, 63, 80, 1, 1+abs(noise(primaryTintLightPos.xz)*0.67f)), 0.f, 1.f);
     primaryTint.rgb = mix(primaryTint.rgb, getLightingColor(primaryTintLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
     float tintAmt = abs(1-primaryTint.a);
     color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);

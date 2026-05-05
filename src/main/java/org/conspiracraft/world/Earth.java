@@ -289,7 +289,7 @@ public class Earth extends WorldType {
                                 Vector2i blockOn = getBlock(x, elevation, z);
                                 Vector2i blockIn = getBlock(x, elevation+1, z);
                                 float randomNumber = rand.nextFloat();
-                                float featureNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
+                                float featureNoise = SimplexNoise.noise(x / 300.f, z / 300.f);
                                 float featureNoiseSmall = SimplexNoise.noise(x / 100.f, z / 100.f);
                                 double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
                                 double eleFactor = elevation + (rockNoise * 50);
@@ -351,11 +351,21 @@ public class Earth extends WorldType {
                                     } else {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.0008f || randomNumber < featureNoise / 50) {
-                                            int maxHeight = rand.nextInt(6) + 12;
-                                            int leavesHeight = rand.nextInt(3) + 3;
-                                            int radius = rand.nextInt(4) + 6;
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, 16, 0, 17, 0);
+                                        } else if (randomNumber < featureNoise / 10) {
+                                            int maxHeight = rand.nextInt(25, 32);
+                                            int radius = rand.nextInt(20, 32);
+                                            int leavesHeight = 8;
+                                            int branchChance = 1;
+                                            GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.getId(BlockTypes.OAK_LOG), 0, BlockTypes.getId(BlockTypes.OAK_LEAVES), 0, branchChance);
+                                        } else if (randomNumber > 0.002 && randomNumber < 0.002125f) {
+                                            int maxHeight = rand.nextInt(16) + 12;
+                                            int radius = rand.nextInt(2) + 3;
+                                            boolean overgrown = rand.nextInt(4) == 0;
+                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.getId(BlockTypes.CHERRY_LOG), 0, BlockTypes.getId(BlockTypes.CHERRY_LEAVES), 0, overgrown);
+                                        } else if (randomNumber > 0.002125 && randomNumber < 0.002175f) {
+                                            int maxHeight = (int) (rand.nextFloat() * 6) + 12;
+                                            DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
+                                            Blob.generate(blockOn, x, elevation, z, BlockTypes.getId(BlockTypes.MUD), 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
                                         }
                                     }
                                 } else if ((blockOn.x == 73 && (biome == Biomes.DESERT.id || biome == Biomes.TEMPERATE.id)) || (biome == Biomes.TROPICAL_ISLAND.id && blockOn.x == 2)) {

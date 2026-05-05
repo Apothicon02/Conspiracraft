@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class SpruceTree {
     public static void generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, boolean snowy, int logType, int logSubType, int leafType, int leafSubType) {
@@ -23,16 +24,12 @@ public class SpruceTree {
             boolean colliding = false;
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             int minCollisionY = y+3;
-            outerLoop:
             for (Vector3i canopyPos : generatedTrunk.getSecond()) {
                 Map<Vector3i, Vector2i> canopy = SpruceCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z));
-                for (Vector3i pos : canopy.keySet()) {
-                    if (pos.y > minCollisionY && inBounds(pos) && !blocks.containsKey(pos) && World.getBlock(pos.x, pos.y, pos.z).x != 0) {
-                        colliding = true;
-                        break outerLoop;
-                    }
+                if (!integrateCanopy(canopy, blocks, minCollisionY)) {
+                    colliding = true;
+                    break;
                 }
-                blocks.putAll(canopy);
             }
             if (!colliding) {
                 blocks.forEach((pos, block) -> {
