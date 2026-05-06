@@ -32,7 +32,7 @@ public class PowderBlockType extends BlockType {
         return blockProperties.blocksLight && block.y == 0;
     }
 
-    public PowderBlockType(BlockProperties blockProperties) {
-        super(blockProperties);
+    public PowderBlockType(int id, BlockProperties blockProperties) {
+        super(id, blockProperties);
     }
 }

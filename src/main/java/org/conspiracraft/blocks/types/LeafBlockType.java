@@ -17,7 +17,7 @@ public class LeafBlockType extends BlockType {
         return block.y == 0 ? blockProperties.blocksLight : false;
     }
 
-    public LeafBlockType(BlockProperties blockProperties) {
-        super(blockProperties);
+    public LeafBlockType(int id, BlockProperties blockProperties) {
+        super(id, blockProperties);
     }
 }

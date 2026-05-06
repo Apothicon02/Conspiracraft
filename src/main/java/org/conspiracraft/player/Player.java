@@ -98,7 +98,7 @@ public class Player {
         float modifiedGrav = World.worldType.gravity();
         friction = 0.99f; //1-airFriction=maxFriction
         if (!flying) {
-            if (blockIn.x() == BlockTypes.getId(BlockTypes.WATER)) {
+            if (blockIn.x() == BlockTypes.WATER.id) {
                 modifiedGrav *= 0.2f;
                 friction *= 0.9f;
                 newMovement.mul(0.5f);

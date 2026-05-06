@@ -12,6 +12,7 @@ import java.util.List;
 import static org.conspiracraft.world.World.*;
 
 public class BlockType {
+    public final int id;
     public BlockProperties blockProperties;
     public List<BlockTag> tags = List.of();
 
@@ -48,7 +49,8 @@ public class BlockType {
         return !blockProperties.isSolid || blockProperties.permeable;
     }
 
-    public BlockType(BlockProperties blockProperties) {
+    public BlockType(int id, BlockProperties blockProperties) {
+        this.id = id;
         this.blockProperties = blockProperties;
     }
 

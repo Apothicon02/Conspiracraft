@@ -5,11 +5,13 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
-import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.shapes.*;
+import org.conspiracraft.world.shapes.Blob;
+import org.conspiracraft.world.shapes.Cloud;
+import org.conspiracraft.world.shapes.Cube;
+import org.conspiracraft.world.shapes.Pillar;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -24,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.conspiracraft.Main.*;
+import static org.conspiracraft.Main.timeNs;
 import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.World.*;
@@ -89,29 +91,25 @@ public class Earth extends WorldType {
     public void generate() throws InterruptedException {
         long start = System.currentTimeMillis();
         generating = true;
-        for (int x = 0; x < sizeChunks; x++) {
-            for (int z = 0; z < sizeChunks; z++) {
-                for (int y = 0; y < heightChunks; y++) {
-                    int packedChunkPos = packChunkPos(x, y, z);
-                    chunks[packedChunkPos] = new Chunk(new Vector3i(x, y, z), packedChunkPos);
-                }
-            }
-        }
         long startTime = System.currentTimeMillis();
-        byte[] biomes = new byte[size*size];
-        short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
-        Queue<Lake> lakes = new ConcurrentLinkedQueue<>();
+        final byte[] biomes = new byte[size*size];
+        final short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
+        final short[] chunksMaxElevations = new short[sizeChunks*sizeChunks];
+        final short[] lakesMaxElevations = new short[size*size];
+        final Queue<Lake> lakes = new ConcurrentLinkedQueue<>();
         int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         ExecutorService pool = Executors.newFixedThreadPool(threads);
-        int heightmapInterval = sizeChunks/threads;
+        final int heightmapInterval = sizeChunks/threads;
         for (int thread = 0; thread < threads; thread++) {
-            int startX = thread * heightmapInterval;
-            int endX  = Math.min(startX + heightmapInterval, sizeChunks);
-            pool.submit(() -> {
-                Random rand = new Random(World.seed);
+            final int threadId = thread;
+            final int startX = thread * heightmapInterval;
+            final int endX  = Math.min(startX + heightmapInterval, sizeChunks);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         short minElevation = (short) (height - 1);
+                        short maxElevation = (short) 0;
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
@@ -151,12 +149,14 @@ public class Earth extends WorldType {
                                 biomes[x * size + z] = (byte) (Math.max(islandness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0 ? Biomes.DESERT.id : islandness > 0 ? Biomes.TROPICAL_ISLAND.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? Biomes.SNOWY_TAIGA.id : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : Biomes.TAIGA.id) : Biomes.TEMPERATE.id))))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
+                                maxElevation = (short) Math.max(maxElevation, finalElevation);
                                 if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.1f, undesertness)) {
                                     lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
                                 }
                             }
                         }
                         chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
+                        chunksMaxElevations[packChunkPos(cX, cZ)] = maxElevation;
                     }
                 }
             });
@@ -171,7 +171,7 @@ public class Earth extends WorldType {
         int lakeInterval = lakes.size()/threads;
         for (int thread = 0; thread < threads; thread++) { //multithreading may break if lakes overlap, but not sure.
             int iterations = Math.min(lakeInterval, lakes.size());
-            pool.submit(() -> {
+            pool.execute(() -> {
                 BitSet threadBitSet = new BitSet(size*size);
                 for (int i = 0; i < iterations; i++) {
                     Lake lake = lakes.poll();
@@ -184,15 +184,9 @@ public class Earth extends WorldType {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
                                     biomes[packedPos] = Biomes.LAKE.id;
-                                    int lakeBed = heightmap[packedPos];
-                                    if (lake.pos.y() > lakeBed+1) {
-                                        if (getBlock(x, lake.pos.y()-1, z).x() == 0) {
-                                            setBlock(x, lake.pos.y()-1, z, 1, 14);
-                                            for (int y = lake.pos.y()-2; y > lakeBed; y--) {
-                                                setBlock(x, y, z, 1, 15);
-                                            }
-                                        }
-                                    }
+                                    int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
+                                    chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
+                                    lakesMaxElevations[packedPos] = (short) Math.max(lake.pos.y(), lakesMaxElevations[packedPos]);
                                 }
                             }
                         }
@@ -207,61 +201,111 @@ public class Earth extends WorldType {
         startTime = System.currentTimeMillis();
         threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         pool = Executors.newFixedThreadPool(threads);
-        int surfaceInterval = (sizeChunks + threads - 1) / threads;
+        final int surfaceInterval = (sizeChunks + threads - 1) / threads;
         for (int thread = 0; thread < threads; thread++) {
-            int startX = thread * surfaceInterval;
-            int endX  = Math.min(startX + surfaceInterval, sizeChunks);
-            pool.submit(() -> {
-                Random rand = new Random(World.seed);
+            final int threadId = thread;
+            final int startX = thread * surfaceInterval;
+            final int endX  = Math.min(startX + surfaceInterval, sizeChunks);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int cY = chunksMinElevations[packChunkPos(cX, cZ)] / chunkSize;
-                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                byte biome = biomes[x * size + z];
-                                int elevation = heightmap[packPos(x, z)];
-                                int maxSteepness = 0;
-                                if (biome != Biomes.DESERT.id) {
-                                    for (int i = 0; i < xOffset.length; i++) {
-                                        int packedPos = packPos(x + xOffset[i], z + zOffset[i]);
-                                        if (packedPos >= 0 && packedPos < heightmap.length) {
-                                            int nY = heightmap[packedPos];
-                                            int steepness = Math.abs(elevation - nY);
-                                            maxSteepness = Math.max(maxSteepness, steepness);
-                                        }
-                                    }
-                                }
-                                boolean flat = maxSteepness < 4;
-                                if (elevation <= 63) {
-                                    World.setBlock(x, 63, z, 1, 14);
-                                    for (int y = 62; y > elevation; y--) {
-                                        World.setBlock(x, y, z, 1, 15);
-                                    }
-                                }
-                                if (flat) {
-                                    int sand = (elevation < 64 ? 73 : 23);
-                                    int blockType = biome == Biomes.LAKE.id ? 73 : (biome == Biomes.DESERT.id ? sand : (biome == Biomes.SNOWY_PEAK.id || biome == Biomes.SNOWY_TAIGA.id ? 54 : (elevation < 66 ? sand : 2)));
-                                    int blockSubtype = elevation >= 66 && (biome == Biomes.REDWOOD_FOREST.id || biome == Biomes.TAIGA.id || biome == Biomes.CHERRY_GROVE.id) ? 1 : 0;
-                                    if (blockType == 2) {
-                                        float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
-                                        if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f) {
-                                            World.setBlock(x, elevation + 1, z, 5, rand.nextInt(3));
-                                        } else if (rand.nextFloat() < 0.003f) {
-                                            World.setBlock(x, elevation + 1, z, 18, rand.nextInt(3));
-                                        } else if (rand.nextFloat() < 0.3f && rand.nextFloat() > foliageNoise) {
-                                            World.setBlock(x, elevation + 1, z, 4, ((biome == Biomes.REDWOOD_FOREST.id || biome == Biomes.TAIGA.id || biome == Biomes.CHERRY_GROVE.id) ? 4 : 0) + rand.nextInt(3));
-                                        }
-                                    }
-                                    World.setBlock(x, elevation, z, blockType, blockSubtype);
-                                    for (int y = elevation - 1; y >= cY * chunkSize; y--) {
-                                        World.setBlock(x, y, z, (blockType == 23 || blockType == 73) ? 24 : 3, 0);
-                                    }
-                                } else {
-                                    for (int y = elevation; y >= cY * chunkSize; y--) {
-                                        World.setBlock(x, y, z, 55, 0);
+                        final int minChunkElevation = chunksMinElevations[packChunkPos(cX, cZ)]>>chunkBits;
+                        for (int cY = 0; cY < minChunkElevation; cY++) {
+                            final int packedCP = World.packChunkPos(cX, cY, cZ);
+                            final Chunk chunk = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
+                            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
+                            World.chunks[packedCP] = chunk;
+                            updateRegion(cX, cY, cZ, false);
+                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
+                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
+                                    for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
+                                        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
+                                        lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
                                     }
                                 }
                             }
+                        }
+                        final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[packChunkPos(cX, cZ)])>>chunkBits;
+                        for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {
+                            final int packedCP = World.packChunkPos(cX, cY, cZ);
+                            final Chunk chunk = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
+                            boolean setAnything = false;
+                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                    final int packedPos = packPos(x, z);
+                                    final short elevation = heightmap[packedPos];
+                                    final byte biome = biomes[packedPos];
+                                    int maxSteepness = 0;
+                                    if (biome != Biomes.DESERT.id) {
+                                        for (int i = 0; i < xOffset.length; i++) {
+                                            int packedOffPos = packPos(x + xOffset[i], z + zOffset[i]);
+                                            if (packedOffPos >= 0 && packedOffPos < heightmap.length) {
+                                                int nY = heightmap[packedOffPos];
+                                                int steepness = Math.abs(elevation - nY);
+                                                maxSteepness = Math.max(maxSteepness, steepness);
+                                            }
+                                        }
+                                    }
+                                    final boolean flat = maxSteepness < 4;
+                                    final int floor = (cY * chunkSize);
+                                    final int ceil = floor + chunkSize;
+                                    final int seafloor = Math.min(elevation+1, ceil);
+                                    final int seafloorAbove = Math.min(elevation+2, ceil);
+                                    if (biome == Biomes.LAKE.id || elevation <= seaLevel) {
+                                        int waterSurface = Math.min(Math.max(seaLevel, lakesMaxElevations[packedPos]-1), ceil);
+                                        int waterSurfaceBelow = waterSurface-1;
+                                        if (waterSurface > elevation) {
+                                            if (waterSurface < ceil) {
+                                                setAnything = true;
+                                                updateLod(x, waterSurface, z, false);
+                                                chunk.setBlock(x & 15, waterSurface & 15, z & 15, 1, 14);
+                                            }
+                                            for (int y = waterSurfaceBelow; y >= Math.max(floor, seafloor); y--) {
+                                                setAnything = true;
+                                                updateLod(x, y, z, false);
+                                                chunk.setBlock(x & 15, y & 15, z & 15, 1, 15);
+                                            }
+                                        }
+                                    }
+
+                                    for (int y = floor; y < seafloorAbove; y++) {
+                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : Chunk.packInts(BlockTypes.GRAVEL.id, 0);
+                                        final int blockType = block >> 16;
+                                        if (blockType > 0) {
+                                            final int blockSubtype = block & 0xFFFF;
+                                            if (y == seafloor) {
+                                                if (blockType == BlockTypes.GRASS.id) {
+                                                    float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                                    if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f) {
+                                                        setAnything = true;
+                                                        updateLod(x, y, z, false);
+                                                        chunk.setBlock(x & 15, y & 15, z & 15, 5, rand.nextInt(3));
+                                                    } else if (rand.nextFloat() < 0.003f) {
+                                                        setAnything = true;
+                                                        updateLod(x, y, z, false);
+                                                        chunk.setBlock(x & 15, y & 15, z & 15, 18, rand.nextInt(3));
+                                                    } else if (rand.nextFloat() < 0.3f && rand.nextFloat() > foliageNoise) {
+                                                        setAnything = true;
+                                                        updateLod(x, y, z, false);
+                                                        chunk.setBlock(x & 15, y & 15, z & 15, 4, (blockSubtype * 4) + rand.nextInt(3));
+                                                    }
+                                                }
+                                            } else {
+                                                setAnything = true;
+                                                updateLod(x, y, z, false);
+                                                chunk.setBlock(x & 15, y & 15, z & 15, blockType, blockSubtype);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            World.chunks[packedCP] = chunk;
+                            if (setAnything) {updateRegion(cX, cY, cZ, false);}
+                        }
+                        for (int cY = maxChunkElevation+1; cY < heightChunks; cY++) {
+                            int packedCP = World.packChunkPos(cX, cY, cZ);
+                            World.chunks[packedCP] = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
                         }
                     }
                 }
@@ -276,10 +320,11 @@ public class Earth extends WorldType {
         pool = Executors.newFixedThreadPool(threads);
         int featuresInterval = (sizeChunks + threads - 1) / threads;
         for (int thread = 0; thread < threads; thread++) {
+            int threadId = thread;
             int startX = thread * featuresInterval;
             int endX  = Math.min(startX + featuresInterval, sizeChunks);
-            pool.submit(() -> {
-                Random rand = new Random(World.seed);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
@@ -296,14 +341,14 @@ public class Earth extends WorldType {
                                 boolean snowy = eleFactor > 136;
                                 if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136 + Math.abs(randomNumber * 250))) {
                                     Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
-                                } else if (blockOn.x == BlockTypes.getId(BlockTypes.SNOW)) {
+                                } else if (blockOn.x == BlockTypes.SNOW.id) {
                                     if (biome == Biomes.SNOWY_TAIGA.id) {
                                         if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, true, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         } else if (randomNumber < 0.001f) {
                                             int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight,true, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight,true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
                                     }
                                 } else if (!snowy && blockOn.x == 2) {
@@ -321,23 +366,23 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(3, 4);
                                             int leavesHeight = 3;
                                             int branchChance = rand.nextInt(4, 7);
-                                            RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.getId(BlockTypes.REDWOOD_LOG), 0, BlockTypes.getId(BlockTypes.REDWOOD_LEAVES), 0, branchChance);
+                                            RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, branchChance);
                                         } else if (randomNumber < 0.0031f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         } else if (randomNumber < 0.0032f) {
                                             int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
                                     } else if (biome == Biomes.TAIGA.id) {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         } else if (randomNumber < 0.00045f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         } else if (randomNumber < 0.0015f) {
                                             int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.getId(BlockTypes.SPRUCE_LOG), 0, BlockTypes.getId(BlockTypes.SPRUCE_LEAVES), 0);
+                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
                                     } else if (biome == Biomes.CHERRY_GROVE.id) {
                                         if (randomNumber < 0.0004f) {
@@ -346,7 +391,7 @@ public class Earth extends WorldType {
                                             int maxHeight = rand.nextInt(16) + 12;
                                             int radius = rand.nextInt(2) + 3;
                                             boolean overgrown = rand.nextInt(4) == 0;
-                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.getId(BlockTypes.CHERRY_LOG), 0, BlockTypes.getId(BlockTypes.CHERRY_LEAVES), 0, overgrown);
+                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, overgrown);
                                         }
                                     } else {
                                         if (randomNumber < 0.0004f) {
@@ -356,16 +401,16 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(20, 32);
                                             int leavesHeight = 8;
                                             int branchChance = 1;
-                                            GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.getId(BlockTypes.OAK_LOG), 0, BlockTypes.getId(BlockTypes.OAK_LEAVES), 0, branchChance);
+                                            GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, branchChance);
                                         } else if (randomNumber > 0.002 && randomNumber < 0.002125f) {
                                             int maxHeight = rand.nextInt(16) + 12;
                                             int radius = rand.nextInt(2) + 3;
                                             boolean overgrown = rand.nextInt(4) == 0;
-                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.getId(BlockTypes.CHERRY_LOG), 0, BlockTypes.getId(BlockTypes.CHERRY_LEAVES), 0, overgrown);
+                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, overgrown);
                                         } else if (randomNumber > 0.002125 && randomNumber < 0.002175f) {
                                             int maxHeight = (int) (rand.nextFloat() * 6) + 12;
                                             DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
-                                            Blob.generate(blockOn, x, elevation, z, BlockTypes.getId(BlockTypes.MUD), 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
+                                            Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
                                         }
                                     }
                                 } else if ((blockOn.x == 73 && (biome == Biomes.DESERT.id || biome == Biomes.TEMPERATE.id)) || (biome == Biomes.TROPICAL_ISLAND.id && blockOn.x == 2)) {
@@ -410,22 +455,16 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
 
-//        for (int x = 950; x < 1050; x++) {
-//            for (int z = 950; z < 1050; z++) {
-//                for (int y = 150; y < 250; y++) {
-//                    World.setBlock(x, y, z, 1, 15);
-//                }
-//            }
-//        }
         startTime = System.currentTimeMillis();
         threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         pool = Executors.newFixedThreadPool(threads);
-        int cloudInterval = (sizeChunks + threads - 1) / threads;
+        final int cloudInterval = (sizeChunks + threads - 1) / threads;
         for (int thread = 0; thread < threads; thread++) {
-            int startX = thread * cloudInterval;
-            int endX = Math.min(startX + cloudInterval, sizeChunks);
-            pool.submit(() -> {
-                Random rand = new Random(World.seed);
+            final int threadId = thread;
+            final int startX = thread * cloudInterval;
+            final int endX = Math.min(startX + cloudInterval, sizeChunks);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
@@ -438,10 +477,10 @@ public class Earth extends WorldType {
                                         boolean isRainCloud = rand.nextFloat() < 0.0005f;
                                         int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
                                         if (radius > 0) {
-                                            Cube.generate(new Vector2i(0), x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius, true);
-                                            Cube.generate(new Vector2i(0), size-x, cloudHeight+75, z, 31, 0, radius, true);
-                                            Cube.generate(new Vector2i(0), x, cloudHeight+150, size-z, 31, 0, radius, true);
-                                            Cube.generate(new Vector2i(0), size-x, cloudHeight+200, size-z, 31, 0, radius+1, true);
+                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
+                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
+                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
+                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
                                         }
                                     }
                                 }
@@ -457,105 +496,4 @@ public class Earth extends WorldType {
         generating = false;
         System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. \n");
     }
-    public short getOldElevation(int x, int z) {
-        double mountainNoise = Math.max(0, SimplexNoise.noise(x / 400.f, z / 400.f));
-        double elevationNoise = SimplexNoise.noise(x / 500.f, z / 500.f) + 0.5f;
-        double elevationMul = (mountainNoise * elevationNoise)+0.25F;
-        double detailNoise = ((SimplexNoise.noise(x / 75.f, z / 75.f)+elevationNoise) * 16);
-        double elevation = Math.abs(detailNoise * Math.max(-0.5f, elevationMul*(2.f+(3*SimplexNoise.noise(x/1250.f, z/1250.f)))));
-        double centDist = new Vector2i(x, z).distance(2048, 2048);
-        double riverness = (0.5f-Math.abs(Math.max(-1.f, Math.min(0, centDist-1024)/150)+0.5f))*3;
-        double continentNoise = (-(Math.abs(elevationNoise-0.5f)-0.7f))-riverness;
-        elevation += 66*Math.min(0, continentNoise);
-        double hilLElevation = Math.max(0, SimplexNoise.noise(x / 800.f, z / 800.f)-0.25f)*150;
-        elevation += 66+hilLElevation;
-        return (short)Math.max(16, elevation);
-    }
-//
-//    @Override
-//    public void generate() {
-//        for (int x = 0; x < sizeChunks; x++) {
-//            for (int z = 0; z < sizeChunks; z++) {
-//                for (int y = 0; y < heightChunks; y++) {
-//                    int packedChunkPos = packChunkPos(x, y, z);
-//                    chunks[packedChunkPos] = new Chunk(new Vector3i(x, y, z), packedChunkPos);
-//                }
-//            }
-//        }
-//        short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
-//        for (int cX = 0; cX < sizeChunks; cX++) {
-//            for (int cZ = 0; cZ < sizeChunks; cZ++) {
-//                short minElevation = (short) (height-1);
-//                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-//                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-//                        short elevation = getElevation(x, z);
-//                        heightmap[packPos(x, z)] = elevation;
-//                        minElevation = (short) Math.min(minElevation, elevation);
-//                    }
-//                }
-//                chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
-//            }
-//        }
-//
-//        for (int cX = 0; cX < sizeChunks; cX++) {
-//            for (int cZ = 0; cZ < sizeChunks; cZ++) {
-//                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-//                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-//                        int topBlock = 0;
-//                        for (int y = heightmap[packPos(x, z)]; y >= 0; y--) {
-//                            if (canPlace(x, y, z)) {
-//                                if (topBlock == 0) {
-//                                    topBlock = y;
-//                                    if (topBlock >= 66 && seededRand.nextFloat() < 0.1f) {
-//                                        World.setBlock(x, y + 1, z, seededRand.nextFloat() < 0.15f ? 5 : 4, seededRand.nextInt(3));
-//                                    }
-//                                    World.setBlock(x, y, z, topBlock < 66 ? 23 : 2, 0);
-//                                } else {
-//                                    World.setBlock(x, y, z, topBlock <= 66 ? 24 : 3, 0);
-//                                }
-//                            } else if (y == 63) {
-//                                World.setBlock(x, y, z, 1, 13);
-//                            } else if (y < 63) {
-//                                World.setBlock(x, y, z, 1, 15);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    public boolean canPlace(int x, int y, int z) {
-//        int yFactor = (int) Math.pow((Math.max(66, y)-66)/2.f, 1.1f);
-//        return getUnelevation(x+yFactor, z+yFactor) > y;
-//    }
-//    public short getElevation(int x, int z) {
-//        double elevation = 62+getContinentElevation(x, z);//Math.max(getContinentElevation(x, z), getIslandsElevation(x, z));
-//        //elevation = Math.min(elevation, getUnelevation(x, z));
-//        return (short)elevation;
-//    }
-//    public double getUnelevation(int x, int z) {
-//        double unelevationNoise = SimplexNoise.noise(x/350.f, z/350.f);
-//        double unelevation = (Math.clamp(unelevationNoise, 0.25f, 0.35f)-0.25f)*10;
-//        if (unelevation >= 0.9f) {
-//            unelevation += (1-Math.max(0.35f, unelevationNoise))*-0.035f;
-//        }
-//        unelevation *= 250;
-//        return height-unelevation;
-//    }
-//    public double getContinentElevation(int x, int z) {
-//        double elevationNoise = SimplexNoise.noise(x/500.f, z/500.f)+0.75f;
-//        elevationNoise *= 30;
-//        return elevationNoise;
-//    }
-//    public double getIslandsElevation(int x, int z) {
-//        double mountainNoise = (1 + Math.max(0, SimplexNoise.noise(x / 500.f, z / 500.f)));
-//        double elevationNoise = SimplexNoise.noise(x / 1000.f, z / 1000.f) + 0.5f;
-//        double elevationMul = mountainNoise * elevationNoise;
-//        double detailNoise = (SimplexNoise.noise(x / 100.f, z / 100.f) * 16);
-//        double elevation = detailNoise * Math.max(0.f, elevationMul);
-//        if (elevation < 0) {
-//            elevation *= -0.25f;
-//        }
-//        return elevation;
-//    }
 }

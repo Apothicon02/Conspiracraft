@@ -35,6 +35,10 @@ public class Main {
     public static long timeMsLong = 0;
     public static long currentTick = 0;
     static void main() throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            System.err.println("Uncaught exception in thread " + thread.getName());
+            throwable.printStackTrace();
+        });
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();

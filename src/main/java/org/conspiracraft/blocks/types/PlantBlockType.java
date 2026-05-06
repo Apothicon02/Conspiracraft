@@ -15,7 +15,7 @@ public class PlantBlockType extends BlockType {
     @Override
     public void lostSupport(Vector3i pos, Vector2i block) {
 //        boolean onSediment = BlockTags.sediment.tagged.contains(getBlock(pos.x, pos.y-1, pos.z).x);
-//        World.setBlock(pos.x, pos.y, pos.z, onSediment ? BlockTypes.getId(BlockTypes.DEAD_BUSH) : 0, onSediment ? (int)(Math.random()*1.9) : 0, true, false, 2, false);
+//        World.setBlock(pos.x, pos.y, pos.z, onSediment ? BlockTypes.DEAD_BUSH) : 0, onSediment ? (int)(Math.random()*1.9) : 0, true, false, 2, false);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class PlantBlockType extends BlockType {
         }
     }
 
-    public PlantBlockType(BlockProperties blockProperties) {
-        super(blockProperties);
+    public PlantBlockType(int id, BlockProperties blockProperties) {
+        super(id, blockProperties);
     }
 }

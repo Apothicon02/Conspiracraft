@@ -35,7 +35,7 @@ public class SpruceTree {
                 blocks.forEach((pos, block) -> {
                     if (inBounds(pos)) {
                         int subtype = block.y();
-                        if (snowy && block.x() == BlockTypes.getId(BlockTypes.SPRUCE_LEAVES)) {
+                        if (snowy && block.x() == BlockTypes.SPRUCE_LEAVES.id) {
                             AtomicBoolean airAbove = new AtomicBoolean(true);
                             blocks.forEach((nPos, nBlock) -> {
                                 if (nPos.x() == pos.x() && nPos.z() == pos.z() && nPos.y == pos.y()+1) {

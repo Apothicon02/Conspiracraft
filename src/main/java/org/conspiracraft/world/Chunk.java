@@ -96,31 +96,29 @@ public class Chunk {
         }
     }
     public void setBlockKey(int pos, int key) {
-        synchronized (blockPalette) {
-            updateBlockPaletteKeySize();
-            blockData.setValue(pos, key);
-            if (blockPalette.get(key) == 0) {
-                boolean isEmpty = true;
-                for (int x = 0; x < chunkSize && isEmpty; x++) {
-                    for (int z = 0; z < chunkSize && isEmpty; z++) {
-                        for (int y = 0; y < chunkSize; y++) {
-                            if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
-                                isEmpty = false;
-                                break;
-                            }
+        updateBlockPaletteKeySize();
+        blockData.setValue(pos, key);
+        if (blockPalette.get(key) == 0) {
+            boolean isEmpty = true;
+            for (int x = 0; x < chunkSize && isEmpty; x++) {
+                for (int z = 0; z < chunkSize && isEmpty; z++) {
+                    for (int y = 0; y < chunkSize; y++) {
+                        if (blockPalette.get(getBlockKey(condenseLocalPos(x, y, z))) != 0) {
+                            isEmpty = false;
+                            break;
                         }
                     }
                 }
-                if (isEmpty) {
-                    blockPalette.clear();
-                    blockPalette.add(0);
-                    setChunkNonEmpty();
-                }
+            }
+            if (isEmpty) {
+                blockPalette.clear();
+                blockPalette.add(0);
+                setChunkNonEmpty();
             }
         }
     }
-    public void setBlockKey(Vector3i pos, int keys) {
-        setBlockKey(condenseLocalPos(pos), keys);
+    public void setBlockKey(int x, int y, int z, int keys) {
+        setBlockKey(condenseLocalPos(x, y, z), keys);
     }
     public int getBlockKey(int pos) {
         return blockData.getValue(pos);
@@ -129,15 +127,15 @@ public class Chunk {
         int index = getBlockKey(pos);
         return unpackInt(blockPalette.get(index));
     }
-    public void setBlock(Vector3i pos, int type, int subType, Vector3i globalPos) {
+    public void setBlock(int x, int y, int z, int type, int subType) {
         int block = packInts(type, subType);
         int key = blockPalette.indexOf(block);
         if (key > -1) {
-            setBlockKey(pos, key);
+            setBlockKey(x, y, z, key);
         } else {
             setChunkNonEmpty();
             blockPalette.addLast(block);
-            setBlockKey(pos, blockPalette.size() - 1);
+            setBlockKey(x, y, z, blockPalette.size() - 1);
         }
     }
     //Blocks end

@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Recipes {
     public static Map<Integer, Map<Item, Float>> siftingRecipes = Map.of( //must have any kind of "guaranteed" drop last.
-            BlockTypes.getId(BlockTypes.SAND), Map.of(new Item().type(ItemTypes.SAND), 1.f),
-            BlockTypes.getId(BlockTypes.GRAVEL), Map.of(new Item().type(ItemTypes.FLINT), 0.05f, new Item().type(ItemTypes.GRAVEL), 1.f),
-            BlockTypes.getId(BlockTypes.MARTIAN_REGOLITH), Map.of(new Item().type(ItemTypes.COPPER_ORE), 0.15f, new Item().type(ItemTypes.IRON_ORE), 0.67f),
-            BlockTypes.getId(BlockTypes.REGOLITH), Map.of(new Item().type(ItemTypes.IRON_ORE), 0.05f, new Item().type(ItemTypes.COPPER_ORE), 0.05f));
+            BlockTypes.SAND.id, Map.of(new Item().type(ItemTypes.SAND), 1.f),
+            BlockTypes.GRAVEL.id, Map.of(new Item().type(ItemTypes.FLINT), 0.05f, new Item().type(ItemTypes.GRAVEL), 1.f),
+            BlockTypes.MARTIAN_REGOLITH.id, Map.of(new Item().type(ItemTypes.COPPER_ORE), 0.15f, new Item().type(ItemTypes.IRON_ORE), 0.67f),
+            BlockTypes.REGOLITH.id, Map.of(new Item().type(ItemTypes.IRON_ORE), 0.05f, new Item().type(ItemTypes.COPPER_ORE), 0.05f));
 
     public static void drop(int blockType, Vector3f pos) {
         AtomicBoolean droppedAnything = new AtomicBoolean(false);

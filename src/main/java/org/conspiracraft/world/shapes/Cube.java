@@ -8,9 +8,7 @@ public class Cube {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 for (int lY = y - radius; lY <= y + radius; lY++) {
-                    if (World.inBounds(lX, lY, lZ)) {
-                        World.setBlock(lX, lY, lZ, blockType, blockSubType);
-                    }
+                    World.setBlock(lX, lY, lZ, blockType, blockSubType);
                 }
             }
         }

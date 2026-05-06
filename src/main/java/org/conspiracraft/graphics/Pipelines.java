@@ -25,7 +25,7 @@ public class Pipelines {
                 new Pipeline("gui.vert", "gui.frag", 1), new Pipeline("fullscreen.vert", "ssao.frag", 1),
                 new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
-        pool.submit(() -> createPipelineCache(stack));
+        pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(pipeline::compile);}
         pool.shutdown();
     }

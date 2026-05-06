@@ -14,12 +14,12 @@ public class PlantLightBlockType extends LightBlockType {
             blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
         }
         Vector2i blockOn = getBlock(pos.x, pos.y-1, pos.z);
-        if (blockOn.x != BlockTypes.getId(BlockTypes.GRASS)) {
+        if (blockOn.x != BlockTypes.GRASS.id) {
             lostSupport(pos, block);
         }
     }
 
-    public PlantLightBlockType(LightBlockProperties blockProperties) {
-        super(blockProperties);
+    public PlantLightBlockType(int id, LightBlockProperties blockProperties) {
+        super(id, blockProperties);
     }
 }
