@@ -12,6 +12,8 @@ public class Biomes {
     public static final Biome TAIGA = create();
     public static final Biome CHERRY_GROVE = create();
     public static final Biome REDWOOD_FOREST = create();
+    public static final Biome VOLCANIC_TAIGA = create();
+    public static final Biome VOLCANIC_SNOWY_TAIGA = create();
     public static final Biome SNOWY_PEAK = create();
     public static final Biome SNOWY_TAIGA = create();
     public static final Biome DESERT = create();
@@ -36,13 +38,13 @@ public class Biomes {
         } else if (elevation <= World.seaLevel+2+(biome == BEACH ? 1 : 0) || biome == DESERT) {
             type = BlockTypes.SAND.id;
             subtype = 0;
-        } else if (biome == SNOWY_PEAK || biome == SNOWY_TAIGA) {
+        } else if (biome == SNOWY_PEAK || biome == SNOWY_TAIGA || biome == VOLCANIC_SNOWY_TAIGA) {
             type = BlockTypes.SNOW.id;
             subtype = 0;
         } else if (biome == LAKE) {
             type = BlockTypes.WET_SAND.id;
             subtype = 0;
-        } else if (biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
+        } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = 1;
         } else {

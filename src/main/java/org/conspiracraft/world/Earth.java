@@ -8,10 +8,7 @@ import de.articdive.jnoise.pipeline.JNoise;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.shapes.Blob;
-import org.conspiracraft.world.shapes.Cloud;
-import org.conspiracraft.world.shapes.Cube;
-import org.conspiracraft.world.shapes.Pillar;
+import org.conspiracraft.world.shapes.*;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -151,10 +148,11 @@ public class Earth extends WorldType {
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
                                 double redwoodness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/quarterSize, 0, 1);
+                                double volcanicness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/(quarterSize*1.2f), 0, 1);
                                 boolean isDesert = Math.max(palmyPlainness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0;
                                 boolean isBeach = uncoastalness < 0.3f;
                                 boolean isIslands = seaness > 0.5f;
-                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (isDesert ? Biomes.DESERT.id : palmyPlainness > 0 ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? Biomes.SNOWY_TAIGA.id : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : Biomes.TAIGA.id) : Biomes.TEMPERATE.id)))))));
+                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (isDesert ? Biomes.DESERT.id : palmyPlainness > 0 ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? (volcanicness > 0.f ? Biomes.VOLCANIC_SNOWY_TAIGA.id : Biomes.SNOWY_TAIGA.id) : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : (volcanicness > 0.f ? Biomes.VOLCANIC_TAIGA.id : Biomes.TAIGA.id)) : Biomes.TEMPERATE.id)))))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 maxElevation = (short) Math.max(maxElevation, finalElevation);
@@ -347,10 +345,18 @@ public class Earth extends WorldType {
                                 double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
                                 double eleFactor = elevation + (rockNoise * 50);
                                 boolean snowy = eleFactor > 136;
+                                int springSand = rand.nextBoolean() ? BlockTypes.RED_SAND.id : BlockTypes.ORANGE_SAND.id;
+                                if (biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
+                                    if (randomNumber < 0.0067f) {
+                                        Spring.generate(x, elevation, z, springSand, 0, (int) (10 + (rand.nextFloat() * 10)));
+                                    }
+                                } else if ((biome == Biomes.REDWOOD_FOREST.id || biome == Biomes.VOLCANIC_TAIGA.id) && (randomNumber < 0.0005f || randomNumber < 0.015f*(featureNoise-0.15f))) {
+                                    Spring.generate(x, elevation, z, springSand, 0, (int) (10 + (rand.nextFloat() * 10)));
+                                }
                                 if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < 136 + Math.abs(randomNumber * 250))) {
                                     Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
                                 } else if (blockOn.x == BlockTypes.SNOW.id) {
-                                    if (biome == Biomes.SNOWY_TAIGA.id) {
+                                    if (biome == Biomes.SNOWY_TAIGA.id || biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
                                         if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
@@ -375,20 +381,20 @@ public class Earth extends WorldType {
                                     } else if (biome == Biomes.REDWOOD_FOREST.id) {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.003) {
+                                        } else if (randomNumber < 0.006) {
                                             int maxHeight = rand.nextInt(42, 54);
                                             int radius = rand.nextInt(3, 4);
                                             int leavesHeight = 3;
                                             int branchChance = rand.nextInt(4, 7);
                                             RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, branchChance);
-                                        } else if (randomNumber < 0.0031f || randomNumber < featureNoise / 50) {
+                                        } else if (randomNumber < 0.0061f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        } else if (randomNumber < 0.0032f) {
+                                        } else if (randomNumber < 0.0062f) {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
-                                    } else if (biome == Biomes.TAIGA.id) {
+                                    } else if (biome == Biomes.TAIGA.id || biome == Biomes.VOLCANIC_TAIGA.id) {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         } else if (randomNumber < 0.00045f || randomNumber < featureNoise / 50) {

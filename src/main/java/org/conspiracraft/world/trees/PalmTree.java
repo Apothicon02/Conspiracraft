@@ -1,6 +1,7 @@
 package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.trees.canopies.PalmCanopy;
 import org.conspiracraft.world.trees.trunks.BendingTrunk;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
@@ -18,17 +20,23 @@ import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 public class PalmTree {
     public static void generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType, int leafType, int leafSubType) {
         Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = BendingTrunk.generateTrunk(random, x, y, z, true, 0, maxHeight, logType, logSubType);
-        boolean colliding = false;
+        AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
+        blocks.forEach((pos, block) -> {
+            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+                colliding.set(true);
+            }
+        });
+        if (colliding.get()) {return;}
         int minCollisionY = y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
             Map<Vector3i, Vector2i> canopy = PalmCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z));
             if (!integrateCanopy(canopy, blocks, minCollisionY)) {
-                colliding = true;
+                colliding.set(true);
                 break;
             }
         }
-        if (!colliding) {
+        if (!colliding.get()) {
             blocks.forEach((pos, block) -> {
                 if (World.inBounds(pos)) {
                     World.setBlock(pos.x, pos.y, pos.z, block.x, block.y);

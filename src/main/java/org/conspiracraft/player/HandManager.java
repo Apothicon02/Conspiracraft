@@ -125,13 +125,9 @@ public class HandManager {
                         } else if (rmbDown) {
                             lastBlockPlaced = Main.timeMsLong;
                             if (blockToPlace.x > 0) {//player.stack[0] > 0) {
-                                Vector2i oldBlock = World.getBlock((int) pos.x, (int) pos.y, (int) pos.z);
-                                BlockProperties oldType = BlockTypes.blockTypeMap.get(oldBlock.x).blockProperties;
-                                if (oldType.isFluidReplaceable) {
-                                    World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, blockToPlace.x, blockToPlace.y, true, false, 1, false);
-                                    if (!player.creative) {
-                                        //StackManager.removeFirstEntryInStack();
-                                    }
+                                World.replaceBlock((int) pos.x, (int) pos.y, (int) pos.z, blockToPlace.x, blockToPlace.y);
+                                if (!player.creative) {
+                                    //StackManager.removeFirstEntryInStack();
                                 }
                             }
                         }

@@ -3,6 +3,7 @@ package org.conspiracraft.world;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.blocks.entities.BlockEntity;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
 import org.joml.Vector2i;
@@ -105,6 +106,29 @@ public class World {
             chunk.setBlock(lX, lY, lZ, type, subType);
             updateLod(x, y, z, type == 0);
             updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+        }
+    }
+    public static void replaceBlock(int x, int y, int z, int type, int subType) {
+        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
+            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
+            return;
+        }
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        if (!generating && !updateSet.contains(chunkPos)) {
+            updateSet.add(chunkPos);
+            updateQueue.addLast(chunkPos);
+        }
+        synchronized (chunk) {
+            int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+            if (BlockTypes.blockTypeMap.get(chunk.getBlock(pos).x()).blockProperties.isFluidReplaceable) {
+                chunk.setBlock(lX, lY, lZ, type, subType);
+                updateLod(x, y, z, type == 0);
+                updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+            }
         }
     }
     public static void updateLod(int x, int y, int z, boolean empty) {

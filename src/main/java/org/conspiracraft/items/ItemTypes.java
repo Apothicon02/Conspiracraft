@@ -5,7 +5,6 @@ import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
-import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
@@ -86,7 +85,7 @@ public class ItemTypes {
             RED_SAND = create(new ItemType("resource/texture/red_sand").maxStackSize(64).blockToPlace(BlockTypes.RED_SAND.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.4f, 1.f))),
             RED_SANDSTONE = create(new ItemType("resource/texture/red_sandstone").maxStackSize(64).blockToPlace(BlockTypes.RED_SANDSTONE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 1.f))),
             RED_GRAVEL = create(new ItemType("resource/texture/red_gravel").maxStackSize(64).blockToPlace(BlockTypes.RED_GRAVEL.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1.f))),
-            MARTIAN_REGOLITH = create(new ItemType("resource/texture/martian_regolith").maxStackSize(64).blockToPlace(BlockTypes.MARTIAN_REGOLITH.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.4f, 1.f))),
+            MARTIAN_REGOLITH = create(new ItemType("resource/texture/martian_regolith").maxStackSize(64).blockToPlace(BlockTypes.ORANGE_SAND.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.4f, 1.f))),
             REGOLITH = create(new ItemType("resource/texture/regolith").maxStackSize(64).blockToPlace(BlockTypes.REGOLITH.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.4f, 1.f))),
             DIRT = create(new ItemType("resource/texture/dirt").maxStackSize(64).blockToPlace(BlockTypes.DIRT.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 0.5f, 1.f))),
             GRASSY_DIRT = create(new ItemType("resource/texture/grassy_dirt").maxStackSize(64).blockToPlace(BlockTypes.GRASS.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 0.5f, 1.f))),

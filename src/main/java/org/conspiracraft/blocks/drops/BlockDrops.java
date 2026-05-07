@@ -19,7 +19,7 @@ public class BlockDrops {
             Map.entry(BlockTypes.PORECAP, LootTables.PORECAP),
             Map.entry(BlockTypes.GRASS, LootTables.GRASSY_DIRT),
             Map.entry(BlockTypes.DIRT, LootTables.DIRT),
-            Map.entry(BlockTypes.MARTIAN_REGOLITH, LootTables.MARTIAN_REGOLITH),
+            Map.entry(BlockTypes.ORANGE_SAND, LootTables.MARTIAN_REGOLITH),
             Map.entry(BlockTypes.REGOLITH, LootTables.REGOLITH),
             Map.entry(BlockTypes.SAND, LootTables.SAND),
             Map.entry(BlockTypes.SANDSTONE, LootTables.SANDSTONE),
