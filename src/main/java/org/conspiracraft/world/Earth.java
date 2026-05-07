@@ -424,6 +424,9 @@ public class Earth extends WorldType {
                                     } else if (biome == Biomes.SAVANNA.id) {
                                         if (randomNumber < 0.0003f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        } else if (randomNumber < 0.0005f) {
+                                            int maxHeight = rand.nextInt(17, 20);
+                                            AcaciaTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.ACACIA_LOG.id, 0, BlockTypes.ACACIA_LEAVES.id, 0);
                                         }
                                     } else {
                                         if (randomNumber < 0.0004f) {
