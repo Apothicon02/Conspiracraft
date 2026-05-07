@@ -118,20 +118,28 @@ public class Earth extends WorldType {
                                 double undesertness = (Math.clamp(desertDist, 1000, 1200)-1000) / 200.f;
                                 double palmyPlainness = 1-((Math.clamp(Math.min(new Vector2i(-750, 1250).distance(x, z), new Vector2i(1250, -750).distance(x, z)), 1000, 1200)-1000) / 200.f);
                                 double desertness = 1-undesertness;
+                                double unsavannaness = (Math.clamp(new Vector2i(1250, 0).distance(x, z), 1000, 1200)-1000) / 200.f;
+                                double savannaness = 1-unsavannaness;
                                 double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
                                 //double riverness = Math.min(0, Math.abs(ogMoutainness)-0.25f)*50;
                                 double mountainness = ogMoutainness;
+                                double badlandness = 0;
                                 if (mountainness < 0.f) {
                                     mountainness *= Utils.mix(-0.2f, -0.15f, undesertness);
                                 } else {
                                     mountainness *= Math.max(undesertness, 0.4f);
+                                    double badlandnessBase = savannaness*Math.max(1, 1 + (((savannaness - desertness) - 0.9f) * 100));
+                                    double badlandsTerrain = Math.min((mountainness - 0.5f) * badlandnessBase, 1);
+                                    badlandness = Math.clamp((mountainness - 0.45f) * badlandnessBase, 0, 1);
+                                    mountainness *= Math.max(unsavannaness, Math.min(0.34f, badlandsTerrain));
+                                    mountainness += badlandsTerrain*0.34f;
                                 }
-                                double elevationNoise = ((noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
+                                double elevationNoise = Math.max(savannaness, (noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
                                         ((noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f)))*undesertness*uncoastalness);
                                 if (desertness > 0.f) {
                                     elevationNoise += noisePipeline.evaluateNoise((x - size) / 525.d, (z - size) / 525.d)*desertness;
                                 }
-                                double elevation = elevationNoise * (125 * Math.max((1-undesertness)/3, mountainness));
+                                double elevation = elevationNoise * (125 * Math.max(desertness/3, mountainness));
                                 double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
                                 double baseHilliness = SimplexNoise.noise((x + size) / 500.f, (z + size) / 500.f);
                                 if (baseHilliness < 0.f) {
@@ -152,7 +160,7 @@ public class Earth extends WorldType {
                                 boolean isDesert = Math.max(palmyPlainness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0;
                                 boolean isBeach = uncoastalness < 0.3f;
                                 boolean isIslands = seaness > 0.5f;
-                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (isDesert ? Biomes.DESERT.id : palmyPlainness > 0 ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? (volcanicness > 0.f ? Biomes.VOLCANIC_SNOWY_TAIGA.id : Biomes.SNOWY_TAIGA.id) : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : (volcanicness > 0.f ? Biomes.VOLCANIC_TAIGA.id : Biomes.TAIGA.id)) : Biomes.TEMPERATE.id)))))));
+                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (badlandness > 0 ? Biomes.BADLANDS.id : (isDesert ? Biomes.DESERT.id : savannaness > 0 ? Biomes.SAVANNA.id : (palmyPlainness > 0 ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? (volcanicness > 0.f ? Biomes.VOLCANIC_SNOWY_TAIGA.id : Biomes.SNOWY_TAIGA.id) : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : (volcanicness > 0.f ? Biomes.VOLCANIC_TAIGA.id : Biomes.TAIGA.id)) : Biomes.TEMPERATE.id)))))))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 maxElevation = (short) Math.max(maxElevation, finalElevation);
@@ -275,15 +283,15 @@ public class Earth extends WorldType {
                                         }
                                     }
 
+                                    float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                     for (int y = floor; y < seafloorAbove; y++) {
-                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : Chunk.packInts(BlockTypes.GRAVEL.id, 0);
+                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : (biome == Biomes.BADLANDS.id ? Chunk.packInts(Biomes.getBadlandsBands(y+(int)(5*foliageNoise)), 0) : Chunk.packInts(BlockTypes.GRAVEL.id, 0));
                                         final int blockType = block >> 16;
                                         if (blockType > 0) {
                                             final int blockSubtype = block & 0xFFFF;
                                             if (y == seafloor) {
                                                 if (blockType == BlockTypes.GRASS.id) {
-                                                    float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
-                                                    if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f) {
+                                                    if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f && biome != Biomes.SAVANNA.id) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
                                                         chunk.setBlock(x & 15, y & 15, z & 15, 5, rand.nextInt(3));
@@ -291,7 +299,7 @@ public class Earth extends WorldType {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
                                                         chunk.setBlock(x & 15, y & 15, z & 15, 18, rand.nextInt(3));
-                                                    } else if (rand.nextFloat() < 0.3f && rand.nextFloat() > foliageNoise) {
+                                                    } else if (rand.nextFloat() < 0.3f && (rand.nextFloat() > foliageNoise || biome == Biomes.SAVANNA.id)) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
                                                         chunk.setBlock(x & 15, y & 15, z & 15, 4, (blockSubtype * 4) + rand.nextInt(3));
@@ -413,6 +421,10 @@ public class Earth extends WorldType {
                                             boolean overgrown = rand.nextInt(4) == 0;
                                             JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, overgrown);
                                         }
+                                    } else if (biome == Biomes.SAVANNA.id) {
+                                        if (randomNumber < 0.0003f) {
+                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        }
                                     } else {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
@@ -439,7 +451,14 @@ public class Earth extends WorldType {
                                             PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         }
                                     }
-                                } else if (blockOn.x == 23 && biome == Biomes.DESERT.id) {
+                                } else if ((blockOn.x == BlockTypes.SAND.id && biome == Biomes.DESERT.id) || (blockOn.x == BlockTypes.RED_SAND.id && biome == Biomes.BADLANDS.id)) {
+                                    if (biome == Biomes.BADLANDS.id) {
+                                        if (randomNumber < 0.0067f) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                        }
+                                    }
                                     if (randomNumber < 0.002f) {
                                         double deadBushChance = rand.nextFloat();
                                         if (deadBushChance < 0.03) {

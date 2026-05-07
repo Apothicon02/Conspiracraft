@@ -20,6 +20,8 @@ public class Biomes {
     public static final Biome PALMY_PLAINS = create();
     public static final Biome TROPICAL_ISLAND = create();
     public static final Biome BEACH = create();
+    public static final Biome SAVANNA = create();
+    public static final Biome BADLANDS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {
@@ -46,11 +48,21 @@ public class Biomes {
             subtype = 0;
         } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
-            subtype = 1;
+            subtype = y >= elevation ? 1 : 0;
+        } else if (biome == SAVANNA) {
+            type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DRY_MUD.id;
+            subtype = y >= elevation ? 2 : 0;
+        } else if (biome == BADLANDS) {
+            type = BlockTypes.RED_SAND.id;
+            subtype = 0;
         } else {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = 0;
         }
         return Chunk.packInts(type, subtype);
+    }
+
+    public static int getBadlandsBands(int y) {
+        return (y&5) == 0 ? BlockTypes.SANDSTONE.id : ((y&2) == 0 ? BlockTypes.ORANGE_SANDSTONE.id : BlockTypes.RED_SANDSTONE.id);
     }
 }

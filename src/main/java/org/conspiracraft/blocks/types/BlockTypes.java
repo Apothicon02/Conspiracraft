@@ -104,9 +104,8 @@ public class BlockTypes {
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //65
             BLUE_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), GLASS.blockProperties)),
             RED_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), GLASS.blockProperties)),
-            REGOLITH = create(List.of(BlockTags.sediment), new PowderBlockType(blockTypeMap.size(), GRAVEL.blockProperties.copy().blockSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1,
-                    new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
             ORANGE_SAND = create(List.of(BlockTags.sediment), new PowderBlockType(blockTypeMap.size(), SAND.blockProperties.copy())),
+            ORANGE_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), SANDSTONE.blockProperties.copy())),
             RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand), new PowderBlockType(blockTypeMap.size(), SAND.blockProperties.copy())), //70
             RED_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), SANDSTONE.blockProperties.copy())),
             RED_GRAVEL = create(List.of(BlockTags.sediment), new PowderBlockType(blockTypeMap.size(), GRAVEL.blockProperties.copy())),
