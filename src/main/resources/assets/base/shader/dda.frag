@@ -396,8 +396,10 @@ vec4 dda(bool shadow) {
                         flatNormal = -ddaMask*raySign;
                         normal = flatNormal;
                         hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
+                        voxelPos = hitPos;
                         if (firstBlock.x == 0) {
                             firstBlockPos = blockPos;
+                            firstVoxelRayPos = ivec3(voxelStartPos);
                             firstBlock = block;
                             firstHitPos = hitPos;
                         }
