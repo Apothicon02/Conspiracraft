@@ -6,17 +6,21 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class World {
@@ -43,37 +47,57 @@ public class World {
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
 
-    public static void save(String path) throws IOException {
+    public static MappedByteBuffer globalMappedBuf = null;
+    public static MappedByteBuffer heightmapMappedBuf = null;
+    public static MappedByteBuffer lodsMappedBuf = null;
+    public static MappedByteBuffer regionsMappedBuf = null;
+    public static void save(String path) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         long start = System.currentTimeMillis();
-        boolean didExist = Files.exists(Path.of(path));
         new File(path).mkdirs();
 
-        String globalDataPath = path+"global.data";
-        FileOutputStream out = new FileOutputStream(globalDataPath);
-        byte[] globalData = Utils.longArrayToByteArray(new long[]{Main.timeNs});
-        out.write(globalData);
-        out.close();
+        FileChannel out;
+        MappedByteBuffer data;
+        long[] globalData = new long[]{Main.timeNs};
+        if (globalMappedBuf == null) {
+            out = FileChannel.open(Path.of(path + "global.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            globalMappedBuf = out.map(FileChannel.MapMode.READ_WRITE, 0, globalData.length * 8L);
+            globalMappedBuf.order(ByteOrder.BIG_ENDIAN);
+        }
+        globalMappedBuf.asLongBuffer().put(globalData);
 
-        String heightmapDataPath = path+"heightmap.data";
-        out = new FileOutputStream(heightmapDataPath);
-        byte[] heightmapData = Utils.shortArrayToByteArray(heightmap);
-        out.write(heightmapData);
-        out.close();
+        if (heightmapMappedBuf == null) {
+            out = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            heightmapMappedBuf = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 2L);
+            heightmapMappedBuf.order(ByteOrder.BIG_ENDIAN);
+        }
+        heightmapMappedBuf.asShortBuffer().put(heightmap);
 
-        String lodsDataPath = path+"lods.data";
-        BufferedOutputStream outBuffered = new BufferedOutputStream(new FileOutputStream(lodsDataPath), Renderer.gigabyte);
-        byte[] lodsData = Utils.longArrayToByteArray(lods);
-        outBuffered.write(lodsData);
-        outBuffered.close();
+        if (lodsMappedBuf == null) {
+            out = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            lodsMappedBuf = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 8L);
+            lodsMappedBuf.order(ByteOrder.BIG_ENDIAN);
+        }
+        lodsMappedBuf.asLongBuffer().put(lods);
 
-        String regionsDataPath = path+"regions.data";
-        out = new FileOutputStream(regionsDataPath);
-        byte[] regionsData = Utils.longArrayToByteArray(regions);
-        out.write(regionsData);
-        out.close();
+        if (regionsMappedBuf == null) {
+            out = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            regionsMappedBuf = out.map(FileChannel.MapMode.READ_WRITE, 0, regions.length * 8L);
+            regionsMappedBuf.order(ByteOrder.BIG_ENDIAN);
+        }
+        regionsMappedBuf.asLongBuffer().put(regions);
 
-        String chunksPath = path + "chunks.data";
-        out = new FileOutputStream(chunksPath);
+        long chunkStart = System.currentTimeMillis();
+        int size = 0;
+        for (Chunk chunk : World.chunks) {
+            int[] blockData = chunk.getBlockData();
+            if (blockData == null) {blockData = new int[]{};}
+            size += (chunk.getBlockPalette().length*4) + 4 + (blockData.length*4) + 4;
+        }
+        System.out.println("Took " + (System.currentTimeMillis()-chunkStart) + "ms to calculate chunk file size. ");
+        out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, size);
+        data.order(ByteOrder.BIG_ENDIAN);
+        int offset = 0;
         for (Chunk chunk : World.chunks) {
             byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
             int[] blockData = chunk.getBlockData();
@@ -89,9 +113,12 @@ public class World {
             buffer.put(blockPalette);
             buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
             buffer.put(blocks);
-            out.write(buffer.array());
+            data.put(offset, buffer.array());
+            offset += buffer.array().length;
         }
         out.close();
+        Utils.unmap(data);
+        System.out.println("Took " + (System.currentTimeMillis()-chunkStart) + "ms to save chunks. ");
         System.out.println("Took " + (System.currentTimeMillis()-start) + "ms to save world. ");
     }
     public static void load(String path) throws IOException, InterruptedException {
@@ -100,43 +127,58 @@ public class World {
         if (didExist) {
             long[] globalData = Utils.flipLongArray(Utils.byteArrayToLongArray(new FileInputStream(path + "global.data").readAllBytes()));
             Main.timeNs = globalData[0];
-            FileInputStream in = new FileInputStream(path + "heightmap.data");
-            Utils.byteArrayToShortArray(heightmap, in.readAllBytes());
-            in.close();
-            in = new FileInputStream(path + "lods.data");
-            Utils.byteArrayToLongArray(lods, in.readAllBytes());
-            in.close();
-            in = new FileInputStream(path + "regions.data");
-            Utils.byteArrayToLongArray(regions, in.readAllBytes());
-            in.close();
 
-            in = new FileInputStream(path+"chunks.data");
-            int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
+            FileChannel in = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ);
+            MappedByteBuffer data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+            data.order(ByteOrder.BIG_ENDIAN);
+            data.asShortBuffer().get(heightmap);
+            in.close();
+            Utils.unmap(data);
+
+            in = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ);
+            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+            data.order(ByteOrder.BIG_ENDIAN);
+            data.asLongBuffer().get(lods);
+            in.close();
+            Utils.unmap(data);
+
+            in = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ);
+            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+            data.order(ByteOrder.BIG_ENDIAN);
+            data.asLongBuffer().get(regions);
+            in.close();
+            Utils.unmap(data);
+
+            in = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ);
+            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+            data.order(ByteOrder.BIG_ENDIAN);
+            IntBuffer chunkData = data.asIntBuffer();
             in.close();
             int dataIndex = 0;
             for (int chunkPos = 0; chunkPos < chunks.length; chunkPos++) {
                 Chunk chunk = new Chunk(chunkPos);
 
-                int dataSize = data[dataIndex];
+                int dataSize = chunkData.get(dataIndex);
                 dataIndex++;
                 int[] subData = new int[dataSize];
                 for (int i = dataSize - 1; i >= 0; i--) {
-                    subData[i] = data[dataIndex];
+                    subData[i] = chunkData.get(dataIndex);
                     dataIndex++;
                 }
                 chunk.setBlockPalette(subData);
 
-                dataSize = data[dataIndex];
+                dataSize = chunkData.get(dataIndex);
                 dataIndex++;
                 subData = new int[dataSize];
                 for (int i = dataSize - 1; i >= 0; i--) {
-                    subData[i] = data[dataIndex];
+                    subData[i] = chunkData.get(dataIndex);
                     dataIndex++;
                 }
                 chunk.setBlockData(subData);
 
                 chunks[chunkPos] = chunk;
             }
+            Utils.unmap(data);
         } else {
             worldType.generate();
         }

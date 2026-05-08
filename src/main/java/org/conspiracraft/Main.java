@@ -8,6 +8,7 @@ import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,7 +102,7 @@ public class Main {
         Window.graphics.cleanup();
     }
 
-    public static void save() throws IOException {
+    public static void save() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         Settings.save();
         player.save();
         World.save(World.worldType.getWorldPath() + "/");

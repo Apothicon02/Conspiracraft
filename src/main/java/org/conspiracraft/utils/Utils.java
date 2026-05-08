@@ -3,13 +3,16 @@ package org.conspiracraft.utils;
 import org.conspiracraft.Main;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import sun.misc.Unsafe;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
 import java.util.List;
 import java.util.Random;
 
@@ -18,6 +21,19 @@ import static org.lwjgl.system.MemoryUtil.memAlloc;
 public class Utils {
     public static Random random = new Random(67);
     public static float randomFloat(float mul) {return random.nextFloat()*mul;}
+
+    @SuppressWarnings("removal")
+    public static void unmap(MappedByteBuffer buffer) {
+        try {
+            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+            f.setAccessible(true);
+            Unsafe unsafe = (Unsafe) f.get(null);
+            unsafe.invokeCleaner(buffer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String readFile(String filePath) {
         List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
         StringBuilder data = new StringBuilder();
