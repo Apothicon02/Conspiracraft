@@ -90,31 +90,21 @@ public class World {
         int size = 0;
         for (Chunk chunk : World.chunks) {
             int[] blockData = chunk.getBlockData();
-            if (blockData == null) {blockData = new int[]{};}
-            size += (chunk.getBlockPalette().length*4) + 4 + (blockData.length*4) + 4;
+            size += (chunk.getBlockPalette().length*4) + 4 + (blockData == null ? 0 : blockData.length*4) + 4;
         }
         System.out.println("Took " + (System.currentTimeMillis()-chunkStart) + "ms to calculate chunk file size. ");
         out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         data = out.map(FileChannel.MapMode.READ_WRITE, 0, size);
         data.order(ByteOrder.BIG_ENDIAN);
-        int offset = 0;
+        IntBuffer chunkData = data.asIntBuffer();
         for (Chunk chunk : World.chunks) {
-            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+            int[] blockPalette = chunk.getBlockPalette();
             int[] blockData = chunk.getBlockData();
-            byte[] blocks;
-            if (blockData != null) {
-                blocks = Utils.intArrayToByteArray(blockData);
-            } else {
-                blocks = new byte[]{};
-            }
-
-            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4);
-            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
-            buffer.put(blockPalette);
-            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
-            buffer.put(blocks);
-            data.put(offset, buffer.array());
-            offset += buffer.array().length;
+            int[] blocks = blockData == null ? new int[0] : blockData;
+            chunkData.put(blockPalette.length);
+            chunkData.put(blockPalette);
+            chunkData.put(blocks.length);
+            chunkData.put(blocks);
         }
         out.close();
         Utils.unmap(data);
@@ -154,27 +144,18 @@ public class World {
             data.order(ByteOrder.BIG_ENDIAN);
             IntBuffer chunkData = data.asIntBuffer();
             in.close();
-            int dataIndex = 0;
             for (int chunkPos = 0; chunkPos < chunks.length; chunkPos++) {
                 Chunk chunk = new Chunk(chunkPos);
 
-                int dataSize = chunkData.get(dataIndex);
-                dataIndex++;
-                int[] subData = new int[dataSize];
-                for (int i = dataSize - 1; i >= 0; i--) {
-                    subData[i] = chunkData.get(dataIndex);
-                    dataIndex++;
-                }
-                chunk.setBlockPalette(subData);
+                int paletteSize = chunkData.get();
+                int[] palette = new int[paletteSize];
+                chunkData.get(palette);
+                chunk.setBlockPalette(palette);
 
-                dataSize = chunkData.get(dataIndex);
-                dataIndex++;
-                subData = new int[dataSize];
-                for (int i = dataSize - 1; i >= 0; i--) {
-                    subData[i] = chunkData.get(dataIndex);
-                    dataIndex++;
-                }
-                chunk.setBlockData(subData);
+                int blockSize = chunkData.get();
+                int[] blocks = new int[blockSize];
+                chunkData.get(blocks);
+                chunk.setBlockData(blocks);
 
                 chunks[chunkPos] = chunk;
             }
