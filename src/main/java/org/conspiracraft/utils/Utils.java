@@ -9,6 +9,7 @@ import javax.imageio.ImageReader;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Random;
 
@@ -73,13 +74,36 @@ public class Utils {
         }
         buffer.flip();
     }
+    public static long[] flipLongArray(long[] arr) {
+        long[] newArr = new long[arr.length];
+        int i = arr.length-1;
+        for (long value : arr) {
+            newArr[i--] = value;
+        }
+        return newArr;
+    }
     public static int[] flipIntArray(int[] arr) {
         int[] newArr = new int[arr.length];
         int i = arr.length-1;
-        for (int integer : arr) {
-            newArr[i--] = integer;
+        for (int value : arr) {
+            newArr[i--] = value;
         }
         return newArr;
+    }
+    public static byte[] longArrayToByteArray(long[] longArr) {
+        byte[] byteArr = new byte[longArr.length*8];
+        for (int i = 0; i < longArr.length; i++) {
+            long val = longArr[i];
+            byteArr[(i*8)] = (byte) (val >> 56);
+            byteArr[(i*8)+1] = (byte) (val >> 48);
+            byteArr[(i*8)+2] = (byte) (val >> 40);
+            byteArr[(i*8)+3] = (byte) (val >> 32);
+            byteArr[(i*8)+4] = (byte) (val >> 24);
+            byteArr[(i*8)+5] = (byte) (val >> 16);
+            byteArr[(i*8)+6] = (byte) (val >> 8);
+            byteArr[(i*8)+7] = (byte) (val);
+        }
+        return byteArr;
     }
     public static byte[] intArrayToByteArray(int[] intArr) {
         byte[] byteArr = new byte[intArr.length*4];
@@ -102,12 +126,24 @@ public class Utils {
         }
         return byteArr;
     }
-    public static short[] byteArrayToShortArray(byte[] byteArr) {
-        short[] shortArr = new short[byteArr.length/2];
+    public static short[] byteArrayToShortArray(short[] shortArr, byte[] byteArr) {
         for (int i = 0; i < shortArr.length; i++) {
             shortArr[i] = (short)(((byteArr[i*2] & 0xFF) << 8) | (byteArr[(i*2)+1] & 0xFF));
         }
         return shortArr;
+    }
+    public static short[] byteArrayToShortArray(byte[] byteArr) {
+        return byteArrayToShortArray(new short[byteArr.length/2], byteArr);
+    }
+    public static long[] byteArrayToLongArray(long[] longArr, byte[] byteArr) {
+        ByteBuffer buf = ByteBuffer.wrap(byteArr).order(ByteOrder.BIG_ENDIAN);
+        for (int i = 0; i < longArr.length; i++) {
+            longArr[i] = buf.getLong();
+        }
+        return longArr;
+    }
+    public static long[] byteArrayToLongArray(byte[] byteArr) {
+        return byteArrayToLongArray(new long[byteArr.length/8], byteArr);
     }
     public static int[] byteArrayToIntArray(byte[] byteArr) {
         int[] intArr = new int[byteArr.length/4];

@@ -235,7 +235,7 @@ public class Inventory {
         setItem(0, 2, new Item().type(ItemTypes.MARBLE).amount(64));
     }
 
-    public static Path invPath = Path.of(Main.mainFolder + "world0/inv.data");
+    public static Path invPath = Path.of(Main.mainFolder + "player_inv.data");
 
     public void load() throws IOException {
         int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(invPath.toFile()).readAllBytes()));

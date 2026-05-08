@@ -8,14 +8,12 @@ import org.joml.Vector3i;
 import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {
-    public final Vector3i chunkPos;
     public final int condensedChunkPos;
     private static final int totalBlocks = chunkSize*chunkSize*chunkSize;
     public final IntArrayList blockPalette;
     public BitBuffer blockData;
 
-    public Chunk(Vector3i chunkPos, int compressedChunkPos) {
-        this.chunkPos = chunkPos;
+    public Chunk(int compressedChunkPos) {
         condensedChunkPos = compressedChunkPos;
         blockPalette = new IntArrayList(new int[]{0});
         blockData = new BitBuffer(totalBlocks, 0);

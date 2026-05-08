@@ -7,6 +7,7 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +46,9 @@ public class Main {
         AudioController.init();
         Files.createDirectories(Path.of(mainFolder));
         Settings.load();
-        Player.create();
+        player = new Player();
+        player.create();
+        World.load(World.worldType.getWorldPath() + "/");
         double timeAccum = 0;
         long prevTime = System.nanoTime();
         while (!isClosing) {
@@ -78,6 +81,10 @@ public class Main {
             Renderer.render();
             AudioController.tick();
 
+            if (isSaving) {
+                Main.save();
+            }
+
             frameTimes.addLast(elapsed);
             if (frameTimes.size() > 60) {
                 frameTimes.removeFirst();
@@ -91,7 +98,13 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
-        Settings.save();
         Window.graphics.cleanup();
+    }
+
+    public static void save() throws IOException {
+        Settings.save();
+        player.save();
+        World.save(World.worldType.getWorldPath() + "/");
+        isSaving = false;
     }
 }

@@ -2,17 +2,22 @@ package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.conspiracraft.Main;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class World {
     public static final int seed = 67;
@@ -23,12 +28,12 @@ public class World {
     public static final int height = 640;
     public static final byte chunkSize = 16;
     public static final int chunkBits = Integer.numberOfTrailingZeros(chunkSize);
-    public static final int sizeChunks = size >>chunkBits;
-    public static final int heightChunks = height >>chunkBits;
+    public static final int sizeChunks = size>>chunkBits;
+    public static final int heightChunks = height>>chunkBits;
     public static final byte regionSizeChunks = 4;
     public static final int regionBits = Integer.numberOfTrailingZeros(regionSizeChunks);
-    public static final int sizeRegions = sizeChunks >>regionBits;
-    public static final int heightRegions = heightChunks >>regionBits;
+    public static final int sizeRegions = sizeChunks>>regionBits;
+    public static final int heightRegions = heightChunks>>regionBits;
     public static final byte lodSize = 4;
     public static final int lodBits = Integer.numberOfTrailingZeros(lodSize);
     public static final int sizeLods = size >>lodBits;
@@ -37,6 +42,106 @@ public class World {
     public static final WorldType worldType = WorldTypes.EARTH;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
+
+    public static void save(String path) throws IOException {
+        long start = System.currentTimeMillis();
+        boolean didExist = Files.exists(Path.of(path));
+        new File(path).mkdirs();
+
+        String globalDataPath = path+"global.data";
+        FileOutputStream out = new FileOutputStream(globalDataPath);
+        byte[] globalData = Utils.longArrayToByteArray(new long[]{Main.timeNs});
+        out.write(globalData);
+        out.close();
+
+        String heightmapDataPath = path+"heightmap.data";
+        out = new FileOutputStream(heightmapDataPath);
+        byte[] heightmapData = Utils.shortArrayToByteArray(heightmap);
+        out.write(heightmapData);
+        out.close();
+
+        String lodsDataPath = path+"lods.data";
+        BufferedOutputStream outBuffered = new BufferedOutputStream(new FileOutputStream(lodsDataPath), Renderer.gigabyte);
+        byte[] lodsData = Utils.longArrayToByteArray(lods);
+        outBuffered.write(lodsData);
+        outBuffered.close();
+
+        String regionsDataPath = path+"regions.data";
+        out = new FileOutputStream(regionsDataPath);
+        byte[] regionsData = Utils.longArrayToByteArray(regions);
+        out.write(regionsData);
+        out.close();
+
+        String chunksPath = path + "chunks.data";
+        out = new FileOutputStream(chunksPath);
+        for (Chunk chunk : World.chunks) {
+            byte[] blockPalette = Utils.intArrayToByteArray(chunk.getBlockPalette());
+            int[] blockData = chunk.getBlockData();
+            byte[] blocks;
+            if (blockData != null) {
+                blocks = Utils.intArrayToByteArray(blockData);
+            } else {
+                blocks = new byte[]{};
+            }
+
+            ByteBuffer buffer = ByteBuffer.allocate(blockPalette.length + 4 + blocks.length + 4);
+            buffer.put(Utils.intArrayToByteArray(new int[]{blockPalette.length / 4}));
+            buffer.put(blockPalette);
+            buffer.put(Utils.intArrayToByteArray(new int[]{blocks.length / 4}));
+            buffer.put(blocks);
+            out.write(buffer.array());
+        }
+        out.close();
+        System.out.println("Took " + (System.currentTimeMillis()-start) + "ms to save world. ");
+    }
+    public static void load(String path) throws IOException, InterruptedException {
+        long start = System.currentTimeMillis();
+        boolean didExist = Files.exists(Path.of(path));
+        if (didExist) {
+            long[] globalData = Utils.flipLongArray(Utils.byteArrayToLongArray(new FileInputStream(path + "global.data").readAllBytes()));
+            Main.timeNs = globalData[0];
+            FileInputStream in = new FileInputStream(path + "heightmap.data");
+            Utils.byteArrayToShortArray(heightmap, in.readAllBytes());
+            in.close();
+            in = new FileInputStream(path + "lods.data");
+            Utils.byteArrayToLongArray(lods, in.readAllBytes());
+            in.close();
+            in = new FileInputStream(path + "regions.data");
+            Utils.byteArrayToLongArray(regions, in.readAllBytes());
+            in.close();
+
+            in = new FileInputStream(path+"chunks.data");
+            int[] data = Utils.byteArrayToIntArray(in.readAllBytes());
+            in.close();
+            int dataIndex = 0;
+            for (int chunkPos = 0; chunkPos < chunks.length; chunkPos++) {
+                Chunk chunk = new Chunk(chunkPos);
+
+                int dataSize = data[dataIndex];
+                dataIndex++;
+                int[] subData = new int[dataSize];
+                for (int i = dataSize - 1; i >= 0; i--) {
+                    subData[i] = data[dataIndex];
+                    dataIndex++;
+                }
+                chunk.setBlockPalette(subData);
+
+                dataSize = data[dataIndex];
+                dataIndex++;
+                subData = new int[dataSize];
+                for (int i = dataSize - 1; i >= 0; i--) {
+                    subData[i] = data[dataIndex];
+                    dataIndex++;
+                }
+                chunk.setBlockData(subData);
+
+                chunks[chunkPos] = chunk;
+            }
+        } else {
+            worldType.generate();
+        }
+        System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
+    }
     public static boolean inBounds(int x, int y, int z) {
         return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
     }

@@ -24,6 +24,7 @@ import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
 import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import org.lwjgl.vulkan.*;
 
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -473,8 +474,7 @@ public class Renderer {
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;
     public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
     public static long[] chunkBlockAllocs;
-    public static void fillSSBOs() throws InterruptedException {
-        worldType.generate();
+    public static void fillSSBOs() {
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(voxelSSBOSize);
         vmaCreateVirtualBlock(blockCreateInfo, blocks);

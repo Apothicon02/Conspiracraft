@@ -1,5 +1,9 @@
 package org.conspiracraft.player;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import org.conspiracraft.Main;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.physics.AABB;
@@ -15,6 +19,9 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntity;
@@ -53,11 +60,61 @@ public class Player {
     public Player() {
         breakingSource = new Source(pos, 1, 1, 0, 1);
     }
-    public static void create() {
-        Main.player = new Player();
-        Main.player.inputHandler.init();
-        Main.player.pos.set(1024, 195, 0);
-        Main.player.inv.init();
+    public static Path plrPath = Path.of(Main.mainFolder + "player.data");
+    public void create() throws IOException {
+        inputHandler.init();
+        inv.init();
+
+        if (Files.exists(plrPath)) {
+            int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));
+            int i = 0;
+            pos.set(new Vector3f(plrData[i++]/1000f, plrData[i++]/1000f, plrData[i++]/1000f));
+            float[] camMatrix = new float[16];
+            for (int cI = 0; cI < 16; cI++) {
+                camMatrix[cI] = plrData[i++]/1000f;
+            }
+            camera.setViewMatrix(camMatrix);
+            camera.pitch.set(plrData[i++]/1000f, plrData[i++]/1000f, plrData[i++]/1000f, plrData[i++]/1000f);
+            movement.set(plrData[i++]/1000f, plrData[i++]/1000f, plrData[i++]/1000f);
+            vel.set(plrData[i++]/1000f, plrData[i++]/1000f, plrData[i++]/1000f);
+            creative = plrData[i++] != 0;
+            flying = plrData[i++] != 0;
+        } else {
+            Main.player.pos.set(1024, 195, 0);
+        }
+        if (Files.exists(Inventory.invPath)) {
+            Main.player.inv.load();
+        } else {
+            Main.player.inv.init();
+        }
+    }
+    public void save() throws IOException {
+        FileOutputStream out = new FileOutputStream(plrPath.toFile());
+        float[] cam = new float[16];
+        camera.getViewMatrixWithoutPitch().get(cam);
+        int[] data = new int[31];
+        int i = 0;
+        data[i++] = (int)(pos.x()*1000);
+        data[i++] = (int)(pos.y()*1000);
+        data[i++] = (int)(pos.z()*1000);
+        for (int cI = 0; cI < 16; cI++) {
+            data[i++] = (int)(cam[cI]*1000);
+        }
+        data[i++] = (int)(camera.pitch.x()*1000);
+        data[i++] = (int)(camera.pitch.y()*1000);
+        data[i++] = (int)(camera.pitch.z()*1000);
+        data[i++] = (int)(camera.pitch.w()*1000);
+        data[i++] = (int)(movement.x()*1000);
+        data[i++] = (int)(movement.y()*1000);
+        data[i++] = (int)(movement.z()*1000);
+        data[i++] = (int)(vel.x()*1000);
+        data[i++] = (int)(vel.y()*1000);
+        data[i++] = (int)(vel.z()*1000);
+        data[i++] = Main.player.creative ? 1 : 0;
+        data[i++] = Main.player.flying ? 1 : 0;
+        out.write(Utils.intArrayToByteArray(data));
+        out.close();
+        inv.save();
     }
 
     public Vector3f oldCamTranslation = new Vector3f();

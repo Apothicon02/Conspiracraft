@@ -7,6 +7,7 @@ public class Camera {
     private final Matrix4f viewMatrix = new Matrix4f();
     public Quaternionf pitch = new Quaternionf();
     public float FOV = Settings.fov;
+    public void setViewMatrix(float[] matrix) {viewMatrix.set(matrix);}
     public Matrix4f getViewMatrix() {
         return getViewMatrixWithoutPitch().rotate(pitch);
     }

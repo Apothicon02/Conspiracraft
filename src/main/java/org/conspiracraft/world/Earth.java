@@ -5,6 +5,7 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
+import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
@@ -15,6 +16,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
+import java.nio.file.Path;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.Random;
@@ -29,6 +31,7 @@ import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
+    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0);
     public static Vector3f sunPos = new Vector3f(0, World.height*2, 0);
     public static Vector3f prevMunPos = new Vector3f(0, World.height*-2, 0);
@@ -86,7 +89,6 @@ public class Earth extends WorldType {
     static final int[] zOffset = { 0, 0, 3, -3, 3, -3, 3, -3 };
     @Override
     public void generate() throws InterruptedException {
-        long start = System.currentTimeMillis();
         generating = true;
         long startTime = System.currentTimeMillis();
         final byte[] biomes = new byte[size*size];
@@ -152,7 +154,7 @@ public class Earth extends WorldType {
                                 double islandsNoise = ogIslandsNoise;
                                 if (islandsNoise < 0.f) {islandsNoise *= -4*(5*baseHilliness);}
                                 double islands = ((60+(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*seaness;
-                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise) + hilliness + elevation));
+                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise*3) + hilliness + elevation));
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
                                 double redwoodness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/quarterSize, 0, 1);
@@ -227,7 +229,7 @@ public class Earth extends WorldType {
                         final int minChunkElevation = chunksMinElevations[packChunkPos(cX, cZ)]>>chunkBits;
                         for (int cY = 0; cY < minChunkElevation; cY++) {
                             final int packedCP = World.packChunkPos(cX, cY, cZ);
-                            final Chunk chunk = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
+                            final Chunk chunk = new Chunk(packedCP);
                             chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
                             World.chunks[packedCP] = chunk;
                             updateRegion(cX, cY, cZ, false);
@@ -243,7 +245,7 @@ public class Earth extends WorldType {
                         final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[packChunkPos(cX, cZ)])>>chunkBits;
                         for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {
                             final int packedCP = World.packChunkPos(cX, cY, cZ);
-                            final Chunk chunk = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
+                            final Chunk chunk = new Chunk(packedCP);
                             boolean setAnything = false;
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                                 for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
@@ -319,7 +321,7 @@ public class Earth extends WorldType {
                         }
                         for (int cY = maxChunkElevation+1; cY < heightChunks; cY++) {
                             int packedCP = World.packChunkPos(cX, cY, cZ);
-                            World.chunks[packedCP] = new Chunk(new Vector3i(cX, cY, cZ), packedCP);
+                            World.chunks[packedCP] = new Chunk(packedCP);
                         }
                     }
                 }
@@ -536,6 +538,5 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
         generating = false;
-        System.out.print("Took "+(System.currentTimeMillis()-start)+"ms to generate world. \n");
     }
 }
