@@ -90,22 +90,29 @@ public class World {
         int size = 0;
         for (Chunk chunk : World.chunks) {
             int[] blockData = chunk.getBlockData();
-            size += (chunk.getBlockPalette().length*4) + 4 + (blockData == null ? 0 : blockData.length*4) + 4;
+            size += 2+chunk.getBlockPalette().length+(blockData == null ? 0 : blockData.length);
         }
         System.out.println("Took " + (System.currentTimeMillis()-chunkStart) + "ms to calculate chunk file size. ");
         out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, size);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, size*4L);
         data.order(ByteOrder.BIG_ENDIAN);
         IntBuffer chunkData = data.asIntBuffer();
+
+        int[] emptyData = new int[0];
+        int[] outData = new int[size];
+        int offset = 0;
         for (Chunk chunk : World.chunks) {
-            int[] blockPalette = chunk.getBlockPalette();
-            int[] blockData = chunk.getBlockData();
-            int[] blocks = blockData == null ? new int[0] : blockData;
-            chunkData.put(blockPalette.length);
-            chunkData.put(blockPalette);
-            chunkData.put(blocks.length);
-            chunkData.put(blocks);
+            int[] palette = chunk.getBlockPalette();
+            int[] blocks  = chunk.getBlockData();
+            blocks = blocks == null ? emptyData : blocks;
+            outData[offset++] = palette.length;
+            System.arraycopy(palette, 0, outData, offset, palette.length);
+            offset += palette.length;
+            outData[offset++] = blocks.length;
+            System.arraycopy(blocks, 0, outData, offset, blocks.length);
+            offset += blocks.length;
         }
+        chunkData.put(outData);
         out.close();
         Utils.unmap(data);
         System.out.println("Took " + (System.currentTimeMillis()-chunkStart) + "ms to save chunks. ");
