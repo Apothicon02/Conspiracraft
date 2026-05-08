@@ -102,7 +102,7 @@ public class Main {
         Window.graphics.cleanup();
     }
 
-    public static void save() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static void save() throws IOException {
         Settings.save();
         player.save();
         World.save(World.worldType.getWorldPath() + "/");
