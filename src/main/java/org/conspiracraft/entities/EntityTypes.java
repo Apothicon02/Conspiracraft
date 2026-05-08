@@ -19,6 +19,17 @@ public class EntityTypes {
     public static int entityTexHeight = 48;
     public static Map<Integer, EntityType> entityTypeMap = new HashMap<>(Map.of());
 
+    public static int getId(EntityType type) {
+        int id = 0;
+        for (EntityType mapBlocKType : entityTypeMap.values()) {
+            if (mapBlocKType.equals(type)) {
+                return id;
+            }
+            id++;
+        }
+        return 0;
+    }
+
     public static EntityType
             MUN = create(new EntityType("celestial/texture/mun")),
             COW = create(new EntityType("animal/texture/cow")),

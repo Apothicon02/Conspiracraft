@@ -1,6 +1,7 @@
 package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.entities.BlockEntity;
@@ -102,6 +103,34 @@ public class World {
         }
         Utils.unmap(data);
         out.close();
+
+        IntArrayList itemsData = new IntArrayList();
+        int i = 0;
+        for (Item item : items) {
+            int[] itemData = item.getData();
+            itemsData.addElements(i, itemData);
+            i += itemData[0]+1;
+        }
+        out = FileChannel.open(Path.of(path + "items.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, itemsData.size() * 4L);
+        data.order(ByteOrder.BIG_ENDIAN);
+        data.asIntBuffer().put(itemsData.toIntArray());
+        Utils.unmap(data);
+        out.close();
+
+        IntArrayList entitiesData = new IntArrayList();
+        i = 0;
+        for (Entity entity : entities) {
+            int[] entityData = entity.getData();
+            entitiesData.addElements(i, entityData);
+            i += entityData[0]+1;
+        }
+        out = FileChannel.open(Path.of(path + "entities.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, entitiesData.size() * 4L);
+        data.order(ByteOrder.BIG_ENDIAN);
+        data.asIntBuffer().put(entitiesData.toIntArray());
+        Utils.unmap(data);
+        out.close();
         System.out.println("Took " + (System.currentTimeMillis()-start) + "ms to save world. ");
     }
     public static void load(String path) throws IOException, InterruptedException {
@@ -153,6 +182,36 @@ public class World {
             }
             Utils.unmap(data);
             in.close();
+
+            if (Files.exists(Path.of(path + "items.data"))) {
+                in = FileChannel.open(Path.of(path + "items.data"), StandardOpenOption.READ);
+                data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+                data.order(ByteOrder.BIG_ENDIAN);
+                IntBuffer itemsData = data.asIntBuffer();
+                while (itemsData.position() < itemsData.capacity()) {
+                    int itemDataLength = itemsData.get();
+                    if (itemDataLength > 0) {
+                        items.add(Item.load(itemsData));
+                    }
+                }
+                Utils.unmap(data);
+                in.close();
+            }
+
+            if (Files.exists(Path.of(path + "entities.data"))) {
+                in = FileChannel.open(Path.of(path + "entities.data"), StandardOpenOption.READ);
+                data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+                data.order(ByteOrder.BIG_ENDIAN);
+                IntBuffer entitiesData = data.asIntBuffer();
+                while (entitiesData.position() < entitiesData.capacity()) {
+                    int itemDataLength = entitiesData.get();
+                    if (itemDataLength > 0) {
+                        entities.add(Entity.load(entitiesData));
+                    }
+                }
+                Utils.unmap(data);
+                in.close();
+            }
         } else {
             worldType.generate();
         }

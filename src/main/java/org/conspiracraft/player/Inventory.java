@@ -10,7 +10,12 @@ import org.conspiracraft.Main;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 import static org.lwjgl.sdl.SDLScancode.*;
@@ -238,35 +243,42 @@ public class Inventory {
     public static Path invPath = Path.of(Main.mainFolder + "player_inv.data");
 
     public void load() throws IOException {
-        int[] data = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(invPath.toFile()).readAllBytes()));
+        FileChannel in = FileChannel.open(invPath, StandardOpenOption.READ);
+        MappedByteBuffer data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+        data.order(ByteOrder.BIG_ENDIAN);
+        IntBuffer itemsData = data.asIntBuffer();
         int slot = 0;
-        for (int i = 0; i < data.length; ) {
-            int itemDataLength = data[i++];
+        while (itemsData.position() < itemsData.capacity()) {
+            int itemDataLength = itemsData.get();
             if (itemDataLength > 0) {
-                items[slot++] = Item.load(data, i);
-                i += itemDataLength;
+                items[slot++] = Item.load(itemsData);
             } else {
                 slot++;
             }
         }
+        Utils.unmap(data);
+        in.close();
     }
 
     public void save() throws IOException {
-        IntArrayList data = new IntArrayList();
+        IntArrayList itemsData = new IntArrayList();
         int i = 0;
         for (Item item : items) {
             if (item == null) {
-                data.add(i, 0);
+                itemsData.add(i, 0);
             } else {
                 int[] itemData = item.getData();
-                data.addElements(i, itemData);
+                itemsData.addElements(i, itemData);
                 i += itemData[0];
             }
             i++;
         }
 
-        FileOutputStream out = new FileOutputStream(invPath.toFile());
-        out.write(Utils.intArrayToByteArray(data.toIntArray()));
+        FileChannel out = FileChannel.open(invPath, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        MappedByteBuffer data = out.map(FileChannel.MapMode.READ_WRITE, 0, itemsData.size() * 4L);
+        data.order(ByteOrder.BIG_ENDIAN);
+        data.asIntBuffer().put(itemsData.toIntArray());
+        Utils.unmap(data);
         out.close();
     }
 

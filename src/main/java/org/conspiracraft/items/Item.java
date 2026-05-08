@@ -7,8 +7,10 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.nio.IntBuffer;
+
 public class Item implements Cloneable {
-    public int dataLength = 9; //excludes this int
+    public static int dataLength = 9; //excludes this int
     public ItemType type = ItemTypes.AIR;
     public Vector3f pos = new Vector3f();
     public int amount = 1;
@@ -18,8 +20,8 @@ public class Item implements Cloneable {
     public int timeExisted = 0;
     public long prevTickTime = 0;
 
-    public static Item load(int[] data, int offset) {
-        return new Item().type(ItemTypes.itemTypeMap.get(data[offset++])).moveTo(new Vector3f(data[offset++]/1000f, data[offset++]/1000f, data[offset++]/1000f)).rot(data[offset++]/1000f).hover(data[offset++]/1000f, data[offset++]>0).amount(data[offset++]).timeExisted(data[offset++]);
+    public static Item load(IntBuffer data) {
+        return new Item().type(ItemTypes.itemTypeMap.get(data.get())).moveTo(new Vector3f(data.get()/1000f, data.get()/1000f, data.get()/1000f)).rot(data.get()/1000f).hover(data.get()/1000f, data.get()>0).amount(data.get()).timeExisted(data.get());
     }
     public int[] getData() {
         return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeExisted};
