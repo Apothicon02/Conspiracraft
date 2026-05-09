@@ -405,13 +405,7 @@ vec4 dda(bool shadow) {
                         }
                         if (voxelColor.a > alphaMax) {
                             shadowPos = (hitPos-(flatNormal*0.002f))+vec3(0, voxelSize, 0);
-                            if (getBlockAndVoxel(shadowPos+vec3(0, voxelSize, 0)).a < alphaMax) {
-                                normal = vec3(0, 1, 0);
-                            }
-                            if (voxelColor.a < 1.f) {
-                                reverseNormShading = true;
-                            }
-                            return vec4(voxelColor.rgb, 1.f);
+                            return voxelColor;
                         } else {
                             addTint(voxelColor, normal, shadow);
                         }
@@ -446,7 +440,7 @@ vec4 dda(bool shadow) {
                     }
                     if (voxelColor.a > alphaMax) {
                         shadowPos = hitPos;
-                        return vec4(voxelColor.rgb, 1.f);
+                        return voxelColor;
                     } else {
                         addTint(voxelColor, normal, shadow);
                         stage = 1;
@@ -514,6 +508,10 @@ void main() {
     rayPos = ogPos;
     rayDir = ogDir;
     vec4 color = dda(false);
+    if (color.a > alphaMax && color.a < 1.f) {
+        reverseNormShading = true;
+        color.a = 1;
+    }
     vec3 primaryNormal = normal;
     vec3 primaryFlatNormal = flatNormal;
     vec3 primaryLightPos = hitPos;
@@ -524,7 +522,7 @@ void main() {
     if (isSky) {
         primaryLightPos = ogPos + ogDir * renderDistance;
     } else {
-        vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos, 1.0));
+        vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos-(primaryFlatNormal*0.001f), 1.0));
         depth = clipPos.z/clipPos.w;
     }
     bool celestial = false;
@@ -554,6 +552,9 @@ void main() {
         }
     } else {
         color.rgb = mipmap(color.rgb);
+        if (getBlockAndVoxel(shadowPos).a < alphaMax) {
+            primaryNormal = vec3(0, 1, 0);
+        }
     }
     vec3 primaryFirstBlockPos = firstBlockPos;
     vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
