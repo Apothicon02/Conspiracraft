@@ -3,6 +3,7 @@ package org.conspiracraft.utils;
 import org.conspiracraft.Main;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 import sun.misc.Unsafe;
 
 import javax.imageio.ImageIO;

@@ -230,8 +230,6 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static final Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
-    public static boolean chunkEmptinessChanged = false;
-    public static final int[] chunkEmptiness = new int[1+((sizeChunks*sizeChunks*heightChunks)/32)];
     public static final long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
@@ -246,6 +244,39 @@ public class World {
     }
     public static int packChunkPos(int x, int z) {
         return (x*World.sizeChunks)+z;
+    }
+    public static Light getLight(Vector3i pos) {
+        return getLight(pos.x(), pos.y(), pos.z());
+    }
+    public static Light getLight(int x, int y, int z) {
+        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
+            //System.out.print("Tried getting block that's out of bounds: x"+x+", y"+y+", z"+z);
+            return new Light(0, 0, 0, 15);
+        }
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+        synchronized (chunk) {
+            return chunk.getLight(pos);
+        }
+    }
+    public static void setLight(int x, int y, int z, Light light) {
+        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
+            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
+            return;
+        }
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        if (!generating && !updateSet.contains(chunkPos)) {
+            updateSet.add(chunkPos);
+            updateQueue.addLast(chunkPos);
+        }
+        synchronized (chunk) {
+            chunk.setLight(lX, lY, lZ, light);
+        }
     }
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
     public static Vector2i getBlock(float x, float y, float z) {
@@ -278,14 +309,17 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        if (!generating && !updateSet.contains(chunkPos)) {
-            updateSet.add(chunkPos);
-            updateQueue.addLast(chunkPos);
-        }
         synchronized (chunk) {
             chunk.setBlock(lX, lY, lZ, type, subType);
             updateLod(x, y, z, type == 0);
             updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+        }
+        if (!generating) {
+            LightHelper.recalculateLight(new Vector3i(x, y, z), getLight(x, y, z));
+            if (!updateSet.contains(chunkPos)) {
+                updateSet.add(chunkPos);
+                updateQueue.addLast(chunkPos);
+            }
         }
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType) {

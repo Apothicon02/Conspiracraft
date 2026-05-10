@@ -30,7 +30,7 @@ public class BlockType {
     }
 
     public boolean blocksLight(Vector2i block) {
-        return  blockProperties.blocksLight;
+        return blockProperties.blocksLight;
     }
 
     public boolean needsSupport(Vector2i block) {

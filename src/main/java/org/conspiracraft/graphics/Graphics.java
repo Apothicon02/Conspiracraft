@@ -53,6 +53,8 @@ public class Graphics {
     public static ShaderStorageBuffer chunkSSBO;
     public static ShaderStorageBuffer lodSSBO;
     public static ShaderStorageBuffer regionSSBO;
+    public static ShaderStorageBuffer lightChunkSSBO;
+    public static ShaderStorageBuffer lightSSBO;
     public void createBuffers(MemoryStack stack) {
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
         vertexStagingBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
@@ -71,6 +73,8 @@ public class Graphics {
         chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT, false);
         voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
         lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        lightSSBO = new ShaderStorageBuffer(stack, lightSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}

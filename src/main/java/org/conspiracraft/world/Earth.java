@@ -17,6 +17,7 @@ import org.lwjgl.system.MemoryStack;
 import java.lang.Math;
 import java.lang.Runtime;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.Random;
@@ -537,6 +538,104 @@ public class Earth extends WorldType {
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
+
+        startTime = System.currentTimeMillis();
+        for (int cX = 0; cX < sizeChunks; cX++) {
+            for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                boolean foundMax = false;
+                for (int cY = heightChunks - 1; cY >= 0; cY--) {
+                    Chunk chunk = World.chunks[packChunkPos(cX, cY, cZ)];
+                    if (chunk.blockPalette != null) {
+                        for (int data : chunk.blockPalette) {
+                            Vector2i block = Chunk.unpackInt(data);
+                            boolean obstructingHeightmap = BlockTypes.blockTypeMap.get(block.x()).obstructingHeightmap(block);
+                            if (!foundMax && obstructingHeightmap) {
+                                foundMax = true;
+                                chunksMaxElevations[packChunkPos(cX, cZ)] = (short) cY;
+                                break;
+                            } else if (foundMax && !obstructingHeightmap) {
+                                chunksMinElevations[packChunkPos(cX, cZ)] = (short) cY;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Arrays.fill(heightmap, (short) 0);
+
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        final int heightInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int startX = thread * heightInterval;
+            final int endX = Math.min(startX + heightInterval, sizeChunks);
+            pool.execute(() -> {
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        int packedHorizontalCP = packChunkPos(cX, cZ);
+                        int maxCy = chunksMaxElevations[packedHorizontalCP];
+                        int minCy = chunksMinElevations[packedHorizontalCP];
+                        for (int cY = maxCy; cY >= minCy; cY--) {
+                            Chunk chunk = World.chunks[packChunkPos(cX, cY, cZ)];
+                            for (int x = 0; x < chunkSize; x++) {
+                                for (int z = 0; z < chunkSize; z++) {
+                                    for (int y = chunkSize - 1; y >= 0; y--) {
+                                        int localPos = Chunk.condenseLocalPos(x, y, z);
+                                        Vector2i block = chunk.getBlock(localPos);
+                                        int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
+                                        int gY = (cY*chunkSize)+y;
+                                        short elevation = heightmap[pos];
+                                        if (BlockTypes.blockTypeMap.get(block.x()).obstructingHeightmap(block)) {
+                                            heightmap[pos] = (short) Math.max(elevation, gY);
+                                            chunk.setLight(x, y, z, 0);
+                                        } else if (gY <= elevation) {
+                                            chunk.setLight(x, y, z, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to update heightmap. \n");
+
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        final int lightInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int startX = thread * lightInterval;
+            final int endX = Math.min(startX + lightInterval, sizeChunks);
+            pool.execute(() -> {
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        int packedHorizontalCP = packChunkPos(cX, cZ);
+                        synchronized (chunks) {
+                            int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
+                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                    int packedHorizontalPos = packPos(x, z);
+                                    int maxY = heightmap[packedHorizontalPos];
+                                    for (int y = maxY; y >= minY; y--) {
+                                        LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
         generating = false;
     }
 }

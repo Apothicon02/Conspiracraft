@@ -20,7 +20,7 @@ struct LongStruct {
 layout(std430, set = 0, binding = 1) readonly buffer RegionBuffer {
     LongStruct[] regions;
 } regionData;
-layout(std430, set = 0, binding = 2) readonly buffer ChunksBuffer {
+layout(std430, set = 0, binding = 2) readonly buffer ChunkBuffer {
     ChunkStruct[] chunks;
 } chunkData;
 layout(std430, set = 0, binding = 3) readonly buffer VoxelBuffer {
@@ -29,6 +29,12 @@ layout(std430, set = 0, binding = 3) readonly buffer VoxelBuffer {
 layout(std430, set = 0, binding = 4) readonly buffer LODBuffer {
     LongStruct[] lods;
 } lodData;
+layout(std430, set = 0, binding = 5) readonly buffer LightChunkBuffer {
+    ChunkStruct[] chunks;
+} lightChunkData;
+layout(std430, set = 0, binding = 6) readonly buffer LightBuffer {
+    int[] lights;
+} lightData;
 const int size = 4096;
 const int height = 640;
 const vec3 worldSize = vec3(size, height, size);
@@ -62,25 +68,60 @@ LongStruct getRegion(ivec3 regionPos) {
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
+ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0);
+int lightValuesPerInt = -1;
+void updateLightChunkData(ivec3 chunkPos) {
+    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    lightChunk = lightChunkData.chunks[condensedChunkPos];
+    lightValuesPerInt = lightChunk.bitsPerValue <= 0 ? 0 : 32/lightChunk.bitsPerValue;
+}
+void updateLightChunkData(int x, int y, int z) {
+    updateLightChunkData(ivec3(x, y, z) >> 4);
+}
+int getLightData(int x, int y, int z) {
+    updateLightChunkData(x, y, z);
+    if (lightValuesPerInt <= 0) {return 536870912;}
+    ivec3 localPos = ivec3(x, y, z) & ivec3(15);
+    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    int intIndex = condensedLocalPos/lightValuesPerInt;
+    int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightChunk.bitsPerValue;
+
+    int index = lightChunk.pointer+lightChunk.paletteSize+intIndex;
+    if (index < 0 || index >= 500000000) return 536870912;
+    int key = (lightData.lights[index] >> bitIndex) & lightChunk.valueMask;
+    return lightData.lights[lightChunk.pointer+key];
+}
+vec4 getLight(int x, int y, int z) {
+    int lightData = getLightData(x, y, z);
+    return vec4(0xFF & lightData >> 16, 0xFF & lightData >> 8, 0xFF & lightData, 0xFF & lightData >> 24);
+}
+vec4 getLight(float x, float y, float z) {
+    return getLight(int(x), int(y), int(z));
+}
+vec4 getLight(vec3 pos) {
+    return getLight(int(pos.x), int(pos.y), int(pos.z));
+}
+
 ChunkStruct chunk = ChunkStruct(0, 0, 0, 0);
-int blockValuesPerInt = -1;
+int blockValuesPerInt = 0;
 void updateChunkData(ivec3 chunkPos) {
     int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
     chunk = chunkData.chunks[condensedChunkPos];
-    blockValuesPerInt = 32/chunk.bitsPerValue;
+    blockValuesPerInt = chunk.bitsPerValue <= 0 ? 0 : 32/chunk.bitsPerValue;
 }
 void updateChunkData(int x, int y, int z) {
     updateChunkData(ivec3(x, y, z) >> 4);
 }
 int getBlockData(int x, int y, int z) {
     updateChunkData(x, y, z);
+    if (blockValuesPerInt <= 0) {return 0;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
-    int intIndex  = condensedLocalPos/blockValuesPerInt;
+    int intIndex = condensedLocalPos/blockValuesPerInt;
     int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * chunk.bitsPerValue;
 
     int index = chunk.pointer+chunk.paletteSize+intIndex;
-    if (index < 0 || index >= 250000000) return 0;
+    if (index < 0 || index >= 500000000) return 0;
 
     int key = (voxelData.voxels[index] >> bitIndex) & chunk.valueMask;
     return voxelData.voxels[chunk.pointer+key];
@@ -93,7 +134,7 @@ ivec2 getBlock(int x, int y, int z) {
 ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
-layout(set = 0, binding = 5) uniform sampler3D atlas;
+layout(set = 0, binding = 7) uniform sampler3D atlas;
 const float alphaMax = 0.95f;
 vec4 fromLinear(vec4 linearRGB){
     bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
@@ -147,7 +188,7 @@ vec4 getBlockAndVoxel(float x, float y, float z) {
 vec4 getBlockAndVoxel(vec3 pos) {
     return getBlockAndVoxel(pos.x, pos.y, pos.z);
 }
-layout(set = 0, binding = 6) uniform sampler2D noises;
+layout(set = 0, binding = 8) uniform sampler2D noises;
 float noise(vec2 coords) {
     return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
 }
@@ -155,9 +196,9 @@ float getCaustic(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/1000 : 0.f;
     return noise((checkPos+time)*32);
 }
-layout(set = 0, binding = 10) uniform sampler2D rasterColors;
-layout(set = 0, binding = 11) uniform sampler2D rasterDepth;
-layout(set = 0, binding = 12) uniform sampler2D rasterNormals;
+layout(set = 0, binding = 12) uniform sampler2D rasterColors;
+layout(set = 0, binding = 13) uniform sampler2D rasterDepth;
+layout(set = 0, binding = 14) uniform sampler2D rasterNormals;
 
 layout(location = 0) in vec2 uv;
 
@@ -587,8 +628,13 @@ void main() {
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
         vec4 skylight = globalUbo.skylight;
-        float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
-        vec3 lighting = (vec3(normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f));
+        //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
+        //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
+        bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
+        vec4 blockLighting = pow(inBounds ? getLight(primaryLightPos)/32.f : vec4(0, 0, 0, 1), vec4(1, 1, 1, 2))*vec4(1, 1, 1, skylight.a);
+        float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
+        vec3 ogLighting = getLightingColor(primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
+        vec3 lighting = ogLighting;
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryShadowPos;
         rayDir = sunDir;
@@ -626,8 +672,7 @@ void main() {
             color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
         }
         color.rgb *= lighting;
-        float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
-        color.rgb = mix(color.rgb, getLightingColor(primaryLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
+        color.rgb = mix(color.rgb, ogLighting, fogginess);
         outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
         outNormal = vec4(primaryFlatNormal, 1);
