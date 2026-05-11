@@ -543,7 +543,7 @@ public class Earth extends WorldType {
         for (int cX = 0; cX < sizeChunks; cX++) {
             for (int cZ = 0; cZ < sizeChunks; cZ++) {
                 boolean foundMax = false;
-                for (int cY = heightChunks - 1; cY >= 0; cY--) {
+                for (short cY = (short) (heightChunks - 1); cY >= 0; cY--) {
                     Chunk chunk = World.chunks[packChunkPos(cX, cY, cZ)];
                     if (chunk.blockPalette != null) {
                         for (int data : chunk.blockPalette) {
@@ -551,10 +551,11 @@ public class Earth extends WorldType {
                             boolean obstructingHeightmap = BlockTypes.blockTypeMap.get(block.x()).obstructingHeightmap(block);
                             if (!foundMax && obstructingHeightmap) {
                                 foundMax = true;
-                                chunksMaxElevations[packChunkPos(cX, cZ)] = (short) cY;
+                                chunksMaxElevations[packChunkPos(cX, cZ)] = cY;
+                                chunksMinElevations[packChunkPos(cX, cZ)] = cY;
                                 break;
                             } else if (foundMax && !obstructingHeightmap) {
-                                chunksMinElevations[packChunkPos(cX, cZ)] = (short) cY;
+                                chunksMinElevations[packChunkPos(cX, cZ)] = cY;
                                 break;
                             }
                         }
@@ -636,6 +637,5 @@ public class Earth extends WorldType {
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
-        generating = false;
     }
 }

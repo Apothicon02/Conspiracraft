@@ -14,6 +14,7 @@ import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
@@ -54,10 +55,12 @@ public class Renderer {
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
     public static void render() throws Exception {
+        if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
                 if (!initialized) {
+                    generating = false;
                     fillSSBOs();
                     ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
                     ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
