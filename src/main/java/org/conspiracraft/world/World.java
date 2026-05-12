@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.entities.BlockEntity;
+import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
@@ -251,7 +252,7 @@ public class World {
     public static Light getLight(int x, int y, int z) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried getting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return new Light(0, 0, 0, 15);
+            return new Light(0, 0, 0, 32);
         }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
@@ -315,8 +316,12 @@ public class World {
             updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         }
         if (!generating) {
-            LightHelper.recalculateLight(new Vector3i(x, y, z), getLight(x, y, z));
-            if (!updateSet.contains(chunkPos)) {
+            int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+            Light oldLight = chunk.getLight(pos);
+            chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+            updateHeightmap(x, y, z);
+            LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+            if (!updateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
                 updateSet.add(chunkPos);
                 updateQueue.addLast(chunkPos);
             }
@@ -324,7 +329,7 @@ public class World {
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
+            //System.out.print("Tried replacing block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
         }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
@@ -332,16 +337,57 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        if (!generating && !updateSet.contains(chunkPos)) {
-            updateSet.add(chunkPos);
-            updateQueue.addLast(chunkPos);
-        }
+        int pos = Chunk.condenseLocalPos(lX, lY, lZ);
         synchronized (chunk) {
-            int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
             if (BlockTypes.blockTypeMap.get(chunk.getBlock(pos).x()).blockProperties.isFluidReplaceable) {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
                 updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+            }
+        }
+        if (!generating) {
+            Light oldLight = chunk.getLight(pos);
+            chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+            updateHeightmap(x, y, z);
+            LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+            if (!updateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
+                updateSet.add(chunkPos);
+                updateQueue.addLast(chunkPos);
+            }
+        }
+    }
+    public static void updateHeightmap(int x, int newY, int z) {
+        int packedPos = packPos(x, z);
+        int elevation = heightmap[packedPos];
+        if (newY >= elevation) {
+            int newElevation = elevation;
+            boolean setHeightmap = false;
+            for (int y = newY; y >= 0; y--) {
+                if (!setHeightmap) {
+                    Vector2i block = getBlock(x, y, z);
+                    BlockType type = BlockTypes.blockTypeMap.get(block.x());
+                    if (!type.obstructingHeightmap(block)) {
+                        Light light = getLight(x, y, z);
+                        if (light.s() < 32) {
+                            Light newLight = new Light(light.s(), light.s(), light.s(), 32);
+                            setLight(x, y, z, newLight);
+                        }
+                    } else {
+                        setHeightmap = true;
+                        newElevation = y;
+                        heightmap[packedPos] = (short) y;
+                    }
+                } else {
+                    Light light = getLight(x, y, z);
+                    if (light.s() > 0) {
+                        Light newLight = new Light(light.s(), light.s(), light.s(), 0);
+                        setLight(x, y, z, newLight);
+                        LightHelper.recalculateLight(new Vector3i(x, y, z), light);
+                    }
+                }
+            }
+            for (int y = elevation - 1; y > newElevation; y--) {
+                LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
             }
         }
     }

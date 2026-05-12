@@ -72,14 +72,14 @@ public class Renderer {
                     EntityTypes.fillTexture(stack);
                     initialized = true;
                 } else {
-                    long startTime = System.nanoTime();
-                    boolean wasEmpty = updateQueue.isEmpty();
+                    //long startTime = System.nanoTime();
+                    //boolean wasEmpty = updateQueue.isEmpty();
                     while (!updateQueue.isEmpty()) {
                         Vector3i chunkPos = updateQueue.pollFirst();
                         updateChunk(chunkPos);
                         updateSet.remove(chunkPos);
                     }
-                    if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
+                    //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
                     ssboBarriers();
                 }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);

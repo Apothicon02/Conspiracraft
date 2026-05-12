@@ -80,9 +80,9 @@ public class Main {
             }
             interpolationTime = timeAccum/tickTime;
 
+            LightHelper.iterateLightQueue();
             Renderer.render();
             AudioController.tick();
-            LightHelper.iterateLightQueue();
 
             if (isSaving) {
                 Main.save();

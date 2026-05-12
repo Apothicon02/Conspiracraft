@@ -114,7 +114,7 @@ void updateChunkData(int x, int y, int z) {
 }
 int getBlockData(int x, int y, int z) {
     updateChunkData(x, y, z);
-    if (blockValuesPerInt <= 0) {return 0;}
+    //if (blockValuesPerInt <= 0) {return 0;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex = condensedLocalPos/blockValuesPerInt;
@@ -633,8 +633,6 @@ void main() {
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
         vec4 blockLighting = pow(inBounds ? getLight(primaryLightPos)/32.f : vec4(0, 0, 0, 1), vec4(1, 1, 1, 2))*vec4(1, 1, 1, skylight.a);
         float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
-        vec3 ogLighting = getLightingColor(primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
-        vec3 lighting = ogLighting;
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryShadowPos;
         rayDir = sunDir;
@@ -647,7 +645,7 @@ void main() {
             }
             if (shadowColor.a > 0.0f) {
                 shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-                lighting *= shadowFactor;
+                blockLighting.a *= shadowFactor;
             }
         }
         if (reflectivity > 0.f) {
@@ -671,8 +669,9 @@ void main() {
             }
             color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
         }
+        vec3 lighting = getLightingColor(primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
         color.rgb *= lighting;
-        color.rgb = mix(color.rgb, ogLighting, fogginess);
+        color.rgb = mix(color.rgb, lighting, fogginess);
         outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
         outNormal = vec4(primaryFlatNormal, 1);

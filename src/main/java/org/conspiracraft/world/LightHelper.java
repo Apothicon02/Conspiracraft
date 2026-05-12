@@ -54,15 +54,13 @@ public class LightHelper {
             }) {
                 Vector2i neighbor = getBlock(neighborPos);
                 Light neighborLight = getLight(neighborPos);
-                if (neighborLight != null) {
-                    BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
-                    boolean isNLight = neighborBlockType instanceof LightBlockType;
-                    if (!blocksLight(neighbor) || isNLight) {
-                        r = Math.max(r, Math.max(neighborLight.r(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0) - 1);
-                        g = Math.max(g, Math.max(neighborLight.g(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().g : 0) - 1);
-                        b = Math.max(b, Math.max(neighborLight.b(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().b : 0) - 1);
-                        s = Math.max(s, neighborLight.s() - 1);
-                    }
+                BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
+                boolean isNLight = neighborBlockType instanceof LightBlockType;
+                if (!blocksLight(neighbor) || isNLight) {
+                    r = Math.max(r, Math.max(neighborLight.r(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0) - 1);
+                    g = Math.max(g, Math.max(neighborLight.g(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().g : 0) - 1);
+                    b = Math.max(b, Math.max(neighborLight.b(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().b : 0) - 1);
+                    s = Math.max(s, neighborLight.s() - 1);
                 }
             }
             setLight(pos.x, pos.y, pos.z, new Light(r, g, b, s));
@@ -71,10 +69,8 @@ public class LightHelper {
                     new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
             }) {
                 Light nLight = getLight(neighborPos);
-                if (nLight != null) {
-                    if (isDarker(r, g, b, s, nLight)) {
-                        queueLightUpdate(neighborPos);
-                    }
+                if (isDarker(r, g, b, s, nLight)) {
+                    queueLightUpdate(neighborPos);
                 }
             }
         }
@@ -109,12 +105,10 @@ public class LightHelper {
                         lightQueue.add(neighborPos);
                         lightSet.add(neighborPos);
                         Light nLight = getLight(neighborPos);
-                        if (nLight != null) {
-                            if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
-                                    (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
-                                removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
-                                removalSet.add(neighborPos);
-                            }
+                        if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
+                                (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
+                            removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
+                            removalSet.add(neighborPos);
                         }
                     }
                 }

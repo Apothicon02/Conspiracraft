@@ -606,36 +606,35 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to update heightmap. \n");
 
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int lightInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int startX = thread * lightInterval;
-            final int endX = Math.min(startX + lightInterval, sizeChunks);
-            pool.execute(() -> {
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int packedHorizontalCP = packChunkPos(cX, cZ);
-                        synchronized (chunks) {
-                            int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
-                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                    int packedHorizontalPos = packPos(x, z);
-                                    int maxY = heightmap[packedHorizontalPos];
-                                    for (int y = maxY; y >= minY; y--) {
-                                        LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int lightInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int startX = thread * lightInterval;
+//            final int endX = Math.min(startX + lightInterval, sizeChunks);
+//            pool.execute(() -> {
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        int packedHorizontalCP = packChunkPos(cX, cZ);
+//                        synchronized (chunks) {
+//                            int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                    int packedHorizontalPos = packPos(x, z);
+//                                    int maxY = heightmap[packedHorizontalPos];
+//                                    for (int y = maxY; y >= minY; y--) {
+//                                        LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
     }
 }
