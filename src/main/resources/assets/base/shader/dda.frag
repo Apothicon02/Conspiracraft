@@ -78,16 +78,17 @@ void updateLightChunkData(ivec3 chunkPos) {
 void updateLightChunkData(int x, int y, int z) {
     updateLightChunkData(ivec3(x, y, z) >> 4);
 }
+const int fullSunlight = 536870912;
 int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
-    if (lightValuesPerInt <= 0) {return 536870912;}
+    if (lightValuesPerInt <= 0) {return fullSunlight;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex = condensedLocalPos/lightValuesPerInt;
     int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightChunk.bitsPerValue;
 
     int index = lightChunk.pointer+lightChunk.paletteSize+intIndex;
-    if (index < 0 || index >= 500000000) return 536870912;
+    if (index < 0 || index >= 500000000) return fullSunlight;
     int key = (lightData.lights[index] >> bitIndex) & lightChunk.valueMask;
     return lightData.lights[lightChunk.pointer+key];
 }
@@ -247,7 +248,7 @@ vec4 getLightingColor(vec3 lightPos, vec4 lighting, bool isSky, float fogginess,
     float sunSetness = min(1.f, max(abs(sunHeight), adjustedTime));
     float skyWhiteness = mix(max(0.33f, gradient(lightPos.y, 63, 437, 0, skyWhiteline)), 0.9f, clamp(abs(1-sunSetness), 0, 1.f));
     float sunBrightness = clamp(sunHeight+0.5, mix(-0.07f, 0.33f, skyWhiteness), 1);
-    if (negateSun) { lighting.a = 0; }
+    if (negateSun) { lighting.a = 0; } else {lighting.a = mix(lighting.a, 1.f, fogginess);}
     float whiteness = (isSky ? skyWhiteness : mix(skyWhiteline, skyWhiteness, max(0, fogginess-0.8f)*5.f))*clamp(sunHeight+0.8f-(min(sunSetness, 0.2f)*4), 0.33f, 1);
     float lowSunHeight = 10*clamp(sunHeight, 0.f, 0.1f);
     sunColor = mix(mix(mix(deepSunsetColor, sunsetColor, min(1, lowSunHeight*2))*(1+(lowSunHeight*(15*min(0.5f, abs(1-sunBrightness))))), mix(nightSkyColor, skyColor, clamp(sunHeight+0.1f, 0, 1))*sunBrightness, sunSetness), vec3(sunBrightness), whiteness);

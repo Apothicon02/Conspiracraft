@@ -160,6 +160,7 @@ public class Renderer {
             Main.isClosing = true;
         }
     }
+    public static long allocated = 0;
     public static void updateChunkLights(Vector3i chunkPos, int packedChunkPos, Chunk chunk) {
         long chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
         long lightPtr = lightSSBO.stagingBuffer.pointer.get(0);
@@ -176,6 +177,7 @@ public class Renderer {
         } else {
             allocCreateInfo.size((paletteSize + compressedLights.length) * 4L);
         }
+        allocated += allocCreateInfo.size();
 
         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
         LongBuffer offset = BufferUtils.createLongBuffer(1);
@@ -201,7 +203,7 @@ public class Renderer {
                 }
             }
         } else {
-            System.out.print("lightsSSBO ran out of space! \n");
+            System.out.println("lightsSSBO ran out of space with "+allocated+" bytes allocated!");
             Main.isClosing = true;
         }
     }
@@ -516,7 +518,7 @@ public class Renderer {
     public static int lodSSBOByteSize = lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte/2;
-    public static int lightSSBOSize = gigabyte/2;
+    public static int lightSSBOSize = gigabyte*2;
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
     public static int chunkByteSize = 4*4;
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;
@@ -541,6 +543,7 @@ public class Renderer {
                 }
             }
         }
+        System.out.println("Allocated "+allocated+" bytes for light data.");
 
         long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
         MemoryUtil.memLongBuffer(regionPtr, regions.length).put(regions).rewind();
@@ -562,7 +565,7 @@ public class Renderer {
         ssboBarriers();
     }
     public static void ssboBarriers() {
-        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(5);
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(6);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -596,6 +599,14 @@ public class Renderer {
                 .buffer(lodSSBO.buffer.buffer[0])
                 .offset(0).size(lodSSBOByteSize);
         barrierBuf.get(4)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(lightChunkSSBO.buffer.buffer[0])
+                .offset(0).size(chunkSSBOSize);
+        barrierBuf.get(5)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)

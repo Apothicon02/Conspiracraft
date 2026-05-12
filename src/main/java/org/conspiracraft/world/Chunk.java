@@ -9,7 +9,7 @@ import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {
     public final int condensedChunkPos;
-    private static final int totalVoxels = chunkSize*chunkSize*chunkSize;
+    public static final int totalVoxels = chunkSize*chunkSize*chunkSize;
     public final IntArrayList blockPalette;
     public BitBuffer blockData;
     public final IntArrayList lightPalette;
