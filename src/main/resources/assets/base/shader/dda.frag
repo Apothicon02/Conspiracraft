@@ -632,7 +632,7 @@ void main() {
         //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        vec4 blockLighting = pow(inBounds ? getLight(primaryLightPos)/32.f : vec4(0, 0, 0, 1), vec4(1, 1, 1, 2))*vec4(1, 1, 1, skylight.a);
+        vec4 blockLighting = pow((inBounds && globalUbo.renderToggles.y > 0) ? getLight(primaryLightPos)/32.f : vec4(0, 0, 0, 1), vec4(1, 1, 1, 2))*vec4(1, 1, 1, skylight.a);
         float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
         vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
         rayPos = primaryShadowPos;
