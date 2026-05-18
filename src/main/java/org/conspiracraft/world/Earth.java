@@ -576,7 +576,7 @@ public class Earth extends WorldType {
             final int endX = Math.min(startX + heightInterval, sizeChunks);
             pool.execute(() -> {
                 for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < 16; cZ++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         int packedHorizontalCP = packChunkPos(cX, cZ);
                         int maxCy = chunksMaxElevations[packedHorizontalCP];
                         int minCy = chunksMinElevations[packedHorizontalCP];
@@ -616,17 +616,26 @@ public class Earth extends WorldType {
             final int startX = thread * lightInterval;
             final int endX = Math.min(startX + lightInterval, sizeChunks);
             pool.execute(() -> {
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < 16; cZ++) {
-                        int packedHorizontalCP = packChunkPos(cX, cZ);
-                        synchronized (chunks) {
+                synchronized (chunks) {
+                    for (int cX = startX; cX < endX; cX++) {
+                        for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                            int packedHorizontalCP = packChunkPos(cX, cZ);
                             int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                                 for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                     int packedHorizontalPos = packPos(x, z);
                                     int maxY = heightmap[packedHorizontalPos];
+                                    boolean prevBlocking = false;
                                     for (int y = maxY; y >= minY; y--) {
-                                        LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
+                                        Vector2i block = World.getBlock(x, y, z);
+                                        boolean blocking = BlockTypes.blockTypeMap.get(block.x()).obstructingHeightmap(block);
+                                        if (prevBlocking && !blocking) {
+                                            Light light = getLight(x, y, z);
+                                            if (light.s() < 31 && (getLight(x+1, y, z).s() >= 31 || getLight(x, y, z+1).s() >= 31 || getLight(x-1, y, z).s() >= 31 || getLight(x, y, z-1).s() >= 31)) {
+                                                LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+                                            }
+                                        }
+                                        prevBlocking = blocking;
                                     }
                                 }
                             }
