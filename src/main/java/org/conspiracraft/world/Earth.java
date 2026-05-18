@@ -631,7 +631,7 @@ public class Earth extends WorldType {
                                         boolean blocking = BlockTypes.blockTypeMap.get(block.x()).obstructingHeightmap(block);
                                         if (prevBlocking && !blocking) {
                                             Light light = getLight(x, y, z);
-                                            if (light.s() < 31 && (getLight(x+1, y, z).s() >= 31 || getLight(x, y, z+1).s() >= 31 || getLight(x-1, y, z).s() >= 31 || getLight(x, y, z-1).s() >= 31)) {
+                                            if (light.s() == 0 && (getLight(x+1, y, z).s() >= 31 || getLight(x, y, z+1).s() >= 31 || getLight(x-1, y, z).s() >= 31 || getLight(x, y, z-1).s() >= 31)) {
                                                 LightHelper.updateLight(new Vector3i(x, y, z), block, light);
                                             }
                                         }

@@ -43,7 +43,7 @@ public class BlockTypes {
             OAK_LOG = create(new BlockType(blockTypeMap.size(), new BlockProperties().ttb(200).blockSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1,
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             OAK_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), new BlockProperties().ttb(100).blockSFX(new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1,
-                    new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(true).isCollidable(false).isFluidReplaceable(true))),
+                    new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
             HYDRANGEA = create(List.of(BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), ROSE.blockProperties)),
             MAGMA = create(List.of(BlockTags.blunt), new LightBlockType(blockTypeMap.size(), ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
