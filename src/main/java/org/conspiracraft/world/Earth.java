@@ -286,9 +286,10 @@ public class Earth extends WorldType {
                                         }
                                     }
 
+                                    double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
                                     float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                     for (int y = floor; y < seafloorAbove; y++) {
-                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : (biome == Biomes.BADLANDS.id ? Chunk.packInts(Biomes.getBadlandsBands(y+(int)(5*foliageNoise)), 0) : Chunk.packInts(maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.FLINT.id, 0));
+                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : (biome == Biomes.BADLANDS.id ? Chunk.packInts(Biomes.getBadlandsBands(y+(int)(5*foliageNoise)), 0) : Chunk.packInts(centDist < 0.4f ? (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.FLINT.id) : (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.STONE.id), 0));
                                         final int blockType = block >> 16;
                                         if (blockType > 0) {
                                             final int blockSubtype = block & 0xFFFF;
