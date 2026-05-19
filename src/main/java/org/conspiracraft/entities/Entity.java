@@ -75,7 +75,7 @@ public class Entity {
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
         Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0);
-        boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
+        boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         float friction = 0.99f; //1-airFriction=maxFriction
         if (onSolid) {
             friction *= 0.75f;

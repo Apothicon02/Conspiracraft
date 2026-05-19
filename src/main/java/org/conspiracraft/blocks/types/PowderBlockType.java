@@ -11,9 +11,9 @@ public class PowderBlockType extends BlockType {
 
     @Override
     public void lostSupport(Vector3i pos, Vector2i block) {
-//        if (BlockTypes.blockTypeMap.get(World.getBlock(pos.x(), pos.y()-1, pos.z()).x).blockProperties.isFluidReplaceable) {
+//        if (BlockTypes.blockTypes[World.getBlock(pos.x(), pos.y()-1, pos.z()).x].blockProperties.isFluidReplaceable) {
 //            World.setBlock(pos.x(), pos.y(), pos.z(), 0, 0, true, false, 2, true);
-//            if (BlockTypes.blockTypeMap.get(World.getBlock(pos.x(), pos.y()-2, pos.z()).x).blockProperties.isFluidReplaceable) {
+//            if (BlockTypes.blockTypes[World.getBlock(pos.x(), pos.y()-2, pos.z()).x].blockProperties.isFluidReplaceable) {
 //                World.setBlock(pos.x(), pos.y()-1, pos.z(), block.x(), Math.min(5, block.y()+1), true, false, 2, false);
 //            } else {
 //                World.setBlock(pos.x(), pos.y()-1, pos.z(), block.y >= 5 ? 0 : block.x(), 0, true, false, -1, false);

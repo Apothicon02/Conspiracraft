@@ -340,7 +340,7 @@ public class World {
         int lZ = z&15;
         int pos = Chunk.condenseLocalPos(lX, lY, lZ);
         synchronized (chunk) {
-            if (BlockTypes.blockTypeMap.get(chunk.getBlock(pos).x()).blockProperties.isFluidReplaceable) {
+            if (BlockTypes.blockTypes[chunk.getBlock(pos).x()].blockProperties.isFluidReplaceable) {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
                 updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
@@ -366,7 +366,7 @@ public class World {
             for (int y = newY; y >= 0; y--) {
                 if (!setHeightmap) {
                     Vector2i block = getBlock(x, y, z);
-                    BlockType type = BlockTypes.blockTypeMap.get(block.x());
+                    BlockType type = BlockTypes.blockTypes[block.x()];
                     if (!type.obstructingHeightmap(block)) {
                         Light light = getLight(x, y, z);
                         if (light.s() < 32) {

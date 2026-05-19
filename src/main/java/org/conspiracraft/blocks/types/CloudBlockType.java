@@ -39,7 +39,7 @@ public class CloudBlockType extends BlockType {
             Vector2i aboveBlock = getBlock(abovePos);
             if (aboveBlock != null) {
                 int aboveBlockId = aboveBlock.x();
-                if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport(aboveBlock)) {
+                if (BlockTypes.blockTypes[aboveBlockId].needsSupport(aboveBlock)) {
                     lostSupport(abovePos, aboveBlock);
                 }
             }
@@ -48,7 +48,7 @@ public class CloudBlockType extends BlockType {
             Vector2i belowBlock = getBlock(new Vector3i(pos.x, pos.y - 1, pos.z));
             if (belowBlock != null) {
                 int belowBlockId = belowBlock.x();
-                if (!BlockTypes.blockTypeMap.get(belowBlockId).blockProperties.isSolid) {
+                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
                     lostSupport(pos, block);
                 }
             }

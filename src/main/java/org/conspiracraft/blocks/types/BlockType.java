@@ -61,7 +61,7 @@ public class BlockType {
 //            Vector2i aboveBlock = getBlock(abovePos);
 //            if (aboveBlock != null) {
 //                int aboveBlockId = aboveBlock.x();
-//                if (BlockTypes.blockTypeMap.get(aboveBlockId).needsSupport(aboveBlock)) {
+//                if (BlockTypes.blockTypes[aboveBlockId].needsSupport(aboveBlock)) {
 //                    lostSupport(abovePos, aboveBlock);
 //                }
 //            }
@@ -70,7 +70,7 @@ public class BlockType {
 //            Vector2i belowBlock = getBlock(new Vector3i(pos.x, pos.y - 1, pos.z));
 //            if (belowBlock != null) {
 //                int belowBlockId = belowBlock.x();
-//                if (!BlockTypes.blockTypeMap.get(belowBlockId).blockProperties.isSolid) {
+//                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
 //                    lostSupport(pos, block);
 //                }
 //            }
@@ -96,7 +96,7 @@ public class BlockType {
 //                new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1), new Vector3i(pos.x, pos.y, pos.z + 1)}) {
 //            Vector2i nBlock = World.getBlock(nPos.x, nPos.y, nPos.z);
 //            if (nBlock != null) {
-//                BlockType blockType = BlockTypes.blockTypeMap.get(nBlock.x);
+//                BlockType blockType = BlockTypes.blockTypes[nBlock.x);
 //                if (blockType instanceof WaterBlockType) {
 //                    ((WaterBlockType) blockType).moisturize(nPos);
 //                }

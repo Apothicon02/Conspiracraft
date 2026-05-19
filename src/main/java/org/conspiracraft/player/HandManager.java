@@ -64,7 +64,7 @@ public class HandManager {
         if ((!player.creative || (Main.timeMsLong - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || Main.timeMsLong - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
             if (lmbDown || mmbDown || rmbDown) {
                 Vector2i handBlock = new Vector2i(blockToPlace.x, blockToPlace.y);
-                BlockType handType = BlockTypes.blockTypeMap.get(blockToPlace.x);
+                BlockType handType = BlockTypes.blockTypes[blockToPlace.x];
                 Vector3f pos = lmbDown || mmbDown ? player.selectedBlock : player.prevSelectedBlock;
                 if (pos != null && World.inBounds((int) pos.x, (int) pos.y, (int) pos.z)) {
                     if (mmbDown) {
@@ -80,7 +80,7 @@ public class HandManager {
                         lastBlockBrokenOrPlaced = Main.timeMsLong;
                         if (lmbDown) {
                             Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
-                            BlockType breakingType = BlockTypes.blockTypeMap.get(blockBreaking.x);
+                            BlockType breakingType = BlockTypes.blockTypes[blockBreaking.x];
                             if (!player.crouching) {
                                 Vector3i intBreakingPos = new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
                                 boolean canBreak = breakingType.whilePlayerBreaking(intBreakingPos, blockBreaking, handBlock);

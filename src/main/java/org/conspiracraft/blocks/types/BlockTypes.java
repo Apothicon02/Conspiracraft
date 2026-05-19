@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockTypes {
-    public static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
+    private static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
     public static BlockType
             AIR = create(new BlockType(blockTypeMap.size(), new BlockProperties().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
@@ -122,5 +122,14 @@ public class BlockTypes {
     private static BlockType create(BlockType type) {
         blockTypeMap.put(blockTypeMap.size(), type);
         return type;
+    }
+    public static final BlockType[] blockTypes = createArr();
+    public static BlockType[] createArr() {
+        BlockType[] arr = new BlockType[blockTypeMap.size()];
+        for (int i = 0; i < blockTypeMap.size(); i++) {
+            arr[i] = blockTypeMap.get(i);
+        }
+        blockTypeMap = null;
+        return arr;
     }
 }

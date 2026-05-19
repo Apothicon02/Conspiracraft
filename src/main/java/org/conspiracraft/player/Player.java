@@ -145,7 +145,7 @@ public class Player {
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin-0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
         Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0);
-        boolean onSolid = BlockTypes.blockTypeMap.get(blockOn.x()).blockProperties.isCollidable;
+        boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         if (!onSolid) {
             entityOn = getAnyEntity(footAABB);
             if (entityOn != null) {

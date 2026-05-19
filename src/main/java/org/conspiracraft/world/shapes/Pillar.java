@@ -12,7 +12,7 @@ public class Pillar {
             for (int newY = y; newY < maxHeight; newY++) {
                 setBlock(x, newY, z, blockType, blockSubType);
             }
-            if (BlockTypes.blockTypeMap.get(blockType).obstructingHeightmap(new Vector2i(blockType, blockSubType))) {
+            if (BlockTypes.blockTypes[blockType].obstructingHeightmap(new Vector2i(blockType, blockSubType))) {
                 int condensedPos = packPos(x, z);
                 int surfaceY = heightmap[condensedPos];
                 heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], maxHeight);

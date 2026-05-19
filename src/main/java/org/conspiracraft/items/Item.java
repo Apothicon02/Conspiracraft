@@ -32,7 +32,7 @@ public class Item implements Cloneable {
         if (prevTickTime != 0) {
             long dif = time - prevTickTime;
             Vector2i block = World.getBlock(pos.x(), pos.y()-0.125f, pos.z());
-            if (block != null && !BlockTypes.blockTypeMap.get(block.x()).blockProperties.isSolid) {
+            if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {
                 this.pos.y -= 0.125f;
             }
 //            int start = (int)(Math.random()*Math.max(1, World.items.size()-10));

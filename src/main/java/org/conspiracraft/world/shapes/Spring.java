@@ -23,7 +23,7 @@ public class Spring {
                     if (dist <= radius * 2) {
                         Vector2i belowBlock = getBlock(lX, y-1, lZ);
                         Vector2i block = getBlock(lX, y, lZ);
-                        if ((belowBlock.x() == BlockTypes.GRASS.id || belowBlock.x() == BlockTypes.DIRT.id || belowBlock.x() == BlockTypes.SNOW.id) && BlockTypes.blockTypeMap.get(block.x()).blockProperties.isFluidReplaceable) {
+                        if ((belowBlock.x() == BlockTypes.GRASS.id || belowBlock.x() == BlockTypes.DIRT.id || belowBlock.x() == BlockTypes.SNOW.id) && BlockTypes.blockTypes[block.x()].blockProperties.isFluidReplaceable) {
                             blocks.add(new Vector3i(lX, y, lZ));
                         }
                     }

@@ -21,7 +21,7 @@ public class PhysicsHelper {
             for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
                 for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isCollidable) {
+                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isCollidable) {
                         AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
                         if (blockAABB.intersects(aabb)) {
                             return blockIn;
@@ -57,7 +57,7 @@ public class PhysicsHelper {
         float travelled = 0;
         for (int i = 0; i < maxDist*2; i++) {
             if (!World.inBounds(ddaPos.x(), ddaPos.y(), ddaPos.z())) {return new DDAResult(prevDDAPos, ddaPos, false);}
-            if (!BlockTypes.blockTypeMap.get(World.getBlock(ddaPos).x()).blockProperties.isFluidReplaceable) {return new DDAResult(prevDDAPos, ddaPos, true);}
+            if (!BlockTypes.blockTypes[World.getBlock(ddaPos).x()].blockProperties.isFluidReplaceable) {return new DDAResult(prevDDAPos, ddaPos, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
 
@@ -101,7 +101,7 @@ public class PhysicsHelper {
             for (float y = Math.max(0, regionAABB.yMin); y < Math.min(World.height-1, regionAABB.yMax); y+=1) {
                 for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypeMap.get(blockIn.x()).blockProperties.isSolid) {
+                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isSolid) {
                         aabbs.add(new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1)));
                     }
                 }

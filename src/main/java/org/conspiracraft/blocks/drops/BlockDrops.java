@@ -60,7 +60,7 @@ public class BlockDrops {
 
     public static ArrayList<Item> getDrops(Vector2i block) {
         ArrayList<Item> drops = new ArrayList<>();
-        Map<Pair<Float, Integer>[], Item> items = blockTypeDropTable.get(BlockTypes.blockTypeMap.get(block.x));
+        Map<Pair<Float, Integer>[], Item> items = blockTypeDropTable.get(BlockTypes.blockTypes[block.x()]);
         if (items != null) {
             boolean droppedAnything = false;
             for (Pair<Float, Integer>[] drop : items.keySet()) {

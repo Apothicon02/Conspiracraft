@@ -14,7 +14,7 @@ public class TreeHelper {
         for (Vector3i pos : canopy.keySet()) {
             Vector2i existingBlock = getBlock(pos.x, pos.y, pos.z);
             if (!blocks.containsKey(pos) && inBounds(pos)) {
-                if (BlockTypes.blockTypeMap.get(existingBlock.x()).blockProperties.isFluidReplaceable) {
+                if (BlockTypes.blockTypes[existingBlock.x()].blockProperties.isFluidReplaceable) {
                     blocks.put(pos, canopy.get(pos));
                 }
                 if (pos.y > minCollisionY && existingBlock.x() != 0) {

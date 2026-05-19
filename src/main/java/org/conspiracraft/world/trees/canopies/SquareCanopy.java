@@ -47,8 +47,8 @@ public class SquareCanopy extends Canopy {
                     for (int extraY = pos.y(); extraY >= surfaceY; extraY--) {
                         if (extraY == surfaceY) {
                             Vector3i abovePos = new Vector3i(x, extraY+1, z);
-                            if (BlockTypes.blockTypeMap.get(getBlock(x, extraY, z).x).blockProperties.isSolid &&
-                                    !BlockTypes.blockTypeMap.get(getBlock(abovePos).x).blockProperties.isSolid && !blocks.containsKey(abovePos) && !map.containsKey(abovePos)) {
+                            if (BlockTypes.blockTypes[getBlock(x, extraY, z).x].blockProperties.isSolid &&
+                                    !BlockTypes.blockTypes[getBlock(abovePos).x].blockProperties.isSolid && !blocks.containsKey(abovePos) && !map.containsKey(abovePos)) {
                                 addToMap(map, abovePos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                             }
                         }

@@ -48,7 +48,7 @@ public class LightHelper {
     }
 
     public static void updateLight(Vector3i pos, Vector2i block, Light light) {
-        BlockType blockType = BlockTypes.blockTypeMap.get(block.x);
+        BlockType blockType = BlockTypes.blockTypes[block.x()];
         boolean isLight = blockType instanceof LightBlockType;
         if (!blocksLight(block) || isLight) {
             int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
@@ -61,7 +61,7 @@ public class LightHelper {
             }) {
                 Vector2i neighbor = getBlock(neighborPos);
                 Light neighborLight = getLight(neighborPos);
-                BlockType neighborBlockType = BlockTypes.blockTypeMap.get(neighbor.x);
+                BlockType neighborBlockType = BlockTypes.blockTypes[neighbor.x];
                 boolean isNLight = neighborBlockType instanceof LightBlockType;
                 if (!blocksLight(neighbor) || isNLight) {
                     r = Math.max(r, Math.max(neighborLight.r(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0) - 1);
@@ -86,7 +86,7 @@ public class LightHelper {
         return r-2 > darker.r() || g-2 > darker.g() || b-2 > darker.b() || s-2 > darker.s();
     }
     public static boolean blocksLight(Vector2i block) {
-        return BlockTypes.blockTypeMap.get(block.x).blocksLight(block);
+        return BlockTypes.blockTypes[block.x()].blocksLight(block);
     }
 
     public static ArrayDeque<lightNode> removalQueue = new ArrayDeque<>();
