@@ -610,36 +610,43 @@ public class Earth extends WorldType {
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to update heightmap. \n");
 
         startTime = System.currentTimeMillis();
-        int i = sizeChunks/4;
-        for (int cX = 0; cX < sizeChunks; cX++) {
-            for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                int packedHorizontalCP = packChunkPos(cX, cZ);
-                int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
-                for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                    for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                        int packedHorizontalPos = packPos(x, z);
-                        int maxY = heightmap[packedHorizontalPos];
-                        boolean prevBlocking = false;
-                        for (int y = maxY; y >= minY; y--) {
-                            Vector2i block = World.getBlock(x, y, z);
-                            boolean blocking = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
-                            if (prevBlocking && !blocking) {
-                                Light light = getLight(x, y, z);
-                                if (light.s() == 0 && (getLight(x+1, y, z).s() >= 31 || getLight(x, y, z+1).s() >= 31 || getLight(x-1, y, z).s() >= 31 || getLight(x, y, z-1).s() >= 31)) {
-                                    LightHelper.updateLight(new Vector3i(x, y, z), block, light);
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        final int lightInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int startX = thread * lightInterval;
+            final int endX = Math.min(startX + lightInterval, sizeChunks);
+            pool.execute(() -> {
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        int packedHorizontalCP = packChunkPos(cX, cZ);
+                        int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
+                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                int packedHorizontalPos = packPos(x, z);
+                                int maxY = heightmap[packedHorizontalPos];
+                                boolean prevBlocking = false;
+                                for (int y = maxY; y >= minY; y--) {
+                                    Vector2i block = World.getBlock(x, y, z);
+                                    boolean blocking = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+                                    if (prevBlocking && !blocking) {
+                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= 31 || getLight(x, y, z + 1).s() >= 31 || getLight(x - 1, y, z).s() >= 31 || getLight(x, y, z - 1).s() >= 31)) {
+                                            LightHelper.queueLightUpdate(new Vector3i(x, y, z));
+                                        }
+                                    }
+                                    prevBlocking = blocking;
                                 }
                             }
-                            prevBlocking = blocking;
                         }
                     }
                 }
-            }
-            i--;
-            if (i <= 0) {
-                i = sizeChunks/4;
-                iterateLightQueue();
-            }
+            });
         }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to init light queue. \n");
+        startTime = System.currentTimeMillis();
+        iterateLightQueue();
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
     }
 }

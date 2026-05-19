@@ -22,29 +22,24 @@ public class LightHelper {
         boolean exists = chunk.lightUpdateArr()[packedLp];
         if (!exists) {
             chunk.lightUpdateArr[packedLp] = true;
-            lightQueue.add(pos);
+            synchronized (lightQueue) {
+                lightQueue.add(pos);
+            }
         }
     }
 
-    public static boolean print = true;
     public static void iterateLightQueue() {
-        long timeStarted = System.currentTimeMillis();
         while (!lightQueue.isEmpty()) {
             Vector3i pos = lightQueue.pollFirst();
             if (inBounds(1, pos.x(), pos.y(), pos.z())) {
                 updateLight(pos, getBlock(pos), getLight(pos));
+                int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                Chunk chunk = chunks[packedCp];
+                chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
             }
-            int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-            Chunk chunk = chunks[packedCp];
-            chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
         }
         for (Chunk chunk : dirtyChunks) {chunk.lightUpdateArr = null;}
         dirtyChunks.clear();
-        if (print) {
-            long timeSpent = (System.currentTimeMillis() - timeStarted);
-            System.out.print("Took " + timeSpent + "ms to do initial light queue. \n");
-            print = false;
-        }
     }
 
     public static void updateLight(Vector3i pos, Vector2i block, Light light) {
