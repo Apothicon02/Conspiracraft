@@ -9,6 +9,8 @@ import org.conspiracraft.graphics.models.Index;
 import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.graphics.textures.Texture;
+import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
@@ -245,6 +247,12 @@ public class Renderer {
             interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(entity.prevPos, pos));
             drawCube(interpolatedMatrix, new Vector4f(1.f));
         }
+        pushUBO.updateTex(1);
+        pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
+        for (Item item : World.items) {
+            pushUBO.updateAtlasOffset(item.type.atlasOffset);
+            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f));
+        }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
     public static void drawDDA(MemoryStack stack) {
@@ -338,6 +346,11 @@ public class Renderer {
         pushUBO.update(modelMatrix, color);
         pushUBO.submit();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
+    }
+    public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
+        pushUBO.submit();
+        vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
     public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);

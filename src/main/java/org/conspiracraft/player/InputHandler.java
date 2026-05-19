@@ -8,6 +8,8 @@ import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
@@ -105,6 +107,13 @@ public class InputHandler {
                 }
                 if (keyRelease(SDL_SCANCODE_F1)) {
                     GUI.showUI = !GUI.showUI;
+                }
+                if (keyRelease(SDL_SCANCODE_Q)) {
+                    Item item = player.inv.getSelectedItem(false);
+                    if (item != null) {
+                        World.dropItem(item);
+                        item.amount(0).type(ItemTypes.AIR);
+                    }
                 }
                 if (keyRelease(SDL_SCANCODE_T)) {
                     Main.timeNs += 10000000000L;

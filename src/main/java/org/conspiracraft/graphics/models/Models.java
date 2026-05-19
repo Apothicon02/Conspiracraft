@@ -15,11 +15,13 @@ public class Models {
     public static Model CUBE;
     public static Model QUAD;
     public static Model QUAD_CENTERED;
+    public static Model DOUBLE_QUAD;
 
     public static void loadModels(long vertexPtr, long indexPtr) {
         CUBE = loadObj(vertexPtr, indexPtr, "generic/model/cube");
         QUAD = loadObj(vertexPtr, indexPtr, "generic/model/quad");
         QUAD_CENTERED = loadObj(vertexPtr, indexPtr, "generic/model/quad_centered");
+        DOUBLE_QUAD = loadObj(vertexPtr, indexPtr, "generic/model/double_quad");
     }
 
     public static IntArrayList indices = new IntArrayList();

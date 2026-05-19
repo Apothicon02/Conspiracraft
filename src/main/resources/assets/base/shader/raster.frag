@@ -16,6 +16,7 @@ layout(push_constant) uniform PushUBO {
     int layer;
     int tex;
 } pushUbo;
+layout(set = 0, binding = 16) uniform sampler2D items;
 layout(set = 0, binding = 17) uniform sampler2D entities;
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
@@ -61,7 +62,9 @@ void main() {
         }
         uv = abs(uv);
 
-        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
-        outColor = texelFetch(entities, coords, 0)*inColor;
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+(pushUbo.tex == 0 ? sideOffset : 0));
+        outColor = (pushUbo.tex == 0 ? texelFetch(entities, coords, 0) : texelFetch(items, coords, 0))*inColor;
+        outColor.rg = uv.xy;
+        outColor.b = 0;
     }
 }

@@ -11,6 +11,7 @@ import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.io.*;
@@ -50,6 +51,19 @@ public class World {
     public static final WorldType worldType = WorldTypes.EARTH;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
+
+    public static void tickItems() {
+        for (Item item : World.items) {
+            if (item.timeExisted >= 600000) { //600000ms = 10m
+                World.items.remove(item);
+            } else {
+                item.tick();
+            }
+        }
+    }
+    public static void dropItem(Item item) {
+        World.items.add(item.clone().timeExisted(-2000).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0)));
+    }
 
     public static void save(String path) throws IOException {
         long start = System.currentTimeMillis();

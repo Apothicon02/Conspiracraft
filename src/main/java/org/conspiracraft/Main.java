@@ -75,6 +75,7 @@ public class Main {
                 timeAccum -= tickTime;
                 World.tick();
                 World.worldType.tick();
+                World.tickItems();
                 player.tick();
                 if (ticksDone >= 3) {
                     timeAccum = (tickTime-1);
