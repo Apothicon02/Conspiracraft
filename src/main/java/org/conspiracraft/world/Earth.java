@@ -50,7 +50,7 @@ public class Earth extends WorldType {
         drawCube(munMatrix, munColor);
     }
     @Override
-    public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 0.33f) : new Vector4f(sunPos, 1.f);}
+    public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1);}
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override

@@ -62,6 +62,7 @@ public class Renderer {
                 if (!initialized) {
                     generating = false;
                     fillSSBOs();
+                    long startTime = System.currentTimeMillis();
                     ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
                     ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
                     memFree(atlasBuffer);
@@ -71,6 +72,7 @@ public class Renderer {
                     GUI.fillTexture();
                     EntityTypes.fillTexture(stack);
                     initialized = true;
+                    System.out.println("Texture initialization took "+(System.currentTimeMillis()-startTime)+"ms");
                 } else {
                     //long startTime = System.nanoTime();
                     //boolean wasEmpty = updateQueue.isEmpty();
@@ -527,6 +529,7 @@ public class Renderer {
     public static long[] chunkBlockAllocs;;
     public static long[] chunkLightBlockAllocs;
     public static void fillSSBOs() {
+        long startTime = System.currentTimeMillis();
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(voxelSSBOSize);
         vmaCreateVirtualBlock(blockCreateInfo, blocks);
@@ -563,6 +566,7 @@ public class Renderer {
         VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lightSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightSSBO.stagingBuffer.buffer[0], lightSSBO.buffer.buffer[0], lightBufferCopy);
         ssboBarriers();
+        System.out.println("Took "+(System.currentTimeMillis()-startTime)+"ms to fill SSBOs.");
     }
     public static void ssboBarriers() {
         VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(6);

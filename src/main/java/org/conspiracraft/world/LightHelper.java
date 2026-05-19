@@ -23,9 +23,9 @@ public class LightHelper {
         }
     }
 
-    public static boolean print = false;
+    public static boolean print = true;
     public static void iterateLightQueue() {
-//        long timeStarted = System.currentTimeMillis();
+        long timeStarted = System.currentTimeMillis();
         while (!lightQueue.isEmpty()) {
             Vector3i pos = lightQueue.pollFirst();
             if (inBounds(1, pos.x(), pos.y(), pos.z())) {
@@ -33,11 +33,11 @@ public class LightHelper {
             }
             lightSet.remove(pos);
         }
-//        if (print) {
-//            long timeSpent = (System.currentTimeMillis() - timeStarted);
-//            System.out.print("Took " + timeSpent + "ms to do light queue. \n");
-//            print = false;
-//        }
+        if (print) {
+            long timeSpent = (System.currentTimeMillis() - timeStarted);
+            System.out.print("Took " + timeSpent + "ms to do initial light queue. \n");
+            print = false;
+        }
     }
 
     public static void updateLight(Vector3i pos, Vector2i block, Light light) {
