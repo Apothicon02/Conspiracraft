@@ -8,12 +8,17 @@ import org.joml.Vector3i;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.world.World.*;
 
 public class LightHelper {
     public static final ArrayDeque<Vector3i> lightQueue = new ArrayDeque<>();
-    public static final ArrayDeque<Chunk> dirtyChunks = new ArrayDeque<>();
+    public static final ConcurrentLinkedDeque<Chunk> dirtyChunks = new ConcurrentLinkedDeque<>();
 
     public static void queueLightUpdate(Vector3i pos) {
         int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
@@ -27,22 +32,52 @@ public class LightHelper {
             }
         }
     }
-
-    public static void iterateLightQueue() {
-        while (!lightQueue.isEmpty()) {
-            Vector3i pos = lightQueue.pollFirst();
-            if (inBounds(1, pos.x(), pos.y(), pos.z())) {
-                updateLight(pos, getBlock(pos), getLight(pos));
-                int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-                Chunk chunk = chunks[packedCp];
-                chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
-            }
+    public static void queueLightUpdate(ArrayDeque<Vector3i> queue, Vector3i pos) {
+        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+        Chunk chunk = chunks[packedCp];
+        int packedLp = Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
+        boolean exists = chunk.lightUpdateArr()[packedLp];
+        if (!exists) {
+            chunk.lightUpdateArr[packedLp] = true;
+            queue.add(pos);
         }
+    }
+
+    public static void iterateLightQueue() throws InterruptedException {
+        int threads = Runtime.getRuntime().availableProcessors();
+        ArrayDeque<Vector3i>[] queues = new ArrayDeque[threads];
+        for (int t = 0; t < threads; t++) {
+            queues[t] = new ArrayDeque<>();
+        }
+        int i = 0;
+        for (Vector3i pos : lightQueue) {
+            queues[i++ % threads].add(pos);
+        }
+        lightQueue.clear();
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        for (ArrayDeque<Vector3i> queue : queues) {
+            pool.submit(() -> {
+                while (!queue.isEmpty()) {
+                    Vector3i pos = queue.pollFirst();
+                    if (inBounds(1, pos.x(), pos.y(), pos.z())) {
+                        updateLight(queue, pos, getBlock(pos), getLight(pos));
+                        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                        Chunk chunk = chunks[packedCp];
+                        chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         for (Chunk chunk : dirtyChunks) {chunk.lightUpdateArr = null;}
         dirtyChunks.clear();
     }
 
     public static void updateLight(Vector3i pos, Vector2i block, Light light) {
+        updateLight(lightQueue, pos, block, light);
+    }
+    public static void updateLight(ArrayDeque<Vector3i> queue, Vector3i pos, Vector2i block, Light light) {
         BlockType blockType = BlockTypes.blockTypes[block.x()];
         boolean isLight = blockType instanceof LightBlockType;
         if (!blocksLight(block) || isLight) {
@@ -72,7 +107,7 @@ public class LightHelper {
             }) {
                 Light nLight = getLight(neighborPos);
                 if (isDarker(r, g, b, s, nLight)) {
-                    queueLightUpdate(neighborPos);
+                    queueLightUpdate(queue, neighborPos);
                 }
             }
         }
