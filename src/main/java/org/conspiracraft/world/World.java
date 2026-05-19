@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
+
 public class World {
     public static final int seed = 67;
     public static final int seaLevel = 63;
@@ -253,7 +255,7 @@ public class World {
     public static Light getLight(int x, int y, int z) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried getting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return new Light(0, 0, 0, 32);
+            return new Light(0, 0, 0, maxSunlightLevel);
         }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
@@ -369,8 +371,8 @@ public class World {
                     BlockType type = BlockTypes.blockTypes[block.x()];
                     if (!type.obstructingHeightmap(block)) {
                         Light light = getLight(x, y, z);
-                        if (light.s() < 32) {
-                            Light newLight = new Light(light.s(), light.s(), light.s(), 32);
+                        if (light.s() < maxSunlightLevel) {
+                            Light newLight = new Light(light.s(), light.s(), light.s(), maxSunlightLevel);
                             setLight(x, y, z, newLight);
                         }
                     } else {

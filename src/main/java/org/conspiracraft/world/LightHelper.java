@@ -8,7 +8,6 @@ import org.joml.Vector3i;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static org.conspiracraft.world.World.*;
 
 public class LightHelper {
+    public static final int maxSunlightLevel = 31;
     public static final ArrayDeque<Vector3i> lightQueue = new ArrayDeque<>();
     public static final ConcurrentLinkedDeque<Chunk> dirtyChunks = new ConcurrentLinkedDeque<>();
 
@@ -84,7 +84,7 @@ public class LightHelper {
             int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
             int g = Math.max(light.g(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
             int b = Math.max(light.b(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
-            int s = (pos.y > heightmap[packPos(pos.x, pos.z)] ? 32 : light.s());
+            int s = (pos.y > heightmap[packPos(pos.x, pos.z)] ? maxSunlightLevel : light.s());
             for (Vector3i neighborPos : new Vector3i[]{
                     new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
                     new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)

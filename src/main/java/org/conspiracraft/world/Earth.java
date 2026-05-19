@@ -30,6 +30,7 @@ import static org.conspiracraft.Main.timeNs;
 import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.LightHelper.iterateLightQueue;
+import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
@@ -630,7 +631,7 @@ public class Earth extends WorldType {
                                     Vector2i block = World.getBlock(x, y, z);
                                     boolean blocking = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
                                     if (prevBlocking && !blocking) {
-                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= 31 || getLight(x, y, z + 1).s() >= 31 || getLight(x - 1, y, z).s() >= 31 || getLight(x, y, z - 1).s() >= 31)) {
+                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z + 1).s() >= maxSunlightLevel || getLight(x - 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z - 1).s() >= maxSunlightLevel)) {
                                             LightHelper.queueLightUpdate(new Vector3i(x, y, z));
                                         }
                                     }

@@ -5,6 +5,7 @@ import org.conspiracraft.utils.BitBuffer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {
@@ -186,7 +187,7 @@ public class Chunk {
             lightData = newData;
         }
     }
-    public static int fullSunlight = packLight(0, 0, 0, 32);
+    public static int fullSunlight = packLight(0, 0, 0, maxSunlightLevel);
     public void setLightKey(int pos, int key) {
         updateLightPaletteKeySize();
         lightData.setValue(pos, key);

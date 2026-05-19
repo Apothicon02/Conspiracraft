@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.conspiracraft.Settings.*;
+import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -38,6 +39,7 @@ public class Main {
     public static long timeMsLong = 0;
     public static long currentTick = 0;
     static void main() throws Exception {
+        //int l = Chunk.packLight(0, 0, 0, maxSunlightLevel);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             System.err.println("Uncaught exception in thread " + thread.getName());
             throwable.printStackTrace();
