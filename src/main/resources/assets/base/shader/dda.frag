@@ -635,20 +635,19 @@ void main() {
         vec4 blockLighting = pow((inBounds && globalUbo.renderToggles.y > 0) ? getLight(primaryLightPos)/31.f : vec4(0, 0, 0, 1), vec4(1, 1, 1, 2))*vec4(1, 1, 1, skylight.a);
         blockLighting.a *= 1-abs(causticness/50);
         float fogginess = isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f)), 0.f, 1.f);
-        vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), skylight.xyz) - (worldSize/2)));
+        vec3 source = vec3(skylight.x, max(height, skylight.y), skylight.z);
+        vec3 sunDir = vec3(normalize(max(vec3(size*-10, 1000, size*-10), source) - (worldSize/2)));
         rayPos = primaryShadowPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (!(block.x == 4 && skylight.y > height*3)) {
-            if (block.x > 0 && dot(primaryNormal, normalize(skylight.xyz)) <= 0.f) {
-                shadowColor.a = 1.f;
-            } else if (globalUbo.renderToggles.x > 0) {
-                shadowColor = dda(true);
-            }
-            if (shadowColor.a > 0.0f) {
-                shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-                blockLighting.a *= shadowFactor;
-            }
+        if (block.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f) {
+            shadowColor.a = 1.f;
+        } else if (globalUbo.renderToggles.x > 0) {
+            shadowColor = dda(true);
+        }
+        if (shadowColor.a > 0.0f) {
+            shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
+            blockLighting.a *= shadowFactor;
         }
         if (reflectivity > 0.f) {
             vec3 idealReflectDir = reflect(ogDir, primaryTint.a < 1 ? primaryTintNormal : primaryNormal);

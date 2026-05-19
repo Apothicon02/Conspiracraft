@@ -13,12 +13,15 @@ import static org.conspiracraft.world.World.*;
 
 public class LightHelper {
     public static final ArrayDeque<Vector3i> lightQueue = new ArrayDeque<>();
-    public static final HashSet<Vector3i> lightSet = new HashSet<>();
+    public static final ArrayDeque<Chunk> dirtyChunks = new ArrayDeque<>();
 
     public static void queueLightUpdate(Vector3i pos) {
-        boolean exists = lightSet.contains(pos);
+        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+        Chunk chunk = chunks[packedCp];
+        int packedLp = Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
+        boolean exists = chunk.lightUpdateArr()[packedLp];
         if (!exists) {
-            lightSet.add(pos);
+            chunk.lightUpdateArr[packedLp] = true;
             lightQueue.add(pos);
         }
     }
@@ -31,8 +34,12 @@ public class LightHelper {
             if (inBounds(1, pos.x(), pos.y(), pos.z())) {
                 updateLight(pos, getBlock(pos), getLight(pos));
             }
-            lightSet.remove(pos);
+            int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+            Chunk chunk = chunks[packedCp];
+            chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
         }
+        for (Chunk chunk : dirtyChunks) {chunk.lightUpdateArr = null;}
+        dirtyChunks.clear();
         if (print) {
             long timeSpent = (System.currentTimeMillis() - timeStarted);
             System.out.print("Took " + timeSpent + "ms to do initial light queue. \n");
@@ -103,7 +110,9 @@ public class LightHelper {
                 }) {
                     if (!removalSet.contains(neighborPos)) {
                         lightQueue.add(neighborPos);
-                        lightSet.add(neighborPos);
+                        int packedCp = World.packChunkPos(neighborPos.x()>>chunkBits, neighborPos.y()>>chunkBits, neighborPos.z()>>chunkBits);
+                        Chunk chunk = chunks[packedCp];
+                        chunk.lightUpdateArr()[Chunk.condenseLocalPos(neighborPos.x()&15, neighborPos.y()&15, neighborPos.z()&15)] = true;
                         Light nLight = getLight(neighborPos);
                         if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
                                 (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {

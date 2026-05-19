@@ -14,6 +14,14 @@ public class Chunk {
     public BitBuffer blockData;
     public final IntArrayList lightPalette;
     public BitBuffer lightData;
+    public boolean[] lightUpdateArr;
+    public boolean[] lightUpdateArr() {
+        if (lightUpdateArr == null) {
+            lightUpdateArr = new boolean[totalVoxels];
+            LightHelper.dirtyChunks.add(this);
+        }
+        return lightUpdateArr;
+    }
 
     public Chunk(int compressedChunkPos) {
         condensedChunkPos = compressedChunkPos;

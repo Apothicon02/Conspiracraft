@@ -27,9 +27,11 @@ public class World {
     public static final int seed = 67;
     public static final int seaLevel = 63;
     public static final int size = 4096;
+    public static final long sizeL = size;
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
     public static final int height = 640;
+    public static final long heightL = height;
     public static final byte chunkSize = 16;
     public static final int chunkBits = Integer.numberOfTrailingZeros(chunkSize);
     public static final int sizeChunks = size>>chunkBits;
@@ -228,6 +230,7 @@ public class World {
     public static final short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
+    public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
     public static final Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static final long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
