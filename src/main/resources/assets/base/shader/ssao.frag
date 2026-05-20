@@ -19,31 +19,32 @@ const vec3 SSAO_NOISE[16] = vec3[](
     vec3( 0.1951, -0.9808, 0.0), vec3( 0.9239,  0.3827, 0.0), vec3(-0.5556,  0.8315, 0.0), vec3(-0.9808,  0.1951, 0.0),
     vec3( 0.3827, -0.9239, 0.0), vec3( 0.8315,  0.5556, 0.0), vec3(-0.7071, -0.7071, 0.0), vec3(-0.1951,  0.9808, 0.0),
     vec3( 0.5556, -0.8315, 0.0), vec3( 0.9808,  0.1951, 0.0), vec3(-0.3827, -0.9239, 0.0), vec3(-0.9239, -0.3827, 0.0));
-vec3 randomVec() {
-    int x = int(mod(gl_FragCoord.x, 4.0));
-    int y = int(mod(gl_FragCoord.y, 4.0));
-    return SSAO_NOISE[x * 4 + y];
+vec3 hash(vec3 vec) {
+    vec3 p = vec;
+    p = vec3(dot(p, vec3(127.1,311.7, 74.7)), dot(p, vec3(269.5,183.3,246.1)), dot(p, vec3(113.5,271.9,124.6)));
+    return fract(sin(p)*43758.5453123);
+}
+const float PI = 3.141592653589793f;
+vec3 randomVec(vec3 vec) {
+    vec3 hash = hash(vec);
+    float theta = hash.x * 2.0f * PI;
+    float phi = acos(2.0f * hash.y - 1.0f);
+    float r = pow(hash.z, 0.333333333f);
+    float sinTheta = sin(theta);
+    float cosTheta = cos(theta);
+    float sinPhi = sin(phi);
+    float cosPhi = cos(phi);
+    return vec3(r * sinPhi * cosTheta, r * sinPhi * sinTheta, r * cosPhi);
 }
 float randomFloat(int y) {
     int x = int(mod(gl_FragCoord.x, 4.0));
     return SSAO_NOISE[x * 4 + y].x;
 }
-//uint pcg(uint v) {
-//    uint state = v * uint(747796405) + uint(2891336453);
-//    uint word = ((state >> ((state >> uint(28)) + uint(4))) ^ state) * uint(277803737);
-//    return (word >> uint(22)) ^ word;
-//}
-//float randomFloat(uint p) {
-//    return ((float(pcg(p)) / float(uint(0xffffffff)))-0.5f)*2;
-//}
-//vec3 randomVec() {
-//    return vec3(randomFloat((uint(gl_FragCoord.x)%4u)), randomFloat(uint(gl_FragCoord.y)%4u), 0);
-//}
 const float AO_RADIUS = 1.f;
-const float AO_STRENGTH = 3.f;
+const float AO_STRENGTH = 2.f;
 const int KERNEL_SIZE = 32; //reduce to something like 8 when taa is enabled.
-vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
-const float Z_NEAR = 0.01f;
+const vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
+//const float Z_NEAR = 0.01f;
 //const float ASPECT = 1.7977529f;
 //const float FOCAL_LENGTH = 1.3514224f;
 vec3 reconstructViewPos(vec2 uvPos, float depth) {
@@ -54,17 +55,15 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 
 float getAO(float depth, vec3 normal) {
     vec3 posVS = reconstructViewPos(uv.xy, depth);
-    //    mat3 normalMatrix = transpose(inverse(mat3(globalUbo.view)));
-    //    vec3 normalVS = normalize(normalMatrix * normal);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
-    vec3 randVec = randomVec();
+    vec3 randVec = randomVec(vec3(uv.xy, -1));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        float radius = randomFloat(i) > -0.5f ? 0.125f : AO_RADIUS;//float radius = randomFloat(i) > -0.5f ? 0.125f : AO_RADIUS;
-        vec3 sampleVec = TBN * SSAO_KERNEL[i];
+        vec3 sampleVec = TBN*abs(randomVec(vec3(uv.xy, i)));//SSAO_KERNEL[i];
+        float radius = 1;//min(AO_RADIUS, abs(randomFloat(i))+0.125f);// > -0.5f ? 0.125f : AO_RADIUS;//float radius = randomFloat(i) > -0.5f ? 0.125f : AO_RADIUS;
         sampleVec = posVS + sampleVec * radius;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
@@ -78,11 +77,15 @@ float getAO(float depth, vec3 normal) {
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);
-    return clamp(pow(occlusion, AO_STRENGTH), 0.25f, 1);
+    return clamp(pow(occlusion, AO_STRENGTH*2), 0.2f, 1);
 }
 void main() {
     vec4 color = texture(ddaColors, uv.xy);
     float depth = texture(ddaDepth, uv.xy).r;
     vec4 normal = texture(ddaNormals, uv.xy);
+//    vec3 randVec = hash()/1.732f;
+//    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
+//    outColor.a = 1;
+    //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     outColor = vec4(color.rgb*mix(getAO(depth, normal.xyz), 1, normal.a), 1); //normal.a is fogginess
 }

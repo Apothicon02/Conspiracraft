@@ -35,7 +35,9 @@ void main() {
         vec3 localNorm = normalize(cross(dFdx(localPos), dFdy(localPos)));
         int sideOffset = 0;
         vec2 uv = vec2(0);
-        if (abs(localNorm.x) > max(abs(localNorm.y), abs(localNorm.z))) {
+        if (pushUbo.tex > 0) {
+            uv = localPos.xy+0.5f;
+        } else if (abs(localNorm.x) > max(abs(localNorm.y), abs(localNorm.z))) {
             uv = localPos.zy;
             if (localNorm.x > 0) {
                 uv.x = 1-abs(uv.x);
@@ -62,9 +64,10 @@ void main() {
         }
         uv = abs(uv);
 
-        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+(pushUbo.tex == 0 ? sideOffset : 0));
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
         outColor = (pushUbo.tex == 0 ? texelFetch(entities, coords, 0) : texelFetch(items, coords, 0))*inColor;
-        outColor.rg = uv.xy;
-        outColor.b = 0;
+        if (outColor.a <= 0) {
+            discard;
+        }
     }
 }
