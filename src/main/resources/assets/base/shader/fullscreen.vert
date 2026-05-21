@@ -6,6 +6,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
     float time;
+    ivec2 res;
 } globalUbo;
 vec2 positions[3] = vec2[](
     vec2(0.0, -3),

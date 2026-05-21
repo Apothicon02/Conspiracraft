@@ -22,6 +22,8 @@ public class Textures {
     public static Texture gui;
     public static Texture items;
     public static Texture entities;
+    public static Texture blurred_horizontally;
+    public static Texture blurred;
 
     public static Texture create(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         Texture texture = new Texture(width, height, channels, format, usage, windowResizable);
@@ -57,6 +59,8 @@ public class Textures {
         gui = create(3840, 2160, 6, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         items = create(4096, 16, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
         entities = create(128, 48, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
+        blurred_horizontally = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
+        blurred = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         textures.forEach((tex) -> {tex.create(stack);});
     }
 }

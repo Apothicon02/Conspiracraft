@@ -6,6 +6,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
     float time;
+    ivec2 res;
 } globalUbo;
 layout(set = 0, binding = 9) uniform sampler2D ddaColors;
 layout(set = 0, binding = 10) uniform sampler2D ddaDepth;
@@ -46,13 +47,13 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 float getAO(float depth, vec3 normal) {
     vec3 posVS = reconstructViewPos(uv, depth);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
-    vec3 randVec = randomVec(vec3(uv, 64));
+    vec3 randVec = randomVec(vec3(posVS));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        vec3 sampleVec = TBN*abs(randomVec(vec3(uv, i)));
+        vec3 sampleVec = TBN*abs(randomVec(vec3(posVS.xy, i)));
         sampleVec = posVS + sampleVec * AO_RADIUS;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
@@ -75,6 +76,6 @@ void main() {
 //    vec3 randVec = hash()/1.732f;
 //    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
 //    outColor.a = 1;
-    outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
-    //outColor = vec4(color.rgb*mix(getAO(depth, normal.xyz), 1, normal.a), 1); //normal.a is fogginess
+    //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
+    outColor = vec4(color.rgb, mix(getAO(depth, normal.xyz), 1, normal.a)); //normal.a is fogginess
 }

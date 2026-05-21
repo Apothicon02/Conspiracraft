@@ -6,6 +6,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
     float time;
+    ivec2 res;
 } globalUbo;
 layout(push_constant) uniform PushUBO {
     mat4 model;
@@ -19,6 +20,7 @@ layout(push_constant) uniform PushUBO {
 layout(set = 0, binding = 12) uniform sampler2D colors;
 layout(set = 0, binding = 15) uniform sampler3D gui;
 layout(set = 0, binding = 16) uniform sampler2D items;
+layout(set = 0, binding = 19) uniform sampler2D blurred;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
 
@@ -30,9 +32,14 @@ vec3 fromLinear(vec3 linearRGB){
     vec3 lower = linearRGB * vec3(12.92);
     return vec3(mix(higher, lower, cutoff));
 }
-
+const int radius = 5;
+const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
     vec4 bgColor = texture(colors, uv);
+    vec4 blurredBgColor = texture(blurred, uv);
+    bgColor.rgb*=blurredBgColor.a;
+    blurredBgColor.rgb*=blurredBgColor.a;
+    //bgColor.rgb = vec3(blurredBgColor.a);
     if (pushUbo.color.a == -1.f) {
         outColor = bgColor;
     } else {
@@ -41,7 +48,7 @@ void main() {
         guiColor.rgb = fromLinear(guiColor.rgb);
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {
-            outColor = vec4(mix(bgColor.rgb, guiColor.rgb, guiColor.a), 1.f);
+            outColor = vec4(mix(blurredBgColor.rgb, guiColor.rgb, guiColor.a), 1.f);
         } else {
             discard;
         }

@@ -6,6 +6,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec3 sun;
     int hdr;
     float time;
+    ivec2 res;
 } globalUbo;
 layout(push_constant) uniform PushUBO {
     mat4 model;

@@ -93,6 +93,7 @@ public class Renderer {
                 drawRaster(stack);
                 drawDDA(stack);
                 drawSSAO(stack);
+                drawBlur(stack);
                 drawGUI(stack);
 
                 bindPresentImage(stack);
@@ -266,6 +267,16 @@ public class Renderer {
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
+    }
+    public static void drawBlur(MemoryStack stack) {
+        currentPipeline = pipelines[5];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth1);
+        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth1.image);
+        currentPipeline = pipelines[6];
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth1);
+        vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth1.image);
     }
     public static void drawGUI(MemoryStack stack) {
         currentPipeline = pipelines[1];

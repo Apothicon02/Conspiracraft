@@ -21,9 +21,10 @@ public class Pipelines {
     private static ExecutorService pool;
     public static void init(MemoryStack stack) {
         pipelines = new Pipeline[]{
-                new Pipeline("fullscreen.vert", "present.frag", 1),
-                new Pipeline("gui.vert", "gui.frag", 1), new Pipeline("fullscreen.vert", "ssao.frag", 1),
-                new Pipeline("fullscreen.vert", "dda.frag", 2), new Pipeline("raster.vert", "raster.frag", 2)};
+                new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1),
+                new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2),
+                new Pipeline("raster.vert", "raster.frag", 2),
+                new Pipeline("fullscreen.vert", "blur_horizontal.frag", 1), new Pipeline("fullscreen.vert", "blur_vertical.frag", 1)};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(pipeline::compile);}
