@@ -577,6 +577,7 @@ void main() {
         reverseNormShading = false;
         depth = rasterDepth;
         color = texture(rasterColors, uv);
+        if (color.r >= 1 || color.g >= 1 || color.b >= 1) { color.rgb *= 10; celestial = true;}
         color.rgb = fromLinear(color.rgb);
         primaryNormal = texture(rasterNormals, uv).xyz;
         primaryFlatNormal = primaryNormal;

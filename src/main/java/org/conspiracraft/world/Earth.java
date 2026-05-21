@@ -43,12 +43,12 @@ public class Earth extends WorldType {
     public void renderCelestialBodies(MemoryStack stack) {
         pushUBO.updateLayer(-1);
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
-        Vector4f sunColor = new Vector4f(1.25f, 1.2f, 0, 1);
+        Vector4f sunColor = new Vector4f(2.5f, 2.4f, 0, 1);
         drawCube(sunMatrix, sunColor);
         pushUBO.updateLayer(0);
         pushUBO.updateAtlasOffset(EntityTypes.MUN.atlasOffset);
         Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(300);
-        Vector4f munColor = new Vector4f(0.9f, 0.88f, 1.f, 1);
+        Vector4f munColor = new Vector4f(0.9f, 0.88f, 0.99f, 1);
         drawCube(munMatrix, munColor);
     }
     @Override

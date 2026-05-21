@@ -21,7 +21,6 @@ layout(set = 0, binding = 16) uniform sampler2D items;
 layout(set = 0, binding = 17) uniform sampler2D entities;
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
-layout(location = 2) in vec4 inColor;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outNormal;
@@ -29,10 +28,8 @@ layout(location = 1) out vec4 outNormal;
 void main() {
     vec3 normal = normalize(cross(dFdx(pos), dFdy(pos)));
     outNormal = vec4(normal, 0);
-
-    if (pushUbo.layer == -1) {
-        outColor = inColor;
-    } else {
+    outColor = pushUbo.color;
+    if (pushUbo.layer != -1) {
         vec3 localNorm = normalize(cross(dFdx(localPos), dFdy(localPos)));
         int sideOffset = 0;
         vec2 uv = vec2(0);
@@ -66,7 +63,7 @@ void main() {
         uv = abs(uv);
 
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
-        outColor = (pushUbo.tex == 0 ? texelFetch(entities, coords, 0) : texelFetch(items, coords, 0))*inColor;
+        outColor = (pushUbo.tex == 0 ? texelFetch(entities, coords, 0) : texelFetch(items, coords, 0))*outColor;
         if (outColor.a <= 0) {
             discard;
         }

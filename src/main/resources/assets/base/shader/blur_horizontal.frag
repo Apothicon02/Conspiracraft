@@ -88,12 +88,13 @@ const float WEIGHTS[33] = float[33](
 );
 
 void main() {
-    outColor = vec4(0);
+    vec4 color = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(OFFSETS[i], 0);
         float weight = WEIGHTS[i];
-        ivec2 samplePos = ivec2(clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1));
-        vec4 newResult = texelFetch(colors, samplePos, 0);
-        outColor += newResult * weight;
+        vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1))/globalUbo.res;
+        vec4 newResult = texture(colors, samplePos);
+        color += newResult * weight;
     }
+    outColor = color;
 }

@@ -16,6 +16,7 @@ layout(location = 0) out vec4 outColor;
 void main() {
     vec4 color = texture(colors, uv.xy);
     color.rgb = pow(color.rgb, vec3(2.2)); //gamma
+    if (color.r > 1 || color.g > 1 || color.b > 1) { color.rgb /= max(color.r, max(color.g, color.b)); }
     if (globalUbo.hdr == 1) {
         color.rgb = (color.rgb*400)/80;//exposure
     }

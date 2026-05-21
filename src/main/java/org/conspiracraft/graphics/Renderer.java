@@ -319,7 +319,7 @@ public class Renderer {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
         Random starRand = new Random(seed);
-        for (int i = 0; i < 1024; i++) {
+        for (int i = 0; i < 512; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)
@@ -330,15 +330,15 @@ public class Renderer {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
                         .setTranslation(starPos)
-                        .scale(starSize);
+                        .scale(starSize*3);
                 if (starMatrix.getTranslation(new Vector3f()).y > 63-player.pos.y()) {
                     //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
-                    Vector3f color = starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)];
+                    Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
 //                    colorBuffer.put(color.x*12);
 //                    colorBuffer.put(color.y*12);
 //                    colorBuffer.put(color.z*12);
 //                    colorBuffer.put(2);
-                    drawCube(starMatrix, new Vector4f(color.x(), color.y(), color.z(), 1.f));
+                    drawCube(starMatrix, new Vector4f(color.x()*5, color.y()*5, color.z()*5, 1.f));
                 }
             }
         }

@@ -63,7 +63,7 @@ float getAO(float depth, vec3 normal) {
             float rangeCheck = smoothstep(0.f, 1.f, (AO_RADIUS/AO_STRENGTH)/length(sampleVS-posVS));
             vec3 viewDirVS = normalize(posVS);
             bool occluded = sampleVS.z <= sampleVec.z-0.05f;
-            occlusion += (occluded ? 1.f : 0.f) * rangeCheck * AO_STRENGTH;
+            occlusion += (occluded ? AO_STRENGTH : 0.f) * rangeCheck;
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);
