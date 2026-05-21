@@ -47,13 +47,13 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 float getAO(float depth, vec3 normal) {
     vec3 posVS = reconstructViewPos(uv, depth);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
-    vec3 randVec = randomVec(vec3(posVS));
+    vec3 randVec = randomVec(vec3(uv.xy, 1));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        vec3 sampleVec = TBN*abs(randomVec(vec3(posVS.xy, i)));
+        vec3 sampleVec = TBN*abs(randomVec(vec3(uv.y, 2+i, uv.x)));
         sampleVec = posVS + sampleVec * AO_RADIUS;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
