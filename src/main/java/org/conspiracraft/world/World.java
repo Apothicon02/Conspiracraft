@@ -101,7 +101,8 @@ public class World {
         int size = 0;
         for (Chunk chunk : World.chunks) {
             int[] blockData = chunk.getBlockData();
-            size += 2+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length);
+            int[] lightData = chunk.getLightData();
+            size += 4+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length)+chunk.lightPalette.size()+(lightData == null ? 0 : lightData.length);
         }
         out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         data = out.map(FileChannel.MapMode.READ_WRITE, 0, size*4L);
@@ -110,13 +111,20 @@ public class World {
 
         int[] emptyData = new int[0];
         for (Chunk chunk : World.chunks) {
-            int[] blocks  = chunk.getBlockData();
-            blocks = blocks == null ? emptyData : blocks;
+            int[] subdata  = chunk.getBlockData();
+            subdata = subdata == null ? emptyData : subdata;
             int[] palette = chunk.getBlockPalette();
             chunkData.put(palette.length);
             chunkData.put(palette);
-            chunkData.put(blocks.length);
-            chunkData.put(blocks);
+            chunkData.put(subdata.length);
+            chunkData.put(subdata);
+            subdata = chunk.getLightData();
+            subdata = subdata == null ? emptyData : subdata;
+            palette = chunk.getLightPalette();
+            chunkData.put(palette.length);
+            chunkData.put(palette);
+            chunkData.put(subdata.length);
+            chunkData.put(subdata);
         }
         Utils.unmap(data);
         out.close();
@@ -185,15 +193,25 @@ public class World {
             for (int chunkPos = 0; chunkPos < chunks.length; chunkPos++) {
                 Chunk chunk = new Chunk(chunkPos);
 
-                int paletteSize = chunkData.get();
-                int[] palette = new int[paletteSize];
-                chunkData.get(palette);
-                chunk.setBlockPalette(palette);
+                int dataSize = chunkData.get();
+                int[] subdata = new int[dataSize];
+                chunkData.get(subdata);
+                chunk.setBlockPalette(subdata);
 
-                int blockSize = chunkData.get();
-                int[] blocks = new int[blockSize];
-                chunkData.get(blocks);
-                chunk.setBlockData(blocks);
+                dataSize = chunkData.get();
+                subdata = new int[dataSize];
+                chunkData.get(subdata);
+                chunk.setBlockData(subdata);
+
+                dataSize = chunkData.get();
+                subdata = new int[dataSize];
+                chunkData.get(subdata);
+                chunk.setLightPalette(subdata);
+
+                dataSize = chunkData.get();
+                subdata = new int[dataSize];
+                chunkData.get(subdata);
+                chunk.setLightData(subdata);
 
                 chunks[chunkPos] = chunk;
             }

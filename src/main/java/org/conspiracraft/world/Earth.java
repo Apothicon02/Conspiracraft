@@ -29,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 import static org.conspiracraft.Main.timeNs;
 import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
-import static org.conspiracraft.world.LightHelper.iterateLightQueue;
-import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
+import static org.conspiracraft.world.LightHelper.*;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
@@ -647,7 +646,7 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to init light queue. \n");
         startTime = System.currentTimeMillis();
-        iterateLightQueue();
+        iterateLightQueueMultithreaded();
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
     }
 }

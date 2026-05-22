@@ -44,6 +44,19 @@ public class LightHelper {
     }
 
     public static void iterateLightQueue() throws InterruptedException {
+        while (!lightQueue.isEmpty()) {
+            Vector3i pos = lightQueue.pollFirst();
+            if (inBounds(1, pos.x(), pos.y(), pos.z())) {
+                updateLight(lightQueue, pos, getBlock(pos), getLight(pos));
+                int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                Chunk chunk = chunks[packedCp];
+                chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
+            }
+        }
+        for (Chunk chunk : dirtyChunks) {chunk.lightUpdateArr = null;}
+        dirtyChunks.clear();
+    }
+    public static void iterateLightQueueMultithreaded() throws InterruptedException {
         int threads = Runtime.getRuntime().availableProcessors();
         ArrayDeque<Vector3i>[] queues = new ArrayDeque[threads];
         for (int t = 0; t < threads; t++) {
@@ -125,35 +138,37 @@ public class LightHelper {
         recalculateLight(ogPos, light.r(), light.g(), light.b(), light.s());
     }
     public static void recalculateLight(Vector3i ogPos, int r, int g, int b, int s) {
-        removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
-        removalSet.add(ogPos);
+        if (World.inBounds(ogPos)) {
+            removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
+            removalSet.add(ogPos);
 
-        while (!removalQueue.isEmpty()) {
-            lightNode node = removalQueue.pollFirst();
-            Vector3i pos = new Vector3i(node.x, node.y, node.z);
-            Light light = new Light(node.r(), node.g(), node.b(), node.s());
-            if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
-                setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
-                for (Vector3i neighborPos : new Vector3i[]{
-                        new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
-                        new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
-                }) {
-                    if (!removalSet.contains(neighborPos)) {
-                        lightQueue.add(neighborPos);
-                        int packedCp = World.packChunkPos(neighborPos.x()>>chunkBits, neighborPos.y()>>chunkBits, neighborPos.z()>>chunkBits);
-                        Chunk chunk = chunks[packedCp];
-                        chunk.lightUpdateArr()[Chunk.condenseLocalPos(neighborPos.x()&15, neighborPos.y()&15, neighborPos.z()&15)] = true;
-                        Light nLight = getLight(neighborPos);
-                        if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
-                                (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
-                            removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
-                            removalSet.add(neighborPos);
+            while (!removalQueue.isEmpty()) {
+                lightNode node = removalQueue.pollFirst();
+                Vector3i pos = new Vector3i(node.x, node.y, node.z);
+                Light light = new Light(node.r(), node.g(), node.b(), node.s());
+                if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
+                    setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
+                    for (Vector3i neighborPos : new Vector3i[]{
+                            new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
+                            new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
+                    }) {
+                        if (!removalSet.contains(neighborPos)) {
+                            lightQueue.add(neighborPos);
+                            int packedCp = World.packChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
+                            Chunk chunk = chunks[packedCp];
+                            chunk.lightUpdateArr()[Chunk.condenseLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
+                            Light nLight = getLight(neighborPos);
+                            if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
+                                    (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
+                                removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
+                                removalSet.add(neighborPos);
+                            }
                         }
                     }
                 }
             }
+            removalSet.clear();
         }
-        removalSet.clear();
     }
 
     public record lightNode(int x, int y, int z, int r, int g, int b, int s) {}
