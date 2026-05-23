@@ -38,7 +38,7 @@ public class PlantBlockType extends BlockType {
         }
     }
 
-    public PlantBlockType(int id, BlockProperties blockProperties) {
-        super(id, blockProperties);
+    public PlantBlockType(int id, String name, BlockProperties blockProperties) {
+        super(id, name, blockProperties);
     }
 }

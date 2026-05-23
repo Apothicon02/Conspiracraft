@@ -13,6 +13,7 @@ import static org.conspiracraft.world.World.*;
 
 public class BlockType {
     public final int id;
+    public final String name;
     public BlockProperties blockProperties;
     public List<BlockTag> tags = List.of();
 
@@ -49,8 +50,9 @@ public class BlockType {
         return !blockProperties.isSolid || blockProperties.permeable;
     }
 
-    public BlockType(int id, BlockProperties blockProperties) {
+    public BlockType(int id, String name, BlockProperties blockProperties) {
         this.id = id;
+        this.name = name;
         this.blockProperties = blockProperties;
     }
 

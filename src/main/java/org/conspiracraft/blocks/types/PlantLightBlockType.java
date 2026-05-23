@@ -19,7 +19,7 @@ public class PlantLightBlockType extends LightBlockType {
         }
     }
 
-    public PlantLightBlockType(int id, LightBlockProperties blockProperties) {
-        super(id, blockProperties);
+    public PlantLightBlockType(int id, String name, LightBlockProperties blockProperties) {
+        super(id, name, blockProperties);
     }
 }

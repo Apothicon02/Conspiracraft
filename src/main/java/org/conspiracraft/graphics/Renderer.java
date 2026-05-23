@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
@@ -65,9 +66,10 @@ public class Renderer {
                     generating = false;
                     fillSSBOs();
                     long startTime = System.currentTimeMillis();
-                    ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
-                    ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
-                    memFree(atlasBuffer);
+//                    ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
+//                    ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
+//                    memFree(atlasBuffer);
+                    BlockTypes.fillTexture(stack);
                     ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
                     ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
                     memFree(noisesBuffer);

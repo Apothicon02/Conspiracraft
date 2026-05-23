@@ -11,8 +11,8 @@ import static org.conspiracraft.world.World.*;
 
 public class CloudBlockType extends BlockType {
 
-    public CloudBlockType(int id, BlockProperties blockProperties) {
-        super(id, blockProperties);
+    public CloudBlockType(int id, String name, BlockProperties blockProperties) {
+        super(id, name, blockProperties);
     }
 
     @Override

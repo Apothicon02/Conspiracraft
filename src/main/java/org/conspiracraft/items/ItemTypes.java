@@ -24,8 +24,8 @@ public class ItemTypes {
 
     public static int getId(ItemType type) {
         int id = 0;
-        for (ItemType mapBlocKType : itemTypeMap.values()) {
-            if (mapBlocKType.equals(type)) {
+        for (ItemType mapType : itemTypeMap.values()) {
+            if (mapType.equals(type)) {
                 return id;
             }
             id++;
