@@ -22,6 +22,7 @@ public class Biomes {
     public static final Biome BEACH = create();
     public static final Biome SAVANNA = create();
     public static final Biome BADLANDS = create();
+    public static final Biome OASIS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {
@@ -43,7 +44,7 @@ public class Biomes {
         } else if (biome == SNOWY_PEAK || biome == SNOWY_TAIGA || biome == VOLCANIC_SNOWY_TAIGA) {
             type = BlockTypes.SNOW.id;
             subtype = 0;
-        } else if (biome == LAKE) {
+        } else if (biome == LAKE || biome == OASIS) {
             type = BlockTypes.WET_SAND.id;
             subtype = 0;
         } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
@@ -63,6 +64,7 @@ public class Biomes {
     }
 
     public static int getBadlandsBands(int y) {
+        y/=2;
         return (y&5) == 0 ? BlockTypes.SANDSTONE.id : ((y&2) == 0 ? BlockTypes.ORANGE_SANDSTONE.id : BlockTypes.RED_SANDSTONE.id);
     }
 }

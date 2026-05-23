@@ -71,6 +71,8 @@ public class Earth extends WorldType {
     }
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
+    public JNoise detailNoisePipeline = JNoise.newBuilder().fastSimplex(135131, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
+            .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
 
     public static boolean fillLake(int x, int y, int z, Lake lake) {
         int packedPos = packPos(x, z);
@@ -151,12 +153,12 @@ public class Earth extends WorldType {
                                 }
                                 double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness;
                                 //riverness *= 1-centerElevation;
-                                double detailNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d);
                                 double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
                                 double islandsNoise = ogIslandsNoise;
                                 if (islandsNoise < 0.f) {islandsNoise *= -4*(5*baseHilliness);}
                                 double islands = ((60+(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*seaness;
-                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise*3) + hilliness + elevation));
+                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise*5*undesertness) + hilliness + elevation));
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
                                 double redwoodness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/quarterSize, 0, 1);
@@ -168,7 +170,7 @@ public class Earth extends WorldType {
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 maxElevation = (short) Math.max(maxElevation, finalElevation);
-                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*Math.max(0.1f, undesertness)) {
+                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*unsavannaness) {
                                     lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
                                 }
                             }
@@ -201,7 +203,10 @@ public class Earth extends WorldType {
                             for (int z = 0; z < size; z++) {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
-                                    biomes[packedPos] = Biomes.LAKE.id;
+                                    int biome = biomes[packedPos];
+                                    if (biome != Biomes.OASIS.id) {
+                                        biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id || biome == Biomes.PALMY_PLAINS.id ? Biomes.OASIS.id : Biomes.LAKE.id;
+                                    }
                                     int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
                                     chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
                                     lakesMaxElevations[packedPos] = (short) Math.max(lake.pos.y(), lakesMaxElevations[packedPos]);
@@ -270,7 +275,7 @@ public class Earth extends WorldType {
                                     final int ceil = floor + chunkSize;
                                     final int seafloor = Math.min(elevation+1, ceil);
                                     final int seafloorAbove = Math.min(elevation+2, ceil);
-                                    if (biome == Biomes.LAKE.id || elevation <= seaLevel) {
+                                    if ((biome == Biomes.LAKE.id || biome == Biomes.OASIS.id) || elevation <= seaLevel) {
                                         int waterSurface = Math.min(Math.max(seaLevel, lakesMaxElevations[packedPos]-1), ceil);
                                         int waterSurfaceBelow = waterSurface-1;
                                         if (waterSurface > elevation) {
@@ -454,10 +459,12 @@ public class Earth extends WorldType {
                                             Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
                                         }
                                     }
-                                } else if ((blockOn.x == BlockTypes.WET_SAND.id && biome == Biomes.DESERT.id) || ((blockOn.x == BlockTypes.SAND.id || blockOn.x == BlockTypes.WET_SAND.id) && (biome == Biomes.BEACH.id || biome == Biomes.TROPICAL_ISLAND.id || biome == Biomes.PALMY_PLAINS.id))) {
+                                } else if ((blockOn.x == BlockTypes.WET_SAND.id && biome == Biomes.OASIS.id) || ((blockOn.x == BlockTypes.SAND.id || blockOn.x == BlockTypes.WET_SAND.id) && (biome == Biomes.BEACH.id || biome == Biomes.TROPICAL_ISLAND.id || biome == Biomes.PALMY_PLAINS.id))) {
                                     if (blockIn.x() != 1) {
                                         if (randomNumber < 0.0067f*(blockOn.x == BlockTypes.SAND.id ? 0.25f : 1.f)) {
                                             PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        } else if (biome == Biomes.OASIS.id && randomNumber < 0.0115f) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
                                         }
                                     }
                                 } else if ((blockOn.x == BlockTypes.SAND.id && biome == Biomes.DESERT.id) || (blockOn.x == BlockTypes.RED_SAND.id && biome == Biomes.BADLANDS.id)) {

@@ -649,7 +649,7 @@ void main() {
             shadowColor = dda(true);
         }
         if (shadowColor.a > 0.0f) {
-            shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.45f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
+            shadowFactor = gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
             blockLighting.a *= shadowFactor;
         }
         if (reflectivity > 0.f) {
