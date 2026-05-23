@@ -23,6 +23,8 @@ public class Biomes {
     public static final Biome SAVANNA = create();
     public static final Biome BADLANDS = create();
     public static final Biome OASIS = create();
+    public static final Biome RAINFOREST = create();
+    public static final Biome PALMY_HILLS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {

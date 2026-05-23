@@ -32,7 +32,7 @@ public class AcaciaTree {
         if (colliding.get()) {return;}
         int minCollisionY = y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-            Map<Vector3i, Vector2i> canopy = DroopingCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z), random.nextInt(4, 5), random.nextInt(7, 9));
+            Map<Vector3i, Vector2i> canopy = DroopingCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z), random.nextInt(4, 5), random.nextInt(7, 9), 1.f);
             if (!integrateCanopy(canopy, blocks, minCollisionY)) {
                 colliding.set(true);
                 break;

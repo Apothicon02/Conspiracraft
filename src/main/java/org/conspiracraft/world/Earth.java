@@ -58,13 +58,13 @@ public class Earth extends WorldType {
     public void tick() {
         prevSunPos.set(sunPos);
         sunPos.set(0, size*2, 0);
-        sunPos.rotateZ(timeNs/100000000000.f);
+        sunPos.rotateZ(timeNs/1000000000000.f);
         sunPos.rotateX(0.5f);
         sunPos.rotateY(2.f);
         sunPos.set(sunPos.x+(size/2f), sunPos.y, sunPos.z+(size/2f)+128);
         prevMunPos.set(munPos);
         munPos.set(0, size*-2, 0);
-        munPos.rotateZ(timeNs/100000000000.f);
+        munPos.rotateZ(timeNs/1000000000000.f);
         munPos.rotateX(-0.2f);
         munPos.rotateY(-1.5f);
         munPos.set(munPos.x+(size/2f), munPos.y, munPos.z+(size/2f)+128);
@@ -122,7 +122,10 @@ public class Earth extends WorldType {
                                 double uncoastalness = (Math.clamp(seaDist, 600, 900)-600) / 300.f;
                                 double desertDist = new Vector2i(0).distance(x, z);
                                 double undesertness = (Math.clamp(desertDist, 1000, 1200)-1000) / 200.f;
-                                double palmyPlainness = 1-((Math.clamp(Math.min(new Vector2i(-750, 1250).distance(x, z), new Vector2i(1250, -750).distance(x, z)), 1000, 1200)-1000) / 200.f);
+                                double unrainforestness = (Math.clamp(desertDist, 1800, 2000)-1800) / 200.f;
+                                double rainforestness = 1-unrainforestness;
+                                double unpalmyPlainness = (Math.clamp(Math.min(new Vector2i(-750, 1250).distance(x, z), new Vector2i(1250, -750).distance(x, z)), 1000, 1200)-1000) / 200.f;
+                                double palmyPlainness = 1-unpalmyPlainness;
                                 double desertness = 1-undesertness;
                                 double unsavannaness = (Math.clamp(new Vector2i(1250, 0).distance(x, z), 1000, 1200)-1000) / 200.f;
                                 double savannaness = 1-unsavannaness;
@@ -145,32 +148,36 @@ public class Earth extends WorldType {
                                 if (desertness > 0.f) {
                                     elevationNoise += noisePipeline.evaluateNoise((x - size) / 525.d, (z - size) / 525.d)*desertness;
                                 }
-                                double elevation = elevationNoise * (125 * Math.max(desertness/3, mountainness));
+                                double elevation = elevationNoise * (125 * Math.max(desertness/3, mountainness)) * Math.max(desertness, unpalmyPlainness);
                                 double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
                                 double baseHilliness = SimplexNoise.noise((x + size) / 500.f, (z + size) / 500.f);
                                 if (baseHilliness < 0.f) {
                                     baseHilliness *= -0.5;
                                 }
-                                double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness;
+                                double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness * unpalmyPlainness;
                                 //riverness *= 1-centerElevation;
                                 double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d);
                                 double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
                                 double islandsNoise = ogIslandsNoise;
                                 if (islandsNoise < 0.f) {islandsNoise *= -4*(5*baseHilliness);}
                                 double islands = ((60+(islandsNoise*10))+Math.max(0, (-islandsNoise)*Math.abs(elevationNoise*20)))*seaness;
-                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise*5*undesertness) + hilliness + elevation));
+                                short finalElevation = (short) Math.max(60, Math.max(islands, 10 + (56*Math.min(1, unseaness+Math.max(0, ogIslandsNoise*0.15f))) + (midElevation * 40) + Math.max(0, detailNoise*5*undesertness*(1+palmyPlainness)) + hilliness + elevation));
                                 double snowiness = Utils.gradient(finalElevation, 96, 120, 0, 1);
                                 double centBiomeFactor = centDist + (elevationNoise * 0.05f);
                                 double redwoodness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/quarterSize, 0, 1);
                                 double volcanicness = 1-Math.clamp(new Vector2f(halfSize+quarterSize, halfSize+quarterSize).distance(x, z)/(quarterSize*1.2f), 0, 1);
-                                boolean isDesert = Math.max(palmyPlainness-(desertDist/1500), desertness)-Math.abs(detailNoise * 0.25f) > 0;
+                                double biomeNoise = Math.abs(detailNoise * 0.25f);
+                                boolean isDesert = Math.max(palmyPlainness-(desertDist/1500), desertness)-biomeNoise > 0;
+                                boolean isSavanna = savannaness-biomeNoise > 0;
+                                boolean isPalmyPlains = palmyPlainness-biomeNoise > 0;
+                                boolean isRainforest = rainforestness-biomeNoise > 0;
                                 boolean isBeach = uncoastalness < 0.3f;
                                 boolean isIslands = seaness > 0.5f;
-                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (badlandness > 0 ? Biomes.BADLANDS.id : (isDesert ? Biomes.DESERT.id : savannaness > 0 ? Biomes.SAVANNA.id : (palmyPlainness > 0 ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? (volcanicness > 0.f ? Biomes.VOLCANIC_SNOWY_TAIGA.id : Biomes.SNOWY_TAIGA.id) : (ogMoutainness > 0.1 ? Biomes.CHERRY_GROVE.id : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : (volcanicness > 0.f ? Biomes.VOLCANIC_TAIGA.id : Biomes.TAIGA.id)) : Biomes.TEMPERATE.id)))))))));
+                                biomes[x * size + z] = (byte) (isBeach ? (isIslands ? Biomes.TROPICAL_ISLAND.id : Biomes.BEACH.id) : (badlandness > 0 ? Biomes.BADLANDS.id : (isDesert ? Biomes.DESERT.id : isSavanna ? Biomes.SAVANNA.id : (isPalmyPlains ? Biomes.PALMY_PLAINS.id : (((elevationNoise * ogMoutainness) + (detailNoise * 0.05f) > snowiness ? Biomes.SNOWY_PEAK.id : (centBiomeFactor < 0.2f ? (volcanicness > 0.f ? Biomes.VOLCANIC_SNOWY_TAIGA.id : Biomes.SNOWY_TAIGA.id) : (ogMoutainness > 0.1 ? (isRainforest ? Biomes.PALMY_HILLS.id : Biomes.CHERRY_GROVE.id) : (centBiomeFactor < 0.4f ? (redwoodness > 0.f ? Biomes.REDWOOD_FOREST.id : (volcanicness > 0.f ? Biomes.VOLCANIC_TAIGA.id : Biomes.TAIGA.id)) : (rainforestness > 0 ? Biomes.RAINFOREST.id : Biomes.TEMPERATE.id))))))))));
                                 heightmap[packPos(x, z)] = finalElevation;
                                 minElevation = (short) Math.min(minElevation, finalElevation);
                                 maxElevation = (short) Math.max(maxElevation, finalElevation);
-                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*unsavannaness) {
+                                if (finalElevation > 66 && rand.nextFloat() < 0.0001f*unsavannaness*(1+(9*palmyPlainness))) {
                                     lakes.add(new Lake(new Vector3i(x, finalElevation+1, z)));
                                 }
                             }
@@ -205,7 +212,7 @@ public class Earth extends WorldType {
                                 if (lake.visited.get(packedPos)) {
                                     int biome = biomes[packedPos];
                                     if (biome != Biomes.OASIS.id) {
-                                        biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id || biome == Biomes.PALMY_PLAINS.id ? Biomes.OASIS.id : Biomes.LAKE.id;
+                                        biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id || biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id ? Biomes.OASIS.id : Biomes.LAKE.id;
                                     }
                                     int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
                                     chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
@@ -385,7 +392,31 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 } else if (!snowy && blockOn.x == 2) {
-                                    if (biome == Biomes.PALMY_PLAINS.id) {
+                                    if (biome == Biomes.RAINFOREST.id) {
+                                        if (randomNumber < 0.0012f) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        } else if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.005f || randomNumber < 0.0021f) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                        } else if (randomNumber < 0.01f) {
+                                            if (randomNumber < 0.0034f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else {
+                                                int maxHeight = rand.nextInt(35, 42);
+                                                int radius = rand.nextInt(5, 8);
+                                                int leavesHeight = 4;
+                                                int branchChance = 1;
+                                                if (RainforestTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.MAHOGANY_LOG.id, 0, BlockTypes.MAHOGANY_LEAVES.id, 0, branchChance)) {
+                                                    Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (12 + ((rand.nextFloat() + 1) * 10)), new int[]{2, 23}, true);
+                                                }
+                                            }
+                                        }
+                                    } else if (biome == Biomes.PALMY_PLAINS.id) {
+                                        if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.001f || randomNumber < 0.0011f) {
+                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                        } else if (randomNumber < 0.002f) {
+                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        }
+                                    } else if (biome == Biomes.PALMY_HILLS.id) {
                                         if (randomNumber < 0.0067f) {
                                             PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                         } else if (randomNumber < Math.max(0, 0.06f*featureNoiseSmall)-0.02f || randomNumber < 0.0071f) {
