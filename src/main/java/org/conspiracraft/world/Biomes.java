@@ -25,6 +25,7 @@ public class Biomes {
     public static final Biome OASIS = create();
     public static final Biome RAINFOREST = create();
     public static final Biome PALMY_HILLS = create();
+    public static final Biome POND = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {
@@ -48,6 +49,9 @@ public class Biomes {
             subtype = 0;
         } else if (biome == LAKE || biome == OASIS) {
             type = BlockTypes.WET_SAND.id;
+            subtype = 0;
+        } else if (biome == POND) {
+            type = BlockTypes.MUD.id;
             subtype = 0;
         } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;

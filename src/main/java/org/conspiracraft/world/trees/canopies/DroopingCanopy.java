@@ -10,6 +10,8 @@ import org.joml.Vector3i;
 import java.util.Map;
 import java.util.Random;
 
+import static org.conspiracraft.world.World.getBlock;
+
 public class DroopingCanopy extends Canopy {
     private static Vector2i getLeaves(Random random, Vector3i pos, int blockType, int blockSubType) {return new Vector2i(blockType, blockSubType);}
 
@@ -62,12 +64,27 @@ public class DroopingCanopy extends Canopy {
                                 addToMap(map, pos.below(i), random, minY, blockType, blockSubType);
                             }
                         }
+                        Vector3i bPos = new Vector3i(x, pos.y()-1, z);
+                        Vector3i aPos = new Vector3i(x, pos.y(), z);
+                        for (int i = 0; i <= 24; i++) {
+                            bPos.sub(0, 1, 0);
+                            aPos.sub(0, 1, 0);
+                            if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                    (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                                addToMap(map, new Vector3i(aPos), random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
+                            }
+                        }
                     }
                 }
             }
         }
 
         return map;
+    }
+
+    private static boolean solid(Vector2i block) {
+        if (block == null) {return false;}
+        return BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
     }
 
     private static void addSquare(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, int radius, boolean corners, int minY, int blockType, int blockSubType) {
