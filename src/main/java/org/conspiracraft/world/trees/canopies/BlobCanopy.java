@@ -21,8 +21,7 @@ public class BlobCanopy extends Canopy {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 if (inBounds(lX, y, lZ)) {
-                    int condensedPos = packPos(lX, lZ);
-                    int surfaceY = heightmap[condensedPos];
+                    boolean set = false;
                     for (int lY = y - height; lY <= y + height; lY++) {
                         int xDist = lX - x;
                         int yDist = lY - y;
@@ -30,15 +29,19 @@ public class BlobCanopy extends Canopy {
                         int dist = xDist * xDist + zDist * zDist + yDist * yDist;
                         if (dist <= radius * 3) {
                             addToMap(map, new Vector3i(lX, lY, lZ), blockType, blockSubType);
-                            heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], lY);
-                            for (int extraY = lY; extraY >= surfaceY; extraY--) {
-                                if (extraY == surfaceY) {
-                                    Vector3i abovePos = new Vector3i(lX, extraY+1, lZ);
-                                    if (BlockTypes.blockTypes[getBlock(lX, extraY, lZ).x].blockProperties.isSolid &&
-                                            !BlockTypes.blockTypes[getBlock(abovePos).x].blockProperties.isSolid && !blocks.containsKey(abovePos) && !map.containsKey(abovePos)) {
-                                        addToMap(map, abovePos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
-                                    }
-                                }
+                            set = true;
+                        }
+                    }
+                    if (set) {
+                        Vector3i bPos = new Vector3i(lX, y - 1, lZ);
+                        Vector3i aPos = new Vector3i(lX, y, lZ);
+                        for (int i = 0; i <= 24; i++) {
+                            bPos.sub(0, 1, 0);
+                            aPos.sub(0, 1, 0);
+                            if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                    (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                                addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
+                                break;
                             }
                         }
                     }
@@ -46,5 +49,10 @@ public class BlobCanopy extends Canopy {
             }
         }
         return map;
+    }
+
+    private static boolean solid(Vector2i block) {
+        if (block == null) {return false;}
+        return BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
     }
 }

@@ -18,7 +18,7 @@ import static org.conspiracraft.world.World.*;
 public class DeadOakTree {
     public static void generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType) {
         if (blockOn.x == 2 || blockOn.x == 23) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, true, 8);
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, 3, logType, logSubType, true, 8);
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             AtomicBoolean colliding = new AtomicBoolean(false);
             blocks.forEach((pos, block) -> {

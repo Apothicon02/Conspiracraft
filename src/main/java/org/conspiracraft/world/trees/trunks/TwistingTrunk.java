@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class TwistingTrunk extends Trunk {
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, int minCanopyHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
         Set<Vector3i> canopies = new HashSet<>();
 
@@ -43,7 +43,7 @@ public class TwistingTrunk extends Trunk {
                     prevZPositive = -5;
                     dir.z -= 1;
                 }
-                branch = true;
+                branch = height >= oY+minCanopyHeight;
                 twistable = 2;
             }
             pos.add(dir);

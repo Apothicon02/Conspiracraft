@@ -26,31 +26,33 @@ public class JungleCanopy extends Canopy {
         int maxZ = z+radius;
         for (int newX = x-radius; newX <= maxX; newX++) {
             for (int newZ = z - radius; newZ <= maxZ; newZ++) {
-                if (inBounds(newX, y-1, newZ) && !((newX == minX || newX == maxX) && (newZ == minZ || newZ == maxZ)) && newX != x && newZ != z && (newX == minX || newX == maxX || newZ == minZ || newZ == maxZ)) {
-                    addToMap(map, new Vector3i(newX, y-1, newZ), blockType, blockSubType);
-                    int condensedPos = packPos(newX, newZ);
-                    int surfaceY = heightmap[condensedPos];
-                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], y-1);
-                    for (int extraY = y-1; extraY >= surfaceY; extraY--) {
-                        if (extraY == surfaceY) {
-                            Vector3i abovePos = new Vector3i(newX, extraY + 1, newZ);
-                            if (BlockTypes.blockTypes[getBlock(newX, extraY, newZ).x].blockProperties.isSolid &&
-                                    !BlockTypes.blockTypes[getBlock(abovePos).x].blockProperties.isSolid && !blocks.containsKey(abovePos) && !map.containsKey(abovePos)) {
-                                addToMap(map, abovePos, blockType, 0);
-                                Vector3i aboveAbovePos = new Vector3i(newX, extraY + 2, newZ);
-                                if (!BlockTypes.blockTypes[getBlock(aboveAbovePos).x].blockProperties.isSolid && !blocks.containsKey(aboveAbovePos) && !map.containsKey(aboveAbovePos)) {
-                                    addToMap(map, new Vector3i(aboveAbovePos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
-                                }
-                            }
+                if (inBounds(newX, y-1, newZ)) {
+                    Vector3i bPos = new Vector3i(newX, y-1, newZ);
+                    Vector3i aPos = new Vector3i(newX, y, newZ);
+                    for (int i = 0; i <= 24; i++) {
+                        bPos.sub(0, 1, 0);
+                        aPos.sub(0, 1, 0);
+                        if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                            addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
+                            break;
                         }
                     }
-                    if (random.nextDouble()*10 < 4) {
-                        addToMap(map, new Vector3i(newX, y-2, newZ), blockType, blockSubType);
+                    if (!((newX == minX || newX == maxX) && (newZ == minZ || newZ == maxZ)) && newX != x && newZ != z && (newX == minX || newX == maxX || newZ == minZ || newZ == maxZ)) {
+                        addToMap(map, new Vector3i(newX, y-1, newZ), blockType, blockSubType);
+                        if (random.nextDouble() * 10 < 4) {
+                            addToMap(map, new Vector3i(newX, y - 2, newZ), blockType, blockSubType);
+                        }
                     }
                 }
             }
         }
         return map;
+    }
+
+    private static boolean solid(Vector2i block) {
+        if (block == null) {return false;}
+        return BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
     }
 
     private static void addSquare(Map<Vector3i, Vector2i> map, int x, int y, int z, int radius, boolean corners, int blockType, int blockSubType) {

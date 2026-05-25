@@ -36,6 +36,7 @@ public class DroopingCanopy extends Canopy {
             for (int z = origin.z()-maxRadius; z <= origin.z()+maxRadius; z++) {
                 int minY = origin.y();
                 int maxY = (origin.y()+height);
+                boolean set = false;
                 for (int y = minY; y <= maxY; y++) {
                     int radius = maxRadius;
                     if ((y == minY && height > 2) || (y == maxY-1 && height >= 4)) {
@@ -64,15 +65,19 @@ public class DroopingCanopy extends Canopy {
                                 addToMap(map, pos.below(i), random, minY, blockType, blockSubType);
                             }
                         }
-                        Vector3i bPos = new Vector3i(x, pos.y()-1, z);
-                        Vector3i aPos = new Vector3i(x, pos.y(), z);
-                        for (int i = 0; i <= 24; i++) {
-                            bPos.sub(0, 1, 0);
-                            aPos.sub(0, 1, 0);
-                            if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
-                                    (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
-                                addToMap(map, new Vector3i(aPos), random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
-                            }
+                        set = true;
+                    }
+                }
+                if (set) {
+                    Vector3i bPos = new Vector3i(x, maxY-1, z);
+                    Vector3i aPos = new Vector3i(x, maxY, z);
+                    for (int i = 0; i <= 24; i++) {
+                        bPos.sub(0, 1, 0);
+                        aPos.sub(0, 1, 0);
+                        if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                            addToMap(map, new Vector3i(aPos), random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
+                            break;
                         }
                     }
                 }

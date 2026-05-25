@@ -26,6 +26,8 @@ public class Biomes {
     public static final Biome RAINFOREST = create();
     public static final Biome PALMY_HILLS = create();
     public static final Biome POND = create();
+    public static final Biome ROOFED_FOREST = create();
+    public static final Biome ROOFED_FOREST_HILLS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {
@@ -53,7 +55,7 @@ public class Biomes {
         } else if (biome == POND) {
             type = BlockTypes.MUD.id;
             subtype = 0;
-        } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST) {
+        } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST || biome == ROOFED_FOREST || biome == ROOFED_FOREST_HILLS) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = y >= elevation ? 1 : 0;
         } else if (biome == SAVANNA) {

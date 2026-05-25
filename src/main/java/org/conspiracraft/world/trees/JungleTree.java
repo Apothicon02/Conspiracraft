@@ -18,40 +18,37 @@ import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class JungleTree {
-    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
-        if (blockOn.x == 2) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, overgrown, 1);
-            AtomicBoolean colliding = new AtomicBoolean(false);
-            Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
+    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int minCanopyHeight, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
+        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, minCanopyHeight, logType, logSubType, overgrown, 1);
+        AtomicBoolean colliding = new AtomicBoolean(false);
+        Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
+        blocks.forEach((pos, block) -> {
+            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+                colliding.set(true);
+            }
+        });
+        if (colliding.get()) {return false;}
+        int minCollisionY = y+5;
+        for (Vector3i canopyPos : generatedTrunk.getSecond()) {
+            Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
+            if (!integrateCanopy(canopy, blocks, minCollisionY)) {
+                colliding.set(true);
+                break;
+            }
+        }
+        if (!colliding.get()) {
             blocks.forEach((pos, block) -> {
-                if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
-                    colliding.set(true);
+                if (inBounds(pos)) {
+                    setBlock(pos.x, pos.y, pos.z, block.x, block.y);
+                    int condensedPos = packPos(pos.x, pos.z);
+                    int surfaceY = heightmap[condensedPos];
+                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                    for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
+                        //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
+                    }
                 }
             });
-            if (colliding.get()) {return false;}
-            int minCollisionY = y+5;
-            for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-                Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
-                if (!integrateCanopy(canopy, blocks, minCollisionY)) {
-                    colliding.set(true);
-                    break;
-                }
-            }
-            if (!colliding.get()) {
-                blocks.forEach((pos, block) -> {
-                    if (inBounds(pos)) {
-                        setBlock(pos.x, pos.y, pos.z, block.x, block.y);
-                        int condensedPos = packPos(pos.x, pos.z);
-                        int surfaceY = heightmap[condensedPos];
-                        heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
-                        for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-                            //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-                        }
-                    }
-                });
-            }
-            return !colliding.get();
         }
-        return false;
+        return !colliding.get();
     }
 }

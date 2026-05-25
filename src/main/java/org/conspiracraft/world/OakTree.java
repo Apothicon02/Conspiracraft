@@ -16,7 +16,7 @@ import static org.conspiracraft.world.World.*;
 public class OakTree {
     public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType) {
         if (blockOn.x == 2) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, true, 8);
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, 3, logType, logSubType, true, 8);
             boolean colliding = false;
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             int minCollisionY = y+5;
