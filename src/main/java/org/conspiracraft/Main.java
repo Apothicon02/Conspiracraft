@@ -4,20 +4,24 @@ import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static org.conspiracraft.Settings.*;
-import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -49,6 +53,7 @@ public class Main {
         window = new Window();
         AudioController.init();
         Files.createDirectories(Path.of(mainFolder));
+        copyAssets();
         Settings.load();
         player = new Player();
         player.create();
@@ -112,5 +117,33 @@ public class Main {
         player.save();
         World.save(World.worldType.getWorldPath() + "/");
         isSaving = false;
+    }
+
+    public static void copyAssets() throws IOException, URISyntaxException {
+        Path targetDir = Paths.get(mainFolder+"assets/");
+        targetDir.toFile().mkdirs();
+        Files.createDirectories(targetDir);
+
+        URI uri = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        Path jarPath = Paths.get(uri);
+        if (!jarPath.toString().endsWith(".jar")) {return;} //don't copy assets if not running from jar
+        try (JarFile jar = new JarFile(jarPath.toFile())) {
+            Enumeration<JarEntry> entries = jar.entries();
+
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String name = entry.getName();
+
+                if (!name.startsWith("assets/")) continue;
+                if (entry.isDirectory()) continue;
+
+                Path outPath = targetDir.resolve(name.substring("assets/".length()));
+                Files.createDirectories(outPath.getParent());
+
+                try (InputStream in = jar.getInputStream(entry)) {
+                    Files.copy(in, outPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
     }
 }

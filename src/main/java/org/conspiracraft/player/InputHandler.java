@@ -1,7 +1,6 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.entities.AnimalEntity;
-import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
@@ -89,47 +88,6 @@ public class InputHandler {
                     HandManager.useHands(window);
                 }
 
-                if (keyRelease(SDL_SCANCODE_F11)) {
-                    if (!isFullscreen) {
-                        isFullscreen = true;
-                        SDL_SetWindowPosition(Window.window, 0, 0);
-                        SDL_SetWindowSize(Window.window, 2560, 1440);
-                        window.resized(2560, 1440);
-                    } else {
-                        isFullscreen = false;
-                        SDL_SetWindowPosition(Window.window, 0, 32);
-                        SDL_SetWindowSize(Window.window, (int) (2560 * 0.8f), (int) (1440 * 0.8f));
-                        window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
-                    }
-                }
-                if (keyRelease(SDL_SCANCODE_TAB)) {
-                    GUI.inventoryOpen = !GUI.inventoryOpen;
-                }
-                if (keyRelease(SDL_SCANCODE_F1)) {
-                    GUI.showUI = !GUI.showUI;
-                }
-                if (keyRelease(SDL_SCANCODE_Q)) {
-                    Item item = player.inv.getSelectedItem(false);
-                    if (item != null) {
-                        World.dropItem(item);
-                        item.amount(0).type(ItemTypes.AIR);
-                    }
-                }
-                if (keyRelease(SDL_SCANCODE_T)) {
-                    Main.timeNs += 100000000000L;
-                }
-                if (keyRelease(SDL_SCANCODE_B)) {
-                    Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);
-                    for (int z = startPos.z(); z < startPos.z()+chunkSize; z++) {
-                        for (int x = startPos.x(); x < startPos.x() + chunkSize; x++) {
-                            for (int y = startPos.y(); y < startPos.y() + chunkSize; y++) {
-                                if ((z == startPos.z() || z == startPos.z()+chunkSize-1) || (x == startPos.x() || x == startPos.x()+chunkSize-1) || (y == startPos.y() || y == startPos.y()+chunkSize-1)) {
-                                    World.setBlock(x, y, z, 1, 15);
-                                }
-                            }
-                        }
-                    }
-                }
                 if (isKeyDown(SDL_SCANCODE_F3)) {
                     float r = 0.f;
                     if (isKeyDown(SDL_SCANCODE_R)) {
@@ -143,6 +101,51 @@ public class InputHandler {
                                 (float)(Math.random()*-0.1f));
                         entity.vel = player.camera.getForward().mul(2);
                         entities.addLast(entity);
+                    }
+                    if (isKeyDown(SDL_SCANCODE_T)) {
+                        Renderer.reloadAtlas = true;
+                    }
+                } else {
+                    if (keyRelease(SDL_SCANCODE_F11)) {
+                        if (!isFullscreen) {
+                            isFullscreen = true;
+                            SDL_SetWindowPosition(Window.window, 0, 0);
+                            SDL_SetWindowSize(Window.window, 2560, 1440);
+                            window.resized(2560, 1440);
+                        } else {
+                            isFullscreen = false;
+                            SDL_SetWindowPosition(Window.window, 0, 32);
+                            SDL_SetWindowSize(Window.window, (int) (2560 * 0.8f), (int) (1440 * 0.8f));
+                            window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
+                        }
+                    }
+                    if (keyRelease(SDL_SCANCODE_TAB)) {
+                        GUI.inventoryOpen = !GUI.inventoryOpen;
+                    }
+                    if (keyRelease(SDL_SCANCODE_F1)) {
+                        GUI.showUI = !GUI.showUI;
+                    }
+                    if (keyRelease(SDL_SCANCODE_Q)) {
+                        Item item = player.inv.getSelectedItem(false);
+                        if (item != null) {
+                            World.dropItem(item);
+                            item.amount(0).type(ItemTypes.AIR);
+                        }
+                    }
+                    if (keyRelease(SDL_SCANCODE_T)) {
+                        Main.timeNs += 100000000000L;
+                    }
+                    if (keyRelease(SDL_SCANCODE_B)) {
+                        Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);
+                        for (int z = startPos.z(); z < startPos.z()+chunkSize; z++) {
+                            for (int x = startPos.x(); x < startPos.x() + chunkSize; x++) {
+                                for (int y = startPos.y(); y < startPos.y() + chunkSize; y++) {
+                                    if ((z == startPos.z() || z == startPos.z()+chunkSize-1) || (x == startPos.x() || x == startPos.x()+chunkSize-1) || (y == startPos.y() || y == startPos.y()+chunkSize-1)) {
+                                        World.setBlock(x, y, z, 1, 15);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

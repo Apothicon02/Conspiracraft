@@ -14,9 +14,12 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 
+import static org.conspiracraft.Main.mainFolder;
 import static org.lwjgl.system.MemoryUtil.memAlloc;
 
 public class Utils {
@@ -44,7 +47,7 @@ public class Utils {
         return data.toString();
     }
     public static BufferedImage loadImage(String name) throws IOException {
-        InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("assets/base/"+name+".png");
+        InputStream inputStream = Files.newInputStream(Paths.get(mainFolder + "assets/base/" + name + ".png"));
         BufferedInputStream bInputStream = new BufferedInputStream(inputStream);
         ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
         reader.setInput(ImageIO.createImageInputStream(bInputStream), true);

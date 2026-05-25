@@ -62,6 +62,9 @@ public class Biomes {
         } else if (biome == BADLANDS) {
             type = BlockTypes.RED_SAND.id;
             subtype = 0;
+        } else if (biome == TROPICAL_ISLAND || biome == PALMY_PLAINS || biome == PALMY_HILLS || biome == RAINFOREST) {
+            type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
+            subtype = y >= elevation ? 3 : 0;
         } else {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = 0;

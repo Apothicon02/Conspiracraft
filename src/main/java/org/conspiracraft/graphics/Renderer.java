@@ -57,6 +57,7 @@ public class Renderer {
     public static VkCommandBuffer currentCmdBuffer;
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
+    public static boolean reloadAtlas = false;
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -66,9 +67,6 @@ public class Renderer {
                     generating = false;
                     fillSSBOs();
                     long startTime = System.currentTimeMillis();
-//                    ByteBuffer atlasBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/atlas"));
-//                    ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
-//                    memFree(atlasBuffer);
                     BlockTypes.fillTexture(stack);
                     ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
                     ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
@@ -87,6 +85,13 @@ public class Renderer {
                     }
                     //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
                     ssboBarriers();
+                    if (reloadAtlas) {
+                        reloadAtlas = false;
+                        long startTime = System.currentTimeMillis();
+                        BlockTypes.fillTexture(stack);
+                        //atlasBarriers();
+                        System.out.println("Atlas reloading took "+(System.currentTimeMillis()-startTime)+"ms");
+                    }
                 }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
                 globalUBO.update(stack);
@@ -644,6 +649,18 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(lightSSBO.buffer.buffer[0])
                 .offset(0).size(lightSSBOSize);
+        vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
+    }
+    public static void atlasBarriers() {
+        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1);
+        barrierBuf.get(0)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                .buffer(BlockTypes.atlasBuffer.buffer[0])
+                .offset(0).size(BlockTypes.atlasBuffer.size);
         vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
     }
 }

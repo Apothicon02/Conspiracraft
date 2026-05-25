@@ -147,11 +147,14 @@ public class BlockTypes {
         blockTypeMap = null;
         return arr;
     }
+    public static boolean reloading = false;
+    public static Buffer atlasBuffer;
     public static void fillTexture(MemoryStack stack) throws IOException {
         int sliceSize = Textures.atlas.width*Textures.atlas.height;
         int texSize = sliceSize*((Texture3D)Textures.atlas).depth;
-        Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-
+        if (atlasBuffer == null) {
+            atlasBuffer = new Buffer(stack, texSize * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+        }
         for (int i = 0; i < blockTypes.length; i++) {
             BlockType type = blockTypes[i];
             BufferedImage image = Utils.loadImage("block/"+type.name);
@@ -159,11 +162,12 @@ public class BlockTypes {
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
             for (long row = 0; row < height; row++) {
                 memCopy(memAddress(blockBuf) + row * blockTexSize * 4L,
-                        stagingBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexSizeL)) * 4L),
+                        atlasBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexSizeL)) * 4L),
                         blockTexSize * 4L);
             }
             memFree(blockBuf);
         }
-        ImageHelper.fillImage(stack, Textures.atlas, stagingBuffer);
+        ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
+        reloading = true;
     }
 }

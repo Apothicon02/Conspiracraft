@@ -301,9 +301,10 @@ public class Earth extends WorldType {
                                     }
 
                                     double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
+                                    boolean warm = new Vector2i(0, 0).distance(x, z) < 2048;
                                     float foliageNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                     for (int y = floor; y < seafloorAbove; y++) {
-                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : (biome == Biomes.BADLANDS.id ? Chunk.packInts(Biomes.getBadlandsBands(y+(int)(5*foliageNoise)), 0) : Chunk.packInts(centDist < 0.4f ? (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.FLINT.id) : (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.STONE.id), 0));
+                                        final int block = flat ? Biomes.getSurfaceBlock(biome, elevation, y) : (biome == Biomes.BADLANDS.id ? Chunk.packInts(Biomes.getBadlandsBands(y+(int)(5*foliageNoise)), 0) : Chunk.packInts(centDist < 0.4f ? (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.FLINT.id) : (warm ? (maxSteepness < 6 ? BlockTypes.MUD.id : BlockTypes.DRY_MUD.id) : (maxSteepness < 6 ? BlockTypes.GRAVEL.id : BlockTypes.STONE.id)), 0));
                                         final int blockType = block >> 16;
                                         if (blockType > 0) {
                                             final int blockSubtype = block & 0xFFFF;
@@ -315,6 +316,7 @@ public class Earth extends WorldType {
                                                         updateLod(x, y, z, false);
                                                         chunk.setBlock(lX, lY, lZ, 5, rand.nextInt(3));
                                                     } else if (rand.nextFloat() < 0.003f) {
+                                                        setAnything = true;
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
                                                         chunk.setBlock(lX, lY, lZ, 18, rand.nextInt(3));
