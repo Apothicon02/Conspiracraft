@@ -11,6 +11,7 @@ import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.*;
 import org.conspiracraft.world.trees.*;
+import org.conspiracraft.world.trees.OakTree;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -354,6 +355,50 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
 
+        final Random islandRand = new Random(World.seed);
+        for (int x = 0; x < size/2; x++) {
+            for (int z = size/2; z < size; z++) {
+//                double roofedForestDist = new Vector2f(0, size*0.67f).distance(x, z);
+//                double unroofedForestness = (Math.clamp(roofedForestDist, 1000, 2000)-1000) / 1000.f;
+//                double roofedForestness = 1-unroofedForestness;
+                double erosion = (noisePipeline.evaluateNoise(x / 1500.d, z / 1500.d)-0.5f)*2;
+                if (erosion > 0.f) {
+                    double stalacites = noisePipeline.evaluateNoise(z / 100.d, x / 100.d);
+                    double simplex = SimplexNoise.noise(x / 400.f, z / 400.f);
+                    int offset = (int) (simplex*20);
+                    int ogMinElevation = (int) (400-(erosion * 200))+offset;
+                    int stalaciteLength = (int) Math.max(0, stalacites*20);
+                    int minElevation = ogMinElevation-stalaciteLength;
+                    int maxElevation = (int) ((Math.sqrt(erosion) * 75) + 300)+offset;
+                    if (maxElevation > minElevation) {
+                        World.setBlock(x, maxElevation, z, BlockTypes.GRASS.id, 0);
+                        float odds = islandRand.nextFloat();
+                        if (odds < 0.02f) {
+                            int maxHeight = islandRand.nextInt(20, 23);
+                            int radius = islandRand.nextInt(13, 17);
+                            int leavesHeight = maxHeight/3;
+                            int count = islandRand.nextInt(3, 6);
+                            WillowTree.generate(islandRand, new Vector2i(BlockTypes.GRASS.id, 0), x, maxElevation+1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
+                        } else if (odds < 0.024f) {
+                            Blob.generate(new Vector2i(BlockTypes.GRASS.id, 0), x, maxElevation+1, z, BlockTypes.CHERRY_LEAVES.id, 0, (int) (2 + (islandRand.nextFloat() * 5)));
+                        } else if (odds < 0.36f) {
+                            World.setBlock(x, maxElevation+1, z, BlockTypes.TALL_GRASS.id, islandRand.nextInt(0, 3));
+                        } else if (odds < 0.4f) {
+                            World.setBlock(x, maxElevation+1, z, BlockTypes.HYDRANGEA.id, islandRand.nextInt(0, 3));
+                        }
+                        for (int y = maxElevation-1; y >= minElevation; y--) {
+                            World.setBlock(x, y, z, erosion+(stalacites/3) > 0.5f ? (erosion+(stalacites*0.75f) > 0.75f ? BlockTypes.MARBLE.id : BlockTypes.DRY_MUD.id) : BlockTypes.DIRT.id, 0);
+                        }
+                        float cloudChance = islandRand.nextFloat();
+                        double cloudNoise = SimplexNoise.noise((x / 200.f)+(z/100.f), ogMinElevation / 75.f);
+                        if (Math.abs(cloudNoise) < 0.05f && cloudChance < 0.34f) {
+                            Cube.generate(new Vector2i(0, 0), x+islandRand.nextInt(-5, 5), minElevation, z+islandRand.nextInt(-5, 5), BlockTypes.CLOUD.id, 0, islandRand.nextInt(1, 3));
+                        }
+                    }
+                }
+            }
+        }
+
         startTime = System.currentTimeMillis();
         threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         pool = Executors.newFixedThreadPool(threads);
@@ -490,20 +535,28 @@ public class Earth extends WorldType {
                                             AcaciaTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.ACACIA_LOG.id, 0, BlockTypes.ACACIA_LEAVES.id, 0);
                                         }
                                     } else {
-                                        if (randomNumber < 0.0004f) {
+                                        if (randomNumber < 0.001f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < featureNoise / 10) {
-                                            int maxHeight = rand.nextInt(25, 32);
-                                            int radius = rand.nextInt(20, 32);
-                                            int leavesHeight = 8;
-                                            int branchChance = 1;
-                                            GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, branchChance);
-                                        } else if (randomNumber > 0.002 && randomNumber < 0.002125f) {
-                                            int maxHeight = rand.nextInt(16) + 12;
-                                            int radius = rand.nextInt(2) + 3;
-                                            boolean overgrown = rand.nextInt(4) == 0;
-                                            JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, 3, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, overgrown);
-                                        } else if (randomNumber > 0.002125 && randomNumber < 0.002175f) {
+                                        } else if (randomNumber < featureNoise / 25) {
+                                            if (randomNumber < 0.0013f) {
+                                                int maxHeight = rand.nextInt(25, 32);
+                                                int radius = rand.nextInt(20, 32);
+                                                int leavesHeight = 8;
+                                                int branchChance = 1;
+                                                GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, branchChance);
+                                            } else {
+                                                int maxHeight = rand.nextInt(24, 30);
+                                                int radius = rand.nextInt(26, 34);
+                                                int count = rand.nextInt(6, 8);
+                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count);
+                                            }
+                                        } else if (randomNumber > 0.002 && randomNumber < 0.00212f) {
+                                            int maxHeight = rand.nextInt(20, 23);
+                                            int radius = rand.nextInt(13, 17);
+                                            int leavesHeight = maxHeight/3;
+                                            int count = rand.nextInt(3, 6);
+                                            WillowTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
+                                        } else if (randomNumber > 0.00212 && randomNumber < 0.00215f) {
                                             int maxHeight = (int) (rand.nextFloat() * 6) + 12;
                                             DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
                                             Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);

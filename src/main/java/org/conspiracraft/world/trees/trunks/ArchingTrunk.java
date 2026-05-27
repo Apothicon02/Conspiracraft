@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-public class BendingTrunk extends Trunk {
+public class ArchingTrunk extends Trunk {
     private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Vector2i block) {
         map.put(pos, block);
     }
     
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, boolean crown, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius) {
         Vector3i origin = new Vector3i(oX, oY, oZ);
         Vector2i wood = new Vector2i(blockType, blockSubType);
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
@@ -36,7 +36,8 @@ public class BendingTrunk extends Trunk {
         for (int trunks = 0; trunks <= extra+1; trunks++) {
             int offsetX = origin.x();
             int offsetZ = origin.z();
-            int maxHeight = origin.y()+(minTrunkHeight < maxTrunkHeight ? random.nextInt(minTrunkHeight, maxTrunkHeight) : maxTrunkHeight);
+            int actualHeight = minTrunkHeight < maxTrunkHeight ? random.nextInt(minTrunkHeight, maxTrunkHeight) : maxTrunkHeight;
+            int maxHeight = origin.y()+actualHeight;
             if (maxHeight > highestHeight) {
                 highestHeight = maxHeight;
             }
@@ -44,19 +45,15 @@ public class BendingTrunk extends Trunk {
                 float bendFactor = ((float) maxHeight /height)*2F;
                 Vector3i pos = new Vector3i(offsetX, height, offsetZ);
                 addToMap(map, pos, wood);
+                double heightFactor = Math.pow((((float)height / maxHeight)-0.4f)*2, 5);
+                if (heightFactor < 0.1f) {
+                    addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
+                    addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
+                    addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                }
                 if (height == maxHeight) {
                     canopies.add(Utils.addVec(pos, 0, 1, 0));
-                    if (crown && height > 12) { //coconuts
-                        addToMap(map, Utils.addVec(pos, 2, 0, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 1, -1, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, 0, 2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, -1, 2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, -2, 0, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, -1, -1, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, 0, -2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, -1, -2), new Vector2i(3, 0));
-                    }
-                } else if (height < maxHeight-4) {
+                } else if (height < maxHeight-4 && random.nextFloat() < heightFactor) {
                     if (trunks == 0 || trunks == 4) {
                         if (random.nextInt(0, 5) < 3-bendFactor) {
                             offsetX += 1;
@@ -85,6 +82,18 @@ public class BendingTrunk extends Trunk {
                         if (random.nextInt(0, 5) < 4-bendFactor) {
                             offsetZ -= 1;
                         }
+                    }
+                    if (heightFactor > 0.66f && random.nextFloat() < 0.25f) {
+                        height--;
+                        if (random.nextFloat() < 0.125f) {
+                            for (int y = height+1; y < height+halfLeafRadius; y++) {
+                                addToMap(map, new Vector3i(offsetX, y, offsetZ), wood);
+                                addToMap(map, new Vector3i(offsetX+1, y, offsetZ+1), wood);
+                            }
+                            canopies.add(Utils.addVec(pos, 0, halfLeafRadius, 0));
+                        }
+                    } else if (heightFactor > 0.25f && random.nextBoolean()) {
+                        height--;
                     }
                     pos = new Vector3i(offsetX, height, offsetZ);
                     addToMap(map, pos, wood);

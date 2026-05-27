@@ -4,6 +4,7 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.BlockPos;
 import org.conspiracraft.world.Directions;
+import org.joml.SimplexNoise;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -51,8 +52,7 @@ public class DroopingCanopy extends Canopy {
                     if (dist <= radius) {
                         int droop = 0;
                         if (dist >= radius-2 && y < minY+(height/2)) {
-                            //droop = (int) (NoiseCoverPlacement.HEIGHT_NOISE.getValue(x, z, false)*3);
-                            droop++;
+                            droop += (int) ((1+SimplexNoise.noise(x/20.f, z/20.f))*2);
                         }
                         int xOgDist = x-treeOrigin.x();
                         int zOgDist = z-treeOrigin.z();

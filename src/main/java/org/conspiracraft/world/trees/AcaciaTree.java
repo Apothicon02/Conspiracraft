@@ -21,7 +21,7 @@ import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class AcaciaTree {
     public static void generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int logType, int logSubType, int leafType, int leafSubType) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = BendingTrunk.generateTrunk(random, x, y, z, false, random.nextInt(4, 6), maxHeight, logType, logSubType);
+        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = BendingTrunk.generateTrunk(random, x, y, z, false, random.nextInt(4, 6), maxHeight, maxHeight, logType, logSubType);
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
