@@ -52,7 +52,7 @@ public class DroopingCanopy extends Canopy {
                     if (dist <= radius) {
                         int droop = 0;
                         if (dist >= radius-2 && y < minY+(height/2)) {
-                            droop += (int) ((1+SimplexNoise.noise(x/20.f, z/20.f))*2);
+                            droop += (int) ((1+SimplexNoise.noise(x/20.f, z/20.f))*4);
                         }
                         int xOgDist = x-treeOrigin.x();
                         int zOgDist = z-treeOrigin.z();

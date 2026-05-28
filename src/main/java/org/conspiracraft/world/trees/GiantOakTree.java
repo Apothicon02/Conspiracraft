@@ -4,6 +4,7 @@ import kotlin.Pair;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.trees.canopies.BlobCanopy;
+import org.conspiracraft.world.trees.canopies.BlobDrippyCanopy;
 import org.conspiracraft.world.trees.trunks.ThickTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -35,7 +36,12 @@ public class GiantOakTree {
                 if (canopyPos.y() < y+(leavesHeight*2)) {
                     eRadius /= 8;
                 }
-                Map<Vector3i, Vector2i> canopy = BlobCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
+                Map<Vector3i, Vector2i> canopy;
+                if (canopyPos.y() >= (y+maxHeight)-(leavesHeight/2)) {
+                    canopy = BlobDrippyCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
+                } else {
+                    canopy = BlobCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
+                }
                 if (!integrateCanopy(canopy, blocks, minCollisionY)) {
                     colliding.set(true);
                     break;

@@ -4,6 +4,7 @@ import kotlin.Pair;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.trees.canopies.BlobCanopy;
+import org.conspiracraft.world.trees.canopies.BlobDrippyCanopy;
 import org.conspiracraft.world.trees.trunks.ArchingTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -30,7 +31,7 @@ public class OakTree {
         if (colliding.get()) {return false;}
         int minCollisionY = y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-            Map<Vector3i, Vector2i> canopy = BlobCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y()-y);
+            Map<Vector3i, Vector2i> canopy = BlobDrippyCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y()-y);
             if (!integrateCanopy(canopy, blocks, minCollisionY)) {
                 colliding.set(true);
                 break;

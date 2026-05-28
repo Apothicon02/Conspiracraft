@@ -28,6 +28,7 @@ public class Biomes {
     public static final Biome POND = create();
     public static final Biome ROOFED_FOREST = create();
     public static final Biome ROOFED_FOREST_HILLS = create();
+    public static final Biome BIRCH_PLAINS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {
@@ -55,7 +56,7 @@ public class Biomes {
         } else if (biome == POND) {
             type = BlockTypes.MUD.id;
             subtype = 0;
-        } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == CHERRY_GROVE || biome == REDWOOD_FOREST || biome == ROOFED_FOREST || biome == ROOFED_FOREST_HILLS) {
+        } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == REDWOOD_FOREST || biome == ROOFED_FOREST || biome == ROOFED_FOREST_HILLS) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = y >= elevation ? 1 : 0;
         } else if (biome == SAVANNA) {
@@ -64,7 +65,7 @@ public class Biomes {
         } else if (biome == BADLANDS) {
             type = BlockTypes.RED_SAND.id;
             subtype = 0;
-        } else if (biome == TROPICAL_ISLAND || biome == PALMY_PLAINS || biome == PALMY_HILLS || biome == RAINFOREST) {
+        } else if (biome == TROPICAL_ISLAND || biome == PALMY_PLAINS || biome == PALMY_HILLS || biome == RAINFOREST || biome == BIRCH_PLAINS || biome == CHERRY_GROVE) {
             type = y >= elevation ? BlockTypes.GRASS.id : BlockTypes.DIRT.id;
             subtype = y >= elevation ? 3 : 0;
         } else {
