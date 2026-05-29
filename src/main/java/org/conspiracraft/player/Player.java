@@ -1,10 +1,7 @@
 package org.conspiracraft.player;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import org.conspiracraft.Main;
+import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -23,7 +20,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Random;
 
+import static org.conspiracraft.Main.timeAccum;
+import static org.conspiracraft.Main.timeMul;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntity;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
@@ -31,6 +31,7 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
+    public Vector3f prevPos = new Vector3f();
     public Vector3f pos = new Vector3f();
     public Vector3f movement = new Vector3f();
     public Vector3f vel = new Vector3f();
@@ -40,13 +41,17 @@ public class Player {
     public AABB playerAABB = new AABB(0, 0, 0,0,0, 0);
 
     public boolean creative = true;
+    public boolean bobbingDir = true;
     public float bobbing = 0f;
+    public float dynamicSpeedOld = 0;
+    public float dynamicSpeed = 0;
     public float jumpStrength = 0.6f;
     public float scale = 1;
     public float baseEyeHeight = 0.86f*scale;
     public float eyeHeight = baseEyeHeight;
     public float baseHeight = eyeHeight+(0.04f*scale);
     public float height = baseHeight;
+    public float bobbingScale = (height*-0.05f)/scale;
     public float width = 0.42f*scale;
     public float baseSpeed = Math.max(0.22f, 0.22f*scale);
     public float speed = baseSpeed;
@@ -55,11 +60,10 @@ public class Player {
     public static Entity entityOn = null;
     public static Vector3f prevEntityOnPos = new Vector3f();
 
+    public static final Random playerRand = new Random();
     public final Source breakingSource;
 
-    public Player() {
-        breakingSource = new Source(pos, 1, 1, 0, 1);
-    }
+    public Player() {breakingSource = new Source(pos, 1, 1, 0, 1);}
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
     public void create() throws IOException {
         inputHandler.init();
@@ -124,15 +128,18 @@ public class Player {
         doSounds();
     }
 
+    public Vector2i blockOn = new Vector2i();
+    public boolean onSolid = true;
     public float friction = 0.75f;
     public void movementTick() {
+        bobbingScale = (height*-0.05f)/scale;
         Vector3f forwardDir = camera.getForwardWithoutPitch();
         Vector3f rightDir = camera.getRightWithoutPitch();
         Vector3f newMovement = new Vector3f();
         if (forward) {newMovement.add(forwardDir);}
-        if (backward) {newMovement.add(forwardDir.negate());}
+        if (backward) {newMovement.sub(forwardDir);}
         if (rightward) {newMovement.add(rightDir);}
-        if (leftward) {newMovement.add(rightDir.negate());}
+        if (leftward) {newMovement.sub(rightDir);}
         if (flying) {
             if (upward) {newMovement.add(0, 1, 0);}
             if (downward) {newMovement.add(0, -1, 0);}
@@ -144,12 +151,37 @@ public class Player {
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin-0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
-        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0);
-        boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
+        blockOn.set(inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0));
+        boolean prevOnSolid = onSolid;
+        onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         if (!onSolid) {
             entityOn = getAnyEntity(footAABB);
             if (entityOn != null) {
                 onSolid = true;
+            }
+        }
+        if (onSolid) {
+            if (!prevOnSolid) { //when landing from a fall
+                bobbing = bobbingScale;
+                bobbingDir = false;
+            } else {
+                float factor = (float) (0.0002f*timeAccum);
+                float actualSpeed = Utils.getInterpolatedFloat(dynamicSpeedOld, dynamicSpeed)*0.02f;
+                float bobbingInc = actualSpeed;//(float) (actualSpeed*(height*factor*1.2f)*timeMul);//((float) (factor*(1.5f+playerRand.nextFloat())))));
+                if (bobbingDir) {
+                    bobbing += bobbingInc;
+                    if (bobbing >= 0) {
+                        bobbing = 0;
+                        bobbingDir = false;
+                    }
+                } else {
+                    bobbing -= bobbingInc;
+                    if (bobbing <= bobbingScale) {
+                        bobbing = bobbingScale;
+                        bobbingDir = true;
+                        stepFx();
+                    }
+                }
             }
         }
         float modifiedGrav = World.worldType.gravity();
@@ -185,6 +217,9 @@ public class Player {
                 }
                 if (upward) {
                     vel.y = Math.max(jumpStrength, vel.y());
+                    bobbing = bobbingScale;
+                    bobbingDir = false;
+                    stepFx();
                 }
             }
         }
@@ -217,9 +252,18 @@ public class Player {
         if (totalVel.x() == 0) {movement.x = 0; vel.x = 0;}
         if (totalVel.y() == 0) {movement.y = 0; vel.y = 0;}
         if (totalVel.z() == 0) {movement.z = 0; vel.z = 0;}
+        prevPos.set(pos);
         pos.set(playerAABB.xMin+width, playerAABB.yMin+height, playerAABB.zMin+width);
+        dynamicSpeedOld = dynamicSpeed;
+        dynamicSpeed = Math.clamp((movement.length()-0.1f)*4, 0, 1);
     }
-
+    public void stepFx() {
+        BlockSFX stepSFX = BlockTypes.blockTypes[blockOn.x()].blockProperties.blockSFX;
+        Source stepSource = new Source(pos, stepSFX.stepGain+((stepSFX.stepGain*playerRand.nextFloat())/3), stepSFX.stepPitch+((stepSFX.stepPitch*playerRand.nextFloat())/3), 0, 0);
+        AudioController.disposableSources.add(stepSource);
+        stepSource.setVel(new Vector3f(vel).add(movement));
+        stepSource.play((stepSFX.stepIds[playerRand.nextInt(stepSFX.stepIds.length-1)]), true);
+    }
     public void movementInputs() {
         if (GUI.inventoryOpen || GUI.pauseMenuOpen) {
             forward = false;

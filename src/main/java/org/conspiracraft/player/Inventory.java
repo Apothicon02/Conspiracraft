@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import kotlin.Pair;
 import org.conspiracraft.items.*;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.conspiracraft.Main;
 
@@ -136,6 +137,7 @@ public class Inventory {
                             }
                         } else if (selSlotId != null) { //dump contents into slot
                             if (addToSlot(selSlotId, cursorItem, cursorItem.amount) == null) {
+                                cursorItem.playSound(Main.player.pos);
                                 cursorItem = null;
                             }
                         } else {
@@ -144,11 +146,13 @@ public class Inventory {
                         }
                     } else if (selSlotId != null) { //dump contents into slot
                         if (addToSlot(selSlotId, cursorItem, cursorItem.amount) == null) {
+                            cursorItem.playSound(Main.player.pos);
                             cursorItem = null;
                         }
                     } else {
                         if (containerSlotId == null) { //only drop if not over container
-                            //World.dropItem(cursorItem);
+                            cursorItem.playSound(Main.player.pos);
+                            World.dropItem(cursorItem);
                         }
                         cursorItem = null;
                     }
@@ -205,6 +209,7 @@ public class Inventory {
                 if (Main.player.inputHandler.leftButtonPressed) {
                     Item item = getItem(slotId);
                     if (Main.timeMsLong-prevInteractTime >= interactionChainDelayLimit && !selectedSlots.contains(slotId) && (item == null || item.type == cursorItem.type)) {
+                        cursorItem.playSound(Main.player.pos);
                         selectedSlots.add(slotId);
                     }
                 } else if (Main.player.inputHandler.rightButtonPressed && prevRMBDeposit != slotId) {

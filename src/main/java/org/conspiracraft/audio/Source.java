@@ -24,7 +24,7 @@ public class Source {
     }
 
     public boolean isPlaying() {
-        return AL10.alGetSourcef(sourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
+        return AL10.alGetSourcei(sourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
     }
 
     public void play(SFX sfx, boolean force) {

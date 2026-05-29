@@ -105,6 +105,9 @@ public class InputHandler {
                     if (isKeyDown(SDL_SCANCODE_T)) {
                         Renderer.reloadAtlas = true;
                     }
+                    if (isKeyDown(SDL_SCANCODE_C)) {
+                        player.creative = !player.creative;
+                    }
                 } else {
                     if (keyRelease(SDL_SCANCODE_F11)) {
                         if (!isFullscreen) {

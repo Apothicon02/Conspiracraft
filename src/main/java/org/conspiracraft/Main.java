@@ -42,6 +42,7 @@ public class Main {
     public static double timeMs = 0;
     public static long timeMsLong = 0;
     public static long currentTick = 0;
+    public static double timeAccum = 0;
     static void main() throws Exception {
         //int l = Chunk.packLight(0, 0, 0, maxSunlightLevel);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -58,7 +59,6 @@ public class Main {
         player = new Player();
         player.create();
         World.load(World.worldType.getWorldPath() + "/");
-        double timeAccum = 0;
         long prevTime = System.nanoTime();
         while (!isClosing) {
             long start = System.nanoTime();

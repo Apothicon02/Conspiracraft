@@ -26,6 +26,10 @@ public class Utils {
     public static Random random = new Random(67);
     public static float randomFloat(float mul) {return random.nextFloat()*mul;}
 
+    public static float absMax(float a, float b) {
+        return Math.max(Math.abs(a), Math.abs(b));
+    }
+
     @SuppressWarnings("removal")
     public static void unmap(MappedByteBuffer buffer) {
         try {

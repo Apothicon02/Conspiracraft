@@ -12,6 +12,7 @@ layout(set = 0, binding = 18) uniform sampler2D colors;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
+
 const int SAMPLE_COUNT = 33;
 
 const float OFFSETS[33] = float[33](
