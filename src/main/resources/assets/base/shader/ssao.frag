@@ -27,20 +27,13 @@ vec3 noise(ivec2 coords) {
 const float PI = 3.141592653589793f;
 vec3 randomVec(ivec2 coords) {
     vec3 noise = noise(coords);
-    vec2 xy = noise.xy * 2.0 - 1.0;
-    float r2 = dot(xy, xy);
-    if (r2 > 1.0) {
-        xy = normalize(xy);
-        r2 = 1.0;
-    }
-    float hemisphere = sqrt(1.0 - r2);
-    float radius = noise.z;
-    return vec3(xy, hemisphere) * radius;
+    vec3 randDir = vec3(normalize(noise.xy * 2.0 - 1.0), noise.z);
+    return randDir;
 }
-const float AO_RADIUS = 2.f;
+const float AO_RADIUS = 1.f;
 const float AO_STRENGTH = 2.f;
-vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.021,  0.183,  0.512), vec3( 0.392,  0.041,  0.734), vec3(-0.221,  0.114,  0.612), vec3( 0.134, -0.287,  0.553), vec3(-0.341, -0.102,  0.487), vec3( 0.287,  0.331,  0.682), vec3(-0.129,  0.412,  0.731), vec3( 0.512, -0.221,  0.612), vec3(-0.412, -0.331,  0.682), vec3( 0.221,  0.129,  0.341), vec3(-0.183, -0.021,  0.512), vec3( 0.331, -0.412,  0.731), vec3(-0.041,  0.392,  0.734), vec3( 0.102, -0.341,  0.487), vec3(-0.287,  0.134,  0.553), vec3( 0.412,  0.287,  0.612), vec3(-0.512, -0.183,  0.512), vec3( 0.341, -0.102,  0.487), vec3(-0.129,  0.221,  0.341), vec3( 0.183,  0.412,  0.731), vec3(-0.392,  0.041,  0.734), vec3( 0.102, -0.512,  0.612), vec3(-0.221, -0.392,  0.682), vec3( 0.331,  0.129,  0.341), vec3(-0.041, -0.183,  0.512), vec3( 0.287, -0.412,  0.731), vec3(-0.134,  0.341,  0.487), vec3( 0.412, -0.287,  0.612), vec3(-0.512,  0.183,  0.512), vec3( 0.341,  0.102,  0.487), vec3(-0.129, -0.221,  0.341), vec3( 0.183, -0.412,  0.731));
-const int KERNEL_SIZE = 8;
+vec3 SSAO_KERNEL[32] = vec3[](vec3( 0.011,  0.015,  0.021), vec3(-0.032,  0.021,  0.039),vec3( 0.025, -0.041,  0.048), vec3(-0.014, -0.062,  0.071),vec3( 0.073,  0.033,  0.082), vec3(-0.089,  0.051,  0.113),vec3( 0.042, -0.112,  0.129), vec3(-0.061, -0.124,  0.142),vec3( 0.141,  0.082,  0.163), vec3(-0.162,  0.094,  0.185),vec3( 0.091, -0.192,  0.211), vec3(-0.115, -0.211,  0.242),vec3( 0.231,  0.141,  0.268), vec3(-0.252,  0.163,  0.291),vec3( 0.152, -0.311,  0.334), vec3(-0.191, -0.332,  0.371),vec3( 0.341,  0.212,  0.412), vec3(-0.372,  0.231,  0.448),vec3( 0.221, -0.442,  0.491), vec3(-0.271, -0.471,  0.532),vec3( 0.462,  0.301,  0.581), vec3(-0.502,  0.322,  0.623), vec3( 0.311, -0.612,  0.672), vec3(-0.382, -0.641,  0.714), vec3( 0.602,  0.411,  0.763), vec3(-0.642,  0.432,  0.812), vec3( 0.412, -0.802,  0.864), vec3(-0.512, -0.831,  0.911), vec3( 0.732,  0.531,  0.942), vec3(-0.782,  0.562,  0.968), vec3( 0.522, -0.951,  0.985), vec3(-0.621, -0.972,  0.998));
+const int KERNEL_SIZE = 32;
 //const float Z_NEAR = 0.01f;
 //const float ASPECT = 1.7977529f;
 //const float FOCAL_LENGTH = 1.3514224f;
@@ -50,29 +43,29 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
     return view.xyz/view.w;
 }
 float getAO(float depth, vec3 normal) {
-    vec3 posVS = reconstructViewPos(uv, depth);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
+    vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.1f);
     vec3 randVec = randomVec(ivec2(gl_FragCoord.xy));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        vec3 sampleVec = TBN*randomVec(ivec2(gl_FragCoord.x+(i*2), gl_FragCoord.y+i));
+        vec3 sampleVec = TBN*SSAO_KERNEL[i];//randomVec(ivec2(gl_FragCoord.x+(i*2), gl_FragCoord.y+i));
         sampleVec = posVS + sampleVec * AO_RADIUS;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
-            float rangeCheck = smoothstep(0.f, 1.f, (AO_RADIUS/AO_STRENGTH)/length(sampleVS-posVS));
-            vec3 viewDirVS = normalize(posVS);
-            bool occluded = sampleVS.z <= sampleVec.z-0.05f;
-            occlusion += (occluded ? AO_STRENGTH : 0.f) * rangeCheck;
+            float rangeCheck = smoothstep(0, 1, AO_RADIUS/(length(posVS-sampleVS)+0.001f));
+            if (sampleVS.z+0.01f < sampleVec.z) {
+                occlusion += AO_STRENGTH*rangeCheck;
+            }
         }
     }
     occlusion = 1.0 - (occlusion / KERNEL_SIZE);
-    return clamp(pow(occlusion, AO_STRENGTH*1.5f), 0.2f, 1);
+    return clamp(pow(occlusion, 2.f), 0.1f, 1);
 }
 void main() {
     vec4 color = texture(ddaColors, uv);

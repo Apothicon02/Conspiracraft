@@ -263,7 +263,7 @@ public class Player {
             Source stepSource = new Source(pos, stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
             AudioController.disposableSources.add(stepSource);
             stepSource.setVel(new Vector3f(vel).add(movement));
-            stepSource.play((stepSFX.stepIds[playerRand.nextInt(stepSFX.stepIds.length - 1)]), true);
+            stepSource.play((stepSFX.stepIds[stepSFX.stepIds.length == 1 ? 0 : playerRand.nextInt(stepSFX.stepIds.length - 1)]), true);
         }
     }
     public void movementInputs() {
