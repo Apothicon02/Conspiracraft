@@ -259,10 +259,12 @@ public class Player {
     }
     public void stepFx() {
         BlockSFX stepSFX = BlockTypes.blockTypes[blockOn.x()].blockProperties.blockSFX;
-        Source stepSource = new Source(pos, stepSFX.stepGain+((stepSFX.stepGain*playerRand.nextFloat())/3), stepSFX.stepPitch+((stepSFX.stepPitch*playerRand.nextFloat())/3), 0, 0);
-        AudioController.disposableSources.add(stepSource);
-        stepSource.setVel(new Vector3f(vel).add(movement));
-        stepSource.play((stepSFX.stepIds[playerRand.nextInt(stepSFX.stepIds.length-1)]), true);
+        if (stepSFX != null && stepSFX.stepIds.length > 0) {
+            Source stepSource = new Source(pos, stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
+            AudioController.disposableSources.add(stepSource);
+            stepSource.setVel(new Vector3f(vel).add(movement));
+            stepSource.play((stepSFX.stepIds[playerRand.nextInt(stepSFX.stepIds.length - 1)]), true);
+        }
     }
     public void movementInputs() {
         if (GUI.inventoryOpen || GUI.pauseMenuOpen) {

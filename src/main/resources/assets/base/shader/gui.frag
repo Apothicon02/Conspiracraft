@@ -37,7 +37,7 @@ const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
     vec4 bgColor = texture(colors, uv);
     vec4 blurredBgColor = texture(blurred, uv);
-    bgColor.rgb*=bgColor.a;//blurredBgColor.a;
+    bgColor.rgb*=bgColor.a;
     bgColor.rgb = mix(bgColor.rgb, blurredBgColor.rgb, clamp(max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))-1, 0, 1)); //bloom
     blurredBgColor.rgb*=blurredBgColor.a;
     //bgColor.rgb = vec3(blurredBgColor.a);

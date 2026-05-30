@@ -71,6 +71,9 @@ public class Renderer {
                     ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
                     ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
                     memFree(noisesBuffer);
+                    ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));
+                    ImageHelper.fillImage(stack, Textures.blueNoise, blueNoiseBuffer);
+                    memFree(blueNoiseBuffer);
                     GUI.fillTexture();
                     EntityTypes.fillTexture(stack);
                     initialized = true;
