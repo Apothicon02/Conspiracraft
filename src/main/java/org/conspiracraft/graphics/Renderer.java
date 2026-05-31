@@ -280,20 +280,20 @@ public class Renderer {
     }
     public static void drawBlur(MemoryStack stack) {
         currentPipeline = pipelines[5];
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth1);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth1.image);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
         currentPipeline = pipelines[6];
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth1);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth1.image);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
     }
     public static void drawGUI(MemoryStack stack) {
         currentPipeline = pipelines[1];
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth1);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
-        unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth1.image);
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
     }
 
     public static void drawClouds() {

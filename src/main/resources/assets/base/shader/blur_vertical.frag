@@ -8,6 +8,8 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     float time;
     ivec2 res;
 } globalUbo;
+layout(set = 0, binding = 10) uniform sampler2D ddaDepth;
+layout(set = 0, binding = 11) uniform sampler2D ddaNormals;
 layout(set = 0, binding = 18) uniform sampler2D colors;
 layout(location = 0) in vec2 uv;
 
@@ -88,13 +90,23 @@ const float WEIGHTS[33] = float[33](
 );
 
 void main() {
+    float baseDepth = texture(ddaDepth, gl_FragCoord.xy/globalUbo.res).r;
+    vec4 baseColor = texture(colors, gl_FragCoord.xy/globalUbo.res);
+    vec4 baseNormal = texture(ddaNormals, gl_FragCoord.xy/globalUbo.res);
     vec4 color = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(0, OFFSETS[i]);
         float weight = WEIGHTS[i];
         vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1))/globalUbo.res;
         vec4 newResult = texture(colors, samplePos);
-        color += newResult * weight;
+        color.rgb += newResult.rgb * weight;
+        float sampleDepth = texture(ddaDepth, samplePos).r;
+        vec4 sampleNormal = texture(ddaNormals, samplePos);
+        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && abs(sampleDepth-baseDepth) < baseDepth*0.01f) {
+            color.a += newResult.a*weight;
+        } else {
+            color.a += baseColor.a*weight;
+        }
     }
     outColor = color;
 }
