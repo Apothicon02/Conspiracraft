@@ -7,6 +7,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.utils.Utils;
@@ -439,10 +440,14 @@ public class World {
         if (empty) {regions[regionIdx] &= ~mask;} else {regions[regionIdx] |= mask;}
     }
 
+    public static final List<Effect> effects = new ArrayList<>();
     public static final List<Entity> entities = new ArrayList<>();
     public static void tick() {
         for (Entity entity : entities) {
             entity.tick();
+        }
+        for (int i = 0; i < effects.size(); i++) {
+            if (effects.get(i).tick()) {effects.remove(i--);}
         }
     }
 }

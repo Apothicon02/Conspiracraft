@@ -1,6 +1,8 @@
 package org.conspiracraft.graphics;
 
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.effects.Effect;
+import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
@@ -249,6 +251,12 @@ public class Renderer {
         //drawClouds();
         drawStars();
         worldType.renderCelestialBodies(stack);
+        for (Effect effect : effects) {
+            if (effect instanceof Lightning lightning) {
+                pushUBO.updateAtlasOffset(new Vector2i(0));
+                drawCube(lightning.matrix, new Vector4f(1.f, 0.95f, 0.1f, 4.f));
+            }
+        }
         pushUBO.updateLayer(0);
         for (Entity entity : entities) {
             pushUBO.updateAtlasOffset(entity.type.atlasOffset);

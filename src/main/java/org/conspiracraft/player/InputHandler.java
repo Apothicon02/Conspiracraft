@@ -1,7 +1,9 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
@@ -19,8 +21,7 @@ import java.nio.ByteBuffer;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.mouseSensitivity;
-import static org.conspiracraft.world.World.chunkSize;
-import static org.conspiracraft.world.World.entities;
+import static org.conspiracraft.world.World.*;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
 import static org.lwjgl.sdl.SDLMouse.*;
@@ -102,10 +103,10 @@ public class InputHandler {
                         entity.vel = player.camera.getForward().mul(2);
                         entities.addLast(entity);
                     }
-                    if (isKeyDown(SDL_SCANCODE_T)) {
+                    if (keyRelease(SDL_SCANCODE_T)) {
                         Renderer.reloadAtlas = true;
                     }
-                    if (isKeyDown(SDL_SCANCODE_C)) {
+                    if (keyRelease(SDL_SCANCODE_C)) {
                         player.creative = !player.creative;
                     }
                 } else {
@@ -137,6 +138,17 @@ public class InputHandler {
                     }
                     if (keyRelease(SDL_SCANCODE_T)) {
                         Main.timeNs += 100000000000L;
+                    }
+                    if (keyRelease(SDL_SCANCODE_L) && !(player.selectedBlock.x() < 0 || player.selectedBlock.y() < 0 || player.selectedBlock.z() < 0)) {
+                        Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, height, 0));
+                        for (int i = 1; i < height; i++) {
+                            lightningPos.sub(0, 1, 0);
+                            Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
+                            if (BlockTypes.blockTypes[block.x()].blocksLight(block)) {
+                                World.effects.add(new Lightning(new Matrix4f().translate(lightningPos.x(), lightningPos.y()+1, lightningPos.z()).scale(1, i, 1)));
+                                break;
+                            }
+                        }
                     }
                     if (keyRelease(SDL_SCANCODE_B)) {
                         Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);

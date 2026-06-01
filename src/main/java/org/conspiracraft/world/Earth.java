@@ -7,6 +7,8 @@ import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.effects.Effect;
+import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.*;
@@ -35,10 +37,8 @@ import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
-    public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0);
-    public static Vector3f sunPos = new Vector3f(0, World.height*2, 0);
-    public static Vector3f prevMunPos = new Vector3f(0, World.height*-2, 0);
-    public static Vector3f munPos = new Vector3f(0, World.height*-2, 0);
+    public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
+            prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
     @Override
     public void renderCelestialBodies(MemoryStack stack) {
         pushUBO.updateLayer(-1);
@@ -52,7 +52,21 @@ public class Earth extends WorldType {
         drawCube(munMatrix, munColor);
     }
     @Override
-    public Vector4f getSkylight() {return sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1);}
+    public Vector4f getSkylight() {
+        nearestLightning.set(-100000);
+        for (Effect effect : effects) {
+            if (effect instanceof Lightning lightning) {
+                Vector3f lightningPos = lightning.pos;
+                if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
+                    nearestLightning.set(lightningPos);
+                }
+            }
+        }
+        if (nearestLightning.x() >= 0) {
+            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+        }
+        return (sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
+    }
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override

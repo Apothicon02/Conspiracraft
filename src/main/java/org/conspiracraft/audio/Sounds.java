@@ -33,4 +33,6 @@ public class Sounds {
     public static SFX METAL_SMALL_PLACE1 = AudioController.loadSound("generic/sound/metal_small_place1.wav");
     public static SFX METAL_SMALL_PLACE2 = AudioController.loadSound("generic/sound/metal_small_place2.wav");
     public static SFX GEARS_TURNING = AudioController.loadSound("generic/sound/gears_turning.wav");
+    public static SFX THUNDER_1 = AudioController.loadSound("generic/sound/thunder_1.wav");
+    public static SFX THUNDER_2 = AudioController.loadSound("generic/sound/thunder_2.wav");
 }
