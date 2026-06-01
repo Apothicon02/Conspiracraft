@@ -57,7 +57,7 @@ public class PhysicsHelper {
         float travelled = 0;
         for (int i = 0; i < maxDist*2; i++) {
             if (!World.inBounds(ddaPos.x(), ddaPos.y(), ddaPos.z())) {return new DDAResult(prevDDAPos, ddaPos, false);}
-            if (!BlockTypes.blockTypes[World.getBlock(ddaPos).x()].blockProperties.isFluidReplaceable) {return new DDAResult(prevDDAPos, ddaPos, true);}
+            if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
 

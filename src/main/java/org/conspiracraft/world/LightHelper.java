@@ -43,7 +43,7 @@ public class LightHelper {
         }
     }
 
-    public static void iterateLightQueue() throws InterruptedException {
+    public static void iterateLightQueue() {
         while (!lightQueue.isEmpty()) {
             Vector3i pos = lightQueue.pollFirst();
             if (inBounds(1, pos.x(), pos.y(), pos.z())) {
@@ -57,8 +57,8 @@ public class LightHelper {
         dirtyChunks.clear();
     }
     public static void iterateLightQueueMultithreaded() throws InterruptedException {
-        int threads = Runtime.getRuntime().availableProcessors();
-        ArrayDeque<Vector3i>[] queues = new ArrayDeque[threads];
+        final int threads = Runtime.getRuntime().availableProcessors();
+        final ArrayDeque<Vector3i>[] queues = new ArrayDeque[threads];
         for (int t = 0; t < threads; t++) {
             queues[t] = new ArrayDeque<>();
         }
@@ -67,8 +67,8 @@ public class LightHelper {
             queues[i++ % threads].add(pos);
         }
         lightQueue.clear();
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-        for (ArrayDeque<Vector3i> queue : queues) {
+        final ExecutorService pool = Executors.newFixedThreadPool(threads);
+        for (final ArrayDeque<Vector3i> queue : queues) {
             pool.submit(() -> {
                 while (!queue.isEmpty()) {
                     Vector3i pos = queue.pollFirst();
@@ -132,8 +132,8 @@ public class LightHelper {
         return BlockTypes.blockTypes[block.x()].blocksLight(block);
     }
 
-    public static ArrayDeque<lightNode> removalQueue = new ArrayDeque<>();
-    public static HashSet<Vector3i> removalSet = new HashSet<>();
+    public static final ArrayDeque<lightNode> removalQueue = new ArrayDeque<>();
+    public static final HashSet<Vector3i> removalSet = new HashSet<>();
     public static void recalculateLight(Vector3i ogPos, Light light) {
         recalculateLight(ogPos, light.r(), light.g(), light.b(), light.s());
     }
@@ -152,7 +152,7 @@ public class LightHelper {
                             new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
                             new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
                     }) {
-                        if (!removalSet.contains(neighborPos)) {
+                        if (removalSet.add(neighborPos)) {
                             lightQueue.add(neighborPos);
                             int packedCp = World.packChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
                             Chunk chunk = chunks[packedCp];
@@ -161,7 +161,6 @@ public class LightHelper {
                             if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
                                     (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
                                 removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
-                                removalSet.add(neighborPos);
                             }
                         }
                     }

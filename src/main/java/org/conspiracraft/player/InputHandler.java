@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
@@ -144,7 +145,7 @@ public class InputHandler {
                         for (int i = 1; i < height; i++) {
                             lightningPos.sub(0, 1, 0);
                             Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
-                            if (BlockTypes.blockTypes[block.x()].blocksLight(block)) {
+                            if (BlockTypes.blockTypes[block.x()].blocksLight(block) || BlockTags.leaves.tagged.contains(block.x())) {
                                 World.effects.add(new Lightning(new Matrix4f().translate(lightningPos.x(), lightningPos.y()+1, lightningPos.z()).scale(1, i, 1)));
                                 break;
                             }

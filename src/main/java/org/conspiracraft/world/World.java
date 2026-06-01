@@ -334,9 +334,12 @@ public class World {
     public static final ArrayDeque<Vector3i> updateQueue = new ArrayDeque<>();
     public static final HashSet<Vector3i> updateSet = new HashSet<>();
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
-        setBlock(x, y, z, type, subType);
+        setBlock(x, y, z, type, subType, true);
     }
     public static void setBlock(int x, int y, int z, int type, int subType) {
+        setBlock(x, y, z, type, subType, true);
+    }
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -352,12 +355,14 @@ public class World {
             updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         }
         if (!generating) {
-            int pos = Chunk.condenseLocalPos(lX, lY, lZ);
-            Light oldLight = chunk.getLight(pos);
-            chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
-            updateHeightmap(x, y, z);
-            LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
-            if (!updateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
+            if (updateLighting) {
+                int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+                Light oldLight = chunk.getLight(pos);
+                chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+                updateHeightmap(x, y, z);
+                LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+            }
+            if (!updateSet.contains(chunkPos)) {
                 updateSet.add(chunkPos);
                 updateQueue.addLast(chunkPos);
             }

@@ -4,23 +4,70 @@ import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.audio.Source;
+import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Lightning extends Effect {
     public int lifetime = 0;
-    public Vector3f pos = new Vector3f();
+    public final Vector3f pos = new Vector3f();
+    public final Vector3i intPos = new Vector3i();
     public Lightning(Matrix4f matrix) {
         super(matrix);
         matrix.getTranslation(pos);
-        matrix.setTranslation(pos.x(), pos.y()+matrix.getScale(new Vector3f()).y()/2.f, pos.z());
+        intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());
+        matrix.setTranslation(pos.x()+0.5f, pos.y()+matrix.getScale(new Vector3f()).y()/2.f, pos.z()+0.5f);
         SFX sfx = Math.random() < 0.5f ? Sounds.THUNDER_1 : Sounds.THUNDER_2;
         Source source = new Source(pos, 2.f, 1.f, 0, 0);
         AL11.alSourcef(source.sourceID, AL10.AL_ROLLOFF_FACTOR, 0.3f);
         source.play(sfx);
         AudioController.disposableSources.add(source);
+
+        Vector3i iPos = new Vector3i(intPos);
+        int blockStruck = World.getBlock(iPos).x();
+        removalQueue.add(iPos);
+        removalSet.add(iPos);
+        while (!removalQueue.isEmpty()) {
+            incinerate(blockStruck, removalQueue.poll());
+        }
+        Vector3i[] horizontalPositons = new Vector3i[removalSet.size()];
+        AtomicInteger size = new AtomicInteger(-1);
+        removalSet.iterator().forEachRemaining(rPos -> {
+            World.setBlock(rPos.x(), rPos.y(), rPos.z(), 0, 0, false);
+            horizontalPositons[size.addAndGet(1)] = rPos;
+        });
+        for (int i = 0; i <= size.get(); i++) {
+            Vector3i hPos = horizontalPositons[i];
+            World.updateHeightmap(hPos.x(), 0, hPos.z());
+        }
+    }
+
+    public final int RADIUS = 3000;
+    public final ArrayDeque<Vector3i> removalQueue = new ArrayDeque<>();
+    public final HashSet<Vector3i> removalSet = new HashSet<>();
+    public void incinerate(int blockStruck, Vector3i iPos) {
+        int dx = iPos.x - intPos.x(), dy = iPos.y - intPos.y(), dz = iPos.z - intPos.z();
+        if (dx * dx + ((dy * dy)/2) + dz * dz <= RADIUS) {
+            if (World.getBlock(iPos).x() == blockStruck) {
+                for (Vector3i nPos : new Vector3i[]{
+                        new Vector3i(iPos.x, iPos.y, iPos.z + 1), new Vector3i(iPos.x + 1, iPos.y, iPos.z), new Vector3i(iPos.x, iPos.y, iPos.z - 1),
+                        new Vector3i(iPos.x - 1, iPos.y, iPos.z), new Vector3i(iPos.x, iPos.y + 1, iPos.z), new Vector3i(iPos.x, iPos.y - 1, iPos.z)
+                }) {
+                    if (removalSet.add(nPos)) {
+                        removalQueue.add(nPos);
+                    }
+                }
+            }
+        }
     }
 
     @Override

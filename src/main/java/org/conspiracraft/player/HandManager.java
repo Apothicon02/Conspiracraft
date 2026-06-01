@@ -12,7 +12,6 @@ import org.conspiracraft.Window;
 import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.drops.BlockDrops;
-import org.conspiracraft.blocks.types.BlockProperties;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
