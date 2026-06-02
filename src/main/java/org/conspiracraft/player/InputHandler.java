@@ -129,49 +129,53 @@ public class InputHandler {
                             window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
                         }
                     }
-                    if (keyRelease(SDL_SCANCODE_TAB)) {
-                        GUI.inventoryOpen = !GUI.inventoryOpen;
-                    }
+
                     if (keyRelease(SDL_SCANCODE_F1)) {
                         GUI.showUI = !GUI.showUI;
                     }
-                    if (keyRelease(SDL_SCANCODE_Q)) {
-                        Item item = player.inv.getSelectedItem(false);
-                        if (item != null) {
-                            World.dropItem(item);
-                            item.amount(0).type(ItemTypes.AIR);
+
+                    if (!GUI.pauseMenuOpen) {
+                        if (keyRelease(SDL_SCANCODE_TAB)) {
+                            GUI.inventoryOpen = !GUI.inventoryOpen;
                         }
-                    }
-                    if (keyRelease(SDL_SCANCODE_T)) {
-                        Main.timeNs += 100000000000L;
-                    }
-                    if (keyRelease(SDL_SCANCODE_F)) {
-                        FireballEntity entity = new FireballEntity(EntityTypes.FIREBALL, new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)), (float)(Math.random()*-0.1f));
-                        entity.vel = player.camera.getForward().mul(2).add(player.vel);
-                        entitiesAddQueue.addLast(entity);
-                        Source source = new Source(entity.matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
-                        source.play(Sounds.FIREBALL_QUICK);
-                        AudioController.disposableSources.add(source);
-                        entity.sfxSource = source;
-                    }
-                    if (keyRelease(SDL_SCANCODE_L) && !(player.selectedBlock.x() < 0 || player.selectedBlock.y() < 0 || player.selectedBlock.z() < 0)) {
-                        Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, height, 0));
-                        for (int i = 1; i < height; i++) {
-                            lightningPos.sub(0, 1, 0);
-                            Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
-                            if (BlockTypes.blockTypes[block.x()].blocksLight(block) || BlockTags.leaves.tagged.contains(block.x())) {
-                                World.effects.add(new Lightning(new Matrix4f().translate(lightningPos.x(), lightningPos.y()+1, lightningPos.z()).scale(1, i, 1)));
-                                break;
+                        if (keyRelease(SDL_SCANCODE_Q)) {
+                            Item item = player.inv.getSelectedItem(false);
+                            if (item != null) {
+                                World.dropItem(item);
+                                item.amount(0).type(ItemTypes.AIR);
                             }
                         }
-                    }
-                    if (keyRelease(SDL_SCANCODE_B)) {
-                        Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);
-                        for (int z = startPos.z(); z < startPos.z()+chunkSize; z++) {
-                            for (int x = startPos.x(); x < startPos.x() + chunkSize; x++) {
-                                for (int y = startPos.y(); y < startPos.y() + chunkSize; y++) {
-                                    if ((z == startPos.z() || z == startPos.z()+chunkSize-1) || (x == startPos.x() || x == startPos.x()+chunkSize-1) || (y == startPos.y() || y == startPos.y()+chunkSize-1)) {
-                                        World.setBlock(x, y, z, 1, 15);
+                        if (keyRelease(SDL_SCANCODE_T)) {
+                            Main.timeNs += 100000000000L;
+                        }
+                        if (keyRelease(SDL_SCANCODE_F)) {
+                            FireballEntity entity = new FireballEntity(EntityTypes.FIREBALL, new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)), (float)(Math.random()*-0.1f));
+                            entity.vel = player.camera.getForward().mul(2).add(player.vel);
+                            entitiesAddQueue.addLast(entity);
+                            Source source = new Source(entity.matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
+                            source.play(Sounds.FIREBALL_QUICK);
+                            AudioController.disposableSources.add(source);
+                            entity.sfxSource = source;
+                        }
+                        if (keyRelease(SDL_SCANCODE_L) && !(player.selectedBlock.x() < 0 || player.selectedBlock.y() < 0 || player.selectedBlock.z() < 0)) {
+                            Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, height, 0));
+                            for (int i = 1; i < height; i++) {
+                                lightningPos.sub(0, 1, 0);
+                                Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
+                                if (BlockTypes.blockTypes[block.x()].blocksLight(block) || BlockTags.leaves.tagged.contains(block.x())) {
+                                    World.effects.add(new Lightning(new Matrix4f().translate(lightningPos.x(), lightningPos.y()+1, lightningPos.z()).scale(1, i, 1)));
+                                    break;
+                                }
+                            }
+                        }
+                        if (keyRelease(SDL_SCANCODE_B)) {
+                            Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);
+                            for (int z = startPos.z(); z < startPos.z()+chunkSize; z++) {
+                                for (int x = startPos.x(); x < startPos.x() + chunkSize; x++) {
+                                    for (int y = startPos.y(); y < startPos.y() + chunkSize; y++) {
+                                        if ((z == startPos.z() || z == startPos.z()+chunkSize-1) || (x == startPos.x() || x == startPos.x()+chunkSize-1) || (y == startPos.y() || y == startPos.y()+chunkSize-1)) {
+                                            World.setBlock(x, y, z, 1, 15);
+                                        }
                                     }
                                 }
                             }
