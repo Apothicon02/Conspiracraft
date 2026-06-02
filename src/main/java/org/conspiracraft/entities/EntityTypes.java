@@ -33,7 +33,9 @@ public class EntityTypes {
     public static EntityType
             MUN = create(new EntityType("celestial/texture/mun")),
             COW = create(new EntityType("animal/texture/cow")),
-            SHEEP = create(new EntityType("animal/texture/sheep"));
+            SHEEP = create(new EntityType("animal/texture/sheep")),
+            FIREBALL = create(new EntityType("magic/texture/fireball")),
+            ASH = create(new EntityType("misc/texture/ash"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);

@@ -5,9 +5,11 @@ import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.entities.AshEntity;
+import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.entities.FireballEntity;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.openal.AL10;
@@ -16,6 +18,8 @@ import org.lwjgl.openal.AL11;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.conspiracraft.world.World.entitiesAddQueue;
 
 public class Lightning extends Effect {
     public int lifetime = 0;
@@ -34,21 +38,36 @@ public class Lightning extends Effect {
 
         Vector3i iPos = new Vector3i(intPos);
         int blockStruck = World.getBlock(iPos).x();
-        removalQueue.add(iPos);
-        removalSet.add(iPos);
-        while (!removalQueue.isEmpty()) {
-            incinerate(blockStruck, removalQueue.poll());
+        if (BlockTags.leaves.tagged.contains(blockStruck)) {
+            Source sizzleSource = new Source(new Vector3f(pos.x(), pos.y(), pos.z()), 1.f, 1.f, 0, 0);
+            sizzleSource.play(Math.random() < 0.5f ? Sounds.SIZZLE1 : Sounds.SIZZLE2);
+            AudioController.disposableSources.add(sizzleSource);
+            spawnAsh(iPos);
+            removalQueue.add(iPos);
+            removalSet.add(iPos);
+            while (!removalQueue.isEmpty()) {
+                incinerate(blockStruck, removalQueue.poll());
+            }
+            Vector3i[] horizontalPositons = new Vector3i[removalSet.size()];
+            AtomicInteger size = new AtomicInteger(-1);
+            removalSet.iterator().forEachRemaining(rPos -> {
+                World.setBlock(rPos.x(), rPos.y(), rPos.z(), 0, 0, false);
+                horizontalPositons[size.addAndGet(1)] = rPos;
+                if (Math.random() < 0.001f) {
+                    spawnAsh(rPos);
+                }
+            });
+            for (int i = 0; i <= size.get(); i++) {
+                Vector3i hPos = horizontalPositons[i];
+                World.updateHeightmap(hPos.x(), 0, hPos.z());
+            }
         }
-        Vector3i[] horizontalPositons = new Vector3i[removalSet.size()];
-        AtomicInteger size = new AtomicInteger(-1);
-        removalSet.iterator().forEachRemaining(rPos -> {
-            World.setBlock(rPos.x(), rPos.y(), rPos.z(), 0, 0, false);
-            horizontalPositons[size.addAndGet(1)] = rPos;
-        });
-        for (int i = 0; i <= size.get(); i++) {
-            Vector3i hPos = horizontalPositons[i];
-            World.updateHeightmap(hPos.x(), 0, hPos.z());
-        }
+    }
+
+    public void spawnAsh(Vector3i pos) {
+        AshEntity ashEntity = new AshEntity(EntityTypes.ASH, new Matrix4f().translate(pos.x(), pos.y(), pos.z()), (float) (Math.random() * -0.1f));
+        ashEntity.vel = new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+        entitiesAddQueue.addLast(ashEntity);
     }
 
     public final int RADIUS = 3000;

@@ -1,10 +1,14 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.audio.SFX;
+import org.conspiracraft.audio.Sounds;
+import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.effects.Lightning;
+import org.conspiracraft.entities.FireballEntity;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
@@ -15,6 +19,7 @@ import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.Math;
@@ -96,13 +101,13 @@ public class InputHandler {
                         r = (float) Math.toRadians(45);
                     }
                     if (keyRelease(SDL_SCANCODE_X)) {
-                        entities.removeLast();
+                        entitiesAddQueue.removeLast();
                     } else if (keyRelease(SDL_SCANCODE_V)) {
                         AnimalEntity entity = new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)).rotateXYZ(r, r, 0),
                                 (float)(Math.random()*-0.1f));
-                        entity.vel = player.camera.getForward().mul(2);
-                        entities.addLast(entity);
+                        entity.vel = player.camera.getForward().mul(2).add(player.vel);
+                        entitiesAddQueue.addLast(entity);
                     }
                     if (keyRelease(SDL_SCANCODE_T)) {
                         Renderer.reloadAtlas = true;
@@ -139,6 +144,15 @@ public class InputHandler {
                     }
                     if (keyRelease(SDL_SCANCODE_T)) {
                         Main.timeNs += 100000000000L;
+                    }
+                    if (keyRelease(SDL_SCANCODE_F)) {
+                        FireballEntity entity = new FireballEntity(EntityTypes.FIREBALL, new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)), (float)(Math.random()*-0.1f));
+                        entity.vel = player.camera.getForward().mul(2).add(player.vel);
+                        entitiesAddQueue.addLast(entity);
+                        Source source = new Source(entity.matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
+                        source.play(Sounds.FIREBALL_QUICK);
+                        AudioController.disposableSources.add(source);
+                        entity.sfxSource = source;
                     }
                     if (keyRelease(SDL_SCANCODE_L) && !(player.selectedBlock.x() < 0 || player.selectedBlock.y() < 0 || player.selectedBlock.z() < 0)) {
                         Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, height, 0));

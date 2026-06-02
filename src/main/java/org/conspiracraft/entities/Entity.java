@@ -25,7 +25,7 @@ public class Entity {
     public Entity(EntityType type, Matrix4f matrix, float scaleOffset) {
         this.type = type;
         this.matrix = matrix;
-        if (scaleOffset > Float.MIN_VALUE) {
+        if (scaleOffset != Float.MAX_VALUE) {
             this.matrix.scale(this.type.size + scaleOffset);
         }
         Vector3f scale = new Vector3f();
@@ -37,6 +37,7 @@ public class Entity {
         vel = new Vector3f();
     }
 
+    public boolean playerCollidesWith() {return true;}
     public static Entity load(IntBuffer data) {
         EntityType entityType = EntityTypes.entityTypeMap.get(data.get());
         float[] matrixData = new float[16];
@@ -44,7 +45,7 @@ public class Entity {
             matrixData[cI] = data.get()/1000f;
         }
         Matrix4f newMatrix = new Matrix4f().set(matrixData);
-        Entity entity = new Entity(entityType, newMatrix, Float.MIN_VALUE);
+        Entity entity = new Entity(entityType, newMatrix, Float.MAX_VALUE);
         entity.vel.set(data.get(), data.get(), data.get()).div(1000);
         return entity;
     }
@@ -65,7 +66,7 @@ public class Entity {
     }
 
     public Vector3f prevPos = new Vector3f();
-    public void tick() {
+    public boolean tick() {
         matrix.getTranslation(prevPos);
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
@@ -74,7 +75,7 @@ public class Entity {
         Vector3f pos = new Vector3f(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
-        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0);
+        Vector2i blockOn = inBounds ? PhysicsHelper.getAnyBlock(footAABB).block() : new Vector2i(0);
         boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         float friction = 0.99f; //1-airFriction=maxFriction
         if (onSolid) {
@@ -87,5 +88,6 @@ public class Entity {
         }
         PhysicsHelper.move(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
         matrix.setTranslation(aabb.xMin+scale.x(), aabb.yMin+scale.y(), aabb.zMin+scale.z());
+        return false;
     }
 }

@@ -242,7 +242,7 @@ public class World {
                 while (entitiesData.position() < entitiesData.capacity()) {
                     int itemDataLength = entitiesData.get();
                     if (itemDataLength > 0) {
-                        entities.add(Entity.load(entitiesData));
+                        entitiesAddQueue.add(Entity.load(entitiesData));
                     }
                 }
                 Utils.unmap(data);
@@ -445,12 +445,14 @@ public class World {
         if (empty) {regions[regionIdx] &= ~mask;} else {regions[regionIdx] |= mask;}
     }
 
+    public static final ArrayDeque<Entity> entitiesAddQueue = new ArrayDeque<>();
     public static final List<Effect> effects = new ArrayList<>();
-    public static final List<Entity> entities = new ArrayList<>();
+    public static final List<Entity> entities = new ArrayList<>(); //never add to this, add to the queue instead.
     public static void tick() {
-        for (Entity entity : entities) {
-            entity.tick();
+        for (int i = 0; i < entities.size(); i++) {
+            if(entities.get(i).tick()) {entities.remove(i--);}
         }
+        while (!entitiesAddQueue.isEmpty()) {entities.add(entitiesAddQueue.poll());}
         for (int i = 0; i < effects.size(); i++) {
             if (effects.get(i).tick()) {effects.remove(i--);}
         }

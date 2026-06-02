@@ -35,4 +35,8 @@ public class Sounds {
     public static SFX GEARS_TURNING = AudioController.loadSound("generic/sound/gears_turning.wav");
     public static SFX THUNDER_1 = AudioController.loadSound("generic/sound/thunder_1.wav");
     public static SFX THUNDER_2 = AudioController.loadSound("generic/sound/thunder_2.wav");
+    public static SFX FIREBALL = AudioController.loadSound("generic/sound/fireball.wav");
+    public static SFX FIREBALL_SLOW = AudioController.loadSound("generic/sound/fireball_slow.wav");
+    public static SFX FIREBALL_QUICK = AudioController.loadSound("generic/sound/fireball_quick.wav");
+    public static SFX ASH = AudioController.loadSound("generic/sound/ash.wav");
 }

@@ -1,6 +1,5 @@
 package org.conspiracraft.physics;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.utils.Utils;
@@ -14,9 +13,38 @@ import static org.conspiracraft.utils.Utils.sign;
 import static org.conspiracraft.world.World.entities;
 
 public class PhysicsHelper {
-    public static float voxelSize = 0.125f;
-    public static Vector2i getAnyBlock(AABB aabb) {
+    public static float voxelSize = 1;//0.125f;
+    public record BlockResult(float x, float y, float z, Vector2i block){};
+    public static BlockResult getClosestBlock(AABB aabb, Vector3f ref) {
+        //final float mX = aabb.xMin+((aabb.xMax-aabb.xMin)/2), mY = aabb.yMin+((aabb.yMax-aabb.yMin)/2), mZ = aabb.zMin+((aabb.zMax-aabb.zMin)/2);
+        BlockResult closestBlock = null;
+        float closestDist = Float.MAX_VALUE;
+        BlockResult closestBlockUncollidable = null;
+        float closestUncollidableDist = Float.MAX_VALUE;
+        for (float x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
+            for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
+                for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
+                    float dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
+                    float dist = (dX*dX)+(dY*dY)+(dZ*dZ);
+                    Vector2i blockIn = World.getBlock(x, y, z);
+                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isCollidable) {
+                        AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
+                        if (blockAABB.intersects(aabb) && dist < closestDist) {
+                            closestDist = dist;
+                            closestBlock = new BlockResult(x, y, z, blockIn);
+                        }
+                    } else if (blockIn.x() > 0 && dist < closestUncollidableDist) {
+                        closestUncollidableDist = dist;
+                        closestBlockUncollidable = new BlockResult(x, y, z, blockIn);
+                    }
+                }
+            }
+        }
+        if (closestBlock != null) {return closestBlock;} else if (closestBlockUncollidable != null) {return closestBlockUncollidable;} else {return null;}
+    }
+    public static BlockResult getAnyBlock(AABB aabb) {
         Vector2i block = new Vector2i();
+        float hX = -1, hY = -1, hZ = -1;
         for (float x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
             for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
                 for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
@@ -24,19 +52,28 @@ public class PhysicsHelper {
                     if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isCollidable) {
                         AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
                         if (blockAABB.intersects(aabb)) {
-                            return blockIn;
+                            return new BlockResult(x, y, z, blockIn);
                         }
-                    } else if (blockIn.x() > block.x()) {
+                    } else if (blockIn.x() > 0) {
+                        hX = x; hY = y; hZ = z;
                         block.set(blockIn); //return non-collidable block if none are collidable
                     }
                 }
             }
         }
-        return block;
+        return new BlockResult(hX, hY, hZ, block);
     }
     public static Entity getAnyEntity(AABB aabb) {
         for (Entity entity : entities) {
-            if (aabb.intersects(entity.aabb)) {
+            if (entity.playerCollidesWith() && aabb.intersects(entity.aabb)) {
+                return entity;
+            }
+        }
+        return null;
+    }
+    public static Entity getAnyEntityPlayerCollidesWith(AABB aabb) {
+        for (Entity entity : entities) {
+            if (entity.playerCollidesWith() && aabb.intersects(entity.aabb)) {
                 return entity;
             }
         }

@@ -37,6 +37,9 @@ public class AABB {
         if (z > 0) {zMax += z;} else {zMax += z;}
         return this;
     }
+    public AABB grow(float xyz) {
+        return grow(xyz, xyz, xyz);
+    }
     public AABB grow(float x, float y, float z) {
         this.xMin -= x;
         this.xMax += x;

@@ -23,8 +23,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static org.conspiracraft.Main.timeAccum;
-import static org.conspiracraft.Main.timeMul;
-import static org.conspiracraft.physics.PhysicsHelper.getAnyEntity;
+import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -151,11 +150,11 @@ public class Player {
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin-0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
-        blockOn.set(inBounds ? PhysicsHelper.getAnyBlock(footAABB) : new Vector2i(0));
+        blockOn.set(inBounds ? PhysicsHelper.getAnyBlock(footAABB).block() : new Vector2i(0));
         boolean prevOnSolid = onSolid;
         onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         if (!onSolid) {
-            entityOn = getAnyEntity(footAABB);
+            entityOn = getAnyEntityPlayerCollidesWith(footAABB);
             if (entityOn != null) {
                 onSolid = true;
             }
@@ -242,7 +241,9 @@ public class Player {
         Vector3f totalVel = new Vector3f(movement).add(vel).add(entityMoveFactor);
         ArrayList<AABB> aabbs = new ArrayList<>();
         for (Entity entity : World.entities) {
-            aabbs.add(entity.aabb);
+            if (entity.playerCollidesWith()) {
+                aabbs.add(entity.aabb);
+            }
         }
         if (sprinting && !flying) {
             PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs);
