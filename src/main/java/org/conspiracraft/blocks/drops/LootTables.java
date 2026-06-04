@@ -2,7 +2,7 @@ package org.conspiracraft.blocks.drops;
 
 import kotlin.Pair;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.items.ItemTypes;
+import org.conspiracraft.items.types.ItemTypes;
 
 import java.util.Map;
 

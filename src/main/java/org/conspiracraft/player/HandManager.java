@@ -3,10 +3,7 @@ package org.conspiracraft.player;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.utils.Utils;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
-import org.joml.Vector4i;
+import org.joml.*;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.BlockSFX;
@@ -16,6 +13,8 @@ import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.world.World;
+
+import java.lang.Math;
 
 import static org.conspiracraft.Main.player;
 
@@ -29,6 +28,8 @@ public class HandManager {
     public static float tiltTarget = 0;
     public static int tiltDelay = 0;
     public static Vector4i blockStartedBreaking = new Vector4i();
+    public static long delayStart = 0;
+    public static int delay = 0;
 
     public static void useHands(Window window) {
         if (player.inputHandler.scroll.y > 0) {
@@ -53,10 +54,14 @@ public class HandManager {
             tiltTarget = 0;
         }
         DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 1000);
-        if (ddaResult != null && ddaResult.hitAnything) {
+        if (Main.timeMsLong - delayStart >= delay) {
+            delayStart = Main.timeMsLong;
+            delay = selectedItem == null ? 0 : selectedItem.use(ddaResult);
+        }
+        if (delay <= 0 && ddaResult != null && ddaResult.hitAnything) {
             player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
             player.prevSelectedBlock.set(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z());
-            if ((!player.creative || (Main.timeMsLong - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || Main.timeMsLong - lastBlockPlaced >= 200)) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
+            if (Main.timeMsLong-delayStart >= delay && ((!player.creative || (Main.timeMsLong - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || Main.timeMsLong - lastBlockPlaced >= 200))) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
                 if (lmbDown || mmbDown || rmbDown) {
                     Vector2i handBlock = new Vector2i(blockToPlace.x, blockToPlace.y);
                     BlockType handType = BlockTypes.blockTypes[blockToPlace.x];
@@ -76,46 +81,42 @@ public class HandManager {
                             if (lmbDown) {
                                 Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
                                 BlockType breakingType = BlockTypes.blockTypes[blockBreaking.x];
-                                if (!player.crouching) {
-                                    Vector3i intBreakingPos = new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
-                                    boolean canBreak = breakingType.whilePlayerBreaking(intBreakingPos, blockBreaking, handBlock);
-                                    if (canBreak && !BlockTags.cantBreakBlocks.tagged.contains(blockToPlace.x)) {
-                                        if (!player.creative) {
-                                            boolean sameBlock = blockStartedBreaking.x == (int)(pos.x) && blockStartedBreaking.y == (int)(pos.y) && blockStartedBreaking.z == (int)(pos.z);
-                                            if (sameBlock) {
-                                                if (blockStartedBreaking.w > 0) {
-                                                    canBreak = false;
-                                                    blockStartedBreaking.sub(0, 0, 0, (int) ((Main.timeMsLong-lastBlockBreakCheck)*breakingType.getTTBSpeed(blockToPlace.x)));
-                                                    lastBlockBreakCheck = Main.timeMsLong;
-                                                }
-                                            } else {
+                                Vector3i intBreakingPos = new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
+                                boolean canBreak = breakingType.whilePlayerBreaking(intBreakingPos, blockBreaking, handBlock);
+                                if (canBreak && !BlockTags.cantBreakBlocks.tagged.contains(blockToPlace.x)) {
+                                    if (!player.creative) {
+                                        boolean sameBlock = blockStartedBreaking.x == (int) (pos.x) && blockStartedBreaking.y == (int) (pos.y) && blockStartedBreaking.z == (int) (pos.z);
+                                        if (sameBlock) {
+                                            if (blockStartedBreaking.w > 0) {
                                                 canBreak = false;
+                                                blockStartedBreaking.sub(0, 0, 0, (int) ((Main.timeMsLong - lastBlockBreakCheck) * breakingType.getTTBSpeed(blockToPlace.x)));
                                                 lastBlockBreakCheck = Main.timeMsLong;
-                                                blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, breakingType.getTTB());
-                                                BlockSFX sfx = breakingType.blockProperties.blockSFX;
-                                                player.breakingSource.setPos(pos);
-                                                player.breakingSource.setGain(sfx.placeGain);
-                                                player.breakingSource.setPitch(sfx.placePitch*(1+(Math.abs(1-breakingType.getTTBSpeed(blockToPlace.x))*0.8f)), 0);
-                                                player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
                                             }
-                                        }
-                                        if (canBreak) {
-                                            if (!player.creative) {
-                                                for (Item item : BlockDrops.getDrops(blockBreaking)) {
-                                                    World.items.add(item.moveTo(new Vector3f((float)(Math.floor(pos.x())+(Math.clamp(pos.x-Math.floor(pos.x), 0.2, 0.8)/2)),
-                                                            (float)(Math.floor(pos.y())+(Math.clamp(pos.y-Math.floor(pos.y), 0.2, 0.8)/2)),
-                                                            (float)(Math.floor(pos.z())+(Math.clamp(pos.z-Math.floor(pos.z), 0.2, 0.8)/2)))));
-                                                }
-                                            }
-                                            blockStartedBreaking.set(0, 0, 0, 0);
-                                            player.breakingSource.stop();
-                                            //World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                            World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                            //BlockBreaking.blockBroken(blockBreaking, handBlock);
+                                        } else {
+                                            canBreak = false;
+                                            lastBlockBreakCheck = Main.timeMsLong;
+                                            blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, breakingType.getTTB());
+                                            BlockSFX sfx = breakingType.blockProperties.blockSFX;
+                                            player.breakingSource.setPos(pos);
+                                            player.breakingSource.setGain(sfx.placeGain);
+                                            player.breakingSource.setPitch(sfx.placePitch * (1 + (Math.abs(1 - breakingType.getTTBSpeed(blockToPlace.x)) * 0.8f)), 0);
+                                            player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
                                         }
                                     }
-                                } else if (breakingType.blockProperties.isSolid) {
-                                    //World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, cornerData);
+                                    if (canBreak) {
+                                        if (!player.creative) {
+                                            for (Item item : BlockDrops.getDrops(blockBreaking)) {
+                                                World.items.add(item.moveTo(new Vector3f((float) (Math.floor(pos.x()) + (Math.clamp(pos.x - Math.floor(pos.x), 0.2, 0.8) / 2)),
+                                                        (float) (Math.floor(pos.y()) + (Math.clamp(pos.y - Math.floor(pos.y), 0.2, 0.8) / 2)),
+                                                        (float) (Math.floor(pos.z()) + (Math.clamp(pos.z - Math.floor(pos.z), 0.2, 0.8) / 2)))));
+                                            }
+                                        }
+                                        blockStartedBreaking.set(0, 0, 0, 0);
+                                        player.breakingSource.stop();
+                                        //World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
+                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
+                                        //BlockBreaking.blockBroken(blockBreaking, handBlock);
+                                    }
                                 }
                             } else if (rmbDown) {
                                 lastBlockPlaced = Main.timeMsLong;

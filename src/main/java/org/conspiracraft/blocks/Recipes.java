@@ -3,7 +3,7 @@ package org.conspiracraft.blocks;
 import org.joml.Vector3f;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.items.ItemTypes;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
 
 import java.util.Map;

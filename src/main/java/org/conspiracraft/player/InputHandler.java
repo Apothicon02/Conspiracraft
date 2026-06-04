@@ -1,25 +1,17 @@
 package org.conspiracraft.player;
 
-import org.conspiracraft.audio.SFX;
-import org.conspiracraft.audio.Sounds;
-import org.conspiracraft.audio.Source;
-import org.conspiracraft.blocks.BlockTags;
-import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
-import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.entities.FireballEntity;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.items.ItemTypes;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.AL11;
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.Math;
@@ -147,26 +139,6 @@ public class InputHandler {
                         }
                         if (keyRelease(SDL_SCANCODE_T)) {
                             Main.timeNs += 100000000000L;
-                        }
-                        if (keyRelease(SDL_SCANCODE_F)) {
-                            FireballEntity entity = new FireballEntity(EntityTypes.FIREBALL, new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)), (float)(Math.random()*-0.1f));
-                            entity.vel = player.camera.getForward().mul(2).add(player.vel);
-                            entitiesAddQueue.addLast(entity);
-                            Source source = new Source(entity.matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
-                            source.play(Sounds.FIREBALL_QUICK);
-                            AudioController.disposableSources.add(source);
-                            entity.sfxSource = source;
-                        }
-                        if (keyRelease(SDL_SCANCODE_L) && !(player.selectedBlock.x() < 0 || player.selectedBlock.y() < 0 || player.selectedBlock.z() < 0)) {
-                            Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, height, 0));
-                            for (int i = 1; i < height; i++) {
-                                lightningPos.sub(0, 1, 0);
-                                Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
-                                if (BlockTypes.blockTypes[block.x()].blocksLight(block) || BlockTags.leaves.tagged.contains(block.x())) {
-                                    World.effects.add(new Lightning(new Matrix4f().translate(lightningPos.x(), lightningPos.y()+1, lightningPos.z()).scale(1, i, 1)));
-                                    break;
-                                }
-                            }
                         }
                         if (keyRelease(SDL_SCANCODE_B)) {
                             Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);

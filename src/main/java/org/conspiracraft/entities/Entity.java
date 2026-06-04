@@ -2,8 +2,6 @@ package org.conspiracraft.entities;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.items.Item;
-import org.conspiracraft.items.ItemTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.world.World;

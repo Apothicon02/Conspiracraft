@@ -1,4 +1,4 @@
-package org.conspiracraft.items;
+package org.conspiracraft.items.types;
 
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
@@ -6,6 +6,9 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.items.ItemSFX;
+import org.conspiracraft.items.ItemTag;
+import org.conspiracraft.items.ItemTags;
 import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
 
@@ -94,7 +97,9 @@ public class ItemTypes {
             STEEL_FRAME = create(new ItemType("component/texture/steel_frame").maxStackSize(64).blockToPlace(BlockTypes.STEEL_FRAME.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             SCREW = create(new ItemType("component/texture/screw").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             STEEL_ROD = create(new ItemType("component/texture/steel_rod").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            POWERED_VENT = create(new ItemType("machine/texture/powered_vent").maxStackSize(64).blockToPlace(BlockTypes.POWERED_VENT.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f)));
+            POWERED_VENT = create(new ItemType("machine/texture/powered_vent").maxStackSize(64).blockToPlace(BlockTypes.POWERED_VENT.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            FIREBALL = create(new FireballItemType("magic/texture/fireball").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.FIREBALL_QUICK}, 1.0f, 1.0f))),
+            LIGHTNING = create(new LightningItemType("magic/texture/lightning").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.THUNDER_1, Sounds.THUNDER_2}, 1.0f, 1.0f)));
 
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);

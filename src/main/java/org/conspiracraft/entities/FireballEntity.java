@@ -4,7 +4,6 @@ import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
@@ -34,6 +33,7 @@ public class FireballEntity extends Entity {
             Source source = new Source(matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
             source.play(Math.random() < 0.5f ? Sounds.SIZZLE1 : Sounds.SIZZLE2);
             AudioController.disposableSources.add(source);
+            if (sfxSource != null) {sfxSource.stop();}
             return true;
         }
         float modifiedGrav = World.worldType.gravity();

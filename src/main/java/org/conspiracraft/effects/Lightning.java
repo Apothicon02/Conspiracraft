@@ -7,7 +7,6 @@ import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.entities.AshEntity;
 import org.conspiracraft.entities.EntityTypes;
-import org.conspiracraft.entities.FireballEntity;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -31,7 +30,7 @@ public class Lightning extends Effect {
         intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());
         matrix.setTranslation(pos.x()+0.5f, pos.y()+matrix.getScale(new Vector3f()).y()/2.f, pos.z()+0.5f);
         SFX sfx = Math.random() < 0.5f ? Sounds.THUNDER_1 : Sounds.THUNDER_2;
-        Source source = new Source(pos, 2.f, 1.f, 0, 0);
+        Source source = new Source(pos, 2.f, 1.f, 1.f, 0);
         AL11.alSourcef(source.sourceID, AL10.AL_ROLLOFF_FACTOR, 0.3f);
         source.play(sfx);
         AudioController.disposableSources.add(source);

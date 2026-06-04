@@ -8,7 +8,6 @@ import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
-import org.conspiracraft.items.ItemType;
 import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
 

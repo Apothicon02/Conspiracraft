@@ -2,14 +2,16 @@ package org.conspiracraft.player;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import kotlin.Pair;
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.*;
+import org.conspiracraft.items.types.ItemType;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.conspiracraft.Main;
+import org.joml.Vector3f;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -233,7 +235,8 @@ public class Inventory {
         setItem(2, 0, new Item().type(ItemTypes.STEEL_HATCHET));
         setItem(3, 0, new Item().type(ItemTypes.STEEL_SPADE));
         setItem(4, 0, new Item().type(ItemTypes.STEEL_HOE));
-        setItem(12, 0, new Item().type(ItemTypes.APPLE).amount(1));
+        setItem(11, 0, new Item().type(ItemTypes.LIGHTNING).amount(16));
+        setItem(12, 0, new Item().type(ItemTypes.FIREBALL).amount(16));
         setItem(13, 0, new Item().type(ItemTypes.ORANGE).amount(2));
         setItem(13, 1, new Item().type(ItemTypes.ORANGE).amount(1));
         setItem(13, 2, new Item().type(ItemTypes.CHERRY).amount(2));
@@ -320,14 +323,17 @@ public class Inventory {
     }
 
     public void setItem(int slotId, Item item) {
-        Item existing = items[slotId];
-        if (item != null) {
-            if (existing == null || item.type != existing.type || item.amount != existing.amount) {
-                item.playSound(Main.player.pos);
+        if (Renderer.initialized) {
+            Vector3f earPos = new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0);
+            Item existing = items[slotId];
+            if (item != null) {
+                if (existing == null || item.type != existing.type || item.amount != existing.amount) {
+                    item.playSound(earPos);
+                }
+                item.prevTickTime(Main.timeMsLong);
+            } else if (existing != null) {
+                existing.playSound(earPos);
             }
-            item.prevTickTime(Main.timeMsLong);
-        } else if (existing != null) {
-            existing.playSound(Main.player.pos);
         }
         items[slotId] = item;
     }

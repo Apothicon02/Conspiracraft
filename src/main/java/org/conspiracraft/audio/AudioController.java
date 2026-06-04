@@ -1,5 +1,6 @@
 package org.conspiracraft.audio;
 
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
@@ -101,9 +102,10 @@ public class AudioController {
         if (!playedSliderSound) {
             sliderSource.stop();
         }
-        buttonSource.setPos(Main.player.pos);
-        hoverSource.setPos(Main.player.pos);
-        sliderSource.setPos(Main.player.pos);
+        Vector3f earPos = new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0);
+        buttonSource.setPos(earPos);
+        hoverSource.setPos(earPos);
+        sliderSource.setPos(earPos);
         for (int i = 0; i < disposableSources.size(); i++) {
             Source source = disposableSources.get(i);
             if (!source.isPlaying()) {

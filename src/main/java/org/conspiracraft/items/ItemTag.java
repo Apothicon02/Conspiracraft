@@ -1,5 +1,7 @@
 package org.conspiracraft.items;
 
+import org.conspiracraft.items.types.ItemType;
+
 import java.util.ArrayList;
 import java.util.List;
 

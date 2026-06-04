@@ -13,7 +13,7 @@ import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.items.ItemTypes;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;

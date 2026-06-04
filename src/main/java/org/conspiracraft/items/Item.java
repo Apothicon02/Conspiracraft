@@ -2,6 +2,9 @@ package org.conspiracraft.items;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.items.types.ItemType;
+import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -120,5 +123,9 @@ public class Item implements Cloneable {
 
     public Vector2i place() {
         return type.blockToPlace;
+    }
+
+    public int use(DDAResult dda) {
+        return type.use(dda);
     }
 }

@@ -1,5 +1,9 @@
-package org.conspiracraft.items;
+package org.conspiracraft.items.types;
 
+import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemSFX;
+import org.conspiracraft.items.ItemTag;
+import org.conspiracraft.physics.DDAResult;
 import org.joml.Vector2i;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
@@ -36,5 +40,8 @@ public class ItemType {
     public ItemType sfx(ItemSFX sfx) {
         sound = sfx;
         return this;
+    }
+    public int use(DDAResult dda) {
+        return 0;
     }
 }

@@ -1,6 +1,8 @@
 package org.conspiracraft.items;
 
 import kotlin.Pair;
+import org.conspiracraft.items.types.ItemType;
+import org.conspiracraft.items.types.ItemTypes;
 
 import java.util.Map;
 
