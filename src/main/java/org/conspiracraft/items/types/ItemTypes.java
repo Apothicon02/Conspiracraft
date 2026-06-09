@@ -41,7 +41,7 @@ public class ItemTypes {
             STEEL_SCYTHE = create(new ItemType("tool/steel/texture/scythe").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             STEEL_PICK = create(new ItemType("tool/steel/texture/pick").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             STEEL_HATCHET = create(List.of(ItemTags.axe), new ItemType("tool/steel/texture/hatchet").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            STEEL_SPADE = create(new ItemType("tool/steel/texture/spade").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_SPADE = create(new SpadeItemType("tool/steel/texture/spade").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             STEEL_HOE = create(new ItemType("tool/steel/texture/hoe").maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             APPLE = create(new ItemType("food/texture/apple").maxStackSize(2)),
             ORANGE = create(new ItemType("food/texture/orange").maxStackSize(2)),

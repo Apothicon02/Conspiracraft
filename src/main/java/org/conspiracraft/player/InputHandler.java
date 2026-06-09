@@ -84,7 +84,7 @@ public class InputHandler {
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
-                    HandManager.useHands(window);
+                    HandManager.input();
                 }
 
                 if (isKeyDown(SDL_SCANCODE_F3)) {

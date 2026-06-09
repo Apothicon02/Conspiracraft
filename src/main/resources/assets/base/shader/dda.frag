@@ -599,6 +599,12 @@ void main() {
         }
     } else {
         color.rgb = mipmap(color.rgb);
+//        float factor = clamp((shadowPos.y-72)/66, 0, 1);
+//        if (factor < 0.5f) {
+//            color.rgb = vec3(0, mix(vec2(0, 1), vec2(1, 0), factor*2));
+//        } else {
+//            color.rgb = vec3(mix(vec2(0, 1), vec2(1, 0), (factor-0.5f)*2), 0);
+//        }
         if (getBlockAndVoxel(shadowPos).a < alphaMax) {
             primaryNormal = vec3(0, 1, 0);
         }

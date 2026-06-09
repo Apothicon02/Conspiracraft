@@ -1,18 +1,19 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.entities.CracksEntity;
+import org.conspiracraft.entities.Entity;
+import org.conspiracraft.entities.EntityType;
+import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.World;
 import org.joml.*;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
-import org.conspiracraft.audio.BlockSFX;
-import org.conspiracraft.blocks.BlockTags;
-import org.conspiracraft.blocks.drops.BlockDrops;
-import org.conspiracraft.blocks.types.BlockType;
-import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.world.World;
 
 import java.lang.Math;
 
@@ -31,7 +32,8 @@ public class HandManager {
     public static long delayStart = 0;
     public static int delay = 0;
 
-    public static void useHands(Window window) {
+    public static boolean lmbDown = false, mmbDown = false, rmbDown = false;
+    public static void input() {
         if (player.inputHandler.scroll.y > 0) {
             hotbarSlot++;
             if (hotbarSlot >= Inventory.invWidth) {
@@ -43,97 +45,34 @@ public class HandManager {
                 hotbarSlot = Inventory.invWidth-1;
             }
         }
+        lmbDown = lmbDown || player.inputHandler.leftButtonPressed;
+        mmbDown = mmbDown || player.inputHandler.middleButtonPressed;
+        rmbDown = rmbDown || player.inputHandler.rightButtonPressed;
+    }
+    public static void useHands(Window window) {
         Item selectedItem = player.inv.getItem(player.inv.selectedSlot);
         Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();
-        boolean lmbDown = player.inputHandler.leftButtonPressed;
-        boolean mmbDown = player.inputHandler.middleButtonPressed;
-        boolean rmbDown = player.inputHandler.rightButtonPressed;
         if (!lmbDown) {
             player.breakingSource.stop();
             blockStartedBreaking.set(0, 0, 0, 0);
             tiltTarget = 0;
         }
         DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 1000);
-        if (Main.timeMsLong - delayStart >= delay) {
-            delayStart = Main.timeMsLong;
-            delay = selectedItem == null ? 0 : selectedItem.use(ddaResult);
-        }
-        if (delay <= 0 && ddaResult != null && ddaResult.hitAnything) {
+        if (ddaResult != null && ddaResult.hitAnything) {
             player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
             player.prevSelectedBlock.set(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z());
-            if (Main.timeMsLong-delayStart >= delay && ((!player.creative || (Main.timeMsLong - lastBlockBrokenOrPlaced >= 200)) && (!rmbDown || Main.timeMsLong - lastBlockPlaced >= 200))) { //two tenth second minimum delay between breaking blocks in creative or when placing blocks
-                if (lmbDown || mmbDown || rmbDown) {
-                    Vector2i handBlock = new Vector2i(blockToPlace.x, blockToPlace.y);
-                    BlockType handType = BlockTypes.blockTypes[blockToPlace.x];
-                    Vector3f pos = lmbDown || mmbDown ? player.selectedBlock : player.prevSelectedBlock;
-                    if (pos != null && World.inBounds((int) pos.x, (int) pos.y, (int) pos.z)) {
-                        if (mmbDown) {
-                            Vector2i block = World.getBlock(pos.x, pos.y, pos.z);
-                            if (block != null) {
-                                if (player.creative) {
-                                    //StackManager.setFirstEntryInStack(block);
-                                } else {
-                                    //StackManager.cycleToEntryInStack(block);
-                                }
-                            }
-                        } else {
-                            lastBlockBrokenOrPlaced = Main.timeMsLong;
-                            if (lmbDown) {
-                                Vector2i blockBreaking = World.getBlock(pos.x, pos.y, pos.z);
-                                BlockType breakingType = BlockTypes.blockTypes[blockBreaking.x];
-                                Vector3i intBreakingPos = new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
-                                boolean canBreak = breakingType.whilePlayerBreaking(intBreakingPos, blockBreaking, handBlock);
-                                if (canBreak && !BlockTags.cantBreakBlocks.tagged.contains(blockToPlace.x)) {
-                                    if (!player.creative) {
-                                        boolean sameBlock = blockStartedBreaking.x == (int) (pos.x) && blockStartedBreaking.y == (int) (pos.y) && blockStartedBreaking.z == (int) (pos.z);
-                                        if (sameBlock) {
-                                            if (blockStartedBreaking.w > 0) {
-                                                canBreak = false;
-                                                blockStartedBreaking.sub(0, 0, 0, (int) ((Main.timeMsLong - lastBlockBreakCheck) * breakingType.getTTBSpeed(blockToPlace.x)));
-                                                lastBlockBreakCheck = Main.timeMsLong;
-                                            }
-                                        } else {
-                                            canBreak = false;
-                                            lastBlockBreakCheck = Main.timeMsLong;
-                                            blockStartedBreaking.set((int) pos.x, (int) pos.y, (int) pos.z, breakingType.getTTB());
-                                            BlockSFX sfx = breakingType.blockProperties.blockSFX;
-                                            player.breakingSource.setPos(pos);
-                                            player.breakingSource.setGain(sfx.placeGain);
-                                            player.breakingSource.setPitch(sfx.placePitch * (1 + (Math.abs(1 - breakingType.getTTBSpeed(blockToPlace.x)) * 0.8f)), 0);
-                                            player.breakingSource.play(sfx.placeIds[(int) (Math.random() * sfx.placeIds.length)], true);
-                                        }
-                                    }
-                                    if (canBreak) {
-                                        if (!player.creative) {
-                                            for (Item item : BlockDrops.getDrops(blockBreaking)) {
-                                                World.items.add(item.moveTo(new Vector3f((float) (Math.floor(pos.x()) + (Math.clamp(pos.x - Math.floor(pos.x), 0.2, 0.8) / 2)),
-                                                        (float) (Math.floor(pos.y()) + (Math.clamp(pos.y - Math.floor(pos.y), 0.2, 0.8) / 2)),
-                                                        (float) (Math.floor(pos.z()) + (Math.clamp(pos.z - Math.floor(pos.z), 0.2, 0.8) / 2)))));
-                                            }
-                                        }
-                                        blockStartedBreaking.set(0, 0, 0, 0);
-                                        player.breakingSource.stop();
-                                        //World.setCorner((int) pos.x, (int) pos.y, (int) pos.z, 0);
-                                        World.setBlock((int) pos.x, (int) pos.y, (int) pos.z, 0, 0, true, false, 1, false);
-                                        //BlockBreaking.blockBroken(blockBreaking, handBlock);
-                                    }
-                                }
-                            } else if (rmbDown) {
-                                lastBlockPlaced = Main.timeMsLong;
-                                if (blockToPlace.x > 0) {//player.stack[0] > 0) {
-                                    World.replaceBlock((int) pos.x, (int) pos.y, (int) pos.z, blockToPlace.x, blockToPlace.y);
-                                    if (!player.creative) {
-                                        //StackManager.removeFirstEntryInStack();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         } else {
             player.selectedBlock.set(-1);
             player.prevSelectedBlock.set(-1);
+        }
+        if (Main.timeMsLong - delayStart >= delay) {
+            delayStart = Main.timeMsLong;
+            delay = selectedItem == null ? 0 : selectedItem.use(ddaResult);
+            if (delay == 0) { //if item did no interaction
+                if (lmbDown && World.inBounds(player.selectedBlock)) {
+                    mine(4);
+                }
+            }
         }
         if (lmbDown) {
             if (tiltTarget == 0) {
@@ -141,6 +80,29 @@ public class HandManager {
             }
         } else {
             tiltTarget = 0;
+        }
+        lmbDown = false;
+        mmbDown = false;
+        rmbDown = false;
+    }
+
+    public static void mine(int damage) {
+        CracksEntity entity = null;
+        for (Entity maybeEntity : World.entities) {
+            if (maybeEntity instanceof CracksEntity cracksEntity && (int)maybeEntity.prevPos.x() == (int)player.selectedBlock.x()
+                    && (int)maybeEntity.prevPos.y() == (int)player.selectedBlock.y()  && (int)maybeEntity.prevPos.z() == (int)player.selectedBlock.z()) {
+                entity = cracksEntity;
+                break;
+            }
+        }
+        Vector3i selectedBlockI = new Vector3i((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
+        Vector2i block = World.getBlock(selectedBlockI);
+        if (entity == null) {
+            entity = new CracksEntity(EntityTypes.SLIGHTLY_CRACKED, new Matrix4f().setTranslation(player.selectedBlock).translate(0.5f, 0.5f, 0.5f).scale(1.01f), 0);
+            World.entities.add(entity);
+        } else if (entity.mine(damage, BlockTypes.blockTypes[block.x()].blockProperties.blockSFX)) {
+            World.setBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z(), 0, 0);
+            delay = 300;
         }
     }
 

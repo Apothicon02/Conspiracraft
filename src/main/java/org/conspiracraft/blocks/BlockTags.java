@@ -25,6 +25,11 @@ public class BlockTags {
     public static BlockTag blunt = new BlockTag();
     public static BlockTag chipping = new BlockTag();
     public static BlockTag smallBlock = new BlockTag();
+    public static BlockTag scytheEfficient = new BlockTag();
+    public static BlockTag spadeEfficient = new BlockTag();
+    public static BlockTag pickEfficient = new BlockTag();
+    public static BlockTag hatchetEfficient = new BlockTag();
+    public static BlockTag hoeEfficient = new BlockTag();
     public static List<BlockTag> tags = List.of(rocks, leaves, shortFlowers, flowers, soakers, crystals, planks, buckets, cantBreakBlocks, blunt, chipping, smallBlock);
     public static List<Pair<BlockTag, BlockTag>> survivalTags = List.of(
             new Pair<>(survivesOnGrass, grass),

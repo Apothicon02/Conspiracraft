@@ -253,6 +253,12 @@ public class World {
         }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
+    public static boolean inBounds(float x, float y, float z) {
+        return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
+    }
+    public static boolean inBounds(Vector3f pos) {
+        return inBounds(pos.x(), pos.y(), pos.z());
+    }
     public static boolean inBounds(int x, int y, int z) {
         return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
     }

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static org.conspiracraft.Main.timeAccum;
+import static org.conspiracraft.Main.window;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
@@ -123,6 +124,7 @@ public class Player {
     public Vector3f oldCamTranslation = new Vector3f();
     public void tick() {
         oldCamTranslation.set(getCameraTranslation());
+        HandManager.useHands(window);
         movementTick();
         doSounds();
     }

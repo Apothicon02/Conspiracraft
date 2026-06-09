@@ -35,7 +35,11 @@ public class EntityTypes {
             COW = create(new EntityType("animal/texture/cow")),
             SHEEP = create(new EntityType("animal/texture/sheep")),
             FIREBALL = create(new EntityType("magic/texture/fireball")),
-            ASH = create(new EntityType("misc/texture/ash"));
+            ASH = create(new EntityType("misc/texture/ash")),
+            SLIGHTLY_CRACKED = create(new EntityType("misc/texture/slightly_cracked")),
+            CRACKED = create(new EntityType("misc/texture/cracked")),
+            VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
+            COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);
