@@ -2,6 +2,7 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.audio.BlockSFX;
+import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -15,6 +16,7 @@ import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -25,6 +27,7 @@ import java.util.Random;
 import static org.conspiracraft.Main.timeAccum;
 import static org.conspiracraft.Main.window;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
+import static org.conspiracraft.world.World.effects;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -161,10 +164,13 @@ public class Player {
                 onSolid = true;
             }
         }
+        Vector4f color = new Vector4f(1.f);
         if (onSolid) {
+            color.set(0.8f, 0.85f, 0.85f, 1.f);
             if (!prevOnSolid) { //when landing from a fall
                 bobbing = bobbingScale;
                 bobbingDir = false;
+                addParticle(color); addParticle(color); addParticle(color); addParticle(color); addParticle(color);
             } else {
                 float factor = (float) (0.0002f*timeAccum);
                 float actualSpeed = Utils.getInterpolatedFloat(dynamicSpeedOld, dynamicSpeed)*0.02f;
@@ -181,6 +187,7 @@ public class Player {
                         bobbing = bobbingScale;
                         bobbingDir = true;
                         stepFx();
+                        addParticle(color); addParticle(color);
                     }
                 }
             }
@@ -221,6 +228,7 @@ public class Player {
                     bobbing = bobbingScale;
                     bobbingDir = false;
                     stepFx();
+                    addParticle(color); addParticle(color); addParticle(color); addParticle(color); addParticle(color);
                 }
             }
         }
@@ -292,6 +300,12 @@ public class Player {
             sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
             superSprinting = inputHandler.isKeyDown(SDL_SCANCODE_CAPSLOCK);
         }
+    }
+
+    public void addParticle(Vector4f color) {
+        Particle particle = new Particle(new Matrix4f().translate(pos).scale(0.075f+(float)(0.05f*Math.random())), color);
+        particle.vel.set((float) (Math.random()-0.5f)/4, (float) (Math.random())/15, (float) (Math.random()-0.5f)/4);
+        effects.addLast(particle);
     }
 
     public void doSounds() {
