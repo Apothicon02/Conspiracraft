@@ -201,6 +201,9 @@ public class Utils {
     public static Vector3f sign(Vector3f vec) {
         return new Vector3f(sign(vec.x()), sign(vec.y()), sign(vec.z()));
     }
+    public static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
     public static float furthestFromZeroMix(float first, float second, float mix) {
         return mix(first, Math.abs(first) > Math.abs(second) ? first : second, mix);
     }

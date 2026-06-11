@@ -70,6 +70,14 @@ public class Earth extends WorldType {
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override
+    public Vector4f getAtmosphereColor() {return new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
+    @Override
+    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.06f, 1.2f, 1.f);}
+    @Override
+    public Vector4f getSunsetAtmosphereColor() {return new Vector4f(1, 0.65f, 0.25f, 1.f);}
+    @Override
+    public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(1, 0.3f, 0.25f, 1.f);}
+    @Override
     public void tick() {
         prevSunPos.set(sunPos);
         sunPos.set(0, size*2, 0);

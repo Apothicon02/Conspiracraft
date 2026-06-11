@@ -14,4 +14,8 @@ public class WorldType {
     public void tick() {}
     public void generate() throws InterruptedException {}
     public float gravity() {return 0.1f;}
+    public Vector4f getAtmosphereColor() {return null;}
+    public Vector4f getNightAtmosphereColor() {return null;}
+    public Vector4f getSunsetAtmosphereColor() {return null;}
+    public Vector4f getDeepSunsetAtmosphereColor() {return null;}
 }
