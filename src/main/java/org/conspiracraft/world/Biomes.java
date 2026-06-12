@@ -31,6 +31,8 @@ public class Biomes {
     public static final Biome BIRCH_PLAINS = create();
     public static final Biome MARB_HIGHLANDS = create();
     public static final Biome MARB_CRATER = create();
+    public static final Biome VERA_PLAINS = create();
+    public static final Biome VERA_HILLS = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {

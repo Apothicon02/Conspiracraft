@@ -70,6 +70,8 @@ public class Earth extends WorldType {
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override
+    public float getFogginess() {return 1.f;}
+    @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
     @Override
     public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.06f, 1.2f, 1.f);}
