@@ -335,12 +335,12 @@ public class Renderer {
 //        glBufferData(GL_SHADER_STORAGE_BUFFER, colorBuffer, GL_DYNAMIC_DRAW);
 //        drawCubes(1024);
     }
-    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1, 0.95f, 0.4f), new Vector3f(0.72f, 0.05f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(0.04f, 0.3f, 1.f), new Vector3f(1, 1, 0.1f)};
+    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1, 0.95f, 0.4f), new Vector3f(0.72f, 0.05f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1, 1, 0.1f)};
     public static int starDist = (World.size*2)+200;
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
-        float atmoFactor = (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
+        float atmoFactor = worldType.getFogginess() < 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
         for (int i = 0; i < 512; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
@@ -348,7 +348,7 @@ public class Renderer {
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
             starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
-            float starSize = ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor));
+            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor)));
             if (starSize > 0.01f) {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
@@ -361,7 +361,7 @@ public class Renderer {
 //                    colorBuffer.put(color.y*12);
 //                    colorBuffer.put(color.z*12);
 //                    colorBuffer.put(2);
-                    drawCube(starMatrix, new Vector4f(color.x()*5, color.y()*5, color.z()*5, 1.f));
+                    drawCube(starMatrix, new Vector4f(color.x()*2.5f, color.y()*2.5f, color.z()*2.5f, 1.f));
                 }
             }
         }
