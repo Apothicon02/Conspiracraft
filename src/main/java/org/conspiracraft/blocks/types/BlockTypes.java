@@ -125,7 +125,9 @@ public class BlockTypes {
             RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_sand",  SAND.blockProperties.copy())), //70
             RED_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/red_sandstone",  SANDSTONE.blockProperties.copy())),
             RED_GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_gravel",  GRAVEL.blockProperties.copy())),
-            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/wet_sand",  SAND.blockProperties.copy()));
+            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/wet_sand",  SAND.blockProperties.copy())),
+            ICE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "natural/texture/ice",  GLASS.blockProperties.copy().blocksLight(true))),
+            BASALT = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())); //75
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

@@ -572,8 +572,8 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = tint.a < 1 ? 1.f : (block.x == 57 ? 0.2f : 0.f);
-    float roughness = block.x == 1 ? 0.2f : (tint.a < 1 ? 0.05f : (block.x == 57 ? 0.3f : 0.f));
+    float reflectivity = tint.a < 1 || block.x == 74 ? 1.f : (block.x == 57 ? 0.2f : 0.f);
+    float roughness = block.x == 1 ? 0.2f : (tint.a < 1 ? 0.05f : (block.x == 57 ? 0.3f : (block.x == 74 ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
         isSky = false;
@@ -652,7 +652,7 @@ void main() {
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
         vec4 blockLighting = ((inBounds && globalUbo.renderToggles.y > 0) ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1))*vec4(1, 1, 1, skylight.a);
         //blockLighting.a *= 1-abs(causticness/50);
-        float fogginess = globalUbo.fogginess < 0 ? 0 : (isSky ? 1.f : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*globalUbo.fogginess))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, 1.f));
+        float fogginess = globalUbo.fogginess < 0 ? 0 : (isSky ? 1.f-pow(max(0, globalUbo.fogginess-1), 2) : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*globalUbo.fogginess))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, 1.f));
         vec3 source = vec3(skylight.x, max(skylight.y/5, primaryShadowPos.y+9), skylight.z);
         vec3 sunDir = normalize(source - primaryShadowPos);
         rayPos = primaryShadowPos;

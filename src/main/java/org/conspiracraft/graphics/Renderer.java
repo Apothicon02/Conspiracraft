@@ -44,7 +44,6 @@ import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffers;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
-import static org.conspiracraft.world.Earth.sunPos;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.util.vma.Vma.*;
@@ -313,7 +312,7 @@ public class Renderer {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(196 * 16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(196 * 4);
         Random cloudRand = new Random(911);
-        float brightness = Math.clamp((640 + sunPos.y()) / 640, 0.3f, 1.f);
+        float brightness = Math.clamp((640 + worldType.getSun().y()) / 640, 0.3f, 1.f);
         for (int i = 0; i < 196; i++) {
             float b = Math.max(0.25f, brightness - (cloudRand.nextFloat() / 2));
             Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
@@ -341,6 +340,7 @@ public class Renderer {
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
+        float atmoFactor = (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
         for (int i = 0; i < 512; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
@@ -348,7 +348,7 @@ public class Renderer {
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
             starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
-            float starSize = ((starRand.nextFloat()*40)+40)-Math.max(0, 150*(sunPos.y/World.size));
+            float starSize = ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor));
             if (starSize > 0.01f) {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
