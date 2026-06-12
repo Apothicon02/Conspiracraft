@@ -71,7 +71,7 @@ public class Marb extends WorldType {
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override
-    public float getFogginess() {return 0.f;}
+    public float getFogginess() {return -1.f;}
     @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(1.f, 1.f, 1.f, 0.f);}
     @Override
@@ -157,7 +157,7 @@ public class Marb extends WorldType {
                                         craterSurfMaxMul = Math.max(craterDist, craterSurfMaxMul);
                                     }
                                 }
-                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? craterSurfMaxMul : craterSurfMul));
+                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
 
                                 biomes[x * size + z] = (byte)(inCrater ? Biomes.MARB_CRATER.id : Biomes.MARB_HIGHLANDS.id);
                                 heightmap[packPos(x, z)] = (short)surface;

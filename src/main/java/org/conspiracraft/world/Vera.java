@@ -13,6 +13,7 @@ import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
+import org.conspiracraft.world.shapes.Cloud;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -41,7 +42,7 @@ public class Vera extends WorldType {
     public void renderCelestialBodies(MemoryStack stack) {
         pushUBO.updateLayer(-1);
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
-        Vector4f sunColor = new Vector4f(0.f, 2.5f, 1.f, 1);
+        Vector4f sunColor = new Vector4f(1.f, 2.5f, 0.f, 1);
         drawCube(sunMatrix, sunColor);
         pushUBO.updateLayer(0);
         pushUBO.updateAtlasOffset(EntityTypes.OLIVIUS.atlasOffset);
@@ -65,14 +66,14 @@ public class Vera extends WorldType {
         if (nearestLightning.x() >= 0) {
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
-        return (sunPos.y() < 0 && sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 0.3f) : new Vector4f(sunPos, 1.f)).max(new Vector4f(0, height, 0, 0));
+        return (sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 0.3f) : new Vector4f(sunPos, 1.f)).max(new Vector4f(0, height, 0, 0));
     }
     @Override
     public Vector3f getSun() {return sunPos;}
     @Override
-    public float getFogginess() {return 2.f;}
+    public float getFogginess() {return 0.4f;}
     @Override
-    public Vector4f getAtmosphereColor() {return new Vector4f(0.55f, 0.1f, 1, 0.85f);}
+    public Vector4f getAtmosphereColor() {return new Vector4f(1.f, 0.6f, 0.8f, 0.85f);}
     @Override
     public Vector4f getNightAtmosphereColor() {return new Vector4f(1.2f, 0.84f, 0.36f, 0.85f);}
     @Override
@@ -245,38 +246,76 @@ public class Vera extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
 
-//        startTime = System.currentTimeMillis();
-//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-//        pool = Executors.newFixedThreadPool(threads);
-//        int featuresInterval = (sizeChunks + threads - 1) / threads;
-//        for (int thread = 0; thread < threads; thread++) {
-//            int threadId = thread;
-//            int startX = thread * featuresInterval;
-//            int endX  = Math.min(startX + featuresInterval, sizeChunks);
-//            pool.execute(() -> {
-//                final Random rand = new Random(World.seed+threadId);
-//                for (int cX = startX; cX < endX; cX++) {
-//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-//                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-//                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-//                                int elevation = heightmap[(x * size) + z];
-//                                //byte biome = biomes[x * size + z];
-//                                Vector2i blockOn = getBlock(x, elevation, z);
-//                                float randomNumber = rand.nextFloat();
-//                                boolean onObsidian = blockOn.x() == BlockTypes.OBSIDIAN.id;
-//                                if (randomNumber < (onObsidian ? 0.005f : 0.0005f)) {
-//                                    boolean crater = !onObsidian ? (rand.nextBoolean() || rand.nextBoolean()) : rand.nextBoolean();
-//                                    Blob.generate(blockOn, x, crater ? elevation+2 : elevation, z, crater ? 0 : BlockTypes.OBSIDIAN.id, 0, (int) (2 + (rand.nextFloat() * 14)));
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            });
-//        }
-//        pool.shutdown();
-//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        int featuresInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            int threadId = thread;
+            int startX = thread * featuresInterval;
+            int endX  = Math.min(startX + featuresInterval, sizeChunks);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                int elevation = heightmap[(x * size) + z];
+                                byte biome = biomes[x * size + z];
+                                Vector2i blockOn = getBlock(x, elevation, z);
+                                float randomNumber = rand.nextFloat();
+                                boolean onMud = blockOn.x() == BlockTypes.MUD.id;
+                                if (biome != Biomes.VERA_HILLS.id && randomNumber < (onMud ? 0.0005f : 0.0001f)) {
+                                    Blob.generate(blockOn, x, elevation, z, randomNumber < 0.00025f ? BlockTypes.STONE.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 14)));
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+        pool = Executors.newFixedThreadPool(threads);
+        final int cloudInterval = (sizeChunks + threads - 1) / threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * cloudInterval;
+            final int endX = Math.min(startX + cloudInterval, sizeChunks);
+            pool.execute(() -> {
+                final Random rand = new Random(World.seed+threadId);
+                for (int cX = startX; cX < endX; cX++) {
+                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
+                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
+                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+                                        if (radius > 0) {
+                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
+                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
+                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
+                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
 
         startTime = System.currentTimeMillis();
         for (int cX = 0; cX < sizeChunks; cX++) {
