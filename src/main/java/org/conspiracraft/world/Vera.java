@@ -64,8 +64,10 @@ public class Vera extends WorldType {
             }
         }
         if (nearestLightning.x() >= 0) {
+            skylightMul.set(0.35f, 0.0f, 1.0f);
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
+        skylightMul.set(1);
         return (sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 0.3f) : new Vector4f(sunPos, 1.f)).max(new Vector4f(0, height, 0, 0));
     }
     @Override

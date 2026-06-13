@@ -41,7 +41,13 @@ public class EntityTypes {
             VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
             COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked")),
             OLIVIUS = create(new EntityType("celestial/texture/olivius")),
-            OLIVIUS_CLOUDS = create(new EntityType("celestial/texture/olivius_clouds"));
+            OLIVIUS_CLOUDS = create(new EntityType("celestial/texture/olivius_clouds")),
+            MARB = create(new EntityType("celestial/texture/marb")),
+            VERA = create(new EntityType("celestial/texture/vera")),
+            VERA_CLOUDS = create(new EntityType("celestial/texture/vera_clouds")),
+            VERA_ORANGE_CLOUDS = create(new EntityType("celestial/texture/vera_orange_clouds")),
+            AKSALA = create(new EntityType("celestial/texture/aksala")),
+            AKSALA_AURORAS = create(new EntityType("celestial/texture/aksala_auroras"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);

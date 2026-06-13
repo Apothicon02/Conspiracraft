@@ -12,6 +12,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec4 sunsetAtmosphere;
     vec4 deepSunsetAtmosphere;
     float fogginess;
+    vec3 skylightMul;
 } globalUbo;
 struct ChunkStruct {
     int pointer;
@@ -254,7 +255,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     sunColor = mix(mix(mix(globalUbo.deepSunsetAtmosphere.rgb, globalUbo.sunsetAtmosphere.rgb, min(1, lowSunHeight*2)), mix(globalUbo.nightAtmosphere.rgb, globalUbo.atmosphere.rgb, clamp(sunHeight+0.1f, 0, 1)), sunSetness), vec3(1), whiteness);
     sunColor = mix(vec3(1), vec3(1, 0.95f, 0.85f), sunSetness/4)*(lighting.a*sunColor);
     if (!isSky && !celestialSource) {
-        sunColor = mix(vec3(1, 0.95f, 0.1f)*lighting.a, sunColor, fogginess);
+        sunColor = mix(globalUbo.skylightMul*lighting.a, sunColor, fogginess);
     }
 //    if (!isSky && globalUbo.skylight.w >= 1.f) {
 //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));

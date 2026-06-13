@@ -19,4 +19,6 @@ public class WorldType {
     public Vector4f getNightAtmosphereColor() {return null;}
     public Vector4f getSunsetAtmosphereColor() {return null;}
     public Vector4f getDeepSunsetAtmosphereColor() {return null;}
+    public final Vector3f skylightMul = new Vector3f(1);
+    public Vector3f getSkylightMul() {return skylightMul;}
 }

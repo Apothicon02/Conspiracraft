@@ -12,6 +12,7 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static org.conspiracraft.Constants.AU;
 import static org.conspiracraft.Main.timeAccum;
 import static org.conspiracraft.Main.window;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
@@ -152,6 +154,9 @@ public class Player {
         newMovement.mul(speed*(downward?0.65f:1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 10.f : 1.f);
+        if (pos.y() > World.height) {
+            newMovement.mul(1000000);
+        }
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin-0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);

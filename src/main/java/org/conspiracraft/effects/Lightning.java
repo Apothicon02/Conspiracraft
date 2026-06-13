@@ -8,9 +8,11 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.entities.AshEntity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.world.World;
+import org.conspiracraft.world.WorldTypes;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 
@@ -24,8 +26,18 @@ public class Lightning extends Effect {
     public int lifetime = 0;
     public final Vector3f pos = new Vector3f();
     public final Vector3i intPos = new Vector3i();
+    public final Vector4f color = new Vector4f(0);
     public Lightning(Matrix4f matrix) {
         super(matrix);
+        if (World.worldType == WorldTypes.EARTH) {
+            color.set(0.1f, 0.95f, 1.0f, 4.f);
+        } else if (World.worldType == WorldTypes.AKSALA) {
+            color.set(1.f, 0.1f, 0.1f, 4.f);
+        } else if (World.worldType == WorldTypes.VERA) {
+            color.set(0.6f, 0.2f, 1.0f, 4.f);
+        } else {
+            color.set(1.f, 0.95f, 0.1f, 4.f);
+        }
         matrix.getTranslation(pos);
         intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());
         matrix.setTranslation(pos.x()+0.5f, pos.y()+matrix.getScale(new Vector3f()).y()/2.f, pos.z()+0.5f);

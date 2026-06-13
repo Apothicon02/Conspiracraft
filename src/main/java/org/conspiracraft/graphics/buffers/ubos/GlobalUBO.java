@@ -18,7 +18,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class GlobalUBO extends UBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector4i(), new Vector4f(), new Vector3f(), 0, 0.f, new Vector2i(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), 0.f};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Vector4i(), new Vector4f(), new Vector3f(), 0, 0.f, new Vector2i(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), 0.f, new Vector3f()};
     @Override public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     @Override public int size(){return size;}
@@ -69,6 +69,7 @@ public class GlobalUBO extends UBO {
         ((Vector4f)uniformStorage[10]).set(World.worldType.getSunsetAtmosphereColor());
         ((Vector4f)uniformStorage[11]).set(World.worldType.getDeepSunsetAtmosphereColor());
         uniformStorage[12] = World.worldType.getFogginess();
+        uniformStorage[13] = World.worldType.getSkylightMul();
     }
     private int offset = 0;
     public void submit() {

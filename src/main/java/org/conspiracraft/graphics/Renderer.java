@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.Constants;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
@@ -21,6 +22,7 @@ import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LightHelper;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
@@ -250,11 +252,12 @@ public class Renderer {
         pushUBO.updateLayer(-1);
         //drawClouds();
         drawStars();
-        worldType.renderCelestialBodies(stack);
+        //worldType.renderCelestialBodies(stack);
+        StarSystem.render(stack);
         pushUBO.updateLayer(-1);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                drawCube(lightning.matrix, new Vector4f(1.f, 0.95f, 0.1f, 4.f));
+                drawCube(lightning.matrix, lightning.color);
             } else if (effect instanceof Particle particle) {
                 Matrix4f interpolatedMatrix = new Matrix4f(particle.matrix);
                 interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(particle.prevPos, particle.pos));
@@ -336,10 +339,11 @@ public class Renderer {
 //        drawCubes(1024);
     }
     public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1, 0.95f, 0.4f), new Vector3f(0.72f, 0.05f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1, 1, 0.1f)};
-    public static int starDist = (World.size*2)+200;
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
+        boolean inSpace = player.pos.y() > height;
+        int starDist = Constants.CENTER;
         float atmoFactor = worldType.getFogginess() < 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
         for (int i = 0; i < 512; i++) {
@@ -347,22 +351,20 @@ public class Renderer {
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
-            starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
-            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor)));
-            if (starSize > 0.01f) {
+            starPos.set(starPos.x + (starDist / 2f) + player.pos.x(), starPos.y + player.pos.y(), starPos.z + (starDist / 2f) + player.pos.z());
+            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor)))*20000;
+            if (starSize > 200.f) {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
                         .setTranslation(starPos)
                         .scale(starSize*3);
-                if (starMatrix.getTranslation(new Vector3f()).y > 63-player.pos.y()) {
-                    //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
-                    Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
+                //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
+                Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
 //                    colorBuffer.put(color.x*12);
 //                    colorBuffer.put(color.y*12);
 //                    colorBuffer.put(color.z*12);
 //                    colorBuffer.put(2);
-                    drawCube(starMatrix, new Vector4f(color.x()*2.5f, color.y()*2.5f, color.z()*2.5f, 1.f));
-                }
+                drawCube(starMatrix, new Vector4f(color.x()*2.5f, color.y()*2.5f, color.z()*2.5f, 1.f));
             }
         }
 //        modelBuffer.flip();

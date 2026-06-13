@@ -63,8 +63,10 @@ public class Earth extends WorldType {
             }
         }
         if (nearestLightning.x() >= 0) {
+            skylightMul.set(0.f, 0.95f, 1.0f);
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
+        skylightMul.set(1);
         return (sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
     }
     @Override

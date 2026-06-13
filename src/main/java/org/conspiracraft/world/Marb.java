@@ -64,8 +64,10 @@ public class Marb extends WorldType {
             }
         }
         if (nearestLightning.x() >= 0) {
+            skylightMul.set(1.f, 0.95f, 0.f);
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
+        skylightMul.set(1);
         return (sunPos.y() < 0 && sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 1.5f) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
     }
     @Override

@@ -3,12 +3,12 @@ package org.conspiracraft;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -43,6 +43,7 @@ public class Main {
     public static long timeMsLong = 0;
     public static long currentTick = 0;
     public static double timeAccum = 0;
+    public static long tickTimeNs = 0;
     static void main() throws Exception {
         //int l = Chunk.packLight(0, 0, 0, maxSunlightLevel);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -71,22 +72,22 @@ public class Main {
             player.inputHandler.update();
 
             long targetFrameTime = 1000000000L / targetFps;
-            long tickTime = (long) (50000000d / timeMul);
+            tickTimeNs = (long) 50000000d;
             int ticksDone = 0;
-            timeAccum += elapsed;
-            while (timeAccum >= tickTime) {
+            timeAccum += (long) (elapsed*timeMul);
+            while (timeAccum >= tickTimeNs) {
                 ticksDone++;
                 currentTick++;
-                timeAccum -= tickTime;
-                World.tick();
-                World.worldType.tick();
-                World.tickItems();
-                player.tick();
-                if (ticksDone >= 3) {
-                    timeAccum = (tickTime-1);
+                timeAccum -= tickTimeNs;
+                StarSystem.tick();
+                if (ticksDone < 3) {
+                    World.tick();
+                    World.worldType.tick();
+                    World.tickItems();
+                    player.tick();
                 }
             }
-            interpolationTime = timeAccum/tickTime;
+            interpolationTime = timeAccum/ tickTimeNs;
 
             LightHelper.iterateLightQueue();
             Renderer.render();
