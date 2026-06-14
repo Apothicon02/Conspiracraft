@@ -33,11 +33,11 @@ public class StarSystem {
     };
 
     public static void render(MemoryStack stack) {
-        pushUBO.updateLayer(-1);
+        pushUBO.updateLayer(0);
+        pushUBO.updateAtlasOffset(EntityTypes.SUN.atlasOffset);
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(pos).scale(SCALE);
         Vector4f sunColor = new Vector4f(2.5f, 2.5f, 2.5f, 1);
         drawCube(sunMatrix, sunColor);
-        pushUBO.updateLayer(0);
         for (Planet planet : planets) {
             planet.render(stack);
         }
