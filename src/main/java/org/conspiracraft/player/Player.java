@@ -12,7 +12,6 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -25,7 +24,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.conspiracraft.Constants.AU;
 import static org.conspiracraft.Main.timeAccum;
 import static org.conspiracraft.Main.window;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
@@ -89,7 +87,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(900, 295, 200);
+            Main.player.pos.set(512, 96, 512);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();

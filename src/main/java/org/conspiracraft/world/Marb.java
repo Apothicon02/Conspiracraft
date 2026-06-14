@@ -110,7 +110,7 @@ public class Marb extends WorldType {
         Random seededRand = new Random(35311350L);
         Vector3i[] craters = new Vector3i[200];
         for (int i = 0; i < craters.length; i++) {
-            int radius = seededRand.nextInt(90) + 10;
+            int radius = (int) ((seededRand.nextInt(90)*Math.min(1, seededRand.nextFloat()+0.5f)) + 10);
             int borderOffset = radius*2;
             int x = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
             int z = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
@@ -231,11 +231,12 @@ public class Marb extends WorldType {
                                     final int seafloorAbove = Math.min(elevation+2, ceil);
                                     double noise = noisePipeline.evaluateNoise(x / 35.f, z / 60.f);
                                     double simplexNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                    //double bigNoise = SimplexNoise.noise(x / 2000.f, z / 2000.f);
 
                                     for (int y = floor; y < seafloorAbove; y++) {
                                         final int blockType = biome == Biomes.MARB_CRATER.id ?
-                                                (noise > 0.5f ? (simplexNoise > 0 ? BlockTypes.MARBLE.id : BlockTypes.OBSIDIAN.id) : (simplexNoise > 0 ? BlockTypes.OBSIDIAN.id : BlockTypes.MARBLE.id)) :
-                                                BlockTypes.IGNEOUS.id;
+                                                ((((simplexNoise > 0.3 && simplexNoise < 0.5) || (simplexNoise > -0.5 && simplexNoise < -0.3)) && noise > 0.34f) ? ((y == seafloorAbove-1 && noise > 0.5f) ? BlockTypes.IRON_ORE.id : BlockTypes.STONE.id) : BlockTypes.GRAVEL.id) :
+                                                (flat ? (Utils.gradient(y, 92, 100, 1, 0)-Math.abs(simplexNoise) > 0.25f ? BlockTypes.CINNABAR.id : BlockTypes.GRANITE.id) : BlockTypes.FLINT.id);
                                         if (blockType > 0) {
                                             final int lX = x & 15, lY = y & 15, lZ = z & 15;
                                             setAnything = true;
@@ -278,10 +279,10 @@ public class Marb extends WorldType {
                                 //byte biome = biomes[x * size + z];
                                 Vector2i blockOn = getBlock(x, elevation, z);
                                 float randomNumber = rand.nextFloat();
-                                boolean onObsidian = blockOn.x() == BlockTypes.OBSIDIAN.id;
-                                if (randomNumber < (onObsidian ? 0.005f : 0.0005f)) {
-                                    boolean crater = !onObsidian ? (rand.nextBoolean() || rand.nextBoolean()) : rand.nextBoolean();
-                                    Blob.generate(blockOn, x, crater ? elevation+2 : elevation, z, crater ? 0 : BlockTypes.OBSIDIAN.id, 0, (int) (2 + (rand.nextFloat() * 14)));
+                                boolean onGravel = blockOn.x() == BlockTypes.GRAVEL.id;
+                                if (randomNumber < (onGravel ? 0.005f : 0.0005f)) {
+                                    boolean crater = !onGravel ? (rand.nextBoolean() || rand.nextBoolean()) : rand.nextBoolean();
+                                    Blob.generate(blockOn, x, crater ? elevation+2 : elevation, z, crater ? 0 : BlockTypes.FLINT.id, 0, (int) (2 + (rand.nextFloat() * 14)));
                                 }
                             }
                         }
