@@ -11,6 +11,8 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.space.Planet;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cloud;
@@ -34,24 +36,17 @@ import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Vera extends WorldType {
+    private final float longitude = (float) Math.toRadians(80.f);
+    @Override
+    public float getLongitude() {return longitude;}
+    public Planet parent = StarSystem.planets[0];
+    @Override
+    public Planet getPlanet(){return parent.moons[1];}
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/vera");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
     public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
-    @Override
-    public void renderCelestialBodies(MemoryStack stack) {
-        pushUBO.updateLayer(-1);
-        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
-        Vector4f sunColor = new Vector4f(1.f, 2.5f, 0.f, 1);
-        drawCube(sunMatrix, sunColor);
-        pushUBO.updateLayer(0);
-        pushUBO.updateAtlasOffset(EntityTypes.OLIVIUS.atlasOffset);
-        Matrix4f oliviusMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevOliviusPos, oliviusPos)).scale(2400);
-        drawCube(oliviusMatrix, oliviusColor);
-        pushUBO.updateAtlasOffset(EntityTypes.OLIVIUS_CLOUDS.atlasOffset);
-        drawCube(oliviusMatrix.scale(1.04f), oliviusColor);
-        drawCube(oliviusMatrix.scale(1.04f).rotateXYZ(0, 0, (float)Math.toRadians(180.f)), oliviusColor);
-    }
+
     @Override
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);

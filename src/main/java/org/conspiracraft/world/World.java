@@ -49,7 +49,7 @@ public class World {
     public static final int sizeLods = size >>lodBits;
     public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
-    public static final WorldType worldType = WorldTypes.MARB;
+    public static WorldType worldType = WorldTypes.MARB;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
 
@@ -159,8 +159,15 @@ public class World {
         out.close();
         System.out.println("Took " + (System.currentTimeMillis()-start) + "ms to save world. ");
     }
+    public static boolean previouslyGenerated = false;
     public static void load(String path) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
+        if (previouslyGenerated) {
+            Arrays.fill(lods, 0L);
+            Arrays.fill(regions, 0L);
+            Arrays.fill(chunks, null);
+        }
+        previouslyGenerated = true;
         boolean didExist = Files.exists(Path.of(path));
         if (didExist) {
             long[] globalData = Utils.flipLongArray(Utils.byteArrayToLongArray(new FileInputStream(path + "global.data").readAllBytes()));

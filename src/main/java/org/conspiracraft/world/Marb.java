@@ -31,6 +31,9 @@ import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Marb extends WorldType {
+    private final float longitude = (float) Math.toRadians(40.f);
+    @Override
+    public float getLongitude() {return longitude;}
     public Planet parent = StarSystem.planets[0];
     @Override
     public Planet getPlanet(){return parent.moons[0];}
@@ -55,8 +58,6 @@ public class Marb extends WorldType {
         skylightMul.set(1);
         return (StarSystem.relativePos.y() < 0 && StarSystem.relativePos.y() < parent.pos.y() ? new Vector4f(parent.pos, 1.5f) : new Vector4f(StarSystem.relativePos, 1)).max(new Vector4f(0, height, 0, 0));
     }
-    @Override
-    public float getFogginess() {return -1.f;}
     @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(1.f, 1.f, 1.f, 0.f);}
     @Override

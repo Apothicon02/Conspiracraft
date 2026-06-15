@@ -30,27 +30,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.Main.timeNs;
-import static org.conspiracraft.graphics.Renderer.drawCube;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.LightHelper.*;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
+    private final float longitude = (float) Math.toRadians(67.f);
+    @Override
+    public float getLongitude() {return longitude;}
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
-    @Override
-    public void renderCelestialBodies(MemoryStack stack) {
-        pushUBO.updateLayer(-1);
-        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
-        Vector4f sunColor = new Vector4f(2.5f, 2.4f, 0, 1);
-        drawCube(sunMatrix, sunColor);
-        pushUBO.updateLayer(0);
-        pushUBO.updateAtlasOffset(EntityTypes.MUN.atlasOffset);
-        Matrix4f munMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevMunPos, munPos)).scale(300);
-        Vector4f munColor = new Vector4f(0.9f, 0.88f, 0.99f, 1);
-        drawCube(munMatrix, munColor);
-    }
     @Override
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);

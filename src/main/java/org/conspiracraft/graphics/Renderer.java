@@ -62,6 +62,7 @@ public class Renderer {
     public static PushUBO pushUBO = new PushUBO();
     public static Pipeline currentPipeline;
     public static boolean reloadAtlas = false;
+    public static boolean reloadTextures = true;
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -70,18 +71,21 @@ public class Renderer {
                 if (!initialized) {
                     generating = false;
                     fillSSBOs();
-                    long startTime = System.currentTimeMillis();
-                    BlockTypes.fillTexture(stack);
-                    ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
-                    ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
-                    memFree(noisesBuffer);
-                    ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));
-                    ImageHelper.fillImage(stack, Textures.blueNoise, blueNoiseBuffer);
-                    memFree(blueNoiseBuffer);
-                    GUI.fillTexture();
-                    EntityTypes.fillTexture(stack);
+                    if (reloadTextures) {
+                        reloadTextures = false;
+                        long startTime = System.currentTimeMillis();
+                        BlockTypes.fillTexture(stack);
+                        ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
+                        ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
+                        memFree(noisesBuffer);
+                        ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));
+                        ImageHelper.fillImage(stack, Textures.blueNoise, blueNoiseBuffer);
+                        memFree(blueNoiseBuffer);
+                        GUI.fillTexture();
+                        EntityTypes.fillTexture(stack);
+                        System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
+                    }
                     initialized = true;
-                    System.out.println("Texture initialization took "+(System.currentTimeMillis()-startTime)+"ms");
                 } else {
                     //long startTime = System.nanoTime();
                     //boolean wasEmpty = updateQueue.isEmpty();
@@ -252,7 +256,6 @@ public class Renderer {
         pushUBO.updateLayer(-1);
         //drawClouds();
         drawStars();
-        //worldType.renderCelestialBodies(stack);
         StarSystem.render(stack);
         pushUBO.updateLayer(-1);
         for (Effect effect : effects) {
@@ -573,12 +576,18 @@ public class Renderer {
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
     public static int chunkByteSize = 4*4;
     public static int chunkSSBOSize = chunkArrSize*chunkByteSize;
-    public static PointerBuffer blocks = BufferUtils.createPointerBuffer(1);
-    public static PointerBuffer lights = BufferUtils.createPointerBuffer(1);
+    public static PointerBuffer blocks;
+    public static PointerBuffer lights;
     public static long[] chunkBlockAllocs;;
     public static long[] chunkLightBlockAllocs;
     public static void fillSSBOs() {
         long startTime = System.currentTimeMillis();
+        if (blocks != null) {
+            vmaDestroyVirtualBlock(blocks.get(0));
+            vmaDestroyVirtualBlock(lights.get(0));
+        }
+        blocks = BufferUtils.createPointerBuffer(1);
+        lights = BufferUtils.createPointerBuffer(1);
         VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
         blockCreateInfo.size(voxelSSBOSize);
         vmaCreateVirtualBlock(blockCreateInfo, blocks);
