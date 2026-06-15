@@ -1,6 +1,8 @@
 package org.conspiracraft.space;
 
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -11,8 +13,9 @@ import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
 
 public class StarSystem {
-    final public static int SCALE = AU*10;
+    final public static int SCALE = AU*5;
     final public static Vector3f pos = new Vector3f(CENTER, CENTER, CENTER);
+    final public static Vector3f relativePos = new Vector3f(pos);
     final public static Planet[] planets = new Planet[]{
             new Planet(EntityTypes.OLIVIUS, new Vector3f(-(AU*35), 0, 0), new Vector4f(0.34f, 0.949f, 0.475f, 1), 10000000, 1000000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.OLIVIUS_CLOUDS, 1.04f, new Vector3f()),
@@ -35,7 +38,8 @@ public class StarSystem {
     public static void render(MemoryStack stack) {
         pushUBO.updateLayer(0);
         pushUBO.updateAtlasOffset(EntityTypes.SUN.atlasOffset);
-        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(pos).scale(SCALE);
+        relativePos.set(pos).sub(Utils.getInterpolatedVec(World.worldType.getPlanet().prevPos, World.worldType.getPlanet().pos));
+        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(relativePos).scale(SCALE);
         Vector4f sunColor = new Vector4f(2.5f, 2.5f, 2.5f, 1);
         drawCube(sunMatrix, sunColor);
         for (Planet planet : planets) {

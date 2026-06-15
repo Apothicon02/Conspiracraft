@@ -3,6 +3,7 @@ package org.conspiracraft.space;
 import org.conspiracraft.Main;
 import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -34,11 +35,13 @@ public class Planet {
     }
 
     public void render(MemoryStack stack) {
-        pushUBO.updateAtlasOffset(type.atlasOffset);
-        Matrix4f matrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevPos, pos)).scale(scale);
-        drawCube(matrix, new Vector4f(1));
-        for (Attachment attachment : attachments) {
-            attachment.render(stack, new Matrix4f(matrix));
+        if (World.worldType.getPlanet() != this) {
+            pushUBO.updateAtlasOffset(type.atlasOffset);
+            Matrix4f matrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevPos, pos).sub(Utils.getInterpolatedVec(World.worldType.getPlanet().prevPos, World.worldType.getPlanet().pos))).scale(scale);
+            drawCube(matrix, new Vector4f(1));
+            for (Attachment attachment : attachments) {
+                attachment.render(stack, new Matrix4f(matrix));
+            }
         }
         for (Planet moon : moons) {
             moon.render(stack);

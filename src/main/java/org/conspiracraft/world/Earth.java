@@ -69,8 +69,7 @@ public class Earth extends WorldType {
         skylightMul.set(1);
         return (sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
     }
-    @Override
-    public Vector3f getSun() {return sunPos;}
+    
     @Override
     public float getFogginess() {return 1.f;}
     @Override

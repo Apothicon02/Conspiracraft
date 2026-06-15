@@ -315,7 +315,7 @@ public class Renderer {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(196 * 16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(196 * 4);
         Random cloudRand = new Random(911);
-        float brightness = Math.clamp((640 + worldType.getSun().y()) / 640, 0.3f, 1.f);
+        float brightness = Math.clamp((640 + StarSystem.relativePos.y()) / 640, 0.3f, 1.f);
         for (int i = 0; i < 196; i++) {
             float b = Math.max(0.25f, brightness - (cloudRand.nextFloat() / 2));
             Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
@@ -352,7 +352,7 @@ public class Renderer {
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
             starPos.set(starPos.x + (starDist / 2f) + player.pos.x(), starPos.y + player.pos.y(), starPos.z + (starDist / 2f) + player.pos.z());
-            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((worldType.getSun().y()/World.size), 0, atmoFactor)))*20000;
+            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((StarSystem.relativePos.y()/World.size), 0, atmoFactor)))*20000;
             if (starSize > 200.f) {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())

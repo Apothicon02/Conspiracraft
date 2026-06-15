@@ -70,8 +70,7 @@ public class Vera extends WorldType {
         skylightMul.set(1);
         return (sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 0.3f) : new Vector4f(sunPos, 1.f)).max(new Vector4f(0, height, 0, 0));
     }
-    @Override
-    public Vector3f getSun() {return sunPos;}
+    
     @Override
     public float getFogginess() {return 0.4f;}
     @Override

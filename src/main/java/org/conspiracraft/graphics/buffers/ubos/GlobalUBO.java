@@ -6,6 +6,7 @@ import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.graphics.Pipelines;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.Swapchain;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -60,7 +61,7 @@ public class GlobalUBO extends UBO {
         ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
         ((Vector4i)uniformStorage[2]).set(Settings.shadowsEnabled ? 1 : 0, Settings.reflectionsEnabled ? 1 : 0, Settings.upscaleEnabled ? 1 : 0, Settings.taaEnabled ? 1 : 0);
         ((Vector4f)uniformStorage[3]).set(World.worldType.getSkylight());
-        ((Vector3f)uniformStorage[4]).set(World.worldType.getSun());
+        ((Vector3f)uniformStorage[4]).set(StarSystem.relativePos);
         uniformStorage[5] = Swapchain.hdr ? 1 : 0;
         uniformStorage[6] = (float)(Main.timeMs);
         ((Vector2i)uniformStorage[7]).set(Settings.width, Settings.height);

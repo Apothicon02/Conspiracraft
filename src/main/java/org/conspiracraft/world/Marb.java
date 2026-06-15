@@ -10,12 +10,12 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.space.Planet;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.*;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
-import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
@@ -26,32 +26,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.conspiracraft.Main.timeNs;
-import static org.conspiracraft.graphics.Renderer.drawCube;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.LightHelper.iterateLightQueueMultithreaded;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Marb extends WorldType {
-    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/marb");}
-    public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
-            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
-    public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
+    public Planet parent = StarSystem.planets[0];
     @Override
-    public void renderCelestialBodies(MemoryStack stack) {
-        pushUBO.updateLayer(-1);
-        Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevSunPos, sunPos)).scale(500);
-        Vector4f sunColor = new Vector4f(2.5f, 2.5f, 2.5f, 1);
-        drawCube(sunMatrix, sunColor);
-        pushUBO.updateLayer(0);
-        pushUBO.updateAtlasOffset(EntityTypes.OLIVIUS.atlasOffset);
-        Matrix4f oliviusMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(Utils.getInterpolatedVec(prevOliviusPos, oliviusPos)).scale(3000);
-        drawCube(oliviusMatrix, oliviusColor);
-        pushUBO.updateAtlasOffset(EntityTypes.OLIVIUS_CLOUDS.atlasOffset);
-        drawCube(oliviusMatrix.scale(1.04f), oliviusColor);
-        drawCube(oliviusMatrix.scale(1.04f).rotateXYZ(0, 0, (float)Math.toRadians(180.f)), oliviusColor);
-    }
+    public Planet getPlanet(){return parent.moons[0];}
+    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/marb");}
+    public static Vector3f nearestLightning = new Vector3f();
+    public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
     @Override
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);
@@ -68,10 +53,8 @@ public class Marb extends WorldType {
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
         skylightMul.set(1);
-        return (sunPos.y() < 0 && sunPos.y() < oliviusPos.y() ? new Vector4f(oliviusPos, 1.5f) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
+        return (StarSystem.relativePos.y() < 0 && StarSystem.relativePos.y() < parent.pos.y() ? new Vector4f(parent.pos, 1.5f) : new Vector4f(StarSystem.relativePos, 1)).max(new Vector4f(0, height, 0, 0));
     }
-    @Override
-    public Vector3f getSun() {return sunPos;}
     @Override
     public float getFogginess() {return -1.f;}
     @Override
@@ -83,20 +66,7 @@ public class Marb extends WorldType {
     @Override
     public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(oliviusColor.x(), oliviusColor.y(), oliviusColor.z(), 0.f);}
     @Override
-    public void tick() {
-        prevSunPos.set(sunPos);
-        sunPos.set(0, size*2, 0);
-        sunPos.rotateZ(timeNs/1000000000000.f);
-        sunPos.rotateX(0.5f);
-        sunPos.rotateY(2.f);
-        sunPos.set(sunPos.x+(size/2f), sunPos.y, sunPos.z+(size/2f)+128);
-        prevOliviusPos.set(oliviusPos);
-        oliviusPos.set(0, size*-2, 0);
-        oliviusPos.rotateZ(timeNs/1000000000000.f);
-        oliviusPos.rotateX(-0.2f);
-        oliviusPos.rotateY(-1.5f);
-        oliviusPos.set(oliviusPos.x+(size/2f), oliviusPos.y, oliviusPos.z+(size/2f)+128);
-    }
+    public void tick() {}
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
     public WorleyNoiseGenerator worleyNoisePipeline = WorleyNoiseGenerator.newBuilder().setSeed(5315).build();
