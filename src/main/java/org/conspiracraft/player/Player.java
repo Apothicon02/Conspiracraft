@@ -134,6 +134,7 @@ public class Player {
         inv.save();
     }
 
+    public double enteredWorld = 0;
     public Planet nearestPlanet = null;
     public Vector3f oldCamTranslation = new Vector3f();
 
@@ -147,6 +148,7 @@ public class Player {
             if (pos.y() >= 1000) {
                 pos.set(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0));
                 World.worldType = WorldTypes.SPACE;
+                enteredWorld = timeMs;
             }
         } else if (nearestPlanet != null) {
             WorldType nearestType = nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA : (
@@ -162,6 +164,7 @@ public class Player {
                 World.worldType = nearestType;
                 World.load(World.worldType.getWorldPath() + "/");
                 Renderer.initialized = false;
+                enteredWorld = timeMs;
             }
         }
     }
@@ -201,7 +204,7 @@ public class Player {
         newMovement.mul(speed * (downward ? 0.65f : 1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 10.f : 1.f);
-        if (World.worldType == WorldTypes.SPACE) {
+        if (World.worldType == WorldTypes.SPACE && timeMs-enteredWorld > 2000) {
             newMovement.mul(1000000);
         }
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());

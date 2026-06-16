@@ -4,7 +4,9 @@ import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.world.World;
+import org.conspiracraft.world.WorldTypes;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -75,14 +77,18 @@ public class Planet {
     }
 
     public void drawOrbit(Vector3f activeRot, Vector3f activePos, Vector3f parent, float orbitThickness) {
-        pushUBO.updateLayer(-1);
-        float mul = 0.f;
-        Vector3f prevPoint = new Vector3f();
-        for (int i = 0; i <= points; i++) {
-            tick(yearLengthNs*mul, activeRot, activePos, parent);
-            if (i > 0) {Renderer.drawLine(prevPoint, rotatedPos, orbitThickness, color);}
-            prevPoint.set(rotatedPos);
-            mul+=lineInc;
+        if (World.worldType == WorldTypes.SPACE && GUI.showUI) {
+            pushUBO.updateLayer(-1);
+            float mul = 0.f;
+            Vector3f prevPoint = new Vector3f();
+            for (int i = 0; i <= points; i++) {
+                tick(yearLengthNs * mul, activeRot, activePos, parent);
+                if (i > 0) {
+                    Renderer.drawLine(prevPoint, rotatedPos, orbitThickness, color);
+                }
+                prevPoint.set(rotatedPos);
+                mul += lineInc;
+            }
         }
     }
 
