@@ -79,7 +79,6 @@ public class Main {
                 ticksDone++;
                 currentTick++;
                 timeAccum -= tickTimeNs;
-                StarSystem.tick();
                 if (ticksDone < 3) {
                     World.tick();
                     World.worldType.tick();

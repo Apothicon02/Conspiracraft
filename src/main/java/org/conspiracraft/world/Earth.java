@@ -10,6 +10,7 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.shapes.*;
 import org.conspiracraft.world.trees.*;
@@ -37,6 +38,8 @@ public class Earth extends WorldType {
     private final float longitude = (float) Math.toRadians(67.f);
     @Override
     public float getLongitude() {return longitude;}
+    @Override
+    public float gravity() {return 1.f;}
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
@@ -56,7 +59,12 @@ public class Earth extends WorldType {
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
         skylightMul.set(1);
-        return (sunPos.y() < 0 && sunPos.y() < munPos.y() ? new Vector4f(munPos, 1) : new Vector4f(sunPos, 1)).max(new Vector4f(0, height, 0, 0));
+        Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
+        if (skylight.y() <= 0) {
+            return new Vector4f(0);
+        } else {
+            return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());
+        }
     }
     
     @Override

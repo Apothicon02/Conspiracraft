@@ -345,7 +345,7 @@ public class Renderer {
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
-        boolean inSpace = player.pos.y() > height;
+        Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
         float atmoFactor = worldType.getFogginess() < 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
@@ -354,7 +354,7 @@ public class Renderer {
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
-            starPos.set(starPos.x + (starDist / 2f) + player.pos.x(), starPos.y + player.pos.y(), starPos.z + (starDist / 2f) + player.pos.z());
+            starPos.set(starPos.x + (starDist / 2f) + interpolatedPlayerPos.x(), starPos.y + interpolatedPlayerPos.y(), starPos.z + (starDist / 2f) + interpolatedPlayerPos.z());
             float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((StarSystem.relativePos.y()/World.size), 0, atmoFactor)))*20000;
             if (starSize > 200.f) {
                 Matrix4f starMatrix = new Matrix4f()
@@ -381,6 +381,12 @@ public class Renderer {
 //        drawCubes(1024);
     }
 
+    public static void drawLine(Vector3f og, Vector3f dest, float width, Vector4f color) {
+        Vector3f dir = new Vector3f(dest).sub(og);
+        float length = dir.length();
+        Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
+        Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
+    }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
         pushUBO.submit();

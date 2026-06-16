@@ -261,7 +261,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
 //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
 //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, height-max(0, sunHeight*height), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
-    vec4 color = vec4(max(lighting.rgb, sunColor*thickness), thickness);
+    vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.a), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
 
@@ -647,19 +647,18 @@ void main() {
         vec3 tiltedNormal = (tint.a < 1 ? primaryTintNormal : primaryNormal)*causticness;
         vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
-        vec4 skylight = globalUbo.skylight;
         //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        vec4 blockLighting = ((inBounds && globalUbo.renderToggles.y > 0) ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1))*vec4(1, 1, 1, skylight.a);
+        vec4 blockLighting = (inBounds && globalUbo.renderToggles.y > 0) ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
         //blockLighting.a *= 1-abs(causticness/50);
         float fogginess = globalUbo.fogginess < 0 ? 0 : (isSky ? 1.f-pow(max(0, globalUbo.fogginess-1), 2) : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*globalUbo.fogginess))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, 1.f));
-        vec3 source = vec3(skylight.x, max(skylight.y/5, primaryShadowPos.y+9), skylight.z);
+        vec3 source = vec3(globalUbo.skylight.x, max(globalUbo.skylight.y/5, primaryShadowPos.y+9), globalUbo.skylight.z);
         vec3 sunDir = normalize(source - primaryShadowPos);
         rayPos = primaryShadowPos;
         rayDir = sunDir;
         vec4 shadowColor = vec4(0);
-        if (block.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f) {
+        if (globalUbo.skylight.a <= 0 || (block.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
             shadowColor.a = 1.f;
         } else if (globalUbo.renderToggles.x > 0) {
             shadowColor = dda(true);

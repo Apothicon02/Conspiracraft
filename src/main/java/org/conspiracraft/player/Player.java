@@ -201,7 +201,7 @@ public class Player {
         newMovement.mul(speed * (downward ? 0.65f : 1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 10.f : 1.f);
-        if (World.worldType == WorldTypes.SPACE && nearestPlanet.pos.distance(pos) > nearestPlanet.scale + 2) {
+        if (World.worldType == WorldTypes.SPACE) {
             newMovement.mul(1000000);
         }
         boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
