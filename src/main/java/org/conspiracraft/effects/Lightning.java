@@ -8,7 +8,7 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.entities.AshEntity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.world.World;
-import org.conspiracraft.world.WorldTypes;
+import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;

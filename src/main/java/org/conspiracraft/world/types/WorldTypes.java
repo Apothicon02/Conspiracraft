@@ -1,4 +1,4 @@
-package org.conspiracraft.world;
+package org.conspiracraft.world.types;
 
 public class WorldTypes {
     public static final WorldType SPACE = new WorldType();

@@ -22,7 +22,7 @@ public class StarSystem {
                     new Attachment(EntityTypes.OLIVIUS_CLOUDS, 1.04f, new Vector3f()),
                     new Attachment(EntityTypes.OLIVIUS_CLOUDS, 1.08f, new Vector3f(0, 0, (float)Math.toRadians(180.f)))
             }, new Planet[]{
-                    new Planet(EntityTypes.MARB, new Vector3f(AU*2, 0, AU*2.5f), new Vector4f(0.7f, 0.f, 0.f, 1), EARTH*0.125f, 600000000000.f, 10000000000.f, new Attachment[]{}, new Planet[]{}),
+                    new Planet(EntityTypes.MARB, new Vector3f(AU*2, 0, AU*2.5f), new Vector4f(0.7f, 0.f, 0.f, 1), EARTH*0.125f, 100000000000.f, 500000000000.f, new Attachment[]{}, new Planet[]{}),
                     new Planet(EntityTypes.VERA, new Vector3f(AU*4, 0, AU*3), new Vector4f(0.9f, 0.45f, 0.3f, 1), EARTH*0.5f, 200000000000.f, 860000000000.f, new Attachment[]{
                             new Attachment(EntityTypes.VERA_CLOUDS, 1.04f, new Vector3f()),
                             new Attachment(EntityTypes.VERA_ORANGE_CLOUDS, 1.07f, new Vector3f(0, 0, (float)Math.toRadians(180.f)))
@@ -60,9 +60,9 @@ public class StarSystem {
         pushUBO.updateLayer(0);
         pushUBO.updateAtlasOffset(EntityTypes.SUN.atlasOffset);
         Planet activePlanet = Main.player.getPlanet();
-        Vector3f activePos = activePlanet == null ? new Vector3f(0) : activePlanet.pos;
+        Vector3f activePos = activePlanet == null ? new Vector3f(0) : new Vector3f(activePlanet.pos);
         relativePos.set(pos).sub(activePos);
-        Vector3f activeRot = activePlanet == null ? new Vector3f(0) : activePlanet.rot;
+        Vector3f activeRot = activePlanet == null ? new Vector3f(0) : new Vector3f(activePlanet.rot);
         if (activePlanet != null) {
             Quaternionf quaternion = new Quaternionf();
             quaternion.rotationXYZ(-activeRot.x, -activeRot.y, -activeRot.z);

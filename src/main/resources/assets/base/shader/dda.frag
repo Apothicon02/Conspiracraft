@@ -243,7 +243,7 @@ float skyDensity = 1.f;
 float sunBrightnessMul = 1.1f;
 vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
     vec3 relativeSun = vec3(ogPos.x, 0, ogPos.z)+(globalUbo.sun*(1000/worldSize));
-    float sunHeight = relativeSun.y/(size*2);
+    float sunHeight = globalUbo.fogginess < 0 ? 1 : relativeSun.y/(size*2);
     float scattering = gradient(lightPos.y, 0, 1500, 1.5f, -0.5f);
     float sunDist = (distance(lightPos.xz, relativeSun.xz)/1500);
     float adjustedTime = clamp((sunDist*abs(1-clamp(sunHeight, 0.05f, 0.5f)))+scattering, 0.f, 1.f);
@@ -653,7 +653,7 @@ void main() {
         vec4 blockLighting = (inBounds && globalUbo.renderToggles.y > 0) ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
         //blockLighting.a *= 1-abs(causticness/50);
         float fogginess = globalUbo.fogginess < 0 ? 0 : (isSky ? 1.f-pow(max(0, globalUbo.fogginess-1), 2) : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*globalUbo.fogginess))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, 1.f));
-        vec3 source = vec3(globalUbo.skylight.x, max(globalUbo.skylight.y/5, primaryShadowPos.y+9), globalUbo.skylight.z);
+        vec3 source = globalUbo.fogginess < 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, max(globalUbo.skylight.y/5, primaryShadowPos.y+9), globalUbo.skylight.z);
         vec3 sunDir = normalize(source - primaryShadowPos);
         rayPos = primaryShadowPos;
         rayDir = sunDir;
@@ -664,7 +664,7 @@ void main() {
             shadowColor = dda(true);
         }
         if (shadowColor.a > 0.0f) {
-            shadowFactor = !celestialSource ? 0.02f : gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
+            shadowFactor = !celestialSource ? 0.02f : 0.5f;//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
             blockLighting.a *= shadowFactor;
         }
         if (reflectivity > 0.f) {
@@ -680,7 +680,7 @@ void main() {
             vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
             if (reflectColor.a < 1.f) {
                 if (globalUbo.fogginess > 0) {
-                    reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, min(1, globalUbo.fogginess), false);
+                    reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, min(1, max(0, globalUbo.fogginess)), false);
                 }
             } else {
                 //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.

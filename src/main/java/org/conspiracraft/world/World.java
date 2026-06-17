@@ -11,6 +11,8 @@ import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.types.WorldType;
+import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -49,7 +51,7 @@ public class World {
     public static final int sizeLods = size >>lodBits;
     public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
-    public static WorldType worldType = WorldTypes.MARB;
+    public static WorldType worldType = WorldTypes.MARB.space();
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
 

@@ -6,7 +6,7 @@ import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.world.World;
-import org.conspiracraft.world.WorldTypes;
+import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -64,15 +64,28 @@ public class Planet {
                     .rotateXYZ(rot)
                     .setTranslation(rotatedPos)
                     .scale(scale);
-            drawCube(matrix, new Vector4f(1));
-            for (Attachment attachment : attachments) {
-                attachment.render(stack, new Matrix4f(matrix));
-            }
+            drawPlanet(stack, matrix);
         } else {
             tick(Main.timeNs, new Vector3f(), new Vector3f(), parent);
+            if (World.worldType.space() == null) {
+                pushUBO.updateLayer(0);
+                pushUBO.updateAtlasOffset(type.atlasOffset);
+                Matrix4f matrix = new Matrix4f()
+                        .rotateX((float)Math.toRadians(90.f))
+                        .setTranslation(0, -scale, 0)
+                        .scale(scale);
+                drawPlanet(stack, matrix);
+            }
         }
         for (Planet moon : moons) {
             moon.render(stack, activeRot, activePos, pos, orbitThickness*0.5f);
+        }
+    }
+
+    public void drawPlanet(MemoryStack stack, Matrix4f matrix) {
+        drawCube(matrix, new Vector4f(1));
+        for (Attachment attachment : attachments) {
+            attachment.render(stack, new Matrix4f(matrix));
         }
     }
 

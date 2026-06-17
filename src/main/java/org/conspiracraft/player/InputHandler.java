@@ -138,7 +138,7 @@ public class InputHandler {
                             }
                         }
                         if (keyRelease(SDL_SCANCODE_T)) {
-                            timeMul = (timeMul == 1 ? 1000 : 1);
+                            timeMul = (timeMul == 1 ? (isKeyDown(SDL_SCANCODE_LSHIFT) ? 1000 : 10) : 1);
                         }
                         if (keyRelease(SDL_SCANCODE_B)) {
                             Vector3i startPos = new Vector3i((int)player.pos.x(), (int)player.pos.y(), (int)player.pos.z()).div(chunkSize).mul(chunkSize);

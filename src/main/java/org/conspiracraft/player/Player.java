@@ -17,8 +17,8 @@ import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
-import org.conspiracraft.world.WorldType;
-import org.conspiracraft.world.WorldTypes;
+import org.conspiracraft.world.types.WorldType;
+import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -144,28 +144,43 @@ public class Player {
         HandManager.useHands(window);
         movementTick();
         doSounds();
-        if (World.worldType != WorldTypes.SPACE) {
+        if (World.worldType.space() != null) { //going from surface to planet orbit
             if (pos.y() >= 1000) {
-                pos.set(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0));
-                World.worldType = WorldTypes.SPACE;
-                enteredWorld = timeMs;
+                changePlanet(new Vector3f(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
             }
-        } else if (nearestPlanet != null) {
-            WorldType nearestType = nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA : (
-                    nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB : (
-                            nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA : null
+        } else if (World.worldType == WorldTypes.SPACE) { //going from space to planet orbit
+            if (pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
+                WorldType nearestType = nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA.space() : (
+                        nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB.space() : (
+                                nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA.space() : null
+                        )
+                );
+                changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+            }
+        } else if (pos.y() <= -500) { //going from planet orbit to planet surface
+            WorldType nearestType = World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
+                    World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (
+                            World.worldType == WorldTypes.VERA.space() ? WorldTypes.VERA : null
                     )
             );
-            if (nearestType != null && pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
-                pos.set(World.size / 2.f, World.height + 2, World.size / 2.f);
-                prevPos.set(pos);
-                vel.set(0);
-                movement.set(0);
-                World.worldType = nearestType;
+            changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+        } else if (pos.y() >= 1000) { //going from planet orbit to space
+            changePlanet(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
+        }
+    }
+
+    public void changePlanet(Vector3f newPos, WorldType newWorldType) throws IOException, InterruptedException {
+        if (newWorldType != null && timeMs-enteredWorld > 5000) { //5 second cooldown
+            pos.set(newPos);
+            prevPos.set(pos);
+            vel.set(0);
+            movement.set(0);
+            World.worldType = newWorldType;
+            if (World.worldType != WorldTypes.SPACE) {
                 World.load(World.worldType.getWorldPath() + "/");
                 Renderer.initialized = false;
-                enteredWorld = timeMs;
             }
+            enteredWorld = timeMs;
         }
     }
 

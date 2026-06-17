@@ -1,4 +1,4 @@
-package org.conspiracraft.world;
+package org.conspiracraft.world.types;
 
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
@@ -11,16 +11,12 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.blocks.types.LightBlockType;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
-import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cloud;
-import org.conspiracraft.world.shapes.Cube;
-import org.conspiracraft.world.trees.WillowTree;
 import org.joml.*;
-import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
@@ -32,13 +28,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.Main.timeNs;
-import static org.conspiracraft.graphics.Renderer.drawCube;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.world.LightHelper.iterateLightQueueMultithreaded;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Aksala extends WorldType {
+    public static class AksalaSpace extends WorldType {
+        @Override
+        public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/aksala_space");}
+        public Planet parent = StarSystem.planets[1];
+        @Override
+        public Planet getPlanet(){return parent;}
+    }
+    public AksalaSpace space = new AksalaSpace();
+    @Override
+    public WorldType space() {
+        return space;
+    }
     private final float longitude = (float) Math.toRadians(15.f);
     @Override
     public float getLongitude() {return longitude;}
@@ -46,6 +52,7 @@ public class Aksala extends WorldType {
     public Planet getPlanet(){return StarSystem.planets[1];}
     @Override
     public float gravity() {return 1.f;}
+@Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/aksala");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();

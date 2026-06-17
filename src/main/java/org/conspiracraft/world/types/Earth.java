@@ -1,4 +1,4 @@
-package org.conspiracraft.world;
+package org.conspiracraft.world.types;
 
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
@@ -9,14 +9,13 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.*;
 import org.conspiracraft.world.trees.*;
 import org.conspiracraft.world.trees.OakTree;
 import org.joml.*;
-import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
 import java.lang.Runtime;
@@ -35,11 +34,21 @@ import static org.conspiracraft.world.LightHelper.*;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
+    public static class EarthSpace extends WorldType {
+        @Override
+        public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth_space");}
+    }
+    public EarthSpace space = new EarthSpace();
+    @Override
+    public WorldType space() {
+        return space;
+    }
     private final float longitude = (float) Math.toRadians(67.f);
     @Override
     public float getLongitude() {return longitude;}
     @Override
     public float gravity() {return 1.f;}
+@Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
