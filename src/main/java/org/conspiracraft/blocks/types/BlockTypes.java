@@ -22,8 +22,9 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class BlockTypes {
-    public static int blockTexSize = 8;
-    public static long blockTexSizeL = blockTexSize;
+    public static int blockTexWidth = 8;
+    public static long blockTexWidthL = blockTexWidth;
+    public static int blockTexHeight = blockTexWidth * blockTexWidth;
     private static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
     public static BlockType
@@ -131,7 +132,11 @@ public class BlockTypes {
             GRANITE = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties())),
             CINNABAR = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties())),
             OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/obsidian_dust",  GRAVEL.blockProperties.copy().blockSFX(
-                    new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1)));
+                    new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
+            STEEL_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().blockSFX(
+                    new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
+            HAZARD = create(new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
+                    new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
@@ -167,14 +172,51 @@ public class BlockTypes {
             BufferedImage image = Utils.loadImage("block/"+type.name);
             int height = image.getHeight();
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
-            for (long row = 0; row < height; row++) {
-                memCopy(memAddress(blockBuf) + row * blockTexSize * 4L,
-                        atlasBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexSizeL)) * 4L),
-                        blockTexSize * 4L);
+            if (height > blockTexWidth) {
+                copyTexture(blockBuf, i);
+            } else {
+                copyPartialTexture(blockBuf, i);
             }
             memFree(blockBuf);
         }
         ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
         reloading = true;
+    }
+    public static void copyTexture(ByteBuffer buf, int i) {
+        for (long row = 0; row < blockTexHeight; row++) {
+            memCopy(memAddress(buf) + row * blockTexWidth * 4L,
+                    atlasBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                    blockTexWidth * 4L);
+        }
+    }
+    public static void copyPartialTexture(ByteBuffer buf, int i) {
+        for (long row = 0; row < blockTexWidth; row++) {
+            for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
+                memCopy(memAddress(buf) + row * blockTexWidth * 4L,
+                        atlasBuffer.pointer.get(0) + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                        blockTexWidth * 4L);
+                for (long col = 0; col < blockTexWidth; col++) {
+                    memCopy(memAddress(buf) + ((((blockTexWidth-1)-row) * blockTexWidth) + ((blockTexWidth-1)-col)) * 4L,
+                            atlasBuffer.pointer.get(0) + ((((row+(layer+(blockTexHeight/2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                            4L);
+                }
+            }
+        }
+        for (long row = 1; row < blockTexWidth; row++) {
+            for (long col = 0; col < blockTexWidth; col++) {
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        4L);
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col+1 + (i * blockTexWidthL)) * 4L),
+                        4L);
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        4L);
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                        4L);
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.shapes.BevelledCube;
 import org.conspiracraft.world.shapes.Blob;
+import org.conspiracraft.world.shapes.Cube;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -68,26 +69,56 @@ public class WorldType {
                 }
             }
         }
-        BevelledCube.generate(World.size/2, World.height/2, World.size/2, BlockTypes.MARBLE.id, 0, chunkSize);
-        BevelledCube.generate(World.size/2, (World.height/2)+4, (World.size/2)+8, BlockTypes.STONE.id, 0, chunkSize);
-        BevelledCube.generate((World.size/2)-5, (World.height/2)-2, World.size/2, BlockTypes.MARBLE.id, 0, chunkSize);
-        BevelledCube.generate((World.size/2)+3, World.height/2, (World.size/2)+5, BlockTypes.STONE.id, 0, chunkSize);
-        final Random rand = new Random(World.seed);
-        float chance = 0.0001f;
-        for (int x = (size/2)-chunkSize; x < (size/2)+chunkSize; x++) {
-            for (int z = (size/2)-chunkSize; z < (size/2)+chunkSize; z++) {
-                for (int y = (height/2)-chunkSize; y < (height/2)+chunkSize; y++) {
-                    if (rand.nextFloat() < chance) {
-                        chance = 0.0001f;
-                        Blob.generate(new Vector2i(0), x, y, z, 0, 0, (int) (2 + (rand.nextFloat() * 5)));
+        Cube.generate(new Vector2i(), (World.size/2)+48, (World.height/2)-24, (World.size/2)+24, BlockTypes.STEEL_PLATING.id, 0, chunkSize/3);
+        Cube.generate(new Vector2i(), (World.size/2)+48, (World.height/2)-24, (World.size/2)+48, BlockTypes.HAZARD.id, 0, chunkSize/3);
+        for (int x = (World.size/2)+12-chunkSize; x <= (World.size/2)+12+chunkSize; x++) {
+            for (int z = (World.size / 2) + 12-chunkSize; z <= (World.size / 2) + 54+chunkSize; z++) {
+                if (x > (World.size/2)+6 && x < (World.size/2)+18) {
+                    World.setBlock(x, ((World.height-chunkSize)/2)-10, z, BlockTypes.STEEL_PLATING.id, 0);
+                } else {
+                    if (x == (World.size/2)+12-chunkSize || x == (World.size/2)+12+chunkSize) {
+                        for (int y = ((World.height-chunkSize)/2)-11; y >= ((World.height-chunkSize)/2)-31; y--) {
+                            World.setBlock(x, y, z, BlockTypes.GLASS.id, 0);
+                        }
                     } else {
-                        chance += 0.00003f;
+                        World.setBlock(x, ((World.height-chunkSize)/2)-11, z, BlockTypes.GLASS.id, 0);
+                    }
+                    if (x == (World.size/2)+6 || x == (World.size/2)+18) {
+                        World.setBlock(x, ((World.height-chunkSize)/2)-32, z, BlockTypes.HAZARD.id, 0);
+                    } else {
+                        World.setBlock(x, ((World.height-chunkSize)/2)-32, z, BlockTypes.STEEL_PLATING.id, 0);
+                    }
+                }
+                World.setBlock(x, ((World.height-chunkSize)/2)-33, z, BlockTypes.STEEL_PLATING.id, 0);
+            }
+        }
+        for (int x = (World.size/2)+10; x <= (World.size/2)+14; x++) {
+            for (int z = (World.size/2)+10; z <= (World.size/2)+14; z++) {
+                World.setBlock(x, ((World.height-chunkSize)/2)-9, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-10, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-33, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-34, z, BlockTypes.HAZARD.id, 0);
+                if (x > (World.size/2)+10 && x < (World.size/2)+14 && z > (World.size/2)+10 && z < (World.size/2)+14) {
+                    for (int y = ((World.height - chunkSize) / 2) - 32; y <= ((World.height - chunkSize) / 2) - 11; y++) {
+                        World.setBlock(x, y, z, BlockTypes.STEEL_FRAME.id, 0);
+                    }
+                }
+            }
+
+            for (int z = (World.size/2)+50; z <= (World.size/2)+54; z++) {
+                World.setBlock(x, ((World.height-chunkSize)/2)-9, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-10, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-33, z, BlockTypes.HAZARD.id, 0);
+                World.setBlock(x, ((World.height-chunkSize)/2)-34, z, BlockTypes.HAZARD.id, 0);
+                if (x > (World.size/2)+10 && x < (World.size/2)+14 && z > (World.size/2)+50 && z < (World.size/2)+54) {
+                    for (int y = ((World.height - chunkSize) / 2) - 32; y <= ((World.height - chunkSize) / 2) - 11; y++) {
+                        World.setBlock(x, y, z, BlockTypes.STEEL_FRAME.id, 0);
                     }
                 }
             }
         }
     }
-    public float gravity() {return 0.f;}
+    public float gravity() {return 0.01f;}
     public float getFogginess() {return -1.f;}
     public Vector4f getAtmosphereColor() {return new Vector4f(0);}
     public Vector4f getNightAtmosphereColor() {return new Vector4f(0);}
