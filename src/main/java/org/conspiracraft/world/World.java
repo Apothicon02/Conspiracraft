@@ -384,6 +384,9 @@ public class World {
         }
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType) {
+        replaceBlock(x, y, z, type, subType, true);
+    }
+    public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried replacing block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -402,10 +405,12 @@ public class World {
             }
         }
         if (!generating) {
-            Light oldLight = chunk.getLight(pos);
-            chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
-            updateHeightmap(x, y, z);
-            LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+            if (updateLighting) {
+                Light oldLight = chunk.getLight(pos);
+                chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+                updateHeightmap(x, y, z);
+                LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+            }
             if (!updateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
                 updateSet.add(chunkPos);
                 updateQueue.addLast(chunkPos);

@@ -44,7 +44,7 @@ public class BlockTypes {
                     .isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             KYANITE = create(List.of(BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/kyanite",  (LightBlockProperties) (new LightBlockProperties().r(4).g(20).b(40).blockSFX(
-                    new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))),
+                    new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))).altTexLoad(true),
             MARBLE = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.6f, new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f))),
             IGNEOUS = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties())),
@@ -136,8 +136,8 @@ public class BlockTypes {
             STEEL_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             HAZARD = create(new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
-                    new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //80
-            ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true)));
+                    new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))).altTexLoad(true), //80
+            ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true);
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
@@ -176,7 +176,7 @@ public class BlockTypes {
             if (height > blockTexWidth) {
                 copyTexture(blockBuf, i);
             } else {
-                copyPartialTexture(blockBuf, i);
+                copyPartialTexture(blockBuf, i, type.altTexLoad);
             }
             memFree(blockBuf);
         }
@@ -190,19 +190,22 @@ public class BlockTypes {
                     blockTexWidth * 4L);
         }
     }
-    public static void copyPartialTexture(ByteBuffer buf, int i) {
+    public static void copyPartialTexture(ByteBuffer buf, int i, boolean alt) {
         for (long row = 0; row < blockTexWidth; row++) {
             for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
                 memCopy(memAddress(buf) + row * blockTexWidth * 4L,
                         atlasBuffer.pointer.get(0) + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
                         blockTexWidth * 4L);
                 for (long col = 0; col < blockTexWidth; col++) {
-                    memCopy(memAddress(buf) + ((((blockTexWidth-1)-(row-1 < 0 ? blockTexWidth-1 : row-1)) * blockTexWidth) + ((blockTexWidth-1)-col)) * 4L,
-                            atlasBuffer.pointer.get(0) + ((((row+(layer+(blockTexHeight/2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
-                            4L);
-//                    memCopy(memAddress(buf) + ((((blockTexWidth-1)-row) * blockTexWidth) + ((blockTexWidth-1)-(col-1 < 0 ? blockTexWidth-1 : col-1))) * 4L,
-//                            atlasBuffer.pointer.get(0) + ((((row+(layer+(blockTexHeight/2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
-//                            4L);
+                    if (alt) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    } else {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
                 }
             }
         }
@@ -211,18 +214,34 @@ public class BlockTypes {
                 memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
                         atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
                         4L);
-                if (col+1 < blockTexWidth) {
-                    memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                            atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
-                            4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
                 }
                 memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
                         atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
                         4L);
-                if (col+1 < blockTexWidth) {
-                    memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                            atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
-                            4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
                 }
             }
         }

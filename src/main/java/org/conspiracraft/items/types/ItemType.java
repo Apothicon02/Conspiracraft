@@ -1,14 +1,19 @@
 package org.conspiracraft.items.types;
 
+import org.conspiracraft.blocks.types.BlockType;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.ItemSFX;
 import org.conspiracraft.items.ItemTag;
 import org.conspiracraft.physics.DDAResult;
+import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 
 import java.util.List;
+
+import static org.conspiracraft.Main.player;
 
 public class ItemType {
     public List<ItemTag> tags = List.of();
@@ -42,6 +47,14 @@ public class ItemType {
         return this;
     }
     public int use(DDAResult dda) {
+        if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything) {
+            Vector2i block = World.getBlock(dda.prevHit);
+            BlockType blockType = BlockTypes.blockTypes[block.x()];
+            if (blockType.blockProperties.isFluidReplaceable) {
+                World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), blockToPlace.y());
+                return 200;
+            }
+        }
         return 0;
     }
 }

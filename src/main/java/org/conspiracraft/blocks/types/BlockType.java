@@ -16,6 +16,11 @@ public class BlockType {
     public final String name;
     public BlockProperties blockProperties;
     public List<BlockTag> tags = List.of();
+    public boolean altTexLoad = false;
+    public BlockType altTexLoad(boolean altTexLoad) {
+        this.altTexLoad = altTexLoad;
+        return this;
+    }
 
     public float getTTBSpeed(int tool) {
         for (BlockTag tag : tags) {
