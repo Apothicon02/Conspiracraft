@@ -555,7 +555,7 @@ public class Earth extends WorldType {
                                     } else if (biome == Biomes.CHERRY_GROVE.id) {
                                         if (randomNumber < 0.0004f) {
                                             Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } if (randomNumber < 0.0043f) {
+                                        } else if (randomNumber < 0.0043f) {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);

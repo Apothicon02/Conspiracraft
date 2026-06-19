@@ -16,6 +16,9 @@ import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cloud;
+import org.conspiracraft.world.trees.OakTree;
+import org.conspiracraft.world.trees.PineTree;
+import org.conspiracraft.world.trees.SpruceTree;
 import org.joml.*;
 
 import java.lang.Math;
@@ -299,6 +302,7 @@ public class Aksala extends WorldType {
                                 Vector2i blockOn = getBlock(x, elevation, z);
                                 float randomNumber = rand.nextFloat();
                                 boolean onSnow = blockOn.x() == BlockTypes.SNOW.id;
+                                float featureNoise = SimplexNoise.noise(x / 300.f, z / 300.f);
                                 if (randomNumber < (onSnow ? 0.0005f : 0.f)) {
                                     Blob.generate(blockOn, x, elevation, z, BlockTypes.ICE.id, 0, (int) (2 + (rand.nextFloat() * 14)));
                                 } else if (blockOn.x() == BlockTypes.BASALT.id && randomNumber < 0.2f) {
@@ -307,6 +311,23 @@ public class Aksala extends WorldType {
                                         World.setBlock(x, elevation+2, z, BlockTypes.BASALT.id, 0);
                                         if (randomNumber < 0.03f) {
                                             World.setBlock(x, elevation+3, z, BlockTypes.BASALT.id, 0);
+                                        }
+                                    }
+                                } else if (onSnow) {
+                                    if ((x/2)+(elevation*10)+(z/500) > size) {
+                                        if (randomNumber < 0.0043f) {
+                                            int maxHeight = rand.nextInt(24, 30);
+                                            int radius = rand.nextInt(26, 34);
+                                            int count = rand.nextInt(6, 8);
+                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.KYANITE.id, 0, BlockTypes.ROSE_QUARTZ.id, 0, count);
+                                        }
+                                    } else {
+                                        if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {
+                                            int maxHeight = rand.nextInt(19) + 5;
+                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, x + elevation + (z / 500) > 1000 ? BlockTypes.ICE.id : BlockTypes.KYANITE.id, 0, BlockTypes.SNOW.id, 0);
+                                        } else if (randomNumber < 0.001f) {
+                                            int maxHeight = rand.nextInt(6) + 12;
+                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.ICE.id, 0, BlockTypes.SNOW.id, 0);
                                         }
                                     }
                                 }

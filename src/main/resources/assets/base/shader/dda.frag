@@ -573,8 +573,8 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = tint.a < 1 || block.x == 74 ? 1.f : (block.x == 57 ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : 0.f));
-    float roughness = block.x == 1 ? 0.2f : (tint.a < 1 ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61) ? 0.009f : 0.f)));
+    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : (block.x == 57  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 64) ? 0.5f : 0.f)));
+    float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 64) ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
         isSky = false;

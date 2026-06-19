@@ -1,5 +1,6 @@
 package org.conspiracraft.world.trees.canopies;
 
+import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.joml.SimplexNoise;
 import org.joml.Vector2i;
@@ -44,7 +45,7 @@ public class BlobDrippyCanopy extends Canopy {
                             aPos.sub(0, 1, 0);
                             if (aPos.y() >= droop) {
                                 addToMap(map, new Vector3i(aPos), blockType, blockSubType);
-                            } else {
+                            } else if (BlockTags.leaves.tagged.contains(blockType)) {
                                 if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
                                         (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                                     addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
