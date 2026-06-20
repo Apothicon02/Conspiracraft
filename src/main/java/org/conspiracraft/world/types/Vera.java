@@ -12,6 +12,7 @@ import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cloud;
@@ -83,7 +84,7 @@ public class Vera extends WorldType {
     }
     
     @Override
-    public float getFogginess() {return 0.4f;}
+    public float getFogginess() {return 0.8f;}
     @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(1.f, 0.6f, 0.8f, 0.85f);}
     @Override
@@ -118,7 +119,7 @@ public class Vera extends WorldType {
         generating = true;
         long startTime = System.currentTimeMillis();
         Random seededRand = new Random(35311350L);
-        Vector3i[] craters = new Vector3i[200];
+        Vector3i[] craters = new Vector3i[20];
         for (int i = 0; i < craters.length; i++) {
             int radius = seededRand.nextInt(90) + 10;
             int borderOffset = radius*2;
@@ -152,7 +153,7 @@ public class Vera extends WorldType {
                                 double elevationNoise = noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
                                         ((noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f));
                                 double elevation = elevationNoise * (125 * mountainness);
-                                double baseHilliness = SimplexNoise.noise((x + size) / 1500.f, (z + size) / 1500.f)*6;
+                                double baseHilliness = SimplexNoise.noise((x + size) / 1500.f, (z + size) / 1500.f)*3;
                                 if (baseHilliness < 0.f) {
                                     baseHilliness *= -0.5;
                                 }
@@ -160,7 +161,28 @@ public class Vera extends WorldType {
                                 double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d);
                                 double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
                                 int surface = (int) Math.max(60, 10 + (56*Math.min(1, 1+Math.max(0, ogIslandsNoise*0.15f))) + Math.max(0, detailNoise*5) + hilliness + elevation);
-
+                                double craterSurfMul = 1.f;
+                                double craterSurfMaxMul = 1.f;
+                                boolean inCrater = false;
+                                for (Vector3i crater : craters) {
+                                    double craterDist = Utils.distance(crater.x(), crater.z(), x, z);
+                                    int radius = crater.y();
+                                    if (craterDist < radius) {
+                                        inCrater = true;
+                                        craterDist /= radius;
+                                        craterDist = Math.pow(craterDist, 2);
+                                        craterDist *= 0.5f; //depth
+                                        double antiRidge = Utils.gradient(Math.clamp(surface, 70, 96), 70, 96, 0.2f, 0.f);
+                                        craterDist += 0.7f-antiRidge;
+                                        double ridgePeak = 1.1f-(antiRidge/2);
+                                        if (craterDist > ridgePeak) { //ridges
+                                            craterDist -= ((craterDist-ridgePeak)*2.f);
+                                        }
+                                        craterSurfMul = Math.min(craterDist, craterSurfMul);
+                                        craterSurfMaxMul = Math.max(craterDist, craterSurfMaxMul);
+                                    }
+                                }
+                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
                                 biomes[x * size + z] = (byte)(ogMoutainness > 0.1 ? Biomes.VERA_HILLS.id : Biomes.VERA_PLAINS.id);
                                 heightmap[packPos(x, z)] = (short)surface;
                                 minElevation = (short) Math.min(minElevation, surface);

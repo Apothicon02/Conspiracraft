@@ -37,6 +37,7 @@ public class Biomes {
     public static final Biome AKSALA_PEAKS = create();
     public static final Biome LAZULI_DUNES = create();
     public static final Biome LAZULI_BADLANDS = create();
+    public static final Biome LAZULI_RIDGES = create();
 
     public static final Biome[] biomes = biomesTemp.toArray(new Biome[0]);
     public static Biome create() {

@@ -51,7 +51,7 @@ public class World {
     public static final int sizeLods = size >>lodBits;
     public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
-    public static WorldType worldType = WorldTypes.LAZULI;
+    public static WorldType worldType = WorldTypes.VERA;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
 

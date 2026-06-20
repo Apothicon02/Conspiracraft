@@ -141,7 +141,7 @@ public class BlockTypes {
             CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             TURQUOISE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/turquoise",  ROSE_QUARTZ.blockProperties.copy())),
             LAPIS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/lapis",  TURQUOISE.blockProperties.copy())),
-            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy()));
+            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy())); //85
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

@@ -73,7 +73,7 @@ public class StarSystem {
             relativePos.set(rotatedPos);
         }
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(relativePos).scale(SCALE);
-        Vector4f sunColor = new Vector4f(2.5f, 2.5f, 2.5f, 1);
+        Vector4f sunColor = new Vector4f(10f, 10f, 10f, 1);
         drawCube(sunMatrix, sunColor);
         for (Planet planet : planets) {
             planet.render(stack, activeRot, activePos, pos, 500000);

@@ -347,7 +347,6 @@ public class Renderer {
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
         Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
-        float atmoFactor = worldType.getFogginess() <= 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
         for (int i = 0; i < 512; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
@@ -355,7 +354,7 @@ public class Renderer {
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
             starPos.set(starPos.x + (starDist / 2f) + interpolatedPlayerPos.x(), starPos.y + interpolatedPlayerPos.y(), starPos.z + (starDist / 2f) + interpolatedPlayerPos.z());
-            float starSize = Math.min(40f, ((starRand.nextFloat()*40)+40)-(150*Math.clamp((StarSystem.relativePos.y()/World.size), 0, atmoFactor)))*20000;
+            float starSize = Math.min(40f, (starRand.nextFloat()*40)+40)*20000;
             if (starSize > 200.f) {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
