@@ -8,11 +8,16 @@ import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.effects.Effect;
+import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
-import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.*;
-import org.conspiracraft.world.shapes.*;
+import org.conspiracraft.world.Biomes;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LightHelper;
+import org.conspiracraft.world.World;
+import org.conspiracraft.world.shapes.BevelledCube;
+import org.conspiracraft.world.shapes.Blob;
 import org.joml.*;
 
 import java.lang.Math;
@@ -24,70 +29,86 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.conspiracraft.Main.timeNs;
 import static org.conspiracraft.world.LightHelper.iterateLightQueueMultithreaded;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
-public class Marb extends WorldType {
-    public static class MarbSpace extends WorldType {
+public class Lazuli extends WorldType {
+    public static class VeraSpace extends WorldType {
         @Override
-        public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/marb_space");}
-        public Planet parent = StarSystem.planets[0].moons[0];
+        public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/lazuli_space");}
+        public Planet parent = StarSystem.planets[2];
         @Override
         public Planet getPlanet(){return parent;}
     }
-    public MarbSpace space = new MarbSpace();
+    public VeraSpace space = new VeraSpace();
     @Override
     public WorldType space() {
         return space;
     }
-    private final float longitude = (float) Math.toRadians(40.f);
+    private final float longitude = (float) Math.toRadians(80.f);
     @Override
     public float getLongitude() {return longitude;}
-    public Planet parent = StarSystem.planets[0];
     @Override
-    public Planet getPlanet(){return parent.moons[0];}
+    public Planet getPlanet(){return StarSystem.planets[2];}
     @Override
-    public float gravity() {return 0.0075f;}
+    public float gravity() {return 0.04f;}
+@Override
+    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/lazuli");}
+    public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
+            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
+    public static Vector4f sunsetColor = new Vector4f(0.f, 0.475f, 0.949f, 1);
+
     @Override
-    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/marb");}
-//    public static Vector3f nearestLightning = new Vector3f();
-//    public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
-//    @Override
-//    public Vector4f getSkylight() {
-//        nearestLightning.set(-100000);
-//        for (Effect effect : effects) {
-//            if (effect instanceof Lightning lightning) {
-//                Vector3f lightningPos = lightning.pos;
-//                if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
-//                    nearestLightning.set(lightningPos);
-//                }
-//            }
-//        }
-//        if (nearestLightning.x() >= 0) {
-//            skylightMul.set(1.f, 0.95f, 0.f);
-//            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
-//        }
-//        skylightMul.set(1);
-//        Vector4f skylight = StarSystem.relativePos.y() < 0 && StarSystem.relativePos.y() < parent.rotatedPos.y() ? new Vector4f(parent.rotatedPos, 1.5f) : new Vector4f(StarSystem.relativePos, 1);
-//        if (skylight.y() <= 0) {
-//            return new Vector4f(0);
-//        } else {
-//            return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());
-//        }
-//    }
+    public Vector4f getSkylight() {
+        nearestLightning.set(-100000);
+        for (Effect effect : effects) {
+            if (effect instanceof Lightning lightning) {
+                Vector3f lightningPos = lightning.pos;
+                if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
+                    nearestLightning.set(lightningPos);
+                }
+            }
+        }
+        if (nearestLightning.x() >= 0) {
+            skylightMul.set(0.35f, 0.0f, 1.0f);
+            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+        }
+        skylightMul.set(1);
+        Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
+        if (skylight.y() <= 0) {
+            return new Vector4f(0);
+        } else {
+            return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());
+        }
+    }
+    
     @Override
-    public float getFogginess() {return 0.f;}
+    public float getFogginess() {return 1.9f;}
     @Override
-    public Vector4f getAtmosphereColor() {return new Vector4f(1.f, 1.f, 1.f, 0.f);}
+    public Vector4f getAtmosphereColor() {return new Vector4f(0.f, 0.8f, 1.2f, 0.85f);}
     @Override
-    public Vector4f getNightAtmosphereColor() {return new Vector4f(oliviusColor.x(), oliviusColor.y(), oliviusColor.z(), 0.f);}
+    public Vector4f getNightAtmosphereColor() {return new Vector4f(1.f, 0.f, 0.8f, 0.85f);}
     @Override
-    public Vector4f getSunsetAtmosphereColor() {return new Vector4f(oliviusColor.x(), oliviusColor.y(), oliviusColor.z(), 0.f);}
+    public Vector4f getSunsetAtmosphereColor() {return new Vector4f(sunsetColor.x(), sunsetColor.y(), sunsetColor.z(), 0.85f);}
     @Override
-    public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(oliviusColor.x(), oliviusColor.y(), oliviusColor.z(), 0.f);}
+    public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(sunsetColor.x(), sunsetColor.y(), sunsetColor.z(), 0.85f);}
     @Override
-    public void tick() {}
+    public void tick() {
+        prevSunPos.set(sunPos);
+        sunPos.set(0, size*2, 0);
+        sunPos.rotateZ(timeNs/1000000000000.f);
+        sunPos.rotateX(0.5f);
+        sunPos.rotateY(2.f);
+        sunPos.set(sunPos.x+(size/2f), sunPos.y, sunPos.z+(size/2f)+128);
+        prevOliviusPos.set(oliviusPos);
+        oliviusPos.set(0, size*-2, 0);
+        oliviusPos.rotateZ(timeNs/1000000000000.f);
+        oliviusPos.rotateX(-0.2f);
+        oliviusPos.rotateY(-1.5f);
+        oliviusPos.set(oliviusPos.x+(size/2f), oliviusPos.y, oliviusPos.z+(size/2f)+128);
+    }
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
     public WorleyNoiseGenerator worleyNoisePipeline = WorleyNoiseGenerator.newBuilder().setSeed(5315).build();
@@ -99,14 +120,6 @@ public class Marb extends WorldType {
         generating = true;
         long startTime = System.currentTimeMillis();
         Random seededRand = new Random(35311350L);
-        Vector3i[] craters = new Vector3i[200];
-        for (int i = 0; i < craters.length; i++) {
-            int radius = (int) ((seededRand.nextInt(90)*Math.min(1, seededRand.nextFloat()+0.5f)) + 10);
-            int borderOffset = radius*2;
-            int x = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
-            int z = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
-            craters[i] = new Vector3i(x, radius, z);
-        }
         final byte[] biomes = new byte[size*size];
         final short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
         final short[] chunksMaxElevations = new short[sizeChunks*sizeChunks];
@@ -125,34 +138,23 @@ public class Marb extends WorldType {
                         short maxElevation = (short) 0;
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                float basePerlinNoise = (SimplexNoise.noise(x / 1250.f, z / 1250.f)+1)*2;
-                                float detailNoise = (SimplexNoise.noise(x / 150.f, z / 150.f) + 0.5f) / 2;
-                                double baseCellularNoise = worleyNoisePipeline.evaluateNoise(x / 1000.f, z / 1000.f) / 2;
-                                int surface = (int) (((100 * (Math.max(0.1f, baseCellularNoise) * (detailNoise+basePerlinNoise))) + 70));
-                                double craterSurfMul = 1.f;
-                                double craterSurfMaxMul = 1.f;
-                                boolean inCrater = false;
-                                for (Vector3i crater : craters) {
-                                    double craterDist = Utils.distance(crater.x(), crater.z(), x, z);
-                                    int radius = crater.y();
-                                    if (craterDist < radius) {
-                                        inCrater = true;
-                                        craterDist /= radius;
-                                        craterDist = Math.pow(craterDist, 2);
-                                        craterDist *= 0.5f; //depth
-                                        double antiRidge = Utils.gradient(Math.clamp(surface, 70, 96), 70, 96, 0.2f, 0.f);
-                                        craterDist += 0.7f-antiRidge;
-                                        double ridgePeak = 1.1f-(antiRidge/2);
-                                        if (craterDist > ridgePeak) { //ridges
-                                            craterDist -= ((craterDist-ridgePeak)*2.f);
+                                double elevationNoise = noisePipeline.evaluateNoise((x - size) / 250.d, (z - size) / 250.d);
+                                double hilliness = SimplexNoise.noise(x / 750.f, z / 750.f);
+                                double surface = 64+(elevationNoise * (32+(hilliness*20)));
+                                boolean badlands = false;
+                                if (hilliness > 0.5f) {
+                                    surface *= 1+(7*(Math.min(0.05f, hilliness-0.5)-Math.clamp((hilliness-0.75)/3, 0, 0.05f)));
+                                    if (hilliness > 0.6f) {
+                                        double bonus = hilliness > 0.925f ? 1.f+(50*Math.min(0.005f, hilliness-0.925f)) : 1.f;
+                                        double badlandsSurface = 64 + (1000 * bonus * Math.min(0.05f, hilliness - 0.6)) + (9 * elevationNoise);
+                                        if (badlandsSurface > surface) {
+                                            surface = badlandsSurface;
+                                            badlands = true;
                                         }
-                                        craterSurfMul = Math.min(craterDist, craterSurfMul);
-                                        craterSurfMaxMul = Math.max(craterDist, craterSurfMaxMul);
                                     }
                                 }
-                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
 
-                                biomes[x * size + z] = (byte)(inCrater ? Biomes.MARB_CRATER.id : Biomes.MARB_HIGHLANDS.id);
+                                biomes[x * size + z] = badlands ? Biomes.LAZULI_BADLANDS.id : Biomes.LAZULI_DUNES.id;
                                 heightmap[packPos(x, z)] = (short)surface;
                                 minElevation = (short) Math.min(minElevation, surface);
                                 maxElevation = (short) Math.max(maxElevation, surface);
@@ -184,7 +186,7 @@ public class Marb extends WorldType {
                         for (int cY = 0; cY < minChunkElevation; cY++) {
                             final int packedCP = World.packChunkPos(cX, cY, cZ);
                             final Chunk chunk = new Chunk(packedCP);
-                            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.MARBLE.id, 0));
+                            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.OBSIDIAN.id, 0));
                             World.chunks[packedCP] = chunk;
                             updateRegion(cX, cY, cZ, false);
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
@@ -220,14 +222,12 @@ public class Marb extends WorldType {
                                     final int ceil = floor + chunkSize;
                                     final int seafloor = Math.min(elevation+1, ceil);
                                     final int seafloorAbove = Math.min(elevation+2, ceil);
-                                    double noise = noisePipeline.evaluateNoise(x / 35.f, z / 60.f);
-                                    double simplexNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
-                                    //double bigNoise = SimplexNoise.noise(x / 2000.f, z / 2000.f);
-
-                                    for (int y = floor; y <= elevation; y++) {
-                                        final int blockType = biome == Biomes.MARB_CRATER.id ?
-                                                ((((simplexNoise > 0.3 && simplexNoise < 0.5) || (simplexNoise > -0.5 && simplexNoise < -0.3)) && noise > 0.34f) ? ((y == elevation && noise > 0.5f) ? BlockTypes.IRON_ORE.id : BlockTypes.STONE.id) : BlockTypes.GRAVEL.id) :
-                                                (flat ? (Utils.gradient(y, 92, 100, 1, 0)-Math.abs(simplexNoise) > 0.25f ? BlockTypes.CINNABAR.id : BlockTypes.GRANITE.id) : BlockTypes.FLINT.id);
+                                    double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
+                                    double eleFactor = elevation + (rockNoise * 50);
+                                    boolean snowy = eleFactor > 136;
+                                    int lapisAzurine = rockNoise > 0.67f || rockNoise < 0.15f ? BlockTypes.AZURINE.id : (rockNoise > 0.4f && rockNoise < 0.5f ? BlockTypes.OBSIDIAN_DUST.id : BlockTypes.LAPIS.id);
+                                    for (int y = floor; y < seafloorAbove; y++) {
+                                        final int blockType = biome == Biomes.LAZULI_BADLANDS.id ? (flat ? (rockNoise < 0.3f ? (rockNoise < 0.15f ? (y >= (seafloor-1)-(100*(0.15f-rockNoise)) ? (y >= 112 ? 0 : BlockTypes.OBSIDIAN.id) : BlockTypes.OBSIDIAN_DUST.id) : BlockTypes.TURQUOISE.id) : lapisAzurine) : lapisAzurine) : BlockTypes.OBSIDIAN_DUST.id;
                                         if (blockType > 0) {
                                             final int lX = x & 15, lY = y & 15, lZ = z & 15;
                                             setAnything = true;
@@ -267,15 +267,25 @@ public class Marb extends WorldType {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 int elevation = heightmap[(x * size) + z];
-                                //byte biome = biomes[x * size + z];
+                                byte biome = biomes[x * size + z];
                                 Vector2i blockOn = getBlock(x, elevation, z);
                                 float randomNumber = rand.nextFloat();
-                                boolean onGravel = blockOn.x() == BlockTypes.GRAVEL.id;
-                                if (randomNumber < (onGravel ? 0.005f : 0.0005f)) {
-                                    boolean crater = !onGravel ? (rand.nextBoolean() || rand.nextBoolean()) : rand.nextBoolean();
-                                    Blob.generate(blockOn, x, crater ? elevation+2 : elevation, z, crater ? 0 : BlockTypes.FLINT.id, 0, (int) (2 + (rand.nextFloat() * 14)));
-                                } else if (blockOn.x() == BlockTypes.CINNABAR.id && randomNumber < 0.15f) {
-                                    World.setBlock(x, elevation+1, z, BlockTypes.CINNABAR_SPIKES.id, rand.nextInt(3), false);
+                                boolean onObsidianDust = blockOn.x() == BlockTypes.OBSIDIAN_DUST.id;
+                                if (biome != Biomes.LAZULI_BADLANDS.id && randomNumber < (onObsidianDust ? 0.0005f : 0.0001f)) {
+                                    BevelledCube.generate(x, elevation, z, BlockTypes.OBSIDIAN.id, 0, (int) (2 + (rand.nextFloat() * 14)));
+                                }
+                                boolean onObsidianOrLapis = biome == Biomes.LAZULI_BADLANDS.id && (blockOn.x() == BlockTypes.OBSIDIAN.id || blockOn.x() == BlockTypes.LAPIS.id);
+                                if (randomNumber < (onObsidianOrLapis ? 0.0034f : 0.0001f)) {
+                                    Blob.generate(blockOn, x, elevation+1, z, rand.nextFloat() < 0.935f ? 0 : BlockTypes.LAPIS.id, 0, (int) (1 + (rand.nextFloat() * 2)));
+                                }
+                                boolean onSnow = blockOn.x() == BlockTypes.TURQUOISE.id;
+                                if (randomNumber < 0.005f && onSnow) {
+                                    Blob.generate(blockOn, x, elevation, z, BlockTypes.MARBLE.id, 0, (int) (1 + (rand.nextFloat() * 2)));
+                                }
+                                if (blockOn.x() == BlockTypes.AZURINE.id && randomNumber < 0.1f) {
+                                    Blob.generate(blockOn, x, elevation, z, BlockTypes.AZURINE.id, 0, (int) (1 + (rand.nextFloat() * 3)));
+                                } else if (randomNumber > 0.9f && randomNumber < 0.90015f) {
+                                    Blob.generate(blockOn, x, elevation, z, rand.nextBoolean() ? BlockTypes.AZURINE.id : BlockTypes.TURQUOISE.id, 0, (int) (1 + (rand.nextFloat() * 3)));
                                 }
                             }
                         }
@@ -286,6 +296,45 @@ public class Marb extends WorldType {
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
+
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int cloudInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int threadId = thread;
+//            final int startX = thread * cloudInterval;
+//            final int endX = Math.min(startX + cloudInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+//                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+//                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+//                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+//                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
+//                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+//                                        if (radius > 0) {
+//                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
+//                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
 
         startTime = System.currentTimeMillis();
         for (int cX = 0; cX < sizeChunks; cX++) {

@@ -138,7 +138,10 @@ public class BlockTypes {
             HAZARD = create(new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))).altTexLoad(true), //80
             ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true),
-            CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true)));
+            CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            TURQUOISE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/turquoise",  ROSE_QUARTZ.blockProperties.copy())),
+            LAPIS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/lapis",  TURQUOISE.blockProperties.copy())),
+            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy()));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

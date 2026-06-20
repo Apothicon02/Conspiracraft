@@ -118,7 +118,7 @@ public class WorldType {
             }
         }
     }
-    public float gravity() {return 0.01f;}
+    public float gravity() {return 0.0034f;}
     public float getFogginess() {return -1.f;}
     public Vector4f getAtmosphereColor() {return new Vector4f(0);}
     public Vector4f getNightAtmosphereColor() {return new Vector4f(0);}

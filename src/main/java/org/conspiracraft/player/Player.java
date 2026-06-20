@@ -150,17 +150,21 @@ public class Player {
             }
         } else if (World.worldType == WorldTypes.SPACE) { //going from space to planet orbit
             if (pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
-                WorldType nearestType = nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA.space() : (
-                        nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB.space() : (
-                                nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA.space() : null
+                WorldType nearestType = nearestPlanet.type == EntityTypes.LAZULI ? WorldTypes.LAZULI.space() : (
+                        nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA.space() : (
+                                nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB.space() : (
+                                        nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA.space() : null
+                                )
                         )
                 );
                 changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
             }
         } else if (pos.y() <= -500) { //going from planet orbit to planet surface
-            WorldType nearestType = World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
-                    World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (
-                            World.worldType == WorldTypes.VERA.space() ? WorldTypes.VERA : null
+            WorldType nearestType = World.worldType == WorldTypes.LAZULI.space() ? WorldTypes.LAZULI : (
+                    World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
+                            World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (
+                                    World.worldType == WorldTypes.VERA.space() ? WorldTypes.VERA : null
+                            )
                     )
             );
             changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);

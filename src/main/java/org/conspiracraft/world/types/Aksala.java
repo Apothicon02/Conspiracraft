@@ -54,7 +54,7 @@ public class Aksala extends WorldType {
     @Override
     public Planet getPlanet(){return StarSystem.planets[1];}
     @Override
-    public float gravity() {return 1.f;}
+    public float gravity() {return 0.05f;}
 @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/aksala");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
