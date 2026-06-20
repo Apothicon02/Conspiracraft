@@ -224,9 +224,9 @@ public class Marb extends WorldType {
                                     double simplexNoise = SimplexNoise.noise(x / 100.f, z / 100.f);
                                     //double bigNoise = SimplexNoise.noise(x / 2000.f, z / 2000.f);
 
-                                    for (int y = floor; y < seafloorAbove; y++) {
+                                    for (int y = floor; y <= elevation; y++) {
                                         final int blockType = biome == Biomes.MARB_CRATER.id ?
-                                                ((((simplexNoise > 0.3 && simplexNoise < 0.5) || (simplexNoise > -0.5 && simplexNoise < -0.3)) && noise > 0.34f) ? ((y == seafloorAbove-1 && noise > 0.5f) ? BlockTypes.IRON_ORE.id : BlockTypes.STONE.id) : BlockTypes.GRAVEL.id) :
+                                                ((((simplexNoise > 0.3 && simplexNoise < 0.5) || (simplexNoise > -0.5 && simplexNoise < -0.3)) && noise > 0.34f) ? ((y == elevation && noise > 0.5f) ? BlockTypes.IRON_ORE.id : BlockTypes.STONE.id) : BlockTypes.GRAVEL.id) :
                                                 (flat ? (Utils.gradient(y, 92, 100, 1, 0)-Math.abs(simplexNoise) > 0.25f ? BlockTypes.CINNABAR.id : BlockTypes.GRANITE.id) : BlockTypes.FLINT.id);
                                         if (blockType > 0) {
                                             final int lX = x & 15, lY = y & 15, lZ = z & 15;
@@ -274,6 +274,8 @@ public class Marb extends WorldType {
                                 if (randomNumber < (onGravel ? 0.005f : 0.0005f)) {
                                     boolean crater = !onGravel ? (rand.nextBoolean() || rand.nextBoolean()) : rand.nextBoolean();
                                     Blob.generate(blockOn, x, crater ? elevation+2 : elevation, z, crater ? 0 : BlockTypes.FLINT.id, 0, (int) (2 + (rand.nextFloat() * 14)));
+                                } else if (blockOn.x() == BlockTypes.CINNABAR.id && randomNumber < 0.15f) {
+                                    World.setBlock(x, elevation+1, z, BlockTypes.CINNABAR_SPIKES.id, rand.nextInt(3), false);
                                 }
                             }
                         }

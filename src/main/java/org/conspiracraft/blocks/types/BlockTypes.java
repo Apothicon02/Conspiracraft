@@ -137,7 +137,8 @@ public class BlockTypes {
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             HAZARD = create(new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))).altTexLoad(true), //80
-            ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true);
+            ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true),
+            CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
@@ -174,7 +175,7 @@ public class BlockTypes {
             int height = image.getHeight();
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
             if (height > blockTexWidth) {
-                copyTexture(blockBuf, i);
+                copyTexture(blockBuf, i, height);
             } else {
                 copyPartialTexture(blockBuf, i, type.altTexLoad);
             }
@@ -183,8 +184,8 @@ public class BlockTypes {
         ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
         reloading = true;
     }
-    public static void copyTexture(ByteBuffer buf, int i) {
-        for (long row = 0; row < blockTexHeight; row++) {
+    public static void copyTexture(ByteBuffer buf, int i, int height) {
+        for (long row = 0; row < height; row++) {
             memCopy(memAddress(buf) + row * blockTexWidth * 4L,
                     atlasBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
                     blockTexWidth * 4L);

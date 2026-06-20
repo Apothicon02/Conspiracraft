@@ -347,7 +347,7 @@ public class Renderer {
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
         Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
-        float atmoFactor = worldType.getFogginess() < 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
+        float atmoFactor = worldType.getFogginess() <= 0 ? 0 : (float) (1-Math.clamp(Math.cbrt(worldType.getFogginess()-1), 0, 1));
         Random starRand = new Random(seed);
         for (int i = 0; i < 512; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
