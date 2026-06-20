@@ -31,7 +31,7 @@ public class StarSystem {
             new Planet(EntityTypes.AKSALA, new Vector3f(AU*100, 0, AU*40), new Vector4f(0.44f, 0.949f, 0.975f, 1), EARTH, 15000000000000.f, 1500000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.AKSALA_AURORAS, 1.05f, new Vector3f())
             }, new Planet[]{}),
-            new Planet(EntityTypes.LAZULI, new Vector3f(AU*30, 0, AU*28), new Vector4f(0.0675f, 0.f, 0.0949f, 1), EARTH*0.75f, 1500000000000.f, 1500000000000.f, new Attachment[]{}, new Planet[]{}),
+            new Planet(EntityTypes.LAZULI, new Vector3f(AU*30, 0, AU*28), new Vector4f(0.f, 0.975f, 0.71f, 1), EARTH*0.75f, 1500000000000.f, 1500000000000.f, new Attachment[]{}, new Planet[]{}),
             new Planet(EntityTypes.FIREBALL, new Vector3f(AU*25, 0, AU*15), new Vector4f(1.f, 0.2f, 0.f, 1), EARTH, 1000000000000.f, 500000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.ASH, 1.02f, new Vector3f())
             }, new Planet[]{})
