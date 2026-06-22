@@ -318,7 +318,7 @@ public class GUI {
 
         if (GUI.inventoryOpen && Main.player.creative) {
             boolean isFirstSlot = true;
-            int itemId = 0;
+            int itemId = Main.player.creativeInvScroll;
             done:
             for (int y = 0; y < 4; y++) {
                 for (int x = 0; x < invWidth; x++) {

@@ -1,6 +1,7 @@
 package org.conspiracraft.items.types;
 
 import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.items.Item;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.player.HandManager;
 import org.conspiracraft.world.World;
@@ -14,7 +15,7 @@ public class SpadeItemType extends ItemType {
         super(name);
     }
     @Override
-    public int use(DDAResult dda) {
+    public int use(DDAResult dda, Item item) {
         if (lmbDown && World.inBounds(player.selectedBlock)) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             HandManager.mine(BlockTags.spadeEfficient.tagged.contains(block.x()) ? 40 : 4);

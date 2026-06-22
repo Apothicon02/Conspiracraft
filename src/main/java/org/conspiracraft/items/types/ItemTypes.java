@@ -3,6 +3,7 @@ package org.conspiracraft.items.types;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.elements.Elements;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
@@ -80,8 +81,6 @@ public class ItemTypes {
             HYDRANGEA = create(new ItemType("plant/texture/hydrangea").blockToPlace(BlockTypes.HYDRANGEA.id, 0).maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 0.45f, 1.f))),
             KYANITE = create(new ItemType("resource/texture/kyanite").blockToPlace(BlockTypes.KYANITE.id, 0).maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 1.2f))),
             FLINT = create(new ItemType("resource/texture/flint").maxStackSize(64).blockToPlace(BlockTypes.FLINT.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 1.05f))),
-            IRON_ORE = create(new ItemType("resource/texture/iron").maxStackSize(64).blockToPlace(BlockTypes.IRON_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
-            COPPER_ORE = create(new ItemType("resource/texture/copper").maxStackSize(64).blockToPlace(BlockTypes.COPPER_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
             GRAVEL = create(new ItemType("resource/texture/gravel").maxStackSize(64).blockToPlace(BlockTypes.GRAVEL.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1.f))),
             SAND = create(new ItemType("resource/texture/sand").maxStackSize(64).blockToPlace(BlockTypes.SAND.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.4f, 1.f))),
             SANDSTONE = create(new ItemType("resource/texture/sandstone").maxStackSize(64).blockToPlace(BlockTypes.SANDSTONE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 1.f))),
@@ -99,8 +98,19 @@ public class ItemTypes {
             STEEL_ROD = create(new ItemType("component/texture/steel_rod").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             POWERED_VENT = create(new ItemType("machine/texture/powered_vent").maxStackSize(64).blockToPlace(BlockTypes.POWERED_VENT.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             FIREBALL = create(new FireballItemType("magic/texture/fireball").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.FIREBALL_QUICK}, 1.0f, 1.0f))),
-            LIGHTNING = create(new LightningItemType("magic/texture/lightning").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.THUNDER_1, Sounds.THUNDER_2}, 1.0f, 1.0f)));
-
+            LIGHTNING = create(new LightningItemType("magic/texture/lightning").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.THUNDER_1, Sounds.THUNDER_2}, 1.0f, 1.0f))),
+            OXYGEN_ICE = create(new IceItemType("resource/texture/oxygen_ice").element(Elements.OXYGEN).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            CARBON_DIOXIDE_ICE = create(new IceItemType("resource/texture/carbon_dioxide_ice").element(Elements.CARBON_DIOXIDE).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            NITROGEN_ICE = create(new IceItemType("resource/texture/nitrogen_ice").element(Elements.NITROGEN).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            ARGON_ICE = create(new IceItemType("resource/texture/argon_ice").element(Elements.ARGON).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            HYDROGEN_ICE = create(new IceItemType("resource/texture/hydrogen_ice").element(Elements.HYDROGEN).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            WATER_ICE = create(new IceItemType("resource/texture/water_ice").element(Elements.WATER).maxStackSize(Integer.MAX_VALUE).blockToPlace(BlockTypes.ICE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            HELIUM_ICE = create(new IceItemType("resource/texture/helium_ice").element(Elements.HELIUM).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            NEON_ICE = create(new IceItemType("resource/texture/neon_ice").element(Elements.NEON).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
+            IRON_ORE = create(new ItemType("resource/texture/iron").maxStackSize(64).blockToPlace(BlockTypes.IRON_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
+            COPPER_ORE = create(new ItemType("resource/texture/copper").maxStackSize(64).blockToPlace(BlockTypes.COPPER_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
+            ZINC_ORE = create(new ItemType("resource/texture/zinc").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
+            GOLD_ORE = create(new ItemType("resource/texture/gold").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f)));
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
         return type;

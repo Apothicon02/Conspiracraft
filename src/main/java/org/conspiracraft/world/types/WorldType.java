@@ -1,27 +1,30 @@
 package org.conspiracraft.world.types;
+import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
+import org.conspiracraft.rooms.Cell;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.World;
-import org.conspiracraft.world.shapes.BevelledCube;
-import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.Cube;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.nio.file.Path;
-import java.util.Random;
+import java.util.ArrayList;
 
 import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.World.chunkSize;
-import static org.conspiracraft.world.World.packLodPos;
 
 public class WorldType {
+    private static final Cell globalAtmo = new Cell(0, new ArrayList<>());
+    public static ByteArrayList globalElements = new ByteArrayList();
+    public Cell getGlobalAtmo() {return globalAtmo;}
+    public ByteArrayList getGlobalElements() {return globalElements;}
     public WorldType space() {return null;}
     public float getLongitude() {return 0.f;}
     public Path getWorldPath() {return Path.of("none");}

@@ -330,6 +330,12 @@ public class World {
             chunk.setLight(lX, lY, lZ, light);
         }
     }
+    public static int getBlockTypeUnchecked(int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+        return chunk.getBlockType(pos);
+    }
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
     public static Vector2i getBlock(float x, float y, float z) {
         return getBlock((int)x, (int)y, (int)z);

@@ -1,7 +1,9 @@
 package org.conspiracraft.items.types;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.ItemSFX;
 import org.conspiracraft.items.ItemTag;
@@ -46,12 +48,13 @@ public class ItemType {
         sound = sfx;
         return this;
     }
-    public int use(DDAResult dda) {
+    public int use(DDAResult dda, Item item) {
         if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything) {
             Vector2i block = World.getBlock(dda.prevHit);
             BlockType blockType = BlockTypes.blockTypes[block.x()];
             if (blockType.blockProperties.isFluidReplaceable) {
                 World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), blockToPlace.y());
+                if (!player.creative) {item.amount--;}
                 return 200;
             }
         }

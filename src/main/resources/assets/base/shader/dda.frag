@@ -614,7 +614,7 @@ void main() {
         }
     }
     float fogDist = pow(globalUbo.fogginess, 4);
-    float maxFogginess = 1.f-max(0, globalUbo.fogginess-1);
+    float maxFogginess = globalUbo.fogginess >= 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
     vec3 primaryFirstBlockPos = firstBlockPos;
     vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
     vec3 primaryTintNormal = tintNormal;
@@ -697,10 +697,10 @@ void main() {
         color.rgb = mix(color.rgb, lighting, fogginess);
         outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
     } else {
-        if (color.r+color.g+color.b < 30) {
+        if (color.r+color.g+color.b < 30 && maxFogginess > 0) {
             vec3 skyPos = ogPos + ogDir * renderDistance;
             vec3 lighting = getLightingColor(celestialSource, skyPos, vec4(0, 0, 0, 1.f), true, 1.f, false).rgb;
-            color.rgb = mix(color.rgb, lighting, 1-clamp((skyPos.y-100)/renderDistance, 0, 1));
+            color.rgb = mix(color.rgb, lighting, min(maxFogginess, 1-clamp((skyPos.y-100)/renderDistance, 0, 1)));
         }
         outNormal = vec4(primaryFlatNormal, 1);
     }

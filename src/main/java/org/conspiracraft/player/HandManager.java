@@ -5,6 +5,7 @@ import org.conspiracraft.entities.CracksEntity;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -67,7 +68,7 @@ public class HandManager {
         }
         if (Main.timeMsLong - delayStart >= delay) {
             delayStart = Main.timeMsLong;
-            delay = selectedItem == null ? 0 : selectedItem.use(ddaResult);
+            delay = (selectedItem == null || selectedItem.amount <= 0) ? 0 : selectedItem.use(ddaResult);
             if (delay == 0) { //if item did no interaction
                 if (lmbDown && World.inBounds(player.selectedBlock)) {
                     mine(4);

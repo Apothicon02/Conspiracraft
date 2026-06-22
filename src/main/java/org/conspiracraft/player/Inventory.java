@@ -222,10 +222,19 @@ public class Inventory {
                 }
             }
         }
-        if (Main.player.inputHandler.scroll.y > 0) {
-            scrollUp();
-        } else if (Main.player.inputHandler.scroll.y < 0) {
-            scrollDown();
+        if (selectedContainerSlot != null && selectedContainerSlot.x() >= 0) {
+            if (Main.player.inputHandler.scroll.y > 0) {
+                Main.player.creativeInvScroll-=invWidth;
+            } else if (Main.player.inputHandler.scroll.y < 0) {
+                Main.player.creativeInvScroll+=invWidth;
+            }
+            Main.player.creativeInvScroll = Math.clamp(Main.player.creativeInvScroll, 0, ItemTypes.itemTypeMap.size()+invWidth);
+        } else if (selectedSlot != null && selectedSlot.x() >= 0) {
+            if (Main.player.inputHandler.scroll.y > 0) {
+                scrollUp();
+            } else if (Main.player.inputHandler.scroll.y < 0) {
+                scrollDown();
+            }
         }
     }
 
@@ -302,7 +311,7 @@ public class Inventory {
     }
 
     public Item getContainerItem(Vector2i xy) {
-        return xy == null ? null : getContainerItem((xy.y * invWidth) + xy.x);
+        return xy == null ? null : getContainerItem((xy.y * invWidth) + xy.x + Main.player.creativeInvScroll);
     }
 
     public Item getContainerItem(int index) {

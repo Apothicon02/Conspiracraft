@@ -128,6 +128,10 @@ public class Chunk {
         int index = getBlockKey(pos);
         return unpackInt(blockPalette.get(index));
     }
+    public int getBlockType(int pos) {
+        int index = getBlockKey(pos);
+        return blockPalette.get(index) >> 16;
+    }
     public void setBlock(int x, int y, int z, int type, int subType) {
         int block = packInts(type, subType);
         int key = blockPalette.indexOf(block);

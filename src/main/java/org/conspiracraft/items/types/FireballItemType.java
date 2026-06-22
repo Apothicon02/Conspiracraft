@@ -6,6 +6,7 @@ import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.entities.FireballEntity;
+import org.conspiracraft.items.Item;
 import org.conspiracraft.physics.DDAResult;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -20,8 +21,9 @@ public class FireballItemType extends ItemType {
         super(name);
     }
     @Override
-    public int use(DDAResult dda) {
+    public int use(DDAResult dda, Item item) {
         if (player.inputHandler.leftButtonPressed) {
+            if (!player.creative) {item.amount--;}
             Vector3f earPos = new Vector3f(player.pos).add(0, player.eyeHeight, 0);
             FireballEntity entity = new FireballEntity(EntityTypes.FIREBALL, new Matrix4f().translate(earPos), (float) (Math.random() * -0.1f));
             entity.vel = player.camera.getForward().mul(2).add(player.vel);

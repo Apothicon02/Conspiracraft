@@ -48,6 +48,8 @@ public class Player {
     public Vector3f prevSelectedBlock = new Vector3f();
     public AABB playerAABB = new AABB(0, 0, 0, 0, 0, 0);
 
+    public float breath = 10000;
+    public int creativeInvScroll = 0;
     public boolean creative = true;
     public boolean bobbingDir = true;
     public float bobbing = 0f;
@@ -141,8 +143,13 @@ public class Player {
     public void tick() throws IOException, InterruptedException {
         oldCamTranslation.set(getCameraTranslation());
         nearestPlanet = StarSystem.getNearestPlanet(pos);
-        HandManager.useHands(window);
+        if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
         movementTick();
+        if (breath > 0) {
+            breath--;
+        } else {
+
+        }
         doSounds();
         if (World.worldType.space() != null) { //going from surface to planet orbit
             if (pos.y() >= 1000) {

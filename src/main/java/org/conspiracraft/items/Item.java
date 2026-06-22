@@ -126,6 +126,6 @@ public class Item implements Cloneable {
     }
 
     public int use(DDAResult dda) {
-        return type.use(dda);
+        return type.use(dda, this);
     }
 }
