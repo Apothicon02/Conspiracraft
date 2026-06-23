@@ -114,7 +114,11 @@ public class ItemTypes {
             STEEL_PLATE = create(new ItemType("component/texture/steel_plate").maxStackSize(64).blockToPlace(BlockTypes.STEEL_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             COPPER_PLATE = create(new ItemType("component/texture/copper_plate").maxStackSize(64).blockToPlace(BlockTypes.COPPER_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             ZINC_PLATE = create(new ItemType("component/texture/zinc_plate").maxStackSize(64).blockToPlace(BlockTypes.ZINC_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            GOLD_PLATE = create(new ItemType("component/texture/gold_plate").maxStackSize(64).blockToPlace(BlockTypes.GOLD_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f)));
+            GOLD_PLATE = create(new ItemType("component/texture/gold_plate").maxStackSize(64).blockToPlace(BlockTypes.GOLD_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            STEEL_WRENCH = create(new ItemType("tool/steel/texture/wrench").sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            COPPER_WRENCH = create(new ItemType("tool/copper/texture/wrench").sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            ZINC_WRENCH = create(new ItemType("tool/zinc/texture/wrench").sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            GOLD_WRENCH = create(new ItemType("tool/gold/texture/wrench").sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f)));
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
         return type;
