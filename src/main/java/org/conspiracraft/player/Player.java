@@ -166,7 +166,7 @@ public class Player {
                 );
                 changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
             }
-        } else if (pos.y() <= -500) { //going from planet orbit to planet surface
+        } else if (pos.y() <= -200) { //going from planet orbit to planet surface
             WorldType nearestType = World.worldType == WorldTypes.LAZULI.space() ? WorldTypes.LAZULI : (
                     World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
                             World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (

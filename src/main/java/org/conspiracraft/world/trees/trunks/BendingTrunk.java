@@ -1,6 +1,7 @@
 package org.conspiracraft.world.trees.trunks;
 
 import kotlin.Pair;
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -47,14 +48,14 @@ public class BendingTrunk extends Trunk {
                 if (height == maxHeight) {
                     canopies.add(Utils.addVec(pos, 0, 1, 0));
                     if (crown && height > 12) { //coconuts
-                        addToMap(map, Utils.addVec(pos, 2, 0, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 1, -1, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, 0, 2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, -1, 2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, -2, 0, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, -1, -1, 0), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, 0, -2), new Vector2i(3, 0));
-                        addToMap(map, Utils.addVec(pos, 0, -1, -2), new Vector2i(3, 0));
+                        addToMap(map, Utils.addVec(pos, 2, 0, 0), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, 1, -1, 0), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, 0, 0, 2), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, 0, -1, 2), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, -2, 0, 0), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, -1, -1, 0), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, 0, 0, -2), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
+                        addToMap(map, Utils.addVec(pos, 0, -1, -2), new Vector2i(BlockTypes.DEAD_LEAVES.id, 0));
                     }
                 } else if (height < maxHeight-4) {
                     if (trunks == 0 || trunks == 4) {

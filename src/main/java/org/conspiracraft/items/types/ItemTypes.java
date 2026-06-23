@@ -110,7 +110,11 @@ public class ItemTypes {
             IRON_ORE = create(new ItemType("resource/texture/iron").maxStackSize(64).blockToPlace(BlockTypes.IRON_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
             COPPER_ORE = create(new ItemType("resource/texture/copper").maxStackSize(64).blockToPlace(BlockTypes.COPPER_ORE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
             ZINC_ORE = create(new ItemType("resource/texture/zinc").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
-            GOLD_ORE = create(new ItemType("resource/texture/gold").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f)));
+            GOLD_ORE = create(new ItemType("resource/texture/gold").maxStackSize(64).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 0.6f))),
+            STEEL_PLATE = create(new ItemType("component/texture/steel_plate").maxStackSize(64).blockToPlace(BlockTypes.STEEL_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            COPPER_PLATE = create(new ItemType("component/texture/copper_plate").maxStackSize(64).blockToPlace(BlockTypes.COPPER_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            ZINC_PLATE = create(new ItemType("component/texture/zinc_plate").maxStackSize(64).blockToPlace(BlockTypes.ZINC_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            GOLD_PLATE = create(new ItemType("component/texture/gold_plate").maxStackSize(64).blockToPlace(BlockTypes.GOLD_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f)));
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
         return type;

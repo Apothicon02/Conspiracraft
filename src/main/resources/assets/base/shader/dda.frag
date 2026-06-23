@@ -571,8 +571,8 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 64 || block.x == 84 || block.x == 83) ? 0.5f : 0.f)));
-    float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
+    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83) ? 0.5f : 0.f)));
+    float roughness = (block.x == 1 || block.x == 90) ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
         isSky = false;
@@ -614,7 +614,7 @@ void main() {
         }
     }
     float fogDist = pow(globalUbo.fogginess, 4);
-    float maxFogginess = globalUbo.fogginess >= 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
+    float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
     vec3 primaryFirstBlockPos = firstBlockPos;
     vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
     vec3 primaryTintNormal = tintNormal;
@@ -624,17 +624,17 @@ void main() {
     if (!celestial) {
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
-        vec3 causticPos = firstBlock.x == 1 ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
+        vec3 causticPos = (firstBlock.x == 1 || firstBlock.x == 90) ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
         vec3 causticVoxelPos = primaryTint.a < 1 ? primaryFirstVoxelRayPos : primaryVoxelRayPos;
-        if (firstBlock.x != 1) {
+        if (firstBlock.x != 1 && firstBlock.x != 90) {
             causticVoxelPos = vec3(0);
         }
         vec3 absNorm = abs(tint.a < 1 ? primaryTintNormal : primaryFlatNormal);
-        bool animated = firstBlock.x == 1;
+        bool animated = (firstBlock.x == 1 || firstBlock.x == 90);
         float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
         (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
         getCaustic(animated, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
-        if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
+        if ((firstBlock.x == 1 || firstBlock.x == 90) && abs(causticness) < 0.033f) {
             color = vec4(1);
             tint = vec4(1);
             primaryTint = vec4(1);
@@ -650,7 +650,7 @@ void main() {
         //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        vec4 blockLighting = (inBounds && globalUbo.renderToggles.y > 0) ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
+        vec4 blockLighting = inBounds ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
         //blockLighting.a *= 1-abs(causticness/50);
         float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);

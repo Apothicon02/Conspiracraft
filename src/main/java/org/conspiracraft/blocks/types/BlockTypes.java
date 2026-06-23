@@ -141,7 +141,15 @@ public class BlockTypes {
             CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             TURQUOISE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/turquoise",  ROSE_QUARTZ.blockProperties.copy())),
             LAPIS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/lapis",  TURQUOISE.blockProperties.copy())),
-            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy())); //85
+            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy())), //85
+            COPPER_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/copper_plating",  STEEL_PLATING.blockProperties.copy())),
+            ZINC_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/zinc_plating",  STEEL_PLATING.blockProperties.copy())),
+            GOLD_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/gold_plating",  STEEL_PLATING.blockProperties.copy())),
+            DEAD_LEAVES = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_leaves",  OAK_LEAVES.blockProperties)),
+            ACID = create(new BlockType(blockTypeMap.size(), "natural/texture/acid", WATER.blockProperties.copy())), //90
+            ROSE_QUARTZ_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/rose_quartz_sand",  SAND.blockProperties.copy())),
+            DEAD_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_log",  OAK_LOG.blockProperties)),
+            DEAD_PLANK = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
