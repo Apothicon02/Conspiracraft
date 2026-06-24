@@ -571,8 +571,8 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83) ? 0.5f : 0.f)));
-    float roughness = (block.x == 1 || block.x == 90) ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
+    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83) ? 0.5f : 0.f)));
+    float roughness = (block.x == 1 || block.x == 90) ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : (block.x == 57 ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
         isSky = false;

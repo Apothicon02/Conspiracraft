@@ -37,119 +37,121 @@ public class BlockTypes {
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
             DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/dirt",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
-            TALL_GRASS = create(List.of(BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/tall_grass",  GRASS.blockProperties.copy().ttb(50).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)
+            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/tall_grass",  GRASS.blockProperties.copy().ttb(50).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)
                     .needsSupport(true))),
-            ROSE = create(List.of(BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/rose",  TALL_GRASS.blockProperties)), //5
+            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/rose",  TALL_GRASS.blockProperties)), //5
             TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/texture/torch",  (LightBlockProperties) new LightBlockProperties().r(40).g(38).b(30).ttb(100).obstructsHeightmap(false).isSolid(false).blocksLight(false)
                     .isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            KYANITE = create(List.of(BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/kyanite",  (LightBlockProperties) (new LightBlockProperties().r(4).g(20).b(40).blockSFX(
+            KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/kyanite",  (LightBlockProperties) (new LightBlockProperties().r(4).g(20).b(40).blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))).altTexLoad(true),
-            MARBLE = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().blockSFX(
+            MARBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.6f, new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f))),
-            IGNEOUS = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties())),
-            STONE = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/stone",  new BlockProperties())), //10
-            GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/glass",  new BlockProperties().blockSFX(
+            IGNEOUS = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties())),
+            STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/stone",  new BlockProperties())), //10
+            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/glass",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1).blocksLight(false).obstructsHeightmap(false))),
-            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/magenta_stained_glass",  GLASS.blockProperties)),
-            LIME_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/lime_stained_glass",  GLASS.blockProperties)),
-            PORECAP = create(List.of(BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/porecap",  ((LightBlockProperties)TORCH.blockProperties.copy().ttb(50)).r(0).g(12).b(6))),
-            OAK_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/oak_planks",  new BlockProperties().ttb(200).blockSFX(
+            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/magenta_stained_glass",  GLASS.blockProperties)),
+            LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/lime_stained_glass",  GLASS.blockProperties)),
+            PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/porecap",  ((LightBlockProperties)TORCH.blockProperties.copy().ttb(50)).r(0).g(12).b(6))),
+            OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/oak_planks",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))), //15
-            OAK_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/oak_log",  new BlockProperties().ttb(200).blockSFX(
+            OAK_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/oak_log",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            OAK_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/oak_leaves",  new BlockProperties().ttb(100).blockSFX(
+            OAK_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/oak_leaves",  new BlockProperties().ttb(100).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
-            HYDRANGEA = create(List.of(BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/hydrangea",  ROSE.blockProperties)),
-            MAGMA = create(List.of(BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/magma",  ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
+            HYDRANGEA = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/hydrangea",  ROSE.blockProperties)),
+            MAGMA = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/magma",  ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
-            MAHOGANY_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/mahogany_log",  OAK_LOG.blockProperties)), //20
-            MAHOGANY_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/mahogany_leaves",  OAK_LEAVES.blockProperties)),
+            MAHOGANY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_log",  OAK_LOG.blockProperties)), //20
+            MAHOGANY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/mahogany_leaves",  OAK_LEAVES.blockProperties)),
             BUCKET = create(List.of(BlockTags.buckets, BlockTags.cantBreakBlocks), new BlockType(blockTypeMap.size(), "crafted/texture/bucket",  new BlockProperties().ttb(0).isSolid(false).blocksLight(false).obstructsHeightmap(false))),
             SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f, new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(true).obstructsHeightmap(true))),
-            SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties())),
-            PALM_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/palm_log",  OAK_LOG.blockProperties)), //25
-            PALM_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
-            PALM_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/palm_leaves",  OAK_LEAVES.blockProperties)),
-            MAHOGANY_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
-            CACTUS = create(List.of(BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
-            DEAD_BUSH = create(List.of(BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties)), //30
+            SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties())),
+            PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/palm_log",  OAK_LOG.blockProperties)), //25
+            PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
+            PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/palm_leaves",  OAK_LEAVES.blockProperties)),
+            MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
+            CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
+            DEAD_BUSH = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties)), //30
             CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "natural/texture/rain_cloud",  CLOUD.blockProperties)),
             DRY_MUD = create(List.of(BlockTags.soakers, BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/dry_mud",  DIRT.blockProperties)),
-            SPRUCE_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/spruce_planks",  OAK_PLANK.blockProperties)),
-            SPRUCE_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/spruce_log",  OAK_LOG.blockProperties)), //35
-            SPRUCE_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/spruce_leaves",  OAK_LEAVES.blockProperties)),
-            CHERRY_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/cherry_planks",  OAK_PLANK.blockProperties)),
-            CHERRY_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/cherry_log",  OAK_LOG.blockProperties)),
-            CHERRY_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/cherry_leaves",  OAK_LEAVES.blockProperties)),
-            BIRCH_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/birch_planks",  OAK_PLANK.blockProperties)), //40
-            BIRCH_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/birch_log",  OAK_LOG.blockProperties)),
-            BIRCH_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/birch_leaves",  OAK_LEAVES.blockProperties)),
-            ACACIA_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/acacia_planks",  OAK_PLANK.blockProperties)),
-            ACACIA_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/acacia_log",  OAK_LOG.blockProperties)),
-            ACACIA_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/acacia_leaves",  OAK_LEAVES.blockProperties)), //45
-            WILLOW_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/willow_planks",  OAK_PLANK.blockProperties)),
-            WILLOW_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/willow_log",  OAK_LOG.blockProperties)),
-            WILLOW_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/willow_leaves",  OAK_LEAVES.blockProperties)),
-            REDWOOD_PLANK = create(List.of(BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/redwood_planks",  OAK_PLANK.blockProperties)),
-            REDWOOD_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/redwood_log",  OAK_LOG.blockProperties)), //50
-            REDWOOD_LEAVES = create(List.of(BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/redwood_leaves",  OAK_LEAVES.blockProperties)),
-            HIBISCUS = create(List.of(BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
-            BLUE_HIBISCUS = create(List.of(BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
+            SPRUCE_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/spruce_planks",  OAK_PLANK.blockProperties)),
+            SPRUCE_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/spruce_log",  OAK_LOG.blockProperties)), //35
+            SPRUCE_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/spruce_leaves",  OAK_LEAVES.blockProperties)),
+            CHERRY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/cherry_planks",  OAK_PLANK.blockProperties)),
+            CHERRY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/cherry_log",  OAK_LOG.blockProperties)),
+            CHERRY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/cherry_leaves",  OAK_LEAVES.blockProperties)),
+            BIRCH_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/birch_planks",  OAK_PLANK.blockProperties)), //40
+            BIRCH_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/birch_log",  OAK_LOG.blockProperties)),
+            BIRCH_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/birch_leaves",  OAK_LEAVES.blockProperties)),
+            ACACIA_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/acacia_planks",  OAK_PLANK.blockProperties)),
+            ACACIA_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/acacia_log",  OAK_LOG.blockProperties)),
+            ACACIA_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/acacia_leaves",  OAK_LEAVES.blockProperties)), //45
+            WILLOW_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/willow_planks",  OAK_PLANK.blockProperties)),
+            WILLOW_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/willow_log",  OAK_LOG.blockProperties)),
+            WILLOW_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/willow_leaves",  OAK_LEAVES.blockProperties)),
+            REDWOOD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/redwood_planks",  OAK_PLANK.blockProperties)),
+            REDWOOD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/redwood_log",  OAK_LOG.blockProperties)), //50
+            REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/redwood_leaves",  OAK_LEAVES.blockProperties)),
+            HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
+            BLUE_HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
             SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/snow",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
             GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/gravel",  SAND.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))), //55
-            FLINT = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/flint",  new BlockProperties())),
+            FLINT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/flint",  new BlockProperties())),
             MUD = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/mud",  new BlockProperties().ttb(200).blockSFX(
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f, new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
             CLAY = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/clay",  MUD.blockProperties)),
-            OBSIDIAN = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/obsidian",  GLASS.blockProperties.copy().ttb(2000).blocksLight(true))),
-            IRON_ORE = create(new BlockType(blockTypeMap.size(), "geological/texture/iron_ore",  new BlockProperties().blockSFX(
+            OBSIDIAN = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/obsidian",  GLASS.blockProperties.copy().ttb(2000).blocksLight(true))),
+            IRON_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/iron_ore",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //60
-            COPPER_ORE = create(new BlockType(blockTypeMap.size(), "geological/texture/copper_ore",  IRON_ORE.blockProperties.copy())),
-            STICK = create(new BlockType(blockTypeMap.size(), "natural/texture/stick",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true).blockSFX(
+            COPPER_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/copper_ore",  IRON_ORE.blockProperties.copy())),
+            STICK = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "natural/texture/stick",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            STICK_PLATFORM = create(new BlockType(blockTypeMap.size(), "crafted/texture/stick_platform",  STICK.blockProperties.copy().isCollidable(true))),
-            STEEL_FRAME = create(new BlockType(blockTypeMap.size(), "crafted/texture/steel_frame",  new BlockProperties().blocksLight(false).obstructsHeightmap(false).permeable(true).blockSFX(
+            STICK_PLATFORM = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/stick_platform",  STICK.blockProperties.copy().isCollidable(true))),
+            STEEL_FRAME = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/steel_frame",  new BlockProperties().blocksLight(false).obstructsHeightmap(false).permeable(true).blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
-            POWERED_VENT = create(new BlockType(blockTypeMap.size(), "crafted/texture/powered_vent",  new BlockProperties().blockSFX(
+            POWERED_VENT = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/powered_vent",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //65
-            BLUE_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/blue_stained_glass",  GLASS.blockProperties)),
-            RED_STAINED_GLASS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/red_stained_glass",  GLASS.blockProperties)),
+            BLUE_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/blue_stained_glass",  GLASS.blockProperties)),
+            RED_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/red_stained_glass",  GLASS.blockProperties)),
             ORANGE_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/orange_sand",  SAND.blockProperties.copy())),
-            ORANGE_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/orange_sandstone",  SANDSTONE.blockProperties.copy())),
+            ORANGE_SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/orange_sandstone",  SANDSTONE.blockProperties.copy())),
             RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_sand",  SAND.blockProperties.copy())), //70
-            RED_SANDSTONE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/red_sandstone",  SANDSTONE.blockProperties.copy())),
+            RED_SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/red_sandstone",  SANDSTONE.blockProperties.copy())),
             RED_GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_gravel",  GRAVEL.blockProperties.copy())),
             WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/wet_sand",  SAND.blockProperties.copy())),
-            ICE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "natural/texture/ice",  GLASS.blockProperties.copy().blocksLight(true))),
-            BASALT = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())), //75
-            GRANITE = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties())),
-            CINNABAR = create(List.of(BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties())),
+            ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "natural/texture/ice",  GLASS.blockProperties.copy().blocksLight(true))),
+            BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())), //75
+            GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties())),
+            CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties())),
             OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/obsidian_dust",  GRAVEL.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
-            STEEL_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().blockSFX(
+            STEEL_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
-            HAZARD = create(new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
+            HAZARD = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))).altTexLoad(true), //80
-            ROSE_QUARTZ = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true),
-            CINNABAR_SPIKES = create(new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
-            TURQUOISE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/turquoise",  ROSE_QUARTZ.blockProperties.copy())),
-            LAPIS = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/lapis",  TURQUOISE.blockProperties.copy())),
-            AZURINE = create(List.of(BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy())), //85
-            COPPER_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/copper_plating",  STEEL_PLATING.blockProperties.copy())),
-            ZINC_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/zinc_plating",  STEEL_PLATING.blockProperties.copy())),
-            GOLD_PLATING = create(new BlockType(blockTypeMap.size(), "crafted/texture/gold_plating",  STEEL_PLATING.blockProperties.copy())),
-            DEAD_LEAVES = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_leaves",  OAK_LEAVES.blockProperties)),
+            ROSE_QUARTZ = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true),
+            CINNABAR_SPIKES = create(List.of(BlockTags.pickEfficient), new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            TURQUOISE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/turquoise",  ROSE_QUARTZ.blockProperties.copy())),
+            LAPIS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/lapis",  TURQUOISE.blockProperties.copy())),
+            AZURINE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/azurine",  LAPIS.blockProperties.copy())), //85
+            COPPER_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/copper_plating",  STEEL_PLATING.blockProperties.copy())),
+            ZINC_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/zinc_plating",  STEEL_PLATING.blockProperties.copy())),
+            GOLD_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/gold_plating",  STEEL_PLATING.blockProperties.copy())),
+            DEAD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new BlockType(blockTypeMap.size(), "tree/texture/dead_leaves",  OAK_LEAVES.blockProperties)),
             ACID = create(new BlockType(blockTypeMap.size(), "natural/texture/acid", WATER.blockProperties.copy())), //90
             ROSE_QUARTZ_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/rose_quartz_sand",  SAND.blockProperties.copy())),
-            DEAD_LOG = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_log",  OAK_LOG.blockProperties)),
-            DEAD_PLANK = create(new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties));
+            DEAD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/dead_log",  OAK_LOG.blockProperties)),
+            DEAD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties)),
+            IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().blockSFX(
+                    new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
