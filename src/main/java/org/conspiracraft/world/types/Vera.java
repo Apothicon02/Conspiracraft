@@ -315,7 +315,7 @@ public class Vera extends WorldType {
                                     double eleFactor = elevation + (rockNoise * 50);
                                     boolean snowy = eleFactor > 136;
                                     for (int y = floor; y < Math.max(waterSurface, seafloorAbove); y++) {
-                                        final int blockType = y >= seafloorAbove ? (y == waterSurface-1 ? BlockTypes.ACID.id : BlockTypes.ROSE_QUARTZ_SAND.id) : waterSurface >= 0 ? (y >= seafloorAbove-1 ? BlockTypes.ROSE_QUARTZ_SAND.id : BlockTypes.ROSE_QUARTZ.id) : (y < 62 ? BlockTypes.MUD.id : (flat ? (snowy ? BlockTypes.SNOW.id : BlockTypes.MUD.id) : (maxSteepness < 6 ? BlockTypes.MUD.id : BlockTypes.DRY_MUD.id)));
+                                        final int blockType = y >= seafloorAbove ? (y == waterSurface-1 ? BlockTypes.ACID.id : BlockTypes.MARBLE.id) : waterSurface >= 0 ? (flat ? BlockTypes.STONE.id : BlockTypes.MARBLE.id ): (y < 62 ? BlockTypes.MUD.id : (flat ? (snowy ? BlockTypes.SNOW.id : BlockTypes.MUD.id) : (maxSteepness < 6 ? BlockTypes.MUD.id : BlockTypes.DRY_MUD.id)));
                                         if (blockType > 0) {
                                             final int lX = x & 15, lY = y & 15, lZ = z & 15;
                                             setAnything = true;

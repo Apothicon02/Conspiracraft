@@ -575,7 +575,7 @@ void main() {
     }
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83) ? 0.5f : 0.f)));
+    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
     float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
@@ -660,7 +660,7 @@ void main() {
         float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);
         vec3 sunDir = normalize(source - primaryShadowPos);
-        if (!isSky && primaryBlock.x != 90) {
+        if (!isSky) {
             rayPos = primaryShadowPos;
             rayDir = sunDir;
             vec4 shadowColor = vec4(0);
@@ -679,8 +679,6 @@ void main() {
         if (primaryBlock.x == 90) {
             vec3 temp = abs(reflectDir);
             color.r = (temp.r+temp.g+temp.b)/2.5f;
-            color.rgb*=5;
-            blockLighting = mix(blockLighting, vec4(1), 0.5f);
         }
         if (reflectivity > 0.f) {
             vec3 viewDir = normalize(ogDir);
