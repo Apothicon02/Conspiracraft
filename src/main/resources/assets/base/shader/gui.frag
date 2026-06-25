@@ -49,7 +49,7 @@ void main() {
         guiColor.rgb = fromLinear(guiColor.rgb);
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {
-            outColor = vec4(mix(blurredBgColor.rgb, guiColor.rgb, guiColor.a), 1.f);
+            outColor = vec4(mix(blurredBgColor.rgb/max(1, max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))), guiColor.rgb, guiColor.a), 1.f);
         } else {
             discard;
         }

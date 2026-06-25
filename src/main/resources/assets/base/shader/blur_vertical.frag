@@ -97,7 +97,7 @@ void main() {
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(0, OFFSETS[i]);
         float weight = WEIGHTS[i];
-        vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1))/globalUbo.res;
+        vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f)/globalUbo.res;
         vec4 newResult = texture(colors, samplePos);
         color.rgb += newResult.rgb * weight;
         float sampleDepth = texture(ddaDepth, samplePos).r;
