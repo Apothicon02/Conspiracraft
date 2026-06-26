@@ -106,9 +106,9 @@ public class Descriptors {
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
-        for (int i = 0; i < Textures.textures.size(); i++) {
+        for (Texture texture : Textures.textures) {
             poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .type(texture == Textures.vrs ? VK_IMAGE_USAGE_SAMPLED_BIT : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }

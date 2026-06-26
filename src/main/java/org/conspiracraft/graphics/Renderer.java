@@ -7,6 +7,8 @@ import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.graphics.buffers.Buffer;
+import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -47,9 +49,12 @@ import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
 import static org.conspiracraft.world.World.*;
-import static org.lwjgl.system.MemoryUtil.memFree;
+import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.util.vma.Vma.*;
+import static org.lwjgl.vulkan.KHRFragmentShadingRate.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
+import static org.lwjgl.vulkan.KHRSynchronization2.VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Renderer {
@@ -246,7 +251,7 @@ public class Renderer {
     }
 
     public static void drawRaster(MemoryStack stack){
-        currentPipeline = pipelines[4];
+        updatePipeline(stack, 4);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
@@ -285,33 +290,40 @@ public class Renderer {
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
     public static void drawDDA(MemoryStack stack) {
-        currentPipeline = pipelines[3];
+        updatePipeline(stack, 3);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
+        //vkCmdSetFragmentShadingRateKHR(currentCmdBuffer, VkExtent2D.malloc(stack).width(4).height(4), new int[]{VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR});
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+        //vkCmdSetFragmentShadingRateKHR(currentCmdBuffer, VkExtent2D.malloc(stack).width(1).height(1), new int[]{VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR});
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
-        currentPipeline = pipelines[2];
+        updatePipeline(stack, 2);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
     public static void drawBlur(MemoryStack stack) {
-        currentPipeline = pipelines[5];
+        updatePipeline(stack, 5);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
-        currentPipeline = pipelines[6];
+        updatePipeline(stack, 6);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
     }
     public static void drawGUI(MemoryStack stack) {
-        currentPipeline = pipelines[1];
+        updatePipeline(stack, 1);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
+    }
+
+    public static void updatePipeline(MemoryStack stack, int i) {
+        currentPipeline = pipelines[i];
+        //vkCmdSetFragmentShadingRateKHR(currentCmdBuffer, VkExtent2D.malloc(stack).width(1).height(1), new int[]{VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR});
     }
 
     public static void drawClouds() {
@@ -481,8 +493,10 @@ public class Renderer {
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
+        VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, Textures.vrs);
         VkRenderingInfo renderingInfo = VkRenderingInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_INFO)
+                .pNext(rateAttachment)
                 .renderArea(renderAreaData)
                 .layerCount(1)
                 .pColorAttachments(colorAttachments)
@@ -491,6 +505,50 @@ public class Renderer {
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
+    }
+    public static VkRenderingFragmentShadingRateAttachmentInfoKHR getRateAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
+        if (tex.isLayoutUnset()) {
+            ByteBuffer data = memAlloc(tex.width * tex.height);
+            byte value = (byte)(4 | 1); //2x2
+            for (int y = 0; y < tex.height; y++) {
+                for (int x = 0; x < tex.width; x++) {
+                    int i = y * tex.width + x;
+                    if (x < tex.width*0.33f || x >= tex.width*0.67f) {
+                        data.put(i, value);
+                    } else {
+                        data.put(i, (byte) 0);
+                    }
+                }
+            }
+            data.rewind();
+            Buffer stagingBuffer = new Buffer(stack, data.remaining(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+            memCopy(memAddress(data), stagingBuffer.pointer.get(0), data.remaining());
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+                    VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+            VkBufferImageCopy.Buffer imageCopy = VkBufferImageCopy.calloc(1, stack)
+                    .bufferOffset(0)
+                    .bufferRowLength(0)
+                    .bufferImageHeight(0)
+                    .imageSubresource(s -> s
+                            .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                            .mipLevel(0)
+                            .baseArrayLayer(0)
+                            .layerCount(1))
+                    .imageOffset(o -> o.set(0, 0, 0))
+                    .imageExtent(e -> e.set(tex.width, tex.height, 1));
+            vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.buffer[0], tex.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR,
+                    VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR,
+                    VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
+        }
+        return VkRenderingFragmentShadingRateAttachmentInfoKHR.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR)
+                .imageView(tex.imageView)
+                .imageLayout(VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR)
+                .shadingRateAttachmentTexelSize(VkExtent2D.calloc(stack).width(16).height(16));
     }
     public static VkRenderingAttachmentInfo.Buffer getColorAttachments(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture[] textures) {
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(textures.length, stack);

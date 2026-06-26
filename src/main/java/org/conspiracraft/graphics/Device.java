@@ -28,6 +28,8 @@ import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
+import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME;
+import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
@@ -58,9 +60,10 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
-        PointerBuffer deviceExtensions = stack.mallocPointer(2)
+        PointerBuffer deviceExtensions = stack.mallocPointer(3)
                 .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
-                .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME));
+                .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME))
+                .put(2, stack.UTF8(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME));
 
         VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
@@ -76,7 +79,13 @@ public class Device {
         VkPhysicalDeviceTimelineSemaphoreFeatures timeline = VkPhysicalDeviceTimelineSemaphoreFeatures.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES)
                 .timelineSemaphore(true)
-                .pNext(dynamicRendering.address());;
+                .pNext(dynamicRendering.address());
+        VkPhysicalDeviceFragmentShadingRateFeaturesKHR shadingRate = VkPhysicalDeviceFragmentShadingRateFeaturesKHR.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR)
+                .pipelineFragmentShadingRate(true)
+                .primitiveFragmentShadingRate(true)
+                .attachmentFragmentShadingRate(true)
+                .pNext(timeline.address());
 
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
@@ -87,7 +96,7 @@ public class Device {
                 .pQueueCreateInfos(queueInfo)
                 .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
-                .pNext(timeline.address());
+                .pNext(shadingRate.address());
 
         PointerBuffer pDevice = stack.mallocPointer(1);
         int deviceCreateErr = vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);

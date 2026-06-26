@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.conspiracraft.graphics.Graphics.globalUBO;
 import static org.conspiracraft.graphics.Swapchain.*;
+import static org.lwjgl.vulkan.KHRFragmentShadingRate.*;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Pipelines {
@@ -110,11 +111,17 @@ public class Pipelines {
                     .colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
                     .blendEnable(false);
             }
+            VkPipelineFragmentShadingRateStateCreateInfoKHR shadeState = VkPipelineFragmentShadingRateStateCreateInfoKHR.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR)
+                    .fragmentSize(VkExtent2D.calloc(stack).width(1).height(1))
+                    .combinerOps(0, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR)
+                    .combinerOps(1, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR);
             VkPipelineRenderingCreateInfo renderingInfo = VkPipelineRenderingCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO)
                     .colorAttachmentCount(pipeline.colorAttachments)
                     .pColorAttachmentFormats(formats)
                     .depthAttachmentFormat(VK_FORMAT_D32_SFLOAT);
+            shadeState.pNext(renderingInfo.address());
             VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO)
                     .logicOpEnable(false)
@@ -146,7 +153,8 @@ public class Pipelines {
                     .pDynamicState(dynamicState)
                     .layout(pipelineLayout)
                     .renderPass(VK_NULL_HANDLE)
-                    .pNext(renderingInfo)
+                    .pNext(shadeState.address())
+                    .flags(VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR)
                     .subpass(0)
                     .basePipelineHandle(VK_NULL_HANDLE) // Optional
                     .basePipelineIndex(-1); // Optional

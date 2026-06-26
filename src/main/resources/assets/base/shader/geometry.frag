@@ -7,6 +7,10 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     int hdr;
     float time;
     ivec2 res;
+    vec4 atmosphere;
+    vec4 nightAtmosphere;
+    vec4 sunsetAtmosphere;
+    vec4 deepSunsetAtmosphere;
     float fogginess;
     vec3 skylightMul;
 } globalUbo;
@@ -237,10 +241,6 @@ vec3 sunColor = vec3(0);
 float skyWhiteline = 0.9f;
 float skyDensity = 1.f;
 float sunBrightnessMul = 1.1f;
-vec4 atmosphere = vec4(0.36f, 0.54f, 1.2f, 1.f);
-vec4 sunsetAtmosphere = vec4(0.3f, 0.06f, 1.2f, 1.f);
-vec4 deepSunsetAtmosphere = vec4(1, 0.65f, 0.25f, 1.f);
-vec4 nightAtmosphere = vec4(1, 0.3f, 0.25f, 1.f);
 vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
     float sunHeight = globalUbo.fogginess < 0 ? 1 : abs(dot(normalize(globalUbo.sun - lightPos), vec3(0, 1, 0)));
     float scattering = gradient(lightPos.y, 0, 1500, 1.5f, -0.5f);
@@ -250,7 +250,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     if (negateSun) { lighting.a = 0; } else {lighting.a = mix(lighting.a, 1.f, fogginess);}
     float whiteness = (isSky ? skyWhiteness : mix(skyWhiteline, skyWhiteness, max(0, fogginess-0.8f)*5.f))*clamp(sunHeight+0.8f-(min(sunSetness, 0.2f)*4), 0.33f, 1);
     float lowSunHeight = 10*clamp(sunHeight, 0.f, 0.1f);
-    sunColor = mix(mix(mix(deepSunsetAtmosphere.rgb, sunsetAtmosphere.rgb, min(1, lowSunHeight*2)), mix(nightAtmosphere.rgb, atmosphere.rgb, clamp(sunHeight+0.1f, 0, 1)), sunSetness), vec3(1), whiteness);
+    sunColor = mix(mix(mix(globalUbo.deepSunsetAtmosphere.rgb, globalUbo.sunsetAtmosphere.rgb, min(1, lowSunHeight*2)), mix(globalUbo.nightAtmosphere.rgb, globalUbo.atmosphere.rgb, clamp(sunHeight+0.1f, 0, 1)), sunSetness), vec3(1), whiteness);
     sunColor = mix(vec3(1), vec3(1, 0.95f, 0.85f), sunSetness/4)*(lighting.a*sunColor);
     if (!isSky && !celestialSource) {
         sunColor = mix(globalUbo.skylightMul*lighting.a, sunColor, fogginess);
@@ -607,119 +607,12 @@ void main() {
         }
     } else if (!isSky || tint.a < 1) {
         color.rgb = mipmap(color.rgb);
-//        float factor = clamp((shadowPos.y-72)/66, 0, 1);
-//        if (factor < 0.5f) {
-//            color.rgb = vec3(0, mix(vec2(0, 1), vec2(1, 0), factor*2));
-//        } else {
-//            color.rgb = vec3(mix(vec2(0, 1), vec2(1, 0), (factor-0.5f)*2), 0);
-//        }
         if (getBlockAndVoxel(vec3(hitPos.x, hitPos.y+voxelSize, hitPos.z)-(flatNormal*voxelSize/2)).a < alphaMax) {
             primaryNormal = vec3(0, 1, 0);
         }
     }
-    float fogDist = pow(globalUbo.fogginess, 4);
-    float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
-    vec3 primaryFirstBlockPos = firstBlockPos;
-    vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
-    vec3 primaryTintNormal = tintNormal;
-    vec4 primaryTint = tint;
-    float shadowFactor = 1.f;
-    bool celestialSource = globalUbo.skylight.x < 0 || globalUbo.skylight.x >= size || globalUbo.skylight.y < 0 || globalUbo.skylight.y >= height || globalUbo.skylight.z < 0 || globalUbo.skylight.z >= size;;
-    if (!celestial) {
-        ivec2 primaryBlock = block;
-        ivec3 primaryBlockPos = blockPos;
-        ivec3 primaryVoxelRayPos = voxelRayPos;
-        vec3 causticPos = (firstBlock.x == 1 || firstBlock.x == 90) ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
-        vec3 causticVoxelPos = primaryTint.a < 1 ? primaryFirstVoxelRayPos : primaryVoxelRayPos;
-        if (firstBlock.x != 1 && firstBlock.x != 90) {
-            causticVoxelPos = vec3(0);
-        }
-        vec3 absNorm = abs(tint.a < 1 ? primaryTintNormal : primaryFlatNormal);
-        bool animated = (firstBlock.x == 1 || firstBlock.x == 90);
-        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
-        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
-        getCaustic(animated, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
-        if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
-            color = vec4(1);
-            tint = vec4(1);
-            primaryTint = vec4(1);
-        }
-        if (causticness > 0) {
-            causticness *= -2;
-        } else {
-            causticness *= 5;
-        }
-        vec3 tiltedNormal = (tint.a < 1 ? primaryTintNormal : primaryNormal)*causticness;
-        vec3 bentNormal = mix(primaryNormal, tiltedNormal, roughness*2);
 
-        //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
-        //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
-        bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        vec4 blockLighting = inBounds ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
-        //blockLighting.a *= 1-abs(causticness/50);
-        float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(camPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
-        vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);
-        vec3 sunDir = normalize(source - primaryShadowPos);
-        if (!isSky) {
-            rayPos = primaryShadowPos;
-            rayDir = sunDir;
-            vec4 shadowColor = vec4(0);
-            if (globalUbo.skylight.a <= 0 || (primaryBlock.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
-                shadowColor.a = 1.f;
-            } else if (globalUbo.renderToggles.x > 0) {
-                shadowColor = dda(true);
-            }
-            if (shadowColor.a > 0.0f) {
-                shadowFactor = !celestialSource ? 0.02f : 0.5f;//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-                blockLighting.a *= shadowFactor;
-            }
-        }
-        vec3 idealReflectDir = reflect(ogDir, primaryTint.a < 1 ? primaryTintNormal : primaryNormal);
-        vec3 reflectDir = unzeroVec(mix(idealReflectDir, (idealReflectDir/2)+(reflect(ogDir, tiltedNormal)/2), roughness));
-        if (primaryBlock.x == 90) {
-            vec3 temp = abs(reflectDir);
-            color.r = (temp.r+temp.g+temp.b)/2.5f;
-        }
-        if (reflectivity > 0.f) {
-            vec3 viewDir = normalize(ogDir);
-            vec3 halfVec = normalize(viewDir-reflectDir);
-            float ang = max(dot(viewDir, halfVec), 0.f);
-            vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
-            vec3 reflectPos = primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos;
-            rayPos = reflectPos;
-            rayDir = reflectDir;
-            vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
-            if (reflectColor.a < 1.f) {
-                if (globalUbo.fogginess > 0) {
-                    reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, maxFogginess, false);
-                }
-            } else {
-                //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
-                vec3 lightPos = hitPos+(primaryFlatNormal*voxelSize);
-                float reflectFogginess = globalUbo.fogginess <= 0 ? 0 : clamp((sqrt(distance(camPos, lightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(lightPos.y, 63, 80, 1, 1+abs(noise(lightPos.xz)/3)), 0.f, maxFogginess);
-                reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(celestialSource, lightPos, vec4(0, 0, 0, 1.f), false, reflectFogginess, false).rgb, reflectFogginess);
-            }
-            color.rgb = mix(color.rgb, reflectColor.rgb, ((frensel*0.75f)+0.25f)*reflectivity);
-        }
-        vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
-        color.rgb *= lighting;
-        color.rgb = mix(color.rgb, lighting, fogginess);
-        outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
-    } else {
-        if (color.r+color.g+color.b < 30 && maxFogginess > 0) {
-            vec3 skyPos = ogPos + ogDir * renderDistance;
-            vec3 lighting = getLightingColor(celestialSource, skyPos, vec4(0, 0, 0, 1.f), true, 1.f, false).rgb;
-            color.rgb = mix(color.rgb, lighting, min(maxFogginess, 1-clamp((skyPos.y-100)/renderDistance, 0, 1)));
-        }
-        outNormal = vec4(primaryFlatNormal, 1);
-    }
-    primaryTint.rgb = mix(primaryTint.rgb, firstTintAddition, 0.5f);
-    float fogginess = globalUbo.fogginess <= 0 ? 0 : clamp((sqrt(distance(camPos, primaryTintLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryTintLightPos.y, 63, 80, 1, 1+abs(noise(primaryTintLightPos.xz)*0.67f)), 0.f, maxFogginess);
-    primaryTint.rgb = mix(primaryTint.rgb, getLightingColor(celestialSource, primaryTintLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
-    float tintAmt = abs(1-primaryTint.a);
-    color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);
-    outNormal.a = mix(outNormal.a, 1, tintAmt);
-    outColor = vec4(color.rgb, 1);
-    //outColor = vec4(vec3(shadowFactor), 1);
+    outNormal = vec4(primaryFlatNormal, 0);
+    outColor = vec4(color);
     gl_FragDepth = depth;
 }

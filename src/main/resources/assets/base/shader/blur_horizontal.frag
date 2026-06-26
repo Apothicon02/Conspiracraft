@@ -88,9 +88,9 @@ const float WEIGHTS[33] = float[33](
 0.008476871774077918,
 0.0035249381298951476
 );
-
+const float Z_NEAR = 0.01f;
 void main() {
-    float baseDepth = texture(ddaDepth, gl_FragCoord.xy/globalUbo.res).r;
+    float baseDepth = Z_NEAR/texture(ddaDepth, gl_FragCoord.xy/globalUbo.res).r;
     vec4 baseColor = texture(colors, gl_FragCoord.xy/globalUbo.res);
     vec4 baseNormal = texture(ddaNormals, gl_FragCoord.xy/globalUbo.res);
     vec4 color = vec4(0);
@@ -100,9 +100,9 @@ void main() {
         vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f)/globalUbo.res;
         vec4 newResult = texture(colors, samplePos);
         color.rgb += newResult.rgb * weight;
-        float sampleDepth = texture(ddaDepth, samplePos).r;
+        float sampleDepth = Z_NEAR/texture(ddaDepth, samplePos).r;
         vec4 sampleNormal = texture(ddaNormals, samplePos);
-        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && abs(sampleDepth-baseDepth) < baseDepth*0.01f) {
+        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && abs(sampleDepth-baseDepth) < baseDepth*0.005f) {
             color.a += newResult.a*weight;
         } else {
             color.a += baseColor.a*weight;

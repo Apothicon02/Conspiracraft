@@ -7,6 +7,7 @@ import org.lwjgl.system.MemoryStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Textures {
@@ -25,6 +26,7 @@ public class Textures {
     public static Texture blurred_horizontally;
     public static Texture blurred;
     public static Texture blueNoise;
+    public static Texture vrs;
 
     public static Texture create(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         Texture texture = new Texture(width, height, channels, format, usage, windowResizable);
@@ -63,6 +65,7 @@ public class Textures {
         blurred_horizontally = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         blurred = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         blueNoise = create(64, 64, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
+        vrs = create((int) Math.ceil(Settings.width/16.f), (int) Math.ceil(Settings.height/16.f), 1, VK_FORMAT_R8_UINT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR | VK_IMAGE_USAGE_SAMPLED_BIT, true);
         textures.forEach((tex) -> {tex.create(stack);});
     }
 }

@@ -12,8 +12,8 @@ import static org.conspiracraft.audio.AudioController.*;
 
 public class Settings {
     public static float mouseSensitivity = 0.1f;
-    public static int width = 1920;
-    public static int height = 1080;
+    public static int width = 2560;
+    public static int height = 1440;
     public static float fov = 73;
     public static int targetFps = 420;
     public static boolean shadowsEnabled = true;
