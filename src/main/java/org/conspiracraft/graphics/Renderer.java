@@ -508,19 +508,23 @@ public class Renderer {
     }
     public static VkRenderingFragmentShadingRateAttachmentInfoKHR getRateAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
         if (tex.isLayoutUnset()) {
-            ByteBuffer data = memAlloc(tex.width * tex.height);
+            int totalPixels = tex.width * tex.height;
+            ByteBuffer data = memAlloc(totalPixels);
+            int fullResPixels = 0;
             byte value = (byte)(4 | 1); //2x2
             for (int y = 0; y < tex.height; y++) {
                 for (int x = 0; x < tex.width; x++) {
                     int i = y * tex.width + x;
-                    if (x < tex.width*0.33f || x >= tex.width*0.67f) {
+                    if (x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
                         data.put(i, value);
                     } else {
+                        fullResPixels++;
                         data.put(i, (byte) 0);
                     }
                 }
             }
             data.rewind();
+            System.out.println(((((float)fullResPixels)/((float)totalPixels))*100)+"% of pixels are native quality.");
             Buffer stagingBuffer = new Buffer(stack, data.remaining(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
             memCopy(memAddress(data), stagingBuffer.pointer.get(0), data.remaining());
             ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,

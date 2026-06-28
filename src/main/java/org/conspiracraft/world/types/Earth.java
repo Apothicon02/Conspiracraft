@@ -9,6 +9,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
+import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
@@ -37,6 +38,9 @@ public class Earth extends WorldType {
     public static class EarthSpace extends WorldType {
         @Override
         public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth_space");}
+        public Planet parent = StarSystem.planets[2];
+        @Override
+        public Planet getPlanet(){return parent;}
     }
     public EarthSpace space = new EarthSpace();
     @Override
@@ -46,6 +50,8 @@ public class Earth extends WorldType {
     private final float longitude = (float) Math.toRadians(67.f);
     @Override
     public float getLongitude() {return longitude;}
+    @Override
+    public Planet getPlanet(){return StarSystem.planets[2];}
     @Override
     public float gravity() {return 0.05f;}
 @Override
