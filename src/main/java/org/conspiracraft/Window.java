@@ -62,6 +62,7 @@ public class Window {
         if (focused) {inputHandler.setInputs();} else {inputHandler.resetInputs();}
     }
 
+    public float jitterX = 0, jitterY = 0;
     private final Matrix4f projectionMatrix = new Matrix4f();
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
@@ -73,7 +74,7 @@ public class Window {
         projectionMatrix.set(
                 focalLength/aspectRatio, 0.f, 0.f, 0.f,
                 0.f, -focalLength, 0.f, 0.f,
-                0.f, 0.f, 0.f, 1.f,
+                jitterX, jitterY, 0.f, 1.f,
                 0.f, 0.f, Constants.Z_NEAR, 0.f
         );
         return projectionMatrix;

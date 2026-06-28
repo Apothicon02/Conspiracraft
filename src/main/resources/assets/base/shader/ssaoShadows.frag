@@ -1,6 +1,8 @@
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
+    mat4 viewPrev;
+    mat4 projPrev;
     ivec4 renderToggles;
     vec4 skylight;
     vec3 sun;

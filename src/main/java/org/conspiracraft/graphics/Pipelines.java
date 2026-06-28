@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Vertex;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -25,7 +26,8 @@ public class Pipelines {
                 new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1),
                 new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2),
                 new Pipeline("raster.vert", "raster.frag", 2),
-                new Pipeline("fullscreen.vert", "blur_horizontal.frag", 1), new Pipeline("fullscreen.vert", "blur_vertical.frag", 1)};
+                new Pipeline("fullscreen.vert", "blur_horizontal.frag", 1), new Pipeline("fullscreen.vert", "blur_vertical.frag", 1),
+                new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(pipeline::compile);}
@@ -81,7 +83,7 @@ public class Pipelines {
         VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
                 .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
                 .offset(0)
-                .size(globalUBO.size());
+                .size(Renderer.pushUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
                 .setLayoutCount(Descriptors.descriptorSetLayouts.length)

@@ -69,12 +69,16 @@ public class Renderer {
     public static Pipeline currentPipeline;
     public static boolean reloadAtlas = false;
     public static boolean reloadTextures = true;
+    public static int jitterFrame = 0;
+    public static float[] xOffsets = new float[]{0.0f, -0.25f, 0.25f, -0.375f, 0.125f, -0.125f, 0.375f, -0.4375f, 0.0625f, -0.1875f, 0.3125f, -0.3125f, 0.1875f, -0.0625f, 0.4375f, -0.46875f};
+    public static float[] yOffsets = new float[]{0.0f, 0.166667f, -0.388889f, -0.055556f, 0.277778f, -0.277778f, 0.055556f, 0.388889f, -0.462963f, -0.12963f, 0.203704f, -0.351852f, -0.018519f, 0.314815f, -0.240741f, 0.092593f};
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
                 if (!initialized) {
+                    System.out.println("atlas = " + Long.toHexString(Textures.atlas.image));System.out.println("noises = " + Long.toHexString(Textures.noises.image));System.out.println("colors1 = " + Long.toHexString(Textures.colors1.image));System.out.println("depth1 = " + Long.toHexString(Textures.depth1.image));System.out.println("norms1 = " + Long.toHexString(Textures.norms1.image));System.out.println("colors2 = " + Long.toHexString(Textures.colors2.image));System.out.println("depth2 = " + Long.toHexString(Textures.depth2.image));System.out.println("norms2 = " + Long.toHexString(Textures.norms2.image));System.out.println("gui = " + Long.toHexString(Textures.gui.image));System.out.println("items = " + Long.toHexString(Textures.items.image));System.out.println("entities = " + Long.toHexString(Textures.entities.image));System.out.println("blurred_horizontally = " + Long.toHexString(Textures.blurred_horizontally.image));System.out.println("blurred = " + Long.toHexString(Textures.blurred.image));System.out.println("blueNoise = " + Long.toHexString(Textures.blueNoise.image));System.out.println("vrs = " + Long.toHexString(Textures.vrs.image));System.out.println("colorsOld = " + Long.toHexString(Textures.colorsOld.image));
                     generating = false;
                     fillSSBOs();
                     if (reloadTextures) {
@@ -117,6 +121,7 @@ public class Renderer {
                 drawRaster(stack);
                 drawDDA(stack);
                 drawSSAO(stack);
+                drawAA(stack);
                 drawBlur(stack);
                 drawGUI(stack);
 
@@ -125,6 +130,13 @@ public class Renderer {
                 unbindPresentImage(stack);
 
                 submitCommandBuffers(stack);
+                if (Settings.taaEnabled) {
+                    int idx = (jitterFrame*47)&15;
+                    Main.window.jitterX=(xOffsets[idx]/Settings.width)/2;
+                    Main.window.jitterY=(yOffsets[idx]/Settings.height)/2;
+                    jitterFrame++;
+                    if (jitterFrame >= 16) {jitterFrame = 0;}
+                }
             }
         }
     }
@@ -253,7 +265,7 @@ public class Renderer {
 
     public static void drawRaster(MemoryStack stack){
         updatePipeline(stack, 4);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, false);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, false, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
@@ -292,29 +304,49 @@ public class Renderer {
     }
     public static void drawDDA(MemoryStack stack) {
         updatePipeline(stack, 3);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
         updatePipeline(stack, 2);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
+    public static void drawAA(MemoryStack stack) {
+        if (Settings.taaEnabled) {
+            updatePipeline(stack, 7);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, false, false);
+            unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
+
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, false, true);
+            vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+            unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
+
+            updatePipeline(stack, 8);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, false, true);
+            vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+            unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
+
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, false, true);
+            vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+            unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
+        }
+    }
     public static void drawBlur(MemoryStack stack) {
         updatePipeline(stack, 5);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, false);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, false, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
         updatePipeline(stack, 6);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, false);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, false, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
     }
     public static void drawGUI(MemoryStack stack) {
         updatePipeline(stack, 1);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, false);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, false, true);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
@@ -486,9 +518,9 @@ public class Renderer {
                 VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
-    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, boolean rated) {
-        VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures);
-        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, boolean rated, boolean clear) {
+        VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures, clear);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, clear);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
@@ -555,7 +587,7 @@ public class Renderer {
                 .imageLayout(VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR)
                 .shadingRateAttachmentTexelSize(VkExtent2D.calloc(stack).width(16).height(16));
     }
-    public static VkRenderingAttachmentInfo.Buffer getColorAttachments(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture[] textures) {
+    public static VkRenderingAttachmentInfo.Buffer getColorAttachments(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture[] textures, boolean clear) {
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(textures.length, stack);
         for (int i = 0; i < textures.length; i++) {
             Texture tex = textures[i];
@@ -568,7 +600,7 @@ public class Renderer {
                     .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
                     .imageView(tex.imageView)
                     .imageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
-                    .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                    .loadOp(clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD)
                     .storeOp(VK_ATTACHMENT_STORE_OP_STORE);
             attachmentInfo.clearValue().color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
         }
@@ -583,7 +615,7 @@ public class Renderer {
     }
     public static void bindPresentImage(MemoryStack stack) {
         VkRenderingAttachmentInfo.Buffer colorAttachment = getPresentColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthImage, depthImageView, VK_IMAGE_LAYOUT_UNDEFINED);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthImage, depthImageView, VK_IMAGE_LAYOUT_UNDEFINED, true);
         VkRect2D renderAreaData = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
@@ -614,7 +646,7 @@ public class Renderer {
         attachmentInfo.clearValue().color().float32(0, 0.0f).float32(1, 0.0f).float32(2, 0.0f).float32(3, 0.0f);
         return attachmentInfo;
     }
-    public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
+    public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout, boolean clear) {
         if (depthImage == image) {
             ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
                     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
@@ -630,7 +662,7 @@ public class Renderer {
                 .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
                 .imageView(imageView)
                 .imageLayout(VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
-                .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                .loadOp(clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD)
                 .storeOp(VK_ATTACHMENT_STORE_OP_STORE);
         attachmentInfo.clearValue().depthStencil().depth(0.f);
         return attachmentInfo;

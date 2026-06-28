@@ -139,7 +139,7 @@ public class GUI {
             color = new Vector4f(1.f);
             Vector2i border = new Vector2i((int) ((32 * (width / 3840f)) / guiScaleMul), (int) ((32 * (height / 2180f)) / guiScaleMul));
             if (Main.isSaving) {
-                //drawText(false, 0, 0, 2 + border.x(), 2 + border.y(), "Saving data...".toCharArray());
+                drawText(false, 0, 0, 2 + border.x(), 2 + border.y(), "Saving data...".toCharArray());
             }
             if (pauseMenuOpen) {
                 color = menuBgColor;
