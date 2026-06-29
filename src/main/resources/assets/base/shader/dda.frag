@@ -45,7 +45,7 @@ layout(std430, set = 0, binding = 5) readonly buffer LightChunkBuffer {
 layout(std430, set = 0, binding = 6) readonly buffer LightBuffer {
     int[] lights;
 } lightData;
-const int size = 4096;
+const int size = 2048;
 const int height = 640;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;

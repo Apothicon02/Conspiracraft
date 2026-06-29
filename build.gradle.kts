@@ -30,6 +30,7 @@ repositories {
 dependencies {
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
 
+    implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("de.articdive:jnoise-pipeline:4.1.0")
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")

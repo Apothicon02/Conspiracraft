@@ -41,23 +41,22 @@ void main() {
     vec2 reprojectedPos = reproject(worldPos.xyz);
     if (reprojectedPos.x >= 0.f && reprojectedPos.x < 1.f && reprojectedPos.y >= 0.f && reprojectedPos.y < 1.f) {
         float oldDepth = texture(depthOld, reprojectedPos).r;
-        if (abs(oldDepth-baseDepth)/baseDepth < 0.02f) {
+        if (abs(oldDepth-baseDepth)/baseDepth < 0.1f) {
             float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
             int radius = velocity < 0.6f ? 2 : 1;
-            vec3 boxMin = vec3(1);
-            vec3 boxMax = vec3(0);
+            vec4 boxMin = vec4(1);
+            vec4 boxMax = vec4(0);
             for (int x = int(gl_FragCoord.x-radius); x < gl_FragCoord.x+radius; x++) {
                 for (int y = int(gl_FragCoord.y-radius); y < gl_FragCoord.y+radius; y++) {
-                    vec3 nearColor = texelFetch(colors, ivec2(x, y), 0).rgb;
+                    vec4 nearColor = texelFetch(colors, ivec2(x, y), 0);
                     boxMin = min(boxMin, nearColor);
                     boxMax = max(boxMax, nearColor);
                 }
             }
             vec4 oldColor = texture(colorsOld, reprojectedPos);
-            oldColor.rgb = clamp(oldColor.rgb, boxMin, boxMax);
+            oldColor = clamp(max(baseColor*vec4(0.95f, 0.95f, 0.95f, 0.f), oldColor), boxMin, boxMax);
             vec3 comparedColors = baseColor.rgb-oldColor.rgb;
-            float brightDif = clamp(max(comparedColors.r, max(comparedColors.g, comparedColors.b))*6.66f, 0.f, 1.f);
-            outColor = vec4(mix(baseColor, oldColor, mix(0.95f, 0.85f, brightDif)));
+            outColor = vec4(mix(baseColor, oldColor, 0.95f));
         } else {
             outColor = baseColor;
         }

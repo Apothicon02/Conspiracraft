@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
 import org.conspiracraft.blocks.types.BlockTypes;
@@ -40,6 +41,7 @@ import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.Arrays;
 
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
@@ -70,16 +72,22 @@ public class Renderer {
     public static boolean reloadAtlas = false;
     public static boolean reloadTextures = true;
     public static int jitterFrame = 0;
-    public static float[] xOffsets = new float[]{0.0f, -0.25f, 0.25f, -0.375f, 0.125f, -0.125f, 0.375f, -0.4375f, 0.0625f, -0.1875f, 0.3125f, -0.3125f, 0.1875f, -0.0625f, 0.4375f, -0.46875f};
-    public static float[] yOffsets = new float[]{0.0f, 0.166667f, -0.388889f, -0.055556f, 0.277778f, -0.277778f, 0.055556f, 0.388889f, -0.462963f, -0.12963f, 0.203704f, -0.351852f, -0.018519f, 0.314815f, -0.240741f, 0.092593f};
+    public static HaltonSequenceGenerator halton = new HaltonSequenceGenerator(2);
+    public static float[] xOffsets = new float[16];
+    public static float[] yOffsets = new float[16];
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
                 if (!initialized) {
-                    System.out.println("atlas = " + Long.toHexString(Textures.atlas.image));System.out.println("noises = " + Long.toHexString(Textures.noises.image));System.out.println("colors1 = " + Long.toHexString(Textures.colors1.image));System.out.println("depth1 = " + Long.toHexString(Textures.depth1.image));System.out.println("norms1 = " + Long.toHexString(Textures.norms1.image));System.out.println("colors2 = " + Long.toHexString(Textures.colors2.image));System.out.println("depth2 = " + Long.toHexString(Textures.depth2.image));System.out.println("norms2 = " + Long.toHexString(Textures.norms2.image));System.out.println("gui = " + Long.toHexString(Textures.gui.image));System.out.println("items = " + Long.toHexString(Textures.items.image));System.out.println("entities = " + Long.toHexString(Textures.entities.image));System.out.println("blurred_horizontally = " + Long.toHexString(Textures.blurred_horizontally.image));System.out.println("blurred = " + Long.toHexString(Textures.blurred.image));System.out.println("blueNoise = " + Long.toHexString(Textures.blueNoise.image));System.out.println("vrs = " + Long.toHexString(Textures.vrs.image));System.out.println("colorsOld = " + Long.toHexString(Textures.colorsOld.image));
+                    //System.out.println("atlas = " + Long.toHexString(Textures.atlas.image));System.out.println("noises = " + Long.toHexString(Textures.noises.image));System.out.println("colors1 = " + Long.toHexString(Textures.colors1.image));System.out.println("depth1 = " + Long.toHexString(Textures.depth1.image));System.out.println("norms1 = " + Long.toHexString(Textures.norms1.image));System.out.println("colors2 = " + Long.toHexString(Textures.colors2.image));System.out.println("depth2 = " + Long.toHexString(Textures.depth2.image));System.out.println("norms2 = " + Long.toHexString(Textures.norms2.image));System.out.println("gui = " + Long.toHexString(Textures.gui.image));System.out.println("items = " + Long.toHexString(Textures.items.image));System.out.println("entities = " + Long.toHexString(Textures.entities.image));System.out.println("blurred_horizontally = " + Long.toHexString(Textures.blurred_horizontally.image));System.out.println("blurred = " + Long.toHexString(Textures.blurred.image));System.out.println("blueNoise = " + Long.toHexString(Textures.blueNoise.image));System.out.println("vrs = " + Long.toHexString(Textures.vrs.image));System.out.println("colorsOld = " + Long.toHexString(Textures.colorsOld.image));
                     generating = false;
+                    for (int i = 0; i < xOffsets.length; i++) {
+                        double[] haltonVec = halton.nextVector();
+                        xOffsets[i] = (float) (haltonVec[0]-0.5f)*0.25f;
+                        yOffsets[i] = (float) (haltonVec[1]-0.5f)*0.25f;
+                    }
                     fillSSBOs();
                     if (reloadTextures) {
                         reloadTextures = false;
@@ -132,8 +140,9 @@ public class Renderer {
                 submitCommandBuffers(stack);
                 if (Settings.taaEnabled) {
                     int idx = (jitterFrame*47)&15;
-                    Main.window.jitterX=(xOffsets[idx]/Settings.width)/2;
-                    Main.window.jitterY=(yOffsets[idx]/Settings.height)/2;
+
+                    Main.window.jitterX=(xOffsets[idx]/Settings.width);
+                    Main.window.jitterY=(yOffsets[idx]/Settings.height);
                     jitterFrame++;
                     if (jitterFrame >= 16) {jitterFrame = 0;}
                 }
