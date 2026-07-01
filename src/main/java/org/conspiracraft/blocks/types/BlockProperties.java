@@ -13,9 +13,9 @@ public class BlockProperties implements Cloneable {
         this.proficiencies = proficiencies;
         return this;
     }
-    public int ttb = 500;
-    public BlockProperties ttb(int ttb) {
-        this.ttb = ttb;
+    public float resistance = 1;
+    public BlockProperties resistance(float resistance) {
+        this.resistance = resistance;
         return this;
     }
     public boolean isSolid = true;

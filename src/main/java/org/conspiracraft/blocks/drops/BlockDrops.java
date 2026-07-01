@@ -1,16 +1,20 @@
 package org.conspiracraft.blocks.drops;
 
 import kotlin.Pair;
+import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.items.Item;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class BlockDrops {
     public static Map<BlockType, Map<Pair<Float, Integer>[], Item>> blockTypeDropTable = Map.ofEntries(
+            Map.entry(BlockTypes.DEAD_BUSH, LootTables.STICK),
+            Map.entry(BlockTypes.STICK, LootTables.STICK),
             Map.entry(BlockTypes.STONE, LootTables.STONE),
             Map.entry(BlockTypes.MARBLE, LootTables.MARBLE),
             Map.entry(BlockTypes.TALL_GRASS, LootTables.GRASS),
@@ -55,7 +59,8 @@ public class BlockDrops {
             Map.entry(BlockTypes.SPRUCE_LEAVES, LootTables.LEAVES), Map.entry(BlockTypes.REDWOOD_LEAVES, LootTables.LEAVES),
             Map.entry(BlockTypes.OAK_LEAVES, LootTables.APPLE_LEAVES), Map.entry(BlockTypes.BIRCH_LEAVES, LootTables.APPLE_LEAVES), Map.entry(BlockTypes.WILLOW_LEAVES, LootTables.APPLE_LEAVES),
             Map.entry(BlockTypes.PALM_LEAVES, LootTables.ORANGE_LEAVES), Map.entry(BlockTypes.MAHOGANY_LEAVES, LootTables.ORANGE_LEAVES), Map.entry(BlockTypes.ACACIA_LEAVES, LootTables.ORANGE_LEAVES),
-            Map.entry(BlockTypes.CHERRY_LEAVES, LootTables.CHERRY_LEAVES)
+            Map.entry(BlockTypes.CHERRY_LEAVES, LootTables.CHERRY_LEAVES),
+            Map.entry(BlockTypes.DEAD_LEAVES, LootTables.LEAVES)
     );
 
     public static ArrayList<Item> getDrops(Vector2i block) {
@@ -65,7 +70,7 @@ public class BlockDrops {
             boolean droppedAnything = false;
             for (Pair<Float, Integer>[] drop : items.keySet()) {
                 for (Pair<Float, Integer> chance : drop) {
-                    if ((!(chance.component1() >= 1.f && droppedAnything)) && Math.random() < chance.component1()) {
+                    if ((!droppedAnything || chance.component1() < 1) && Math.random() < chance.component1()) {
                         droppedAnything = true;
                         drops.add(items.get(drop).clone());
                     }
@@ -73,5 +78,12 @@ public class BlockDrops {
             }
         }
         return drops;
+    }
+    public static void dropDrops(Vector2i block, int x, int y, int z) {
+        ArrayList<Item> drops = getDrops(block);
+        for (Item item : drops) {
+            item.pos.set(x+0.5f, y+0.5f, z+0.5f);
+            World.items.add(item);
+        }
     }
 }

@@ -22,17 +22,8 @@ public class BlockType {
         return this;
     }
 
-    public float getTTBSpeed(int tool) {
-        for (BlockTag tag : tags) {
-            Float speed = blockProperties.proficiencies.get(tag);
-            if (speed != null) {
-                return speed;
-            }
-        }
-        return 1;
-    }
-    public int getTTB() {
-        return blockProperties.ttb;
+    public float getResistance() {
+        return blockProperties.resistance;
     }
 
     public boolean blocksLight(Vector2i block) {

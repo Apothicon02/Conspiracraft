@@ -6,6 +6,7 @@ import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.items.Item;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
@@ -98,7 +99,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(512, 96, 512);
+            Main.player.pos.set(512, 516, 512);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
@@ -144,6 +145,16 @@ public class Player {
         oldCamTranslation.set(getCameraTranslation());
         nearestPlanet = StarSystem.getNearestPlanet(pos);
         if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
+        for (Item item : World.items) {
+            if (pos.distance(item.pos) < 1) {
+                Item newItem = inv.addToInventory(item, true);
+                if (newItem == null || newItem.amount <= 0) {
+                    World.items.remove(item);
+                } else {
+                    item.amount = newItem.amount;
+                }
+            }
+        }
         movementTick();
         if (breath > 0) {
             breath--;

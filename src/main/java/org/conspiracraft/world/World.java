@@ -4,12 +4,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
+import org.conspiracraft.blocks.drops.BlockDrops;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
@@ -51,7 +53,7 @@ public class World {
     public static final int sizeLods = size >>lodBits;
     public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
-    public static WorldType worldType = WorldTypes.LAZULI;
+    public static WorldType worldType = WorldTypes.SAHARA;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
 
@@ -354,6 +356,30 @@ public class World {
     }
     public static final ArrayDeque<Vector3i> updateQueue = new ArrayDeque<>();
     public static final HashSet<Vector3i> updateSet = new HashSet<>();
+    public static void breakBlock(int x, int y, int z) {
+        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
+            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
+            return;
+        }
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+        BlockDrops.dropDrops(chunk.getBlock(pos), x, y, z);
+        chunk.setBlock(lX, lY, lZ, 0, 0);
+        updateLod(x, y, z, true);
+        updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+        Light oldLight = chunk.getLight(pos);
+        chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+        updateHeightmap(x, y, z);
+        LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+        if (!updateSet.contains(chunkPos)) {
+            updateSet.add(chunkPos);
+            updateQueue.addLast(chunkPos);
+        }
+    }
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
         setBlock(x, y, z, type, subType, true);
     }

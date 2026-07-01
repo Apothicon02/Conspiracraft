@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class LootTables {
     public static Map<Pair<Float, Integer>[], Item>  //must have any kind of "guaranteed" drop last.
+            STICK = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.STICK)),
             STONE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.STONE)),
             MARBLE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.MARBLE)),
             GRASS = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.GRASS)),
@@ -18,7 +19,9 @@ public class LootTables {
             DIRT = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.DIRT)),
             MARTIAN_REGOLITH = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.MARTIAN_REGOLITH)),
             REGOLITH = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.REGOLITH)),
-            SAND = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.SAND)),
+            SAND = Map.of(
+                    new Pair[]{new Pair<>(0.05f, 1)}, new Item().type(ItemTypes.DRIFTWOOD),
+                    new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.SAND)),
             SANDSTONE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.SANDSTONE)),
             CLAY = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.CLAY)),
             MUD = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.MUD)),

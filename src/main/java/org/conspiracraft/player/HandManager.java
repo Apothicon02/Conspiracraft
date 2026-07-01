@@ -98,11 +98,13 @@ public class HandManager {
         }
         Vector3i selectedBlockI = new Vector3i((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
         Vector2i block = World.getBlock(selectedBlockI);
+        float resistance = BlockTypes.blockTypes[block.x()].getResistance();
+        if (resistance <= 0) {damage = 10000000;} else {damage = (int)(((float)damage)/resistance);}
         if (entity == null) {
             entity = new CracksEntity(EntityTypes.SLIGHTLY_CRACKED, new Matrix4f().setTranslation(player.selectedBlock).translate(0.5f, 0.5f, 0.5f).scale(1.01f), 0);
             World.entities.add(entity);
         } else if (entity.mine(damage, BlockTypes.blockTypes[block.x()].blockProperties.blockSFX)) {
-            World.setBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z(), 0, 0);
+            World.breakBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
             delay = 300;
         }
     }

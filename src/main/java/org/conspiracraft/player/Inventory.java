@@ -49,9 +49,9 @@ public class Inventory {
                     item = cursorItem.clone().amount(amtPerSlot);
                     amtPut += amtPerSlot;
                 } else {
-                    int transfer = Math.min(item.type.maxStackSize, item.amount + amtPerSlot);
-                    item.amount = transfer;
-                    amtPut += transfer;
+                    int prevAmount = item.amount;
+                    item.amount = Math.min(item.type.maxStackSize, item.amount + amtPerSlot);
+                    amtPut += item.amount-prevAmount;
                 }
                 items[slotId] = item;
             }
@@ -106,13 +106,14 @@ public class Inventory {
                             cursorItem = newSelItem.clone();
                             float splitAmt = cursorItem.amount / 2.f;
                             int existAmt = (int) Math.floor(splitAmt);
-                            if (existAmt <= 0) {
-                                newSelItem = null;
-                            } else {
-                                newSelItem.amount = existAmt;
-                            }
+                            newSelItem.amount = existAmt;
                             cursorItem.amount = (int) Math.ceil(splitAmt);
+                        } else if (Main.player.inputHandler.middleButtonClick) {
+                            cursorItem = newSelItem.clone();
+                            cursorItem.amount = 1;
+                            newSelItem.amount--;
                         }
+                        if (newSelItem != null && newSelItem.amount <= 0) {newSelItem = null;}
                         if (selSlotId != null) {
                             setItem(selSlotId, newSelItem);
                             if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LEFT) && cursorItem != null) {
@@ -183,15 +184,17 @@ public class Inventory {
                     }
                     if (product != null) {
                         if (!useCursorItem || selItem.amount <= cursorItem.amount) {
-                            selItem.type(product);
-                            if (useCursorItem) {
-                                cursorItem.amount(cursorItem.amount - selItem.amount);
-                                if (cursorItem.amount <= 0) {
-                                    cursorItem = null;
+                            if (selItem.amount <= product.maxStackSize) {
+                                selItem.type(product);
+                                if (useCursorItem) {
+                                    cursorItem.amount(cursorItem.amount - selItem.amount);
+                                    if (cursorItem.amount <= 0) {
+                                        cursorItem = null;
+                                    }
                                 }
+                                selItem.playSound(Main.player.pos);
                             }
-                            selItem.playSound(Main.player.pos);
-                        } else {
+                        } else if (cursorItem.amount <= product.maxStackSize) {
                             cursorItem.type(product);
                             selItem.amount(selItem.amount - cursorItem.amount);
                             if (selItem.amount <= 0) {
@@ -239,27 +242,6 @@ public class Inventory {
     }
 
     public void init() {
-        setItem(0, 0, new Item().type(ItemTypes.STEEL_WRENCH));
-        setItem(1, 0, new Item().type(ItemTypes.STEEL_SCYTHE));
-        setItem(2, 0, new Item().type(ItemTypes.STEEL_PICK));
-        setItem(3, 0, new Item().type(ItemTypes.STEEL_HATCHET));
-        setItem(4, 0, new Item().type(ItemTypes.STEEL_SPADE));
-        setItem(5, 0, new Item().type(ItemTypes.STEEL_HOE));
-        setItem(6, 0, new Item().type(ItemTypes.GOLD_PLATE));
-        setItem(7, 0, new Item().type(ItemTypes.ZINC_PLATE));
-        setItem(8, 0, new Item().type(ItemTypes.COPPER_PLATE));
-        setItem(9, 0, new Item().type(ItemTypes.IRON_PLATE));
-        setItem(10, 0, new Item().type(ItemTypes.STEEL_PLATE));
-        setItem(11, 0, new Item().type(ItemTypes.STEEL_FRAME));
-        setItem(12, 0, new Item().type(ItemTypes.HAZARD_PLATE));
-        setItem(13, 0, new Item().type(ItemTypes.FIREBALL).amount(16));
-        setItem(13, 1, new Item().type(ItemTypes.LIGHTNING).amount(16));
-        setItem(3, 3, new Item().type(ItemTypes.GLASS).amount(37));
-        setItem(3, 2, new Item().type(ItemTypes.GLASS).amount(1));
-        setItem(2, 3, new Item().type(ItemTypes.STICK).amount(60));
-        setItem(1, 3, new Item().type(ItemTypes.OAK_LOG).amount(54));
-        setItem(0, 3, new Item().type(ItemTypes.STONE).amount(64));
-        setItem(0, 2, new Item().type(ItemTypes.MARBLE).amount(64));
     }
 
     public static Path invPath = Path.of(Main.mainFolder + "player_inv.data");
