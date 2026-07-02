@@ -9,6 +9,7 @@ import org.conspiracraft.elements.Elements;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.items.Item;
 import org.conspiracraft.items.ItemSFX;
 import org.conspiracraft.items.ItemTag;
 import org.conspiracraft.items.ItemTags;
@@ -17,6 +18,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,37 +117,40 @@ public class ItemTypes {
             ZINC_PLATE = create(new ItemType("component/texture/zinc_plate").maxStackSize(64).blockToPlace(BlockTypes.ZINC_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             GOLD_PLATE = create(new ItemType("component/texture/gold_plate").maxStackSize(64).blockToPlace(BlockTypes.GOLD_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             HAZARD_PLATE = create(new ItemType("component/texture/hazard_plate").maxStackSize(64).blockToPlace(BlockTypes.HAZARD.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            STEEL_WRENCH = create(new ToolItemType("tool/steel/texture/wrench", 50, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            IRON_WRENCH = create(new ToolItemType("tool/iron/texture/wrench", 15, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            COPPER_WRENCH = create(new ToolItemType("tool/copper/texture/wrench", 25, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            ZINC_WRENCH = create(new ToolItemType("tool/zinc/texture/wrench", 15, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            GOLD_WRENCH = create(new ToolItemType("tool/gold/texture/wrench", 50, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            STEEL_SCYTHE = create(new ToolItemType("tool/steel/texture/scythe", 50, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            IRON_SCYTHE = create(new ToolItemType("tool/iron/texture/scythe", 15, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            COPPER_SCYTHE = create(new ToolItemType("tool/copper/texture/scythe", 25, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            ZINC_SCYTHE = create(new ToolItemType("tool/zinc/texture/scythe", 15, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_SCYTHE = create(new ToolItemType("tool/gold/texture/scythe", 50, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            STEEL_PICK = create(new ToolItemType("tool/steel/texture/pick", 50, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            IRON_PICK = create(new ToolItemType("tool/iron/texture/pick", 15, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            COPPER_PICK = create(new ToolItemType("tool/copper/texture/pick", 25, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            ZINC_PICK = create(new ToolItemType("tool/zinc/texture/pick", 15, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_PICK = create(new ToolItemType("tool/gold/texture/pick", 50, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            STEEL_HATCHET = create(new ToolItemType("tool/steel/texture/hatchet", 50, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            IRON_HATCHET = create(new ToolItemType("tool/iron/texture/hatchet", 15, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            COPPER_HATCHET = create(new ToolItemType("tool/copper/texture/hatchet", 25, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            ZINC_HATCHET = create(new ToolItemType("tool/zinc/texture/hatchet", 15, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_HATCHET = create(new ToolItemType("tool/gold/texture/hatchet", 50, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            STEEL_SPADE = create(new ToolItemType("tool/steel/texture/spade", 50, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            IRON_SPADE = create(new ToolItemType("tool/iron/texture/spade", 15, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            COPPER_SPADE = create(new ToolItemType("tool/copper/texture/spade", 25, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            ZINC_SPADE = create(new ToolItemType("tool/zinc/texture/spade", 15, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_SPADE = create(new ToolItemType("tool/gold/texture/spade", 50, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            WOOD_SPADE = create(new ToolItemType("tool/wood/texture/spade", 5, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            STEEL_HOE = create(new ToolItemType("tool/steel/texture/hoe", 50, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            IRON_HOE = create(new ToolItemType("tool/iron/texture/hoe", 15, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            COPPER_HOE = create(new ToolItemType("tool/copper/texture/hoe", 25, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            ZINC_HOE = create(new ToolItemType("tool/zinc/texture/hoe", 15, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_HOE = create(new ToolItemType("tool/gold/texture/hoe", 50, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f)));
+            STEEL_WRENCH = create(new ToolItemType("tool/steel/texture/wrench", 50, 20, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            IRON_WRENCH = create(new ToolItemType("tool/iron/texture/wrench", 15, 20, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            COPPER_WRENCH = create(new ToolItemType("tool/copper/texture/wrench", 25, 20, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            ZINC_WRENCH = create(new ToolItemType("tool/zinc/texture/wrench", 15, 20, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            GOLD_WRENCH = create(new ToolItemType("tool/gold/texture/wrench", 50, 20, new BlockTag[]{BlockTags.wrenchEfficient}).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
+            STEEL_SCYTHE = create(new ToolItemType("tool/steel/texture/scythe", 50, 20, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_SCYTHE = create(new ToolItemType("tool/iron/texture/scythe", 15, 20, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_SCYTHE = create(new ToolItemType("tool/copper/texture/scythe", 25, 20, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_SCYTHE = create(new ToolItemType("tool/zinc/texture/scythe", 15, 20, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_SCYTHE = create(new ToolItemType("tool/gold/texture/scythe", 50, 20, new BlockTag[]{BlockTags.scytheEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_PICK = create(new ToolItemType("tool/steel/texture/pick", 50, 20, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_PICK = create(new ToolItemType("tool/iron/texture/pick", 15, 20, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_PICK = create(new ToolItemType("tool/copper/texture/pick", 25, 20, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_PICK = create(new ToolItemType("tool/zinc/texture/pick", 15, 20, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_PICK = create(new ToolItemType("tool/gold/texture/pick", 50, 20, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STONE_PICK = create(new ToolItemType("tool/stone/texture/pick", 7, 10, new BlockTag[]{BlockTags.pickEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_HATCHET = create(new ToolItemType("tool/steel/texture/hatchet", 50, 20, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_HATCHET = create(new ToolItemType("tool/iron/texture/hatchet", 15, 20, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_HATCHET = create(new ToolItemType("tool/copper/texture/hatchet", 25, 20, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_HATCHET = create(new ToolItemType("tool/zinc/texture/hatchet", 15, 20, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_HATCHET = create(new ToolItemType("tool/gold/texture/hatchet", 50, 20, new BlockTag[]{BlockTags.hatchetEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_SPADE = create(new ToolItemType("tool/steel/texture/spade", 50, 20, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_SPADE = create(new ToolItemType("tool/iron/texture/spade", 15, 20, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_SPADE = create(new ToolItemType("tool/copper/texture/spade", 25, 20, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_SPADE = create(new ToolItemType("tool/zinc/texture/spade", 15, 20, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_SPADE = create(new ToolItemType("tool/gold/texture/spade", 50, 20, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            WOOD_SPADE = create(new ToolItemType("tool/wood/texture/spade", 5, 10, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STONE_SPADE = create(new ToolItemType("tool/stone/texture/spade", 7, 10, new BlockTag[]{BlockTags.spadeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_HOE = create(new ToolItemType("tool/steel/texture/hoe", 50, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_HOE = create(new ToolItemType("tool/iron/texture/hoe", 15, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_HOE = create(new ToolItemType("tool/copper/texture/hoe", 25, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_HOE = create(new ToolItemType("tool/zinc/texture/hoe", 15, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_HOE = create(new ToolItemType("tool/gold/texture/hoe", 50, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f)));
+
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
         return type;
@@ -181,5 +186,10 @@ public class ItemTypes {
             }
         }
         ImageHelper.fillImage(stack, Textures.items, stagingBuffer);
+    }
+
+    public static Item loadItem(IntBuffer data) {
+        ItemType type = itemTypeMap.get(data.get(data.position()));
+        return type.createItem().load(data);
     }
 }

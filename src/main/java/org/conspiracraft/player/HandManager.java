@@ -6,6 +6,7 @@ import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -68,10 +69,17 @@ public class HandManager {
         }
         if (Main.timeMsLong - delayStart >= delay) {
             delayStart = Main.timeMsLong;
-            delay = (selectedItem == null || selectedItem.amount <= 0) ? 0 : selectedItem.use(ddaResult);
+            if (selectedItem == null || selectedItem.amount <= 0) {
+                delay = 0;
+            } else {
+                ItemUseResult result = selectedItem.use(ddaResult);
+                delay = result.delay();
+                selectedItem = result.item();
+                player.inv.setItem(player.inv.selectedSlot, selectedItem);
+            }
             if (delay == 0) { //if item did no interaction
                 if (lmbDown && World.inBounds(player.selectedBlock)) {
-                    mine(4);
+                    delay = mine(4);
                 }
             }
         }
@@ -87,7 +95,7 @@ public class HandManager {
         rmbDown = false;
     }
 
-    public static void mine(int damage) {
+    public static int mine(int damage) {
         CracksEntity entity = null;
         for (Entity maybeEntity : World.entities) {
             if (maybeEntity instanceof CracksEntity cracksEntity && (int)maybeEntity.prevPos.x() == (int)player.selectedBlock.x()
@@ -105,8 +113,9 @@ public class HandManager {
             World.entities.add(entity);
         } else if (entity.mine(damage, BlockTypes.blockTypes[block.x()].blockProperties.blockSFX)) {
             World.breakBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
-            delay = 300;
+            return 300;
         }
+        return 1;
     }
 
     public static void tick() {

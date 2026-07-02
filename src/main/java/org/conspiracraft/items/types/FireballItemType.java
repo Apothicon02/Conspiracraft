@@ -1,12 +1,12 @@
 package org.conspiracraft.items.types;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.entities.FireballEntity;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -21,7 +21,7 @@ public class FireballItemType extends ItemType {
         super(name);
     }
     @Override
-    public int use(DDAResult dda, Item item) {
+    public ItemUseResult use(DDAResult dda, Item item) {
         if (player.inputHandler.leftButtonPressed) {
             if (!player.creative) {item.amount--;}
             Vector3f earPos = new Vector3f(player.pos).add(0, player.eyeHeight, 0);
@@ -37,9 +37,9 @@ public class FireballItemType extends ItemType {
             source.play(Sounds.MAGMA);
             AudioController.disposableSources.add(source);
             entity.sfxSource = source;
-            return 500;
+            return new ItemUseResult(500, item);
         } else {
-            return 0;
+            return new ItemUseResult(0, item);
         }
     }
 }

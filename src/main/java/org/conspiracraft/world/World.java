@@ -238,7 +238,7 @@ public class World {
                 while (itemsData.position() < itemsData.capacity()) {
                     int itemDataLength = itemsData.get();
                     if (itemDataLength > 0) {
-                        items.add(Item.load(itemsData));
+                        items.add(ItemTypes.loadItem(itemsData));
                     }
                 }
                 Utils.unmap(data);

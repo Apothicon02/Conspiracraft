@@ -1,8 +1,9 @@
 package org.conspiracraft.items.types;
 
 import org.conspiracraft.blocks.BlockTag;
-import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.player.HandManager;
 import org.conspiracraft.world.World;
@@ -13,14 +14,22 @@ import static org.conspiracraft.player.HandManager.lmbDown;
 
 public class ToolItemType extends ItemType {
     public int strength;
+    public int maxDurability;
     public BlockTag[] uses;
-    public ToolItemType(String name, int strength, BlockTag[] uses) {
+    public ToolItemType(String name, int strength, int maxDurability, BlockTag[] uses) {
         super(name);
         this.strength = strength;
+        this.maxDurability = maxDurability;
         this.uses = uses;
     }
     @Override
-    public int use(DDAResult dda, Item item) {
+    public Item createItem() {
+        return new DurableItem().durability(maxDurability).type(this);
+    }
+    @Override
+    public int maxDurability() {return maxDurability;}
+    @Override
+    public ItemUseResult use(DDAResult dda, Item item) {
         if (lmbDown && World.inBounds(player.selectedBlock)) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             boolean rightTool = false;
@@ -30,10 +39,11 @@ public class ToolItemType extends ItemType {
                     break;
                 }
             }
-            HandManager.mine(rightTool ? strength : 4);
-            return 1;
+            int delay = HandManager.mine(rightTool ? strength : 4);
+            if (rightTool && delay > 1) {item = ((DurableItem)item).damage(1);}
+            return new ItemUseResult(delay, item);
         } else {
-            return 0;
+            return new ItemUseResult(0, item);
         }
     }
 }

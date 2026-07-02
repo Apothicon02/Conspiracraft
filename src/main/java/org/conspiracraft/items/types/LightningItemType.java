@@ -4,6 +4,7 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
@@ -17,7 +18,7 @@ public class LightningItemType extends ItemType {
         super(name);
     }
     @Override
-    public int use(DDAResult dda, Item item) {
+    public ItemUseResult use(DDAResult dda, Item item) {
         if (player.inputHandler.leftButtonPressed && World.inBounds(player.selectedBlock)) {
             Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, World.height, 0));
             for (int i = 1; i < World.height; i++) {
@@ -29,9 +30,9 @@ public class LightningItemType extends ItemType {
                     break;
                 }
             }
-            return 500;
+            return new ItemUseResult(500, item);
         } else {
-            return 0;
+            return new ItemUseResult(0, item);
         }
     }
 }

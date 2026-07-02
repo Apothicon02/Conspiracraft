@@ -7,6 +7,7 @@ import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.ItemSFX;
 import org.conspiracraft.items.ItemTag;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
@@ -48,16 +49,17 @@ public class ItemType {
         sound = sfx;
         return this;
     }
-    public int use(DDAResult dda, Item item) {
+    public int maxDurability() {return 0;}
+    public ItemUseResult use(DDAResult dda, Item item) {
         if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything) {
             Vector2i block = World.getBlock(dda.prevHit);
             BlockType blockType = BlockTypes.blockTypes[block.x()];
             if (blockType.blockProperties.isFluidReplaceable) {
                 World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), blockToPlace.y());
                 if (!player.creative) {item.amount--;}
-                return 200;
+                return new ItemUseResult(200, item);
             }
         }
-        return 0;
+        return new ItemUseResult(0, item);
     }
 }

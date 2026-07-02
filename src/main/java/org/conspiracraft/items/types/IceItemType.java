@@ -1,12 +1,11 @@
 package org.conspiracraft.items.types;
 
-
-import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.elements.Element;
 import org.conspiracraft.items.IceItem;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
@@ -30,7 +29,7 @@ public class IceItemType extends ItemType {
         return (IceItem) new IceItem().type(this);
     }
     @Override
-    public int use(DDAResult dda, Item item) {
+    public ItemUseResult use(DDAResult dda, Item item) {
         if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything && item.amount >= 1000) {
             Vector2i block = World.getBlock(dda.prevHit);
             BlockType blockType = BlockTypes.blockTypes[block.x()];
@@ -39,9 +38,9 @@ public class IceItemType extends ItemType {
                 if (!player.creative) {
                     item.amount -= 1000;
                 }
-                return 200;
+                return new ItemUseResult(200, item);
             }
         }
-        return 0;
+        return new ItemUseResult(0, item);
     }
 }

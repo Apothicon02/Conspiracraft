@@ -23,7 +23,7 @@ public class Item implements Cloneable {
     public int timeExisted = 0;
     public long prevTickTime = 0;
 
-    public static Item load(IntBuffer data) {
+    public Item load(IntBuffer data) {
         return new Item().type(ItemTypes.itemTypeMap.get(data.get())).moveTo(new Vector3f(data.get()/1000f, data.get()/1000f, data.get()/1000f)).rot(data.get()/1000f).hover(data.get()/1000f, data.get()>0).amount(data.get()).timeExisted(data.get());
     }
     public int[] getData() {
@@ -125,7 +125,7 @@ public class Item implements Cloneable {
         return type.blockToPlace;
     }
 
-    public int use(DDAResult dda) {
+    public ItemUseResult use(DDAResult dda) {
         return type.use(dda, this);
     }
 }

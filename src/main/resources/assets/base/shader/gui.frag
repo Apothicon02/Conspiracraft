@@ -47,7 +47,7 @@ void main() {
         outColor = bgColor;
     } else {
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(localUV.x*pushUbo.size.x), pushUbo.atlasOffset.y+(localUV.y*pushUbo.size.y));
-        vec4 guiColor = pushUbo.tex == 0 ? texelFetch(gui, ivec3(coords, pushUbo.layer), 0) : texelFetch(items, coords, 0);
+        vec4 guiColor = pushUbo.tex < 0 ? vec4(1) : (pushUbo.tex == 0 ? texelFetch(gui, ivec3(coords, pushUbo.layer), 0) : texelFetch(items, coords, 0));
         guiColor.rgb = fromLinear(guiColor.rgb);
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {

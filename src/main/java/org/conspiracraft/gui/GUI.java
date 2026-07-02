@@ -10,6 +10,7 @@ import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.buttons.*;
 import org.conspiracraft.gui.sliders.*;
+import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
@@ -305,6 +306,14 @@ public class GUI {
                         int offX = 3 + (x * slotSize);
                         int offY = 3 + (y * slotSizeY);
                         drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+                        if (item instanceof DurableItem durableItem && durableItem.durability < itemType.maxDurability()) {
+                            pushUBO.updateTex(-1); //use no texture
+                            float durabilityPercent = (float) durableItem.durability / itemType.maxDurability();
+                            float duraMix = (float)Math.sqrt(durabilityPercent);
+                            color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);
+                            drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, (int)(ItemTypes.itemTexSize*durabilityPercent), 2);
+                            color.set(1);
+                        }
                         if (item.amount > 1) {
                             pushUBO.updateTex(0); //use gui atlas
                             char[] chars = String.valueOf(item.amount).toCharArray();

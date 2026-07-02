@@ -255,7 +255,7 @@ public class Inventory {
         while (itemsData.position() < itemsData.capacity()) {
             int itemDataLength = itemsData.get();
             if (itemDataLength > 0) {
-                items[slot++] = Item.load(itemsData);
+                items[slot++] = ItemTypes.loadItem(itemsData);
             } else {
                 slot++;
             }
