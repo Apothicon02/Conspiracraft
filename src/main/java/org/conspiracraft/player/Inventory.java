@@ -162,31 +162,12 @@ public class Inventory {
                     prevInteract = 0;
                     prevInteractTime = Main.timeMsLong;
                 } else if (Main.player.inputHandler.middleButtonClick) {
-                    ItemType product = Recipes.recipes.get(new Pair<>(cursorItem.type, selItem.type));
-                    if (product == null) {
-                        product = Recipes.recipes.get(new Pair<>(selItem.type, cursorItem.type));
-                    }
-                    boolean useCursorItem = true;
-                    if (product == null) {
-                        for (ItemTag tag : cursorItem.type.tags) {
-                            if (tag.tagged.contains(cursorItem.type)) {
-                                for (ItemTag selTag : selItem.type.tags) {
-                                    if (selTag.tagged.contains(selItem.type)) {
-                                        product = Recipes.tagRecipes.get(new Pair<>(tag, selTag));
-                                        if (product != null) {
-                                            useCursorItem = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    Recipes.Product product = Recipes.getProduct(cursorItem, selItem);
                     if (product != null) {
-                        if (!useCursorItem || selItem.amount <= cursorItem.amount) {
-                            if (selItem.amount <= product.maxStackSize) {
-                                selItem.type(product);
-                                if (useCursorItem) {
+                        if (!product.consume() || selItem.amount <= cursorItem.amount) {
+                            if (selItem.amount <= product.itemType().maxStackSize) {
+                                selItem.type(product.itemType());
+                                if (product.consume()) {
                                     cursorItem.amount(cursorItem.amount - selItem.amount);
                                     if (cursorItem.amount <= 0) {
                                         cursorItem = null;
@@ -194,8 +175,8 @@ public class Inventory {
                                 }
                                 selItem.playSound(Main.player.pos);
                             }
-                        } else if (cursorItem.amount <= product.maxStackSize) {
-                            cursorItem.type(product);
+                        } else if (cursorItem.amount <= product.itemType().maxStackSize) {
+                            cursorItem.type(product.itemType());
                             selItem.amount(selItem.amount - cursorItem.amount);
                             if (selItem.amount <= 0) {
                                 selItem = null;

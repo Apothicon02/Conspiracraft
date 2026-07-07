@@ -19,6 +19,9 @@ public class LootTables {
             DIRT = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.DIRT)),
             MARTIAN_REGOLITH = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.MARTIAN_REGOLITH)),
             REGOLITH = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.REGOLITH)),
+            WET_SAND = Map.of(
+                    new Pair[]{new Pair<>(0.5f, 1)}, new Item().type(ItemTypes.DRIFTWOOD),
+                    new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.SAND)),
             SAND = Map.of(
                     new Pair[]{new Pair<>(0.05f, 1)}, new Item().type(ItemTypes.DRIFTWOOD),
                     new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.SAND)),
@@ -30,6 +33,7 @@ public class LootTables {
                     new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.GRAVEL)),
             KYANITE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.KYANITE)),
             FLINT = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.FLINT)),
+            PEBBLE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.PEBBLE)),
             IRON_ORE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.IRON_ORE)),
             COPPER_ORE = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.COPPER_ORE)),
             GLASS = Map.of(new Pair[]{new Pair<>(1.f, 1)}, new Item().type(ItemTypes.GLASS)),

@@ -543,13 +543,15 @@ public class Sahara extends WorldType {
                                             Blob.generate(blockOn, x, elevation + 7 + variant, z + 1 + variant, 24, 0, 2 + variant);
                                             Blob.generate(blockOn, x - 1 - variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
                                             Blob.generate(blockOn, x + 1 + variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
-                                        } else if (deadBushChance < 0.2) {
-                                            if (deadBushChance > 0.19) {
+                                        } else if (deadBushChance < 0.4) {
+                                            if (deadBushChance > 0.39) {
                                                 int maxHeight = (int) (rand.nextFloat() * 6) + 12;
                                                 DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
                                                 Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
+                                            } else if (deadBushChance > 0.2) {
+                                                setBlock(x, elevation + 1, z, BlockTypes.PEBBLE.id, deadBushChance < 0.3 ? 0 : 1);
                                             } else {
-                                                setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                                setBlock(x, elevation + 1, z, BlockTypes.DEAD_BUSH.id, deadBushChance < 0.1 ? 0 : 1);
                                             }
                                         } else {
                                             Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, 29, 0);

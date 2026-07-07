@@ -463,7 +463,8 @@ vec4 dda(bool shadow) {
                             firstHitPos = hitPos;
                         }
                         if (voxelColor.a > alphaMax) {
-                            shadowPos = hitPos+vec3(0, voxelSize, 0);
+                            vec3 aboveHitPos = hitPos+vec3(0, voxelSize, 0);
+                            shadowPos = int(aboveHitPos.y) > int(hitPos.y) ? aboveHitPos : hitPos;
                             return voxelColor;
                         } else {
                             addTint(voxelColor, normal, shadow);

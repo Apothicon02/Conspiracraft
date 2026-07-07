@@ -30,7 +30,7 @@ public class ToolItemType extends ItemType {
     public int maxDurability() {return maxDurability;}
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (lmbDown && World.inBounds(player.selectedBlock)) {
+        if (lmbDown && World.inBounds(player.selectedBlock) && item instanceof DurableItem durableItem) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             boolean rightTool = false;
             for (BlockTag tag : uses) {
@@ -40,7 +40,7 @@ public class ToolItemType extends ItemType {
                 }
             }
             int delay = HandManager.mine(rightTool ? strength : 4);
-            if (rightTool && delay > 1) {item = ((DurableItem)item).damage(1);}
+            if (rightTool && delay > 1) {item = durableItem.damage(1);}
             return new ItemUseResult(delay, item);
         } else {
             return new ItemUseResult(0, item);
