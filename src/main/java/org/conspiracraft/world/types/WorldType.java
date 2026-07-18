@@ -27,7 +27,7 @@ public class WorldType {
     public ByteArrayList getGlobalElements() {return globalElements;}
     public WorldType space() {return null;}
     public float getLongitude() {return 0.f;}
-    public Path getWorldPath() {return Path.of("none");}
+    public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/none");}
     public Planet getPlanet(){return null;}
     public static Vector3f nearestLightning = new Vector3f();
     public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);

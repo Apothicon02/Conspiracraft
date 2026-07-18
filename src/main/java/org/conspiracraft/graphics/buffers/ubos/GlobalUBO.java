@@ -16,10 +16,9 @@ import java.nio.ByteOrder;
 
 import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.system.MemoryUtil.*;
-import static org.lwjgl.vulkan.VK10.*;
 
 public class GlobalUBO extends UBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Matrix4f(), new Matrix4f(), new Vector4i(), new Vector4f(), new Vector3f(), 0, 0.f, new Vector2i(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), 0.f, new Vector3f(), 0};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Matrix4f(), new Matrix4f(), new Vector4i(), new Vector4f(), new Vector3f(), 0, 0.f, new Vector2i(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), 0.f, new Vector3f()};
     @Override public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     @Override public int size(){return size;}
@@ -73,7 +72,6 @@ public class GlobalUBO extends UBO {
         ((Vector4f)uniformStorage[13]).set(World.worldType.getDeepSunsetAtmosphereColor());
         uniformStorage[14] = World.worldType.getFogginess();
         uniformStorage[15] = World.worldType.getSkylightMul();
-        uniformStorage[16] = Renderer.jitterFrame;
     }
     private int offset = 0;
     public void submit() {

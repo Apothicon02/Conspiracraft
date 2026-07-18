@@ -15,7 +15,6 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec4 deepSunsetAtmosphere;
     float fogginess;
     vec3 skylightMul;
-    int jitterFrame;
 } globalUbo;
 struct ChunkStruct {
     int pointer;
@@ -564,7 +563,6 @@ const float[16] yOffsets = float[16](0.0f, 0.166667f, -0.388889f, -0.055556f, 0.
 const float Z_NEAR = 0.01f;
 void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
-    //vec2 jitter = (blueNoise(ivec2((gl_FragCoord.xy*10)+globalUbo.jitterFrame))-0.5f).xy/globalUbo.res;
     ogPos = camPos;
     ogChunkPos = ogPos/chunkSize;
     ogDir = getDir(uv);//+jitter);

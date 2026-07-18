@@ -73,8 +73,8 @@ public class Renderer {
     public static boolean reloadTextures = true;
     public static int jitterFrame = 0;
     public static HaltonSequenceGenerator halton = new HaltonSequenceGenerator(2);
-    public static float[] xOffsets = new float[16];
-    public static float[] yOffsets = new float[16];
+    public static float[] xOffsets = new float[8];
+    public static float[] yOffsets = new float[8];
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -139,12 +139,10 @@ public class Renderer {
 
                 submitCommandBuffers(stack);
                 if (Settings.taaEnabled) {
-                    int idx = (jitterFrame*47)&15;
-
-                    Main.window.jitterX=(xOffsets[idx]/Settings.width);
-                    Main.window.jitterY=(yOffsets[idx]/Settings.height);
+                    Main.window.jitterX=(xOffsets[jitterFrame]/Settings.width);
+                    Main.window.jitterY=(yOffsets[jitterFrame]/Settings.height);
                     jitterFrame++;
-                    if (jitterFrame >= 16) {jitterFrame = 0;}
+                    if (jitterFrame >= xOffsets.length) {jitterFrame = 0;}
                 }
             }
         }
@@ -436,6 +434,7 @@ public class Renderer {
         Vector3f dir = new Vector3f(dest).sub(og);
         float length = dir.length();
         Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
+        width *= Math.max(1, (Math.max(og.distance(player.pos), dest.distance(player.pos))/(width*300f))-1.5f);
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {

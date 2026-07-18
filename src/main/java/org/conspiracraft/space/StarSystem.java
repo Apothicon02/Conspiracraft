@@ -76,7 +76,7 @@ public class StarSystem {
         Vector4f sunColor = new Vector4f(10f, 10f, 10f, 1);
         drawCube(sunMatrix, sunColor);
         for (Planet planet : planets) {
-            planet.render(stack, activeRot, activePos, pos, 500000);
+            planet.render(stack, activeRot, activePos, pos, 100000);
         }
     }
 }
