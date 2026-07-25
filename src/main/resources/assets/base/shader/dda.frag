@@ -103,8 +103,9 @@ int getLightData(int x, int y, int z) {
     return lightData.lights[lightChunk.pointer+key];
 }
 vec4 getLight(int x, int y, int z) {
-    int lightData = getLightData(x, y, z);
-    return vec4(0xFF & lightData >> 16, 0xFF & lightData >> 8, 0xFF & lightData, 0xFF & lightData >> 24);
+    return vec4(0, 0, 0, 0xFF & fullSunlight >> 24);
+//    int lightData = getLightData(x, y, z);
+//    return vec4(0xFF & lightData >> 16, 0xFF & lightData >> 8, 0xFF & lightData, 0xFF & lightData >> 24);
 }
 vec4 getLight(float x, float y, float z) {
     return getLight(int(x), int(y), int(z));

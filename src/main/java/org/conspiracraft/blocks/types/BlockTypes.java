@@ -23,8 +23,10 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class BlockTypes {
     public static int blockTexWidth = 8;
+    public static int blockTexWidthHalf = blockTexWidth/2;
     public static long blockTexWidthL = blockTexWidth;
     public static int blockTexHeight = blockTexWidth * blockTexWidth;
+    public static long blockTexHeightHalf = blockTexHeight/2;
     private static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
     public static BlockType
@@ -45,18 +47,18 @@ public class BlockTypes {
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/kyanite",  (LightBlockProperties) (new LightBlockProperties().r(4).g(20).b(40).blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))).altTexLoad(true),
-            MARBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().blockSFX(
+            MARBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.6f, new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f))),
-            IGNEOUS = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties())),
-            STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/stone",  new BlockProperties())), //10
-            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/glass",  new BlockProperties().blockSFX(
+            IGNEOUS = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties().hasSlab())),
+            STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/stone",  new BlockProperties().hasSlab())), //10
+            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/glass",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1).blocksLight(false).obstructsHeightmap(false))),
             MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/magenta_stained_glass",  GLASS.blockProperties)),
             LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/lime_stained_glass",  GLASS.blockProperties)),
             PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/porecap",  ((LightBlockProperties)TORCH.blockProperties.copy().resistance(1)).r(0).g(12).b(6))),
-            OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/oak_planks",  new BlockProperties().resistance(1).blockSFX(
+            OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/oak_planks",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))), //15
-            OAK_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/oak_log",  new BlockProperties().resistance(1).blockSFX(
+            OAK_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/oak_log",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             OAK_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/oak_leaves",  new BlockProperties().resistance(0.25f).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
@@ -66,16 +68,16 @@ public class BlockTypes {
             MAHOGANY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_log",  OAK_LOG.blockProperties)), //20
             MAHOGANY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/mahogany_leaves",  OAK_LEAVES.blockProperties)),
             BUCKET = create(List.of(BlockTags.buckets, BlockTags.cantBreakBlocks), new BlockType(blockTypeMap.size(), "crafted/texture/bucket",  new BlockProperties().resistance(1).isSolid(false).blocksLight(false).obstructsHeightmap(false))),
-            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().resistance(1).blockSFX(
+            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f, new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(true).obstructsHeightmap(true))),
-            SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties())),
+            SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties().hasSlab())),
             PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/palm_log",  OAK_LOG.blockProperties)), //25
             PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
             PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/palm_leaves",  OAK_LEAVES.blockProperties)),
             MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
             CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
             DEAD_BUSH = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties.copy().resistance(0.f))), //30
-            CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().blockSFX(
+            CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "natural/texture/rain_cloud",  CLOUD.blockProperties)),
@@ -100,16 +102,16 @@ public class BlockTypes {
             REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/redwood_leaves",  OAK_LEAVES.blockProperties)),
             HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
             BLUE_HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
-            SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/snow",  new BlockProperties().resistance(1).blockSFX(
+            SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/snow",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
             GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/gravel",  SAND.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))), //55
-            FLINT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/flint",  new BlockProperties())),
-            MUD = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/mud",  new BlockProperties().resistance(1).blockSFX(
+            FLINT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/flint",  new BlockProperties().hasSlab())),
+            MUD = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/mud",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f, new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
             CLAY = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/clay",  MUD.blockProperties)),
             OBSIDIAN = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/obsidian",  GLASS.blockProperties.copy().resistance(0.5f).blocksLight(true))),
-            IRON_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/iron_ore",  new BlockProperties().blockSFX(
+            IRON_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/iron_ore",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //60
             COPPER_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/copper_ore",  IRON_ORE.blockProperties.copy())),
             STICK = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "natural/texture/stick",  new BlockProperties().resistance(0.f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true).blockSFX(
@@ -129,13 +131,13 @@ public class BlockTypes {
             WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/wet_sand",  SAND.blockProperties.copy())),
             ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "natural/texture/ice",  GLASS.blockProperties.copy().blocksLight(true))),
             BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())), //75
-            GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties())),
-            CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties())),
+            GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties().hasSlab())),
+            CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties().hasSlab())),
             OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/obsidian_dust",  GRAVEL.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
-            STEEL_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().blockSFX(
+            STEEL_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/steel_plating",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
-            HAZARD = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().blockSFX(
+            HAZARD = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/hazard",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))).altTexLoad(true), //80
             ROSE_QUARTZ = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/rose_quartz",  ICE.blockProperties.copy().blocksLight(true))).altTexLoad(true),
             CINNABAR_SPIKES = create(List.of(BlockTags.pickEfficient), new PlantBlockType(blockTypeMap.size(), "geological/texture/cinnabar_spikes",  CINNABAR.blockProperties.copy().obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
@@ -150,7 +152,7 @@ public class BlockTypes {
             ROSE_QUARTZ_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/rose_quartz_sand",  SAND.blockProperties.copy())),
             DEAD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/dead_log",  OAK_LOG.blockProperties)),
             DEAD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties)),
-            IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().blockSFX(
+            IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             PEBBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/pebble",  STONE.blockProperties.copy().resistance(0.34f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true)));
 
@@ -189,36 +191,44 @@ public class BlockTypes {
             int height = image.getHeight();
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
             if (height > blockTexWidth) {
-                copyTexture(blockBuf, i, height);
+                copyTexture(blockBuf, i, height, 0, 0);
+                if (type.blockProperties.hasSlab) {
+                    copyTexture(blockBuf, i, height/2, 0, blockTexHeight * Textures.atlas.width * 4L);
+                    copyTexture(blockBuf, i, height/2, blockTexHeightHalf * 4L, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+                }
             } else {
-                copyPartialTexture(blockBuf, i, type.altTexLoad);
+                copyPartialTexture(blockBuf, i, type.altTexLoad, 0);
+                if (type.blockProperties.hasSlab) {
+                    copyTopSlabTexture(blockBuf, i, type.altTexLoad, blockTexHeight * Textures.atlas.width * 4L);
+                    copyBottomSlabTexture(blockBuf, i, type.altTexLoad, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+                }
             }
             memFree(blockBuf);
         }
         ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
         reloading = true;
     }
-    public static void copyTexture(ByteBuffer buf, int i, int height) {
+    public static void copyTexture(ByteBuffer buf, int i, int height, long offset, long dstOffset) {
         for (long row = 0; row < height; row++) {
-            memCopy(memAddress(buf) + row * blockTexWidth * 4L,
-                    atlasBuffer.pointer.get(0) + ((row * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+            memCopy(memAddress(buf) + offset + (row * blockTexWidth * 4L),
+                    atlasBuffer.pointer.get(0) + (offset*Textures.atlas.width) + dstOffset + ((row * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
                     blockTexWidth * 4L);
         }
     }
-    public static void copyPartialTexture(ByteBuffer buf, int i, boolean alt) {
+    public static void copyPartialTexture(ByteBuffer buf, int i, boolean alt, long offset) {
         for (long row = 0; row < blockTexWidth; row++) {
             for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
                 memCopy(memAddress(buf) + row * blockTexWidth * 4L,
-                        atlasBuffer.pointer.get(0) + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                        atlasBuffer.pointer.get(0) + offset + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
                         blockTexWidth * 4L);
                 for (long col = 0; col < blockTexWidth; col++) {
                     if (alt) {
                         memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
                                 4L);
                     } else {
                         memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
                 }
@@ -227,34 +237,132 @@ public class BlockTypes {
         for (long row = 1; row < blockTexWidth; row++) {
             for (long col = 0; col < blockTexWidth; col++) {
                 memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                        atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
                         4L);
                 if (alt) {
                     if (col+1 < blockTexWidth) {
                         memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                                atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
                 } else {
                     if (row + 1 < blockTexWidth) {
                         memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
                 }
                 memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                        atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
                         4L);
                 if (alt) {
                     if (col+1 < blockTexWidth) {
                         memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
-                                atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
                 } else {
                     if (row + 1 < blockTexWidth) {
                         memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+            }
+        }
+    }
+    public static void copyTopSlabTexture(ByteBuffer buf, int i, boolean alt, long offset) {
+        for (long row = 0; row < blockTexWidth; row++) {
+            for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
+                memCopy(memAddress(buf) + row * blockTexWidth * 4L,
+                        atlasBuffer.pointer.get(0) + offset + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                        blockTexWidth * 4L);
+            }
+        }
+        for (long row = 1; row < blockTexWidthHalf; row++) {
+            for (long col = 0; col < blockTexWidth; col++) {
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+            }
+        }
+    }
+    public static void copyBottomSlabTexture(ByteBuffer buf, int i, boolean alt, long offset) {
+        for (long row = 0; row < blockTexWidth; row++) {
+            for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
+                for (long col = 0; col < blockTexWidth; col++) {
+                    if (alt) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    } else {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+            }
+        }
+        for (long row = blockTexWidthHalf; row < blockTexWidth; row++) {
+            for (long col = 0; col < blockTexWidth; col++) {
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
                 }

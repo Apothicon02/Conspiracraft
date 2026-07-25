@@ -8,6 +8,11 @@ import org.conspiracraft.blocks.BlockTag;
 import java.util.Map;
 
 public class BlockProperties implements Cloneable {
+    public boolean hasSlab = false;
+    public BlockProperties hasSlab() {
+        this.hasSlab = true;
+        return this;
+    }
     public Map<BlockTag, Float> proficiencies = Map.of();
     public BlockProperties proficiencies(Map<BlockTag, Float> proficiencies) {
         this.proficiencies = proficiencies;

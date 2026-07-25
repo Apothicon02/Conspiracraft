@@ -150,7 +150,13 @@ public class ItemTypes {
             IRON_HOE = create(new ToolItemType("tool/iron/texture/hoe", 15, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             COPPER_HOE = create(new ToolItemType("tool/copper/texture/hoe", 25, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             ZINC_HOE = create(new ToolItemType("tool/zinc/texture/hoe", 15, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
-            GOLD_HOE = create(new ToolItemType("tool/gold/texture/hoe", 50, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f)));
+            GOLD_HOE = create(new ToolItemType("tool/gold/texture/hoe", 50, 20, new BlockTag[]{BlockTags.hoeEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STEEL_CHISEL = create(new ChiselItemType("tool/steel/texture/chisel", 50, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            IRON_CHISEL = create(new ChiselItemType("tool/iron/texture/chisel", 15, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            COPPER_CHISEL = create(new ChiselItemType("tool/copper/texture/chisel", 25, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            ZINC_CHISEL = create(new ChiselItemType("tool/zinc/texture/chisel", 15, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            GOLD_CHISEL = create(new ChiselItemType("tool/gold/texture/chisel", 50, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
+            STONE_CHISEL = create(new ChiselItemType("tool/stone/texture/chisel", 7, 10, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f)));
 
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
