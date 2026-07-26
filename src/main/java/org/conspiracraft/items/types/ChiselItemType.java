@@ -23,7 +23,7 @@ public class ChiselItemType extends ToolItemType {
             int delay = 0;
             if (BlockTypes.blockTypes[block.x()].blockProperties.hasSlab) {
                 delay = 400;
-                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), block.x(), block.y() >= 2 ? 0 : block.y()+1);
+                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), block.x(), block.y() >= 2 ? 0 : block.y()+1, true);
                 item = durableItem.damage(1);
             }
             return new ItemUseResult(delay, item);

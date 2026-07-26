@@ -30,6 +30,9 @@ public class BlockType {
     }
 
     public boolean blocksLight(Vector2i block) {
+        return blocksLight(block.x(), block.y());
+    }
+    public boolean blocksLight(int type, int subType) {
         return blockProperties.blocksLight;
     }
 

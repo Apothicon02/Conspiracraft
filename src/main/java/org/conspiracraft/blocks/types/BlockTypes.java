@@ -68,7 +68,7 @@ public class BlockTypes {
             MAHOGANY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_log",  OAK_LOG.blockProperties)), //20
             MAHOGANY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/mahogany_leaves",  OAK_LEAVES.blockProperties)),
             BUCKET = create(List.of(BlockTags.buckets, BlockTags.cantBreakBlocks), new BlockType(blockTypeMap.size(), "crafted/texture/bucket",  new BlockProperties().resistance(1).isSolid(false).blocksLight(false).obstructsHeightmap(false))),
-            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().hasSlab().resistance(1).blockSFX(
+            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f, new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(true).obstructsHeightmap(true))),
             SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties().hasSlab())),
             PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/palm_log",  OAK_LOG.blockProperties)), //25

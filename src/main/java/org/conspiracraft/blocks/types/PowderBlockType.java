@@ -28,8 +28,8 @@ public class PowderBlockType extends BlockType {
     }
 
     @Override
-    public boolean blocksLight(Vector2i block) {
-        return blockProperties.blocksLight && block.y == 0;
+    public boolean blocksLight(int type, int subType) {
+        return blockProperties.blocksLight && subType == 0;
     }
 
     public PowderBlockType(int id, String name, BlockProperties blockProperties) {

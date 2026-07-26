@@ -371,10 +371,8 @@ public class World {
         chunk.setBlock(lX, lY, lZ, 0, 0);
         updateLod(x, y, z, true);
         updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
-        Light oldLight = chunk.getLight(pos);
-        chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
         updateHeightmap(x, y, z);
-        LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+        LightHelper.queueLightUpdate(new Vector3i(x, y, z));
         if (!updateSet.contains(chunkPos)) {
             updateSet.add(chunkPos);
             updateQueue.addLast(chunkPos);
@@ -403,11 +401,19 @@ public class World {
         }
         if (!generating) {
             if (updateLighting) {
-                int pos = Chunk.condenseLocalPos(lX, lY, lZ);
-                Light oldLight = chunk.getLight(pos);
-                chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
-                updateHeightmap(x, y, z);
-                LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+                BlockType blockType = BlockTypes.blockTypes[type];
+                boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
+                boolean blocksLight = blockType.blocksLight(type, subType);
+                if (!blocksLight || isSlab) {
+                    LightHelper.queueLightUpdate(new Vector3i(x, y, z));
+                }
+                if (blocksLight || isSlab) {
+                    int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+                    Light oldLight = chunk.getLight(pos);
+                    chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+                    updateHeightmap(x, y, z);
+                    LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
+                }
             }
             if (!updateSet.contains(chunkPos)) {
                 updateSet.add(chunkPos);
@@ -459,11 +465,17 @@ public class World {
                 if (!setHeightmap) {
                     Vector2i block = getBlock(x, y, z);
                     BlockType type = BlockTypes.blockTypes[block.x()];
-                    if (!type.obstructingHeightmap(block)) {
+                    boolean isBottomSlab = type.blockProperties.hasSlab && block.y() == 2;
+                    if (!type.obstructingHeightmap(block) || isBottomSlab) {
                         Light light = getLight(x, y, z);
                         if (light.s() < maxSunlightLevel) {
                             Light newLight = new Light(light.s(), light.s(), light.s(), maxSunlightLevel);
                             setLight(x, y, z, newLight);
+                        }
+                        if (isBottomSlab) {
+                            setHeightmap = true;
+                            newElevation = y-1;
+                            heightmap[packedPos] = (short) (y-1);
                         }
                     } else {
                         setHeightmap = true;
