@@ -1,5 +1,6 @@
 package org.conspiracraft.physics;
 
+import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.utils.Utils;
@@ -27,8 +28,9 @@ public class PhysicsHelper {
                     float dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
                     float dist = (dX*dX)+(dY*dY)+(dZ*dZ);
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isCollidable) {
-                        AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
+                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    if (blockType.blockProperties.isCollidable) {
+                        AABB blockAABB = blockType.getAABB(blockIn.y(), x, y, z);
                         if (blockAABB.intersects(aabb) && dist < closestDist) {
                             closestDist = dist;
                             closestBlock = new BlockResult(x, y, z, blockIn);
@@ -49,8 +51,9 @@ public class PhysicsHelper {
             for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
                 for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isCollidable) {
-                        AABB blockAABB = new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1));
+                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    if (blockType.blockProperties.isCollidable) {
+                        AABB blockAABB = blockType.getAABB(blockIn.y(), x, y, z);
                         if (blockAABB.intersects(aabb)) {
                             return new BlockResult(x, y, z, blockIn);
                         }
@@ -110,16 +113,19 @@ public class PhysicsHelper {
         return null;
     }
     public static void moveWithStepping(AABB objAABB, Vector3f vel) {
-        moveWithStepping(objAABB, vel, new ArrayList<>());
+        moveWithStepping(objAABB, vel, new ArrayList<>(), 1.f);
     }
     public static void moveWithStepping(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs) {
+        moveWithStepping(objAABB, vel, aabbs, 1.f);
+    }
+    public static void moveWithStepping(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs, float stepHeight) {
         Vector3f ogVel = new Vector3f(vel);
         move(objAABB, vel, new ArrayList<>(aabbs));
         if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
             vel.set(ogVel);
-            move(objAABB, new Vector3f(0, 1.f, 0), new ArrayList<>(aabbs));
+            move(objAABB, new Vector3f(0, stepHeight, 0), new ArrayList<>(aabbs));
             move(objAABB, vel, new ArrayList<>(aabbs));
-            move(objAABB, new Vector3f(0, -1.f, 0), new ArrayList<>(aabbs));
+            move(objAABB, new Vector3f(0, -stepHeight, 0), new ArrayList<>(aabbs));
         }
     }
 
@@ -138,8 +144,9 @@ public class PhysicsHelper {
             for (float y = Math.max(0, regionAABB.yMin); y < Math.min(World.height-1, regionAABB.yMax); y+=1) {
                 for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
-                    if (BlockTypes.blockTypes[blockIn.x()].blockProperties.isSolid) {
-                        aabbs.add(new AABB((float) Math.floor(x), (float) Math.floor(x+1), (float) Math.floor(y), (float) Math.floor(y+1),(float) Math.floor(z), (float) Math.floor(z+1)));
+                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    if (blockType.blockProperties.isSolid) {
+                        aabbs.add(blockType.getAABB(blockIn.y(), x, y, z));
                     }
                 }
             }

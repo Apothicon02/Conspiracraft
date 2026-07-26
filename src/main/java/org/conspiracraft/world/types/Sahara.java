@@ -54,7 +54,7 @@ public class Sahara extends WorldType {
     @Override
     public Planet getPlanet(){return StarSystem.planets[2];}
     @Override
-    public float gravity() {return 0.05f;}
+    public float gravity() {return 0.1f;}
 @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/sahara");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),

@@ -56,7 +56,7 @@ public class Player {
     public float bobbing = 0f;
     public float dynamicSpeedOld = 0;
     public float dynamicSpeed = 0;
-    public float jumpStrength = 0.6f;
+    public float jumpStrength = 0.425f;
     public float scale = 1;
     public float baseEyeHeight = 0.86f * scale;
     public float eyeHeight = baseEyeHeight;
@@ -357,7 +357,9 @@ public class Player {
             }
         }
         if (sprinting && !flying) {
-            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs);
+            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
+        } else if (onSolid) {
+            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 0.5f);
         } else {
             PhysicsHelper.move(playerAABB, totalVel, aabbs);
         }

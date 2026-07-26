@@ -1,5 +1,6 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.physics.AABB;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -21,6 +22,8 @@ public class BlockType {
         this.altTexLoad = altTexLoad;
         return this;
     }
+
+    public AABB getAABB(int subType, float x, float y, float z) {return blockProperties.getAABB(subType, x, y, z);}
 
     public float getResistance() {
         return blockProperties.resistance;

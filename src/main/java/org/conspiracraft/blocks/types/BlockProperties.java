@@ -4,6 +4,7 @@ import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.BlockTag;
+import org.conspiracraft.physics.AABB;
 
 import java.util.Map;
 
@@ -12,6 +13,16 @@ public class BlockProperties implements Cloneable {
     public BlockProperties hasSlab() {
         this.hasSlab = true;
         return this;
+    }
+    public AABB getAABB(int subType, float x, float y, float z) {
+        if (hasSlab) {
+            if (subType == 1) {
+                return new AABB((int)x, (int)(x+1), ((int)y)+0.5f, (int)(y+1), (int)z, (int)(z+1));
+            } else if (subType == 2) {
+                return new AABB((int)x, (int)(x+1), (int)y, ((int)(y+1))-0.5f, (int)z, (int)(z+1));
+            }
+        }
+        return new AABB((int)x, (int)(x+1), (int)y, (int)(y+1), (int)z, (int)(z+1));
     }
     public Map<BlockTag, Float> proficiencies = Map.of();
     public BlockProperties proficiencies(Map<BlockTag, Float> proficiencies) {
