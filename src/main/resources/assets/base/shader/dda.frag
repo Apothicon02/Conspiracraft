@@ -44,7 +44,7 @@ layout(std430, set = 0, binding = 5) readonly buffer LightChunkBuffer {
 layout(std430, set = 0, binding = 6) readonly buffer LightBuffer {
     int[] lights;
 } lightData;
-const int size = 2048;
+const int size = 4096;
 const int height = 640;
 const vec3 worldSize = vec3(size, height, size);
 const int chunkSize = 16;
@@ -87,7 +87,9 @@ void updateLightChunkData(ivec3 chunkPos) {
 void updateLightChunkData(int x, int y, int z) {
     updateLightChunkData(ivec3(x, y, z) >> 4);
 }
+const int maxBlocklightLevel = 31;
 const int maxSunlightLevel = 31;
+const vec4 maxLightLevel = vec4(maxBlocklightLevel, maxBlocklightLevel, maxBlocklightLevel, maxSunlightLevel);
 const int fullSunlight = 520093696;
 int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
@@ -566,7 +568,7 @@ void main() {
     vec3 camPos = inverse(globalUbo.view)[3].xyz;
     ogPos = camPos;
     ogChunkPos = ogPos/chunkSize;
-    ogDir = getDir(uv);//+jitter);
+    ogDir = getDir(uv);
     rayPos = ogPos;
     rayDir = ogDir;
     vec4 color = dda(false);
@@ -669,7 +671,7 @@ void main() {
         //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        vec4 blockLighting = inBounds ? min(vec4(1), getLight(primaryLightPos)/vec4(15, 15, 15, maxSunlightLevel)) : vec4(0, 0, 0, 1);
+        vec4 blockLighting = inBounds ? min(vec4(1), getLight(primaryLightPos)/maxLightLevel) : vec4(0, 0, 0, 1);
         //blockLighting.a *= 1-abs(causticness/50);
         float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);
@@ -718,7 +720,7 @@ void main() {
         vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
         color.rgb *= lighting;
         color.rgb = mix(color.rgb, lighting, fogginess);
-        outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+max(0, abs(1-shadowFactor)-0.34f), 0, 1));
+        outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+(max(0, abs(1-shadowFactor)-0.34f)*0.2f), 0, 1));
     } else {
         if (color.r+color.g+color.b < 30 && maxFogginess > 0) {
             vec3 skyPos = ogPos + ogDir * renderDistance;
@@ -733,8 +735,6 @@ void main() {
     float tintAmt = abs(1-primaryTint.a);
     color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);
     outNormal.a = mix(outNormal.a, 1, tintAmt);
-//    outNormal.a = 1;
-//    color.rgb = jitter;
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(vec3(shadowFactor), 1);
     gl_FragDepth = depth;
