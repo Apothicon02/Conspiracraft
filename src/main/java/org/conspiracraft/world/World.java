@@ -382,10 +382,10 @@ public class World {
             updateNeighbors(x, y, z);
         }
     }
-    public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {setBlock(x, y, z, type, subType, true, true);}
-    public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true);}
-    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true);}
-    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {setBlock(x, y, z, type, subType, true, true, false);}
+    public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true, false);}
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true, false);}
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors, boolean silent) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -401,8 +401,9 @@ public class World {
             updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         }
         if (!generating) {
+            BlockType blockType = BlockTypes.blockTypes[type];
+            blockType.onPlace(x, y, z, type, subType, silent);
             if (updateLighting) {
-                BlockType blockType = BlockTypes.blockTypes[type];
                 boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
                 boolean blocksLight = blockType.blocksLight(type, subType);
                 if (!blocksLight || isSlab) {

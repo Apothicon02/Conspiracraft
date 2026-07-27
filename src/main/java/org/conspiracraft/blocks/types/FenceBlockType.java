@@ -15,7 +15,7 @@ public class FenceBlockType extends BlockType {
         boolean north = canConnectTo(new Vector3i(x, y, z+1)), east = canConnectTo(new Vector3i(x+1, y, z)),
                 south = canConnectTo(new Vector3i(x, y, z-1)), west = canConnectTo(new Vector3i(x-1, y, z));
         byte shape = (byte) ((north ? 1 << 3 : 0) | (east ? 1 << 2 : 0) | (south ? 1 << 1 : 0) | (west ? 1 : 0));
-        World.setBlock(x, y, z, block.x(), shapeMapping[shape], false, false);
+        World.setBlock(x, y, z, block.x(), shapeMapping[shape], false, false, true);
     }
 
     public static boolean canConnectTo(Vector3i pos) {

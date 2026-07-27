@@ -2,20 +2,19 @@ package org.conspiracraft.blocks.types;
 
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import static org.conspiracraft.world.World.getBlock;
 
 public class PlantLightBlockType extends LightBlockType {
 
     @Override
-    public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
+    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
-            blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
+            blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
-        Vector2i blockOn = getBlock(pos.x, pos.y-1, pos.z);
+        Vector2i blockOn = getBlock(x, y-1, z);
         if (blockOn.x != BlockTypes.GRASS.id) {
-            lostSupport(pos, block);
+            //lostSupport(x, y, z, blockType, blockSubType);
         }
     }
 

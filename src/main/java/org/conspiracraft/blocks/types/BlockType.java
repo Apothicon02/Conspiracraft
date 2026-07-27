@@ -94,9 +94,9 @@ public class BlockType {
         return true;
     }
 
-    public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
+    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
-            blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
+            blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
 //        for (Vector3i nPos : new Vector3i[]{new Vector3i(pos.x, pos.y - 1, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x - 1, pos.y, pos.z),
 //                new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1), new Vector3i(pos.x, pos.y, pos.z + 1)}) {

@@ -27,15 +27,15 @@ public class CloudBlockType extends BlockType {
     }
 
     @Override
-    public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
-        ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), pos, 1);
+    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+        //ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), pos, 1);
 
         if (!isSilent) {
-            blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
+            blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
 
         if (!blockProperties.isSolid) {
-            Vector3i abovePos = new Vector3i(pos.x, pos.y + 1, pos.z);
+            Vector3i abovePos = new Vector3i(x, y + 1, z);
             Vector2i aboveBlock = getBlock(abovePos);
             if (aboveBlock != null) {
                 int aboveBlockId = aboveBlock.x();
@@ -44,14 +44,14 @@ public class CloudBlockType extends BlockType {
                 }
             }
         }
-        if (needsSupport(block)) {
-            Vector2i belowBlock = getBlock(new Vector3i(pos.x, pos.y - 1, pos.z));
-            if (belowBlock != null) {
-                int belowBlockId = belowBlock.x();
-                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
-                    lostSupport(pos, block);
-                }
-            }
-        }
+//        if (needsSupport(blockType, blockSubType)) {
+//            Vector2i belowBlock = getBlock(new Vector3i(x, y - 1, z));
+//            if (belowBlock != null) {
+//                int belowBlockId = belowBlock.x();
+//                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
+//                    lostSupport(x, y, z, blockType, blockSubType);
+//                }
+//            }
+//        }
     }
 }

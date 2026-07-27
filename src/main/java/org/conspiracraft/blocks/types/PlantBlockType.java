@@ -19,14 +19,14 @@ public class PlantBlockType extends BlockType {
     }
 
     @Override
-    public void onPlace(Vector3i pos, Vector2i block, boolean isSilent) {
+    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
-            blockProperties.blockSFX.placed(new Vector3f(pos.x, pos.y, pos.z));
+            blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
-        Vector2i blockOn = getBlock(pos.x, pos.y-1, pos.z);
+        Vector2i blockOn = getBlock(x, y-1, z);
         boolean survives = false;
         for (Pair<BlockTag, BlockTag> pair : BlockTags.survivalTags) {
-            if (pair.getFirst().tagged.contains(block.x)) {
+            if (pair.getFirst().tagged.contains(x)) {
                 if (pair.getSecond().tagged.contains(blockOn.x)) {
                     survives = true;
                     break;
@@ -34,7 +34,7 @@ public class PlantBlockType extends BlockType {
             }
         }
         if (!survives) {
-            lostSupport(pos, block);
+            //lostSupport(x, y, z, blockType, blockSubType);
         }
     }
 
