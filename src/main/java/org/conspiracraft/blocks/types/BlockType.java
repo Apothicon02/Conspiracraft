@@ -58,6 +58,8 @@ public class BlockType {
         this.blockProperties = blockProperties;
     }
 
+    public void neighborUpdated(int x, int y, int z, Vector2i block) {}
+
     public void updateSupport(Vector3i pos) {
 //        Vector2i block = getBlock(pos);
 //        if (!blockProperties.isSolid) {

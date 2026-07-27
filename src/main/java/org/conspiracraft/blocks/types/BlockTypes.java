@@ -155,16 +155,16 @@ public class BlockTypes {
             IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             PEBBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/pebble",  STONE.blockProperties.copy().resistance(0.34f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true))),
-            OAK_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
+            OAK_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            BIRCH_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            CHERRY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/cherry", OAK_FENCE.blockProperties.copy())),
-            MAHOGANY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/mahogany", OAK_FENCE.blockProperties.copy())),
-            ACACIA_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            PALM_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy()));
+            BIRCH_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            CHERRY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/cherry", OAK_FENCE.blockProperties.copy())),
+            MAHOGANY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/mahogany", OAK_FENCE.blockProperties.copy())),
+            ACACIA_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            PALM_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy()));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

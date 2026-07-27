@@ -356,7 +356,8 @@ public class World {
     }
     public static final ArrayDeque<Vector3i> updateQueue = new ArrayDeque<>();
     public static final HashSet<Vector3i> updateSet = new HashSet<>();
-    public static void breakBlock(int x, int y, int z) {
+    public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
+    public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -377,14 +378,14 @@ public class World {
             updateSet.add(chunkPos);
             updateQueue.addLast(chunkPos);
         }
+        if (updateNeighbors) {
+            updateNeighbors(x, y, z);
+        }
     }
-    public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {
-        setBlock(x, y, z, type, subType, true);
-    }
-    public static void setBlock(int x, int y, int z, int type, int subType) {
-        setBlock(x, y, z, type, subType, true);
-    }
-    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {setBlock(x, y, z, type, subType, true, true);}
+    public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true);}
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true);}
+    public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -419,12 +420,15 @@ public class World {
                 updateSet.add(chunkPos);
                 updateQueue.addLast(chunkPos);
             }
+            if (updateNeighbors) {
+                updateNeighbors(x, y, z);
+            }
         }
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType) {
-        replaceBlock(x, y, z, type, subType, true);
+        replaceBlock(x, y, z, type, subType, true, true);
     }
-    public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {
+    public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
             //System.out.print("Tried replacing block that's out of bounds: x"+x+", y"+y+", z"+z);
             return;
@@ -453,7 +457,23 @@ public class World {
                 updateSet.add(chunkPos);
                 updateQueue.addLast(chunkPos);
             }
+            if (updateNeighbors) {
+                updateNeighbors(x, y, z);
+            }
         }
+    }
+    public static void updateNeighbors(int x, int y, int z) {
+        updateNeighbor(x, y, z+1);
+        updateNeighbor(x+1, y, z);
+        updateNeighbor(x, y, z-1);
+        updateNeighbor(x-1, y, z);
+        updateNeighbor(x, y+1, z);
+        updateNeighbor(x, y-1, z);
+        updateNeighbor(x, y, z);
+    }
+    public static void updateNeighbor(int x, int y, int z) {
+        Vector2i block = getBlock(x, y, z);
+        BlockTypes.blockTypes[block.x()].neighborUpdated(x, y, z, block);
     }
     public static void updateHeightmap(int x, int newY, int z) {
         int packedPos = packPos(x, z);
