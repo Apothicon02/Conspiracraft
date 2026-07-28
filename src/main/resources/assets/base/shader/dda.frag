@@ -705,7 +705,7 @@ void main() {
             rayPos = reflectPos;
             rayDir = reflectDir;
             vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
-            if (reflectColor.a < 1.f) {
+            if (reflectColor.a < alphaMax) {
                 if (globalUbo.fogginess > 0) {
                     reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, maxFogginess, false);
                 }
