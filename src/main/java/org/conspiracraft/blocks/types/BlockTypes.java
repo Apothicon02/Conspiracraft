@@ -164,7 +164,8 @@ public class BlockTypes {
             PALM_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/palm", OAK_FENCE.blockProperties.copy())),
             SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/spruce", OAK_FENCE.blockProperties.copy())),
             WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/willow", OAK_FENCE.blockProperties.copy())),
-            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy()));
+            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
+            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
