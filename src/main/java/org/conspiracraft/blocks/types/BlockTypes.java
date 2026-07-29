@@ -75,11 +75,9 @@ public class BlockTypes {
             PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
             PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/palm_leaves",  OAK_LEAVES.blockProperties)),
             MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
-            CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isCollidable(true).isFluidReplaceable(true).needsSupport(true))),
+            CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(false).needsSupport(true))),
             DEAD_BUSH = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties.copy().resistance(0.f))), //30
-            CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().hasSlab().blockSFX(
-                    new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
-                    .isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "natural/texture/rain_cloud",  CLOUD.blockProperties)),
             DRY_MUD = create(List.of(BlockTags.soakers, BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/dry_mud",  DIRT.blockProperties)),
             SPRUCE_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/spruce_planks",  OAK_PLANK.blockProperties)),
@@ -116,7 +114,7 @@ public class BlockTypes {
             COPPER_ORE = create(List.of(BlockTags.pickEfficient), new BlockType(blockTypeMap.size(), "geological/texture/copper_ore",  IRON_ORE.blockProperties.copy())),
             STICK = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "natural/texture/stick",  new BlockProperties().resistance(0.f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            STICK_PLATFORM = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/stick_platform",  STICK.blockProperties.copy().resistance(0.15f).isCollidable(true))),
+            STICK_PLATFORM = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/stick_platform",  STICK.blockProperties.copy().resistance(0.15f))),
             STEEL_FRAME = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/steel_frame",  new BlockProperties().blocksLight(false).obstructsHeightmap(false).permeable(true).blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             POWERED_VENT = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/powered_vent",  new BlockProperties().blockSFX(
@@ -165,7 +163,9 @@ public class BlockTypes {
             SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/spruce", OAK_FENCE.blockProperties.copy())),
             WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/willow", OAK_FENCE.blockProperties.copy())),
             REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
-            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f)));
+            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
+            BAMBOO = create(new BlockType(blockTypeMap.size(), "plant/texture/bamboo",  CACTUS.blockProperties.copy())),
+            PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

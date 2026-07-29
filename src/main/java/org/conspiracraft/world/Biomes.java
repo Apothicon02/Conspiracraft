@@ -30,6 +30,8 @@ public class Biomes {
     public static final Biome ROOFED_FOREST_HILLS = create();
     public static final Biome BIRCH_PLAINS = create();
     public static final Biome FROZEN_LAKE = create();
+    public static final Biome RAINY_POND = create();
+    public static final Biome ROOFED_POND = create();
     public static final Biome MARB_HIGHLANDS = create();
     public static final Biome MARB_CRATER = create();
     public static final Biome VERA_PLAINS = create();
@@ -60,10 +62,10 @@ public class Biomes {
         } else if (biome == FROZEN_LAKE || biome == SNOWY_PEAK || biome == SNOWY_TAIGA || biome == VOLCANIC_SNOWY_TAIGA) {
             type = BlockTypes.SNOW.id;
             subtype = 0;
-        } else if (biome == LAKE || biome == OASIS) {
+        } else if (biome == LAKE || biome == OASIS || biome == ROOFED_POND) {
             type = BlockTypes.WET_SAND.id;
             subtype = 0;
-        } else if (biome == POND) {
+        } else if (biome == POND || biome == RAINY_POND) {
             type = BlockTypes.MUD.id;
             subtype = 0;
         } else if (biome == VOLCANIC_TAIGA || biome == TAIGA || biome == REDWOOD_FOREST || biome == ROOFED_FOREST || biome == ROOFED_FOREST_HILLS) {

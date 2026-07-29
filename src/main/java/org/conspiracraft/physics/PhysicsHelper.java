@@ -145,7 +145,7 @@ public class PhysicsHelper {
                 for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
-                    if (blockType.blockProperties.isSolid) {
+                    if (blockType.blockProperties.isCollidable) {
                         aabbs.add(blockType.getAABB(blockIn.y(), x, y, z));
                     }
                 }

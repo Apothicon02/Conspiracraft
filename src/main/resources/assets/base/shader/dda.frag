@@ -268,9 +268,9 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     if (!isSky && !celestialSource) {
         sunColor = mix(globalUbo.skylightMul*lighting.a, sunColor, fogginess);
     }
-//    if (!isSky && globalUbo.skylight.w >= 1.f) {
-//        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
-//    }
+    //    if (!isSky && globalUbo.skylight.w >= 1.f) {
+    //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
+    //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, height-max(0, sunHeight*height), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
     vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.a), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
@@ -623,12 +623,12 @@ void main() {
         }
     } else if (!isSky || tint.a < 1) {
         color.rgb = mipmap(color.rgb);
-//        float factor = clamp((shadowPos.y-72)/66, 0, 1);
-//        if (factor < 0.5f) {
-//            color.rgb = vec3(0, mix(vec2(0, 1), vec2(1, 0), factor*2));
-//        } else {
-//            color.rgb = vec3(mix(vec2(0, 1), vec2(1, 0), (factor-0.5f)*2), 0);
-//        }
+        //        float factor = clamp((shadowPos.y-72)/66, 0, 1);
+        //        if (factor < 0.5f) {
+        //            color.rgb = vec3(0, mix(vec2(0, 1), vec2(1, 0), factor*2));
+        //        } else {
+        //            color.rgb = vec3(mix(vec2(0, 1), vec2(1, 0), (factor-0.5f)*2), 0);
+        //        }
         if (getBlockAndVoxel(vec3(hitPos.x, hitPos.y+voxelSize, hitPos.z)-(flatNormal*voxelSize/2)).a < alphaMax) {
             primaryNormal = vec3(0, 1, 0);
         }

@@ -259,9 +259,9 @@ public class Earth extends WorldType {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
                                     int biome = biomes[packedPos];
-                                    if (biome != Biomes.OASIS.id && biome != Biomes.POND.id && biome != Biomes.FROZEN_LAKE.id) {
+                                    if (biome != Biomes.OASIS.id && biome != Biomes.POND.id && biome != Biomes.RAINY_POND.id && biome != Biomes.ROOFED_POND.id && biome != Biomes.FROZEN_LAKE.id) {
                                         biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id ? Biomes.OASIS.id :
-                                                ((biome == Biomes.RAINFOREST.id || biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id) ? Biomes.POND.id : (ogBiomeFrozen ? Biomes.FROZEN_LAKE.id : Biomes.LAKE.id));
+                                                (biome == Biomes.RAINFOREST.id ? Biomes.RAINY_POND.id : (biome == Biomes.ROOFED_FOREST.id || biome == Biomes.ROOFED_FOREST_HILLS.id) ? Biomes.ROOFED_POND.id : (biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id) ? Biomes.POND.id : (ogBiomeFrozen ? Biomes.FROZEN_LAKE.id : Biomes.LAKE.id));
                                     }
                                     int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
                                     chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
@@ -332,7 +332,7 @@ public class Earth extends WorldType {
                                     final int seafloor = Math.min(elevation+1, ceil);
                                     final int seafloorAbove = Math.min(elevation+2, ceil);
                                     final boolean isFrozenLake = biome == Biomes.FROZEN_LAKE.id;
-                                    if ((biome == Biomes.LAKE.id || biome == Biomes.OASIS.id || biome == Biomes.POND.id || isFrozenLake) || elevation <= seaLevel) {
+                                    if ((biome == Biomes.LAKE.id || biome == Biomes.OASIS.id || biome == Biomes.POND.id || biome == Biomes.RAINY_POND.id || biome == Biomes.ROOFED_POND.id || isFrozenLake) || elevation <= seaLevel) {
                                         int waterSurface = Math.min(Math.max(seaLevel, lakesMaxElevations[packedPos]-1), ceil);
                                         int waterSurfaceBelow = waterSurface-1;
                                         if (waterSurface > elevation) {
@@ -618,6 +618,10 @@ public class Earth extends WorldType {
                                                 Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
                                             }
                                         }
+                                    } else if ((blockOn.x() == BlockTypes.MUD.id || blockOn.x() == BlockTypes.WET_SAND.id || blockOn.x() == BlockTypes.GRASS.id) && blockIn.x() == 0 && (biome == Biomes.RAINY_POND.id || biome == Biomes.ROOFED_POND.id || biome == Biomes.ROOFED_FOREST_HILLS.id)) {
+                                        if (randomNumber < (blockOn.x() == BlockTypes.WET_SAND.id ? 0.02f : 0.1f)) {
+                                            Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 10) + 3, BlockTypes.BAMBOO.id, 0);
+                                        }
                                     } else if ((blockOn.x == BlockTypes.WET_SAND.id && biome == Biomes.OASIS.id) || (blockOn.x == BlockTypes.MUD.id && biome == Biomes.POND.id) || ((blockOn.x == BlockTypes.SAND.id || blockOn.x == BlockTypes.WET_SAND.id) && (biome == Biomes.BEACH.id || biome == Biomes.TROPICAL_ISLAND.id || biome == Biomes.PALMY_PLAINS.id))) {
                                         if (blockIn.x() != 1) {
                                             if (randomNumber < 0.0067f*(blockOn.x == BlockTypes.SAND.id ? 0.25f : 1.f)) {
@@ -655,7 +659,7 @@ public class Earth extends WorldType {
                                                     setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
                                                 }
                                             } else {
-                                                Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, 29, 0);
+                                                Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, BlockTypes.CACTUS.id, 0);
                                             }
                                         }
                                     }
