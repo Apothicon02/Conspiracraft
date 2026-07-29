@@ -21,15 +21,17 @@ import org.lwjgl.system.MemoryStack;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Math;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.conspiracraft.Main.fps;
-import static org.conspiracraft.Main.ms;
+import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.width;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
@@ -541,7 +543,7 @@ public class GUI {
     public static ByteBuffer layerBuffer = ByteBuffer.allocateDirect(layerSize);
     public static void loadImage(Buffer stagingBuffer, String path) throws IOException {
         layerBuffer.clear();
-        Utils.imageToBuffer(layerBuffer, Textures.gui.width, Textures.gui.height, ImageIO.read(Renderer.class.getClassLoader().getResourceAsStream("assets/base/gui/" + path + ".png")));
+        Utils.imageToBuffer(layerBuffer, Textures.gui.width, Textures.gui.height, Utils.loadImage("gui/" + path));
         memCopy(memAddress(layerBuffer), stagingBuffer.pointer.get(0)+(guiTexDepth*layerSize), layerSize);
         guiTexDepth++;
     }

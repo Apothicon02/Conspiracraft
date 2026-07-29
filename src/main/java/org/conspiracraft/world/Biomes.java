@@ -29,6 +29,7 @@ public class Biomes {
     public static final Biome ROOFED_FOREST = create();
     public static final Biome ROOFED_FOREST_HILLS = create();
     public static final Biome BIRCH_PLAINS = create();
+    public static final Biome FROZEN_LAKE = create();
     public static final Biome MARB_HIGHLANDS = create();
     public static final Biome MARB_CRATER = create();
     public static final Biome VERA_PLAINS = create();
@@ -56,7 +57,7 @@ public class Biomes {
         } else if (elevation <= World.seaLevel+2+(biome == BEACH ? 1 : 0) || biome == DESERT) {
             type = BlockTypes.SAND.id;
             subtype = 0;
-        } else if (biome == SNOWY_PEAK || biome == SNOWY_TAIGA || biome == VOLCANIC_SNOWY_TAIGA) {
+        } else if (biome == FROZEN_LAKE || biome == SNOWY_PEAK || biome == SNOWY_TAIGA || biome == VOLCANIC_SNOWY_TAIGA) {
             type = BlockTypes.SNOW.id;
             subtype = 0;
         } else if (biome == LAKE || biome == OASIS) {

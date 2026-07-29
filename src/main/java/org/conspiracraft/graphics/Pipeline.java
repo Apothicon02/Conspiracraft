@@ -2,6 +2,8 @@ package org.conspiracraft.graphics;
 
 import org.lwjgl.util.shaderc.Shaderc;
 
+import java.io.IOException;
+
 public class Pipeline {
     public String vertName;
     public String fragName;
@@ -14,7 +16,7 @@ public class Pipeline {
         fragName = frag;
         this.colorAttachments = colorAttachments;
     }
-    public void compile() {
+    public void compile() throws IOException {
         this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));
         this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(fragName, Shaderc.shaderc_glsl_fragment_shader));
     }

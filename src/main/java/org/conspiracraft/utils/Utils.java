@@ -42,16 +42,21 @@ public class Utils {
         }
     }
 
-    public static String readFile(String filePath) {
-        List<String> file = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader().getResourceAsStream(filePath))).lines().toList();
+    public static InputStream getInputStream(String filePath) throws IOException {
+        return Files.newInputStream(Paths.get(mainFolder + filePath));
+    }
+    public static List<String> readFile(String filePath) throws IOException {
+        return new BufferedReader(new InputStreamReader(getInputStream(filePath))).lines().toList();
+    }
+    public static String appendNewlinesAndMerge(List<String> strings) {
         StringBuilder data = new StringBuilder();
-        for (String s : file) {
+        for (String s : strings) {
             data.append(s).append("\n");
         }
         return data.toString();
     }
     public static BufferedImage loadImage(String name) throws IOException {
-        InputStream inputStream = Files.newInputStream(Paths.get(mainFolder + "assets/base/" + name + ".png"));
+        InputStream inputStream = getInputStream("assets/base/" + name + ".png");
         BufferedInputStream bInputStream = new BufferedInputStream(inputStream);
         ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
         reader.setInput(ImageIO.createImageInputStream(bInputStream), true);

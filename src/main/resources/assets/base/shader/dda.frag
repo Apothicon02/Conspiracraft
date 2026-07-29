@@ -680,13 +680,15 @@ void main() {
             rayPos = primaryShadowPos;
             rayDir = sunDir;
             vec4 shadowColor = vec4(0);
+            bool weakShadow = false;
             if (globalUbo.skylight.a <= 0 || (primaryBlock.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
                 shadowColor.a = 1.f;
             } else if (globalUbo.renderToggles.x > 0) {
                 shadowColor = dda(true);
+                weakShadow = ((block.x == 31 || block.x == 32) && blockLighting.a >= 1);
             }
             if (shadowColor.a > 0.0f) {
-                shadowFactor = !celestialSource ? 0.02f : 0.5f;//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
+                shadowFactor = !celestialSource ? 0.02f : (weakShadow ? 0.875f : 0.5f);//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
                 blockLighting.a *= shadowFactor;
             }
         }

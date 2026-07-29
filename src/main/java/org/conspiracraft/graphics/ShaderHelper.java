@@ -6,9 +6,14 @@ import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.VkShaderModuleCreateInfo;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import static org.conspiracraft.Main.mainFolder;
 import static org.lwjgl.vulkan.VK13.*;
 
 public class ShaderHelper {
@@ -25,9 +30,9 @@ public class ShaderHelper {
         }
     }
 
-    public static ByteBuffer compileGLSLString(String path, int stage) {
+    public static ByteBuffer compileGLSLString(String path, int stage) throws IOException {
         StringBuilder glsl = new StringBuilder("#version 450 \n");
-        glsl.append(Utils.readFile("assets/base/shader/" + path));
+        glsl.append(Utils.appendNewlinesAndMerge(Utils.readFile("assets/base/shader/" + path)));
         long compiler = Shaderc.shaderc_compiler_initialize();
         if (compiler == 0) {System.out.print("Failed to create shaderc compiler");}
         long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, path, "main", 0);

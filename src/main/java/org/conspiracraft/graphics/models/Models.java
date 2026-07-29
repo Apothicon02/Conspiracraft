@@ -3,8 +3,10 @@ package org.conspiracraft.graphics.models;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.utils.Utils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,7 @@ public class Models {
     public static Model QUAD_CENTERED;
     public static Model DOUBLE_QUAD;
 
-    public static void loadModels(long vertexPtr, long indexPtr) {
+    public static void loadModels(long vertexPtr, long indexPtr) throws IOException {
         CUBE = loadObj(vertexPtr, indexPtr, "generic/model/cube");
         QUAD = loadObj(vertexPtr, indexPtr, "generic/model/quad");
         QUAD_CENTERED = loadObj(vertexPtr, indexPtr, "generic/model/quad_centered");
@@ -31,10 +33,9 @@ public class Models {
         verts.clear();
     }
 
-    public static Model loadObj(long vertexPtr, long indexPtr, String name) {
+    public static Model loadObj(long vertexPtr, long indexPtr, String name) throws IOException {
         clearArrays();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(Renderer.class.getClassLoader().getResourceAsStream("assets/base/"+name+".obj")));
-        reader.lines().forEach((String line) -> {
+        Utils.readFile("assets/base/"+name+".obj").forEach((String line) -> {
             String[] parts = line.split("\\s+");
             if (parts[0].equals("v")) {
                 verts.addLast(Float.parseFloat(parts[1]));

@@ -1,5 +1,6 @@
 package org.conspiracraft.audio;
 
+import org.conspiracraft.utils.Utils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
@@ -54,23 +55,21 @@ public class WaveData {
         return data;
     }
 
-    public static WaveData create(String file){
-        InputStream stream = WaveData.class.getClassLoader().getResourceAsStream("assets/base/" +file);
-        if(stream==null){
-            System.err.println("Couldn't find file: "+file);
-            return null;
-        }
-        InputStream bufferedInput = new BufferedInputStream(stream);
-        AudioInputStream audioStream = null;
+    public static WaveData create(String file) {
         try {
-            audioStream = AudioSystem.getAudioInputStream(bufferedInput);
-        } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        WaveData wavStream = new WaveData(audioStream);
-        return wavStream;
+            InputStream stream = Utils.getInputStream("assets/base/" + file);
+            InputStream bufferedInput = new BufferedInputStream(stream);
+            AudioInputStream audioStream = null;
+            try {
+                audioStream = AudioSystem.getAudioInputStream(bufferedInput);
+            } catch (UnsupportedAudioFileException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            WaveData wavStream = new WaveData(audioStream);
+            return wavStream;
+        } catch (IOException e) {e.printStackTrace(); return null;}
     }
 
     public static WaveData createFromAppdata(String file) throws FileNotFoundException {

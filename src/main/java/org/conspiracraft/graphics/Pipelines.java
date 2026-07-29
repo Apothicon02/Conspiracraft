@@ -5,6 +5,7 @@ import org.conspiracraft.graphics.models.Vertex;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +31,11 @@ public class Pipelines {
                 new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
-        for (Pipeline pipeline : pipelines) {pool.submit(pipeline::compile);}
+        for (Pipeline pipeline : pipelines) {pool.submit(() -> {
+            try {
+                pipeline.compile();
+            } catch (IOException e) {e.printStackTrace();}
+        });}
         pool.shutdown();
     }
     public static long pipelineCache;

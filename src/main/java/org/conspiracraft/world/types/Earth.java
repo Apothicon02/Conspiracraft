@@ -251,6 +251,7 @@ public class Earth extends WorldType {
                     Lake lake = lakes.poll();
                     threadBitSet.clear();
                     lake.visited = threadBitSet;
+                    boolean ogBiomeFrozen = new Vector2f(halfSize, halfSize).distance(lake.pos.x(), lake.pos.z()) < size/8.f;
                     boolean filledLake = fillLake(lake.pos.x(), lake.pos.y(), lake.pos.z(), lake);
                     if (filledLake) {
                         for (int x = 0; x < size; x++) {
@@ -258,9 +259,9 @@ public class Earth extends WorldType {
                                 int packedPos = packPos(x, z);
                                 if (lake.visited.get(packedPos)) {
                                     int biome = biomes[packedPos];
-                                    if (biome != Biomes.OASIS.id && biome != Biomes.POND.id) {
+                                    if (biome != Biomes.OASIS.id && biome != Biomes.POND.id && biome != Biomes.FROZEN_LAKE.id) {
                                         biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id ? Biomes.OASIS.id :
-                                                ((biome == Biomes.RAINFOREST.id || biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id) ? Biomes.POND.id : Biomes.LAKE.id);
+                                                ((biome == Biomes.RAINFOREST.id || biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id) ? Biomes.POND.id : (ogBiomeFrozen ? Biomes.FROZEN_LAKE.id : Biomes.LAKE.id));
                                     }
                                     int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
                                     chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
@@ -330,19 +331,20 @@ public class Earth extends WorldType {
                                     final int ceil = floor + chunkSize;
                                     final int seafloor = Math.min(elevation+1, ceil);
                                     final int seafloorAbove = Math.min(elevation+2, ceil);
-                                    if ((biome == Biomes.LAKE.id || biome == Biomes.OASIS.id || biome == Biomes.POND.id) || elevation <= seaLevel) {
+                                    final boolean isFrozenLake = biome == Biomes.FROZEN_LAKE.id;
+                                    if ((biome == Biomes.LAKE.id || biome == Biomes.OASIS.id || biome == Biomes.POND.id || isFrozenLake) || elevation <= seaLevel) {
                                         int waterSurface = Math.min(Math.max(seaLevel, lakesMaxElevations[packedPos]-1), ceil);
                                         int waterSurfaceBelow = waterSurface-1;
                                         if (waterSurface > elevation) {
                                             if (waterSurface < ceil) {
                                                 setAnything = true;
                                                 updateLod(x, waterSurface, z, false);
-                                                chunk.setBlock(x & 15, waterSurface & 15, z & 15, 1, 14);
+                                                chunk.setBlock(x & 15, waterSurface & 15, z & 15, isFrozenLake ? BlockTypes.ICE.id : BlockTypes.WATER.id, isFrozenLake ? 0 : 14);
                                             }
                                             for (int y = waterSurfaceBelow; y >= Math.max(floor, seafloor); y--) {
                                                 setAnything = true;
                                                 updateLod(x, y, z, false);
-                                                chunk.setBlock(x & 15, y & 15, z & 15, 1, 15);
+                                                chunk.setBlock(x & 15, y & 15, z & 15, isFrozenLake ? BlockTypes.ICE.id : BlockTypes.WATER.id, isFrozenLake ? 0 : 15);
                                             }
                                         }
                                     }
@@ -457,202 +459,204 @@ public class Earth extends WorldType {
                                 int elevation = heightmap[(x * size) + z];
                                 byte biome = biomes[x * size + z];
                                 Vector2i blockOn = getBlock(x, elevation, z);
-                                Vector2i blockIn = getBlock(x, elevation+1, z);
-                                float randomNumber = rand.nextFloat();
-                                float featureNoise = SimplexNoise.noise(x / 300.f, z / 300.f);
-                                float featureNoiseSmall = SimplexNoise.noise(x / 100.f, z / 100.f);
-                                double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
-                                double eleFactor = elevation + (rockNoise * 50);
-                                boolean snowy = eleFactor > 136;
-                                int springSand = rand.nextBoolean() ? BlockTypes.RED_SAND.id : BlockTypes.ORANGE_SAND.id;
-                                if (biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
-                                    if (randomNumber < 0.0067f) {
+                                if (blockOn.x() != BlockTypes.WATER.id && blockOn.x() != BlockTypes.ICE.id) {
+                                    Vector2i blockIn = getBlock(x, elevation+1, z);
+                                    float randomNumber = rand.nextFloat();
+                                    float featureNoise = SimplexNoise.noise(x / 300.f, z / 300.f);
+                                    float featureNoiseSmall = SimplexNoise.noise(x / 100.f, z / 100.f);
+                                    double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
+                                    double eleFactor = elevation + (rockNoise * 50);
+                                    boolean snowy = eleFactor > 136;
+                                    int springSand = rand.nextBoolean() ? BlockTypes.RED_SAND.id : BlockTypes.ORANGE_SAND.id;
+                                    if (biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
+                                        if (randomNumber < 0.0067f) {
+                                            Spring.generate(x, elevation, z, springSand, 0, (int) (10 + (rand.nextFloat() * 10)));
+                                        }
+                                    } else if ((biome == Biomes.REDWOOD_FOREST.id || biome == Biomes.VOLCANIC_TAIGA.id) && (randomNumber < 0.0005f || randomNumber < 0.015f*(featureNoise-0.15f))) {
                                         Spring.generate(x, elevation, z, springSand, 0, (int) (10 + (rand.nextFloat() * 10)));
                                     }
-                                } else if ((biome == Biomes.REDWOOD_FOREST.id || biome == Biomes.VOLCANIC_TAIGA.id) && (randomNumber < 0.0005f || randomNumber < 0.015f*(featureNoise-0.15f))) {
-                                    Spring.generate(x, elevation, z, springSand, 0, (int) (10 + (rand.nextFloat() * 10)));
-                                }
-                                double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
-                                if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < (136 + Math.abs(randomNumber * 250))-((Math.clamp(centDist, 0.2, 0.35)-0.2)*400))) {
-                                    Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
-                                } else if (blockOn.x == BlockTypes.SNOW.id) {
-                                    if (biome == Biomes.SNOWY_TAIGA.id || biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
-                                        if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {
-                                            int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        } else if (randomNumber < 0.001f) {
-                                            int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight,true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        }
-                                    }
-                                } else if (!snowy && blockOn.x == BlockTypes.GRASS.id) {
-                                    if (biome == Biomes.ROOFED_FOREST.id || biome == Biomes.ROOFED_FOREST_HILLS.id) {
-                                        if (randomNumber < 0.0004f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < (featureNoise+0.5f) / 15) {
-                                            int maxHeight = rand.nextInt(20) + 12;
-                                            int radius = rand.nextInt(3) + 5;
-                                            boolean overgrown = rand.nextInt(4) == 0;
-                                            if (JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, 10, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, overgrown)) {
-                                                Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 5)), new int[]{BlockTypes.GRASS.id}, true);
+                                    double centDist = Math.clamp(Math.max(Math.abs(x - 2048), Math.abs(z - 2048)), 0, 2048) / 2048.f;
+                                    if (blockOn.x == 55 && (randomNumber < 0.2f && eleFactor < (136 + Math.abs(randomNumber * 250))-((Math.clamp(centDist, 0.2, 0.35)-0.2)*400))) {
+                                        Cube.generate(blockOn, x, elevation, z, (rockNoise < 0.05f ? 56 : 10), 0, (int) (1 + (rand.nextFloat() * (Utils.gradient((int) eleFactor, 131, 181, 0, 2)))));
+                                    } else if (blockOn.x == BlockTypes.SNOW.id) {
+                                        if (biome == Biomes.SNOWY_TAIGA.id || biome == Biomes.VOLCANIC_SNOWY_TAIGA.id) {
+                                            if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {
+                                                int maxHeight = rand.nextInt(19) + 5;
+                                                PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
+                                            } else if (randomNumber < 0.001f) {
+                                                int maxHeight = rand.nextInt(6) + 12;
+                                                SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight,true, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                             }
                                         }
-                                    } else if (biome == Biomes.RAINFOREST.id) {
-                                        if (randomNumber < 0.0012f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
-                                        } else if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.005f || randomNumber < 0.0021f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        } else if (randomNumber < 0.01f) {
-                                            if (randomNumber < 0.0034f) {
+                                    } else if (!snowy && blockOn.x == BlockTypes.GRASS.id) {
+                                        if (biome == Biomes.ROOFED_FOREST.id || biome == Biomes.ROOFED_FOREST_HILLS.id) {
+                                            if (randomNumber < 0.0004f) {
                                                 Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                            } else {
-                                                int maxHeight = rand.nextInt(35, 42);
-                                                int radius = rand.nextInt(5, 8);
-                                                int leavesHeight = 4;
-                                                int branchChance = 1;
-                                                if (RainforestTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.MAHOGANY_LOG.id, 0, BlockTypes.MAHOGANY_LEAVES.id, 0, branchChance)) {
-                                                    Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.GRASS.id}, true);
+                                            } else if (randomNumber < (featureNoise+0.5f) / 15) {
+                                                int maxHeight = rand.nextInt(20) + 12;
+                                                int radius = rand.nextInt(3) + 5;
+                                                boolean overgrown = rand.nextInt(4) == 0;
+                                                if (JungleTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, 10, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, overgrown)) {
+                                                    Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 5)), new int[]{BlockTypes.GRASS.id}, true);
                                                 }
                                             }
-                                        }
-                                    } else if (biome == Biomes.PALMY_PLAINS.id) {
-                                        if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.001f || randomNumber < 0.0011f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        } else if (randomNumber < 0.002f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        }
-                                    } else if (biome == Biomes.PALMY_HILLS.id) {
-                                        if (randomNumber < 0.0067f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
-                                        } else if (randomNumber < Math.max(0, 0.06f*featureNoiseSmall)-0.02f || randomNumber < 0.0071f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        }
-                                    } else if (biome == Biomes.TROPICAL_ISLAND.id) {
-                                        if (randomNumber < 0.0067f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
-                                        } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        }
-                                    } else if (biome == Biomes.REDWOOD_FOREST.id) {
-                                        if (randomNumber < 0.0004f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.006) {
-                                            int maxHeight = rand.nextInt(42, 54);
-                                            int radius = rand.nextInt(3, 4);
-                                            int leavesHeight = 3;
-                                            int branchChance = rand.nextInt(4, 7);
-                                            RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, branchChance);
-                                        } else if (randomNumber < 0.0061f || randomNumber < featureNoise / 50) {
-                                            int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        } else if (randomNumber < 0.0062f) {
-                                            int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        }
-                                    } else if (biome == Biomes.TAIGA.id || biome == Biomes.VOLCANIC_TAIGA.id) {
-                                        if (randomNumber < 0.0004f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.00045f || randomNumber < featureNoise / 50) {
-                                            int maxHeight = rand.nextInt(19) + 5;
-                                            PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        } else if (randomNumber < 0.0015f) {
-                                            int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        }
-                                    } else if (biome == Biomes.CHERRY_GROVE.id) {
-                                        if (randomNumber < 0.0004f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.0043f) {
-                                            int maxHeight = rand.nextInt(24, 30);
-                                            int radius = rand.nextInt(26, 34);
-                                            int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
-                                        }
-                                    } else if (biome == Biomes.SAVANNA.id) {
-                                        if (randomNumber < 0.0003f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.0005f) {
-                                            int maxHeight = rand.nextInt(17, 20);
-                                            AcaciaTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.ACACIA_LOG.id, 0, BlockTypes.ACACIA_LEAVES.id, 0);
-                                        }
-                                    } else if (biome == Biomes.BIRCH_PLAINS.id) {
-                                        if (randomNumber < 0.0003f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < 0.0004f || randomNumber < (featureNoise-0.25f) / 100) {
-                                            int maxHeight = rand.nextInt(6) + 12;
-                                            SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0);
-                                        } else if (randomNumber < 0.000425f) {
-                                            int maxHeight = rand.nextInt(24, 30);
-                                            int radius = rand.nextInt(26, 34);
-                                            int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
-                                        }
-                                    } else {
-                                        if (randomNumber < 0.001f) {
-                                            Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        } else if (randomNumber < featureNoise / 25) {
-                                            if (randomNumber < 0.0013f) {
-                                                int maxHeight = rand.nextInt(25, 32);
-                                                int radius = rand.nextInt(20, 32);
-                                                int leavesHeight = 8;
-                                                int branchChance = 1;
-                                                GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, branchChance);
-                                            } else {
+                                        } else if (biome == Biomes.RAINFOREST.id) {
+                                            if (randomNumber < 0.0012f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            } else if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.005f || randomNumber < 0.0021f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            } else if (randomNumber < 0.01f) {
+                                                if (randomNumber < 0.0034f) {
+                                                    Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                                } else {
+                                                    int maxHeight = rand.nextInt(35, 42);
+                                                    int radius = rand.nextInt(5, 8);
+                                                    int leavesHeight = 4;
+                                                    int branchChance = 1;
+                                                    if (RainforestTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.MAHOGANY_LOG.id, 0, BlockTypes.MAHOGANY_LEAVES.id, 0, branchChance)) {
+                                                        Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.GRASS.id}, true);
+                                                    }
+                                                }
+                                            }
+                                        } else if (biome == Biomes.PALMY_PLAINS.id) {
+                                            if (randomNumber < Math.max(0, 0.02f*featureNoiseSmall)-0.001f || randomNumber < 0.0011f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            } else if (randomNumber < 0.002f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            }
+                                        } else if (biome == Biomes.PALMY_HILLS.id) {
+                                            if (randomNumber < 0.0067f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            } else if (randomNumber < Math.max(0, 0.06f*featureNoiseSmall)-0.02f || randomNumber < 0.0071f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            }
+                                        } else if (biome == Biomes.TROPICAL_ISLAND.id) {
+                                            if (randomNumber < 0.0067f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            }
+                                        } else if (biome == Biomes.REDWOOD_FOREST.id) {
+                                            if (randomNumber < 0.0004f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < 0.006) {
+                                                int maxHeight = rand.nextInt(42, 54);
+                                                int radius = rand.nextInt(3, 4);
+                                                int leavesHeight = 3;
+                                                int branchChance = rand.nextInt(4, 7);
+                                                RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, branchChance);
+                                            } else if (randomNumber < 0.0061f || randomNumber < featureNoise / 50) {
+                                                int maxHeight = rand.nextInt(19) + 5;
+                                                PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
+                                            } else if (randomNumber < 0.0062f) {
+                                                int maxHeight = rand.nextInt(6) + 12;
+                                                SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
+                                            }
+                                        } else if (biome == Biomes.TAIGA.id || biome == Biomes.VOLCANIC_TAIGA.id) {
+                                            if (randomNumber < 0.0004f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < 0.00045f || randomNumber < featureNoise / 50) {
+                                                int maxHeight = rand.nextInt(19) + 5;
+                                                PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
+                                            } else if (randomNumber < 0.0015f) {
+                                                int maxHeight = rand.nextInt(6) + 12;
+                                                SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
+                                            }
+                                        } else if (biome == Biomes.CHERRY_GROVE.id) {
+                                            if (randomNumber < 0.0004f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < 0.0043f) {
                                                 int maxHeight = rand.nextInt(24, 30);
                                                 int radius = rand.nextInt(26, 34);
                                                 int count = rand.nextInt(6, 8);
-                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count);
+                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
                                             }
-                                        } else if (randomNumber > 0.002 && randomNumber < 0.00212f) {
-                                            int maxHeight = rand.nextInt(20, 23);
-                                            int radius = rand.nextInt(13, 17);
-                                            int leavesHeight = maxHeight/3;
-                                            int count = rand.nextInt(3, 6);
-                                            WillowTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
-                                        } else if (randomNumber > 0.00212 && randomNumber < 0.00215f) {
-                                            int maxHeight = (int) (rand.nextFloat() * 6) + 12;
-                                            DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
-                                            Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
-                                        }
-                                    }
-                                } else if ((blockOn.x == BlockTypes.WET_SAND.id && biome == Biomes.OASIS.id) || (blockOn.x == BlockTypes.MUD.id && biome == Biomes.POND.id) || ((blockOn.x == BlockTypes.SAND.id || blockOn.x == BlockTypes.WET_SAND.id) && (biome == Biomes.BEACH.id || biome == Biomes.TROPICAL_ISLAND.id || biome == Biomes.PALMY_PLAINS.id))) {
-                                    if (blockIn.x() != 1) {
-                                        if (randomNumber < 0.0067f*(blockOn.x == BlockTypes.SAND.id ? 0.25f : 1.f)) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
-                                        } else if (biome == Biomes.OASIS.id && randomNumber < 0.0115f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        }
-                                    }
-                                } else if ((blockOn.x == BlockTypes.SAND.id && biome == Biomes.DESERT.id) || (blockOn.x == BlockTypes.RED_SAND.id && biome == Biomes.BADLANDS.id)) {
-                                    if (biome == Biomes.BADLANDS.id) {
-                                        if (randomNumber < 0.0067f) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
-                                        } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
-                                            PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
-                                        }
-                                    }
-                                    if (randomNumber < 0.002f) {
-                                        double deadBushChance = rand.nextFloat();
-                                        if (deadBushChance < 0.03) {
-                                            int variant = deadBushChance < 0.015 ? 0 : 1;
-                                            Blob.generate(blockOn, x, elevation - 3 + variant, z + variant, 24, 0, 3 + variant);
-                                            Blob.generate(blockOn, x, elevation, z + variant, 24, 0, 2 + variant);
-                                            Blob.generate(blockOn, x, elevation + 2 + variant, z + variant, 24, 0, 1);
-                                            Blob.generate(blockOn, x, elevation + 4 + variant, z + 1 + variant, 24, 0, 1);
-                                            variant *= 2;
-                                            Blob.generate(blockOn, x, elevation + 7 + variant, z + 1 + variant, 24, 0, 2 + variant);
-                                            Blob.generate(blockOn, x - 1 - variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
-                                            Blob.generate(blockOn, x + 1 + variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
-                                        } else if (deadBushChance < 0.2) {
-                                            if (deadBushChance > 0.19) {
-                                                int maxHeight = (int) (rand.nextFloat() * 6) + 12;
-                                                DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
-                                                Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
-                                            } else {
-                                                setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                        } else if (biome == Biomes.SAVANNA.id) {
+                                            if (randomNumber < 0.0003f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < 0.0005f) {
+                                                int maxHeight = rand.nextInt(17, 20);
+                                                AcaciaTree.generate(rand, blockOn, x, elevation, z, maxHeight, BlockTypes.ACACIA_LOG.id, 0, BlockTypes.ACACIA_LEAVES.id, 0);
+                                            }
+                                        } else if (biome == Biomes.BIRCH_PLAINS.id) {
+                                            if (randomNumber < 0.0003f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < 0.0004f || randomNumber < (featureNoise-0.25f) / 100) {
+                                                int maxHeight = rand.nextInt(6) + 12;
+                                                SpruceTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0);
+                                            } else if (randomNumber < 0.000425f) {
+                                                int maxHeight = rand.nextInt(24, 30);
+                                                int radius = rand.nextInt(26, 34);
+                                                int count = rand.nextInt(6, 8);
+                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
                                             }
                                         } else {
-                                            Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, 29, 0);
+                                            if (randomNumber < 0.001f) {
+                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            } else if (randomNumber < featureNoise / 25) {
+                                                if (randomNumber < 0.0013f) {
+                                                    int maxHeight = rand.nextInt(25, 32);
+                                                    int radius = rand.nextInt(20, 32);
+                                                    int leavesHeight = 8;
+                                                    int branchChance = 1;
+                                                    GiantOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, branchChance);
+                                                } else {
+                                                    int maxHeight = rand.nextInt(24, 30);
+                                                    int radius = rand.nextInt(26, 34);
+                                                    int count = rand.nextInt(6, 8);
+                                                    OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count);
+                                                }
+                                            } else if (randomNumber > 0.002 && randomNumber < 0.00212f) {
+                                                int maxHeight = rand.nextInt(20, 23);
+                                                int radius = rand.nextInt(13, 17);
+                                                int leavesHeight = maxHeight/3;
+                                                int count = rand.nextInt(3, 6);
+                                                WillowTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
+                                            } else if (randomNumber > 0.00212 && randomNumber < 0.00215f) {
+                                                int maxHeight = (int) (rand.nextFloat() * 6) + 12;
+                                                DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
+                                                Blob.generate(blockOn, x, elevation, z, BlockTypes.MUD.id, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
+                                            }
+                                        }
+                                    } else if ((blockOn.x == BlockTypes.WET_SAND.id && biome == Biomes.OASIS.id) || (blockOn.x == BlockTypes.MUD.id && biome == Biomes.POND.id) || ((blockOn.x == BlockTypes.SAND.id || blockOn.x == BlockTypes.WET_SAND.id) && (biome == Biomes.BEACH.id || biome == Biomes.TROPICAL_ISLAND.id || biome == Biomes.PALMY_PLAINS.id))) {
+                                        if (blockIn.x() != 1) {
+                                            if (randomNumber < 0.0067f*(blockOn.x == BlockTypes.SAND.id ? 0.25f : 1.f)) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            } else if (biome == Biomes.OASIS.id && randomNumber < 0.0115f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            }
+                                        }
+                                    } else if ((blockOn.x == BlockTypes.SAND.id && biome == Biomes.DESERT.id) || (blockOn.x == BlockTypes.RED_SAND.id && biome == Biomes.BADLANDS.id)) {
+                                        if (biome == Biomes.BADLANDS.id) {
+                                            if (randomNumber < 0.0067f) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                            } else if (randomNumber < 0.02f+Math.max(0, 0.06f*featureNoiseSmall)) {
+                                                PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), 20, 0, 21, 0);
+                                            }
+                                        }
+                                        if (randomNumber < 0.002f) {
+                                            double deadBushChance = rand.nextFloat();
+                                            if (deadBushChance < 0.03) {
+                                                int variant = deadBushChance < 0.015 ? 0 : 1;
+                                                Blob.generate(blockOn, x, elevation - 3 + variant, z + variant, 24, 0, 3 + variant);
+                                                Blob.generate(blockOn, x, elevation, z + variant, 24, 0, 2 + variant);
+                                                Blob.generate(blockOn, x, elevation + 2 + variant, z + variant, 24, 0, 1);
+                                                Blob.generate(blockOn, x, elevation + 4 + variant, z + 1 + variant, 24, 0, 1);
+                                                variant *= 2;
+                                                Blob.generate(blockOn, x, elevation + 7 + variant, z + 1 + variant, 24, 0, 2 + variant);
+                                                Blob.generate(blockOn, x - 1 - variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
+                                                Blob.generate(blockOn, x + 1 + variant, elevation + 7 + variant, z + variant, 24, 0, 2 + variant);
+                                            } else if (deadBushChance < 0.2) {
+                                                if (deadBushChance > 0.19) {
+                                                    int maxHeight = (int) (rand.nextFloat() * 6) + 12;
+                                                    DeadOakTree.generate(rand, blockOn, x, elevation, z, maxHeight, 16, 0);
+                                                    Blob.generate(blockOn, x, elevation, z, 33, 0, (int) (2 + ((rand.nextFloat() + 1) * 3)), new int[]{2, 23}, true);
+                                                } else {
+                                                    setBlock(x, elevation + 1, z, 30, deadBushChance < 0.1 ? 0 : 1);
+                                                }
+                                            } else {
+                                                Pillar.generate(blockOn, x, elevation + 1, z, (int) (rand.nextFloat() * 6) + 2, 29, 0);
+                                            }
                                         }
                                     }
                                 }
