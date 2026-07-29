@@ -38,7 +38,7 @@ public class Earth extends WorldType {
     public static class EarthSpace extends WorldType {
         @Override
         public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth_space");}
-        public Planet parent = StarSystem.planets[2];
+        public Planet parent = StarSystem.planets[4];
         @Override
         public Planet getPlanet(){return parent;}
     }
@@ -51,7 +51,7 @@ public class Earth extends WorldType {
     @Override
     public float getLongitude() {return longitude;}
     @Override
-    public Planet getPlanet(){return StarSystem.planets[2];}
+    public Planet getPlanet(){return StarSystem.planets[4];}
     @Override
     public float gravity() {return 0.1f;}
 @Override

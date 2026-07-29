@@ -39,7 +39,7 @@ public class Sahara extends WorldType {
     public static class SaharaSpace extends WorldType {
         @Override
         public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/sahara_space");}
-        public Planet parent = StarSystem.planets[2];
+        public Planet parent = StarSystem.planets[4];
         @Override
         public Planet getPlanet(){return parent;}
     }
@@ -52,7 +52,7 @@ public class Sahara extends WorldType {
     @Override
     public float getLongitude() {return longitude;}
     @Override
-    public Planet getPlanet(){return StarSystem.planets[2];}
+    public Planet getPlanet(){return StarSystem.planets[4];}
     @Override
     public float gravity() {return 0.1f;}
 @Override

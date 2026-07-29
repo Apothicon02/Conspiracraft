@@ -49,7 +49,9 @@ public class EntityTypes {
             AKSALA = create(new EntityType("celestial/texture/aksala")),
             AKSALA_AURORAS = create(new EntityType("celestial/texture/aksala_auroras")),
             SUN = create(new EntityType("celestial/texture/sun")),
-            LAZULI = create(new EntityType("celestial/texture/lazuli"));
+            LAZULI = create(new EntityType("celestial/texture/lazuli")),
+            EARTH = create(new EntityType("celestial/texture/earth")),
+            EARTH_CLOUDS = create(new EntityType("celestial/texture/earth_clouds"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);

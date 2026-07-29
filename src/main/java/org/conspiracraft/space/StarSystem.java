@@ -14,7 +14,7 @@ import static org.conspiracraft.graphics.Renderer.drawCube;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
 
 public class StarSystem {
-    final public static int SCALE = AU*5;
+    final public static int SCALE = AU*3;
     final public static Vector3f pos = new Vector3f(CENTER, CENTER, CENTER);
     final public static Vector3f relativePos = new Vector3f(pos);
     final public static Planet[] planets = new Planet[]{
@@ -32,9 +32,14 @@ public class StarSystem {
                     new Attachment(EntityTypes.AKSALA_AURORAS, 1.05f, new Vector3f())
             }, new Planet[]{}),
             new Planet(EntityTypes.LAZULI, new Vector3f(AU*30, 0, AU*28), new Vector4f(0.f, 0.975f, 0.71f, 1), EARTH*0.75f, 1500000000000.f, 1500000000000.f, new Attachment[]{}, new Planet[]{}),
-            new Planet(EntityTypes.FIREBALL, new Vector3f(AU*25, 0, AU*15), new Vector4f(1.f, 0.2f, 0.f, 1), EARTH, 1000000000000.f, 500000000000.f, new Attachment[]{
+            new Planet(EntityTypes.FIREBALL, new Vector3f(AU*13.5f, 0, AU*5), new Vector4f(1.f, 0.2f, 0.f, 1), EARTH, 1000000000000.f, 500000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.ASH, 1.02f, new Vector3f())
-            }, new Planet[]{})
+            }, new Planet[]{}),
+            new Planet(EntityTypes.EARTH, new Vector3f(AU*15.5f, 0, AU*15), new Vector4f(0.f, 0.07f, 0.91f, 1), EARTH, 86400000000000.f, 3600000000000.f, new Attachment[]{
+                    new Attachment(EntityTypes.EARTH_CLOUDS, 1.04f, new Vector3f())
+            }, new Planet[]{
+                    new Planet(EntityTypes.MUN, new Vector3f(AU*1.115f, 0, AU*1.f), new Vector4f(0.8f, 0.8f, 0.85f, 1), EARTH*0.27f, 3600000000000.f, 3600000000000.f, new Attachment[]{}, new Planet[]{}),
+            }),
     };
 
     public static Planet getNearestPlanet(Vector3f pos) {
