@@ -11,6 +11,7 @@ import java.nio.file.*;
 import static org.conspiracraft.audio.AudioController.*;
 
 public class Settings {
+    public static int language = 0;
     public static float mouseSensitivity = 0.1f;
     public static int width = 2560;
     public static int height = 1440;

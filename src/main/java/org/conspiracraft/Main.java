@@ -1,6 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.audio.AudioController;
+import org.conspiracraft.gui.Languages;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.space.StarSystem;
@@ -57,6 +58,7 @@ public class Main {
         Files.createDirectories(Path.of(mainFolder));
         copyAssets();
         Settings.load();
+        Languages.load();
         player = new Player();
         player.create();
         World.load(World.worldType.getWorldPath() + "/");

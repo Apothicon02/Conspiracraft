@@ -216,7 +216,9 @@ public class GUI {
             drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * 3) + 1, saveChars, new Vector4f(1.f), new Vector4f(1.f));
             drawingButton = new SettingsButton();
             drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Settings".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
-            drawButton(true, 0.5f, 0.5f, 0, charHeight, "    Language    ".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+            drawingButton = new LanguageButton();
+            drawButton(true, 0.5f, 0.5f, 0, charHeight, "                ".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+            drawText(true, 0.5f, 0.5f, 0, charHeight, Languages.translate("name").toCharArray());
             drawingButton = new QuitToMenuButton();
             drawButton(true, 0.5f, 0.5f, 0, (-charHeight) - 1, "Quit To Menu".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
             drawingButton = new QuitToDesktopButton();
@@ -367,6 +369,17 @@ public class GUI {
                 drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars);
             }
         }
+        Item item = player.inv.getSelectedItem(true);
+        if (item != null) {
+            char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
+            float offX = Main.player.inputHandler.currentPos.x() / width;
+            float offY = Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height;
+            pushUBO.updateTex(0); //use gui atlas
+            pushUBO.updateLayer(0); //text
+            drawButton(false, offX, offY, charWidth*2, charHeight, chars, new Vector4f(0.5f, 0.6f, 0.55f, 1.f), new Vector4f(1.f));
+//            pushUBO.updateTex(0); //use gui atlas
+//            drawText(false, offX, offY, charWidth*2, charHeight, chars);
+        }
     }
     public static void drawSlider(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, Vector4f bgColor, Vector4f txtColor) {
         pushUBO.updateLayer(5); //button/slider
@@ -399,19 +412,19 @@ public class GUI {
         Vector2i borderData = getButtonBorderData((charWidth * chars.length) + 6);
         pushUBO.updateAtlasOffset(new Vector2i(0, borderData.y()));
         color = bgColor;
-        drawSlot(true, false, offsetX, offsetY, offsetPX - 1, offsetPY - 4, 0, 0, borderData.x() + 2, 16);
+        drawSlot(centered, false, offsetX, offsetY, offsetPX - 1, offsetPY - 4, 0, 0, borderData.x() + 2, 16);
         drawingButton = null;
 
         pushUBO.updateLayer(0); //text
         color = txtColor;
         float size = chars.length * charWidth;
-        float centeredOffset = centered ? size / 2 : 0.f;
+        float centeredOffset = centered ? size*0.5f : 0.f;
         float offset = 0;
         for (char character : chars) {
             int charAtlasOffset = getCharAtlasOffset(character);
             if (charAtlasOffset >= 0) {
                 pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, 0));
-                drawSlot(offsetX, offsetY, offsetPX + offset - centeredOffset, offsetPY, 0, 0, charWidth, charHeight);
+                drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : charWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight);
             }
             offset += charWidth;
         }
@@ -507,8 +520,7 @@ public class GUI {
     public static int charWidth = 6;
     public static int charHeight = 8;
     public static char[] alphabet = """
-            0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.!?$:,;`'"()[]{}*=+-/\\^%&#~<>|
-            """.toCharArray();
+            0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.!?$:,;`'"()[]{}*=+-/\\^%&#~<>|_\s""".toCharArray();
     public static Map<Character, Integer> charAtlasOffsetIndex = new HashMap<>();
     public static char space = " ".toCharArray()[0];
 
