@@ -22,44 +22,24 @@ public class Recipes {
         }
         if (product == null) {
             for (ItemTag tag : cursorItem.type.tags) {
-                if (tag.tagged.contains(cursorItem.type)) {
-                    for (ItemTag selTag : selItem.type.tags) {
-                        if (selTag.tagged.contains(selItem.type)) {
-                            product = Recipes.recipes.get(new Pair<>(tag, selTag));
-                            if (product != null) {
-                                return product;
-                            }
-                            product = Recipes.recipes.get(new Pair<>(selTag, tag));
-                            if (product != null) {
-                                return product;
-                            }
-                        }
-                    }
+                for (ItemTag selTag : selItem.type.tags) {
+                    product = Recipes.recipes.get(new Pair<>(tag, selTag));
+                    if (product != null) {return product;}
+                    product = Recipes.recipes.get(new Pair<>(selTag, tag));
+                    if (product != null) {if (product.consume()) {return product;} else {product = null;}}
                 }
             }
             for (ItemTag tag : cursorItem.type.tags) {
-                if (tag.tagged.contains(cursorItem.type)) {
-                    product = Recipes.recipes.get(new Pair<>(tag, selItem.type));
-                    if (product != null) {
-                        return product;
-                    }
-                    product = Recipes.recipes.get(new Pair<>(selItem.type, tag));
-                    if (product != null) {
-                        return product;
-                    }
-                }
+                product = Recipes.recipes.get(new Pair<>(tag, selItem.type));
+                if (product != null) {return product;}
+                product = Recipes.recipes.get(new Pair<>(selItem.type, tag));
+                if (product != null) {if (product.consume()) {return product;} else {product = null;}}
             }
             for (ItemTag selTag : selItem.type.tags) {
-                if (selTag.tagged.contains(selItem.type)) {
-                    product = Recipes.recipes.get(new Pair<>(cursorItem.type, selTag));
-                    if (product != null) {
-                        return product;
-                    }
-                    product = Recipes.recipes.get(new Pair<>(selTag, cursorItem.type));
-                    if (product != null) {
-                        return product;
-                    }
-                }
+                product = Recipes.recipes.get(new Pair<>(cursorItem.type, selTag));
+                if (product != null) {return product;}
+                product = Recipes.recipes.get(new Pair<>(selTag, cursorItem.type));
+                if (product != null) {if (product.consume()) {return product;} else {product = null;}}
             }
         }
         return product;

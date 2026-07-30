@@ -1,9 +1,7 @@
 package org.conspiracraft.items.types;
 
-import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.ItemSFX;
 import org.conspiracraft.items.ItemTag;
