@@ -48,6 +48,7 @@ public class PushUBO {
             offset = align(alignment) + fieldSize;
             size = offset;
         }
+        buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
     public void update(Matrix4f modelMatrix, Vector4f color) {
         ((Matrix4f)uniformStorage[0]).set(modelMatrix);
@@ -58,9 +59,10 @@ public class PushUBO {
     public void updateSize(Vector2i size) {uniformStorage[4] = size;}
     public void updateLayer(int layer) {uniformStorage[5] = layer;}
     public void updateTex(int tex) {uniformStorage[6] = tex;}
-    public void submit() {
+    public ByteBuffer buf = null;
+    public void push() {
         offset = 0;
-        ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+        buf.clear();
         for (Object obj : uniforms()) {
             switch (obj) {
                 case Float v -> buf.putFloat(alignAndOffset(FLOAT_ALIGN, FLOAT_SIZE), v);

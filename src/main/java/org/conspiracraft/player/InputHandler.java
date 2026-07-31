@@ -93,7 +93,9 @@ public class InputHandler {
                         r = (float) Math.toRadians(45);
                     }
                     if (keyRelease(SDL_SCANCODE_X)) {
-                        entitiesAddQueue.removeLast();
+                        if (!entitiesAddQueue.isEmpty()) {
+                            entitiesAddQueue.removeLast();
+                        }
                     } else if (keyRelease(SDL_SCANCODE_V)) {
                         AnimalEntity entity = new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Matrix4f().translate(new Vector3f(player.pos).add(0, player.eyeHeight, 0)).rotateXYZ(r, r, 0),

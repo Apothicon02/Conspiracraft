@@ -120,6 +120,7 @@ public class GUI {
     }
     public static boolean showUI = true;
     public static void draw() {
+        //long startTime = System.nanoTime();
         update();
         if (showUI) {
             if (!GUI.pauseMenuOpen) {
@@ -134,6 +135,7 @@ public class GUI {
             drawDebug();
         }
         drawAlwaysVisible();
+        //System.out.println((System.nanoTime() - startTime) + "ns to draw gui");
         tick();
     }
     public static Vector4f menuBgColor = new Vector4f(1.f);
@@ -240,10 +242,11 @@ public class GUI {
         color.set(1.f, 1.f, 1.f, 0.5f);
         pushUBO.updateLayer(0); //text
         pushUBO.updateTex(0); //use gui atlas
-        drawText(false, 0, 1, pauseMenuOpen ? 6 : 2, (pauseMenuOpen ? -6 : -2) - charHeight, (String.format("%.2f", fps) + "fps ").toCharArray());
+        int pauseOff = (pauseMenuOpen ? -6 : -2);
+        drawText(false, 0, 1, -pauseOff-1, pauseOff - (charHeight*0.5f), (String.format("%.2f", fps) + "fps ").toCharArray(), 2);
+        drawText(false, 0, 1, -0.5f-pauseOff, 1+pauseOff - charHeight, (String.format("%.2f", ms) + "ms").toCharArray(), 3);
         if (showDebug && !pauseMenuOpen) {
-            drawText(false, 0, 1, 2, -2 - (charHeight * 2), (String.format("%.2f", ms) + "ms").toCharArray());
-            drawText(false, 0, 1, 2, -2 - (charHeight * 3), ((int) Main.player.pos.x + "x," + (int) Main.player.pos.y + "y," + (int) Main.player.pos.z + "z").toCharArray());
+            drawText(false, 0, 1, 1.5f, -1.34f - (charHeight*1.33f), ((int) Main.player.pos.x + "x," + (int) Main.player.pos.y + "y," + (int) Main.player.pos.z + "z").toCharArray(), 3);
         }
     }
     public static void drawInventory() {

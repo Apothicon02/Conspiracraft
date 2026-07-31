@@ -28,7 +28,7 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class ItemTypes {
     public static int itemTexSize = 16;
-    public static int standardStackSize = 99;
+    public static int standardStackSize = 100;
     public static Map<Integer, ItemType> itemTypeMap = new HashMap<>(Map.of());
 
     public static int getId(ItemType type) {
@@ -116,8 +116,8 @@ public class ItemTypes {
             GRASSY_DIRT = create(new ItemType("resource/texture/grassy_dirt").maxStackSize(standardStackSize).blockToPlace(BlockTypes.GRASS.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 0.5f, 1.f))),
             CLAY = create(new ItemType("resource/texture/clay").maxStackSize(standardStackSize).blockToPlace(BlockTypes.CLAY.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.5f, 0.66f))),
             MUD = create(new ItemType("resource/texture/mud").maxStackSize(standardStackSize).blockToPlace(BlockTypes.MUD.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.5f, 0.66f))),
-            FIREBALL = create(new FireballItemType("magic/texture/fireball").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.FIREBALL_QUICK}, 1.0f, 1.0f))),
-            LIGHTNING = create(new LightningItemType("magic/texture/lightning").maxStackSize(16).sfx(new ItemSFX(new SFX[]{Sounds.THUNDER_1, Sounds.THUNDER_2}, 1.0f, 1.0f))),
+            FIREBALL = create(new FireballItemType("magic/texture/fireball").maxStackSize(10).sfx(new ItemSFX(new SFX[]{Sounds.FIREBALL_QUICK}, 1.0f, 1.0f))),
+            LIGHTNING = create(new LightningItemType("magic/texture/lightning").maxStackSize(10).sfx(new ItemSFX(new SFX[]{Sounds.THUNDER_1, Sounds.THUNDER_2}, 1.0f, 1.0f))),
             OXYGEN_ICE = create(new IceItemType("resource/texture/oxygen_ice").element(Elements.OXYGEN).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
             CARBON_DIOXIDE_ICE = create(new IceItemType("resource/texture/carbon_dioxide_ice").element(Elements.CARBON_DIOXIDE).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),
             NITROGEN_ICE = create(new IceItemType("resource/texture/nitrogen_ice").element(Elements.NITROGEN).maxStackSize(Integer.MAX_VALUE).sfx(new ItemSFX(new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 0.6f, 0.66f))),

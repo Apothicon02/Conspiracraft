@@ -3,8 +3,6 @@ package org.conspiracraft.graphics.buffers.ubos;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.graphics.Graphics;
-import org.conspiracraft.graphics.Pipelines;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.Swapchain;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
@@ -54,6 +52,7 @@ public class GlobalUBO extends UBO {
             offset = align(alignment) + fieldSize;
             size = offset;
         }
+        buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
     public void update(MemoryStack stack) {
         ((Matrix4f)uniformStorage[2]).identity().set((Matrix4f)uniformStorage[0]);
@@ -74,9 +73,10 @@ public class GlobalUBO extends UBO {
         uniformStorage[15] = World.worldType.getSkylightMul();
     }
     private int offset = 0;
-    public void submit() {
+    public ByteBuffer buf = null;
+    public void push() {
         offset = 0;
-        ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+        buf.clear();
         for (Object obj : uniforms()) {
             switch (obj) {
                 case Float v -> buf.putFloat(alignAndOffset(FLOAT_ALIGN, FLOAT_SIZE), v);

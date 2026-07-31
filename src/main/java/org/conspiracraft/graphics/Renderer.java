@@ -10,7 +10,6 @@ import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
-import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -41,7 +40,6 @@ import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.Arrays;
 
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
@@ -124,7 +122,7 @@ public class Renderer {
                 }
                 vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSets[frameIdx]), null);
                 globalUBO.update(stack);
-                globalUBO.submit();
+                globalUBO.push();
 
                 drawRaster(stack);
                 drawDDA(stack);
@@ -439,22 +437,22 @@ public class Renderer {
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
-        pushUBO.submit();
+        pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
     public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
-        pushUBO.submit();
+        pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
     public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
-        pushUBO.submit();
+        pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
     public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
-        pushUBO.submit();
+        pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD_CENTERED.indexCount, 1, Models.QUAD_CENTERED.indexOffset/Index.SIZE, Models.QUAD_CENTERED.vertexOffset/Vertex.SIZE, 0);
     }
 
