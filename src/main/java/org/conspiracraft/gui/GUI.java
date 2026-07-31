@@ -1,5 +1,6 @@
 package org.conspiracraft.gui;
 
+import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.audio.AudioController;
@@ -12,6 +13,7 @@ import org.conspiracraft.gui.buttons.*;
 import org.conspiracraft.gui.sliders.*;
 import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.Recipes;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.player.HandManager;
@@ -19,13 +21,9 @@ import org.conspiracraft.utils.Utils;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
-import javax.imageio.ImageIO;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.Math;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +63,7 @@ public class GUI {
     public static float hotbarPosY = 0.f;
     public static int slotSize = 20;
     public static int slotSizeY = 22;
-    public static int enlargedSlotSize = 24;
+    public static int enlargedSlotSize = 22;
     public static float containerPosY = 0;
     public static void update() {
         guiScaleMul = (int) (Math.min(width, height) / 270f);
@@ -83,7 +81,7 @@ public class GUI {
     public static void tick() {
         boolean shouldSetObjectOnPrev = true;
         Vector2i cursorPos = new Vector2i(cursorPxX(), cursorPxY());
-        color = new Vector4f(1);
+        color.set(1);
         pushUBO.updateTex(0); //use gui atlas
         pushUBO.updateLayer(5); //button
         for (Button button : buttons) {
@@ -126,7 +124,7 @@ public class GUI {
                 pushUBO.updateLayer(3); //frame
                 pushUBO.updateSize(new Vector2i(1));
                 pushUBO.updateAtlasOffset(new Vector2i(0));
-                color = new Vector4f(1.f);
+                color.set(1.f);
                 drawQuad(true, true, 0.5f, 0.5f, 1, 1); //crosshair
                 drawInventory();
             }
@@ -139,7 +137,7 @@ public class GUI {
     public static void drawAlwaysVisible() {
         pushUBO.updateTex(0); //use gui atlas
         if (Main.isSaving || pauseMenuOpen) {
-            color = new Vector4f(1.f);
+            color.set(1.f);
             Vector2i border = new Vector2i((int) ((32 * (width / 3840f)) / guiScaleMul), (int) ((32 * (height / 2180f)) / guiScaleMul));
             if (Main.isSaving) {
                 drawText(false, 0, 0, 2 + border.x(), 2 + border.y(), "Saving data...".toCharArray());
@@ -154,7 +152,7 @@ public class GUI {
             }
         }
 
-        color = new Vector4f(1.f);
+        color.set(1.f);
         pushUBO.updateLayer(0); //text
         if (graphicsSettingMenuOpen) {
             menuBgColor = new Vector4f(1.f, 1.f, 0.75f, 1.f);
@@ -228,7 +226,7 @@ public class GUI {
     }
     public static boolean showDebug = true;
     public static void drawDebug() {
-        color = new Vector4f(1.f, 1.f, 1.f, 0.5f);
+        color.set(1.f, 1.f, 1.f, 0.5f);
         pushUBO.updateLayer(0); //text
         pushUBO.updateTex(0); //use gui atlas
         drawText(false, 0, 1, pauseMenuOpen ? 6 : 2, (pauseMenuOpen ? -6 : -2) - charHeight, (String.format("%.2f", fps) + "fps ").toCharArray());
@@ -242,7 +240,7 @@ public class GUI {
         pushUBO.updateLayer(1); //inventory
         pushUBO.updateTex(0); //use gui atlas
         if (GUI.inventoryOpen) {
-            color = new Vector4f(0.85f);
+            color.set(0.85f);
             drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
             drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
             drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
@@ -251,7 +249,7 @@ public class GUI {
             pushUBO.updateLayer(1); //inventory
             pushUBO.updateAtlasOffset(new Vector2i(0));
             if (Main.player.creative) {
-                color = new Vector4f(1);
+                color.set(1);
                 drawQuad(false, false, hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY);
                 drawQuad(false, false, hotbarPosX, containerPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
                 drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
@@ -262,7 +260,7 @@ public class GUI {
                 pushUBO.updateAtlasOffset(new Vector2i(0));
             }
         }
-        color = new Vector4f(1.f);
+        color.set(1.f);
         drawQuad(false, false, hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY); //hotbar
         pushUBO.updateLayer(2); //selector
         Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
@@ -279,7 +277,7 @@ public class GUI {
                 selSlot = Main.player.inv.selectedContainerSlot;
             }
             for (int slotId : Main.player.inv.selectedSlots) {
-                color = new Vector4f(0.85f, 0.85f, 0.85f, 1.f);
+                color.set(0.85f, 0.85f, 0.85f, 1.f);
                 Vector2i pos = new Vector2i(slotId % invWidth, slotId / invWidth);
                 if (pos.x() != selSlot.x() || pos.y() != selSlot.y()) { //don't draw in the selected slot, as that would just get overlapped.
                     drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, pos.x(), pos.y(), enlargedSlotSize, enlargedSlotSize);
@@ -289,12 +287,12 @@ public class GUI {
             Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
             selSlot = Main.player.inv.selectedSlot;
         }
-        color = new Vector4f(1.f);
+        color.set(1.f);
         if (selSlot != null) {
             if (selSlot.x() < 0 || selSlot.y() < 0) {
                 selSlot.set(-1, -1);
             } else {
-                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
+                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, 1, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
             }
         }
 
@@ -371,15 +369,56 @@ public class GUI {
         }
         Item item = player.inv.getSelectedItem(true);
         if (item != null) {
-            char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
-            float offX = Main.player.inputHandler.currentPos.x() / width;
-            float offY = Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height;
-            pushUBO.updateTex(0); //use gui atlas
-            pushUBO.updateLayer(0); //text
-            drawButton(false, offX, offY, charWidth*2, charHeight, chars, new Vector4f(0.5f, 0.6f, 0.55f, 1.f), new Vector4f(1.f));
-//            pushUBO.updateTex(0); //use gui atlas
-//            drawText(false, offX, offY, charWidth*2, charHeight, chars);
+            drawItemHoverDetails(Main.player.inputHandler.currentPos.x() / width, Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height, item);
         }
+    }
+    public static void drawItemHoverDetails(float offX, float offY, Item item) {
+        char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
+        color.set(1.f);
+        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateLayer(2); //selector
+        pushUBO.updateAtlasOffset(new Vector2i(0, 22));
+        drawSlot(false, false, offX, offY, (charWidth*2) - 1, charHeight - 4, 0, 0, 10, 16);
+        int centerWidth = Math.max(0, (charWidth*chars.length)-12);
+        if (centerWidth > 0) {
+            pushUBO.updateAtlasOffset(new Vector2i(10, 22));
+            drawSlot(false, false, offX, offY, ((charWidth * 2) - 1) + 10, charHeight - 4, 0, 0, centerWidth, 16);
+        }
+        pushUBO.updateAtlasOffset(new Vector2i(201, 22));
+        drawSlot(false, false, offX, offY, ((charWidth*2) - 1)+10+centerWidth, charHeight - 4, 0, 0, 10, 16);
+        pushUBO.updateLayer(0); //text
+        drawText(false, offX, offY, charWidth*2, charHeight, chars);
+
+        pushUBO.updateTex(-1); //use no texture
+        color.set(0.015f, 0.023f, 0.027f, 1.f);
+        int recipes = 2;
+        if (recipes > 0) {
+            drawSlot(false, false, offX, offY, (charWidth * 2) - 1, (charHeight * -2.5f) + 1 - (enlargedSlotSize * (recipes - 1)), 0, 0, (enlargedSlotSize * 3) + 2, (enlargedSlotSize * recipes) + 2);
+            pushUBO.updateTex(0); //use gui atlas
+            color.set(1);
+            drawRecipe(offX, offY, 0, ItemTypes.BAMBOO, ItemTypes.PAPER);
+            drawRecipe(offX, offY, -enlargedSlotSize, ItemTypes.OAK_LOG, ItemTypes.STICK);
+        }
+    }
+    public static void drawRecipe(float offX, float offY, int offPxY, ItemType ingredient, ItemType product) {
+        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateLayer(2); //selector
+        color.set(1, 1, 1, 0.85f);
+        pushUBO.updateAtlasOffset(new Vector2i(44, 0));
+        drawSlot(false, false, offX, offY, (charWidth*2)+ enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
+        pushUBO.updateAtlasOffset(new Vector2i(22, 0));
+        drawSlot(false, false, offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
+        drawSlot(false, false, offX, offY, (charWidth*2)+(enlargedSlotSize *2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
+        color.set(1.f);
+        pushUBO.updateTex(1); //items
+        pushUBO.updateLayer(0); //items
+        pushUBO.updateAtlasOffset(ingredient.atlasOffset);
+        drawSlot(false, false, offX, offY, (charWidth*2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+        pushUBO.updateAtlasOffset(product.atlasOffset);
+        drawSlot(false, false, offX, offY, (charWidth*2)+(enlargedSlotSize *2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateLayer(0); //text
+        drawText(true, offX, offY, (charWidth*2)+(enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray());
     }
     public static void drawSlider(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, Vector4f bgColor, Vector4f txtColor) {
         pushUBO.updateLayer(5); //button/slider
@@ -389,7 +428,7 @@ public class GUI {
         drawSlot(true, false, offsetX, offsetY, offsetPX - 1, offsetPY - 4, 0, 0, borderData.x() + 2, 16);
         drawingSlider = null;
         pushUBO.updateAtlasOffset(new Vector2i(272, 320));
-        color = new Vector4f(bgColor.x(), bgColor.y(), bgColor.z(), 1);
+        color.set(bgColor.x(), bgColor.y(), bgColor.z(), 1);
         float posX = (sliderX-0.5f)*borderData.x();
         drawSlot(true, false, offsetX, offsetY, (offsetPX+posX) - 1, offsetPY - 4, 0, 0, 5, 16);
         sliderX = 0.f;
@@ -417,6 +456,9 @@ public class GUI {
 
         pushUBO.updateLayer(0); //text
         color = txtColor;
+        drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars);
+    }
+    public static void drawText(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars) {
         float size = chars.length * charWidth;
         float centeredOffset = centered ? size*0.5f : 0.f;
         float offset = 0;
@@ -425,19 +467,6 @@ public class GUI {
             if (charAtlasOffset >= 0) {
                 pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, 0));
                 drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : charWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight);
-            }
-            offset += charWidth;
-        }
-    }
-    public static void drawText(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars) {
-        float size = chars.length * charWidth;
-        float centeredOffset = centered ? size / 2 : 0.f;
-        float offset = 0;
-        for (char character : chars) {
-            int charAtlasOffset = getCharAtlasOffset(character);
-            if (charAtlasOffset >= 0) {
-                pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, 0));
-                drawSlot(offsetX, offsetY, offsetPX + offset - centeredOffset, offsetPY, 0, 0, charWidth, charHeight);
             }
             offset += charWidth;
         }
