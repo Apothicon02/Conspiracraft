@@ -106,7 +106,7 @@ public class GUI {
                 pushUBO.updateAtlasOffset(new Vector2i(277, 320));
                 drawQuad(true, false, (float) cursorPos.x() / width, (float) slider.bounds.y() / height, 5, 16);
                 if (Main.player.inputHandler.leftButtonPressed) {
-                    slider.clicked(cursorPos.x());
+                    slider.pressed(cursorPos.x());
                 } else if (objectOnPrev == null || !objectOnPrev.getClass().equals(slider.getClass())) {
                     AudioController.playHoverSound();
                 }
@@ -158,7 +158,7 @@ public class GUI {
         color.set(1.f);
         pushUBO.updateLayer(0); //text
         if (graphicsSettingMenuOpen) {
-            menuBgColor = new Vector4f(1.f, 1.f, 0.75f, 1.f);
+            menuBgColor = new Vector4f(1.f, 0.9f, 0.5f, 1.f);
             drawText(true, 0.5f, 1, 0, -10 - charHeight, "Graphics Settings".toCharArray());
             drawingButton = new BackButton();
             drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
@@ -196,8 +196,15 @@ public class GUI {
             drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (AudioController.muted ? "  Muted  " :  " Unmuted ").toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new AudioChannelButton();
             drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, AudioController.getOutputModeAsTxt().toCharArray(), menuBgColor, new Vector4f(1.f));
+        } else if (accessibilitySettingMenuOpen) {
+            menuBgColor = new Vector4f(0.72f, 0.725f, 1.f, 1.f);
+            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Accessibility Settings".toCharArray());
+            drawingButton = new BackButton();
+            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+            drawingButton = new GUIScaleButton();
+            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("GUI Scale:"+Settings.guiScale).toCharArray(), menuBgColor, new Vector4f(1.f));
         } else if (settingMenuOpen) {
-            menuBgColor = new Vector4f(0.75f, 0.75f, 1.f, 1.f);
+            menuBgColor = new Vector4f(0.93f, 0.85f, 1.0f, 1.f);
             drawText(true, 0.5f, 1, 0, -10 - charHeight, "Settings".toCharArray());
             drawingButton = new BackButton();
             drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Main Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
@@ -207,6 +214,7 @@ public class GUI {
             drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Controls".toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new GraphicsSettingsButton();
             drawButton(true, 0.5f, 0.5f, 0, charHeight, "    Graphics    ".toCharArray(), menuBgColor, new Vector4f(1.f));
+            drawingButton = new AccessibilitySettingsButton();
             drawButton(true, 0.5f, 0.5f, 0, (-charHeight)-1, "Accessibility".toCharArray(), menuBgColor, new Vector4f(1.f));
         } else if (pauseMenuOpen) {
             drawText(true, 0.5f, 1, 0, -10 - charHeight, "Paused".toCharArray());

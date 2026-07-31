@@ -8,7 +8,7 @@ public class FoVSlider extends Slider {
     public FoVSlider() {}
 
     @Override
-    public void clicked(int cursorX) {
+    public void pressed(int cursorX) {
         float relX = Math.abs(((float) (bounds.x()-cursorX)) / (bounds.z()-bounds.x()));
         if (relX < 0.01f) {relX = 0.f;}
         if (relX > 0.495f && relX < 0.505f) {relX = 0.5f;}

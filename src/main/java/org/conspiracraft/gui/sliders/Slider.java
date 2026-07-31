@@ -7,5 +7,5 @@ public class Slider {
     public Vector4i bounds = null;
     public Slider() {}
 
-    public void clicked(int cursorX) {}
+    public void pressed(int cursorX) {}
 }
