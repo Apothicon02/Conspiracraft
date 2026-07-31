@@ -66,14 +66,17 @@ public class GUI {
     public static int enlargedSlotSize = 22;
     public static float containerPosY = 0;
     public static void update() {
-        guiScaleMul = (int) (Math.min(width, height) / 270f);
-        guiScale = width / guiScaleMul;
         aspectRatio = (float) width / height;
+        updateScale(1);
         hotbarPosX = (0.5f - ((hotbarSizeX / 2f) / guiScale));
         hotbarPosY = 5.f / height;
         containerPosY = hotbarPosY + (((hotbarSizeY * 5) / guiScale) * aspectRatio);
         buttons.clear();
         sliders.clear();
+    }
+    public static void updateScale(int scaleDiv) {
+        guiScaleMul = (int) (((Math.min(width, height) / 270f)/scaleDiv)*Settings.guiScale);
+        guiScale = width / guiScaleMul;
     }
     public static Vector4f color = new Vector4f(1.f);
     public static Object objectOnPrev = null;
@@ -318,9 +321,9 @@ public class GUI {
                         }
                         if (item.amount > 1) {
                             pushUBO.updateTex(0); //use gui atlas
-                            char[] chars = String.valueOf(item.amount).toCharArray();
-                            float startOffset = 16 - (chars.length * charWidth);
-                            drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars);
+                            char[] chars = item.amountString().toCharArray();
+                            float startOffset = 16 - (chars.length * (charWidth/2.f));
+                            drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars, 2);
                         }
                     }
                 }
@@ -362,14 +365,16 @@ public class GUI {
             drawQuad(true, true, offX, offY, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
             if (Main.player.inv.cursorItem.amount > 1) {
                 pushUBO.updateTex(0); //use gui atlas
-                char[] chars = String.valueOf(Main.player.inv.cursorItem.amount).toCharArray();
-                float startOffset = 16 - (chars.length * charWidth);
-                drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars);
+                char[] chars = Main.player.inv.cursorItem.amountString().toCharArray();
+                float startOffset = 16 - (chars.length * (charWidth/2.f));
+                drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars, 2);
             }
         }
-        Item item = player.inv.getSelectedItem(true);
-        if (item != null) {
-            drawItemHoverDetails(Main.player.inputHandler.currentPos.x() / width, Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height, item);
+        if (inventoryOpen) {
+            Item item = player.inv.getSelectedItem(true);
+            if (item != null) {
+                drawItemHoverDetails(Main.player.inputHandler.currentPos.x() / width, Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height, item);
+            }
         }
     }
     public static void drawItemHoverDetails(float offX, float offY, Item item) {
@@ -391,13 +396,16 @@ public class GUI {
 
         pushUBO.updateTex(-1); //use no texture
         color.set(0.015f, 0.023f, 0.027f, 1.f);
-        int recipes = 2;
-        if (recipes > 0) {
-            drawSlot(false, false, offX, offY, (charWidth * 2) - 1, (charHeight * -2.5f) + 1 - (enlargedSlotSize * (recipes - 1)), 0, 0, (enlargedSlotSize * 3) + 2, (enlargedSlotSize * recipes) + 2);
-            pushUBO.updateTex(0); //use gui atlas
-            color.set(1);
-            drawRecipe(offX, offY, 0, ItemTypes.BAMBOO, ItemTypes.PAPER);
-            drawRecipe(offX, offY, -enlargedSlotSize, ItemTypes.OAK_LOG, ItemTypes.STICK);
+        List<Pair<ItemType, ItemType>> uses = Recipes.getUses(item.type);
+        if (!uses.isEmpty()) {
+            drawSlot(false, false, offX, offY, (charWidth * 2) - 1, (charHeight * -2.5f) + 1 - (enlargedSlotSize * (uses.size() - 1)), 0, 0, (enlargedSlotSize * 3) + 2, (enlargedSlotSize * uses.size()) + 2);
+            int offPxY = 0;
+            for (int i = 0; i < uses.size(); i++) {
+                Pair<ItemType, ItemType> recipe = uses.get(i);
+                drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond());
+                offPxY-=enlargedSlotSize;
+            }
+            //drawRecipe(offX, offY, -enlargedSlotSize, ItemTypes.OAK_LOG, ItemTypes.STICK);
         }
     }
     public static void drawRecipe(float offX, float offY, int offPxY, ItemType ingredient, ItemType product) {
@@ -459,16 +467,20 @@ public class GUI {
         drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars);
     }
     public static void drawText(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars) {
-        float size = chars.length * charWidth;
+        drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars, 1);
+    }
+    public static void drawText(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, int iScale) {
+        int scaledCharWidth = charWidth/iScale;
+        float size = chars.length * scaledCharWidth;
         float centeredOffset = centered ? size*0.5f : 0.f;
         float offset = 0;
         for (char character : chars) {
             int charAtlasOffset = getCharAtlasOffset(character);
             if (charAtlasOffset >= 0) {
                 pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, 0));
-                drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : charWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight);
+                drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : scaledCharWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight, iScale);
             }
-            offset += charWidth;
+            offset += scaledCharWidth;
         }
     }
     public static Vector2i getButtonBorderData(int buttonWidth) {
@@ -516,15 +528,24 @@ public class GUI {
         );
     }
     public static void drawSlot(float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY) {
-        drawSlot(false, false, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY);
+        drawSlot(false, false, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY, 1);
+    }
+    public static void drawSlot(float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, int iScale) {
+        drawSlot(false, false, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY, iScale);
     }
     public static void drawSlot(boolean centeredX, boolean centeredY, float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY) {
+        drawSlot(centeredX, centeredY, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY, 1);
+    }
+    public static void drawSlot(boolean centeredX, boolean centeredY, float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, int iScale) {
         float selectedPosX = x * (slotSize / guiScale);
         float selectedPosY = y * ((slotSizeY / guiScale) * aspectRatio);
-        drawQuad(centeredX, centeredY, selectedPosX + offsetX + (offPxX / guiScale), selectedPosY + (offsetY - (3.f / height)) + ((offPxY / guiScale) * aspectRatio), sizeX, sizeY);
+        drawQuad(centeredX, centeredY, selectedPosX + offsetX + (offPxX / guiScale), selectedPosY + (offsetY - (3.f / height)) + ((offPxY / guiScale) * aspectRatio), sizeX, sizeY, iScale);
     }
-
-    public static void drawQuad(boolean centeredX, boolean centeredY, float x, float y, int scaleX, int scaleY) {
+    public static void drawQuad(boolean centeredX, boolean centeredY, float x, float y, int scaleX, int scaleY) {drawQuad(centeredX, centeredY, x, y, scaleX, scaleY, 1);}
+    public static void drawQuad(boolean centeredX, boolean centeredY, float x, float y, int scaleX, int scaleY, int iScale) {
+        if (iScale > 1) {
+            updateScale(iScale);
+        }
         float xScale = (scaleX / guiScale);
         float yScale = (scaleY / guiScale) * aspectRatio;
         float xOffset = ((x * 2) - 1) + (centeredX ? 0 : xScale);
@@ -544,6 +565,9 @@ public class GUI {
             sliders.add(drawingSlider);
         }
         Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color);
+        if (iScale > 1) {
+            updateScale(1);
+        }
     }
 
     public static int charWidth = 6;

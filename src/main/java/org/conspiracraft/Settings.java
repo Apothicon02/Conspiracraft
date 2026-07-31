@@ -22,6 +22,7 @@ public class Settings {
     public static boolean taaEnabled = true;
     public static boolean upscaleEnabled = true;
     public static boolean dynamicFoVEnabled = true;
+    public static float guiScale = 1.25f;
 
     public static void load() throws IOException {
         Path path = Path.of(Main.mainFolder + "settings.json");

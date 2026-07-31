@@ -4,7 +4,10 @@ import kotlin.Pair;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Recipes {
     public static Map<Pair<Object, Object>, Product> recipes = Map.of(
@@ -44,5 +47,27 @@ public class Recipes {
             }
         }
         return product;
+    }
+    public static List<Pair<ItemType, ItemType>> getUses(ItemType item) {
+        List<Pair<ItemType, ItemType>> uses = new ArrayList<>();
+        recipes.forEach((ingredients, product) -> {
+            boolean matchFirst = ingredients.component1() == item, matchLast = ingredients.component2() == item;
+            ItemTag firstTag = ingredients.component1() instanceof ItemTag ? (ItemTag) ingredients.component1() : null,
+                    lastTag = ingredients.component2() instanceof ItemTag ? (ItemTag) ingredients.component2() : null;
+            if (matchFirst || (!matchLast && firstTag != null && firstTag.tagged.contains(item))) {
+                if (ingredients.component2() instanceof ItemType ingredient) {
+                    uses.add(new Pair<>(ingredient, product.itemType));
+                } else if (ingredients.component2() instanceof ItemTag tag) {
+                    uses.add(new Pair<>(tag.tagged.get(0), product.itemType));
+                }
+            } else if (matchLast || (lastTag != null && lastTag.tagged.contains(item))) {
+                if (ingredients.component1() instanceof ItemType ingredient) {
+                    uses.add(new Pair<>(ingredient, product.itemType));
+                } else if (ingredients.component1() instanceof ItemTag tag) {
+                    uses.add(new Pair<>(tag.tagged.get(0), product.itemType));
+                }
+            }
+        });
+        return uses;
     }
 }

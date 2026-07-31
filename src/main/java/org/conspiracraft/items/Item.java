@@ -30,6 +30,26 @@ public class Item implements Cloneable {
         return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeExisted};
     }
 
+    public String amountString() {
+        String amtStr = String.valueOf(amount);
+        if (amount >= 1000000000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"b";
+        } else if (amount >= 100000000) {
+            amtStr = amtStr.substring(0, 3)+"m";
+        } else if (amount >= 10000000) {
+            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"m";
+        } else if (amount >= 1000000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"m";
+        } else if (amount >= 100000) {
+            amtStr = amtStr.substring(0, 3)+"k";
+        } else if (amount >= 10000) {
+            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"k";
+        } else if (amount >= 1000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"k";
+        }
+        return amtStr;
+    }
+
     public void tick() {
         long time = Main.timeMsLong;
         if (prevTickTime != 0) {
