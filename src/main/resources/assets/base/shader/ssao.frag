@@ -43,7 +43,8 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
     vec4 view = inverse(globalUbo.proj)*clip;
     return view.xyz/view.w;
 }
-float getAO(float depth, vec3 normal) {
+float getAO(float depth, vec4 normal) {
+    float radius = AO_RADIUS;//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.1f);
     vec3 randVec = randomVec(ivec2(gl_FragCoord.xy));
@@ -53,13 +54,13 @@ float getAO(float depth, vec3 normal) {
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
         vec3 sampleVec = TBN*SSAO_KERNEL[i];//randomVec(ivec2(gl_FragCoord.x+(i*2), gl_FragCoord.y+i));
-        sampleVec = posVS + sampleVec * AO_RADIUS;
+        sampleVec = posVS + sampleVec * radius;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
-            float rangeCheck = smoothstep(0, 1, AO_RADIUS/(length(posVS-sampleVS)+0.001f));
+            float rangeCheck = smoothstep(0, 1, radius/(length(posVS-sampleVS)+0.001f));
             if (sampleVS.z+0.01f < sampleVec.z) {
                 occlusion += rangeCheck;
             }
@@ -72,9 +73,9 @@ void main() {
     vec4 color = texture(ddaColors, uv);
     float depth = texture(ddaDepth, uv).r;
     vec4 normal = texture(ddaNormals, uv);
-//    vec3 randVec = hash()/1.732f;
-//    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
-//    outColor.a = 1;
+    //    vec3 randVec = hash()/1.732f;
+    //    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
+    //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
-    outColor = vec4(color.rgb, mix(getAO(depth, normal.xyz), 1, normal.a)); //normal.a is fogginess
+    outColor = vec4(color.rgb, mix(getAO(depth, normal), 1, pow(normal.a, 2))); //normal.a is fogginess
 }

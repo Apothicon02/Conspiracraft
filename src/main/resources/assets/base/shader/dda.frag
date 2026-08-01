@@ -722,7 +722,7 @@ void main() {
         vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, isSky, fogginess, false).rgb;
         color.rgb *= lighting;
         color.rgb = mix(color.rgb, lighting, fogginess);
-        outNormal = vec4(primaryFlatNormal, clamp((fogginess*2)+(max(0, abs(1-shadowFactor)-0.34f)*0.2f), 0, 1));
+        outNormal = vec4(primaryFlatNormal, fogginess);
     } else {
         if (color.r+color.g+color.b < 30 && maxFogginess > 0) {
             vec3 skyPos = ogPos + ogDir * renderDistance;
