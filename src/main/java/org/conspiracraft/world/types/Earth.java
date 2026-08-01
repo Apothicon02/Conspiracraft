@@ -5,6 +5,7 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
+import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
@@ -56,8 +57,8 @@ public class Earth extends WorldType {
     public float gravity() {return 0.1f;}
 @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/earth");}
-    public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
-            prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
+    public Planet mun = StarSystem.planets[4].moons[0];
+    public Planet olivius = StarSystem.planets[0];
     @Override
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);
@@ -75,38 +76,37 @@ public class Earth extends WorldType {
         }
         skylightMul.set(1);
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
+        oliviusSource = false;
         if (skylight.y() <= 0) {
-            return new Vector4f(0);
+            if (mun.rotatedPos.y() > 0) {
+                if (olivius.rotatedPos.y() > 0) {
+                    skylightMul.set(oliviusColor);
+                }
+                return new Vector4f(mun.rotatedPos.x(), Math.max(height, mun.rotatedPos.y()), mun.rotatedPos.z(), 0.95f);
+            } else if (olivius.rotatedPos.y() > 0) {
+                oliviusSource = true;
+                skylightMul.set(oliviusColor.x()/2, oliviusColor.y()/2, oliviusColor.z()/2);
+                return new Vector4f(olivius.rotatedPos.x(), Math.max(height, olivius.rotatedPos.y()), olivius.rotatedPos.z(), 1.0f);
+            } else {
+                return new Vector4f(0, Constants.AU, 0, 0.08f);
+            }
         } else {
             return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());
         }
     }
-    
+    public boolean oliviusSource = false;
     @Override
     public float getFogginess() {return 1.f;}
     @Override
-    public Vector4f getAtmosphereColor() {return new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
+    public Vector4f getAtmosphereColor() {return oliviusSource ? oliviusColor : new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
     @Override
-    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.06f, 1.2f, 1.f);}
+    public Vector4f getNightAtmosphereColor() {return oliviusSource ? oliviusColor : new Vector4f(0.3f, 0.06f, 1.2f, 1.f);}
     @Override
-    public Vector4f getSunsetAtmosphereColor() {return new Vector4f(1, 0.65f, 0.25f, 1.f);}
+    public Vector4f getSunsetAtmosphereColor() {return oliviusSource ? oliviusColor : new Vector4f(1, 0.65f, 0.25f, 1.f);}
     @Override
-    public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(1, 0.3f, 0.25f, 1.f);}
+    public Vector4f getDeepSunsetAtmosphereColor() {return oliviusSource ? oliviusColor : new Vector4f(1, 0.3f, 0.25f, 1.f);}
     @Override
-    public void tick() {
-        prevSunPos.set(sunPos);
-        sunPos.set(0, generationSize*2, 0);
-        sunPos.rotateZ(timeNs/1000000000000.f);
-        sunPos.rotateX(0.5f);
-        sunPos.rotateY(2.f);
-        sunPos.set(sunPos.x+(generationSize/2f), sunPos.y, sunPos.z+(generationSize/2f)+128);
-        prevMunPos.set(munPos);
-        munPos.set(0, generationSize*-2, 0);
-        munPos.rotateZ(timeNs/1000000000000.f);
-        munPos.rotateX(-0.2f);
-        munPos.rotateY(-1.5f);
-        munPos.set(munPos.x+(generationSize/2f), munPos.y, munPos.z+(generationSize/2f)+128);
-    }
+    public void tick() {}
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
     public JNoise detailNoisePipeline = JNoise.newBuilder().fastSimplex(135131, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)

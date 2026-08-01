@@ -58,7 +58,7 @@ public class Vera extends WorldType {
     public Planet getPlanet(){return parent.moons[1];}
     @Override
     public float gravity() {return 0.03f;}
-@Override
+    @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/vera");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
             prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
