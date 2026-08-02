@@ -73,9 +73,9 @@ void main() {
     vec4 color = texture(ddaColors, uv);
     float depth = texture(ddaDepth, uv).r;
     vec4 normal = texture(ddaNormals, uv);
-    //    vec3 randVec = hash()/1.732f;
-    //    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
-    //    outColor.a = 1;
+//    vec3 randVec = hash()/1.732f;
+//    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
+//    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     outColor = vec4(color.rgb, mix(getAO(depth, normal), 1, pow(normal.a, 2))); //normal.a is fogginess
 }

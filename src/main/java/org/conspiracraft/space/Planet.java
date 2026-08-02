@@ -21,6 +21,7 @@ public class Planet {
     public final Vector3f localPos;
     public final Vector3f rotatedPos;
     public final Vector4f color;
+    public final Vector4f sourceColor;
     public final float scale;
     public final Attachment[] attachments;
     public final Planet[] moons;
@@ -34,12 +35,13 @@ public class Planet {
     public final float lineInc;
     public final int points;
 
-    public Planet(EntityType type, Vector3f pos, Vector4f color, float scale, float yearLengthNs, float dayLengthNs, Attachment[] attachments, Planet[] moons) {
+    public Planet(EntityType type, Vector3f pos, Vector4f color, Vector4f sourceColor, float scale, float yearLengthNs, float dayLengthNs, Attachment[] attachments, Planet[] moons) {
         this.type = type;
         this.pos = pos;
         this.localPos = new Vector3f(pos);
         this.rotatedPos = new Vector3f(pos);
         this.color = color;
+        this.sourceColor = sourceColor;
         this.scale = scale;
         this.yearLengthNs = yearLengthNs;
         this.yearDelta = (float)(2*Math.PI/yearLengthNs);
