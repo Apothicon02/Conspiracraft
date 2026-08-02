@@ -32,13 +32,13 @@ public class StarSystem {
                     new Attachment(EntityTypes.AKSALA_AURORAS, 1.05f, new Vector3f())
             }, new Planet[]{}),
             new Planet(EntityTypes.LAZULI, new Vector3f(AU*30, 0, AU*28), new Vector4f(0.f, 0.975f, 0.71f, 1), new Vector4f(0, 0.05f, 1, 1), EARTH*0.75f, 1500000000000.f, 1500000000000.f, new Attachment[]{}, new Planet[]{}),
-            new Planet(EntityTypes.FIREBALL, new Vector3f(AU*13.5f, 0, AU*5), new Vector4f(1.f, 0.02f, 0.f, 1), new Vector4f(1, 0.125f, 0, 1), EARTH, 1000000000000.f, 500000000000.f, new Attachment[]{
+            new Planet(EntityTypes.FIREBALL, new Vector3f(AU*13.5f, 0, AU*5), new Vector4f(1.f, 0.02f, 0.f, 1), new Vector4f(1, 0.5f, 0, 1), EARTH, 1000000000000.f, 500000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.ASH, 1.02f, new Vector3f())
             }, new Planet[]{}),
             new Planet(EntityTypes.EARTH, new Vector3f(AU*15.5f, 0, AU*15), new Vector4f(0.f, 0.07f, 0.91f, 1), new Vector4f(0, 0.03f, 1, 1), EARTH, 86400000000000.f, 3600000000000.f, new Attachment[]{
                     new Attachment(EntityTypes.EARTH_CLOUDS, 1.04f, new Vector3f())
             }, new Planet[]{
-                    new Planet(EntityTypes.MUN, new Vector3f(AU*1.115f, 0, AU*1.f), new Vector4f(0.8f, 0.8f, 0.85f, 1), new Vector4f(0.9f, 0.9f, 1.f, 0.25f), EARTH*0.27f, 3600000000000.f, 3600000000000.f, new Attachment[]{}, new Planet[]{}),
+                    new Planet(EntityTypes.MUN, new Vector3f(AU*1.115f, 0, AU*1.f), new Vector4f(0.8f, 0.8f, 0.85f, 1), new Vector4f(0.25f, 0.26f, 1.f, 0.25f), EARTH*0.27f, 3600000000000.f, 3600000000000.f, new Attachment[]{}, new Planet[]{}),
             }),
     };
 
