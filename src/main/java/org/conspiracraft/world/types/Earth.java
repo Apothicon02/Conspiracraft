@@ -93,7 +93,7 @@ public class Earth extends WorldType {
             if (rgbDiv > 1) {
                 skylightMul.set(skylightMul.x() / rgbDiv, skylightMul.y() / rgbDiv, skylightMul.z() / rgbDiv, skylightMul.w());
             }
-            return new Vector4f(pos.x(), pos.y(), pos.z(), Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
+            return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
         } else {
             skylightMul.set(1);
             return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());

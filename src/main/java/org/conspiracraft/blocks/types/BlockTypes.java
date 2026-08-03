@@ -207,11 +207,20 @@ public class BlockTypes {
                     copyTexture(blockBuf, i, height/2, 0, blockTexHeight * Textures.atlas.width * 4L);
                     copyTexture(blockBuf, i, height, height/2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
                 }
+            } else if (type instanceof LeafBlockType) {
+                copyPartialTexture(blockBuf, i, true, type.altTexLoad, 0);
+                copyLeafpileTexture(blockBuf, i, 1, (blockTexHeight) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 3, (blockTexHeight*3L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 4, (blockTexHeight*4L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 5, (blockTexHeight*5L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 6, (blockTexHeight*6L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 7, (blockTexHeight*7L) * Textures.atlas.width * 4L);
             } else {
-                copyPartialTexture(blockBuf, i, type.altTexLoad, 0);
+                copyPartialTexture(blockBuf, i, false, type.altTexLoad, 0);
                 if (type.blockProperties.hasSlab) {
                     copyTopSlabTexture(blockBuf, i, type.altTexLoad, blockTexHeight * Textures.atlas.width * 4L);
-                    copyBottomSlabTexture(blockBuf, i, type.altTexLoad, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+                    copyBottomSlabTexture(blockBuf, i, type.altTexLoad, (blockTexHeight * 2L) * Textures.atlas.width * 4L);
                 }
             }
             memFree(blockBuf);
@@ -226,21 +235,34 @@ public class BlockTypes {
                     blockTexWidth * 4L);
         }
     }
-    public static void copyPartialTexture(ByteBuffer buf, int i, boolean alt, long offset) {
+    public static void copyPartialTexture(ByteBuffer buf, int i, boolean hollow, boolean alt, long offset) {
         for (long row = 0; row < blockTexWidth; row++) {
             for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
-                memCopy(memAddress(buf) + row * blockTexWidth * 4L,
-                        atlasBuffer.pointer.get(0) + offset + (((row+layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
-                        blockTexWidth * 4L);
+                if (hollow) {
+                    for (long col = 0; col < blockTexWidth; col++) {
+                        if (col == 0 || col == blockTexWidth - 1 || row == 0 || row == blockTexWidth - 1 || layer == 0 || layer == blockTexHeight - blockTexWidth) {
+                            memCopy(memAddress(buf) + ((row * blockTexWidth)+col) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + layer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        }
+                    }
+                } else {
+                    memCopy(memAddress(buf) + row * blockTexWidth * 4L,
+                            atlasBuffer.pointer.get(0) + offset + (((row + layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                            blockTexWidth * 4L);
+                }
                 for (long col = 0; col < blockTexWidth; col++) {
-                    if (alt) {
-                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
-                                4L);
-                    } else {
-                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
-                                atlasBuffer.pointer.get(0) + offset + ((((row + (layer + (blockTexHeight / 2))) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
-                                4L);
+                    long shiftedLayer = layer + (blockTexHeight/2);
+                    if (!hollow || (col == 0 || col == blockTexWidth - 1 || row == 0 || row == blockTexWidth - 1 || shiftedLayer == 0 || shiftedLayer == blockTexHeight-blockTexWidth)) {
+                        if (alt) {
+                            memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + shiftedLayer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        } else {
+                            memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + shiftedLayer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        }
                     }
                 }
             }
@@ -399,6 +421,41 @@ public class BlockTypes {
                                 atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
+                }
+            }
+        }
+    }
+    public static void copyLeafpileTexture(ByteBuffer buf, int i, int height, long offset) {
+        long minHeight = blockTexWidthL*height;
+        float halfHeight = minHeight+((blockTexHeight-minHeight)*0.5f);
+        for (long row = 0; row < blockTexWidth; row++) {
+            for (long layer = minHeight; layer < blockTexHeight; layer+=blockTexWidth) {
+                for (long col = 0; col < blockTexWidth; col++) {
+                    if (col == 0 || col == blockTexWidth - 1 || row == 0 || row == blockTexWidth - 1 || layer == minHeight || layer == blockTexHeight-blockTexWidth) {
+                        memCopy(memAddress(buf) + (layer < halfHeight ? ((row * blockTexWidth) + col) : ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col))) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((row + layer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+            }
+        }
+        for (long row = height; row < blockTexWidth; row++) {
+            for (long col = 0; col < blockTexWidth; col++) {
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (row + 1 < blockTexWidth) {
+                    memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                            atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                            4L);
+                }
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (row + 1 < blockTexWidth) {
+                    memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                            atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                            4L);
                 }
             }
         }
