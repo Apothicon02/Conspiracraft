@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.CracksEntity;
 import org.conspiracraft.entities.Entity;
@@ -69,17 +70,25 @@ public class HandManager {
         }
         if (Main.timeMsLong - delayStart >= delay) {
             delayStart = Main.timeMsLong;
-            if (selectedItem == null || selectedItem.amount <= 0) {
-                delay = 0;
-            } else {
-                ItemUseResult result = selectedItem.use(ddaResult);
-                delay = result.delay();
-                selectedItem = result.item();
-                player.inv.setItem(player.inv.selectedSlot, selectedItem);
+            delay = 0;
+            if (rmbDown && !player.crouching) {
+                Vector2i block = World.getBlock(player.selectedBlock.x(), player.selectedBlock.y(), player.selectedBlock.z());
+                BlockType blockType = BlockTypes.blockTypes[block.x()];
+                if (blockType != null) {
+                    delay = blockType.use(player.selectedBlock, block);
+                }
             }
-            if (delay == 0) { //if item did no interaction
-                if (lmbDown && World.inBounds(player.selectedBlock)) {
-                    delay = mine(4);
+            if (delay == 0) { //if block did no interaction
+                if (!(selectedItem == null || selectedItem.amount <= 0)) {
+                    ItemUseResult result = selectedItem.use(ddaResult);
+                    delay = result.delay();
+                    selectedItem = result.item();
+                    player.inv.setItem(player.inv.selectedSlot, selectedItem);
+                }
+                if (delay == 0) { //if item did no interaction
+                    if (lmbDown && World.inBounds(player.selectedBlock)) {
+                        delay = mine(4);
+                    }
                 }
             }
         }

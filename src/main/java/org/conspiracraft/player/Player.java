@@ -415,6 +415,7 @@ public class Player {
             leftward = inputHandler.isKeyDown(SDL_SCANCODE_A);
             upward = inputHandler.isKeyDown(SDL_SCANCODE_SPACE);
             downward = inputHandler.isKeyDown(SDL_SCANCODE_LCTRL);
+            crouching = downward;
             sprinting = inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT);
             superSprinting = inputHandler.isKeyDown(SDL_SCANCODE_CAPSLOCK);
         }

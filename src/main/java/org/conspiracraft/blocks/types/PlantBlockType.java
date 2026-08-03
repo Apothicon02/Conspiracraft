@@ -19,7 +19,7 @@ public class PlantBlockType extends BlockType {
     }
 
     @Override
-    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
@@ -36,6 +36,7 @@ public class PlantBlockType extends BlockType {
         if (!survives) {
             //lostSupport(x, y, z, blockType, blockSubType);
         }
+        return new Vector2i(blockType, blockSubType);
     }
 
     public PlantBlockType(int id, String name, BlockProperties blockProperties) {

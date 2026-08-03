@@ -165,7 +165,9 @@ public class BlockTypes {
             REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
             RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
             BAMBOO = create(new BlockType(blockTypeMap.size(), "plant/texture/bamboo",  CACTUS.blockProperties.copy())),
-            PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)));
+            PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
+            OAK_GATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
+                    new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

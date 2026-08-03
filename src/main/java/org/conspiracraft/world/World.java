@@ -395,6 +395,12 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
+        if (!generating) {
+            BlockType blockType = BlockTypes.blockTypes[type];
+            Vector2i newBlock = blockType.onPlace(x, y, z, type, subType, silent);
+            type = newBlock.x();
+            subType = newBlock.y();
+        }
         synchronized (chunk) {
             chunk.setBlock(lX, lY, lZ, type, subType);
             updateLod(x, y, z, type == 0);
@@ -402,7 +408,6 @@ public class World {
         }
         if (!generating) {
             BlockType blockType = BlockTypes.blockTypes[type];
-            blockType.onPlace(x, y, z, type, subType, silent);
             if (updateLighting) {
                 boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
                 boolean blocksLight = blockType.blocksLight(type, subType);

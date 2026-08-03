@@ -8,7 +8,7 @@ import static org.conspiracraft.world.World.getBlock;
 public class PlantLightBlockType extends LightBlockType {
 
     @Override
-    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
@@ -16,6 +16,7 @@ public class PlantLightBlockType extends LightBlockType {
         if (blockOn.x != BlockTypes.GRASS.id) {
             //lostSupport(x, y, z, blockType, blockSubType);
         }
+        return new Vector2i(blockType, blockSubType);
     }
 
     public PlantLightBlockType(int id, String name, LightBlockProperties blockProperties) {

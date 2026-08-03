@@ -29,13 +29,21 @@ public class PhysicsHelper {
                     float dist = (dX*dX)+(dY*dY)+(dZ*dZ);
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    boolean collided = false;
                     if (blockType.blockProperties.isCollidable) {
-                        AABB blockAABB = blockType.getAABB(blockIn.y(), x, y, z);
-                        if (blockAABB.intersects(aabb) && dist < closestDist) {
-                            closestDist = dist;
-                            closestBlock = new BlockResult(x, y, z, blockIn);
+                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        if (aabbArr != null) {
+                            for (AABB blockAABB : aabbArr) {
+                                if (blockAABB.intersects(aabb) && dist < closestDist) {
+                                    collided = true;
+                                    closestDist = dist;
+                                    closestBlock = new BlockResult(x, y, z, blockIn);
+
+                                }
+                            }
                         }
-                    } else if (blockIn.x() > 0 && dist < closestUncollidableDist) {
+                    }
+                    if (!collided && blockIn.x() > 0 && dist < closestUncollidableDist) {
                         closestUncollidableDist = dist;
                         closestBlockUncollidable = new BlockResult(x, y, z, blockIn);
                     }
@@ -53,11 +61,16 @@ public class PhysicsHelper {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     if (blockType.blockProperties.isCollidable) {
-                        AABB blockAABB = blockType.getAABB(blockIn.y(), x, y, z);
-                        if (blockAABB.intersects(aabb)) {
-                            return new BlockResult(x, y, z, blockIn);
+                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        if (aabbArr != null) {
+                            for (AABB blockAABB : aabbArr) {
+                                if (blockAABB.intersects(aabb)) {
+                                    return new BlockResult(x, y, z, blockIn);
+                                }
+                            }
                         }
-                    } else if (blockIn.x() > 0) {
+                    }
+                    if (blockIn.x() > 0) {
                         hX = x; hY = y; hZ = z;
                         block.set(blockIn); //return non-collidable block if none are collidable
                     }
@@ -146,7 +159,12 @@ public class PhysicsHelper {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     if (blockType.blockProperties.isCollidable) {
-                        aabbs.add(blockType.getAABB(blockIn.y(), x, y, z));
+                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        if (aabbArr != null) {
+                            for (AABB aabb : aabbArr) {
+                                aabbs.add(aabb);
+                            }
+                        }
                     }
                 }
             }

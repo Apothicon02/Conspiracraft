@@ -27,7 +27,7 @@ public class CloudBlockType extends BlockType {
     }
 
     @Override
-    public void onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         //ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), pos, 1);
 
         if (!isSilent) {
@@ -44,6 +44,7 @@ public class CloudBlockType extends BlockType {
                 }
             }
         }
+        return new Vector2i(blockType, blockSubType);
 //        if (needsSupport(blockType, blockSubType)) {
 //            Vector2i belowBlock = getBlock(new Vector3i(x, y - 1, z));
 //            if (belowBlock != null) {
