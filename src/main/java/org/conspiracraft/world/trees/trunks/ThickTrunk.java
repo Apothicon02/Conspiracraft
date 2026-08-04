@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class ThickTrunk extends Trunk {
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, boolean singleCanopy, int branchChance, int blockType, int blockSubType) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, boolean singleCanopy, int minBranchHeight, int branchChance, int blockType, int blockSubType) {
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
         Set<Vector3i> canopies = new HashSet<>();
 
@@ -63,18 +63,18 @@ public class ThickTrunk extends Trunk {
                 } else {
                     map.put(pos.immutable(), new Vector2i(blockType, blockSubType));
                 }
-                if (!singleCanopy && i < trunkHeight-1 && random.nextInt(0, 10) < branchChance) {
+                if (!singleCanopy && i < trunkHeight-1 && random.nextInt(0, 10) < branchChance && currentHeight > minBranchHeight) {
                     canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             } else if (currentHeight >= trunkHeight/1.75) {
                 makeSquare(map, pos.immutable(), baseRadius, false, blockType, blockSubType);
-                if (!singleCanopy && random.nextInt(0, 10) < branchChance) {
+                if (!singleCanopy && random.nextInt(0, 10) < branchChance && currentHeight > minBranchHeight) {
                     canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             } else {
                 makeSquare(map, pos.immutable(), baseRadius, true, blockType, blockSubType);
                 double actualTrunkHeight = Utils.gradient(pos.y(), oY+(trunkHeight/4), oY+trunkHeight, 3, 1);
-                if (!singleCanopy && actualTrunkHeight != 1 && random.nextInt(0, 10) < actualTrunkHeight) {
+                if (!singleCanopy && actualTrunkHeight != 1 && random.nextInt(0, 10) < actualTrunkHeight && currentHeight > minBranchHeight) {
                     canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             }

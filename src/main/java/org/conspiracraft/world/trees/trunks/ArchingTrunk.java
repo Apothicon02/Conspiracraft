@@ -15,7 +15,7 @@ public class ArchingTrunk extends Trunk {
         map.put(pos, block);
     }
     
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius, int miBranchHeight) {
         Vector3i origin = new Vector3i(oX, oY, oZ);
         Vector2i wood = new Vector2i(blockType, blockSubType);
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
@@ -85,7 +85,7 @@ public class ArchingTrunk extends Trunk {
                     }
                     if (heightFactor > 0.66f && random.nextFloat() < 0.25f) {
                         height--;
-                        if (random.nextFloat() < 0.125f) {
+                        if (random.nextFloat() < 0.125f && pos.y() >= miBranchHeight) {
                             for (int y = height+1; y < height+halfLeafRadius; y++) {
                                 addToMap(map, new Vector3i(offsetX, y, offsetZ), wood);
                                 addToMap(map, new Vector3i(offsetX+1, y, offsetZ+1), wood);

@@ -441,7 +441,7 @@ public class Sahara extends WorldType {
                                             int radius = rand.nextInt(3, 4);
                                             int leavesHeight = 3;
                                             int branchChance = rand.nextInt(4, 7);
-                                            RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, branchChance);
+                                            RedwoodTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.REDWOOD_LOG.id, 0, BlockTypes.REDWOOD_LEAVES.id, 0, 3, branchChance);
                                         } else if (randomNumber < 0.0061f || randomNumber < featureNoise / 50) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             PineTree.generate(rand, blockOn, x, elevation, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
@@ -466,7 +466,7 @@ public class Sahara extends WorldType {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
+                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
                                         }
                                     } else if (biome == Biomes.SAVANNA.id) {
                                         if (randomNumber < 0.0003f) {
@@ -485,7 +485,7 @@ public class Sahara extends WorldType {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count);
+                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
                                         }
                                     } else {
                                         if (randomNumber < 0.001f) {
@@ -501,7 +501,7 @@ public class Sahara extends WorldType {
                                                 int maxHeight = rand.nextInt(24, 30);
                                                 int radius = rand.nextInt(26, 34);
                                                 int count = rand.nextInt(6, 8);
-                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count);
+                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 3);
                                             }
                                         } else if (randomNumber > 0.002 && randomNumber < 0.00212f) {
                                             int maxHeight = rand.nextInt(20, 23);

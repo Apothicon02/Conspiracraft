@@ -21,7 +21,7 @@ import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 public class GiantOakTree {
     public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int branchChance) {
         if (blockOn.x == 2) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ThickTrunk.generateTrunk(random, x, y, z, maxHeight, false, branchChance, logType, logSubType);
+            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ThickTrunk.generateTrunk(random, x, y, z, maxHeight, false, 3, branchChance, logType, logSubType);
             AtomicBoolean colliding = new AtomicBoolean(false);
             Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
             blocks.forEach((pos, block) -> {

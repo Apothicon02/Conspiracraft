@@ -19,17 +19,22 @@ import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class OakTree {
-    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ArchingTrunk.generateTrunk(random, x, y, z, count, maxHeight-5, maxHeight, logType, logSubType, radius/2);
+    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count, int miBranchHeight) {
+        return generate(random, blockOn, x, y, z, maxHeight, radius, logType, logSubType, leafType, leafSubType, count, miBranchHeight, false);
+    }
+    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count, int miBranchHeight, boolean ignoreCollision) {
+        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ArchingTrunk.generateTrunk(random, x, y, z, count, maxHeight-5, maxHeight, logType, logSubType, radius/2, miBranchHeight);
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-        blocks.forEach((pos, block) -> {
-            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
-                colliding.set(true);
-            }
-        });
-        if (colliding.get()) {return false;}
-        int minCollisionY = y+5;
+        if (!ignoreCollision) {
+            blocks.forEach((pos, block) -> {
+                if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+                    colliding.set(true);
+                }
+            });
+            if (colliding.get()) {return false;}
+        }
+        int minCollisionY = ignoreCollision ? World.height : y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
             Map<Vector3i, Vector2i> canopy = BlobDrippyCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y()-y);
             if (!integrateCanopy(canopy, blocks, minCollisionY)) {

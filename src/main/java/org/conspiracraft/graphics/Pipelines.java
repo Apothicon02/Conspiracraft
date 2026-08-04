@@ -1,6 +1,5 @@
 package org.conspiracraft.graphics;
 
-import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Vertex;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -13,7 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
-import static org.conspiracraft.graphics.Graphics.globalUBO;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.lwjgl.vulkan.KHRFragmentShadingRate.*;
 import static org.lwjgl.vulkan.VK14.*;

@@ -319,7 +319,7 @@ public class Aksala extends WorldType {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.KYANITE.id, 0, BlockTypes.ROSE_QUARTZ.id, 0, count);
+                                            OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.KYANITE.id, 0, BlockTypes.ROSE_QUARTZ.id, 0, count, 3);
                                         }
                                     } else {
                                         if (randomNumber < 0.0005f || randomNumber < featureNoise / 50) {

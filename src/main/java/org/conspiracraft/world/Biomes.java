@@ -28,6 +28,7 @@ public class Biomes {
     public static final Biome POND = create();
     public static final Biome ROOFED_FOREST = create();
     public static final Biome ROOFED_FOREST_HILLS = create();
+    public static final Biome FLOWERY_FIELD = create();
     public static final Biome BIRCH_PLAINS = create();
     public static final Biome FROZEN_LAKE = create();
     public static final Biome RAINY_POND = create();

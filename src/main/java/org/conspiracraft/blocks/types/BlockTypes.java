@@ -98,8 +98,8 @@ public class BlockTypes {
             REDWOOD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/redwood_planks",  OAK_PLANK.blockProperties)),
             REDWOOD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/redwood_log",  OAK_LOG.blockProperties)), //50
             REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/redwood_leaves",  OAK_LEAVES.blockProperties)),
-            HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(17).g(1).b(17))),
-            BLUE_HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(1).g(10).b(17))),
+            HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(34).g(7).b(34))),
+            BLUE_HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(7).g(10).b(34))),
             SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/snow",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
             GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/gravel",  SAND.blockProperties.copy().blockSFX(
