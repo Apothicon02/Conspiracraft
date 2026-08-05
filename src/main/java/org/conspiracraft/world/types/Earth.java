@@ -208,12 +208,19 @@ public class Earth extends WorldType {
                                 double elevation = (elevationNoise * (125 * Math.max(desertness/3, mountainness)) * Math.max(0.03f, unriverness))-(25*(1+mountainness)*Math.max(0, riverNoise-0.5f));
                                 double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
                                 double baseHilliness = SimplexNoise.noise((x + generationSize) / 500.f, (z + generationSize) / 500.f);
+                                double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d)*unriverness;
+                                double plateauDist = Math.max(0, detailNoise*0.34f)+Math.clamp(Math.min(new Vector2f(halfSize+eigthSize, halfSize).distance(x, z), Math.min(new Vector2f(halfSize+eigthSize, halfSize-eigthSize).distance(x, z), Math.min(new Vector2f(halfSize-eigthSize, halfSize+eigthSize).distance(x, z), new Vector2f(halfSize, halfSize-eigthSize).distance(x, z))))/250, 0, 1);
+                                if (plateauDist < 1) {
+                                    double unplateauness = Math.max(0, (Math.max(0.9f, plateauDist)-0.9f)*10);
+                                    baseHilliness*=unplateauness;
+                                    elevation*=unplateauness;
+                                    midElevation = Math.max(midElevation, 1-unplateauness);
+                                }
                                 if (baseHilliness < 0.f) {
                                     baseHilliness *= -0.5;
                                 }
                                 double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness;
                                 //riverness *= 1-centerElevation;
-                                double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d)*unriverness;
                                 double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
                                 double islandsNoise = ogIslandsNoise;
                                 if (islandsNoise < 0.f) {islandsNoise *= -4*(5*baseHilliness);}
