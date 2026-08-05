@@ -129,4 +129,5 @@ public class WorldType {
     public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(0);}
     public final Vector4f skylightMul = new Vector4f(1, 1, 1, 0);
     public Vector4f getSkylightMul() {return skylightMul;}
+    public int getSeason() {return 0;};
 }

@@ -15,6 +15,7 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     vec4 deepSunsetAtmosphere;
     float fogginess;
     vec4 skylightMul;
+    int season;
 } globalUbo;
 struct ChunkStruct {
     int pointer;
@@ -562,6 +563,14 @@ vec3 mipmap(vec3 color) {
     }
     return color;
 }
+vec3 desaturate(vec3 color, float factor){
+    return color+((vec3(max(color.r, max(color.g, color.b)))-color)*factor);
+}
+vec3 hueShift(vec3 color, float hue) {
+    const vec3 k = vec3(0.57735, 0.57735, 0.57735);
+    float cosAngle = cos(hue);
+    return vec3(color * cosAngle + cross(k, color) * sin(hue) + k * dot(k, color) * (1.0 - cosAngle));
+}
 const float[16] xOffsets = float[16](0.0f, -0.25f, 0.25f, -0.375f, 0.125f, -0.125f, 0.375f, -0.4375f, 0.0625f, -0.1875f, 0.3125f, -0.3125f, 0.1875f, -0.0625f, 0.4375f, -0.46875f);
 const float[16] yOffsets = float[16](0.0f, 0.166667f, -0.388889f, -0.055556f, 0.277778f, -0.277778f, 0.055556f, 0.388889f, -0.462963f, -0.12963f, 0.203704f, -0.351852f, -0.018519f, 0.314815f, -0.240741f, 0.092593f);
 const float Z_NEAR = 0.01f;
@@ -590,6 +599,7 @@ void main() {
         vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos-(primaryFlatNormal*0.001f), 1.0));
         depth = clipPos.z/clipPos.w;
     }
+    bool airAbove = false;
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
     float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
@@ -632,6 +642,7 @@ void main() {
         //        }
         if (getBlockAndVoxel(vec3(hitPos.x, hitPos.y+voxelSize, hitPos.z)-(flatNormal*voxelSize/2)).a < alphaMax) {
             primaryNormal = vec3(0, 1, 0);
+            airAbove = true;
         }
     }
     bool isNight = globalUbo.skylight.w < 1.f;
@@ -647,6 +658,18 @@ void main() {
     vec4 blockLighting = vec4(0, 0, 0, 1);
     if (!celestial) {
         ivec2 primaryBlock = block;
+        if (globalUbo.season == 1) { //autumn
+            if (primaryBlock.x == 17) {color.rgb = max(hueShift(color.rgb, -2.f), vec3(0));} else if (primaryBlock.x == 48) {color.rgb = max(hueShift(color.rgb, -1.34f), vec3(0));} else
+            if (primaryBlock.x == 21) {color.rgb = max(hueShift(color.rgb, -1.2f), vec3(0));} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = max(hueShift(color.rgb, -0.85f), vec3(0));} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 3) || (primaryBlock.x == 4 && primaryBlock.y >= 12)) {color.rgb = max(hueShift(color.rgb, -1.5f), vec3(0));}
+        } else if (globalUbo.season == 2) { //winter
+            if (primaryBlock.x == 17) {color.rgb = desaturate(max(hueShift(color.rgb, -2.f), vec3(0)), 0.5f);} else if (primaryBlock.x == 48) {color.rgb = desaturate(max(hueShift(color.rgb, -1.34f), vec3(0)), 0.5f);} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = desaturate(max(hueShift(color.rgb, -0.85f), vec3(0)), 0.8f);}
+        } else if (globalUbo.season == 3) { //spring
+            if (primaryBlock.x == 17) {color.rgb = max(hueShift(color.rgb, 0.2f), vec3(0));} else if (primaryBlock.x == 48) {color.rgb = max(hueShift(color.rgb, 0.67f), vec3(0));} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = max(hueShift(color.rgb, 0.425f), vec3(0));}
+        }
         ivec3 primaryBlockPos = blockPos;
         ivec3 primaryVoxelRayPos = voxelRayPos;
         vec3 causticPos = (firstBlock.x == 1 || firstBlock.x == 90) ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
@@ -675,7 +698,12 @@ void main() {
         //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
         //color.rgb*=(((normDot*0.3f/min(1, skylight.a*2))+(0.1f+(0.6f*skylight.a)))*(0.05f+(skylight.a*0.95f)));
         bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size);
-        if (inBounds) { blockLighting = min(vec4(1), getLight(primaryLightPos)/maxLightLevel); }
+        if (inBounds) {
+            blockLighting = min(vec4(1), getLight(primaryLightPos)/maxLightLevel);
+            if (globalUbo.season == 2 && airAbove && blockLighting.w > 0.75f && blockLighting.r <= 0.f && blockLighting.g <= 0.f && blockLighting.b <= 0.f) { //snow
+                color = sampleAtlas(primaryVoxelRayPos.x, primaryVoxelRayPos.y, primaryVoxelRayPos.z, 54, 0);
+            }
+        }
         //blockLighting.a *= 1-abs(causticness/50);
         float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);

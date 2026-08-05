@@ -110,6 +110,8 @@ public class Earth extends WorldType {
     @Override
     public Vector4f getDeepSunsetAtmosphereColor() {return new Vector4f(1, 0.3f, 0.25f, 1.f);}
     @Override
+    public int getSeason() {return 0;};
+    @Override
     public void tick() {}
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
@@ -531,7 +533,7 @@ public class Earth extends WorldType {
                                             }
                                         } else if (biome == Biomes.ROOFED_FOREST.id || biome == Biomes.ROOFED_FOREST_HILLS.id) {
                                             if (randomNumber < 0.0004f) {
-                                                Blob.generate(blockOn, x, elevation, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                                Blob.generate(blockOn, x, elevation, z, BlockTypes.OAK_LEAVES.id, 0, (int) (2 + (rand.nextFloat() * 7)));
                                             } else if (randomNumber < (featureNoise+0.5f) / 15) {
                                                 int maxHeight = rand.nextInt(20) + 12;
                                                 int radius = rand.nextInt(3) + 5;
