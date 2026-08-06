@@ -665,7 +665,9 @@ void main() {
             if ((primaryBlock.x == 2 && primaryBlock.y == 3) || (primaryBlock.x == 4 && primaryBlock.y >= 12)) {color.rgb = max(hueShift(color.rgb, -1.5f), vec3(0));}
         } else if (globalUbo.season == 2) { //winter
             if (primaryBlock.x == 17) {color.rgb = desaturate(max(hueShift(color.rgb, -2.f), vec3(0)), 0.5f);} else if (primaryBlock.x == 48) {color.rgb = desaturate(max(hueShift(color.rgb, -1.34f), vec3(0)), 0.5f);} else
-            if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = desaturate(max(hueShift(color.rgb, -0.85f), vec3(0)), 0.8f);}
+            if (primaryBlock.x == 21) {color.rgb = max(hueShift(color.rgb, -1.2f), vec3(0));} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = desaturate(max(hueShift(color.rgb, -0.85f), vec3(0)), 0.8f);} else
+            if ((primaryBlock.x == 2 && primaryBlock.y == 3) || (primaryBlock.x == 4 && primaryBlock.y >= 12)) {color.rgb = desaturate(max(hueShift(color.rgb, -1.5f), vec3(0)), 0.8f);}
         } else if (globalUbo.season == 3) { //spring
             if (primaryBlock.x == 17) {color.rgb = max(hueShift(color.rgb, 0.2f), vec3(0));} else if (primaryBlock.x == 48) {color.rgb = max(hueShift(color.rgb, 0.67f), vec3(0));} else
             if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) {color.rgb = max(hueShift(color.rgb, 0.425f), vec3(0));}

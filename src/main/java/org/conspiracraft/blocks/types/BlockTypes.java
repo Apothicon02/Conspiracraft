@@ -166,7 +166,11 @@ public class BlockTypes {
             RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
             BAMBOO = create(new BlockType(blockTypeMap.size(), "plant/texture/bamboo",  CACTUS.blockProperties.copy())),
             PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
-            OAK_GATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
+            OAK_GATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                    new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
+            OAK_CRATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak",  new BlockProperties().blockSFX(
+                    new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
+            OAK_BARREL = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/barrel/texture/oak",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
@@ -203,12 +207,14 @@ public class BlockTypes {
             BufferedImage image = Utils.loadImage("block/"+type.name);
             int height = image.getHeight();
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
-            if (height > blockTexWidth) {
+            if (height > blockTexWidth*3) {
                 copyTexture(blockBuf, i, height, 0, 0);
                 if (type.blockProperties.hasSlab) {
                     copyTexture(blockBuf, i, height/2, 0, blockTexHeight * Textures.atlas.width * 4L);
                     copyTexture(blockBuf, i, height, height/2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
                 }
+            } else if (height > blockTexWidth) {
+                copyTopSideBottomTexture(blockBuf, i, false, type.altTexLoad, 0);
             } else if (type instanceof LeafBlockType) {
                 copyPartialTexture(blockBuf, i, true, type.altTexLoad, 0);
                 copyLeafpileTexture(blockBuf, i, 1, (blockTexHeight) * Textures.atlas.width * 4L);
@@ -299,6 +305,77 @@ public class BlockTypes {
                 } else {
                     if (row + 1 < blockTexWidth) {
                         memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col)) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+            }
+        }
+    }
+    public static void copyTopSideBottomTexture(ByteBuffer buf, int i, boolean hollow, boolean alt, long offset) {
+        long srcOffset = (blockTexWidthL+blockTexWidthL)*blockTexWidthL;
+        for (long row = 0; row < blockTexWidth; row++) {
+            for (long layer = 0; layer < blockTexHeight/2; layer+=blockTexWidth) {
+                if (hollow) {
+                    for (long col = 0; col < blockTexWidth; col++) {
+                        if (col == 0 || col == blockTexWidth - 1 || row == 0 || row == blockTexWidth - 1 || layer == 0 || layer == blockTexHeight - blockTexWidth) {
+                            memCopy(memAddress(buf) + ((row * blockTexWidth)+col) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + layer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        }
+                    }
+                } else {
+                    memCopy(memAddress(buf) + row * blockTexWidth * 4L,
+                            atlasBuffer.pointer.get(0) + offset + (((row + layer) * Textures.atlas.width + (i * blockTexWidthL)) * 4L),
+                            blockTexWidth * 4L);
+                }
+                for (long col = 0; col < blockTexWidth; col++) {
+                    long shiftedLayer = layer + (blockTexHeight/2);
+                    if (!hollow || (col == 0 || col == blockTexWidth - 1 || row == 0 || row == blockTexWidth - 1 || shiftedLayer == 0 || shiftedLayer == blockTexHeight-blockTexWidth)) {
+                        if (alt) {
+                            memCopy(memAddress(buf) + ((((blockTexWidth - 1) - (row - 1 < 0 ? blockTexWidth - 1 : row - 1)) * blockTexWidth) + ((blockTexWidth - 1) - col) + srcOffset) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + shiftedLayer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        } else {
+                            memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col) + srcOffset) * 4L,
+                                    atlasBuffer.pointer.get(0) + offset + ((((row + shiftedLayer) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                    4L);
+                        }
+                    }
+                }
+            }
+        }
+        srcOffset = blockTexWidthL*blockTexWidthL;
+        for (long row = 1; row < blockTexWidth; row++) {
+            for (long col = 0; col < blockTexWidth; col++) {
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col + srcOffset) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col + srcOffset) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + 1 + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col) + srcOffset) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + ((((((row - 1) * blockTexWidth) + blockTexWidth + (blockTexWidth - 1)) * Textures.atlas.width) + col + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                }
+                memCopy(memAddress(buf) + ((row * blockTexWidth) + col + srcOffset) * 4L,
+                        atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (i * blockTexWidthL)) * 4L),
+                        4L);
+                if (alt) {
+                    if (col+1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((row * blockTexWidth) + col + srcOffset) * 4L,
+                                atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col + 1) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
+                                4L);
+                    }
+                } else {
+                    if (row + 1 < blockTexWidth) {
+                        memCopy(memAddress(buf) + ((((blockTexWidth - 1) - row) * blockTexWidth) + ((blockTexWidth - 1) - col) + srcOffset) * 4L,
                                 atlasBuffer.pointer.get(0) + offset + (((((((row - 1) * blockTexWidth) + blockTexWidth) + col) * Textures.atlas.width) + (blockTexWidth - 1) + (i * blockTexWidthL)) * 4L),
                                 4L);
                     }
