@@ -1,12 +1,16 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.physics.AABB;
+import org.conspiracraft.utils.Utils;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4i;
 import org.conspiracraft.blocks.BlockTag;
 import java.util.List;
+import java.util.Map;
 
 import static org.conspiracraft.world.World.*;
 
@@ -59,9 +63,17 @@ public class BlockType {
         return !blockProperties.isSolid || blockProperties.permeable;
     }
 
+    public Map<Integer, Material> materials;
+    public BlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        this.id = id;
+        this.name = name;
+        this.materials = materials;
+        this.blockProperties = blockProperties;
+    }
     public BlockType(int id, String name, BlockProperties blockProperties) {
         this.id = id;
         this.name = name;
+        this.materials = Map.of(Utils.packColor(255), Materials.KYANITE);
         this.blockProperties = blockProperties;
     }
 

@@ -42,7 +42,7 @@ public class ItemTypes {
         return 0;
     }
 
-    public static ItemType
+    public static final ItemType
             AIR = create(new ItemType("misc/texture/air").maxStackSize(1)),
             APPLE = create(new ItemType("food/texture/apple").maxStackSize(2)),
             ORANGE = create(new ItemType("food/texture/orange").maxStackSize(2)),

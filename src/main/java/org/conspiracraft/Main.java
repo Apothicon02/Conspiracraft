@@ -56,7 +56,7 @@ public class Main {
         window = new Window();
         AudioController.init();
         Files.createDirectories(Path.of(mainFolder));
-        copyAssets();
+        //copyAssets(); //disabled to prevent changes being undone when opening game via renderdoc while testing.
         Settings.load();
         Languages.load();
         player = new Player();

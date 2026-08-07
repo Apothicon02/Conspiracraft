@@ -3,6 +3,7 @@ package org.conspiracraft.graphics;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
@@ -90,6 +91,7 @@ public class Renderer {
                     if (reloadTextures) {
                         reloadTextures = false;
                         long startTime = System.currentTimeMillis();
+                        Materials.fillTexture(stack);
                         BlockTypes.fillTexture(stack);
                         ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
                         ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
@@ -115,6 +117,7 @@ public class Renderer {
                     if (reloadAtlas) {
                         reloadAtlas = false;
                         long startTime = System.currentTimeMillis();
+                        Materials.fillTexture(stack);
                         BlockTypes.fillTexture(stack);
                         //atlasBarriers();
                         System.out.println("Atlas reloading took "+(System.currentTimeMillis()-startTime)+"ms");

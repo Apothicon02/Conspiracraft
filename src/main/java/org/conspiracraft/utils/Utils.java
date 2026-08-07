@@ -64,7 +64,12 @@ public class Utils {
         bInputStream.close();
         return image;
     }
-
+    public static int packColor(int rgba) {
+        return ((rgba & 0xFF) << 24) | ((rgba & 0xFF) << 16) | ((rgba & 0xFF) << 8) | (rgba & 0xFF);
+    }
+    public static int packColor(int r, int g, int b, int a) {
+        return ((r & 0xFF) << 24) | ((g & 0xFF) << 16) | ((b & 0xFF) << 8) | (a & 0xFF);
+    }
     public static ByteBuffer imageToBuffer(BufferedImage image) {
         int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
         ByteBuffer buffer = memAlloc(pixels.length * 4);

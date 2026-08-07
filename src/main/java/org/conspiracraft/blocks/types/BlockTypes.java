@@ -4,11 +4,14 @@ import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.BlockTag;
 import org.conspiracraft.blocks.BlockTags;
+import org.conspiracraft.blocks.Material;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.utils.Utils;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
 import java.awt.image.BufferedImage;
@@ -29,15 +32,15 @@ public class BlockTypes {
     public static long blockTexHeightHalf = blockTexHeight/2;
     private static Map<Integer, BlockType> blockTypeMap = new HashMap<>(Map.of());
 
-    public static BlockType
-            AIR = create(new BlockType(blockTypeMap.size(), "misc/texture/air", new BlockProperties().blockSFX(
+    public static final BlockType
+            AIR = create(new BlockType(blockTypeMap.size(), "misc/model/air", Map.of(0, Materials.AIR), new BlockProperties().blockSFX(
                     new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))),
-            WATER = create(new BlockType(blockTypeMap.size(), "natural/texture/water", new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
+            WATER = create(new BlockType(blockTypeMap.size(), "natural/model/water", Map.of(Utils.packColor(0, 44, 255, 150), Materials.WATER), new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.SPLASH1}, 1f, 1.25f, new SFX[]{Sounds.SPLASH1}, 0f, 1f))),
-            GRASS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "plant/texture/grass",  new BlockProperties().resistance(1).blockSFX(
+            GRASS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "plant/model/grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
-            DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/dirt",  new BlockProperties().resistance(1).blockSFX(
+            DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DIRT),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
             TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/tall_grass",  GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)
                     .needsSupport(true))),
@@ -168,9 +171,9 @@ public class BlockTypes {
             PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
             OAK_GATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            OAK_CRATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak",  new BlockProperties().blockSFX(
+            OAK_CRATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak", Map.of(Utils.packColor(255), Materials.BARREL),  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            OAK_BARREL = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/barrel/texture/oak",  new BlockProperties().blockSFX(
+            OAK_BARREL = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/barrel/texture/oak", Map.of(Utils.packColor(255), Materials.BARREL),  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
@@ -204,33 +207,48 @@ public class BlockTypes {
         }
         for (int i = 0; i < blockTypes.length; i++) {
             BlockType type = blockTypes[i];
-            BufferedImage image = Utils.loadImage("block/"+type.name);
-            int height = image.getHeight();
+            BufferedImage image = i < 4 ? Utils.loadImage("block/"+type.name) : Utils.loadImage("block/misc/model/cube");
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
-            if (height > blockTexWidth*3) {
-                copyTexture(blockBuf, i, height, 0, 0);
-                if (type.blockProperties.hasSlab) {
-                    copyTexture(blockBuf, i, height/2, 0, blockTexHeight * Textures.atlas.width * 4L);
-                    copyTexture(blockBuf, i, height, height/2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+            for (int pX = 0; pX < blockBuf.capacity()/4; pX++) {
+                long row = pX/blockTexWidth;
+                long dst = (row*Textures.atlas.width)+((i * blockTexWidthL)+(pX%blockTexWidth));
+                int color = blockBuf.getInt(pX*4);
+                byte alpha = (byte) (color & 0xFF);
+                int materialId = Materials.AIR.id();
+                if (alpha != 0) {
+                    Material mat = type.materials.get(color);
+                    if (mat != null) {
+                        materialId = mat.id();
+                    } else {
+                        materialId = Materials.KYANITE.id();
+                    }
                 }
-            } else if (height > blockTexWidth) {
-                copyTopSideBottomTexture(blockBuf, i, false, type.altTexLoad, 0);
-            } else if (type instanceof LeafBlockType) {
-                copyPartialTexture(blockBuf, i, true, type.altTexLoad, 0);
-                copyLeafpileTexture(blockBuf, i, 1, (blockTexHeight) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 3, (blockTexHeight*3L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 4, (blockTexHeight*4L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 5, (blockTexHeight*5L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 6, (blockTexHeight*6L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 7, (blockTexHeight*7L) * Textures.atlas.width * 4L);
-            } else {
-                copyPartialTexture(blockBuf, i, false, type.altTexLoad, 0);
-                if (type.blockProperties.hasSlab) {
-                    copyTopSlabTexture(blockBuf, i, type.altTexLoad, blockTexHeight * Textures.atlas.width * 4L);
-                    copyBottomSlabTexture(blockBuf, i, type.altTexLoad, (blockTexHeight * 2L) * Textures.atlas.width * 4L);
-                }
+                memPutInt(atlasBuffer.pointer.get(0) + (dst*4L), (materialId & 0x00FFFFFF) | ((alpha & 0xFF) << 24));
             }
+//            if (height > blockTexWidth*3) {
+//                copyTexture(blockBuf, i, height, 0, 0);
+//                if (type.blockProperties.hasSlab) {
+//                    copyTexture(blockBuf, i, height/2, 0, blockTexHeight * Textures.atlas.width * 4L);
+//                    copyTexture(blockBuf, i, height, height/2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+//                }
+//            } else if (height > blockTexWidth) {
+//                copyTopSideBottomTexture(blockBuf, i, false, type.altTexLoad, 0);
+//            } else if (type instanceof LeafBlockType) {
+//                copyPartialTexture(blockBuf, i, true, type.altTexLoad, 0);
+//                copyLeafpileTexture(blockBuf, i, 1, (blockTexHeight) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 3, (blockTexHeight*3L) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 4, (blockTexHeight*4L) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 5, (blockTexHeight*5L) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 6, (blockTexHeight*6L) * Textures.atlas.width * 4L);
+//                copyLeafpileTexture(blockBuf, i, 7, (blockTexHeight*7L) * Textures.atlas.width * 4L);
+//            } else {
+//                copyPartialTexture(blockBuf, i, false, type.altTexLoad, 0);
+//                if (type.blockProperties.hasSlab) {
+//                    copyTopSlabTexture(blockBuf, i, type.altTexLoad, blockTexHeight * Textures.atlas.width * 4L);
+//                    copyBottomSlabTexture(blockBuf, i, type.altTexLoad, (blockTexHeight * 2L) * Textures.atlas.width * 4L);
+//                }
+//            }
             memFree(blockBuf);
         }
         ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
