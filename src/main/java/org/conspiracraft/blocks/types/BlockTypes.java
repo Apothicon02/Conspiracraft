@@ -38,27 +38,37 @@ public class BlockTypes {
                     .isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))),
             WATER = create(new BlockType(blockTypeMap.size(), "natural/model/water", Map.of(Utils.packColor(0, 44, 255, 150), Materials.WATER), new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.SPLASH1}, 1f, 1.25f, new SFX[]{Sounds.SPLASH1}, 0f, 1f))),
-            GRASS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "plant/model/grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),  new BlockProperties().resistance(1).blockSFX(
+            GRASS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "plant/model/grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),
+                    new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
             DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DIRT),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
-            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/tall_grass",  GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true)
-                    .needsSupport(true))),
-            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/texture/rose",  TALL_GRASS.blockProperties)), //5
-            TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/texture/torch",  (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false)
-                    .isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
+            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),
+                    GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
+            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
+                    TALL_GRASS.blockProperties)), //5
+            TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/model/torch", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME),
+                    (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "geological/texture/kyanite",  (LightBlockProperties) (new LightBlockProperties().r(4).g(19).b(31).blockSFX(
+            KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.KYANITE),
+                    (LightBlockProperties) (new LightBlockProperties().r(4).g(19).b(31).blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1)))).altTexLoad(true),
-            MARBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/marble",  new BlockProperties().hasSlab().blockSFX(
+            MARBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MARBLE),
+                    new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.6f, new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 1f, 0.5f))),
-            IGNEOUS = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/igneous",  new BlockProperties().hasSlab())),
-            STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/stone",  new BlockProperties().hasSlab())), //10
-            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/glass",  new BlockProperties().hasSlab().blockSFX(
+            IGNEOUS = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.IGNEOUS),
+                    new BlockProperties().hasSlab())),
+            STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STONE),
+                    new BlockProperties().hasSlab())), //10
+            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.GLASS),
+                    new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1).blocksLight(false).obstructsHeightmap(false))),
-            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/magenta_stained_glass",  GLASS.blockProperties)),
-            LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/lime_stained_glass",  GLASS.blockProperties)),
-            PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/porecap",  ((LightBlockProperties)TORCH.blockProperties.copy().resistance(1)).r(0).g(12).b(6))),
+            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAGENTA_GLASS),
+                    GLASS.blockProperties)),
+            LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.LIME_GLASS),
+                    GLASS.blockProperties)),
+            PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/model/porecap", Map.of(Utils.packColor(255), Materials.PORECAP, Utils.packColor(255, 0, 0, 255), Materials.PORECAP_STEM),
+                    ((LightBlockProperties)TORCH.blockProperties.copy().resistance(1)).r(0).g(12).b(6))),
             OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/oak_planks",  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))), //15
             OAK_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/oak_log",  new BlockProperties().hasSlab().resistance(1).blockSFX(
@@ -207,13 +217,13 @@ public class BlockTypes {
         }
         for (int i = 0; i < blockTypes.length; i++) {
             BlockType type = blockTypes[i];
-            BufferedImage image = i < 4 ? Utils.loadImage("block/"+type.name) : Utils.loadImage("block/misc/model/cube");
+            BufferedImage image = i < 15 ? Utils.loadImage("block/"+type.name) : Utils.loadImage("block/misc/model/cube");
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
             for (int pX = 0; pX < blockBuf.capacity()/4; pX++) {
                 long row = pX/blockTexWidth;
                 long dst = (row*Textures.atlas.width)+((i * blockTexWidthL)+(pX%blockTexWidth));
                 int color = blockBuf.getInt(pX*4);
-                byte alpha = (byte) (color & 0xFF);
+                byte alpha = (byte) (color >> 24);
                 int materialId = Materials.AIR.id();
                 if (alpha != 0) {
                     Material mat = type.materials.get(color);

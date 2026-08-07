@@ -1,7 +1,10 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+
+import java.util.Map;
 
 import static org.conspiracraft.world.World.getBlock;
 
@@ -19,6 +22,9 @@ public class PlantLightBlockType extends LightBlockType {
         return new Vector2i(blockType, blockSubType);
     }
 
+    public PlantLightBlockType(int id, String name, Map<Integer, Material> materials, LightBlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
+    }
     public PlantLightBlockType(int id, String name, LightBlockProperties blockProperties) {
         super(id, name, blockProperties);
     }

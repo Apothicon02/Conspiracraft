@@ -1,12 +1,15 @@
 package org.conspiracraft.blocks.types;
 
 import kotlin.Pair;
+import org.conspiracraft.blocks.Material;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.conspiracraft.blocks.BlockTag;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.world.World;
+
+import java.util.Map;
 
 import static org.conspiracraft.world.World.getBlock;
 
@@ -41,5 +44,8 @@ public class PlantBlockType extends BlockType {
 
     public PlantBlockType(int id, String name, BlockProperties blockProperties) {
         super(id, name, blockProperties);
+    }
+    public PlantBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
     }
 }

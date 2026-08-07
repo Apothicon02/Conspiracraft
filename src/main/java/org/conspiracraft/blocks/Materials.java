@@ -32,7 +32,20 @@ public class Materials {
             DRY_GRASS = create("plant/material/dry_grass"),
             LIME_GRASS = create("plant/material/lime_grass"),
             DIRT = create("natural/material/dirt"),
+            ROSE = create("plant/material/rose"),
+            TORCH_FLAME = create("crafted/material/torch_flame"),
+            OAK_LOG = create("tree/material/oak_log"),
+            MARBLE = create("geological/material/marble"),
+            STONE = create("geological/material/stone"),
+            IGNEOUS = create("geological/material/igneous"),
             KYANITE = create("geological/material/kyanite"),
+            GLASS = create("crafted/material/glass"),
+            RED_GLASS = create("crafted/material/red_stained_glass"),
+            BLUE_GLASS = create("crafted/material/blue_stained_glass"),
+            LIME_GLASS = create("crafted/material/lime_stained_glass"),
+            MAGENTA_GLASS = create("crafted/material/magenta_stained_glass"),
+            PORECAP = create("plant/material/porecap"),
+            PORECAP_STEM = create("plant/material/porecap_stem"),
             BARREL = create("crafted/barrel/material/oak");
 
     private static Material create(String path) {
