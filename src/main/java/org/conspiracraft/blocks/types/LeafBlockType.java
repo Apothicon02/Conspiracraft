@@ -1,6 +1,9 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
 import org.joml.Vector2i;
+
+import java.util.Map;
 
 public class LeafBlockType extends BlockType {
 
@@ -17,6 +20,9 @@ public class LeafBlockType extends BlockType {
         return subType == 0 ? blockProperties.blocksLight : false;
     }
 
+    public LeafBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
+    }
     public LeafBlockType(int id, String name, BlockProperties blockProperties) {
         super(id, name, blockProperties);
     }

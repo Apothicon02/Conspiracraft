@@ -23,6 +23,7 @@ layout(set = 0, binding = 12) uniform sampler2D colors;
 layout(set = 0, binding = 15) uniform sampler3D gui;
 layout(set = 0, binding = 16) uniform sampler2D items;
 layout(set = 0, binding = 19) uniform sampler2D blurred;
+layout(set = 0, binding = 24) uniform sampler2D materials;layout(set = 0, binding = 7) uniform sampler3D atlas;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
 
@@ -37,6 +38,7 @@ vec3 fromLinear(vec3 linearRGB){
 const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
+    //outColor = texelFetch(materials, ivec2(gl_FragCoord.xy), 0);
     vec4 bgColor = texture(colors, uv);
     vec4 blurredBgColor = texture(blurred, uv);
     bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(min(blurredBgColor.a, bgColor.a), 1.2f)));

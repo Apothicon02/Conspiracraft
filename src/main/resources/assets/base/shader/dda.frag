@@ -150,6 +150,7 @@ ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
 layout(set = 0, binding = 7) uniform sampler3D atlas;
+layout(set = 0, binding = 24) uniform sampler2D materials;
 const float alphaMax = 0.95f;
 vec4 fromLinear(vec4 linearRGB){
     bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
@@ -532,6 +533,21 @@ vec3 scatterVec(vec3 vec) {
     return fract((vec.xxy + vec.yzz) * vec.zyx);
 }
 ivec3 voxelRayPos = ivec3(0);
+const int materialWidth = 16;
+const int materialHeight = materialWidth*6;
+const int materialAtlasWidth = 512;
+const int materialsPerRow = materialAtlasWidth/materialWidth;
+vec4 getMaterialColor(vec4 model) {
+    vec3 unoffsetHitPos = hitPos-(flatNormal*0.002f);
+    vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
+    vec3 absNorm = abs(flatNormal);
+    vec2 matUV = (absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
+    int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
+    int materialY = int(materialId/materialsPerRow);
+    materialId-=(materialY*materialsPerRow);
+    vec4 materialColor = texelFetch(materials, ivec2(ivec2(materialId*materialWidth, materialY*materialHeight)+(matUV*materialWidth)), 0);
+    return vec4(fromLinear(materialColor.rgb), materialColor.a);
+}
 vec3 mipmap(vec3 color) {
     vec3 localPos = unzeroVec(abs(fract(hitPos)-vec3(0, 1, 0)));
     voxelRayPos = ivec3(localPos*blockSize);
@@ -547,7 +563,8 @@ vec3 mipmap(vec3 color) {
         for (int y = yHighest ? voxelRayPos.y : voxelRayPos.y-inc; y <= voxelRayPos.y+inc; y+= yHighest ? 100 : inc) {
             for (int z = zHighest ? voxelRayPos.z : voxelRayPos.z-inc; z <= voxelRayPos.z+inc; z+= zHighest ? 100 : inc) {
                 vec4 neighbor = sampleAtlasTiled(x, y, z, block.x, block.y);
-                if (neighbor.a >= alphaMax) {
+                if (neighbor.a > alphaMax) {
+                    neighbor.rgb = getMaterialColor(neighbor).rgb;
                     float brightness = max(neighbor.r, max(neighbor.g, neighbor.b));
                     maxBrightness = max(maxBrightness, brightness);
                     avgNColor += (neighbor.rgb)*brightness;
@@ -582,6 +599,12 @@ void main() {
     rayPos = ogPos;
     rayDir = ogDir;
     vec4 color = dda(false);
+    float reflectivity = 0;//(tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
+    if (color.a > 0.f) {
+        vec4 materialColor = getMaterialColor(color);
+        color.rgb = materialColor.rgb;
+        reflectivity = 1-materialColor.a;
+    }
     if (color.a > alphaMax && color.a < 1.f) {
         reverseNormShading = true;
         color.a = 1;
@@ -602,7 +625,6 @@ void main() {
     bool airAbove = false;
     bool celestial = false;
     float rasterDepth = texture(rasterDepth, uv).r;
-    float reflectivity = (tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
     float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
@@ -741,6 +763,9 @@ void main() {
             rayPos = reflectPos;
             rayDir = reflectDir;
             vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
+            if (reflectColor.a > 0.f) {
+                reflectColor.rgb = getMaterialColor(reflectColor).rgb;
+            }
             if (reflectColor.a < alphaMax) {
                 if (globalUbo.fogginess > 0) {
                     reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, maxFogginess, false);
@@ -777,9 +802,12 @@ void main() {
         float grey = max(primaryTint.r, max(primaryTint.g, primaryTint.b));
         primaryTint.rgb = (primaryTint.rgb+((vec3(grey)-primaryTint.rgb)*mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)))));
     }
-    color.rgb = mix(color.rgb, isNight ? primaryTint.rgb*0.1f : primaryTint.rgb, tintAmt*0.67f);
+    //color.rgb = mix(color.rgb, isNight ? primaryTint.rgb*0.1f : primaryTint.rgb, tintAmt*0.67f);
     outNormal.a = mix(outNormal.a, 1, tintAmt);
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(vec3(shadowFactor), 1);
     gl_FragDepth = depth;
+//    outNormal = vec4(1);
+//    outColor = vec4(1);
+//    gl_FragDepth = 1;
 }
