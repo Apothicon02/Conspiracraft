@@ -1,5 +1,6 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -7,10 +8,14 @@ import org.joml.Vector4i;
 import org.conspiracraft.Main;
 import org.conspiracraft.ScheduledTicker;
 
+import java.util.Map;
+
 import static org.conspiracraft.world.World.*;
 
 public class CloudBlockType extends BlockType {
-
+    public CloudBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
+    }
     public CloudBlockType(int id, String name, BlockProperties blockProperties) {
         super(id, name, blockProperties);
     }

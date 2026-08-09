@@ -43,7 +43,7 @@ public class BlockTypes {
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
             DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DIRT),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
-            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),
+            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS_TOP, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS_TOP, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS_TOP),
                     GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
                     TALL_GRASS.blockProperties)), //5
@@ -82,47 +82,66 @@ public class BlockTypes {
                     ROSE.blockProperties)),
             MAGMA = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAGMA),  ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
-            MAHOGANY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_log",  OAK_LOG.blockProperties)), //20
-            MAHOGANY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/mahogany_leaves",  OAK_LEAVES.blockProperties)),
+            MAHOGANY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAHOGANY_LOG),
+                    OAK_LOG.blockProperties)), //20
+            MAHOGANY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.MAHOGANY_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             BUCKET = create(List.of(BlockTags.buckets, BlockTags.cantBreakBlocks), new BlockType(blockTypeMap.size(), "crafted/texture/bucket",  new BlockProperties().resistance(1).isSolid(false).blocksLight(false).obstructsHeightmap(false))),
-            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/sand",  new BlockProperties().resistance(1).blockSFX(
+            SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SAND),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f, new SFX[]{Sounds.SAND_STEP1, Sounds.SAND_STEP2}, 0.45f, 1.33f).needsSupport(true).blocksLight(true).obstructsHeightmap(true))),
             SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/sandstone",  new BlockProperties().hasSlab())),
-            PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/palm_log",  OAK_LOG.blockProperties)), //25
+            PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.PALM_LOG),
+                    OAK_LOG.blockProperties)), //25
             PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
-            PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/palm_leaves",  OAK_LEAVES.blockProperties)),
+            PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.PALM_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
             CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/texture/cactus",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(false).needsSupport(true))),
             DEAD_BUSH = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties.copy().resistance(0.f))), //30
-            CLOUD = create(new BlockType(blockTypeMap.size(), "natural/texture/cloud",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
-            RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "natural/texture/rain_cloud",  CLOUD.blockProperties)),
-            DRY_MUD = create(List.of(BlockTags.soakers, BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/dry_mud",  DIRT.blockProperties)),
+            CLOUD = create(new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.CLOUD),  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
+            RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.RAIN_CLOUD),  CLOUD.blockProperties)),
+            DRY_MUD = create(List.of(BlockTags.soakers, BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DRY_MUD),
+                    DIRT.blockProperties)),
             SPRUCE_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/spruce_planks",  OAK_PLANK.blockProperties)),
-            SPRUCE_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/spruce_log",  OAK_LOG.blockProperties)), //35
-            SPRUCE_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/spruce_leaves",  OAK_LEAVES.blockProperties)),
+            SPRUCE_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SPRUCE_LOG),
+                    OAK_LOG.blockProperties)), //35
+            SPRUCE_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.SPRUCE_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             CHERRY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/cherry_planks",  OAK_PLANK.blockProperties)),
-            CHERRY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/cherry_log",  OAK_LOG.blockProperties)),
-            CHERRY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/cherry_leaves",  OAK_LEAVES.blockProperties)),
+            CHERRY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.CHERRY_LOG),
+                    OAK_LOG.blockProperties)),
+            CHERRY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.CHERRY_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             BIRCH_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/birch_planks",  OAK_PLANK.blockProperties)), //40
-            BIRCH_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/birch_log",  OAK_LOG.blockProperties)),
-            BIRCH_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/birch_leaves",  OAK_LEAVES.blockProperties)),
+            BIRCH_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.BIRCH_LOG),
+                    OAK_LOG.blockProperties)),
+            BIRCH_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.BIRCH_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             ACACIA_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/acacia_planks",  OAK_PLANK.blockProperties)),
-            ACACIA_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/acacia_log",  OAK_LOG.blockProperties)),
-            ACACIA_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/acacia_leaves",  OAK_LEAVES.blockProperties)), //45
+            ACACIA_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ACACIA_LOG),
+                    OAK_LOG.blockProperties)),
+            ACACIA_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.ACACIA_LEAVES),
+                    OAK_LEAVES.blockProperties)), //45
             WILLOW_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/willow_planks",  OAK_PLANK.blockProperties)),
-            WILLOW_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/willow_log",  OAK_LOG.blockProperties)),
-            WILLOW_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/willow_leaves",  OAK_LEAVES.blockProperties)),
+            WILLOW_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.WILLOW_LOG),
+                    OAK_LOG.blockProperties)),
+            WILLOW_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.WILLOW_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             REDWOOD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/redwood_planks",  OAK_PLANK.blockProperties)),
-            REDWOOD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/redwood_log",  OAK_LOG.blockProperties)), //50
-            REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/texture/redwood_leaves",  OAK_LEAVES.blockProperties)),
+            REDWOOD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.REDWOOD_LOG),
+                    OAK_LOG.blockProperties)), //50
+            REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.REDWOOD_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(34).g(7).b(34))),
             BLUE_HIBISCUS = create(List.of(BlockTags.scytheEfficient, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantLightBlockType(blockTypeMap.size(), "plant/texture/blue_hibiscus",  ((LightBlockProperties)(PORECAP.blockProperties)).copy().r(7).g(10).b(34))),
-            SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/snow",  new BlockProperties().hasSlab().resistance(1).blockSFX(
+            SNOW = create(List.of(BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SNOW),  new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.5f, 0.8f))),
-            GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/gravel",  SAND.blockProperties.copy().blockSFX(
+            GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.GRAVEL),  SAND.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))), //55
-            FLINT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/flint",  new BlockProperties().hasSlab())),
-            MUD = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/mud",  new BlockProperties().hasSlab().resistance(1).blockSFX(
+            FLINT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.FLINT),
+                    new BlockProperties().hasSlab())),
+            MUD = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MUD),
+                    new BlockProperties().hasSlab().resistance(1).blockSFX(
                     new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f, new SFX[]{Sounds.MUD_STEP1, Sounds.MUD_STEP2}, 0.66f, 0.66f))),
             CLAY = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "natural/texture/clay",  MUD.blockProperties)),
             OBSIDIAN = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/obsidian",  GLASS.blockProperties.copy().resistance(0.5f).blocksLight(true))),
@@ -143,8 +162,8 @@ public class BlockTypes {
             RED_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_sand",  SAND.blockProperties.copy())), //70
             RED_SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/red_sandstone",  SANDSTONE.blockProperties.copy())),
             RED_GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/red_gravel",  GRAVEL.blockProperties.copy())),
-            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/wet_sand",  SAND.blockProperties.copy())),
-            ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "natural/texture/ice",  GLASS.blockProperties.copy().blocksLight(true))),
+            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.WET_SAND),  SAND.blockProperties.copy())),
+            ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ICE),  GLASS.blockProperties.copy().blocksLight(true))),
             BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())), //75
             GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties().hasSlab())),
             CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties().hasSlab())),
@@ -162,10 +181,12 @@ public class BlockTypes {
             COPPER_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/copper_plating",  STEEL_PLATING.blockProperties.copy())),
             ZINC_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/zinc_plating",  STEEL_PLATING.blockProperties.copy())),
             GOLD_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/gold_plating",  STEEL_PLATING.blockProperties.copy())),
-            DEAD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new BlockType(blockTypeMap.size(), "tree/texture/dead_leaves",  OAK_LEAVES.blockProperties)),
+            DEAD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new BlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.DEAD_LEAVES),
+                    OAK_LEAVES.blockProperties)),
             ACID = create(new BlockType(blockTypeMap.size(), "natural/texture/acid", WATER.blockProperties.copy())), //90
             ROSE_QUARTZ_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/rose_quartz_sand",  SAND.blockProperties.copy())),
-            DEAD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "tree/texture/dead_log",  OAK_LOG.blockProperties)),
+            DEAD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DEAD_LOG),
+                    OAK_LOG.blockProperties)),
             DEAD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties)),
             IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
@@ -221,7 +242,7 @@ public class BlockTypes {
         }
         for (int i = 0; i < blockTypes.length; i++) {
             BlockType type = blockTypes[i];
-            BufferedImage image = i < 19 ? Utils.loadImage("block/"+type.name) : Utils.loadImage("block/misc/model/cube");
+            BufferedImage image = type.materials == BlockType.defaultMaterials ? Utils.loadImage("block/misc/model/cube") : Utils.loadImage("block/"+type.name);
             int height = image.getHeight();
             ByteBuffer blockBuf = Utils.imageToBuffer(image);
             for (int pX = 0; pX < blockBuf.capacity(); pX+=4) {

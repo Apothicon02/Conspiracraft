@@ -1,10 +1,13 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.conspiracraft.blocks.Recipes;
 import org.conspiracraft.world.World;
+
+import java.util.Map;
 
 
 public class PowderBlockType extends BlockType {
@@ -32,6 +35,9 @@ public class PowderBlockType extends BlockType {
         return blockProperties.blocksLight && subType == 0;
     }
 
+    public PowderBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
+    }
     public PowderBlockType(int id, String name, BlockProperties blockProperties) {
         super(id, name, blockProperties);
     }

@@ -347,12 +347,43 @@ vec3 uv3d(vec3 worldPos, float stageSize, int nextStageSize) {
 vec3 uv3d(ivec3 worldPos, float stageSize, int nextStageSize) {
     return uv3d(vec3(worldPos), stageSize, nextStageSize);
 }
-
+ivec3 voxelRayPos = ivec3(0);
+const int materialWidth = 16;
+const int materialHeight = materialWidth*6;
+const int materialAtlasWidth = 512;
+const int materialsPerRow = materialAtlasWidth/materialWidth;
+vec4 getMaterialColor(vec4 model) {
+    vec3 unoffsetHitPos = hitPos-(flatNormal*0.002f);
+    vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
+    vec3 absNorm = abs(flatNormal);
+    vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
+    int yOff = 0; //top
+    if (flatNormal.y < flatNormal.x && flatNormal.y < flatNormal.z) { //bottom
+        yOff = materialHeight-materialWidth;
+        matUV = floatingHitPos.zx;
+    } else if (!(flatNormal.y > flatNormal.x && flatNormal.y > flatNormal.z)) { //side
+        vec3 floatingUV = floatingHitPos;
+        floatingUV.y = 1-floatingUV.y;
+        if (absNorm.x > absNorm.z) {
+            matUV = floatingUV.zy;
+            yOff = flatNormal.x > 0 ? materialWidth : materialWidth*3;
+        } else {
+            matUV = floatingUV.xy;
+            yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
+        }
+    }
+    int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
+    int materialY = int(materialId/materialsPerRow);
+    materialId-=(materialY*materialsPerRow);
+    vec4 materialColor = texelFetch(materials, ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+(matUV*materialWidth)), 0);
+    return vec4(fromLinear(materialColor.rgb), materialColor.a);
+}
 vec3 firstTintAddition = vec3(0);
 vec4 prevTintAddition = vec4(0);
 vec4 tint = vec4(1);
 vec3 tintNormal = vec3(0);
 void addTint(vec4 voxelColor, vec3 normal, bool shadow) {
+    voxelColor.rgb = getMaterialColor(voxelColor).rgb;
     if (tintNormal == vec3(0)) {
         tintNormal = normal;
     }
@@ -558,37 +589,6 @@ vec3 scatterVec(vec3 vec) {
     vec = fract(vec * 0.1031);
     vec += dot(vec, vec + 33.33);
     return fract((vec.xxy + vec.yzz) * vec.zyx);
-}
-ivec3 voxelRayPos = ivec3(0);
-const int materialWidth = 16;
-const int materialHeight = materialWidth*6;
-const int materialAtlasWidth = 512;
-const int materialsPerRow = materialAtlasWidth/materialWidth;
-vec4 getMaterialColor(vec4 model) {
-    vec3 unoffsetHitPos = hitPos-(flatNormal*0.002f);
-    vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
-    vec3 absNorm = abs(flatNormal);
-    vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
-    int yOff = 0; //top
-    if (flatNormal.y < flatNormal.x && flatNormal.y < flatNormal.z) { //bottom
-        yOff = materialHeight-materialWidth;
-        matUV = floatingHitPos.zx;
-    } else if (!(flatNormal.y > flatNormal.x && flatNormal.y > flatNormal.z)) { //side
-        vec3 floatingUV = floatingHitPos;
-        floatingUV.y = 1-floatingUV.y;
-        if (absNorm.x > absNorm.z) {
-            matUV = floatingUV.zy;
-            yOff = flatNormal.x > 0 ? materialWidth : materialWidth*3;
-        } else {
-            matUV = floatingUV.xy;
-            yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
-        }
-    }
-    int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
-    int materialY = int(materialId/materialsPerRow);
-    materialId-=(materialY*materialsPerRow);
-    vec4 materialColor = texelFetch(materials, ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+(matUV*materialWidth)), 0);
-    return vec4(fromLinear(materialColor.rgb), materialColor.a);
 }
 vec3 mipmap(vec3 color) {
     vec3 localPos = unzeroVec(abs(fract(hitPos)-vec3(0, 1, 0)));
@@ -844,7 +844,7 @@ void main() {
         float grey = max(primaryTint.r, max(primaryTint.g, primaryTint.b));
         primaryTint.rgb = (primaryTint.rgb+((vec3(grey)-primaryTint.rgb)*mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)))));
     }
-    //color.rgb = mix(color.rgb, isNight ? primaryTint.rgb*0.1f : primaryTint.rgb, tintAmt*0.67f);
+    color.rgb = mix(color.rgb, isNight ? primaryTint.rgb*0.1f : primaryTint.rgb, tintAmt*0.67f);
     outNormal.a = mix(outNormal.a, 1, tintAmt);
     outColor = vec4(color.rgb, 1);
     //outColor = vec4(vec3(shadowFactor), 1);

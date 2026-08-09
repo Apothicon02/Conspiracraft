@@ -63,6 +63,7 @@ public class BlockType {
         return !blockProperties.isSolid || blockProperties.permeable;
     }
 
+    public static final Map<Integer, Material> defaultMaterials = Map.of(Utils.packColor(255), Materials.KYANITE);
     public Map<Integer, Material> materials;
     public BlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
         this.id = id;
@@ -73,7 +74,7 @@ public class BlockType {
     public BlockType(int id, String name, BlockProperties blockProperties) {
         this.id = id;
         this.name = name;
-        this.materials = Map.of(Utils.packColor(255), Materials.KYANITE);
+        this.materials = defaultMaterials;
         this.blockProperties = blockProperties;
     }
 
