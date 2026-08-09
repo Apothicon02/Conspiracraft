@@ -176,14 +176,49 @@ vec3 toLinear(vec3 sRGB){
     vec3 lower = sRGB/vec3(12.92);
     return vec3(mix(higher, lower, cutoff));
 }
-const int blockSize = 8;
+ivec3 blockPos = ivec3(0);
+const int blockSize = 16;
+const float blockSizeF = float(blockSize);
 const int blockTexSize = blockSize;
 const float voxelSize = 1.f/blockSize;
+layout(set = 0, binding = 8) uniform sampler2D noises;
+float noise(vec2 coords) {
+    return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
+}
+float getCaustic(bool animated, vec2 checkPos) {
+    float time = animated ? globalUbo.time/1000 : 0.f;
+    return noise((checkPos+time)*32);
+}
 vec4 sampleAtlas(int x, int y, int z, int blockType, int blockSubtype) {
     //    if ((bX & 1) != 0) { x += blockSize; }
     //    if ((bY & 1) != 0) { y += blockSize; }
     //    if ((bZ & 1) != 0) { z += blockSize; }
-    vec4 color = texelFetch(atlas, ivec3(x+(blockType*8), ((abs(y-blockTexSize)-1)*blockTexSize)+z, blockSubtype), 0);
+//    if (blockType == 4 && y > 2.0) {
+//        bool windDir = true;//timeOfDay > 0.f;
+//        float time = globalUbo.time/500000.f;
+//        float windStr = noise(((vec2(blockPos.x, blockPos.z)/48) + (time * 100)) * (16+(time/(time/32))))+0.5f;
+//        if (windStr > 0.8) {
+//            x = x+((y > 10 ? 3 : (y > 8 ? 2 : 1)) * (windDir ? -1 : 1));
+//            if (blockSubtype < 2) {
+//                z = z+(y > 8 ? 2 : 1);
+//            }
+//        } else if (windStr > 0.4) {
+//            x = x+((y > 10 ? 3 : (y > 8 ? 2 : 1)) * (windDir ? -1 : 1));
+//            if (blockSubtype < 2) {
+//                z = z+(y > 8 ? 1 : 0);
+//            }
+//        } else if (windStr > -0.2) {
+//            x = x+((y > 8 ? 2 : 1) * (windDir ? -1 : 1));
+//            if (blockSubtype < 2) {
+//                z = z+(y > 8 ? 1 : 0);
+//            }
+//        } else if (windStr > -0.8) {
+//            x = x+((y > 8 ? 1 : 0) * (windDir ? -1 : 1));
+//        }
+//        x = clamp(x, 0, 15);
+//        z = clamp(z, 0, 15);
+//    }
+    vec4 color = texelFetch(atlas, ivec3(x+(blockType*blockSize), ((abs(y-blockSize)-1)*blockSize)+z, blockSubtype), 0);
     return vec4(fromLinear(color.rgb), color.a);
 }
 vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
@@ -198,7 +233,7 @@ vec4 getBlockAndVoxel(float x, float y, float z) {
     int blockData = getBlockData(int(x), int(y), int(z));
     int type = (blockData >> 16) & 0xFFFF;
     ivec2 block = ivec2(type, min(16, blockData & 0xFFFF));
-    ivec3 voxelPos = ivec3(fract(vec3(x, y, z))*8);
+    ivec3 voxelPos = ivec3(fract(vec3(x, y, z))*blockSize);
     return sampleAtlas(voxelPos.x, voxelPos.y, voxelPos.z, block.x, block.y);
 }
 vec4 getBlockAndVoxel(vec3 pos) {
@@ -207,14 +242,6 @@ vec4 getBlockAndVoxel(vec3 pos) {
 layout(set = 0, binding = 20) uniform sampler2D blueNoises;
 vec3 blueNoise(ivec2 coords) {
     return texelFetch(blueNoises, ivec2(coords.x&63, coords.y&63), 0).rgb;
-}
-layout(set = 0, binding = 8) uniform sampler2D noises;
-float noise(vec2 coords) {
-    return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
-}
-float getCaustic(bool animated, vec2 checkPos) {
-    float time = animated ? globalUbo.time/1000 : 0.f;
-    return noise((checkPos+time)*32);
 }
 layout(set = 0, binding = 12) uniform sampler2D rasterColors;
 layout(set = 0, binding = 13) uniform sampler2D rasterDepth;
@@ -292,7 +319,6 @@ vec3 unzeroVec(vec3 dir) {
     return dir;
 }
 
-ivec3 blockPos = ivec3(0);
 vec3 hitPos = vec3(0);
 vec3 shadowPos = vec3(0);
 vec3 flatNormal = vec3(0);
@@ -454,6 +480,7 @@ vec4 dda(bool shadow) {
                 if ((lodToUse & mask) != 0) {
                     blockPos = lodWorldPos+ddaPos;
                     block = getBlock(blockPos);
+                    if (shadow && block.x == 4) {block.x = 0;}
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
                     vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
                     if (voxelColor.a > 0) {
@@ -541,11 +568,26 @@ vec4 getMaterialColor(vec4 model) {
     vec3 unoffsetHitPos = hitPos-(flatNormal*0.002f);
     vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
     vec3 absNorm = abs(flatNormal);
-    vec2 matUV = (absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
+    vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
+    int yOff = 0; //top
+    if (flatNormal.y < flatNormal.x && flatNormal.y < flatNormal.z) { //bottom
+        yOff = materialHeight-materialWidth;
+        matUV = floatingHitPos.zx;
+    } else if (!(flatNormal.y > flatNormal.x && flatNormal.y > flatNormal.z)) { //side
+        vec3 floatingUV = floatingHitPos;
+        floatingUV.y = 1-floatingUV.y;
+        if (absNorm.x > absNorm.z) {
+            matUV = floatingUV.zy;
+            yOff = flatNormal.x > 0 ? materialWidth : materialWidth*3;
+        } else {
+            matUV = floatingUV.xy;
+            yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
+        }
+    }
     int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
     int materialY = int(materialId/materialsPerRow);
     materialId-=(materialY*materialsPerRow);
-    vec4 materialColor = texelFetch(materials, ivec2(ivec2(materialId*materialWidth, materialY*materialHeight)+(matUV*materialWidth)), 0);
+    vec4 materialColor = texelFetch(materials, ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+(matUV*materialWidth)), 0);
     return vec4(fromLinear(materialColor.rgb), materialColor.a);
 }
 vec3 mipmap(vec3 color) {
@@ -703,9 +745,9 @@ void main() {
         }
         vec3 absNorm = abs(tint.a < 1 ? primaryTintNormal : primaryFlatNormal);
         bool animated = (firstBlock.x == 1 || firstBlock.x == 90);
-        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz)+(causticVoxelPos.xz/8.f)) :
-        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy)+(causticVoxelPos.xy/8.f)) :
-        getCaustic(animated, vec2(causticPos.yz)+(causticVoxelPos.yz/8.f)));
+        float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz)+(causticVoxelPos.xz/blockSizeF)) :
+        (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy)+(causticVoxelPos.xy/blockSizeF)) :
+        getCaustic(animated, vec2(causticPos.yz)+(causticVoxelPos.yz/blockSizeF)));
         if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
             color = vec4(1);
             tint = vec4(1);
@@ -737,7 +779,7 @@ void main() {
             rayDir = sunDir;
             vec4 shadowColor = vec4(0);
             bool weakShadow = false;
-            if (globalUbo.skylight.a <= 0.05f || (primaryBlock.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
+            if (globalUbo.skylight.a <= 0.05f || (primaryBlock.x != 4 && primaryBlock.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
                 shadowColor.a = 1.f;
             } else if (globalUbo.renderToggles.x > 0 && globalUbo.skylight.w >= 0.1f) {
                 shadowColor = dda(true);

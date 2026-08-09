@@ -25,7 +25,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class BlockTypes {
-    public static int blockTexWidth = 8;
+    public static int blockTexWidth = 16;
     public static int blockTexWidthHalf = blockTexWidth/2;
     public static long blockTexWidthL = blockTexWidth;
     public static int blockTexHeight = blockTexWidth * blockTexWidth;
@@ -43,11 +43,11 @@ public class BlockTypes {
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
             DIRT = create(List.of(BlockTags.sediment, BlockTags.dirt, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DIRT),  new BlockProperties().resistance(1).blockSFX(
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
-            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),
+            TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),
                     GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
-            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
+            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
                     TALL_GRASS.blockProperties)), //5
-            TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/model/torch", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME),
+            TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME),
                     (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.KYANITE),
@@ -67,7 +67,7 @@ public class BlockTypes {
                     GLASS.blockProperties)),
             LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.LIME_GLASS),
                     GLASS.blockProperties)),
-            PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/model/porecap", Map.of(Utils.packColor(255), Materials.PORECAP, Utils.packColor(255, 0, 0, 255), Materials.PORECAP_STEM),
+            PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.PORECAP, Utils.packColor(255, 0, 0, 255), Materials.PORECAP_STEM),
                     ((LightBlockProperties)TORCH.blockProperties.copy().resistance(1)).r(0).g(12).b(6))),
             OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.OAK_PLANK),
                     new BlockProperties().hasSlab().resistance(1).blockSFX(
@@ -78,7 +78,7 @@ public class BlockTypes {
             OAK_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.OAK_LEAVES),
                     new BlockProperties().resistance(0.25f).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
-            HYDRANGEA = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/hydrangea", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.HYDRANGEA),
+            HYDRANGEA = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.HYDRANGEA),
                     ROSE.blockProperties)),
             MAGMA = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAGMA),  ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
@@ -251,13 +251,13 @@ public class BlockTypes {
                 copyTopSideBottomTexture(blockBuf, i, false, type.altTexLoad, 0);
             } else if (type instanceof LeafBlockType) {
                 copyPartialTexture(blockBuf, i, true, type.altTexLoad, 0);
-                copyLeafpileTexture(blockBuf, i, 1, (blockTexHeight) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 2, (blockTexHeight*2L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 3, (blockTexHeight*3L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 4, (blockTexHeight*4L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 5, (blockTexHeight*5L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 6, (blockTexHeight*6L) * Textures.atlas.width * 4L);
-                copyLeafpileTexture(blockBuf, i, 7, (blockTexHeight*7L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 2, (blockTexHeight) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 4, (blockTexHeight*2L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 6, (blockTexHeight*3L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 8, (blockTexHeight*4L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 10, (blockTexHeight*5L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 12, (blockTexHeight*6L) * Textures.atlas.width * 4L);
+                copyLeafpileTexture(blockBuf, i, 14, (blockTexHeight*7L) * Textures.atlas.width * 4L);
             } else {
                 copyPartialTexture(blockBuf, i, false, type.altTexLoad, 0);
                 if (type.blockProperties.hasSlab) {

@@ -31,6 +31,7 @@ public class Materials {
             DARK_GRASS = create("plant/material/dark_grass"),
             DRY_GRASS = create("plant/material/dry_grass"),
             LIME_GRASS = create("plant/material/lime_grass"),
+            GRASS_TOP = create("plant/material/grass_top"),
             DIRT = create("natural/material/dirt"),
             ROSE = create("plant/material/rose"),
             HYDRANGEA = create("plant/material/hydrangea"),

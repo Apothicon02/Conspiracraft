@@ -38,7 +38,7 @@ vec3 fromLinear(vec3 linearRGB){
 const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
-    //outColor = texelFetch(materials, ivec2(gl_FragCoord.xy), 0);
+    //outColor = texelFetch(atlas, ivec3(gl_FragCoord.xy, 0), 0)*20;
     vec4 bgColor = texture(colors, uv);
     vec4 blurredBgColor = texture(blurred, uv);
     bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(min(blurredBgColor.a, bgColor.a), 1.2f)));
