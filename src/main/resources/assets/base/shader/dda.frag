@@ -644,6 +644,7 @@ void main() {
         color.rgb = materialColor.rgb;
         reflectivity = 1-materialColor.a;
     }
+    if (tint.a < 1) {reflectivity = 1.f;}
     if (color.a > alphaMax && color.a < 1.f) {
         reverseNormShading = true;
         color.a = 1;

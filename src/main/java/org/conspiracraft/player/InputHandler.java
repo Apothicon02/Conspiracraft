@@ -131,8 +131,8 @@ public class InputHandler {
                             isFullscreen = false;
                             SDL_SetWindowFullscreen(Window.window, false);
                             SDL_SetWindowPosition(Window.window, 0, 32);
-                            SDL_SetWindowSize(Window.window, (int) (2560 * 0.8f), (int) (1440 * 0.8f));
-                            window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
+                            SDL_SetWindowSize(Window.window, (int) (2560 * 0.75f), (int) (1440 * 0.75f));
+                            window.resized((int) (2560 * 0.75f), (int) (1440 * 0.75f));
                         }
                     }
 
