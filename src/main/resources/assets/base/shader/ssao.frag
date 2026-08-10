@@ -38,9 +38,10 @@ const int KERNEL_SIZE = 32;
 //const float Z_NEAR = 0.01f;
 //const float ASPECT = 1.7977529f;
 //const float FOCAL_LENGTH = 1.3514224f;
+mat4 invProj = inverse(globalUbo.proj);
 vec3 reconstructViewPos(vec2 uvPos, float depth) {
     vec4 clip = vec4((uvPos*2)-1, depth, 1.f);
-    vec4 view = inverse(globalUbo.proj)*clip;
+    vec4 view = invProj*clip;
     return view.xyz/view.w;
 }
 float getAO(float depth, vec4 normal) {
@@ -59,7 +60,7 @@ float getAO(float depth, vec4 normal) {
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
-            vec3 sampleVS = reconstructViewPos(sampleUV, texture(ddaDepth, sampleUV).r);
+            vec3 sampleVS = reconstructViewPos(sampleUV, textureLod(ddaDepth, sampleUV, 0).r);
             float rangeCheck = smoothstep(0, 1, radius/(length(posVS-sampleVS)+0.001f));
             if (sampleVS.z+0.01f < sampleVec.z) {
                 occlusion += rangeCheck;
@@ -70,12 +71,13 @@ float getAO(float depth, vec4 normal) {
     return pow(clamp(occlusion, 0.f, 1), 2.25f);
 }
 void main() {
-    vec4 color = texture(ddaColors, uv);
-    float depth = texture(ddaDepth, uv).r;
-    vec4 normal = texture(ddaNormals, uv);
+    vec4 color = textureLod(ddaColors, uv, 0);
+    float depth = textureLod(ddaDepth, uv, 0).r;
+    vec4 normal = textureLod(ddaNormals, uv, 0);
 //    vec3 randVec = hash()/1.732f;
 //    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
 //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
-    outColor = vec4(color.rgb, mix(getAO(depth, normal), 1, pow(normal.a, 2))); //normal.a is fogginess
+    float antiAO = normal.a;
+    outColor = antiAO > 0.95f ? color : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO)); //normal.a is fogginess
 }

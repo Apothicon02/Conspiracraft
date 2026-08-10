@@ -23,7 +23,7 @@ layout(set = 0, binding = 12) uniform sampler2D colors;
 layout(set = 0, binding = 15) uniform sampler3D gui;
 layout(set = 0, binding = 16) uniform sampler2D items;
 layout(set = 0, binding = 19) uniform sampler2D blurred;
-layout(set = 0, binding = 24) uniform sampler2D materials;layout(set = 0, binding = 7) uniform sampler3D atlas;
+//layout(set = 0, binding = 24) uniform sampler2D materials;layout(set = 0, binding = 7) uniform sampler3D atlas;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
 

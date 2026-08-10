@@ -28,9 +28,9 @@ vec2 reproject(vec3 worldPos) {
 
 const float Z_NEAR = 0.01f;
 void main() {
-    float baseDepth = texture(depth, uv).r;
-    vec4 baseColor = texture(colors, uv);
-    vec4 baseNormal = texture(normals, uv);
+    float baseDepth = textureLod(depth, uv, 0).r;
+    vec4 baseColor = textureLod(colors, uv, 0);
+    vec4 baseNormal = textureLod(normals, uv, 0);
     vec4 color = baseColor;
     vec2 uvNdc = (uv * 2.0) - 1.0;
     vec4 ndc = vec4(uvNdc, baseDepth, 1.0);
@@ -40,7 +40,7 @@ void main() {
     worldPos /= worldPos.w;
     vec2 reprojectedPos = reproject(worldPos.xyz);
     if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < 1.f && reprojectedPos.y >= 0.f && reprojectedPos.y < 1.f)) { reprojectedPos = uv; }
-    float oldDepth = texture(depthOld, reprojectedPos).r;
+    float oldDepth = textureLod(depthOld, reprojectedPos, 0).r;
     if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
         float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
         int radius = velocity < 0.6f ? 2 : 1;
@@ -53,7 +53,7 @@ void main() {
                 boxMax = max(boxMax, nearColor);
             }
         }
-        vec4 oldColor = texture(colorsOld, reprojectedPos);
+        vec4 oldColor = textureLod(colorsOld, reprojectedPos, 0);
         oldColor = clamp(max(baseColor*vec4(0.95f, 0.95f, 0.95f, 0.f), oldColor), boxMin, boxMax);
         vec3 comparedColors = baseColor.rgb-oldColor.rgb;
         outColor = vec4(mix(baseColor, oldColor, 0.95f));

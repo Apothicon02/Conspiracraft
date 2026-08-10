@@ -183,7 +183,7 @@ const int blockTexSize = blockSize;
 const float voxelSize = 1.f/blockSize;
 layout(set = 0, binding = 8) uniform sampler2D noises;
 float noise(vec2 coords) {
-    return (texture(noises, vec2(coords/1024)).r*2)-0.5f;
+    return (textureLod(noises, vec2(coords/1024), 0).r*2)-0.5f;
 }
 float getCaustic(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/1000 : 0.f;
@@ -327,11 +327,12 @@ vec3 ddaMask = vec3(0);
 void stepMask(vec3 sideDist) {
     ddaMask = step(sideDist, vec3(min(min(sideDist.x, sideDist.y), sideDist.z) + 0.000000001));
 }
-
+mat4 invProj = inverse(globalUbo.proj);
+mat4 invView = inverse(globalUbo.view);
 vec3 getDir(vec2 pos) {
     vec2 modifiedUV = (pos * 2.0) - 1.0;
-    vec4 clipSpace = vec4((inverse(globalUbo.proj) * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
-    return unzeroVec(normalize((inverse(globalUbo.view)*clipSpace).xyz));
+    vec4 clipSpace = vec4((invProj * vec4(modifiedUV, 1.f, 1.f)).xyz, 0);
+    return unzeroVec(normalize((invView*clipSpace).xyz));
 }
 vec3 rayPos = vec3(0);
 vec3 rayDir = vec3(0);
@@ -435,12 +436,10 @@ vec4 dda(bool shadow) {
     vec3 lodStartPos = vec3(0);
     ivec3 lodRayPos = ivec3(0);
     vec3 lodPos = vec3(0);
-    vec3 lodSideDist = vec3(0);
     ivec3 lodWorldPos = ivec3(0);
 
     vec3 blockStartPos = vec3(0);
     ivec3 blockRayPos = ivec3(0);
-    vec3 blockSideDist = vec3(0);
 
     vec3 voxelStartPos = vec3(0);
     vec3 voxelPos = vec3(0);
@@ -487,7 +486,6 @@ vec4 dda(bool shadow) {
                     stage = 1;
                     stepAnything = false;
                     lodRayPos = ddaPos;
-                    lodSideDist = sideDist;
 
                     lodWorldPos = ivec3(lodPos*lodSize);
                     blockStartPos = uv3d(lodWorldPos, float(lodSize), lodSize);
@@ -499,7 +497,7 @@ vec4 dda(bool shadow) {
             if (ddaPos.x < 0 || ddaPos.x >= lodSize || ddaPos.y < 0 || ddaPos.y >= lodSize || ddaPos.z < 0 || ddaPos.z >= lodSize) {
                 stage = 2;
                 ddaPos = lodRayPos;
-                sideDist = lodSideDist;
+                sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
             } else {
                 int bitIdx = (ddaPos.x & (lodSize-1)) + (ddaPos.y & (lodSize-1)) * lodSize + (ddaPos.z & (lodSize-1)) * lodSize * lodSize;
                 int lodToUse = lod.first;
@@ -511,7 +509,7 @@ vec4 dda(bool shadow) {
                 if ((lodToUse & mask) != 0) {
                     blockPos = lodWorldPos+ddaPos;
                     block = getBlock(blockPos);
-                    if (shadow && block.x == 4) {block.x = 0;}
+                    //if (shadow && block.x == 4) {block.x = 0;}
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
                     vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
                     if (voxelColor.a > 0) {
@@ -536,7 +534,6 @@ vec4 dda(bool shadow) {
                         stage = 0;
                         stepAnything = false;
                         blockRayPos = ddaPos;
-                        blockSideDist = sideDist;
 
                         ddaPos = ivec3(voxelStartPos);
                         sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
@@ -547,7 +544,7 @@ vec4 dda(bool shadow) {
             if (ddaPos.x < 0 || ddaPos.x >= blockSize || ddaPos.y < 0 || ddaPos.y >= blockSize || ddaPos.z < 0 || ddaPos.z >= blockSize) {
                 stage = 1;
                 ddaPos = blockRayPos;
-                sideDist = blockSideDist;
+                sideDist = ((ddaPos - blockStartPos) + 0.5 + raySign * 0.5) * dist;
             } else {
                 vec4 voxelColor = sampleAtlas(ddaPos.x, ddaPos.y, ddaPos.z, block.x, block.y);
                 if (voxelColor.a > 0) {
@@ -568,7 +565,7 @@ vec4 dda(bool shadow) {
                         addTint(voxelColor, normal, shadow);
                         stage = 1;
                         ddaPos = blockRayPos;
-                        sideDist = blockSideDist;
+                        sideDist = ((ddaPos - blockStartPos) + 0.5 + raySign * 0.5) * dist;
                     }
                 }
             }
@@ -634,7 +631,7 @@ const float[16] xOffsets = float[16](0.0f, -0.25f, 0.25f, -0.375f, 0.125f, -0.12
 const float[16] yOffsets = float[16](0.0f, 0.166667f, -0.388889f, -0.055556f, 0.277778f, -0.277778f, 0.055556f, 0.388889f, -0.462963f, -0.12963f, 0.203704f, -0.351852f, -0.018519f, 0.314815f, -0.240741f, 0.092593f);
 const float Z_NEAR = 0.01f;
 void main() {
-    vec3 camPos = inverse(globalUbo.view)[3].xyz;
+    vec3 camPos = invView[3].xyz;
     ogPos = camPos;
     ogChunkPos = ogPos/chunkSize;
     ogDir = getDir(uv);
@@ -666,23 +663,23 @@ void main() {
     }
     bool airAbove = false;
     bool celestial = false;
-    float rasterDepth = texture(rasterDepth, uv).r;
+    float rasterDepth = textureLod(rasterDepth, uv, 0).r;
     float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
     float fogginessMul = 1.f;
     if (rasterDepth > depth) {
         isSky = false;
         reverseNormShading = false;
         depth = rasterDepth;
-        color = texture(rasterColors, uv);
+        color = textureLod(rasterColors, uv, 0);
         bool isGlowing = color.r >= 1 || color.g > 1 || color.b > 1;
         if (isGlowing) { color.rgb *= 10; celestial = true;}
         color.rgb = fromLinear(color.rgb);
-        primaryNormal = texture(rasterNormals, uv).xyz;
+        primaryNormal = textureLod(rasterNormals, uv, 0).xyz;
         primaryFlatNormal = primaryNormal;
         vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
-        vec4 view = inverse(globalUbo.proj)*clip;
+        vec4 view = invProj*clip;
         view/=view.w;
-        primaryLightPos = (inverse(globalUbo.view)*view).xyz;
+        primaryLightPos = (invView*view).xyz;
         primaryShadowPos = primaryLightPos;
         blockPos = ivec3(primaryLightPos);
         block = ivec2(0);
@@ -768,6 +765,9 @@ void main() {
             blockLighting = min(vec4(1), getLight(primaryLightPos)/maxLightLevel);
             if (globalUbo.season == 2 && airAbove && blockLighting.w > 0.75f && blockLighting.r <= 0.f && blockLighting.g <= 0.f && blockLighting.b <= 0.f) { //snow
                 color = sampleAtlas(primaryVoxelRayPos.x, primaryVoxelRayPos.y, primaryVoxelRayPos.z, 54, 0);
+            }
+            if (globalUbo.renderToggles.x <= 0) {
+                blockLighting.a = pow(blockLighting.a, 2);
             }
         }
         //blockLighting.a *= 1-abs(causticness/50);

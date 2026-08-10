@@ -49,23 +49,23 @@ const float WEIGHTS[11] = float[11](
 
 const float Z_NEAR = 0.01f;
 void main() {
-    float baseDepth = Z_NEAR/texture(ddaDepth, gl_FragCoord.xy/globalUbo.res).r;
-    vec4 baseColor = texture(colors, gl_FragCoord.xy/globalUbo.res);
-    vec4 baseNormal = texture(ddaNormals, gl_FragCoord.xy/globalUbo.res);
-    vec4 color = vec4(0);
+//    float baseDepth = Z_NEAR/texelFetch(ddaDepth, ivec2(gl_FragCoord.xy), 0).r;
+    vec4 baseColor = texelFetch(colors, ivec2(gl_FragCoord.xy), 0);
+    vec4 baseNormal = texelFetch(ddaNormals, ivec2(gl_FragCoord.xy), 0);
+    vec3 color = vec3(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(OFFSETS[i], 0);
         float weight = WEIGHTS[i];
         vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f)/globalUbo.res;
-        vec4 newResult = texture(colors, samplePos);
-        color.rgb += newResult.rgb * weight;
-        //float sampleDepth = Z_NEAR/texture(ddaDepth, samplePos).r;
-        vec4 sampleNormal = texture(ddaNormals, samplePos);
-        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && (sampleNormal.w-baseNormal.w) < 0.02f) {// && abs(sampleDepth-baseDepth) < baseDepth*0.005f) {
-            color.a += newResult.a*weight;
-        } else {
-            color.a += baseColor.a*weight;
-        }
+        vec4 newResult = textureLod(colors, samplePos, 0);
+        color += newResult.rgb * weight;
+//        float sampleDepth = Z_NEAR/textureLod(ddaDepth, samplePos, 0).r;
+//        vec4 sampleNormal = textureLod(ddaNormals, samplePos, 0);
+//        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && abs(sampleDepth-baseDepth) < baseDepth*0.005f) {
+//            color.a += newResult.a*weight;
+//        } else {
+//            color.a += baseColor.a*weight;
+//        }
     }
-    outColor = color;
+    outColor = vec4(color, baseColor.a);
 }

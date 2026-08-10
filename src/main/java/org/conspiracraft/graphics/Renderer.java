@@ -60,6 +60,8 @@ import static org.lwjgl.vulkan.KHRSynchronization2.VK_PIPELINE_STAGE_2_FRAGMENT_
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Renderer {
+    public static boolean forceRated = false;
+
     public static int imageIdx = 0;
     public static int frameIdx = 0;
     public static boolean firstImages = true;
@@ -143,7 +145,9 @@ public class Renderer {
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
                 labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
                 EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                //forceRated = true;
                 drawSSAO(stack);
+                //forceRated = false;
                 EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                 labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
@@ -155,7 +159,9 @@ public class Renderer {
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
                 labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
                 EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                forceRated = true;
                 drawBlur(stack);
+                forceRated = false;
                 EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                 labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
@@ -374,11 +380,11 @@ public class Renderer {
     }
     public static void drawBlur(MemoryStack stack) {
         updatePipeline(stack, 5);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, false, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
         updatePipeline(stack, 6);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, false, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
     }
@@ -570,8 +576,8 @@ public class Renderer {
                 .layerCount(1)
                 .pColorAttachments(colorAttachments)
                 .pDepthAttachment(depthAttachment);
-        if (rated && Settings.upscaleEnabled) {
-            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, Textures.vrs);
+        if ((rated && Settings.upscaleEnabled) || forceRated) {
+            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, forceRated && !Settings.upscaleEnabled ? Textures.vrsTotal : Textures.vrs);
             renderingInfo.pNext(rateAttachment);
         }
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
@@ -588,7 +594,7 @@ public class Renderer {
             for (int y = 0; y < tex.height; y++) {
                 for (int x = 0; x < tex.width; x++) {
                     int i = y * tex.width + x;
-                    if (x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
+                    if (tex == Textures.vrsTotal || x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
                         data.put(i, value);
                     } else {
                         fullResPixels++;
