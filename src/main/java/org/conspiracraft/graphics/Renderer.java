@@ -127,12 +127,42 @@ public class Renderer {
                 globalUBO.update(stack);
                 globalUBO.push();
 
+                VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("Rstr"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawRaster(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawDDA(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawSSAO(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawAA(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawBlur(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                labelInfo.pLabelName(MemoryUtil.memUTF8("GUI"));
+                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                 drawGUI(stack);
+                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
 
                 bindPresentImage(stack);
                 vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
@@ -473,6 +503,7 @@ public class Renderer {
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             System.out.print("Out of date!");
+            Graphics.rebuild();
             return false;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {System.err.println("Failed to acquire next image!");}
         imageIdx = imageIdxBuf.get(0);

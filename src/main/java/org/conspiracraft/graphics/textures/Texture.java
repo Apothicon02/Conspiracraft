@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics.textures;
 
+import org.conspiracraft.Settings;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkSamplerCreateInfo;
 
@@ -9,6 +10,7 @@ import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Texture {
+    public float resDiv = 1;
     public int width;
     public int height;
     public int channels;
@@ -20,6 +22,15 @@ public class Texture {
     public int usage;
     public boolean windowResizable;
 
+    public Texture(float resDiv, int width, int height, int channels, int format, int usage, boolean windowResizable) {
+        this.resDiv = resDiv;
+        this.width = (int)Math.ceil(width/resDiv);
+        this.height = (int)Math.ceil(height/resDiv);
+        this.channels = channels;
+        this.format = format;
+        this.usage = usage;
+        this.windowResizable = windowResizable;
+    }
     public Texture(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         this.width = width;
         this.height = height;

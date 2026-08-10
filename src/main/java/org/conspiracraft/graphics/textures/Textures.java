@@ -31,6 +31,11 @@ public class Textures {
     public static Texture depthOld;
     public static Texture materials;
 
+    public static Texture create(float resMul, int width, int height, int channels, int format, int usage, boolean windowResizable) {
+        Texture texture = new Texture(resMul, width, height, channels, format, usage, windowResizable);
+        textures.addLast(texture);
+        return texture;
+    }
     public static Texture create(int width, int height, int channels, int format, int usage, boolean windowResizable) {
         Texture texture = new Texture(width, height, channels, format, usage, windowResizable);
         textures.addLast(texture);
@@ -46,9 +51,9 @@ public class Textures {
         for (Texture tex : textures) {
             if (tex.windowResizable) {
                 tex.destroy();
-                tex.width = Settings.width;
-                tex.height = Settings.height;
-                if (tex.format != VK_FORMAT_D32_SFLOAT) {tex.format = Swapchain.vkSurfFormat.format();}
+                tex.width = (int)Math.ceil(Settings.width/tex.resDiv);
+                tex.height = (int)Math.ceil(Settings.height/tex.resDiv);
+                if (tex.format != VK_FORMAT_D32_SFLOAT && tex.format != VK_FORMAT_R8_UINT) {tex.format = Swapchain.vkSurfFormat.format();}
                 tex.create(stack);
             }
         }
@@ -68,7 +73,7 @@ public class Textures {
         blurred_horizontally = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         blurred = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         blueNoise = create(64, 64, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
-        vrs = create((int) Math.ceil(Settings.width/16.f), (int) Math.ceil(Settings.height/16.f), 1, VK_FORMAT_R8_UINT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR | VK_IMAGE_USAGE_SAMPLED_BIT, true);
+        vrs = create(16.f, Settings.width, Settings.height, 1, VK_FORMAT_R8_UINT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR | VK_IMAGE_USAGE_SAMPLED_BIT, true);
         colorsOld = create(Settings.width, Settings.height, 4, Swapchain.vkSurfFormat.format(), VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         depthOld = create(Settings.width, Settings.height, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, true);
         materials = create(512, 512, 4, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);

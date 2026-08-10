@@ -171,11 +171,12 @@ public class Device {
     public static void createVkInst(MemoryStack stack) {
         PointerBuffer extBuffer = SDLVulkan.SDL_Vulkan_GetInstanceExtensions();
         int extCount = extBuffer.remaining();
-        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+1);
+        PointerBuffer extensions = MemoryUtil.memAllocPointer(extCount+2);
         for (int i = 0; i < extCount; i++) {
             extensions.put(i, extBuffer.get(i));
         }
         extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
+        extensions.put(extCount+1, memUTF8(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
 
         VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_APPLICATION_INFO)

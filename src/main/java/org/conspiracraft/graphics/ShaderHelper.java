@@ -5,15 +5,10 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.shaderc.Shaderc;
 import org.lwjgl.vulkan.VkShaderModuleCreateInfo;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import static org.conspiracraft.Main.mainFolder;
 import static org.lwjgl.vulkan.VK13.*;
 
 public class ShaderHelper {
@@ -35,7 +30,12 @@ public class ShaderHelper {
         glsl.append(Utils.appendNewlinesAndMerge(Utils.readFile("assets/base/shader/" + path)));
         long compiler = Shaderc.shaderc_compiler_initialize();
         if (compiler == 0) {System.out.print("Failed to create shaderc compiler");}
-        long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, path, "main", 0);
+        long options = Shaderc.shaderc_compile_options_initialize();
+        if (options == 0) {System.out.print("Failed to create shaderc compiler options");}
+//        Shaderc.shaderc_compile_options_set_generate_debug_info(options);
+//        Shaderc.shaderc_compile_options_set_source_language(options, Shaderc.shaderc_source_language_glsl);
+//        Shaderc.shaderc_compile_options_set_optimization_level(options, Shaderc.shaderc_optimization_level_zero);
+        long result = Shaderc.shaderc_compile_into_spv(compiler, glsl, stage, path, "main", options);
         if (result == 0) {System.out.print(path + " compile returned null.");}
         long status = Shaderc.shaderc_result_get_compilation_status(result);
         if (status != Shaderc.shaderc_compilation_status_success) {System.out.print("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));}
@@ -44,6 +44,7 @@ public class ShaderHelper {
         ByteBuffer copy = MemoryUtil.memAlloc(spirv.remaining());
         copy.put(spirv.duplicate().rewind());
         copy.flip();
+        Shaderc.shaderc_compile_options_release(options);
         Shaderc.shaderc_result_release(result);
         Shaderc.shaderc_compiler_release(compiler);
         return copy;

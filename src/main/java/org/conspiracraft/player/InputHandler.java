@@ -12,6 +12,8 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.sdl.SDL_DisplayMode;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.Math;
@@ -24,8 +26,7 @@ import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
 import static org.lwjgl.sdl.SDLMouse.*;
 import static org.lwjgl.sdl.SDLScancode.*;
-import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowPosition;
-import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowSize;
+import static org.lwjgl.sdl.SDLVideo.*;
 
 public class InputHandler {
     public InputHandler() {}
@@ -116,8 +117,19 @@ public class InputHandler {
                             SDL_SetWindowPosition(Window.window, 0, 0);
                             SDL_SetWindowSize(Window.window, 2560, 1440);
                             window.resized(2560, 1440);
+//                            try (MemoryStack stack = MemoryStack.stackPush()) {
+//                                SDL_SetWindowFullscreen(Window.window, true);
+//                                SDL_DisplayMode mode = SDL_DisplayMode.calloc(stack);
+//                                int displayID = SDL_GetDisplayForWindow(Window.window);
+//                                SDL_GetClosestFullscreenDisplayMode(displayID, 2560, 1440, 0.f, true, mode);
+//                                SDL_SetWindowFullscreenMode(Window.window, mode);
+//                                window.resized(2560, 1440);
+//                                SDL_DisplayMode emode = SDL_GetWindowFullscreenMode(Window.window);
+//                                System.out.println(emode.format());
+//                            }
                         } else {
                             isFullscreen = false;
+                            SDL_SetWindowFullscreen(Window.window, false);
                             SDL_SetWindowPosition(Window.window, 0, 32);
                             SDL_SetWindowSize(Window.window, (int) (2560 * 0.8f), (int) (1440 * 0.8f));
                             window.resized((int) (2560 * 0.8f), (int) (1440 * 0.8f));
