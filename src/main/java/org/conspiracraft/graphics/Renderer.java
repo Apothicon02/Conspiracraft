@@ -60,7 +60,6 @@ import static org.lwjgl.vulkan.KHRSynchronization2.VK_PIPELINE_STAGE_2_FRAGMENT_
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Renderer {
-    public static boolean forceRated = false;
 
     public static int imageIdx = 0;
     public static int frameIdx = 0;
@@ -145,9 +144,7 @@ public class Renderer {
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
                 labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
                 EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                //forceRated = true;
                 drawSSAO(stack);
-                //forceRated = false;
                 EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                 labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
@@ -159,9 +156,7 @@ public class Renderer {
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
                 labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
                 EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                forceRated = true;
                 drawBlur(stack);
-                forceRated = false;
                 EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                 labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                 labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
@@ -309,7 +304,7 @@ public class Renderer {
 
     public static void drawRaster(MemoryStack stack){
         updatePipeline(stack, 4);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, false, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 0, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
@@ -348,49 +343,49 @@ public class Renderer {
     }
     public static void drawDDA(MemoryStack stack) {
         updatePipeline(stack, 3);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1, true, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1, 1, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
         updatePipeline(stack, 2);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, true, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
     public static void drawAA(MemoryStack stack) {
         if (Settings.taaEnabled) {
             updatePipeline(stack, 7);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, false, false);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 0, false);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, false, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 0, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
 
             updatePipeline(stack, 8);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, false, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 0, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, false, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 0, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
         }
     }
     public static void drawBlur(MemoryStack stack) {
         updatePipeline(stack, 5);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, true, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, 2, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
         updatePipeline(stack, 6);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, true, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, 2, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
     }
     public static void drawGUI(MemoryStack stack) {
         updatePipeline(stack, 1);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, false, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 0, true);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
@@ -564,26 +559,28 @@ public class Renderer {
                 VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
-    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, boolean rated, boolean clear) {
+    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, int upscaling, boolean clear) {
         VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures, clear);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, clear);
-        VkRect2D renderAreaData = VkRect2D.calloc(stack)
+        depthTex.layoutUnset = false;
+        int w = upscaling == 2 ? eWidth/2 : eWidth, h = upscaling == 2 ? eHeight/2 : eHeight;
+        VkRect2D renderArea = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
-                .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
+                .extent(VkExtent2D.calloc(stack).width(w).height(h));
         VkRenderingInfo renderingInfo = VkRenderingInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_INFO)
-                .renderArea(renderAreaData)
+                .renderArea(renderArea)
                 .layerCount(1)
                 .pColorAttachments(colorAttachments)
                 .pDepthAttachment(depthAttachment);
-        if ((rated && Settings.upscaleEnabled) || forceRated) {
-            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, forceRated && !Settings.upscaleEnabled ? Textures.vrsTotal : Textures.vrs);
+        if (upscaling == 1 && Settings.lowRate) {
+            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, Textures.vrs);
             renderingInfo.pNext(rateAttachment);
         }
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-        vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(eWidth).height(eHeight).minDepth(0).maxDepth(1));
-        vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight)));
+        vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(w).height(h).minDepth(0).maxDepth(1));
+        vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(w).height(h)));
     }
     public static VkRenderingFragmentShadingRateAttachmentInfoKHR getRateAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
         if (tex.isLayoutUnset()) {
@@ -594,7 +591,7 @@ public class Renderer {
             for (int y = 0; y < tex.height; y++) {
                 for (int x = 0; x < tex.width; x++) {
                     int i = y * tex.width + x;
-                    if (tex == Textures.vrsTotal || x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
+                    if (x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
                         data.put(i, value);
                     } else {
                         fullResPixels++;
@@ -610,6 +607,7 @@ public class Renderer {
                     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                     0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
                     VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+            tex.layoutUnset = false;
             VkBufferImageCopy.Buffer imageCopy = VkBufferImageCopy.calloc(1, stack)
                     .bufferOffset(0)
                     .bufferRowLength(0)
@@ -640,8 +638,9 @@ public class Renderer {
             int prevLayout = tex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
                     prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                    prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, clear ? VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT,
                     prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+            tex.layoutUnset = false;
             attachmentInfo.get(i)
                     .sType(VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO)
                     .imageView(tex.imageView)
@@ -662,12 +661,12 @@ public class Renderer {
     public static void bindPresentImage(MemoryStack stack) {
         VkRenderingAttachmentInfo.Buffer colorAttachment = getPresentColorAttachment(stack, currentCmdBuffer, images[imageIdx], imageViews[imageIdx], firstImages ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthImage, depthImageView, VK_IMAGE_LAYOUT_UNDEFINED, true);
-        VkRect2D renderAreaData = VkRect2D.calloc(stack)
+        VkRect2D renderArea = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(eWidth).height(eHeight));
         VkRenderingInfo renderingInfo = VkRenderingInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_RENDERING_INFO)
-                .renderArea(renderAreaData)
+                .renderArea(renderArea)
                 .layerCount(1)
                 .pColorAttachments(colorAttachment)
                 .pDepthAttachment(depthAttachment);
@@ -696,12 +695,12 @@ public class Renderer {
         if (depthImage == image) {
             ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
                     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                    VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                    VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, clear ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
                     VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
         } else {
             ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
                     prevLayout, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                    VK_ACCESS_2_NONE, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                    VK_ACCESS_2_NONE, clear ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
                     VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
         }
         VkRenderingAttachmentInfo attachmentInfo = VkRenderingAttachmentInfo.calloc(stack)

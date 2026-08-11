@@ -59,7 +59,7 @@ public class GlobalUBO extends UBO {
         ((Matrix4f)uniformStorage[3]).set((Matrix4f)uniformStorage[1]);
         ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix());
         ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
-        ((Vector4i)uniformStorage[4]).set(Settings.shadowsEnabled ? 1 : 0, Settings.reflectionsEnabled ? 1 : 0, Settings.upscaleEnabled ? 1 : 0, Settings.taaEnabled ? 1 : 0);
+        ((Vector4i)uniformStorage[4]).set(Settings.shadowsEnabled ? 1 : 0, Settings.reflectionsEnabled ? 1 : 0, 0, 0);
         ((Vector4f)uniformStorage[5]).set(World.worldType.getSkylight());
         ((Vector3f)uniformStorage[6]).set(StarSystem.relativePos);
         uniformStorage[7] = Swapchain.hdr ? 1 : 0;

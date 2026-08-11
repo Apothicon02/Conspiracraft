@@ -40,12 +40,8 @@ public class Texture {
         this.windowResizable = windowResizable;
     }
 
-    private boolean layoutUnset = true;
+    public boolean layoutUnset = true;
     public boolean isLayoutUnset() {
-        if (layoutUnset) {
-            layoutUnset = false;
-            return true;
-        }
         return layoutUnset;
     }
 

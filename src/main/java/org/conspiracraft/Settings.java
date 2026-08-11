@@ -20,8 +20,8 @@ public class Settings {
     public static boolean shadowsEnabled = true;
     public static boolean reflectionsEnabled = true;
     public static boolean taaEnabled = true;
-    public static boolean upscaleEnabled = true;
     public static boolean dynamicFoVEnabled = true;
+    public static boolean lowRate = true;
     public static float guiScale = 1.25f;
 
     public static void load() throws IOException {
@@ -65,10 +65,10 @@ public class Settings {
         } else {
             data.addProperty("taaEnabled", taaEnabled);
         }
-        if (data.get("upscaleEnabled") != null) {
-            upscaleEnabled = data.get("upscaleEnabled").getAsBoolean();
+        if (data.get("lowRate") != null) {
+            lowRate = data.get("lowRate").getAsBoolean();
         } else {
-            data.addProperty("upscaleEnabled", upscaleEnabled);
+            data.addProperty("lowRate", lowRate);
         }
         if (data.get("outputMode") != null) {
             outputMode = data.get("outputMode").getAsInt();
@@ -100,7 +100,7 @@ public class Settings {
         data.addProperty("shadowsEnabled", shadowsEnabled);
         data.addProperty("reflectionsEnabled", reflectionsEnabled);
         data.addProperty("taaEnabled", taaEnabled);
-        data.addProperty("upscaleEnabled", upscaleEnabled);
+        data.addProperty("lowRate", lowRate);
         data.addProperty("outputMode", outputMode);
         data.addProperty("muted", muted);
         data.addProperty("masterVolume", masterVolume);

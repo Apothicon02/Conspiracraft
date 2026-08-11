@@ -8,7 +8,7 @@ public class UpscaleButton extends Button {
 
     @Override
     public void clicked() {
-        Settings.upscaleEnabled = !Settings.upscaleEnabled;
+        Settings.lowRate = !Settings.lowRate;
         AudioController.playButtonSound();
     }
 }
