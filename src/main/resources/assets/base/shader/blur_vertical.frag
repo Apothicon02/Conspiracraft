@@ -56,8 +56,8 @@ void main() {
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(0, OFFSETS[i]);
         float weight = WEIGHTS[i];
-        vec2 samplePos = (clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f)/globalUbo.res;
-        vec4 newResult = textureLod(colors, samplePos, 0);
+        ivec2 samplePos = ivec2(clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f);
+        vec4 newResult = texelFetch(colors, samplePos, 0);
         color += newResult.rgb * weight;
 //        float sampleDepth = Z_NEAR/textureLod(ddaDepth, samplePos, 0).r;
 //        vec4 sampleNormal = textureLod(ddaNormals, samplePos, 0);

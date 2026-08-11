@@ -17,6 +17,6 @@ layout(location = 0) in vec2 uv;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    outColor = texture(colors, uv);
-    gl_FragDepth = texture(depth, uv).r;
+    outColor = textureLod(colors, uv, 0);
+    gl_FragDepth = textureLod(depth, uv, 0).r;
 }

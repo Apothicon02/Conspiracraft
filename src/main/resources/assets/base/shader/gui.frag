@@ -39,8 +39,8 @@ const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
     //outColor = texelFetch(atlas, ivec3(gl_FragCoord.xy, 0), 0)*20;
-    vec4 bgColor = texture(colors, uv);
-    vec4 blurredBgColor = texture(blurred, uv);
+    vec4 bgColor = textureLod(colors, uv, 0);
+    vec4 blurredBgColor = textureLod(blurred, uv/2, 0);
     bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(min(blurredBgColor.a, bgColor.a), 1.2f)));
     bgColor.rgb = mix(bgColor.rgb, max(bgColor.rgb, blurredBgColor.rgb), clamp(max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))-1, 0, 1)); //bloom
     blurredBgColor.rgb*=blurredBgColor.a;

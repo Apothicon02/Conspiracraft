@@ -1,0 +1,25 @@
+layout(set = 0, binding = 0) readonly uniform GlobalUBO {
+    mat4 view;
+    mat4 proj;
+    mat4 viewPrev;
+    mat4 projPrev;
+    ivec4 renderToggles;
+    vec4 skylight;
+    vec3 sun;
+    int hdr;
+    float time;
+    ivec2 res;
+} globalUbo;
+vec2 positions[3] = vec2[](
+    vec2(0, -3),
+    vec2(0, 0),
+    vec2(-3, 0)
+);
+
+layout(location = 0) out vec2 uv;
+
+void main() {
+    vec2 pos = positions[gl_VertexIndex];
+    gl_Position = vec4(pos, 0, 1.0);
+    uv = (pos+1)/2;
+}
