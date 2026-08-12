@@ -29,12 +29,6 @@ layout(location = 1) in vec2 localUV;
 
 layout(location = 0) out vec4 outColor;
 
-vec3 fromLinear(vec3 linearRGB){
-    bvec3 cutoff = lessThan(linearRGB, vec3(0.0031308));
-    vec3 higher = vec3(1.055)*pow(linearRGB, vec3(1.0/2.4)) - vec3(0.055);
-    vec3 lower = linearRGB * vec3(12.92);
-    return vec3(mix(higher, lower, cutoff));
-}
 const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
@@ -50,7 +44,6 @@ void main() {
     } else {
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(localUV.x*pushUbo.size.x), pushUbo.atlasOffset.y+(localUV.y*pushUbo.size.y));
         vec4 guiColor = pushUbo.tex < 0 ? vec4(1) : (pushUbo.tex == 0 ? texelFetch(gui, ivec3(coords, pushUbo.layer), 0) : texelFetch(items, coords, 0));
-        guiColor.rgb = fromLinear(guiColor.rgb);
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {
             outColor = vec4(mix(blurredBgColor.rgb/max(1, max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))), guiColor.rgb, guiColor.a), 1.f);
