@@ -350,7 +350,7 @@ public class Renderer {
 //        unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
         updateComputePipeline(stack, 0);
         bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
-        vkCmdDispatch(currentCmdBuffer, (int)Math.ceil(eWidth/8.f), (int)Math.ceil(eHeight/8.f), 1);
+        vkCmdDispatch(currentCmdBuffer, ((int)Math.ceil(eWidth/16.f))*((int)Math.ceil(eHeight/8.f)), 1, 1);
         unbindComputeImages(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
