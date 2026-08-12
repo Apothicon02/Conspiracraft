@@ -139,7 +139,9 @@ public class InputHandler {
                     if (keyRelease(SDL_SCANCODE_F1)) {
                         GUI.showUI = !GUI.showUI;
                     }
-
+                    if (keyRelease(SDL_SCANCODE_F4)) {
+                        System.out.println(Main.fps+"fps | "+Main.ms+"ms");
+                    }
                     if (!GUI.pauseMenuOpen) {
                         if (keyRelease(SDL_SCANCODE_TAB)) {
                             GUI.inventoryOpen = !GUI.inventoryOpen;

@@ -19,6 +19,7 @@ import static org.lwjgl.vulkan.VK14.*;
 public class Pipelines {
     public static long pipelineLayout;
     public static Pipeline[] pipelines;
+    public static ComputePipeline[] computePipelines;
     private static ExecutorService pool;
     public static void init(MemoryStack stack) {
         pipelines = new Pipeline[]{
@@ -27,9 +28,15 @@ public class Pipelines {
                 new Pipeline("raster.vert", "raster.frag", 2),
                 new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 1), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 1),
                 new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
+        computePipelines = new ComputePipeline[]{new ComputePipeline("dda.comp")};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(() -> {
+            try {
+                pipeline.compile();
+            } catch (IOException e) {e.printStackTrace();}
+        });}
+        for (ComputePipeline pipeline : computePipelines) {pool.submit(() -> {
             try {
                 pipeline.compile();
             } catch (IOException e) {e.printStackTrace();}
@@ -84,7 +91,7 @@ public class Pipelines {
         multisampling.rasterizationSamples(VK_SAMPLE_COUNT_1_BIT);
 
         VkPushConstantRange.Buffer pushConstRanges = VkPushConstantRange.calloc(1, stack)
-                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+                .stageFlags(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT)
                 .offset(0)
                 .size(Renderer.pushUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
@@ -113,8 +120,8 @@ public class Pipelines {
             for (int f = 0; f < formats.limit(); f++) {
                 formats.put(f, vkSurfFormat.format());
                 colorBlendAttachments.get(f)
-                    .colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
-                    .blendEnable(false);
+                        .colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
+                        .blendEnable(false);
             }
             VkPipelineFragmentShadingRateStateCreateInfoKHR shadeState = VkPipelineFragmentShadingRateStateCreateInfoKHR.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR)
@@ -166,6 +173,28 @@ public class Pipelines {
 
             LongBuffer pipelineBuf = stack.mallocLong(1);
             if (vkCreateGraphicsPipelines(vkDevice, pipelineCache, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
+                throw new RuntimeException("failed to create graphics pipeline!");
+            }
+            pipeline.vkPipeline = pipelineBuf.get(0);
+        }
+        for (int i = 0; i < computePipelines.length; i++) {
+            ComputePipeline pipeline = computePipelines[i];
+
+            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(1, stack);
+            shaderStages.get(0)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
+                    .stage(VK_SHADER_STAGE_COMPUTE_BIT)
+                    .module(pipeline.comp)
+                    .pName(stack.UTF8("main"));
+            VkComputePipelineCreateInfo.Buffer pipelineInfo = VkComputePipelineCreateInfo.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO)
+                    .stage(shaderStages.get(0))
+                    .layout(pipelineLayout)
+                    .basePipelineHandle(VK_NULL_HANDLE) // Optional
+                    .basePipelineIndex(-1); // Optional
+
+            LongBuffer pipelineBuf = stack.mallocLong(1);
+            if (vkCreateComputePipelines(vkDevice, pipelineCache, pipelineInfo, null, pipelineBuf) != VK_SUCCESS) {
                 throw new RuntimeException("failed to create graphics pipeline!");
             }
             pipeline.vkPipeline = pipelineBuf.get(0);

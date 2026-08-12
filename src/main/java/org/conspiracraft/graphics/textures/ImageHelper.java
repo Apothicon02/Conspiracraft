@@ -171,4 +171,12 @@ public class ImageHelper {
                 .pImageMemoryBarriers(barrier);
         vkCmdPipelineBarrier2(cmdBuffer, depInfo);
     }
+
+    public static void transitionStorageWrite(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
+        transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
+                VK_ACCESS_2_NONE, VK_ACCESS_2_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT);
+        tex.layoutUnset = false;
+    }
 }

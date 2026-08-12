@@ -88,6 +88,21 @@ public class Descriptors {
                         .pImageInfo(imageInfo);
                 b++;
             }
+            for (Texture tex : Textures.textures) {
+                VkDescriptorImageInfo.Buffer imageInfo = VkDescriptorImageInfo.calloc(1, stack)
+                        .imageLayout(tex.computeWritable ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+                        .imageView(tex.imageView)
+                        .sampler(tex.computeWritable ? VK_NULL_HANDLE : tex.sampler);
+                descriptorWrites.get(b)
+                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                        .dstSet(descriptorSets[i])
+                        .dstBinding(b)
+                        .dstArrayElement(0)
+                        .descriptorType(tex.computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                        .descriptorCount(1)
+                        .pImageInfo(imageInfo);
+                b++;
+            }
             vkUpdateDescriptorSets(vkDevice, descriptorWrites, null);
         }
     }
@@ -109,6 +124,12 @@ public class Descriptors {
         for (int i = 0; i < Textures.textures.size(); i++) {
             poolSizes.get(b)
                     .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .descriptorCount(FRAMES_IN_FLIGHT);
+            b++;
+        }
+        for (int i = 0; i < Textures.textures.size(); i++) {
+            poolSizes.get(b)
+                    .type(textures.get(i).computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                     .descriptorCount(FRAMES_IN_FLIGHT);
             b++;
         }
@@ -149,6 +170,14 @@ public class Descriptors {
                     .stageFlags(VK_SHADER_STAGE_FRAGMENT_BIT);
             b++;
         }
+        for (int i = 0; i < Textures.textures.size(); i++) {
+            layoutBindings.get(b)
+                    .binding(b)
+                    .descriptorType(textures.get(i).computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .descriptorCount(1)
+                    .stageFlags(VK_SHADER_STAGE_COMPUTE_BIT);
+            b++;
+        }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
@@ -160,6 +189,6 @@ public class Descriptors {
         descriptorSetLayouts = new long[]{descriptorSetLayoutsBuf.get(0)};
     }
     public static int descriptorCount() {
-        return UniformBuffer.uniformBuffers.size()+ShaderStorageBuffer.storageBuffers.size()+textures.size();
+        return UniformBuffer.uniformBuffers.size()+ShaderStorageBuffer.storageBuffers.size()+(textures.size()*2);
     }
 }

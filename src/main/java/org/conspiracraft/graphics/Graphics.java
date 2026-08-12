@@ -69,14 +69,14 @@ public class Graphics {
         indexBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, false);
         BufferHelper.copyBuffer(stack, indexStagingBuf.buffer[0], indexBuf.buffer[0], bufferSize);
 
-        globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, globalUBO);
+        globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, globalUBO);
 
-        regionSSBO = new ShaderStorageBuffer(stack, regionSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
-        lightSSBO = new ShaderStorageBuffer(stack, lightSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT, false);
+        regionSSBO = new ShaderStorageBuffer(stack, regionSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        lightSSBO = new ShaderStorageBuffer(stack, lightSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}
@@ -110,6 +110,9 @@ public class Graphics {
         }
         //pipeline
         for (Pipeline pipeline : pipelines) {
+            vkDestroyPipeline(vkDevice, pipeline.vkPipeline, null);
+        }
+        for (ComputePipeline pipeline : computePipelines) {
             vkDestroyPipeline(vkDevice, pipeline.vkPipeline, null);
         }
         vkDestroyPipelineLayout(vkDevice, pipelineLayout, null);

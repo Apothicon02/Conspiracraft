@@ -80,7 +80,7 @@ public class PushUBO {
             };
         }
         buf.rewind();
-        vkCmdPushConstants(Renderer.currentCmdBuffer, Pipelines.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, buf);
+        vkCmdPushConstants(Renderer.currentCmdBuffer, Pipelines.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 0, buf);
     }
 
     private int align(int alignment) {
