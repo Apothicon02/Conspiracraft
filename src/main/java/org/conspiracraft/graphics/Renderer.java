@@ -355,7 +355,7 @@ public class Renderer {
     }
     public static void drawSSAO(MemoryStack stack) {
         updatePipeline(stack, 2);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 0, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
@@ -582,10 +582,10 @@ public class Renderer {
                 .layerCount(1)
                 .pColorAttachments(colorAttachments)
                 .pDepthAttachment(depthAttachment);
-        if (upscaling == 1 && Settings.lowRate) {
-            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, Textures.vrs);
-            renderingInfo.pNext(rateAttachment);
-        }
+//        if (upscaling == 1 && Settings.upscaled) {
+//            VkRenderingFragmentShadingRateAttachmentInfoKHR rateAttachment = getRateAttachment(stack, currentCmdBuffer, Textures.vrs);
+//            renderingInfo.pNext(rateAttachment);
+//        }
         vkCmdBeginRendering(currentCmdBuffer, renderingInfo);
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(w).height(h).minDepth(0).maxDepth(1));
