@@ -433,7 +433,7 @@ public class Renderer {
 //        glBufferData(GL_SHADER_STORAGE_BUFFER, colorBuffer, GL_DYNAMIC_DRAW);
 //        drawCubes(1024);
     }
-    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1, 0.95f, 0.4f), new Vector3f(0.72f, 0.05f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1, 1, 0.1f)};
+    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
     public static void drawStars() {
 //        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
 //        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
@@ -451,14 +451,14 @@ public class Renderer {
                 Matrix4f starMatrix = new Matrix4f()
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
                         .setTranslation(starPos)
-                        .scale(starSize*3);
+                        .scale(starSize*5);
                 //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
                 Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
 //                    colorBuffer.put(color.x*12);
 //                    colorBuffer.put(color.y*12);
 //                    colorBuffer.put(color.z*12);
 //                    colorBuffer.put(2);
-                drawCube(starMatrix, new Vector4f(color.x()*2.5f, color.y()*2.5f, color.z()*2.5f, 1.f));
+                drawCube(starMatrix, new Vector4f(color.x()*1.02f, color.y()*1.02f, color.z()*1.02f, 1.f));
             }
         }
 //        modelBuffer.flip();

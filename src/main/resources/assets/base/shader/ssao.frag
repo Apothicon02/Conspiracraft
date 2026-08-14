@@ -108,5 +108,5 @@ void main() {
 //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     float antiAO = normal.a;
-    outColor = antiAO > 0.95f ? color : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO));
+    outColor = antiAO > 0.95f ? vec4(color.rgb, 1) : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO));
 }
