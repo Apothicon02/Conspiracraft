@@ -17,55 +17,35 @@ layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
 
-const int SAMPLE_COUNT = 11;
+const int SAMPLE_COUNT = 5;
 
-const float OFFSETS[11] = float[11](
--9.47074270360747,
--7.4768919324809096,
--5.4830484388316485,
--3.4892105931983437,
--1.4953752517922876,
-0.4984572288165547,
-2.4922929486601455,
-4.486128941894109,
-6.479969366444332,
-8.473816318234265,
-10
+const float OFFSETS[5] = float[5](
+-3.4458098836553415,
+-1.4767017588568079,
+0.492228282731395,
+2.4612181104350137,
+4
 );
 
-const float WEIGHTS[11] = float[11](
-0.06713590953428764,
-0.08274259114380782,
-0.0970834630671909,
-0.10844310372695917,
-0.11531852921840198,
-0.11674539038922478,
-0.11251753407230614,
-0.10323896289874948,
-0.09017933222573615,
-0.07499144416001882,
-0.03160373956331709
+const float WEIGHTS[5] = float[5](
+0.1835121872508657,
+0.2492203893736597,
+0.26495143816720684,
+0.2205044383606221,
+0.08181154684764567
 );
 
 const float Z_NEAR = 0.01f;
 void main() {
-//    float baseDepth = Z_NEAR/texelFetch(ddaDepth, ivec2(gl_FragCoord.xy), 0).r;
     vec4 baseColor = texelFetch(colors, ivec2(gl_FragCoord.xy), 0);
     vec4 baseNormal = texelFetch(ddaNormals, ivec2(gl_FragCoord.xy), 0);
-    vec3 color = vec3(0);
+    vec4 color = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
-        vec2 offset = vec2(0, OFFSETS[i]);
+        vec2 offset = vec2(0, OFFSETS[i])/2;
         float weight = WEIGHTS[i];
-        ivec2 samplePos = ivec2(clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.5f);
-        vec4 newResult = texelFetch(colors, samplePos, 0);
-        color += newResult.rgb * weight;
-//        float sampleDepth = Z_NEAR/textureLod(ddaDepth, samplePos, 0).r;
-//        vec4 sampleNormal = textureLod(ddaNormals, samplePos, 0);
-//        if (dot(sampleNormal.xyz, baseNormal.xyz) >= 0.9f && abs(sampleDepth-baseDepth) < baseDepth*0.005f) {
-//            color.a += newResult.a*weight;
-//        } else {
-//            color.a += baseColor.a*weight;
-//        }
+        vec2 samplePos = vec2(clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.25f);
+        vec4 newResult = textureLod(colors, samplePos/(globalUbo.res/2.f), 0);
+        color += newResult * weight;
     }
-    outColor = vec4(color, baseColor.a);
+    outColor = color;
 }

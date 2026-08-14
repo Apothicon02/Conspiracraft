@@ -70,14 +70,43 @@ float getAO(float depth, vec4 normal) {
     occlusion = 1.0 - occlusion / KERNEL_SIZE;
     return pow(clamp(occlusion, 0.f, 1), 2.25f);
 }
+vec4 normal = vec4(0);
+float shade = 1.f;
+bool sampleShade(int x, int y) {
+    ivec2 offCoords = ivec2(gl_FragCoord.x+x, gl_FragCoord.y+y);
+    vec4 offNormal = texelFetch(ddaNormals, offCoords, 0);
+    if (dot(offNormal.xyz, normal.xyz) >= 0.9f) {
+        float potentialShade = texelFetch(ddaColors, offCoords, 0).a;
+        if (potentialShade <= 1) {
+            shade = potentialShade;
+            return false;
+        }
+    }
+    return true;
+}
 void main() {
     vec4 color = textureLod(ddaColors, uv, 0);
     float depth = textureLod(ddaDepth, uv, 0).r;
-    vec4 normal = textureLod(ddaNormals, uv, 0);
+    normal = textureLod(ddaNormals, uv, 0);
+    shade = color.a;
+    if (shade > 2) { // && scaledCoords.x > 0 && scaledCoords.y > 0 && scaledCoords.x < globalUbo.res.x-1 && scaledCoords.y < globalUbo.res.y-1
+        shade = 1.f;
+        if (sampleShade(-1, 0)) {
+            if (sampleShade(0, -1)) {
+                if (sampleShade(1, 0)) {
+                    sampleShade(0, 1);
+                }
+            }
+        }
+    }
+    //if (shade < 1) {shade = 0.1f;}
+    color.rgb*=min(1, shade);
+//    outColor.rgb = color.rgb;
+//    outColor.a = 1;
 //    vec3 randVec = hash()/1.732f;
 //    if (length(randVec) > 1.f) {outColor.rgb = vec3(1, 0, 0);} else {outColor.rgb = vec3(0, 1, 0);}
 //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     float antiAO = normal.a;
-    outColor = antiAO > 0.95f ? color : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO)); //normal.a is fogginess
+    outColor = antiAO > 0.95f ? color : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO));
 }

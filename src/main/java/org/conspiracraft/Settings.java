@@ -21,7 +21,7 @@ public class Settings {
     public static boolean reflectionsEnabled = true;
     public static boolean taaEnabled = true;
     public static boolean dynamicFoVEnabled = true;
-    public static boolean upscaled = true;
+    public static boolean upscaled = false;
     public static float guiScale = 1.25f;
 
     public static void load() throws IOException {

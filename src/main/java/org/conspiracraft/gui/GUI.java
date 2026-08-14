@@ -170,7 +170,7 @@ public class GUI {
             drawingButton = new DynamicFoVButton();
             drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (Settings.dynamicFoVEnabled ? " FoV VFX " : "No FoV VFX").toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new UpscaleButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, (Settings.upscaled ? "Upscaled" : "Native").toCharArray(), menuBgColor, new Vector4f(1.f));
+            drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, (Settings.upscaled ? "Upscaled" : "  Native  ").toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new ShadowsButton();
             drawButton(true, 0.5f, 0.5f, -35.5f, (-charHeight)-1, (Settings.shadowsEnabled ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
             drawingButton = new TAAButton();

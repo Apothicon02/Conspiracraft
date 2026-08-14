@@ -417,7 +417,7 @@ vec4 dda(bool shadow) {
     vec3 voxelStartPos = vec3(0);
     vec3 voxelPos = vec3(0);
     while (true) {
-        steps++;
+        //steps++;
         bool stepAnything = true;
         if (stage == 3) {
             if (abs(dot(ddaPos-ogChunkPos, ogChunkPos-ddaPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
@@ -605,14 +605,18 @@ const int localSize = 8;
 const int localSizeSub1 = localSize-1;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main() {
+    ivec2 res = globalUbo.renderToggles.z == 1 ? ivec2(globalUbo.res/2.f) : globalUbo.res;
     int group = int(gl_WorkGroupID.x);
-    int groupsPerTile = swizzle * ((globalUbo.res.y + localSizeSub1) / localSize);
+    int groupsPerTile = swizzle * ((res.y + localSizeSub1) / localSize);
     int tile = group / groupsPerTile;
     int localIdx = group % groupsPerTile;
-    int tilesPerRow = (((globalUbo.res.x + localSizeSub1) / localSize) + swizzle - 1) / swizzle;
+    int tilesPerRow = (((res.x + localSizeSub1) / localSize) + swizzle - 1) / swizzle;
     ivec2 coords = ivec2(((tile % tilesPerRow) * swizzle) + (localIdx % swizzle), (localIdx / swizzle)) * localSize + ivec2(gl_LocalInvocationID.xy);
-    //ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
-    vec2 uv = coords/vec2(globalUbo.res);
+    bool xOdd = bool(int(coords.x*2) % 2 == 1);
+    bool yOdd = bool(int(coords.y*2) % 2 == 1);
+    bool isChecker = (xOdd && yOdd) || (!xOdd && !yOdd);
+    bool doShadows = isChecker;
+    vec2 uv = coords/vec2(res);
     vec3 camPos = invView[3].xyz;
     ogPos = camPos;
     ogChunkPos = ogPos/chunkSize;
@@ -759,7 +763,7 @@ void main() {
         float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);
         vec3 sunDir = normalize(source - primaryShadowPos);
-        if (!isSky) {
+        if (!isSky && doShadows) {
             rayPos = primaryShadowPos;
             rayDir = sunDir;
             vec4 shadowColor = vec4(0);
@@ -772,7 +776,7 @@ void main() {
             }
             if (shadowColor.a > 0.0f) {
                 shadowFactor = !celestialSource ? 0.02f : (weakShadow ? 0.875f : 0.5f);//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-                blockLighting.a *= shadowFactor;
+                //blockLighting.a *= shadowFactor;
             }
         }
         vec3 idealReflectDir = reflect(ogDir, primaryTint.a < 1 ? primaryTintNormal : primaryNormal);
@@ -781,7 +785,7 @@ void main() {
             vec3 temp = abs(reflectDir);
             color.r = (temp.r+temp.g+temp.b)/2.5f;
         }
-        if (reflectivity > 0.f) {
+        if (reflectivity > 0.f && !doShadows) {
             vec3 viewDir = normalize(ogDir);
             vec3 halfVec = normalize(viewDir-reflectDir);
             float ang = max(dot(viewDir, halfVec), 0.f);
@@ -833,7 +837,7 @@ void main() {
     outNormal.a = mix(outNormal.a, 1, tintAmt);
 //    color = vec4(mix(vec3(0, 1, 0), vec3(1, 0, 0), clamp(steps/200.f, 0, 1)), 1);
 //    outNormal.a = 1;
-    imageStore(colors, coords, vec4(color.rgb, 1));
+    imageStore(colors, coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(shadowFactor, 1, max(fogginess, max(blockLighting.r, max(blockLighting.g, blockLighting.b))))) : 3)));
     imageStore(depths, coords, vec4(depth, 0, 0, 0));
     imageStore(normals, coords, outNormal);
 }

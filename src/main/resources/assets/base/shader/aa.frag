@@ -28,9 +28,12 @@ vec2 reproject(vec3 worldPos) {
 
 const float Z_NEAR = 0.01f;
 void main() {
-    float baseDepth = textureLod(depth, uv, 0).r;
-    vec4 baseColor = textureLod(colors, uv, 0);
-    vec4 baseNormal = textureLod(normals, uv, 0);
+    float scale = globalUbo.renderToggles.z == 1 ? 0.5f : 1.f;
+    vec2 scaledCoords = gl_FragCoord.xy*scale;
+    vec2 scaledUv = uv*scale;
+    float baseDepth = textureLod(depth, scaledUv, 0).r;
+    vec4 baseColor = textureLod(colors, scaledUv, 0);
+    vec4 baseNormal = textureLod(normals, scaledUv, 0);
     vec4 color = baseColor;
     vec2 uvNdc = (uv * 2.0) - 1.0;
     vec4 ndc = vec4(uvNdc, baseDepth, 1.0);
@@ -39,15 +42,15 @@ void main() {
     vec4 worldPos = inverse(globalUbo.view) * viewPos;
     worldPos /= worldPos.w;
     vec2 reprojectedPos = reproject(worldPos.xyz);
-    if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < 1.f && reprojectedPos.y >= 0.f && reprojectedPos.y < 1.f)) { reprojectedPos = uv; }
+    if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
     float oldDepth = textureLod(depthOld, reprojectedPos, 0).r;
     if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
         float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
         int radius = velocity < 0.6f ? 2 : 1;
         vec4 boxMin = vec4(1000);
         vec4 boxMax = vec4(-1000);
-        for (int x = int(gl_FragCoord.x-radius); x <= gl_FragCoord.x+radius; x++) {
-            for (int y = int(gl_FragCoord.y-radius); y <= gl_FragCoord.y+radius; y++) {
+        for (int x = int(scaledCoords.x-radius); x <= scaledCoords.x+radius; x++) {
+            for (int y = int(scaledCoords.y-radius); y <= scaledCoords.y+radius; y++) {
                 vec4 nearColor = texelFetch(colors, ivec2(x, y), 0);
                 boxMin = min(boxMin, nearColor);
                 boxMax = max(boxMax, nearColor);
