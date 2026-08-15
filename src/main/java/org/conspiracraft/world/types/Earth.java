@@ -205,11 +205,15 @@ public class Earth extends WorldType {
                                 riverNoise = riverNoise > 0.5f ? 1-riverNoise : riverNoise;
                                 riverNoise = Math.max(0, riverNoise-0.48f)*50;
                                 double unriverness = 1-riverNoise;
+                                mountainness *= 1+((0.1f-(Math.clamp(centDist, 0.1f, 0.2f)-0.1f))*25);
+                                double snowPlateauness = (0.05f-(Math.clamp(centDist, 0.1f, 0.15f)-0.1f))*20;
+                                double unsnowPlateauness = 1-snowPlateauness;
+                                mountainness*=unsnowPlateauness;
                                 double elevation = (elevationNoise * (125 * Math.max(desertness/3, mountainness)) * Math.max(0.03f, unriverness))-(25*(1+mountainness)*Math.max(0, riverNoise-0.5f));
-                                double midElevation = (0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f)) * 6.667f;
+                                double midElevation = ((0.15f - (Math.clamp(centDist, 0.2f, 0.35f) - 0.2f))+(snowPlateauness*0.2f)) * 6.667f;
                                 double baseHilliness = SimplexNoise.noise((x + generationSize) / 500.f, (z + generationSize) / 500.f);
                                 double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d)*unriverness;
-                                double plateauDist = Math.max(0, detailNoise*0.34f)+Math.clamp(Math.min(new Vector2f(halfSize+eigthSize, halfSize).distance(x, z), Math.min(new Vector2f(halfSize+eigthSize, halfSize-eigthSize).distance(x, z), Math.min(new Vector2f(halfSize-eigthSize, halfSize+eigthSize).distance(x, z), new Vector2f(halfSize, halfSize-eigthSize).distance(x, z))))/250, 0, 1);
+                                double plateauDist = Math.max(0, detailNoise*0.34f)+Math.clamp(Math.min(new Vector2f(halfSize+(eigthSize*1.35f), halfSize).distance(x, z), Math.min(new Vector2f(halfSize+eigthSize, halfSize-eigthSize).distance(x, z), Math.min(new Vector2f(halfSize-eigthSize, halfSize+eigthSize).distance(x, z), new Vector2f(size-eigthSize, eigthSize*1.35f).distance(x, z))))/250, 0, 1);
                                 if (plateauDist < 1) {
                                     double unplateauness = Math.max(0, (Math.max(0.9f, plateauDist)-0.9f)*10);
                                     baseHilliness*=unplateauness;
@@ -219,7 +223,7 @@ public class Earth extends WorldType {
                                 if (baseHilliness < 0.f) {
                                     baseHilliness *= -0.5;
                                 }
-                                double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness;
+                                double hilliness = (Math.max(0, baseHilliness) * 35)  * midElevation * undesertness * unsnowPlateauness;
                                 //riverness *= 1-centerElevation;
                                 double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
                                 double islandsNoise = ogIslandsNoise;
@@ -421,8 +425,8 @@ public class Earth extends WorldType {
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
 
         final Random islandRand = new Random(World.seed);
-        for (int x = 0; x < Math.min(size, generationSize/2); x++) {
-            for (int z = generationSize/2; z < Math.min(size, generationSize); z++) {
+        for (int x = 0; x < Math.min(size, generationSize*0.4f); x++) {
+            for (int z = (int)(generationSize*0.6f); z < Math.min(size, generationSize); z++) {
 //                double roofedForestDist = new Vector2f(0, size*0.67f).distance(x, z);
 //                double unroofedForestness = (Math.clamp(roofedForestDist, 1000, 2000)-1000) / 1000.f;
 //                double roofedForestness = 1-unroofedForestness;
