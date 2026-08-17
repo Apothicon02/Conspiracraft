@@ -23,6 +23,7 @@ layout(set = 0, binding = 12) uniform sampler2D colors;
 layout(set = 0, binding = 15) uniform sampler3D gui;
 layout(set = 0, binding = 16) uniform sampler2D items;
 layout(set = 0, binding = 19) uniform sampler2D blurred;
+layout(set = 0, binding = 26) uniform sampler2D bloom;
 //layout(set = 0, binding = 24) uniform sampler2D materials;layout(set = 0, binding = 7) uniform sampler3D atlas;
 layout(location = 0) in vec2 uv;
 layout(location = 1) in vec2 localUV;
@@ -32,15 +33,12 @@ layout(location = 0) out vec4 outColor;
 const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
-    //outColor = texelFetch(atlas, ivec3(gl_FragCoord.xy, 0), 0)*20;
     vec4 bgColor = textureLod(colors, uv, 0);
-    vec4 blurredBgColor = textureLod(blurred, uv/2, 0);
     bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(bgColor.a, 1.2f)));
-    vec3 bloom = blurredBgColor.rgb * smoothstep(0.5f, 1.5f, max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b)));
-    bgColor.rgb += bloom * 0.175f;
-    //bgColor.rgb = mix(bgColor.rgb, max(bgColor.rgb, blurredBgColor.rgb), clamp((max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))-1)*0.2f, 0, 0.2f)); //bloom
+    vec3 bloomColor = textureLod(bloom, uv/2, 0).rgb;
+    bgColor.rgb+=bloomColor;
+    vec4 blurredBgColor = textureLod(blurred, uv/2, 0);
     blurredBgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(blurredBgColor.a, 1.2f)));
-    //bgColor.rgb = vec3(blurredBgColor.a);
     if (pushUbo.color.a == -1.f) {
         outColor = bgColor;
     } else {

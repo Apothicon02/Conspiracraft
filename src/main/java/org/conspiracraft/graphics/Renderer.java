@@ -306,7 +306,7 @@ public class Renderer {
 
     public static void drawRaster(MemoryStack stack){
         updatePipeline(stack, 4);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 0, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
@@ -356,43 +356,43 @@ public class Renderer {
     }
     public static void drawSSAO(MemoryStack stack) {
         updatePipeline(stack, 2);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 0, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
     public static void drawAA(MemoryStack stack) {
         if (Settings.taaEnabled || Settings.upscaled) {
             updatePipeline(stack, 7);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 0, false);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, false);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 0, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
 
             updatePipeline(stack, 8);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 0, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 0, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
         }
     }
     public static void drawBlur(MemoryStack stack) {
         updatePipeline(stack, 5);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally}, Textures.depth2, 2, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally, Textures.bloom_horizontally}, Textures.depth2, 4, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image}, Textures.depth2.image);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image, Textures.bloom_horizontally.image}, Textures.depth2.image);
         updatePipeline(stack, 6);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred}, Textures.depth2, 2, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred, Textures.bloom}, Textures.depth2, 4, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-        unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image}, Textures.depth2.image);
+        unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image, Textures.bloom.image}, Textures.depth2.image);
     }
     public static void drawGUI(MemoryStack stack) {
         updatePipeline(stack, 1);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 0, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
@@ -407,36 +407,16 @@ public class Renderer {
     }
 
     public static void drawClouds() {
-//        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(196 * 16);
-//        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(196 * 4);
         Random cloudRand = new Random(911);
         float brightness = Math.clamp((640 + StarSystem.relativePos.y()) / 640, 0.3f, 1.f);
         for (int i = 0; i < 196; i++) {
             float b = Math.max(0.25f, brightness - (cloudRand.nextFloat() / 2));
             Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
             drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
-//            try (MemoryStack stack = MemoryStack.stackPush()) {
-//                modelBuffer.put(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 320 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(5 + cloudRand.nextInt(5), 1 + cloudRand.nextInt(2), 5 + cloudRand.nextInt(5)).get(stack.mallocFloat(16)));
-//            }
-//            colorBuffer.put(b);
-//            colorBuffer.put(b);
-//            colorBuffer.put(b);
-//            colorBuffer.put(-1);
         }
-//        modelBuffer.flip();
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelsSSBOId);
-//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, modelsSSBOId);
-//        glBufferData(GL_SHADER_STORAGE_BUFFER, modelBuffer, GL_DYNAMIC_DRAW);
-//        colorBuffer.flip();
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorsSSBOId);
-//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, colorsSSBOId);
-//        glBufferData(GL_SHADER_STORAGE_BUFFER, colorBuffer, GL_DYNAMIC_DRAW);
-//        drawCubes(1024);
     }
-    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(0.9f, 0.95f, 1.f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
+    public static Vector3f[] starColors = new Vector3f[]{new Vector3f(1.0f, 1.05f, 1.1f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
     public static void drawStars() {
-//        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(1024*16);
-//        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(1024*4);
         Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
@@ -452,24 +432,10 @@ public class Renderer {
                         .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
                         .setTranslation(starPos)
                         .scale(starSize*5);
-                //modelBuffer.put(starMatrix.get(stack.mallocFloat(16)));
                 Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
-//                    colorBuffer.put(color.x*12);
-//                    colorBuffer.put(color.y*12);
-//                    colorBuffer.put(color.z*12);
-//                    colorBuffer.put(2);
-                drawCube(starMatrix, new Vector4f(color.x()*1.02f, color.y()*1.02f, color.z()*1.02f, 1.f));
+                drawCube(starMatrix, new Vector4f(color.x()*2, color.y()*2, color.z()*2, 1.f));
             }
         }
-//        modelBuffer.flip();
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelsSSBOId);
-//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, modelsSSBOId);
-//        glBufferData(GL_SHADER_STORAGE_BUFFER, modelBuffer, GL_DYNAMIC_DRAW);
-//        colorBuffer.flip();
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorsSSBOId);
-//        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, colorsSSBOId);
-//        glBufferData(GL_SHADER_STORAGE_BUFFER, colorBuffer, GL_DYNAMIC_DRAW);
-//        drawCubes(1024);
     }
 
     public static void drawLine(Vector3f og, Vector3f dest, float width, Vector4f color) {
@@ -573,7 +539,7 @@ public class Renderer {
         VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures, clear);
         VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, clear);
         depthTex.layoutUnset = false;
-        int w = upscaling == 2 ? eWidth/2 : eWidth, h = upscaling == 2 ? eHeight/2 : eHeight;
+        int w = eWidth/upscaling, h = eHeight/upscaling;
         VkRect2D renderArea = VkRect2D.calloc(stack)
                 .offset(VkOffset2D.calloc(stack).set(0, 0))
                 .extent(VkExtent2D.calloc(stack).width(w).height(h));

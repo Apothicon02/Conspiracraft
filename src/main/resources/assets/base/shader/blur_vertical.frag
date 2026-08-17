@@ -13,47 +13,99 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
 layout(set = 0, binding = 10) uniform sampler2D ddaDepth;
 layout(set = 0, binding = 11) uniform sampler2D ddaNormals;
 layout(set = 0, binding = 18) uniform sampler2D colors;
+layout(set = 0, binding = 25) uniform sampler2D bloomColors;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outBloom;
 
-const int SAMPLE_COUNT = 9;
+const int SAMPLE_COUNT = 33;
 
-const float OFFSETS[9] = float[9](
--7.385486338269373,
--5.415332322090894,
--3.4458098836553415,
--1.4767017588568079,
-0.492228282731395,
-2.4612181104350137,
-4.4305055426526785,
-6.400317149797591,
-8
+const float OFFSETS[33] = float[33](
+-31.459924198526778,
+-29.46245880836075,
+-27.4649954276151,
+-25.46753389524034,
+-23.47007404809871,
+-21.472615723891717,
+-19.475158765320867,
+-17.477703025511563,
+-15.480248374349454,
+-13.482794704564832,
+-11.485341934780664,
+-9.487890003637036,
+-7.49043884330122,
+-5.4929883099664005,
+-3.4955380293457177,
+-1.498087079428199,
+0.49936143204283034,
+2.496812731089608,
+4.494263177521871,
+6.4917135135848145,
+8.489164333069937,
+10.486615867937406,
+12.484068211306809,
+14.481521422473012,
+16.478975571149928,
+18.476430751673004,
+20.47388708339721,
+22.471344705634408,
+24.468803771221125,
+26.466264440557175,
+28.46372687680043,
+30.461191242339762,
+32
 );
 
-const float WEIGHTS[9] = float[9](
-0.036514415685046854,
-0.0809315020373954,
-0.1404066727610046,
-0.190680554683392,
-0.20271650855234985,
-0.16870974611035225,
-0.1099127158139171,
-0.056052075960067727,
-0.014075808396474473
+const float WEIGHTS[33] = float[33](
+0.0046439740774359105,
+0.006336144077450895,
+0.00847055517140977,
+0.011095582579608208,
+0.014240973828049439,
+0.017909384606900877,
+0.022068518950688704,
+0.0266451082797811,
+0.03152200389362316,
+0.036539481502171005,
+0.04150144802685349,
+0.04618663131188169,
+0.05036410380799834,
+0.05381176333522809,
+0.05633580775326326,
+0.05778892422377961,
+0.05808419688161252,
+0.05720318908753185,
+0.055199728227933384,
+0.05219216125544708,
+0.04835314840864257,
+0.04389305066403763,
+0.039040806406930445,
+0.034024680944266264,
+0.029055050565596208,
+0.024310917573953914,
+0.019931178053524616,
+0.0160109183822761,
+0.012602333852422086,
+0.009719346690747895,
+0.0073447078618579,
+0.005438303661552029,
+0.0021358760555438526
 );
 
 const float Z_NEAR = 0.01f;
 void main() {
-    vec4 baseColor = texelFetch(colors, ivec2(gl_FragCoord.xy), 0);
-    vec4 baseNormal = texelFetch(ddaNormals, ivec2(gl_FragCoord.xy), 0);
     vec4 color = vec4(0);
+    vec4 bloom = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
-        vec2 offset = vec2(0, OFFSETS[i]);
+        vec2 offset = vec2(0, OFFSETS[i])*0.5f;
         float weight = WEIGHTS[i];
-        vec2 samplePos = vec2(clamp(gl_FragCoord.xy + offset, vec2(0), globalUbo.res-1)+0.25f);
-        vec4 newResult = textureLod(colors, samplePos/(globalUbo.res/2.f), 0);
-        color += newResult * weight;
+        vec2 samplePos = vec2(gl_FragCoord.xy+offset+0.125f)/(globalUbo.res/4);
+        if (samplePos.x >= 0 && samplePos.x < 1 && samplePos.y >= 0 && samplePos.y < 1) {
+            color += textureLod(colors, samplePos, 0) * weight;
+            bloom += textureLod(bloomColors, samplePos, 0) * weight;
+        }
     }
     outColor = color;
+    outBloom = bloom;
 }
