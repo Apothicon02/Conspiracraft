@@ -60,12 +60,12 @@ public class BlockTypes {
                     new BlockProperties().hasSlab())),
             STONE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STONE),
                     new BlockProperties().hasSlab())), //10
-            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.GLASS),
+            GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/glass", Map.of(Utils.packColor(251, 251, 251, 31), Materials.GLASS),
                     new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1, new SFX[]{Sounds.GLASS_STEP1, Sounds.GLASS_STEP2}, 1, 1).blocksLight(false).obstructsHeightmap(false))),
-            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAGENTA_GLASS),
+            MAGENTA_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/magenta_stained_glass", Map.of(Utils.packColor(191, 64, 191, 88), Materials.MAGENTA_GLASS),
                     GLASS.blockProperties)),
-            LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.LIME_GLASS),
+            LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/lime_stained_glass", Map.of(Utils.packColor(154, 191, 64, 88), Materials.LIME_GLASS),
                     GLASS.blockProperties)),
             PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.PORECAP, Utils.packColor(255, 0, 0, 255), Materials.PORECAP_STEM),
                     ((LightBlockProperties)TORCH.blockProperties.copy().resistance(1)).r(0).g(12).b(6))),
@@ -157,8 +157,10 @@ public class BlockTypes {
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             POWERED_VENT = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/powered_vent",  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))), //65
-            BLUE_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/blue_stained_glass",  GLASS.blockProperties)),
-            RED_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/texture/red_stained_glass",  GLASS.blockProperties)),
+            BLUE_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/blue_stained_glass", Map.of(Utils.packColor(65, 65, 191, 88), Materials.BLUE_GLASS),
+                    GLASS.blockProperties)),
+            RED_STAINED_GLASS = create(List.of(BlockTags.pickEfficient,BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/red_stained_glass", Map.of(Utils.packColor(191, 65, 65, 88), Materials.RED_GLASS),
+                    GLASS.blockProperties)),
             ORANGE_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ORANGE_SAND),
                     SAND.blockProperties.copy())),
             ORANGE_SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ORANGE_SANDSTONE),
@@ -208,7 +210,8 @@ public class BlockTypes {
             SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/spruce", OAK_FENCE.blockProperties.copy())),
             WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/willow", OAK_FENCE.blockProperties.copy())),
             REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
-            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "crafted/texture/research_table",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
+            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "machine/model/research_table", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.OAK_PLANK, Utils.packColor(0, 0, 255, 255), Materials.BLUEPRINT),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
             BAMBOO = create(new BlockType(blockTypeMap.size(), "plant/model/bamboo", Map.of(Utils.packColor(255), Materials.BAMBOO, Utils.packColor(255, 0, 0, 255), Materials.BAMBOO_RING),
                     CACTUS.blockProperties.copy())),
             PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),

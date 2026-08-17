@@ -24,7 +24,15 @@ public class WallMountableItemType extends ItemType {
                 int subType = blockToPlace.y();
                 Vector3f normal = new Vector3f(dda.hit).sub(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z()).negate();
                 if (normal.y() == 0) {
-                    subType+=1;
+                    if (normal.x() > 0.f) {
+                        subType += 1;
+                    } else if (normal.z() > 0.f) {
+                        subType += 3;
+                    } else if (normal.x() < 0.f){
+                        subType += 2;
+                    } else {
+                        subType += 4;
+                    }
                 }
                 World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), subType);
                 if (!player.creative) {item.amount--;}
