@@ -17,22 +17,30 @@ layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
 
-const int SAMPLE_COUNT = 5;
+const int SAMPLE_COUNT = 9;
 
-const float OFFSETS[5] = float[5](
+const float OFFSETS[9] = float[9](
+-7.385486338269373,
+-5.415332322090894,
 -3.4458098836553415,
 -1.4767017588568079,
 0.492228282731395,
 2.4612181104350137,
-4
+4.4305055426526785,
+6.400317149797591,
+8
 );
 
-const float WEIGHTS[5] = float[5](
-0.1835121872508657,
-0.2492203893736597,
-0.26495143816720684,
-0.2205044383606221,
-0.08181154684764567
+const float WEIGHTS[9] = float[9](
+0.036514415685046854,
+0.0809315020373954,
+0.1404066727610046,
+0.190680554683392,
+0.20271650855234985,
+0.16870974611035225,
+0.1099127158139171,
+0.056052075960067727,
+0.014075808396474473
 );
 
 const float Z_NEAR = 0.01f;
@@ -43,7 +51,7 @@ void main() {
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
         vec2 offset = vec2(OFFSETS[i], 0);
         float weight = WEIGHTS[i];
-        vec2 samplePos = vec2(clamp(((gl_FragCoord.xy*2) + offset)*2, vec2(0), globalUbo.res-1)+1);
+        vec2 samplePos = vec2(clamp((gl_FragCoord.xy + offset)*4, vec2(0), globalUbo.res-1)+1);
         vec4 newResult = textureLod(colors, (samplePos)/globalUbo.res, 0);
         color += newResult * weight;
     }

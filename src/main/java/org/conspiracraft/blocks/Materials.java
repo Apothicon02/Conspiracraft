@@ -100,7 +100,8 @@ public class Materials {
             ACACIA_LEAVES = create("tree/material/acacia_leaves"),
             REDWOOD_LEAVES = create("tree/material/redwood_leaves"),
             DEAD_LEAVES = create("tree/material/dead_leaves"),
-            BARREL = create("crafted/barrel/material/oak");
+            BARREL = create("crafted/barrel/material/oak"),
+            STEEL = create("crafted/material/steel");
 
     private static Material create(String path) {
         Material material = new Material(path, materialsList.size());

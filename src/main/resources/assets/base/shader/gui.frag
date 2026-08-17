@@ -36,7 +36,9 @@ void main() {
     vec4 bgColor = textureLod(colors, uv, 0);
     vec4 blurredBgColor = textureLod(blurred, uv/2, 0);
     bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(bgColor.a, 1.2f)));
-    bgColor.rgb = mix(bgColor.rgb, max(bgColor.rgb, blurredBgColor.rgb), clamp(max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))-1, 0, 1)); //bloom
+    vec3 bloom = blurredBgColor.rgb * smoothstep(0.5f, 1.5f, max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b)));
+    bgColor.rgb += bloom * 0.175f;
+    //bgColor.rgb = mix(bgColor.rgb, max(bgColor.rgb, blurredBgColor.rgb), clamp((max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))-1)*0.2f, 0, 0.2f)); //bloom
     blurredBgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(blurredBgColor.a, 1.2f)));
     //bgColor.rgb = vec3(blurredBgColor.a);
     if (pushUbo.color.a == -1.f) {

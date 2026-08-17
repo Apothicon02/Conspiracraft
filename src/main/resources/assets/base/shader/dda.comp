@@ -328,7 +328,7 @@ const int materialHeight = materialWidth*6;
 const int materialAtlasWidth = 512;
 const int materialsPerRow = materialAtlasWidth/materialWidth;
 vec4 getMaterialColor(vec4 model) {
-    vec3 unoffsetHitPos = hitPos-(flatNormal*0.002f);
+    vec3 unoffsetHitPos = hitPos-(flatNormal*0.0006f);
     vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
     vec3 absNorm = abs(flatNormal);
     vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
@@ -488,7 +488,7 @@ vec4 dda(bool shadow) {
                     if (voxelColor.a > 0) {
                         flatNormal = -ddaMask*raySign;
                         normal = flatNormal;
-                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.001f);
+                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.0003f);
                         voxelPos = hitPos;
                         if (firstBlock.x == 0) {
                             firstBlockPos = blockPos;
@@ -497,8 +497,7 @@ vec4 dda(bool shadow) {
                             firstHitPos = hitPos;
                         }
                         if (voxelColor.a > alphaMax) {
-                            vec3 aboveHitPos = hitPos+vec3(0, voxelSize, 0);
-                            shadowPos = int(aboveHitPos.y) > int(hitPos.y) ? aboveHitPos : hitPos;
+                            shadowPos = hitPos;
                             return voxelColor;
                         } else {
                             addTint(voxelColor, normal, shadow);
@@ -523,7 +522,7 @@ vec4 dda(bool shadow) {
                 if (voxelColor.a > 0) {
                     flatNormal = -ddaMask*raySign;
                     normal = flatNormal;
-                    voxelPos = blockPos+(ddaPos*voxelSize)+(flatNormal*0.001f);
+                    voxelPos = blockPos+(ddaPos*voxelSize)+(flatNormal*0.0003f);
                     vec3 subvoxelPos = (uv3d(voxelPos, voxelSize, blockSize)/blockSize)*voxelSize;
                     hitPos = voxelPos+(subvoxelPos);
                     if (firstBlock.x == 0) {
@@ -644,19 +643,22 @@ void main() {
         rayPos = ogPos;
         rayDir = ogDir;
 
+        bool celestial = false;
         vec4 outNormal = vec4(0);
         vec4 color = dda(false);
         float reflectivity = 0;//(tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
         if (color.a > 0.f) {
             vec4 materialColor = getMaterialColor(color);
             color.rgb = materialColor.rgb;
-            reflectivity = 1-materialColor.a;
+            if (materialColor.a > alphaMax && materialColor.a < 1.f) {
+                //reverseNormShading = true;
+                color.rgb*=10;
+                color.a = 1;
+            } else {
+                reflectivity = 1-materialColor.a;
+            }
         }
         if (tint.a < 1) {reflectivity = 1.f;}
-        if (color.a > alphaMax && color.a < 1.f) {
-            reverseNormShading = true;
-            color.a = 1;
-        }
         vec3 primaryNormal = normal;
         vec3 primaryFlatNormal = flatNormal;
         vec3 primaryLightPos = hitPos;
@@ -667,11 +669,10 @@ void main() {
         if (isSky) {
             primaryLightPos = ogPos + ogDir * renderDistance;
         } else {
-            vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos-(primaryFlatNormal*0.001f), 1.0));
+            vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos-(primaryFlatNormal*0.0003f), 1.0));
             depth = clipPos.z/clipPos.w;
         }
         bool airAbove = false;
-        bool celestial = false;
         float rasterDepth = textureLod(rasterDepth, uv, 0).r;
         float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
         float fogginessMul = 1.f;
@@ -695,7 +696,7 @@ void main() {
             reflectivity = 0.f;
             roughness = 0.0f;
             voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
-            if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height  || primaryLightPos.z >= size) {
+            if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size) {
                 celestial = true;
                 if (!isGlowing) {
                     fogginessMul = 0.f;
@@ -711,7 +712,7 @@ void main() {
             //            color.rgb = vec3(mix(vec2(0, 1), vec2(1, 0), (factor-0.5f)*2), 0);
             //        }
             if (getBlockAndVoxel(vec3(hitPos.x, hitPos.y+voxelSize, hitPos.z)-(flatNormal*voxelSize/2)).a < alphaMax) {
-                primaryNormal = vec3(0, 1, 0);
+                //primaryNormal = vec3(0, 1, 0);
                 airAbove = true;
             }
         }
@@ -781,6 +782,12 @@ void main() {
             }
             //blockLighting.a *= 1-abs(causticness/50);
             float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryLightPos.y, 63, 80, 1, 1+abs(noise(primaryLightPos.xz)*0.67f))*fogginessMul, 0.f, maxFogginess));
+            bool offsetShadow = false;
+            float shadowOffset = mix(0, voxelSize*3, clamp(distance(ogPos, primaryShadowPos), 0, 100)/100);
+            if (fract(primaryShadowPos.y) > 1-shadowOffset && globalUbo.renderToggles.x > 0) {
+                primaryShadowPos.y=floor(primaryShadowPos.y)+1+shadowOffset;
+                offsetShadow = true;
+            }
             vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y+9) : globalUbo.skylight.y, globalUbo.skylight.z);
             vec3 sunDir = normalize(source - primaryShadowPos);
             if (!isSky && !doReflections) {
@@ -788,7 +795,7 @@ void main() {
                 rayDir = sunDir;
                 vec4 shadowColor = vec4(0);
                 bool weakShadow = false;
-                if (globalUbo.skylight.a <= 0.05f || (primaryBlock.x != 4 && primaryBlock.x > 0 && dot(primaryNormal, normalize(source)) <= 0.f)) {
+                if (globalUbo.skylight.a <= 0.05f || (primaryBlock.x != 4 && primaryBlock.x > 0 && !offsetShadow && dot(primaryFlatNormal, normalize(source)) <= 0.f)) {
                     shadowColor.a = 1.f;
                 } else if (globalUbo.renderToggles.x > 0 && globalUbo.skylight.w >= 0.1f) {
                     shadowColor = dda(true);
@@ -854,10 +861,11 @@ void main() {
             primaryTint.rgb = (primaryTint.rgb+((vec3(grey)-primaryTint.rgb)*mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)))));
         }
         color.rgb = mix(color.rgb, isNight ? primaryTint.rgb*0.1f : primaryTint.rgb, tintAmt*0.67f);
-        outNormal.a = mix(outNormal.a, 1, tintAmt);
+        outNormal.a = (color.r > 1 || color.g > 1 || color.b > 1) ? 1 : mix(outNormal.a, 1, tintAmt);
         //    color = vec4(mix(vec3(0, 1, 0), vec3(1, 0, 0), clamp(steps/200.f, 0, 1)), 1);
         //    outNormal.a = 1;
-        imageStore(colors, coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(shadowFactor, 1, max(fogginess, max(blockLighting.r, max(blockLighting.g, blockLighting.b))))) : 3)));
+        vec4 sunOnly = getLightingColor(celestialSource, primaryLightPos, vec4(0, 0, 0, blockLighting.w), false, 0, false);
+        imageStore(colors, coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(shadowFactor, 1, max(fogginess, (1-min(1, max(sunOnly.r, max(sunOnly.g, sunOnly.b))))+(0.5f*max(blockLighting.r, max(blockLighting.g, blockLighting.b)))))) : 3)));
         imageStore(depths, coords, vec4(depth, 0, 0, 0));
         imageStore(normals, coords, outNormal);
     }
