@@ -14,6 +14,7 @@ public class Recipes {
             new Pair<>(ItemTypes.DIRT, ItemTypes.GRASS), new Product(ItemTypes.GRASSY_DIRT, true),
             new Pair<>(ItemTypes.PEBBLE, ItemTypes.PEBBLE), new Product(ItemTypes.STONE, true),
             new Pair<>(ItemTags.log, ItemTypes.PAPER), new Product(ItemTypes.RESEARCH_TABLE, true),
+            new Pair<>(ItemTypes.STICK, ItemTypes.PAPER), new Product(ItemTypes.SHOJI, true),
             new Pair<>(ItemTypes.STICK, ItemTypes.PEBBLE), new Product(ItemTypes.STONE_HATCHET, true),
             new Pair<>(ItemTags.axe, ItemTags.log), new Product(ItemTypes.STICK, false),
             new Pair<>(ItemTags.axe, ItemTypes.BAMBOO), new Product(ItemTypes.PAPER, false)

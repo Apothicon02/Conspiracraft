@@ -101,6 +101,8 @@ public class Materials {
             REDWOOD_LEAVES = create("tree/material/redwood_leaves"),
             DEAD_LEAVES = create("tree/material/dead_leaves"),
             BARREL = create("crafted/barrel/material/oak"),
+            PAPER = create("crafted/material/paper"),
+            SHOJI = create("crafted/material/shoji"),
             BLUEPRINT = create("machine/material/blueprint"),
             STEEL = create("crafted/material/steel");
 

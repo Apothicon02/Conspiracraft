@@ -1,6 +1,8 @@
 {
     "name": "American",
+
     "item/block/texture/torch": "Torch",
+
     "item/component/texture/glass": "Glass",
     "item/component/texture/blue_stained_glass": "Blue Glass",
     "item/component/texture/red_stained_glass": "Red Glass",
@@ -16,26 +18,33 @@
     "item/component/texture/steel_rod": "Steel Rod",
     "item/component/texture/screw": "Screw",
     "item/component/texture/paper": "Paper",
+    "item/component/texture/shoji": "Shoji",
+
     "item/food/texture/apple": "Apple",
     "item/food/texture/cherry": "Cherry",
     "item/food/texture/orange": "Orange",
+
     "item/machine/texture/kiln": "Kiln",
     "item/machine/texture/furnace": "Furnace",
     "item/machine/texture/forge": "Forge",
     "item/machine/texture/research_table": "Research Table",
     "item/machine/texture/powered_vent": "Powered Vent",
+
     "item/magic/texture/fireball": "Fireball",
     "item/magic/texture/fracture": "Fracture",
     "item/magic/texture/lightning": "Lightning",
     "item/magic/texture/waterball": "Waterball",
+
     "item/misc/texture/air": "Air",
     "item/misc/texture/blueprint": "Blueprint",
     "item/misc/texture/debug": "Debug",
+
     "item/plant/texture/bamboo": "Bamboo",
     "item/plant/texture/grass": "Grass",
     "item/plant/texture/hydrangea": "Hydrangea",
     "item/plant/texture/porecap": "Porecap",
     "item/plant/texture/rose": "Rose",
+
     "item/resource/texture/argon_ice": "Argon Ice",
     "item/resource/texture/carbon_dioxide_ice": "Carbon Dioxide Ice",
     "item/resource/texture/helium_ice": "Helium Ice",

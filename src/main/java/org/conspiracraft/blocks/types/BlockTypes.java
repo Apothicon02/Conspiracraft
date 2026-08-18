@@ -47,8 +47,8 @@ public class BlockTypes {
                     GRASS.blockProperties.copy().resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
             ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "misc/model/test", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
                     TALL_GRASS.blockProperties)), //5
-            TORCH = create(List.of(BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/model/torch", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME, Utils.packColor(0, 255, 0, 255), Materials.STEEL),
-                    (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true).blockSFX(
+            TORCH = create(List.of(BlockTags.hatchetEfficient, BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/model/torch", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME, Utils.packColor(0, 255, 0, 255), Materials.STEEL),
+                    (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(1).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true).resistance(0.f).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             KYANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.crystals, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.KYANITE),
                     (LightBlockProperties) (new LightBlockProperties().r(4).g(19).b(31).blockSFX(
@@ -93,43 +93,51 @@ public class BlockTypes {
                     new BlockProperties().hasSlab())),
             PALM_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.PALM_LOG),
                     OAK_LOG.blockProperties)), //25
-            PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/palm_planks",  OAK_PLANK.blockProperties)),
+            PALM_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.PALM_PLANK),
+                    OAK_PLANK.blockProperties)),
             PALM_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.PALM_LEAVES),
                     OAK_LEAVES.blockProperties)),
-            MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/mahogany_planks",  OAK_PLANK.blockProperties)),
+            MAHOGANY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAHOGANY_PLANK),
+                    OAK_PLANK.blockProperties)),
             CACTUS = create(List.of(BlockTags.hatchetEfficient, BlockTags.survivesOnSand), new PlantBlockType(blockTypeMap.size(), "plant/model/cactus", Map.of(Utils.packColor(255), Materials.CACTUS, Utils.packColor(255, 0, 0, 255), Materials.CACTUS_BARB),
-                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(false).needsSupport(true))),
+                    new BlockProperties().resistance(0.67f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(false).needsSupport(true))),
             DEAD_BUSH = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnSediment), new PlantBlockType(blockTypeMap.size(), "plant/texture/dead_bush",  ROSE.blockProperties.copy().resistance(0.f))), //30
             CLOUD = create(new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.CLOUD),  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f).isSolid(false).isCollidable(false).blocksLight(false).obstructsHeightmap(false))),
             RAIN_CLOUD = create(new CloudBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.RAIN_CLOUD),  CLOUD.blockProperties)),
             DRY_MUD = create(List.of(BlockTags.soakers, BlockTags.sediment, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DRY_MUD),
                     DIRT.blockProperties)),
-            SPRUCE_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/spruce_planks",  OAK_PLANK.blockProperties)),
+            SPRUCE_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SPRUCE_PLANK),
+                    OAK_PLANK.blockProperties)),
             SPRUCE_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SPRUCE_LOG),
                     OAK_LOG.blockProperties)), //35
             SPRUCE_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.SPRUCE_LEAVES),
                     OAK_LEAVES.blockProperties)),
-            CHERRY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/cherry_planks",  OAK_PLANK.blockProperties)),
+            CHERRY_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.CHERRY_PLANK),
+                    OAK_PLANK.blockProperties)),
             CHERRY_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.CHERRY_LOG),
                     OAK_LOG.blockProperties)),
             CHERRY_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.CHERRY_LEAVES),
                     OAK_LEAVES.blockProperties)),
-            BIRCH_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/birch_planks",  OAK_PLANK.blockProperties)), //40
+            BIRCH_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.BIRCH_PLANK),
+                    OAK_PLANK.blockProperties)), //40
             BIRCH_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.BIRCH_LOG),
                     OAK_LOG.blockProperties)),
             BIRCH_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.BIRCH_LEAVES),
                     OAK_LEAVES.blockProperties)),
-            ACACIA_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/acacia_planks",  OAK_PLANK.blockProperties)),
+            ACACIA_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ACACIA_PLANK),
+                    OAK_PLANK.blockProperties)),
             ACACIA_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ACACIA_LOG),
                     OAK_LOG.blockProperties)),
             ACACIA_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.ACACIA_LEAVES),
                     OAK_LEAVES.blockProperties)), //45
-            WILLOW_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/willow_planks",  OAK_PLANK.blockProperties)),
+            WILLOW_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.WILLOW_PLANK),
+                    OAK_PLANK.blockProperties)),
             WILLOW_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.WILLOW_LOG),
                     OAK_LOG.blockProperties)),
             WILLOW_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.WILLOW_LEAVES),
                     OAK_LEAVES.blockProperties)),
-            REDWOOD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/redwood_planks",  OAK_PLANK.blockProperties)),
+            REDWOOD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.REDWOOD_PLANK),
+                    OAK_PLANK.blockProperties)),
             REDWOOD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.REDWOOD_LOG),
                     OAK_LOG.blockProperties)), //50
             REDWOOD_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.REDWOOD_LEAVES),
@@ -196,30 +204,34 @@ public class BlockTypes {
             ROSE_QUARTZ_SAND = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/rose_quartz_sand",  SAND.blockProperties.copy())),
             DEAD_LOG = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DEAD_LOG),
                     OAK_LOG.blockProperties)),
-            DEAD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "tree/texture/dead_planks",  OAK_PLANK.blockProperties)),
+            DEAD_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DEAD_PLANK),
+                    OAK_PLANK.blockProperties)),
             IRON_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "crafted/texture/iron_plating",  new BlockProperties().hasSlab().blockSFX(
                     new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f, new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.66f, 0.66f))),
             PEBBLE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/pebble",  STONE.blockProperties.copy().resistance(0.34f).isSolid(false).blocksLight(false).obstructsHeightmap(false).isFluidReplaceable(true))),
-            OAK_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
+            OAK_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(1).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            BIRCH_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
-            CHERRY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/cherry", OAK_FENCE.blockProperties.copy())),
-            MAHOGANY_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/mahogany", OAK_FENCE.blockProperties.copy())),
-            ACACIA_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/acacia", OAK_FENCE.blockProperties.copy())),
-            PALM_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/palm", OAK_FENCE.blockProperties.copy())),
-            SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/spruce", OAK_FENCE.blockProperties.copy())),
-            WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/willow", OAK_FENCE.blockProperties.copy())),
-            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
-            RESEARCH_TABLE = create(new BlockType(blockTypeMap.size(), "machine/model/research_table", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.OAK_PLANK, Utils.packColor(0, 0, 255, 255), Materials.BLUEPRINT),
+            BIRCH_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/birch", OAK_FENCE.blockProperties.copy())),
+            CHERRY_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/cherry", OAK_FENCE.blockProperties.copy())),
+            MAHOGANY_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/mahogany", OAK_FENCE.blockProperties.copy())),
+            ACACIA_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/acacia", OAK_FENCE.blockProperties.copy())),
+            PALM_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/palm", OAK_FENCE.blockProperties.copy())),
+            SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/spruce", OAK_FENCE.blockProperties.copy())),
+            WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/willow", OAK_FENCE.blockProperties.copy())),
+            REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/fence/texture/redwood", OAK_FENCE.blockProperties.copy())),
+            RESEARCH_TABLE = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "machine/model/research_table", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.OAK_PLANK, Utils.packColor(0, 0, 255, 255), Materials.BLUEPRINT),
                     new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).resistance(0.5f))),
-            BAMBOO = create(new BlockType(blockTypeMap.size(), "plant/model/bamboo", Map.of(Utils.packColor(255), Materials.BAMBOO, Utils.packColor(255, 0, 0, 255), Materials.BAMBOO_RING),
-                    CACTUS.blockProperties.copy())),
-            PAPER = create(new BlockType(blockTypeMap.size(), "crafted/texture/paper",  new BlockProperties().hasSlab().blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
-            OAK_GATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+            BAMBOO = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "plant/model/bamboo", Map.of(Utils.packColor(255), Materials.BAMBOO, Utils.packColor(255, 0, 0, 255), Materials.BAMBOO_RING),
+                    CACTUS.blockProperties.copy().resistance(0.1f))),
+            PAPER = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.PAPER),
+                    new BlockProperties().hasSlab().resistance(0.25f).blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
+            SHOJI = create(List.of(BlockTags.hatchetEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.SHOJI),
+                    new BlockProperties().hasSlab().resistance(0.25f).blockSFX(new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f))),
+            OAK_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/gate/texture/oak",  new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            OAK_CRATE = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak", Map.of(Utils.packColor(255), Materials.BARREL),  new BlockProperties().blockSFX(
+            OAK_CRATE = create(List.of(BlockTags.hatchetEfficient), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak", Map.of(Utils.packColor(255), Materials.BARREL),  new BlockProperties().blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
-            OAK_BARREL = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new CrateBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.BARREL),
+            OAK_BARREL = create(List.of(BlockTags.hatchetEfficient), new CrateBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.BARREL),
                     new BlockProperties().blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 

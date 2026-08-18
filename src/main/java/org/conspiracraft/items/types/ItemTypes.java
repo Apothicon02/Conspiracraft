@@ -86,7 +86,7 @@ public class ItemTypes {
             REDWOOD_LOG = create(List.of(ItemTags.log), new ItemType("wood/redwood/texture/log").maxStackSize(standardStackSize).blockToPlace(BlockTypes.REDWOOD_LOG.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1))),
             REDWOOD_PLANK = create(new ItemType("wood/redwood/texture/plank").blockToPlace(BlockTypes.REDWOOD_PLANK.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.1f))),
             REDWOOD_BEAM = create(new ItemType("wood/redwood/texture/beam").blockToPlace(BlockTypes.REDWOOD_FENCE.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.1f))),
-            DRIFTWOOD = create(new ItemType("wood/texture/driftwood").blockToPlace(BlockTypes.BIRCH_PLANK.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.33f, 1.33f))),
+            DRIFTWOOD = create(new ItemType("wood/texture/driftwood").blockToPlace(BlockTypes.DEAD_PLANK.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.33f, 1.33f))),
             STICK = create(new ItemType("wood/texture/stick").maxStackSize(standardStackSize).blockToPlace(BlockTypes.STICK.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.33f, 1.33f))),
             PEBBLE = create(new ItemType("resource/texture/pebble").maxStackSize(standardStackSize).blockToPlace(BlockTypes.PEBBLE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 0.75f))),
             STONE = create(List.of(ItemTags.stone), new ItemType("resource/texture/stone").maxStackSize(standardStackSize).blockToPlace(BlockTypes.STONE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 0.75f))),
@@ -181,7 +181,8 @@ public class ItemTypes {
             GOLD_CHISEL = create(new ChiselItemType("tool/gold/texture/chisel", 50, 20, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             STONE_CHISEL = create(new ChiselItemType("tool/stone/texture/chisel", 7, 10, new BlockTag[]{BlockTags.chiselEfficient}).maxStackSize(1).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.3f, 0.7f))),
             BAMBOO = create(new ItemType("plant/texture/bamboo").maxStackSize(standardStackSize).blockToPlace(BlockTypes.BAMBOO.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.15f))),
-            PAPER = create(new ItemType("component/texture/paper").maxStackSize(standardStackSize).blockToPlace(BlockTypes.PAPER.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.5f, 0.75f)));
+            PAPER = create(new ItemType("component/texture/paper").maxStackSize(standardStackSize).blockToPlace(BlockTypes.PAPER.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.5f, 0.75f))),
+            SHOJI = create(new ItemType("component/texture/shoji").maxStackSize(standardStackSize).blockToPlace(BlockTypes.SHOJI.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.5f, 0.75f)));
 
     private static ItemType create(ItemType type) {
         itemTypeMap.put(itemTypeMap.size(), type);
