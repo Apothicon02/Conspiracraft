@@ -2,6 +2,9 @@ package org.conspiracraft.gui.buttons;
 
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.gui.GUI;
+import org.lwjgl.openal.AL10;
+
+import static org.conspiracraft.Main.timeMul;
 
 public class BackButton extends Button {
     public BackButton() {}
@@ -20,6 +23,7 @@ public class BackButton extends Button {
             GUI.settingMenuOpen = false;
         } else {
             GUI.pauseMenuOpen = false;
+            timeMul = 1.f;
         }
         AudioController.playButtonSound();
     }

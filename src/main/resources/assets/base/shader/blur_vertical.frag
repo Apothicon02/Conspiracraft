@@ -98,7 +98,7 @@ void main() {
     vec4 color = vec4(0);
     vec4 bloom = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
-        vec2 offset = vec2(0, OFFSETS[i])*0.5f;
+        vec2 offset = vec2(0, OFFSETS[i])*0.25f;
         float weight = WEIGHTS[i];
         vec2 samplePos = vec2(gl_FragCoord.xy+offset+0.125f)/(globalUbo.res/4);
         if (samplePos.x >= 0 && samplePos.x < 1 && samplePos.y >= 0 && samplePos.y < 1) {

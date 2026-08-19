@@ -388,15 +388,15 @@ public class Earth extends WorldType {
                                                     if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f && biome != Biomes.SAVANNA.id && biome != Biomes.FLOWERY_FIELD.id) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
-                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.ROSE.id, rand.nextInt(3));
+                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.ROSE.id, rand.nextInt(4));
                                                     } else if (rand.nextFloat() < 0.003f && biome != Biomes.FLOWERY_FIELD.id) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
-                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.HYDRANGEA.id, rand.nextInt(3));
+                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.HYDRANGEA.id, rand.nextInt(4));
                                                     } else if (rand.nextFloat() < 0.3f && (rand.nextFloat() > foliageNoise || biome == Biomes.SAVANNA.id)) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
-                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.TALL_GRASS.id, (blockSubtype * 4) + rand.nextInt(3));
+                                                        chunk.setBlock(lX, lY, lZ, BlockTypes.TALL_GRASS.id, (blockSubtype * 4) + rand.nextInt(4));
                                                     }
                                                 }
                                             } else {
@@ -527,9 +527,9 @@ public class Earth extends WorldType {
                                                 WillowTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
                                             } else if (rand.nextFloat() < 0.15f) {
                                                 if (flowerNoise < -0.5f) {
-                                                    World.setBlock(x, elevation+1, z, BlockTypes.ROSE.id, rand.nextInt(3));
+                                                    World.setBlock(x, elevation+1, z, BlockTypes.ROSE.id, rand.nextInt(4));
                                                 } else if (flowerNoise < 0.f) {
-                                                    World.setBlock(x, elevation+1, z, BlockTypes.HYDRANGEA.id, rand.nextInt(3));
+                                                    World.setBlock(x, elevation+1, z, BlockTypes.HYDRANGEA.id, rand.nextInt(4));
                                                 }
                                             } else if (rand.nextFloat() < 0.05f && flowerNoise >= 0) {
                                                 if (flowerNoise < 0.5f) {

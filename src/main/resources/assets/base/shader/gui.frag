@@ -34,9 +34,18 @@ const int radius = 5;
 const int samples = ((radius*2)+1)*((radius*2)+1);
 void main() {
     vec4 bgColor = textureLod(colors, uv, 0);
-    bgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(bgColor.a, 1.2f)));
-    vec3 bloomColor = textureLod(bloom, uv/2, 0).rgb;
-    bgColor.rgb+=bloomColor;
+    bgColor.rgb *= max(vec3(0.088f, 0.0934f, 0.1f) * 2, vec3(pow(bgColor.a, 1.2f)));
+    vec3 ogColor = bgColor.rgb;
+//    bool xOdd = bool(int(gl_FragCoord.x) % 2 == 1);
+//    bool yOdd = bool(int(gl_FragCoord.y) % 2 == 1);
+//    bool isChecker = (xOdd && yOdd) || (!xOdd && !yOdd);
+//    if (isChecker) {
+//        vec3 bloomColor = textureLod(bloom, uv / 2, 0).rgb;
+//        bgColor.rgb += bloomColor;
+//    }
+    vec3 bloomColor = textureLod(bloom, uv / 2, 0).rgb;
+    if (bloomColor.r > 1 || bloomColor.g > 1 || bloomColor.b > 1) { bloomColor.rgb /= max(bloomColor.r, max(bloomColor.g, bloomColor.b)); }
+    bgColor.rgb += bloomColor*0.5f;
     vec4 blurredBgColor = textureLod(blurred, uv/2, 0);
     blurredBgColor.rgb*=max(vec3(0.088f, 0.0934f, 0.1f)*2, vec3(pow(blurredBgColor.a, 1.2f)));
     if (pushUbo.color.a == -1.f) {

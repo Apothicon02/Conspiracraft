@@ -159,81 +159,83 @@ public class GUI {
 
         color.set(1.f);
         pushUBO.updateLayer(0); //text
-        if (graphicsSettingMenuOpen) {
-            menuBgColor = new Vector4f(1.f, 0.9f, 0.5f, 1.f);
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Graphics Settings".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingSlider = new FoVSlider();
-            sliderX = (Settings.fov-30)/150;
-            drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Field of View:"+String.format("%.1f", (sliderX*150)+30)).toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new DynamicFoVButton();
-            drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (Settings.dynamicFoVEnabled ? " FoV VFX " : "No FoV VFX").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new UpscaleButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, (Settings.upscaled ? "Upscaled" : "  Native  ").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new ShadowsButton();
-            drawButton(true, 0.5f, 0.5f, -35.5f, (-charHeight)-1, (Settings.shadowsEnabled ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new TAAButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, (-charHeight)-1, (Settings.taaEnabled ? "   TAA   " : "  No AA  ").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new ReflectionsButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight*-3)-2, (Settings.reflectionsEnabled ? "Reflections Enabled" : "Reflections Disabled").toCharArray(), menuBgColor, new Vector4f(1.f));
-        } else if (controlsSettingMenuOpen) {
-            menuBgColor = new Vector4f(0.75f, 1.f, 0.75f, 1.f);
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Control Settings".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingSlider = new SensitivitySlider();
-            sliderX = Settings.mouseSensitivity;
-            drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Sensitivity:"+String.format("%.1f", sliderX*100)+"%").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawButton(true, 0.5f, 0.5f, 0, charHeight, "Keybind Settings".toCharArray(), menuBgColor, new Vector4f(1.f));
-        } else if (audioSettingMenuOpen) {
-            menuBgColor = new Vector4f(0.9f, 0.75f, 1.f, 1.f);
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Audio Settings".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingSlider = new VolumeSlider();
-            sliderX = AudioController.masterVolume/2.f;
-            drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Master Volume:"+String.format("%.1f", sliderX*200)+"%").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new MuteButton();
-            drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (AudioController.muted ? "  Muted  " :  " Unmuted ").toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new AudioChannelButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, AudioController.getOutputModeAsTxt().toCharArray(), menuBgColor, new Vector4f(1.f));
-        } else if (accessibilitySettingMenuOpen) {
-            menuBgColor = new Vector4f(0.72f, 0.725f, 1.f, 1.f);
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Accessibility Settings".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new GUIScaleButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("GUI Scale:"+Settings.guiScale).toCharArray(), menuBgColor, new Vector4f(1.f));
-        } else if (settingMenuOpen) {
-            menuBgColor = new Vector4f(0.93f, 0.85f, 1.0f, 1.f);
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Settings".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Main Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new AudioSettingsButton();
-            drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * 3) + 1, "  Audio  ".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new ControlsSettingsButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Controls".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new GraphicsSettingsButton();
-            drawButton(true, 0.5f, 0.5f, 0, charHeight, "    Graphics    ".toCharArray(), menuBgColor, new Vector4f(1.f));
-            drawingButton = new AccessibilitySettingsButton();
-            drawButton(true, 0.5f, 0.5f, 0, (-charHeight)-1, "Accessibility".toCharArray(), menuBgColor, new Vector4f(1.f));
-        } else if (pauseMenuOpen) {
-            drawText(true, 0.5f, 1, 0, -10 - charHeight, "Paused".toCharArray());
-            drawingButton = new BackButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Continue Playing".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
-            char[] saveChars = "Save World".toCharArray();
-            drawingButton = new SaveWorldButton();
-            drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * 3) + 1, saveChars, new Vector4f(1.f), new Vector4f(1.f));
-            drawingButton = new SettingsButton();
-            drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Settings".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
-            drawingButton = new LanguageButton();
-            drawButton(true, 0.5f, 0.5f, 0, charHeight, "                ".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
-            drawText(true, 0.5f, 0.5f, 0, charHeight, Languages.translate("name").toCharArray());
-            drawingButton = new QuitToMenuButton();
-            drawButton(true, 0.5f, 0.5f, 0, (-charHeight) - 1, "Quit To Menu".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
-            drawingButton = new QuitToDesktopButton();
-            drawButton(true, 0.5f, 0.5f, 0, (charHeight * -3) - 2, "Quit To Desktop".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+        if (showUI) {
+            if (graphicsSettingMenuOpen) {
+                menuBgColor = new Vector4f(1.f, 0.9f, 0.5f, 1.f);
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Graphics Settings".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingSlider = new FoVSlider();
+                sliderX = (Settings.fov - 30) / 150;
+                drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Field of View:" + String.format("%.1f", (sliderX * 150) + 30)).toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new DynamicFoVButton();
+                drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (Settings.dynamicFoVEnabled ? " FoV VFX " : "No FoV VFX").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new UpscaleButton();
+                drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, (Settings.upscaled ? "Upscaled" : "  Native  ").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new ShadowsButton();
+                drawButton(true, 0.5f, 0.5f, -35.5f, (-charHeight) - 1, (Settings.shadowsEnabled ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new TAAButton();
+                drawButton(true, 0.5f, 0.5f, 35.5f, (-charHeight) - 1, (Settings.taaEnabled ? "   TAA   " : "  No AA  ").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new ReflectionsButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * -3) - 2, (Settings.reflectionsEnabled ? "Reflections Enabled" : "Reflections Disabled").toCharArray(), menuBgColor, new Vector4f(1.f));
+            } else if (controlsSettingMenuOpen) {
+                menuBgColor = new Vector4f(0.75f, 1.f, 0.75f, 1.f);
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Control Settings".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingSlider = new SensitivitySlider();
+                sliderX = Settings.mouseSensitivity;
+                drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Sensitivity:" + String.format("%.1f", sliderX * 100) + "%").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawButton(true, 0.5f, 0.5f, 0, charHeight, "Keybind Settings".toCharArray(), menuBgColor, new Vector4f(1.f));
+            } else if (audioSettingMenuOpen) {
+                menuBgColor = new Vector4f(0.9f, 0.75f, 1.f, 1.f);
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Audio Settings".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingSlider = new VolumeSlider();
+                sliderX = AudioController.masterVolume / 2.f;
+                drawSlider(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("Master Volume:" + String.format("%.1f", sliderX * 200) + "%").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new MuteButton();
+                drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (AudioController.muted ? "  Muted  " : " Unmuted ").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new AudioChannelButton();
+                drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, AudioController.getOutputModeAsTxt().toCharArray(), menuBgColor, new Vector4f(1.f));
+            } else if (accessibilitySettingMenuOpen) {
+                menuBgColor = new Vector4f(0.72f, 0.725f, 1.f, 1.f);
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Accessibility Settings".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Settings Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new GUIScaleButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 3) + 1, ("GUI Scale:" + Settings.guiScale).toCharArray(), menuBgColor, new Vector4f(1.f));
+            } else if (settingMenuOpen) {
+                menuBgColor = new Vector4f(0.93f, 0.85f, 1.0f, 1.f);
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Settings".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Back To Main Menu".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new AudioSettingsButton();
+                drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * 3) + 1, "  Audio  ".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new ControlsSettingsButton();
+                drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Controls".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new GraphicsSettingsButton();
+                drawButton(true, 0.5f, 0.5f, 0, charHeight, "    Graphics    ".toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingButton = new AccessibilitySettingsButton();
+                drawButton(true, 0.5f, 0.5f, 0, (-charHeight) - 1, "Accessibility".toCharArray(), menuBgColor, new Vector4f(1.f));
+            } else if (pauseMenuOpen) {
+                drawText(true, 0.5f, 1, 0, -10 - charHeight, "Paused".toCharArray());
+                drawingButton = new BackButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * 5) + 2, "Continue Playing".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+                char[] saveChars = "Save World".toCharArray();
+                drawingButton = new SaveWorldButton();
+                drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * 3) + 1, saveChars, new Vector4f(1.f), new Vector4f(1.f));
+                drawingButton = new SettingsButton();
+                drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * 3) + 1, "Settings".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+                drawingButton = new LanguageButton();
+                drawButton(true, 0.5f, 0.5f, 0, charHeight, "                ".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+                drawText(true, 0.5f, 0.5f, 0, charHeight, Languages.translate("name").toCharArray());
+                drawingButton = new QuitToMenuButton();
+                drawButton(true, 0.5f, 0.5f, 0, (-charHeight) - 1, "Quit To Menu".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+                drawingButton = new QuitToDesktopButton();
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * -3) - 2, "Quit To Desktop".toCharArray(), new Vector4f(1.f), new Vector4f(1.f));
+            }
         }
         menuBgColor = new Vector4f(1.f);
     }
@@ -306,7 +308,7 @@ public class GUI {
             if (selSlot.x() < 0 || selSlot.y() < 0) {
                 selSlot.set(-1, -1);
             } else {
-                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, 1, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
+                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, 0.5f, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
             }
         }
 

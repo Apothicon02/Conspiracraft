@@ -3,11 +3,10 @@ package org.conspiracraft.space;
 import org.conspiracraft.Main;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.world.World;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+
+import java.lang.Math;
 
 import static org.conspiracraft.Constants.*;
 import static org.conspiracraft.graphics.Renderer.drawCube;
@@ -78,7 +77,7 @@ public class StarSystem {
             relativePos.set(rotatedPos);
         }
         Matrix4f sunMatrix = new Matrix4f().rotateXYZ(0.5f, 0.5f, 0.5f).setTranslation(relativePos).scale(SCALE);
-        Vector4f sunColor = new Vector4f(10f, 10f, 10f, 1);
+        Vector4f sunColor = new Vector4f(3, 3, 3, 1);
         drawCube(sunMatrix, sunColor);
         for (Planet planet : planets) {
             planet.render(stack, activeRot, activePos, pos, 100000);

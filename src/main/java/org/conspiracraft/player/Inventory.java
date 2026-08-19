@@ -62,7 +62,7 @@ public class Inventory {
             selectedSlots.clear();
         } else if (Main.player.inputHandler.leftButtonClick && prevInteract == 0 && Main.timeMsLong-prevInteractTime < interactionChainDelayLimit) { //if double-clicked
             prevInteract = -1;
-            if (cursorItem == null) { //pickup item hovering over if none is being carried by cursor
+            if (cursorItem == null && selectedSlot != null) { //pickup item hovering over if none is being carried by cursor
                 cursorItem = getItem(selectedSlot);
                 setItem(selectedSlot, null);
             }
@@ -98,8 +98,17 @@ public class Inventory {
                     if (selItem != null) {
                         Item newSelItem = selItem.clone();
                         if (Main.player.inputHandler.leftButtonClick) {
-                            cursorItem = newSelItem.clone();
-                            newSelItem = null;
+                            if (containerSlotId == null || containerSlotId == 0) {
+                                containerSlotId = null;
+                                selItem = null;
+                                cursorItem = null;
+                                if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT)) {
+                                    clearInv();
+                                }
+                            } else {
+                                cursorItem = newSelItem.clone();
+                                newSelItem = null;
+                            }
                             prevInteract = 0;
                             prevInteractTime = Main.timeMsLong;
                         } else if (Main.player.inputHandler.rightButtonClick) {
@@ -321,6 +330,10 @@ public class Inventory {
 
     public void setItem(int x, int y, Item item) {
         setItem((y * invWidth) + x, item);
+    }
+
+    public void clearInv() {
+        Arrays.fill(items, null);
     }
 
     public void addToInventory(ArrayList<Item> items) {
