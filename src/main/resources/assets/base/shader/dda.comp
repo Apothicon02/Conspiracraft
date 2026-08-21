@@ -355,11 +355,15 @@ vec4 getMaterialColor(vec4 model) {
         floatingUV.y = 1-floatingUV.y;
         if (absNorm.x > absNorm.z) {
             matUV = floatingUV.zy;
+            if (flatNormal.x < 0) { matUV.x = 1-matUV.x; }
             yOff = flatNormal.x > 0 ? materialWidth : materialWidth*3;
         } else {
             matUV = floatingUV.xy;
+            if (flatNormal.z > 0) { matUV.x = 1-matUV.x; }
             yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
         }
+    } else { //top
+        matUV.xy = 1-matUV.xy;
     }
     int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
     int materialY = int(materialId/materialsPerRow);

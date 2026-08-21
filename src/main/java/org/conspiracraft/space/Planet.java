@@ -59,7 +59,6 @@ public class Planet {
         Planet activePlanet = World.worldType.getPlanet();
         if (activePlanet != this) {
             drawOrbit(activeRot, activePos, parent, orbitThickness);
-            pushUBO.updateLayer(0);
             pushUBO.updateAtlasOffset(type.atlasOffset);
             tick(Main.timeNs, activeRot, activePos, parent);
             Matrix4f matrix = new Matrix4f()
@@ -70,7 +69,6 @@ public class Planet {
         } else {
             tick(Main.timeNs, new Vector3f(), new Vector3f(), parent);
             if (World.worldType.space() == null) {
-                pushUBO.updateLayer(0);
                 pushUBO.updateAtlasOffset(type.atlasOffset);
                 Matrix4f matrix = new Matrix4f()
                         .rotateX((float)Math.toRadians(90.f))

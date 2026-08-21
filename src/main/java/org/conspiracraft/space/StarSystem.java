@@ -2,6 +2,7 @@ package org.conspiracraft.space;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -62,7 +63,7 @@ public class StarSystem {
     }
 
     public static void render(MemoryStack stack) {
-        pushUBO.updateLayer(0);
+        pushUBO.updateTex(Textures.entities);
         pushUBO.updateAtlasOffset(EntityTypes.SUN.atlasOffset);
         Planet activePlanet = Main.player.getPlanet();
         Vector3f activePos = activePlanet == null ? new Vector3f(0) : new Vector3f(activePlanet.pos);

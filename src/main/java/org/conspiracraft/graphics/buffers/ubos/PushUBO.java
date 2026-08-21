@@ -9,6 +9,7 @@ import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.joml.*;
 
+import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -66,7 +67,9 @@ public class PushUBO {
     public void updateTex(Texture tex1) {
         Vector4i textures = ((Vector4i)uniformStorage[6]);
         textures.set(tex1 == null ? -1 : tex1.handle, textures.y(), textures.z(), textures.w());
-        if (!(tex1 instanceof Texture3D)) {
+        if (tex1 instanceof Texture3D) {
+            updateLayer(Math.max((int)uniformStorage[5], 0));
+        } else {
             updateLayer(-1);
         }
     }

@@ -30,13 +30,13 @@ public class Lightning extends Effect {
     public Lightning(Matrix4f matrix) {
         super(matrix);
         if (World.worldType == WorldTypes.EARTH) {
-            color.set(0.1f, 0.95f, 1.0f, 4.f);
+            color.set(2.f, 1.9f, 0.2f, 4.f);
         } else if (World.worldType == WorldTypes.AKSALA) {
-            color.set(1.f, 0.1f, 0.1f, 4.f);
+            color.set(2.f, 0.2f, 0.2f, 4.f);
         } else if (World.worldType == WorldTypes.VERA) {
-            color.set(0.6f, 0.2f, 1.0f, 4.f);
+            color.set(1.2f, 0.4f, 2.0f, 4.f);
         } else {
-            color.set(1.f, 0.95f, 0.1f, 4.f);
+            color.set(2.f, 1.9f, 0.2f, 4.f);
         }
         matrix.getTranslation(pos);
         intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());

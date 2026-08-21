@@ -313,12 +313,12 @@ public class Renderer {
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
         pushUBO.updateAtlasOffset(new Vector2i(0));
-        pushUBO.updateSize(new Vector2i(8));
-        pushUBO.updateLayer(-1);
+        pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
+        pushUBO.updateTex(null); //use no texture
         //drawClouds();
         drawStars();
         StarSystem.render(stack);
-        pushUBO.updateLayer(-1);
+        pushUBO.updateTex(null); //use no texture
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
                 drawCube(lightning.matrix, lightning.color);
@@ -328,7 +328,7 @@ public class Renderer {
                 drawCube(interpolatedMatrix, particle.color);
             }
         }
-        pushUBO.updateLayer(0);
+        pushUBO.updateTex(Textures.entities);
         for (Entity entity : entities) {
             pushUBO.updateAtlasOffset(entity.type.atlasOffset);
             Matrix4f interpolatedMatrix = new Matrix4f(entity.matrix);
@@ -369,7 +369,7 @@ public class Renderer {
             bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, false);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            pushUBO.updateTex(Textures.colors2, Textures.depth2, Textures.norms2);
+            pushUBO.updateTex(Textures.colors2, Textures.depth1, Textures.norms1);
             pushUBO.updateWriteTex(Textures.colorsOld, Textures.depthOld, null, null);
             pushUBO.push();
             bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);

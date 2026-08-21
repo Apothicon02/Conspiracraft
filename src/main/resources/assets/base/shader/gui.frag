@@ -53,7 +53,7 @@ void main() {
         outColor = bgColor;
     } else {
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(localUV.x*pushUbo.size.x), pushUbo.atlasOffset.y+(localUV.y*pushUbo.size.y));
-        vec4 guiColor = pushUbo.tex.x < 0 ? vec4(1) : (pushUbo.layer >= 0 ? texelFetch(Sampler3D[nonuniformEXT(pushUbo.writeTex.x)], ivec3(coords, pushUbo.layer), 0) : texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], coords, 0));
+        vec4 guiColor = pushUbo.tex.x < 0 ? vec4(1) : (pushUbo.layer >= 0 ? texelFetch(Sampler3D[nonuniformEXT(pushUbo.tex.x)], ivec3(coords, pushUbo.layer), 0) : texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0));
         guiColor *= pushUbo.color;
         if (guiColor.a > 0) {
             outColor = vec4(mix(blurredBgColor.rgb/max(1, max(blurredBgColor.r, max(blurredBgColor.g, blurredBgColor.b))), guiColor.rgb, guiColor.a), 1.f);

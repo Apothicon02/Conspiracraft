@@ -312,7 +312,6 @@ public class GUI {
             }
         }
 
-        pushUBO.updateLayer(0); //items
         for (int y = 0; y < (GUI.inventoryOpen ? 4 : 1); y++) {
             for (int x = 0; x < invWidth; x++) {
                 Item item = Main.player.inv.getItem(x, y);
@@ -350,12 +349,12 @@ public class GUI {
             for (int y = 0; y < 4; y++) {
                 for (int x = 0; x < invWidth; x++) {
                     ItemType itemType = ItemTypes.itemTypeMap.get(itemId);
-                    pushUBO.updateTex(isFirstSlot ? Textures.gui : Textures.items); //use item atlas unless first slot then use gui atlas
                     if (isFirstSlot) {
+                        pushUBO.updateTex(Textures.gui);
                         pushUBO.updateLayer(4); //trash
                         pushUBO.updateAtlasOffset(new Vector2i(0));
                     } else {
-                        pushUBO.updateLayer(0); //items
+                        pushUBO.updateTex(Textures.items);
                         pushUBO.updateAtlasOffset(itemType.atlasOffset);
                     }
                     int offX = 3 + (x * slotSize);
@@ -418,7 +417,6 @@ public class GUI {
                 drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond());
                 offPxY-=enlargedSlotSize;
             }
-            //drawRecipe(offX, offY, -enlargedSlotSize, ItemTypes.OAK_LOG, ItemTypes.STICK);
         }
     }
     public static void drawRecipe(float offX, float offY, int offPxY, ItemType ingredient, ItemType product) {
@@ -432,7 +430,6 @@ public class GUI {
         drawSlot(false, false, offX, offY, (charWidth*2)+(enlargedSlotSize *2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
         color.set(1.f);
         pushUBO.updateTex(Textures.items); //items
-        pushUBO.updateLayer(0); //items
         pushUBO.updateAtlasOffset(ingredient.atlasOffset);
         drawSlot(false, false, offX, offY, (charWidth*2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
         pushUBO.updateAtlasOffset(product.atlasOffset);

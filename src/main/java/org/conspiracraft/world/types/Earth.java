@@ -65,7 +65,7 @@ public class Earth extends WorldType {
             }
         }
         if (nearestLightning.x() >= 0) {
-            skylightMul.set(0.f, 0.95f, 1.0f, 0);
+            skylightMul.set(1.f, 0.95f, 0.0f, 0);
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);

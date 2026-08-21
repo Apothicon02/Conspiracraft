@@ -50,35 +50,34 @@ void main() {
     vec2 scaledUv = uv*scale;
     float baseDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], scaledUv, 0).r;
     vec4 baseColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], scaledUv, 0);
-    outColor = baseColor;
-//    vec4 baseNormal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], scaledUv, 0);
-//    vec4 color = baseColor;
-//    vec2 uvNdc = (uv * 2.0) - 1.0;
-//    vec4 ndc = vec4(uvNdc, baseDepth, 1.0);
-//    vec4 viewPos = inverse(globalUbo.proj) * ndc;
-//    viewPos /= viewPos.w;
-//    vec4 worldPos = inverse(globalUbo.view) * viewPos;
-//    worldPos /= worldPos.w;
-//    vec2 reprojectedPos = reproject(worldPos.xyz);
-//    if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
-//    float oldDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], reprojectedPos, 0).r;
-//    if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
-//        float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
-//        int radius = velocity < 0.6f ? 2 : 1;
-//        vec4 boxMin = vec4(1000);
-//        vec4 boxMax = vec4(-1000);
-//        for (int x = int(scaledCoords.x-radius); x <= scaledCoords.x+radius; x++) {
-//            for (int y = int(scaledCoords.y-radius); y <= scaledCoords.y+radius; y++) {
-//                vec4 nearColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], ivec2(x, y), 0);
-//                boxMin = min(boxMin, nearColor);
-//                boxMax = max(boxMax, nearColor);
-//            }
-//        }
-//        vec4 oldColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.x)], reprojectedPos, 0);
-//        oldColor = clamp(max(baseColor*vec4(0.95f, 0.95f, 0.95f, 0.f), oldColor), boxMin, boxMax);
-//        vec3 comparedColors = baseColor.rgb-oldColor.rgb;
-//        outColor = vec4(mix(baseColor, oldColor, 0.95f));
-//    } else {
-//        outColor = baseColor;
-//    }
+    vec4 baseNormal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], scaledUv, 0);
+    vec4 color = baseColor;
+    vec2 uvNdc = (uv * 2.0) - 1.0;
+    vec4 ndc = vec4(uvNdc, baseDepth, 1.0);
+    vec4 viewPos = inverse(globalUbo.proj) * ndc;
+    viewPos /= viewPos.w;
+    vec4 worldPos = inverse(globalUbo.view) * viewPos;
+    worldPos /= worldPos.w;
+    vec2 reprojectedPos = reproject(worldPos.xyz);
+    if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
+    float oldDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], reprojectedPos, 0).r;
+    if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
+        float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
+        int radius = velocity < 0.6f ? 2 : 1;
+        vec4 boxMin = vec4(1000);
+        vec4 boxMax = vec4(-1000);
+        for (int x = int(scaledCoords.x-radius); x <= scaledCoords.x+radius; x++) {
+            for (int y = int(scaledCoords.y-radius); y <= scaledCoords.y+radius; y++) {
+                vec4 nearColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], ivec2(x, y), 0);
+                boxMin = min(boxMin, nearColor);
+                boxMax = max(boxMax, nearColor);
+            }
+        }
+        vec4 oldColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.x)], reprojectedPos, 0);
+        oldColor = clamp(max(baseColor*vec4(0.95f, 0.95f, 0.95f, 0.f), oldColor), boxMin, boxMax);
+        vec3 comparedColors = baseColor.rgb-oldColor.rgb;
+        outColor = vec4(mix(baseColor, oldColor, 0.95f));
+    } else {
+        outColor = baseColor;
+    }
 }
