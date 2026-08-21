@@ -1,7 +1,12 @@
 package org.conspiracraft.graphics.buffers.ubos;
 
+import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.graphics.Pipelines;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
+import org.conspiracraft.graphics.textures.Texture;
+import org.conspiracraft.graphics.textures.Texture3D;
+import org.conspiracraft.graphics.textures.Textures;
 import org.joml.*;
 
 import java.nio.ByteBuffer;
@@ -11,7 +16,7 @@ import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class PushUBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, 0};
+    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, new Vector4i(), new Vector4i(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     private int offset = 0;
@@ -58,7 +63,35 @@ public class PushUBO {
     public void updateAtlasOffset(Vector2i atlasOffset) {uniformStorage[3] = atlasOffset;}
     public void updateSize(Vector2i size) {uniformStorage[4] = size;}
     public void updateLayer(int layer) {uniformStorage[5] = layer;}
-    public void updateTex(int tex) {uniformStorage[6] = tex;}
+    public void updateTex(Texture tex1) {
+        Vector4i textures = ((Vector4i)uniformStorage[6]);
+        textures.set(tex1 == null ? -1 : tex1.handle, textures.y(), textures.z(), textures.w());
+        if (!(tex1 instanceof Texture3D)) {
+            updateLayer(-1);
+        }
+    }
+    public void updateTex(Texture tex2, Texture tex3, Texture tex4) {
+        Vector4i textures = ((Vector4i)uniformStorage[6]);
+        textures.set(textures.x(), tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);
+    }
+    public void updateTex(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {
+        ((Vector4i)uniformStorage[6]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);
+    }
+    public void updateWriteTex(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);}
+    public void updatePermanentTextures() {
+        uniformStorage[8] = Textures.atlas.handle;
+        uniformStorage[9] = Textures.materials.handle;
+        uniformStorage[10] = Textures.noises.handle;
+        uniformStorage[11] = Textures.blueNoise.handle;
+    }
+    public void updateSSBOs() {
+        uniformStorage[12] = Graphics.regionSSBO.buffer.handle;
+        uniformStorage[13] = Graphics.chunkSSBO.buffer.handle;
+        uniformStorage[14] = Graphics.voxelSSBO.buffer.handle;
+        uniformStorage[15] = Graphics.lodSSBO.buffer.handle;
+        uniformStorage[16] = Graphics.lightChunkSSBO.buffer.handle;
+        uniformStorage[17] = Graphics.lightSSBO.buffer.handle;
+    }
     public ByteBuffer buf = null;
     public void push() {
         offset = 0;

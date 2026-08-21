@@ -1,8 +1,10 @@
 package org.conspiracraft.graphics.textures;
 
-import org.conspiracraft.Settings;
+import org.conspiracraft.graphics.Descriptors;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.VkDescriptorImageInfo;
 import org.lwjgl.vulkan.VkSamplerCreateInfo;
+import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
 import java.nio.LongBuffer;
 
@@ -10,6 +12,7 @@ import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Texture {
+    public int handle;
     public float resDiv = 1;
     public int width;
     public int height;
@@ -21,9 +24,9 @@ public class Texture {
     public long sampler = -1;
     public int usage;
     public boolean windowResizable;
-    public boolean computeWritable;
 
-    public Texture(float resDiv, int width, int height, int channels, int format, int usage, boolean windowResizable, boolean computeWritable) {
+    public Texture(float resDiv, int width, int height, int channels, int format, int usage, boolean windowResizable) {
+        this.handle = Textures.textures.size();
         this.resDiv = resDiv;
         this.width = (int)Math.ceil(width/resDiv);
         this.height = (int)Math.ceil(height/resDiv);
@@ -31,16 +34,15 @@ public class Texture {
         this.format = format;
         this.usage = usage;
         this.windowResizable = windowResizable;
-        this.computeWritable = computeWritable;
     }
-    public Texture(int width, int height, int channels, int format, int usage, boolean windowResizable, boolean computeWritable) {
+    public Texture(int width, int height, int channels, int format, int usage, boolean windowResizable) {
+        this.handle = Textures.textures.size();
         this.width = width;
         this.height = height;
         this.channels = channels;
         this.format = format;
         this.usage = usage;
         this.windowResizable = windowResizable;
-        this.computeWritable = computeWritable;
     }
 
     public boolean layoutUnset = true;
@@ -62,13 +64,41 @@ public class Texture {
                 .addressModeU(VK_SAMPLER_ADDRESS_MODE_REPEAT)
                 .addressModeV(VK_SAMPLER_ADDRESS_MODE_REPEAT)
                 .addressModeW(VK_SAMPLER_ADDRESS_MODE_REPEAT)
-                .anisotropyEnable(true)
+                .anisotropyEnable(false)
                 .maxAnisotropy(16)
                 .borderColor(VK_BORDER_COLOR_INT_OPAQUE_BLACK)
                 .unnormalizedCoordinates(false);
         LongBuffer samplerBuf = stack.mallocLong(1);
         vkCreateSampler(vkDevice, samplerInfo, null, samplerBuf);
         sampler = samplerBuf.get(0);
+
+        VkDescriptorImageInfo.Buffer descriptorImageInfo = VkDescriptorImageInfo.calloc(1, stack);
+        descriptorImageInfo.get(0)
+                .imageLayout(VK_IMAGE_LAYOUT_GENERAL)
+                .imageView(this.imageView)
+                .sampler(this.sampler);
+        VkDescriptorImageInfo.Buffer storageImageInfo = VkDescriptorImageInfo.calloc(1, stack);
+        storageImageInfo.get(0)
+                .imageLayout(VK_IMAGE_LAYOUT_GENERAL)
+                .imageView(this.imageView);
+        VkWriteDescriptorSet.Buffer write = VkWriteDescriptorSet.calloc(2, stack);
+        write.get(0)
+                .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                .dstSet(Descriptors.descriptorSet)
+                .dstBinding(Descriptors.SAMP_IMG_BINDING)
+                .dstArrayElement(handle)
+                .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                .descriptorCount(1)
+                .pImageInfo(descriptorImageInfo);
+        write.get(1)
+                .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                .dstSet(Descriptors.descriptorSet)
+                .dstBinding(Descriptors.STORE_IMG_BINDING)
+                .dstArrayElement(handle)
+                .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+                .descriptorCount(1)
+                .pImageInfo(storageImageInfo);
+        vkUpdateDescriptorSets(vkDevice, write, null);
     }
     public void destroy() {
         vkDestroyImageView(vkDevice, imageView, null);

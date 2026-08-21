@@ -1,8 +1,10 @@
 package org.conspiracraft.graphics.buffers;
 
-import org.conspiracraft.graphics.Graphics;
+import org.conspiracraft.graphics.Descriptors;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.VkDescriptorBufferInfo;
+import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,7 @@ import static org.lwjgl.vulkan.VK10.*;
 public class Buffer {
     public static List<Buffer> buffers = new ArrayList<>();
 
+    public int handle = -1;
     public int size;
     public long[] buffer;
     public long[] memory;
@@ -29,8 +32,26 @@ public class Buffer {
             if (error != VK_SUCCESS) {throw new RuntimeException("vkMapMemory failed: " + error);}
         }
         if (!temporary) {
+            handle = buffers.size();
             buffers.addLast(this);
-            Graphics.recreateDescriptors(stack);
+            if ((usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) != 0) {
+                VkDescriptorBufferInfo.Buffer bufferInfo = VkDescriptorBufferInfo.calloc(1, stack);
+                bufferInfo.get(0)
+                        .buffer(buffer[0])
+                        .offset(0)
+                        .range(VK_WHOLE_SIZE);
+                VkWriteDescriptorSet.Buffer write = VkWriteDescriptorSet.calloc(1, stack);
+                write.get(0)
+                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                        .dstSet(Descriptors.descriptorSet)
+                        .dstBinding(Descriptors.SSBO_BINDING)
+                        .dstArrayElement(handle)
+                        .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                        .descriptorCount(1)
+                        .pBufferInfo(bufferInfo);
+                vkUpdateDescriptorSets(vkDevice, write, null);
+                //Graphics.recreateDescriptors(stack);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+#extension GL_EXT_nonuniform_qualifier : require
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
@@ -10,8 +11,27 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     float time;
     ivec2 res;
 } globalUbo;
-layout(set = 0, binding = 10) uniform sampler2D ddaDepth;
-layout(set = 0, binding = 11) uniform sampler2D ddaNormals;
+layout(push_constant) uniform PushUBO {
+    mat4 model;
+    vec4 color;
+    int instanced;
+    ivec2 atlasOffset;
+    ivec2 size;
+    int layer;
+    ivec4 tex;
+    ivec4 writeTex;
+    int atlas;
+    int materials;
+    int noises;
+    int blueNoise;
+    int regions;
+    int chunks;
+    int voxels;
+    int lods;
+    int lightChunks;
+    int lights;
+} pushUbo;
+layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(set = 0, binding = 18) uniform sampler2D colors;
 layout(set = 0, binding = 25) uniform sampler2D bloomColors;
 layout(location = 0) in vec2 uv;
@@ -102,8 +122,8 @@ void main() {
         float weight = WEIGHTS[i];
         vec2 samplePos = vec2(gl_FragCoord.xy+offset+0.125f)/(globalUbo.res/4);
         if (samplePos.x >= 0 && samplePos.x < 1 && samplePos.y >= 0 && samplePos.y < 1) {
-            color += textureLod(colors, samplePos, 0) * weight;
-            bloom += textureLod(bloomColors, samplePos, 0) * weight;
+            color += textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], samplePos, 0) * weight;
+            bloom += textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], samplePos, 0) * weight;
         }
     }
     outColor = color;

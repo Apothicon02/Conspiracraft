@@ -1,142 +1,60 @@
 package org.conspiracraft.graphics;
 
-import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
-import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
-import org.conspiracraft.graphics.textures.Texture;
-import org.conspiracraft.graphics.textures.Textures;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
 import java.nio.LongBuffer;
 
 import static org.conspiracraft.graphics.Device.vkDevice;
-import static org.conspiracraft.graphics.Swapchain.FRAMES_IN_FLIGHT;
-import static org.conspiracraft.graphics.textures.Textures.textures;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK12.*;
 
 public class Descriptors {
     public Descriptors(MemoryStack stack) {
         createDescriptorSetLayout(stack);
         Pipelines.createPipeline(stack);
         createDescriptorPool(stack);
-        createDescriptorSets(stack);
+        createDescriptorSet(stack);
     }
 
     public static long descriptorPool;
-    public static long[] descriptorSets;
-    public static long[] descriptorSetLayouts;
-    public static void createDescriptorSets(MemoryStack stack) {
-        LongBuffer layouts = stack.mallocLong(FRAMES_IN_FLIGHT);
-        for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
-            layouts.put(i, descriptorSetLayouts[0]);
-        }
+    public static long descriptorSet;
+    public static long descriptorSetLayout;
+    public static void createDescriptorSet(MemoryStack stack) {
+        LongBuffer layouts = stack.mallocLong(1).put(0, descriptorSetLayout);
         VkDescriptorSetAllocateInfo allocInfo = VkDescriptorSetAllocateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
                 .descriptorPool(descriptorPool)
                 .pSetLayouts(layouts);
-        LongBuffer descriptorSetsBuf = stack.mallocLong(FRAMES_IN_FLIGHT);
+        LongBuffer descriptorSetsBuf = stack.mallocLong(1);
         if (vkAllocateDescriptorSets(vkDevice, allocInfo, descriptorSetsBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to allocate descriptor sets!");
         }
-        descriptorSets = new long[FRAMES_IN_FLIGHT];
-        for (int i = 0; i < descriptorSets.length; i++) {
-            descriptorSets[i] = descriptorSetsBuf.get(i);
-            VkWriteDescriptorSet.Buffer descriptorWrites = VkWriteDescriptorSet.calloc(descriptorCount(), stack);
-            int b = 0;
-            for (UniformBuffer buf : UniformBuffer.uniformBuffers) {
-                VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
-                        .buffer(buf.buffer[0])
-                        .offset(0)
-                        .range(buf.size);
-                descriptorWrites.get(b)
-                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-                        .dstSet(descriptorSets[i])
-                        .dstBinding(b)
-                        .dstArrayElement(0)
-                        .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                        .descriptorCount(1)
-                        .pBufferInfo(bufInfo);
-                b++;
-            }
-            for (ShaderStorageBuffer buf : ShaderStorageBuffer.storageBuffers) {
-                VkDescriptorBufferInfo.Buffer bufInfo = VkDescriptorBufferInfo.calloc(1, stack)
-                        .buffer(buf.buffer.buffer[0])
-                        .offset(0)
-                        .range(buf.buffer.size);
-                descriptorWrites.get(b)
-                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-                        .dstSet(descriptorSets[i])
-                        .dstBinding(b)
-                        .dstArrayElement(0)
-                        .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                        .descriptorCount(1)
-                        .pBufferInfo(bufInfo);
-                b++;
-            }
-            for (Texture tex : Textures.textures) {
-                VkDescriptorImageInfo.Buffer imageInfo = VkDescriptorImageInfo.calloc(1, stack)
-                        .imageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-                        .imageView(tex.imageView)
-                        .sampler(tex.sampler);
-                descriptorWrites.get(b)
-                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-                        .dstSet(descriptorSets[i])
-                        .dstBinding(b)
-                        .dstArrayElement(0)
-                        .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                        .descriptorCount(1)
-                        .pImageInfo(imageInfo);
-                b++;
-            }
-            for (Texture tex : Textures.textures) {
-                VkDescriptorImageInfo.Buffer imageInfo = VkDescriptorImageInfo.calloc(1, stack)
-                        .imageLayout(tex.computeWritable ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-                        .imageView(tex.imageView)
-                        .sampler(tex.computeWritable ? VK_NULL_HANDLE : tex.sampler);
-                descriptorWrites.get(b)
-                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-                        .dstSet(descriptorSets[i])
-                        .dstBinding(b)
-                        .dstArrayElement(0)
-                        .descriptorType(tex.computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                        .descriptorCount(1)
-                        .pImageInfo(imageInfo);
-                b++;
-            }
-            vkUpdateDescriptorSets(vkDevice, descriptorWrites, null);
-        }
+        descriptorSet = descriptorSetsBuf.get(0);
     }
+    public static final int UBO_BINDING = 0;
+    public static final int SSBO_BINDING = 1;
+    public static final int SAMP_IMG_BINDING = 2;
+    public static final int STORE_IMG_BINDING = 3;
     public void createDescriptorPool(MemoryStack stack) {
-        VkDescriptorPoolSize.Buffer poolSizes = VkDescriptorPoolSize.calloc(descriptorCount(), stack);
-        int b = 0;
-        for (int i = 0; i < UniformBuffer.uniformBuffers.size(); i++) {
-            poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                    .descriptorCount(FRAMES_IN_FLIGHT);
-            b++;
-        }
-        for (int i = 0; i < ShaderStorageBuffer.storageBuffers.size(); i++) {
-            poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                    .descriptorCount(FRAMES_IN_FLIGHT);
-            b++;
-        }
-        for (int i = 0; i < Textures.textures.size(); i++) {
-            poolSizes.get(b)
-                    .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                    .descriptorCount(FRAMES_IN_FLIGHT);
-            b++;
-        }
-        for (int i = 0; i < Textures.textures.size(); i++) {
-            poolSizes.get(b)
-                    .type(textures.get(i).computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                    .descriptorCount(FRAMES_IN_FLIGHT);
-            b++;
-        }
+        VkDescriptorPoolSize.Buffer poolSizes = VkDescriptorPoolSize.calloc(4, stack);
+        poolSizes.get(UBO_BINDING)
+                .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(1);
+        poolSizes.get(SSBO_BINDING)
+                .type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                .descriptorCount(Short.MAX_VALUE);
+        poolSizes.get(SAMP_IMG_BINDING)
+                .type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                .descriptorCount(Short.MAX_VALUE);
+        poolSizes.get(STORE_IMG_BINDING)
+                .type(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+                .descriptorCount(Short.MAX_VALUE);
         VkDescriptorPoolCreateInfo poolInfo = VkDescriptorPoolCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
                 .pPoolSizes(poolSizes)
-                .maxSets(FRAMES_IN_FLIGHT);
+                .maxSets(1)
+                .flags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT);
         LongBuffer descriptorPoolBuf = stack.mallocLong(1);
         if (vkCreateDescriptorPool(vkDevice, poolInfo, null, descriptorPoolBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create descriptor pool!");
@@ -144,51 +62,43 @@ public class Descriptors {
         descriptorPool = descriptorPoolBuf.get(0);
     }
     public void createDescriptorSetLayout(MemoryStack stack) {
-        VkDescriptorSetLayoutBinding.Buffer layoutBindings = VkDescriptorSetLayoutBinding.calloc(descriptorCount(), stack);
-        int b = 0;
-        for (int i = 0; i < UniformBuffer.uniformBuffers.size(); i++) {
-            layoutBindings.get(b)
-                    .binding(b)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                    .descriptorCount(1)
-                    .stageFlags(UniformBuffer.uniformBuffers.get(i).stageFlags);
-            b++;
-        }
-        for (int i = 0; i < ShaderStorageBuffer.storageBuffers.size(); i++) {
-            layoutBindings.get(b)
-                    .binding(b)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                    .descriptorCount(1)
-                    .stageFlags(ShaderStorageBuffer.storageBuffers.get(i).stageFlags);
-            b++;
-        }
-        for (int i = 0; i < Textures.textures.size(); i++) {
-            layoutBindings.get(b)
-                    .binding(b)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                    .descriptorCount(1)
-                    .stageFlags(VK_SHADER_STAGE_FRAGMENT_BIT);
-            b++;
-        }
-        for (int i = 0; i < Textures.textures.size(); i++) {
-            layoutBindings.get(b)
-                    .binding(b)
-                    .descriptorType(textures.get(i).computeWritable ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                    .descriptorCount(1)
-                    .stageFlags(VK_SHADER_STAGE_COMPUTE_BIT);
-            b++;
-        }
+        VkDescriptorSetLayoutBinding.Buffer layoutBindings = VkDescriptorSetLayoutBinding.calloc(4, stack);
+        layoutBindings.get(UBO_BINDING)
+                .binding(UBO_BINDING)
+                .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(1)
+                .stageFlags(VK_SHADER_STAGE_ALL);
+        layoutBindings.get(SSBO_BINDING)
+                .binding(SSBO_BINDING)
+                .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                .descriptorCount(Short.MAX_VALUE)
+                .stageFlags(VK_SHADER_STAGE_ALL);
+        layoutBindings.get(SAMP_IMG_BINDING)
+                .binding(SAMP_IMG_BINDING)
+                .descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                .descriptorCount(Short.MAX_VALUE)
+                .stageFlags(VK_SHADER_STAGE_ALL);
+        layoutBindings.get(STORE_IMG_BINDING)
+                .binding(STORE_IMG_BINDING)
+                .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+                .descriptorCount(Short.MAX_VALUE)
+                .stageFlags(VK_SHADER_STAGE_ALL);
+
+        int singleFlags = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+        int arrFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+        VkDescriptorSetLayoutBindingFlagsCreateInfo layoutBindingFlags = VkDescriptorSetLayoutBindingFlagsCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO)
+                .pBindingFlags(stack.ints(singleFlags, arrFlags, arrFlags, arrFlags));
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
+                .pNext(layoutBindingFlags)
+                .flags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
                 .pBindings(layoutBindings);
         LongBuffer descriptorSetLayoutsBuf = stack.callocLong(1);
         if (vkCreateDescriptorSetLayout(vkDevice, layoutInfo, null, descriptorSetLayoutsBuf) != VK_SUCCESS) {
             throw new RuntimeException("Failed to create descriptor set layout!");
         }
-        descriptorSetLayouts = new long[]{descriptorSetLayoutsBuf.get(0)};
-    }
-    public static int descriptorCount() {
-        return UniformBuffer.uniformBuffers.size()+ShaderStorageBuffer.storageBuffers.size()+(textures.size()*2);
+        descriptorSetLayout = descriptorSetLayoutsBuf.get(0);
     }
 }

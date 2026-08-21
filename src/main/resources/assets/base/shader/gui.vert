@@ -17,7 +17,18 @@ layout(push_constant) uniform PushUBO {
     ivec2 atlasOffset;
     ivec2 size;
     int layer;
-    int tex;
+    ivec4 tex;
+    ivec4 writeTex;
+    int atlas;
+    int materials;
+    int noises;
+    int blueNoise;
+    int regions;
+    int chunks;
+    int voxels;
+    int lods;
+    int lightChunks;
+    int lights;
 } pushUbo;
 layout(location = 0) in vec3 position;
 

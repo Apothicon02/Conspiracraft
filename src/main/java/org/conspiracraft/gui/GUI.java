@@ -85,7 +85,7 @@ public class GUI {
         boolean shouldSetObjectOnPrev = true;
         Vector2i cursorPos = new Vector2i(cursorPxX(), cursorPxY());
         color.set(1);
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(5); //button
         for (Button button : buttons) {
             if (cursorPos.x() > button.bounds.x() && cursorPos.x() < button.bounds.z() && cursorPos.y() > button.bounds.y() && cursorPos.y() < button.bounds.w()) {
@@ -124,7 +124,7 @@ public class GUI {
         update();
         if (showUI) {
             if (!GUI.pauseMenuOpen) {
-                pushUBO.updateTex(0); //use gui atlas
+                pushUBO.updateTex(Textures.gui); //use gui atlas
                 pushUBO.updateLayer(3); //frame
                 pushUBO.updateSize(new Vector2i(1));
                 pushUBO.updateAtlasOffset(new Vector2i(0));
@@ -140,7 +140,7 @@ public class GUI {
     }
     public static Vector4f menuBgColor = new Vector4f(1.f);
     public static void drawAlwaysVisible() {
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         if (Main.isSaving || pauseMenuOpen) {
             color.set(1.f);
             Vector2i border = new Vector2i((int) ((32 * (width / 3840f)) / guiScaleMul), (int) ((32 * (height / 2180f)) / guiScaleMul));
@@ -243,7 +243,7 @@ public class GUI {
     public static void drawDebug() {
         color.set(1.f, 1.f, 1.f, 0.5f);
         pushUBO.updateLayer(0); //text
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         int pauseOff = (pauseMenuOpen ? -6 : -2);
         drawText(false, 0, 1, -pauseOff-1, pauseOff - (charHeight*0.5f), (String.format("%.2f", fps) + "fps ").toCharArray(), 2);
         drawText(false, 0, 1, -0.5f-pauseOff, 1+pauseOff - charHeight, (String.format("%.2f", ms) + "ms").toCharArray(), 3);
@@ -254,7 +254,7 @@ public class GUI {
     public static void drawInventory() {
         pushUBO.updateAtlasOffset(new Vector2i(0));
         pushUBO.updateLayer(1); //inventory
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         if (GUI.inventoryOpen) {
             color.set(0.85f);
             drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
@@ -319,13 +319,13 @@ public class GUI {
                 if (item != null) {
                     ItemType itemType = item.type;
                     if (itemType != ItemTypes.AIR) {
-                        pushUBO.updateTex(1); //use item atlas
+                        pushUBO.updateTex(Textures.items); //use item atlas
                         pushUBO.updateAtlasOffset(itemType.atlasOffset);
                         int offX = 3 + (x * slotSize);
                         int offY = 3 + (y * slotSizeY);
                         drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
                         if (item instanceof DurableItem durableItem && durableItem.durability < itemType.maxDurability()) {
-                            pushUBO.updateTex(-1); //use no texture
+                            pushUBO.updateTex(null); //use no texture
                             float durabilityPercent = (float) durableItem.durability / itemType.maxDurability();
                             float duraMix = (float)Math.sqrt(durabilityPercent);
                             color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);
@@ -333,7 +333,7 @@ public class GUI {
                             color.set(1);
                         }
                         if (item.amount > 1) {
-                            pushUBO.updateTex(0); //use gui atlas
+                            pushUBO.updateTex(Textures.gui); //use gui atlas
                             char[] chars = item.amountString().toCharArray();
                             float startOffset = 16 - (chars.length * (charWidth/2.f));
                             drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars, 2);
@@ -350,7 +350,7 @@ public class GUI {
             for (int y = 0; y < 4; y++) {
                 for (int x = 0; x < invWidth; x++) {
                     ItemType itemType = ItemTypes.itemTypeMap.get(itemId);
-                    pushUBO.updateTex(isFirstSlot ? 0 : 1); //use item atlas unless first slot then use gui atlas
+                    pushUBO.updateTex(isFirstSlot ? Textures.gui : Textures.items); //use item atlas unless first slot then use gui atlas
                     if (isFirstSlot) {
                         pushUBO.updateLayer(4); //trash
                         pushUBO.updateAtlasOffset(new Vector2i(0));
@@ -369,7 +369,7 @@ public class GUI {
                 }
             }
         }
-        pushUBO.updateTex(1); //use item atlas
+        pushUBO.updateTex(Textures.items); //use item atlas
         if (Main.player.inv.cursorItem != null) { //cursor item
             ItemType itemType = Main.player.inv.cursorItem.type;
             pushUBO.updateAtlasOffset(itemType.atlasOffset);
@@ -377,7 +377,7 @@ public class GUI {
             float offY = Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height;
             drawQuad(true, true, offX, offY, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
             if (Main.player.inv.cursorItem.amount > 1) {
-                pushUBO.updateTex(0); //use gui atlas
+                pushUBO.updateTex(Textures.gui); //use gui atlas
                 char[] chars = Main.player.inv.cursorItem.amountString().toCharArray();
                 float startOffset = 16 - (chars.length * (charWidth/2.f));
                 drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars, 2);
@@ -393,7 +393,7 @@ public class GUI {
     public static void drawItemHoverDetails(float offX, float offY, Item item) {
         char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
         color.set(1.f);
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
         pushUBO.updateAtlasOffset(new Vector2i(0, 22));
         drawSlot(false, false, offX, offY, (charWidth*2) - 1, charHeight - 4, 0, 0, 10, 16);
@@ -407,7 +407,7 @@ public class GUI {
         pushUBO.updateLayer(0); //text
         drawText(false, offX, offY, charWidth*2, charHeight, chars);
 
-        pushUBO.updateTex(-1); //use no texture
+        pushUBO.updateTex(null); //use no texture
         color.set(0.015f, 0.023f, 0.027f, 1.f);
         List<Pair<ItemType, ItemType>> uses = Recipes.getUses(item.type);
         if (!uses.isEmpty()) {
@@ -422,7 +422,7 @@ public class GUI {
         }
     }
     public static void drawRecipe(float offX, float offY, int offPxY, ItemType ingredient, ItemType product) {
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
         color.set(1, 1, 1, 0.85f);
         pushUBO.updateAtlasOffset(new Vector2i(44, 0));
@@ -431,13 +431,13 @@ public class GUI {
         drawSlot(false, false, offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
         drawSlot(false, false, offX, offY, (charWidth*2)+(enlargedSlotSize *2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, enlargedSlotSize, enlargedSlotSize);
         color.set(1.f);
-        pushUBO.updateTex(1); //items
+        pushUBO.updateTex(Textures.items); //items
         pushUBO.updateLayer(0); //items
         pushUBO.updateAtlasOffset(ingredient.atlasOffset);
         drawSlot(false, false, offX, offY, (charWidth*2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
         pushUBO.updateAtlasOffset(product.atlasOffset);
         drawSlot(false, false, offX, offY, (charWidth*2)+(enlargedSlotSize *2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
-        pushUBO.updateTex(0); //use gui atlas
+        pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(0); //text
         drawText(true, offX, offY, (charWidth*2)+(enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray());
     }

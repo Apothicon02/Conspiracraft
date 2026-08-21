@@ -1,3 +1,4 @@
+#extension GL_EXT_nonuniform_qualifier : require
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
@@ -17,10 +18,20 @@ layout(push_constant) uniform PushUBO {
     ivec2 atlasOffset;
     ivec2 size;
     int layer;
-    int tex;
+    ivec4 tex;
+    ivec4 writeTex;
+    int atlas;
+    int materials;
+    int noises;
+    int blueNoise;
+    int regions;
+    int chunks;
+    int voxels;
+    int lods;
+    int lightChunks;
+    int lights;
 } pushUbo;
-layout(set = 0, binding = 16) uniform sampler2D items;
-layout(set = 0, binding = 17) uniform sampler2D entities;
+layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
 
@@ -35,7 +46,7 @@ void main() {
         vec3 localNorm = normalize(cross(dFdx(localPos), dFdy(localPos)));
         int sideOffset = 0;
         vec2 uv = vec2(0);
-        if (pushUbo.tex > 0) {
+        if (pushUbo.tex.x > 0) {
             uv = localPos.xy+0.5f;
         } else if (abs(localNorm.x) > max(abs(localNorm.y), abs(localNorm.z))) {
             uv = localPos.zy;
@@ -65,7 +76,7 @@ void main() {
         uv = abs(uv);
 
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
-        outColor = (pushUbo.tex == 0 ? texelFetch(entities, coords, 0) : texelFetch(items, coords, 0))*outColor;
+        outColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0)*outColor;
         if (outColor.a <= 0) {
             discard;
         }

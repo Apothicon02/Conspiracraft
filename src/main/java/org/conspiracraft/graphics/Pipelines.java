@@ -24,7 +24,7 @@ public class Pipelines {
     public static void init(MemoryStack stack) {
         pipelines = new Pipeline[]{
                 new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1),
-                new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "dda.frag", 2),
+                new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "present.frag", 2), //this duplicate present should be removed
                 new Pipeline("raster.vert", "raster.frag", 2),
                 new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2),
                 new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
@@ -96,8 +96,8 @@ public class Pipelines {
                 .size(Renderer.pushUBO.size());
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                .setLayoutCount(Descriptors.descriptorSetLayouts.length)
-                .pSetLayouts(stack.longs(Descriptors.descriptorSetLayouts))
+                .setLayoutCount(1)
+                .pSetLayouts(stack.longs(Descriptors.descriptorSetLayout))
                 .pPushConstantRanges(pushConstRanges);
 
         LongBuffer pPipelineLayout = stack.mallocLong(1);
@@ -123,17 +123,17 @@ public class Pipelines {
                         .colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
                         .blendEnable(false);
             }
-            VkPipelineFragmentShadingRateStateCreateInfoKHR shadeState = VkPipelineFragmentShadingRateStateCreateInfoKHR.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR)
-                    .fragmentSize(VkExtent2D.calloc(stack).width(1).height(1))
-                    .combinerOps(0, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR)
-                    .combinerOps(1, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR);
+//            VkPipelineFragmentShadingRateStateCreateInfoKHR shadeState = VkPipelineFragmentShadingRateStateCreateInfoKHR.calloc(stack)
+//                    .sType(VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR)
+//                    .fragmentSize(VkExtent2D.calloc(stack).width(1).height(1))
+//                    .combinerOps(0, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR)
+//                    .combinerOps(1, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_KHR);
             VkPipelineRenderingCreateInfo renderingInfo = VkPipelineRenderingCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO)
                     .colorAttachmentCount(pipeline.colorAttachments)
                     .pColorAttachmentFormats(formats)
                     .depthAttachmentFormat(VK_FORMAT_D32_SFLOAT);
-            shadeState.pNext(renderingInfo.address());
+//            shadeState.pNext(renderingInfo.address());
             VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO)
                     .logicOpEnable(false)
@@ -165,7 +165,7 @@ public class Pipelines {
                     .pDynamicState(dynamicState)
                     .layout(pipelineLayout)
                     .renderPass(VK_NULL_HANDLE)
-                    .pNext(shadeState.address())
+                    .pNext(renderingInfo.address()) //shadeState.address()
                     .flags(VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR)
                     .subpass(0)
                     .basePipelineHandle(VK_NULL_HANDLE) // Optional

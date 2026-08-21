@@ -6,6 +6,7 @@ import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.graphics.buffers.CmdBuffer;
 import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
 import org.conspiracraft.graphics.buffers.ubos.GlobalUBO;
+import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
 import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.models.Vertex;
@@ -34,10 +35,10 @@ public class Graphics {
             Device.init(stack);
             Swapchain.init(stack);
             CmdBuffer.createCommandPool(stack);
-            createBuffers(stack);
-            Textures.generate(stack);
             Pipelines.init(stack);
             descriptors = new Descriptors(stack);
+            createBuffers(stack);
+            Textures.generate(stack);
             CmdBuffer.createCommandBuffer(stack);
             SyncObjects.init(stack);
         } catch (IOException e) {e.printStackTrace();}
@@ -77,6 +78,7 @@ public class Graphics {
         lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         lightSSBO = new ShaderStorageBuffer(stack, lightSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
+        pushUBO.updateSSBOs();
     }
 
     public static void recreateDescriptors(MemoryStack stack) {if (descriptors != null) {descriptors = new Descriptors(stack);}}

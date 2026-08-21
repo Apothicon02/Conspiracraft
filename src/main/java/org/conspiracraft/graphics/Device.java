@@ -33,6 +33,7 @@ import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_STRUCTURE_TYPE_PHYSICAL
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
 import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
@@ -80,12 +81,25 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES)
                 .timelineSemaphore(true)
                 .pNext(dynamicRendering.address());
+        VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexing = VkPhysicalDeviceDescriptorIndexingFeatures.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES)
+                .runtimeDescriptorArray(true)
+                .descriptorBindingPartiallyBound(true)
+                .shaderStorageBufferArrayNonUniformIndexing(true)
+                .shaderUniformBufferArrayNonUniformIndexing(true)
+                .shaderSampledImageArrayNonUniformIndexing(true)
+                .shaderStorageImageArrayNonUniformIndexing(true)
+                .descriptorBindingStorageBufferUpdateAfterBind(true)
+                .descriptorBindingUniformBufferUpdateAfterBind(true)
+                .descriptorBindingSampledImageUpdateAfterBind(true)
+                .descriptorBindingStorageImageUpdateAfterBind(true)
+                .pNext(timeline.address());
         VkPhysicalDeviceFragmentShadingRateFeaturesKHR shadingRate = VkPhysicalDeviceFragmentShadingRateFeaturesKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR)
-                .pipelineFragmentShadingRate(true)
-                .primitiveFragmentShadingRate(true)
-                .attachmentFragmentShadingRate(true)
-                .pNext(timeline.address());
+                .pipelineFragmentShadingRate(false)
+                .primitiveFragmentShadingRate(false)
+                .attachmentFragmentShadingRate(false)
+                .pNext(descriptorIndexing.address());
 
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
@@ -108,6 +122,7 @@ public class Device {
         graphicsQueueHandle = graphicsQueueBuf.get(0);
         graphicsQueue = new VkQueue(graphicsQueueHandle, vkDevice);
     }
+    public static VkPhysicalDeviceProperties pdProperties = null;
     public static void createVkPhysicalDeviceAndVkQueue(MemoryStack stack) {
         IntBuffer deviceCount = stack.mallocInt(1);
         vkEnumeratePhysicalDevices(vkInst, deviceCount, null);
@@ -119,7 +134,6 @@ public class Device {
         vkEnumeratePhysicalDevices(vkInst, deviceCount, devices);
         for (int d = 0; d < devices.capacity(); d++) {
             VkPhysicalDevice pDevice = new VkPhysicalDevice(devices.get(d), vkInst);
-            VkPhysicalDeviceProperties pdProperties;
             pdProperties = VkPhysicalDeviceProperties.malloc(stack);
             vkGetPhysicalDeviceProperties(pDevice, pdProperties);
             //System.out.println("Device name: " + pdProperties.deviceNameString());

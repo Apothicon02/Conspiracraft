@@ -2,18 +2,24 @@ package org.conspiracraft.graphics.buffers.ubos;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
+import org.conspiracraft.graphics.Descriptors;
 import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.graphics.Swapchain;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.VkDescriptorBufferInfo;
+import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static org.conspiracraft.graphics.Device.vkDevice;
 import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK10.vkUpdateDescriptorSets;
 
 public class GlobalUBO extends UBO {
     private Object[] uniformStorage = new Object[]{new Matrix4f(), new Matrix4f(), new Matrix4f(), new Matrix4f(), new Vector4i(), new Vector4f(), new Vector3f(), 0, 0.f, new Vector2i(), new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f(), 0.f, new Vector4f(), 0};
@@ -75,7 +81,7 @@ public class GlobalUBO extends UBO {
     }
     private int offset = 0;
     public ByteBuffer buf = null;
-    public void push() {
+    public void push(MemoryStack stack) {
         offset = 0;
         buf.clear();
         for (Object obj : uniforms()) {
@@ -96,6 +102,21 @@ public class GlobalUBO extends UBO {
         }
         buf.rewind();
         memCopy(memAddress(buf), Graphics.globalUBOBuf.pointer.get(0), buf.remaining());
+        VkDescriptorBufferInfo.Buffer bufferInfo = VkDescriptorBufferInfo.calloc(1, stack);
+        bufferInfo.get(0)
+                .buffer(Graphics.globalUBOBuf.buffer[0])
+                .offset(0)
+                .range(VK_WHOLE_SIZE);
+        VkWriteDescriptorSet.Buffer write = VkWriteDescriptorSet.calloc(1, stack);
+        write.get(0)
+                .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                .dstSet(Descriptors.descriptorSet)
+                .dstBinding(Descriptors.UBO_BINDING)
+                .dstArrayElement(0)
+                .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                .descriptorCount(1)
+                .pBufferInfo(bufferInfo);
+        vkUpdateDescriptorSets(vkDevice, write, null);
     }
     private int align(int alignment) {
         int mask = alignment - 1;

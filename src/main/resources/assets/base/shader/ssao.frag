@@ -1,3 +1,4 @@
+#extension GL_EXT_nonuniform_qualifier : require
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
@@ -10,10 +11,27 @@ layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     float time;
     ivec2 res;
 } globalUbo;
-layout(set = 0, binding = 9) uniform sampler2D ddaColors;
-layout(set = 0, binding = 10) uniform sampler2D ddaDepth;
-layout(set = 0, binding = 11) uniform sampler2D ddaNormals;
-layout(set = 0, binding = 20) uniform sampler2D blueNoise;
+layout(push_constant) uniform PushUBO {
+    mat4 model;
+    vec4 color;
+    int instanced;
+    ivec2 atlasOffset;
+    ivec2 size;
+    int layer;
+    ivec4 tex;
+    ivec4 writeTex;
+    int atlas;
+    int materials;
+    int noises;
+    int blueNoise;
+    int regions;
+    int chunks;
+    int voxels;
+    int lods;
+    int lightChunks;
+    int lights;
+} pushUbo;
+layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
@@ -24,7 +42,7 @@ vec3 hash(vec3 vec) {
     return fract(sin(p)*43758.5453123);
 }
 vec3 noise(ivec2 coords) {
-    return texelFetch(blueNoise, ivec2(coords.x&63, coords.y&63), 0).rgb;
+    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], ivec2(coords.x&63, coords.y&63), 0).rgb;
 }
 const float PI = 3.141592653589793f;
 vec3 randomVec(ivec2 coords) {
@@ -60,7 +78,7 @@ float getAO(float depth, vec4 normal) {
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
-            vec3 sampleVS = reconstructViewPos(sampleUV, textureLod(ddaDepth, sampleUV, 0).r);
+            vec3 sampleVS = reconstructViewPos(sampleUV, textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], sampleUV, 0).r);
             float rangeCheck = smoothstep(0, 1, radius/(length(posVS-sampleVS)+0.001f));
             if (sampleVS.z+0.01f < sampleVec.z) {
                 occlusion += rangeCheck;
@@ -74,9 +92,9 @@ vec4 normal = vec4(0);
 float shade = 1.f;
 bool sampleShade(int x, int y) {
     ivec2 offCoords = ivec2(gl_FragCoord.x+x, gl_FragCoord.y+y);
-    vec4 offNormal = texelFetch(ddaNormals, offCoords, 0);
+    vec4 offNormal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], offCoords, 0);
     if (dot(offNormal.xyz, normal.xyz) >= 0.9f) {
-        float potentialShade = texelFetch(ddaColors, offCoords, 0).a;
+        float potentialShade = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], offCoords, 0).a;
         if (potentialShade <= 1) {
             shade = potentialShade;
             return false;
@@ -85,9 +103,9 @@ bool sampleShade(int x, int y) {
     return true;
 }
 void main() {
-    vec4 color = textureLod(ddaColors, uv, 0);
-    float depth = textureLod(ddaDepth, uv, 0).r;
-    normal = textureLod(ddaNormals, uv, 0);
+    vec4 color = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0);
+    float depth = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r;
+    normal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0);
     shade = color.a;
     if (shade > 2) { // && scaledCoords.x > 0 && scaledCoords.y > 0 && scaledCoords.x < globalUbo.res.x-1 && scaledCoords.y < globalUbo.res.y-1
         shade = 1.f;
