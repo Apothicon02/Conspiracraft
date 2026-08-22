@@ -81,9 +81,11 @@ public class GUI {
     public static Vector4f color = new Vector4f(1.f);
     public static Object objectOnPrev = null;
 
+    public static List<Menu> menus = new ArrayList<>(List.of(new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f)));
+    public static Vector2i cursorPos = new Vector2i();
     public static void tick() {
         boolean shouldSetObjectOnPrev = true;
-        Vector2i cursorPos = new Vector2i(cursorPxX(), cursorPxY());
+        cursorPos.set(cursorPxX(), cursorPxY());
         color.set(1);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(5); //button
@@ -123,6 +125,7 @@ public class GUI {
         //long startTime = System.nanoTime();
         update();
         if (showUI) {
+            for (Menu menu : menus) {menu.update(); menu.draw();}
             if (!GUI.pauseMenuOpen) {
                 pushUBO.updateTex(Textures.gui); //use gui atlas
                 pushUBO.updateLayer(3); //frame
@@ -252,9 +255,9 @@ public class GUI {
         }
     }
     public static void drawInventory() {
-        pushUBO.updateAtlasOffset(new Vector2i(0));
-        pushUBO.updateLayer(1); //inventory
         pushUBO.updateTex(Textures.gui); //use gui atlas
+        pushUBO.updateLayer(1); //inventory
+        pushUBO.updateAtlasOffset(new Vector2i(0));
         if (GUI.inventoryOpen) {
             color.set(0.85f);
             drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar

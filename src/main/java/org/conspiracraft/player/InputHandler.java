@@ -7,6 +7,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.Window;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.gui.Menu;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
@@ -21,6 +22,7 @@ import java.nio.ByteBuffer;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.mouseSensitivity;
+import static org.conspiracraft.gui.GUI.menus;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
@@ -80,7 +82,10 @@ public class InputHandler {
                     SDL_SetWindowRelativeMouseMode(Window.window, false);
                     //player.clearVars();
                     if (GUI.inventoryOpen) {
-                        player.inv.tick();
+                        //player.inv.tick();
+                        for (Menu menu : menus) {
+                            menu.tick();
+                        }
                     }
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
