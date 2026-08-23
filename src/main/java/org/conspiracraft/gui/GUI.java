@@ -52,6 +52,7 @@ public class GUI {
     public static List<Slider> sliders = new ArrayList<>();
     public static Button drawingButton = null;
     public static List<Button> buttons = new ArrayList<>();
+    public static boolean canInteract = true;
 
     public static float guiScale = 1;
     public static float guiScaleMul = 4f; //even-though it's a float, should always be set to a round number to prevent distortion of pixel-art
@@ -255,122 +256,122 @@ public class GUI {
         }
     }
     public static void drawInventory() {
-        pushUBO.updateTex(Textures.gui); //use gui atlas
-        pushUBO.updateLayer(1); //inventory
-        pushUBO.updateAtlasOffset(new Vector2i(0));
-        if (GUI.inventoryOpen) {
-            color.set(0.85f);
-            drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
-            drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
-            drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
-            pushUBO.updateLayer(0); //gui
-            drawText(false, hotbarPosX, hotbarPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Inventory".toCharArray());
-            pushUBO.updateLayer(1); //inventory
-            pushUBO.updateAtlasOffset(new Vector2i(0));
-            if (Main.player.creative) {
-                color.set(1);
-                drawQuad(false, false, hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY);
-                drawQuad(false, false, hotbarPosX, containerPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
-                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
-                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
-                pushUBO.updateLayer(0); //gui
-                drawText(false, hotbarPosX, containerPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Creative Supplies".toCharArray());
-                pushUBO.updateLayer(1); //inventory
-                pushUBO.updateAtlasOffset(new Vector2i(0));
-            }
-        }
+//        pushUBO.updateTex(Textures.gui); //use gui atlas
+//        pushUBO.updateLayer(1); //inventory
+//        pushUBO.updateAtlasOffset(new Vector2i(0));
+//        if (GUI.inventoryOpen) {
+//            color.set(0.85f);
+//            drawQuad(false, false, hotbarPosX, hotbarPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
+//            drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
+//            drawQuad(false, false, hotbarPosX, hotbarPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY); //hotbar
+//            pushUBO.updateLayer(0); //gui
+//            drawText(false, hotbarPosX, hotbarPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Inventory".toCharArray());
+//            pushUBO.updateLayer(1); //inventory
+//            pushUBO.updateAtlasOffset(new Vector2i(0));
+//            if (Main.player.creative) {
+//                color.set(1);
+//                drawQuad(false, false, hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY);
+//                drawQuad(false, false, hotbarPosX, containerPosY + ((hotbarSizeY / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+//                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 2) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+//                drawQuad(false, false, hotbarPosX, containerPosY + (((hotbarSizeY * 3) / guiScale) * aspectRatio), hotbarSizeX, hotbarSizeY);
+//                pushUBO.updateLayer(0); //gui
+//                drawText(false, hotbarPosX, containerPosY + ((((hotbarSizeY * 4) + 3) / guiScale) * aspectRatio), 0, 0, "Creative Supplies".toCharArray());
+//                pushUBO.updateLayer(1); //inventory
+//                pushUBO.updateAtlasOffset(new Vector2i(0));
+//            }
+//        }
         color.set(1.f);
-        drawQuad(false, false, hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY); //hotbar
-        pushUBO.updateLayer(2); //selector
-        Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
-        Vector2i selSlot = null;
-        if (GUI.inventoryOpen) {
-            Vector2f clampedPos = confineToMenu(hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY * 4);
-            if (clampedPos.x() > -1 && clampedPos.y() > -1) {
-                Main.player.inv.selectedSlot = new Vector2i((int) (clampedPos.x() * invWidth), (int) (clampedPos.y() * 4));
-                selSlot = Main.player.inv.selectedSlot;
-            } else if (Main.player.creative) {
-                Main.player.inv.selectedSlot = null;
-                clampedPos = confineToMenu(hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY * 4);
-                Main.player.inv.selectedContainerSlot = new Vector2i((int) (clampedPos.x() * invWidth), (int) (clampedPos.y() * 4));
-                selSlot = Main.player.inv.selectedContainerSlot;
-            }
-            for (int slotId : Main.player.inv.selectedSlots) {
-                color.set(0.85f, 0.85f, 0.85f, 1.f);
-                Vector2i pos = new Vector2i(slotId % invWidth, slotId / invWidth);
-                if (pos.x() != selSlot.x() || pos.y() != selSlot.y()) { //don't draw in the selected slot, as that would just get overlapped.
-                    drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, pos.x(), pos.y(), enlargedSlotSize, enlargedSlotSize);
-                }
-            }
-        } else {
-            Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
-            selSlot = Main.player.inv.selectedSlot;
-        }
-        color.set(1.f);
-        if (selSlot != null) {
-            if (selSlot.x() < 0 || selSlot.y() < 0) {
-                selSlot.set(-1, -1);
-            } else {
-                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, 0.5f, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
-            }
-        }
-
-        for (int y = 0; y < (GUI.inventoryOpen ? 4 : 1); y++) {
-            for (int x = 0; x < invWidth; x++) {
-                Item item = Main.player.inv.getItem(x, y);
-                if (item != null) {
-                    ItemType itemType = item.type;
-                    if (itemType != ItemTypes.AIR) {
-                        pushUBO.updateTex(Textures.items); //use item atlas
-                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
-                        int offX = 3 + (x * slotSize);
-                        int offY = 3 + (y * slotSizeY);
-                        drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
-                        if (item instanceof DurableItem durableItem && durableItem.durability < itemType.maxDurability()) {
-                            pushUBO.updateTex(null); //use no texture
-                            float durabilityPercent = (float) durableItem.durability / itemType.maxDurability();
-                            float duraMix = (float)Math.sqrt(durabilityPercent);
-                            color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);
-                            drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, (int)(ItemTypes.itemTexSize*durabilityPercent), 2);
-                            color.set(1);
-                        }
-                        if (item.amount > 1) {
-                            pushUBO.updateTex(Textures.gui); //use gui atlas
-                            char[] chars = item.amountString().toCharArray();
-                            float startOffset = 16 - (chars.length * (charWidth/2.f));
-                            drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars, 2);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (GUI.inventoryOpen && Main.player.creative) {
-            boolean isFirstSlot = true;
-            int itemId = Main.player.creativeInvScroll;
-            done:
-            for (int y = 0; y < 4; y++) {
-                for (int x = 0; x < invWidth; x++) {
-                    ItemType itemType = ItemTypes.itemTypeMap.get(itemId);
-                    if (isFirstSlot) {
-                        pushUBO.updateTex(Textures.gui);
-                        pushUBO.updateLayer(4); //trash
-                        pushUBO.updateAtlasOffset(new Vector2i(0));
-                    } else {
-                        pushUBO.updateTex(Textures.items);
-                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
-                    }
-                    int offX = 3 + (x * slotSize);
-                    int offY = 3 + (y * slotSizeY);
-                    drawSlot(hotbarPosX, containerPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
-                    itemId++;
-                    if (itemId >= ItemTypes.itemTypeMap.size()) {
-                        break done;
-                    }
-                    isFirstSlot = false;
-                }
-            }
-        }
+//        drawQuad(false, false, hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY); //hotbar
+//        pushUBO.updateLayer(2); //selector
+//        Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
+//        Vector2i selSlot = null;
+//        if (GUI.inventoryOpen) {
+//            Vector2f clampedPos = confineToMenu(hotbarPosX, hotbarPosY, hotbarSizeX, hotbarSizeY * 4);
+//            if (clampedPos.x() > -1 && clampedPos.y() > -1) {
+//                Main.player.inv.selectedSlot = new Vector2i((int) (clampedPos.x() * invWidth), (int) (clampedPos.y() * 4));
+//                selSlot = Main.player.inv.selectedSlot;
+//            } else if (Main.player.creative) {
+//                Main.player.inv.selectedSlot = null;
+//                clampedPos = confineToMenu(hotbarPosX, containerPosY, hotbarSizeX, hotbarSizeY * 4);
+//                Main.player.inv.selectedContainerSlot = new Vector2i((int) (clampedPos.x() * invWidth), (int) (clampedPos.y() * 4));
+//                selSlot = Main.player.inv.selectedContainerSlot;
+//            }
+//            for (int slotId : Main.player.inv.selectedSlots) {
+//                color.set(0.85f, 0.85f, 0.85f, 1.f);
+//                Vector2i pos = new Vector2i(slotId % invWidth, slotId / invWidth);
+//                if (pos.x() != selSlot.x() || pos.y() != selSlot.y()) { //don't draw in the selected slot, as that would just get overlapped.
+//                    drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, -1, pos.x(), pos.y(), enlargedSlotSize, enlargedSlotSize);
+//                }
+//            }
+//        } else {
+//            Main.player.inv.selectedSlot = new Vector2i(HandManager.hotbarSlot, 0);
+//            selSlot = Main.player.inv.selectedSlot;
+//        }
+//        color.set(1.f);
+//        if (selSlot != null) {
+//            if (selSlot.x() < 0 || selSlot.y() < 0) {
+//                selSlot.set(-1, -1);
+//            } else {
+//                drawSlot(hotbarPosX, selSlot == Main.player.inv.selectedContainerSlot ? containerPosY : hotbarPosY, 0, 0.5f, selSlot.x(), selSlot.y(), enlargedSlotSize, enlargedSlotSize); //selector
+//            }
+//        }
+//
+//        for (int y = 0; y < (GUI.inventoryOpen ? 4 : 1); y++) {
+//            for (int x = 0; x < invWidth; x++) {
+//                Item item = Main.player.inv.getItem(x, y);
+//                if (item != null) {
+//                    ItemType itemType = item.type;
+//                    if (itemType != ItemTypes.AIR) {
+//                        pushUBO.updateTex(Textures.items); //use item atlas
+//                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
+//                        int offX = 3 + (x * slotSize);
+//                        int offY = 3 + (y * slotSizeY);
+//                        drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+//                        if (item instanceof DurableItem durableItem && durableItem.durability < itemType.maxDurability()) {
+//                            pushUBO.updateTex(null); //use no texture
+//                            float durabilityPercent = (float) durableItem.durability / itemType.maxDurability();
+//                            float duraMix = (float)Math.sqrt(durabilityPercent);
+//                            color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);
+//                            drawSlot(hotbarPosX, hotbarPosY, offX, offY, 0, 0, (int)(ItemTypes.itemTexSize*durabilityPercent), 2);
+//                            color.set(1);
+//                        }
+//                        if (item.amount > 1) {
+//                            pushUBO.updateTex(Textures.gui); //use gui atlas
+//                            char[] chars = item.amountString().toCharArray();
+//                            float startOffset = 16 - (chars.length * (charWidth/2.f));
+//                            drawText(false, hotbarPosX, hotbarPosY, offX + startOffset, offY + 1, chars, 2);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (GUI.inventoryOpen && Main.player.creative) {
+//            boolean isFirstSlot = true;
+//            int itemId = Main.player.creativeInvScroll;
+//            done:
+//            for (int y = 0; y < 4; y++) {
+//                for (int x = 0; x < invWidth; x++) {
+//                    ItemType itemType = ItemTypes.itemTypeMap.get(itemId);
+//                    if (isFirstSlot) {
+//                        pushUBO.updateTex(Textures.gui);
+//                        pushUBO.updateLayer(4); //trash
+//                        pushUBO.updateAtlasOffset(new Vector2i(0));
+//                    } else {
+//                        pushUBO.updateTex(Textures.items);
+//                        pushUBO.updateAtlasOffset(itemType.atlasOffset);
+//                    }
+//                    int offX = 3 + (x * slotSize);
+//                    int offY = 3 + (y * slotSizeY);
+//                    drawSlot(hotbarPosX, containerPosY, offX, offY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
+//                    itemId++;
+//                    if (itemId >= ItemTypes.itemTypeMap.size()) {
+//                        break done;
+//                    }
+//                    isFirstSlot = false;
+//                }
+//            }
+//        }
         pushUBO.updateTex(Textures.items); //use item atlas
         if (Main.player.inv.cursorItem != null) { //cursor item
             ItemType itemType = Main.player.inv.cursorItem.type;
@@ -385,12 +386,12 @@ public class GUI {
                 drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars, 2);
             }
         }
-        if (inventoryOpen) {
-            Item item = player.inv.getSelectedItem(true);
-            if (item != null) {
-                drawItemHoverDetails(Main.player.inputHandler.currentPos.x() / width, Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height, item);
-            }
-        }
+//        if (inventoryOpen) {
+//            Item item = player.inv.getSelectedItem(true);
+//            if (item != null) {
+//                drawItemHoverDetails(Main.player.inputHandler.currentPos.x() / width, Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height, item);
+//            }
+//        }
     }
     public static void drawItemHoverDetails(float offX, float offY, Item item) {
         char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
