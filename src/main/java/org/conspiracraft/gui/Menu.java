@@ -19,15 +19,8 @@ import java.util.List;
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.width;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
-import static org.conspiracraft.gui.GUI.guiScale;
-import static org.conspiracraft.gui.GUI.aspectRatio;
-import static org.conspiracraft.gui.GUI.charWidth;
-import static org.conspiracraft.gui.GUI.charHeight;
-import static org.conspiracraft.gui.GUI.getCharAtlasOffset;
-import static org.conspiracraft.gui.GUI.guiScaleMul;
-import static org.conspiracraft.gui.GUI.color;
-import static org.conspiracraft.gui.GUI.slotSize;
-import static org.conspiracraft.gui.GUI.slotSizeY;
+import static org.conspiracraft.gui.GUI.*;
+import static org.conspiracraft.gui.GUI.enlargedSlotSize;
 
 public class Menu {
     public String name = "Menu";
@@ -121,7 +114,46 @@ public class Menu {
         GUI.canInteract = true;
     }
 
-    public void draw() {}
+    public void draw() {
+        drawBase();
+    }
+    public void drawBase() {
+        pushUBO.updateTex(null);
+        color.set(0, 0, 0, 1);
+        drawQuad(-1, -1, menuSizeRaw.x()+2, menuSizeRaw.y()+1, 1);
+        for (Slot slot : slots) {
+            pushUBO.updateTex(Textures.gui);
+            pushUBO.updateLayer(1); //inventory
+            pushUBO.updateAtlasOffset(new Vector2i(0));
+            menuColor(color);
+            drawSlot(0, 0, slot.posRaw.x(), slot.posRaw.y() - 0.5f, 0, 0, slotSize, slotSize, 1);
+            color.set(1);
+            if (items != null && slot.id < items.length) {
+                drawItem(items[slot.id], slot.posRaw.x() + 2, slot.posRaw.y() + 2);
+            }
+        }
+        pushUBO.updateTex(Textures.gui);
+        pushUBO.updateLayer(2); //selector
+        pushUBO.updateAtlasOffset(new Vector2i());
+        for (Slot slot : selectedSlotsL) {
+            drawSlot(0, 0, slot.posRaw.x()-1, slot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
+        }
+        for (Slot slot : selectedSlotsR) {
+            drawSlot(0, 0, slot.posRaw.x()-1, slot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
+        }
+        if (selectedSlot != null) {
+            pushUBO.updateTex(Textures.gui);
+            pushUBO.updateLayer(2); //selector
+            pushUBO.updateAtlasOffset(new Vector2i());
+            drawSlot(0, 0, selectedSlot.posRaw.x()-1, selectedSlot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
+            if (selectedSlot.id < items.length) {
+                Item item = items[selectedSlot.id];
+                if (item != null && item.type != ItemTypes.AIR) {
+                    drawItemHoverDetails(selectedSlot.posRaw.x() + (GUI.slotSize/2), selectedSlot.posRaw.y() + (GUI.slotSizeY-4), item);
+                }
+            }
+        }
+    }
 
     public void drawItemHoverDetails(int offX, int offY, Item item) {
         pushUBO.updateTex(null); //use no texture
