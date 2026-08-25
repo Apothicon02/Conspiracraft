@@ -43,7 +43,7 @@ void main() {
     outNormal = vec4(normal, 0);
     outColor = pushUbo.color;
     if (pushUbo.tex.x >= 0) {
-        vec2 uv = localPos.xy;
+        vec2 uv = localPos.xy+0.5f;
         ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y));
         outColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0)*outColor;
         if (outColor.a <= 0) {
