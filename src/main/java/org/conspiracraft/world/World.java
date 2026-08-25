@@ -68,7 +68,9 @@ public class World {
         }
     }
     public static void dropItem(Item item) {
-        World.items.add(item.clone().timeExisted(-2000).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0)));
+        Item newItem = item.clone().timeExisted(-2000).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0));
+        World.items.add(newItem);
+        newItem.playSound(newItem.pos);
     }
 
     public static void save(String path) throws IOException {

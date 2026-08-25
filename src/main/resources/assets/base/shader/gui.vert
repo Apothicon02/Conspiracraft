@@ -37,7 +37,7 @@ layout(location = 1) out vec2 localUV;
 
 void main() {
     vec3 pos = (pushUbo.model*vec4(position.xy, 0.f, 1.f)).xyz;
+    gl_Position = vec4(pos, 1.0);
     uv = (pos.xy+1)/2;
     localUV = (position.xy+1)/2;
-    gl_Position = vec4(pos, 1.0);
 }

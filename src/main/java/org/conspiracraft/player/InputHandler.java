@@ -80,18 +80,12 @@ public class InputHandler {
                 keyMods = SDL_GetModState();
                 if (GUI.pauseMenuOpen || GUI.inventoryOpen) {
                     SDL_SetWindowRelativeMouseMode(Window.window, false);
-                    //player.clearVars();
-                    if (GUI.inventoryOpen) {
-                        //player.inv.tick();
-                        for (Menu menu : menus) {
-                            menu.tick();
-                        }
-                    }
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
                     HandManager.input();
                 }
+                for (Menu menu : menus) {if (menu != null) {menu.tick();}}
 
                 if (isKeyDown(SDL_SCANCODE_F3)) {
                     float r = 0.f;
@@ -151,11 +145,11 @@ public class InputHandler {
                         if (keyRelease(SDL_SCANCODE_TAB)) {
                             GUI.inventoryOpen = !GUI.inventoryOpen;
                         }
-                        if (keyRelease(SDL_SCANCODE_Q)) {
+                        if (keyRelease(SDL_SCANCODE_Q) && !GUI.inventoryOpen) {
                             Item item = player.inv.getSelectedItem(false);
                             if (item != null) {
                                 World.dropItem(item);
-                                item.amount(0).type(ItemTypes.AIR);
+                                item.amount(0).type(ItemTypes.AIR).timeExisted(0);
                             }
                         }
                         if (keyRelease(SDL_SCANCODE_T)) {

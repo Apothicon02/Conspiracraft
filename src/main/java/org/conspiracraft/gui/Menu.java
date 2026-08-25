@@ -8,14 +8,13 @@ import org.conspiracraft.items.Item;
 import org.conspiracraft.items.Recipes;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector4f;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.conspiracraft.Main.player;
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.width;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
@@ -32,6 +31,7 @@ public class Menu {
     public ArrayList<Slot> selectedSlotsL = new ArrayList<>();
     public ArrayList<Slot> selectedSlotsR = new ArrayList<>();
     public Slot selectedSlot = null;
+    public int scroll = 0, maxScroll = 0;
     public Item[] items = null;
     public Menu() {}
 
@@ -58,16 +58,88 @@ public class Menu {
         slots.add(slot);
         elements.add(slot);
     }
+    public Item addItem(Item item) {
+        for (int i = 0; i < items.length; i++) { //first try merging with existing stacks
+            Item slotItem = getItem(i);
+            if (slotItem != null && slotItem.type == item.type) {
+                item = addToSlot(i, item, item.amount);
+                if (item == null) {
+                    break;
+                }
+            }
+        }
+        if (item != null) {
+            for (int i = 0; i < items.length; i++) {//then try adding to an empty slot
+                Item slotItem = getItem(i);
+                if (slotItem == null || slotItem.type == ItemTypes.AIR) {
+                    setItem(i, item.clone());
+                    item = null;
+                    break;
+                }
+            }
+        }
+        return item;
+    }
+
+    public Item addToSlot(int existingId, Item item, int amount) {
+        Item existing = getItem(existingId);
+        if (existing == null || existing.amount <= 0 || existing.type == ItemTypes.AIR) {
+            existing = item.clone();
+            existing.amount = amount;
+            item.amount -= amount;
+        } else if (existing.type == item.type && existing.amount < existing.type.maxStackSize) {
+            existing = existing.clone();
+            int space = Math.min(amount, Math.min(item.amount, existing.type.maxStackSize - existing.amount));
+            if (space > 0) {
+                existing.amount += space;
+                item.amount -= space;
+            }
+        }
+        if (item.amount <= 0) {
+            item = null;
+        }
+        setItem(existingId, existing);
+        return item;
+    }
+    public void setItem(int slotId, Item item) {
+        if (Renderer.initialized) {
+            Vector3f earPos = new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0);
+            Item existing = items[slotId];
+            if (item != null) {
+                if (existing == null || item.type != existing.type || item.amount != existing.amount) {
+                    item.playSound(earPos);
+                }
+                item.prevTickTime(Main.timeMsLong);
+            } else if (existing != null) {
+                existing.playSound(earPos);
+            }
+        }
+        items[slotId] = item;
+    }
+    public Item getItem(int index) {
+        return items[index];
+    }
     public void tick() {
-        baseTick();
+        if (GUI.inventoryOpen) {baseTick();}
     }
     public void baseTick() {
+        if (player.inputHandler.scroll.y > 0) {
+            scroll++;
+            if (scroll >= maxScroll) {
+                scroll = maxScroll-1;//0;
+            }
+        } else if (player.inputHandler.scroll.y < 0) {
+            scroll--;
+            if (scroll < 0) {
+                scroll = 0;//maxScroll-1;
+            }
+        }
         if (!Main.player.inputHandler.leftButtonPressed) {
             if (Main.player.inv.cursorItem != null && selectedSlotsL.size() > 1) {
                 int amtPerSlot = Main.player.inv.cursorItem.amount / selectedSlotsL.size();
                 int amtPut = 0;
                 for (Slot slot : selectedSlotsL) {
-                    Item item = items[slot.id];
+                    Item item = getItem(slot.id);
                     if (item == null) {
                         item = Main.player.inv.cursorItem.clone().amount(amtPerSlot);
                         amtPut += amtPerSlot;
@@ -76,7 +148,7 @@ public class Menu {
                         item.amount = Math.min(item.type.maxStackSize, item.amount + amtPerSlot);
                         amtPut += item.amount - prevAmount;
                     }
-                    items[slot.id] = item;
+                    setItem(slot.id, item);
                 }
                 Main.player.inv.cursorItem.amount -= amtPut;
                 if (Main.player.inv.cursorItem.amount <= 0) {
@@ -90,7 +162,7 @@ public class Menu {
             if (Main.player.inv.cursorItem != null && selectedSlotsR.size() > 1) {
                 int amtPut = 0;
                 for (Slot slot : selectedSlotsR) {
-                    Item item = items[slot.id];
+                    Item item = getItem(slot.id);
                     if (item == null) {
                         item = Main.player.inv.cursorItem.clone().amount(1);
                         amtPut++;
@@ -99,7 +171,7 @@ public class Menu {
                         item.amount = Math.min(item.type.maxStackSize, item.amount+1);
                         amtPut += item.amount - prevAmount;
                     }
-                    items[slot.id] = item;
+                    setItem(slot.id, item);
                 }
                 Main.player.inv.cursorItem.amount -= amtPut;
                 if (Main.player.inv.cursorItem.amount <= 0) {
@@ -118,38 +190,46 @@ public class Menu {
         drawBase();
     }
     public void drawBase() {
+        if (inventoryOpen) {
+            color.set(1);
+            pushUBO.updateTex(Textures.gui);
+            pushUBO.updateLayer(0);
+            pushUBO.updateAtlasOffset(new Vector2i());
+            drawText(false, 0, menuSizeRaw.y() + 3, 0, 0, name.toCharArray(), 1);
+        }
         pushUBO.updateTex(null);
         color.set(0, 0, 0, 1);
-        drawQuad(-1, -1, menuSizeRaw.x()+2, menuSizeRaw.y()+1, 1);
+        drawQuad(-1, -1, menuSizeRaw.x()+2, menuSizeRaw.y()+2, 1);
         for (Slot slot : slots) {
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(1); //inventory
             pushUBO.updateAtlasOffset(new Vector2i(0));
             menuColor(color);
-            drawSlot(0, 0, slot.posRaw.x(), slot.posRaw.y() - 0.5f, 0, 0, slotSize, slotSize, 1);
+            drawQuad(slot.posRaw.x(), slot.posRaw.y(), slotSize, slotSize, 1);
             color.set(1);
             if (items != null && slot.id < items.length) {
-                drawItem(items[slot.id], slot.posRaw.x() + 2, slot.posRaw.y() + 2);
+                drawItem(getItem(slot.id), slot.posRaw.x() + 2, slot.posRaw.y()+2);
             }
         }
         pushUBO.updateTex(Textures.gui);
         pushUBO.updateLayer(2); //selector
         pushUBO.updateAtlasOffset(new Vector2i());
         for (Slot slot : selectedSlotsL) {
-            drawSlot(0, 0, slot.posRaw.x()-1, slot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
+            drawQuad(slot.posRaw.x()-1, slot.posRaw.y()-2, enlargedSlotSize, enlargedSlotSize, 1);
         }
         for (Slot slot : selectedSlotsR) {
-            drawSlot(0, 0, slot.posRaw.x()-1, slot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
+            drawQuad(slot.posRaw.x()-1, slot.posRaw.y()-2, enlargedSlotSize, enlargedSlotSize, 1);
         }
         if (selectedSlot != null) {
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(2); //selector
             pushUBO.updateAtlasOffset(new Vector2i());
-            drawSlot(0, 0, selectedSlot.posRaw.x()-1, selectedSlot.posRaw.y()-1, 0, 0, enlargedSlotSize, enlargedSlotSize, 1);
-            if (selectedSlot.id < items.length) {
-                Item item = items[selectedSlot.id];
+            drawQuad(selectedSlot.posRaw.x()-1, selectedSlot.posRaw.y()-1, enlargedSlotSize, enlargedSlotSize, 1);
+            if (selectedSlot.id < items.length && inventoryOpen) {
+                Item item = getItem(selectedSlot.id);
                 if (item != null && item.type != ItemTypes.AIR) {
-                    drawItemHoverDetails(selectedSlot.posRaw.x() + (GUI.slotSize/2), selectedSlot.posRaw.y() + (GUI.slotSizeY-4), item);
+                    int y = selectedSlot.posRaw.y() + (GUI.slotSizeY-5);
+                    drawItemHoverDetails(selectedSlot.posRaw.x() + (GUI.slotSize/2), y, item);
                 }
             }
         }
@@ -160,7 +240,7 @@ public class Menu {
         color.set(0.015f, 0.023f, 0.027f, 1.f);
         List<Pair<ItemType, ItemType>> uses = Recipes.getUses(item.type);
         if (!uses.isEmpty()) {
-            drawSlot(offX, offY, (charWidth * 2) - 1, (charHeight * -2.5f) + 1 - (GUI.enlargedSlotSize * (uses.size() - 1)), 0, 0, (GUI.enlargedSlotSize * 3) + 2, (GUI.enlargedSlotSize * uses.size()) + 2, 1);
+            drawSlot(offX, offY, enlargedSlotSize*0.5f, 3-(GUI.enlargedSlotSize * (uses.size())), 0, 0, (GUI.enlargedSlotSize * 3) + 2, (GUI.enlargedSlotSize * uses.size()) + 2, 1);
             int offPxY = 0;
             for (int i = 0; i < uses.size(); i++) {
                 Pair<ItemType, ItemType> recipe = uses.get(i);
@@ -169,6 +249,7 @@ public class Menu {
             }
         }
 
+        offX -= enlargedSlotSize+1;
         char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
         color.set(1.f);
         pushUBO.updateTex(Textures.gui); //use gui atlas
@@ -208,11 +289,11 @@ public class Menu {
         if (item != null) {
             pushUBO.updateTex(Textures.items);
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
-            drawSlot(0, 0, x, y, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+            drawQuad(x, y, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
             if (item.amount > 1) {
                 pushUBO.updateTex(Textures.gui); //use gui atlas
                 char[] chars = item.amountString().toCharArray();
-                float startOffset = 16 - (chars.length * (charWidth/2.f));
+                float startOffset = 13 - (chars.length * (charWidth/2.f));
                 drawText(false, x, y, startOffset, 1, chars, 2);
             }
         }
@@ -235,9 +316,7 @@ public class Menu {
         drawSlot(false, false, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY, iScale);
     }
     public void drawSlot(boolean centeredX, boolean centeredY, float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, int iScale) {
-        float selectedPosX = x * (slotSize / guiScale);
-        float selectedPosY = y * ((slotSizeY / guiScale) * aspectRatio);
-        drawQuad(centeredX, centeredY, (int)(x + offsetX + offPxX), (int)(y + (offsetY - (3.f / height)) + offPxY), sizeX, sizeY, iScale);
+        drawQuad(centeredX, centeredY, Math.round(x + offsetX + offPxX), Math.round(y + offsetY + offPxY), sizeX, sizeY, iScale);
     }
     public void drawQuad(int x, int y, int scaleX, int scaleY, int iScale) {
         drawQuad(false, false, x, y, scaleX, scaleY, iScale);
@@ -251,8 +330,8 @@ public class Menu {
         if (iScale > 1) {
             GUI.updateScale(1);
         }
-        float xOffset = (((((float)menuPos.x()+(x*guiScaleMul))/width)-0.5f)*2) + (centeredX ? 0 : xScale);
-        float yOffset = (((((float)menuPos.y()+(y*guiScaleMul))/height)-0.5f)*-2) - (centeredY ? 0 : yScale);
+        float xOffset = ((((menuPos.x()+(x*guiScaleMul))*2)-width)/width) + (centeredX ? 0 : xScale);
+        float yOffset = ((((menuPos.y()+(y*guiScaleMul))*-2)+height)/height) - (centeredY ? 0 : yScale);
         pushUBO.updateSize(new Vector2i(scaleX, scaleY));
         Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color);
     }

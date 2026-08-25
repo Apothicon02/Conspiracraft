@@ -140,14 +140,15 @@ public class Player {
     public double enteredWorld = 0;
     public Planet nearestPlanet = null;
     public Vector3f oldCamTranslation = new Vector3f();
-
+    public int itemPickupDelayMs = 2000;
     public void tick() throws IOException, InterruptedException {
         oldCamTranslation.set(getCameraTranslation());
         nearestPlanet = StarSystem.getNearestPlanet(pos);
+        inv.tick();
         if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
         for (Item item : World.items) {
-            if (pos.distance(item.pos) < 1) {
-                Item newItem = inv.addToInventory(item, true);
+            if (pos.distance(item.pos) < 1 && item.timeExisted > itemPickupDelayMs) {
+                Item newItem = inv.menu.addItem(item);
                 if (newItem == null || newItem.amount <= 0) {
                     World.items.remove(item);
                 } else {

@@ -24,8 +24,8 @@ public class Pipelines {
     public static void init(MemoryStack stack) {
         pipelines = new Pipeline[]{
                 new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1),
-                new Pipeline("fullscreen.vert", "ssao.frag", 1), new Pipeline("fullscreen.vert", "present.frag", 2), //this duplicate present should be removed
-                new Pipeline("raster.vert", "raster.frag", 2),
+                new Pipeline("fullscreen.vert", "ssao.frag", 1),
+                new Pipeline("raster.vert", "raster.frag", 2), new Pipeline("raster.vert", "cube.frag", 2),
                 new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2),
                 new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
         computePipelines = new ComputePipeline[]{new ComputePipeline("dda.comp")};

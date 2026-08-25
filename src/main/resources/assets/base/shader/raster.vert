@@ -25,7 +25,7 @@ layout(location = 0) out vec3 localPos;
 layout(location = 1) out vec3 pos;
 
 void main() {
-    localPos = -(position-0.5f);
+    localPos = 1.f-position;
     mat4 untranslatedModel = pushUbo.model;
     untranslatedModel[3] = vec4(0, 0, 0, 1);
     pos = (untranslatedModel*vec4(position, 1.f)).xyz;

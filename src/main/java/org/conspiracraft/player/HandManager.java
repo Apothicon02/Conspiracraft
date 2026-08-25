@@ -37,15 +37,17 @@ public class HandManager {
 
     public static boolean lmbDown = false, mmbDown = false, rmbDown = false;
     public static void input() {
-        if (player.inputHandler.scroll.y > 0) {
-            hotbarSlot++;
-            if (hotbarSlot >= Inventory.invWidth) {
-                hotbarSlot = 0;
-            }
-        } else if (player.inputHandler.scroll.y < 0) {
-            hotbarSlot--;
-            if (hotbarSlot < 0) {
-                hotbarSlot = Inventory.invWidth-1;
+        if (!GUI.inventoryOpen) {
+            if (player.inputHandler.scroll.y > 0) {
+                hotbarSlot++;
+                if (hotbarSlot >= player.inv.menu.slotAmt) {
+                    hotbarSlot = 0;
+                }
+            } else if (player.inputHandler.scroll.y < 0) {
+                hotbarSlot--;
+                if (hotbarSlot < 0) {
+                    hotbarSlot = player.inv.menu.slotAmt - 1;
+                }
             }
         }
         lmbDown = lmbDown || player.inputHandler.leftButtonPressed;
@@ -53,7 +55,7 @@ public class HandManager {
         rmbDown = rmbDown || player.inputHandler.rightButtonPressed;
     }
     public static void useHands(Window window) {
-        Item selectedItem = player.inv.getItem(player.inv.selectedSlot);
+        Item selectedItem = player.inv.getSelectedItem(true);
         Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();
         if (!lmbDown) {
             player.breakingSource.stop();
@@ -83,7 +85,7 @@ public class HandManager {
                     ItemUseResult result = selectedItem.use(ddaResult);
                     delay = result.delay();
                     selectedItem = result.item();
-                    player.inv.setItem(player.inv.selectedSlot, selectedItem);
+                    player.inv.menu.setItem(hotbarSlot, selectedItem);
                 }
                 if (delay == 0) { //if item did no interaction
                     if (lmbDown && World.inBounds(player.selectedBlock)) {

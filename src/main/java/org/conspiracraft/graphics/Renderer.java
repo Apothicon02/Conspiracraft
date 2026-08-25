@@ -307,7 +307,7 @@ public class Renderer {
     }
 
     public static void drawRaster(MemoryStack stack){
-        updatePipeline(stack, 4);
+        updatePipeline(stack, 3);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
@@ -337,6 +337,7 @@ public class Renderer {
             interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(entity.prevPos, pos));
             drawCube(interpolatedMatrix, new Vector4f(1.f));
         }
+        updatePipeline(stack, 4);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
         for (Item item : World.items) {
