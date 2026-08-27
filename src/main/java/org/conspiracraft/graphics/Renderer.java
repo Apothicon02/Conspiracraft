@@ -437,7 +437,10 @@ public class Renderer {
         Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
-        for (int i = 0; i < 256; i++) {
+        int amt = 256;
+        float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
+        amt -= (int) Math.max(0, StarSystem.relativePos.y()/(0.001f*dist));
+        for (int i = 0; i < amt; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)

@@ -69,7 +69,8 @@ public class Earth extends WorldType {
             return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
         }
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
-        if (skylight.y() <= 0) {
+        float starDist = getPlanet().pos.distance(StarSystem.pos);
+        if (Math.min(0, StarSystem.relativePos.y())/(0.001f*starDist) < -500) {
             skylightMul.set(0);
             float mostProminent = 0.f;
             Vector3f pos = new Vector3f();
@@ -96,7 +97,7 @@ public class Earth extends WorldType {
             return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
         } else {
             skylightMul.set(1);
-            return new Vector4f(skylight.x(), Math.max(height, skylight.y()), skylight.z(), skylight.w());
+            return new Vector4f(skylight.x(), Math.max(starDist*0.2f, skylight.y()), skylight.z(), skylight.w());
         }
     }
     @Override
@@ -214,6 +215,9 @@ public class Earth extends WorldType {
                                 double baseHilliness = SimplexNoise.noise((x + generationSize) / 500.f, (z + generationSize) / 500.f);
                                 double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d)*unriverness;
                                 double plateauDist = Math.max(0, detailNoise*0.34f)+Math.clamp(Math.min(new Vector2f(halfSize+(eigthSize*1.35f), halfSize).distance(x, z), Math.min(new Vector2f(halfSize+eigthSize, halfSize-eigthSize).distance(x, z), Math.min(new Vector2f(halfSize-eigthSize, halfSize+eigthSize).distance(x, z), new Vector2f(size-eigthSize, eigthSize*1.35f).distance(x, z))))/250, 0, 1);
+                                if (SimplexNoise.noise(z / 500.f, x / 500.f) > 0.6f) {
+                                    plateauDist -= 0.05f;
+                                }
                                 if (plateauDist < 1) {
                                     double unplateauness = Math.max(0, (Math.max(0.9f, plateauDist)-0.9f)*10);
                                     baseHilliness*=unplateauness;
