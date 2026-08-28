@@ -315,7 +315,7 @@ public class Renderer {
         pushUBO.updateAtlasOffset(new Vector2i(0));
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
         pushUBO.updateTex(null); //use no texture
-        //drawClouds();
+        drawClouds();
         drawStars();
         StarSystem.render(stack);
         pushUBO.updateTex(null); //use no texture
@@ -437,9 +437,9 @@ public class Renderer {
         Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
-        int amt = 256;
         float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
-        amt -= (int) Math.max(0, StarSystem.relativePos.y()/(0.001f*dist));
+        int amt = (int) -Math.min(0, StarSystem.relativePos.y()/(0.001f*dist));
+        amt = Math.min(amt, 256);
         for (int i = 0; i < amt; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)
@@ -451,7 +451,7 @@ public class Renderer {
                     .setTranslation(starPos)
                     .scale(4000000);
             Vector3f color = (starRand.nextFloat() < 0.64f ? new Vector3f(0.97f, 0.98f, 1.f) : starColors[starRand.nextInt(starColors.length - 1)]);
-            drawCube(starMatrix, new Vector4f(color.x()*100, color.y()*100, color.z()*100, 1.f));
+            drawCube(starMatrix, new Vector4f(color.x()*9, color.y()*9, color.z()*9, 1.f));
         }
     }
 

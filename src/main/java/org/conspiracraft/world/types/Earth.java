@@ -70,7 +70,8 @@ public class Earth extends WorldType {
         }
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
         float starDist = getPlanet().pos.distance(StarSystem.pos);
-        if (Math.min(0, StarSystem.relativePos.y())/(0.001f*starDist) < -500) {
+        float sunniness = 1+Math.max(-1, (Math.min(0, StarSystem.relativePos.y())/(0.001f*starDist))/500);
+        if (sunniness <= 0) {
             skylightMul.set(0);
             float mostProminent = 0.f;
             Vector3f pos = new Vector3f();
@@ -78,6 +79,10 @@ public class Earth extends WorldType {
                 float dist = planet.rotatedPos.distance(Main.player.pos);
                 if (dist > 0.f && planet.rotatedPos.y() > 0 && planet != getPlanet()) {
                     float prominence = (float) ((planet.scale/dist)*Utils.gradient((int) planet.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0));
+//                    if (prominence > mostProminent) {
+//                        mostProminent = prominence; pos.set(planet.rotatedPos);
+//                        skylightMul.set(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
+//                    }
                     if (prominence > mostProminent) {mostProminent = prominence; pos.set(planet.rotatedPos);}
                     skylightMul.add(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
                 }
@@ -85,16 +90,22 @@ public class Earth extends WorldType {
                     dist = moon.rotatedPos.distance(Main.player.pos);
                     if (dist > 0.f && moon.rotatedPos.y() > 0) {
                         float prominence = (float) ((moon.scale/dist)*(Utils.gradient((int) moon.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0)));
+//                        if (prominence > mostProminent) {
+//                            mostProminent = prominence; pos.set(moon.rotatedPos);
+//                            skylightMul.set(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
+//                        }
                         if (prominence > mostProminent) {mostProminent = prominence; pos.set(moon.rotatedPos);}
                         skylightMul.add(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
                     }
                 }
             }
             float rgbDiv = Math.max(skylightMul.x(), Math.max(skylightMul.y(), skylightMul.z()));
-            if (rgbDiv > 1) {
-                skylightMul.set(skylightMul.x() / rgbDiv, skylightMul.y() / rgbDiv, skylightMul.z() / rgbDiv, skylightMul.w());
-            }
-            return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
+//            if (rgbDiv > 1) {
+                skylightMul.set(skylightMul.x() / rgbDiv, skylightMul.y() / rgbDiv, skylightMul.z() / rgbDiv, 0.99f);//skylightMul.w());
+//            }
+            skylightMul.set(Utils.mix(skylightMul.x(), 1, sunniness), Utils.mix(skylightMul.y(), 1, sunniness), Utils.mix(skylightMul.z(), 1, sunniness), sunniness);
+
+            return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), 0.99f);//Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
         } else {
             skylightMul.set(1);
             return new Vector4f(skylight.x(), Math.max(starDist*0.2f, skylight.y()), skylight.z(), skylight.w());
@@ -105,7 +116,7 @@ public class Earth extends WorldType {
     @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
     @Override
-    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.06f, 1.2f, 1.f);}
+    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.48f, 1.2f, 1.f);}
     @Override
     public Vector4f getSunsetAtmosphereColor() {return new Vector4f(1, 0.65f, 0.25f, 1.f);}
     @Override
@@ -731,44 +742,44 @@ public class Earth extends WorldType {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
 
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int cloudInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int threadId = thread;
-            final int startX = thread * cloudInterval;
-            final int endX = Math.min(startX + cloudInterval, sizeChunks);
-            pool.execute(() -> {
-                final Random rand = new Random(World.seed+threadId);
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
-                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
-                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
-                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
-                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
-                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
-                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
-                                        if (radius > 0) {
-                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
-                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
-                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
-                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int cloudInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int threadId = thread;
+//            final int startX = thread * cloudInterval;
+//            final int endX = Math.min(startX + cloudInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+//                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+//                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && heightmap[packPos(x, z)] < 166) {
+//                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+//                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
+//                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+//                                        if (radius > 0) {
+//                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
+//                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
 
         startTime = System.currentTimeMillis();
         for (int cX = 0; cX < sizeChunks; cX++) {
