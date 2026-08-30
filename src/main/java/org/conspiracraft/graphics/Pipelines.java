@@ -118,7 +118,7 @@ public class Pipelines {
             VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachments = VkPipelineColorBlendAttachmentState.calloc(pipeline.colorAttachments, stack);
             IntBuffer formats = stack.callocInt(pipeline.colorAttachments);
             for (int f = 0; f < formats.limit(); f++) {
-                formats.put(f, vkSurfFormat.format());
+                formats.put(f, i == 0 ? vkSurfFormat.format() : VK_FORMAT_R16G16B16A16_SFLOAT);
                 colorBlendAttachments.get(f)
                         .colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
                         .blendEnable(false);

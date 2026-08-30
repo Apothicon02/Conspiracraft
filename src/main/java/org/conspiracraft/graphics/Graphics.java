@@ -90,10 +90,12 @@ public class Graphics {
                 flags = SDL_GetWindowFlags(window);
                 SDL_PollEvent(events);
             }
-            vkDeviceWaitIdle(vkDevice);
+            int res = vkDeviceWaitIdle(vkDevice);
+            if (res != VK_SUCCESS) {throw new RuntimeException("Device wait failed during graphics rebuild: " + res);}
             Swapchain.recreate(stack);
-            Textures.resize(stack);
             recreateDescriptors(stack);
+            Buffer.recreateDescriptors(stack);
+            Textures.resize(stack);
             CmdBuffer.recreate(stack);
             SyncObjects.init(stack);
             frameIdx = 0;

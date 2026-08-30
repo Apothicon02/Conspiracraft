@@ -37,6 +37,7 @@ import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
 import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import org.lwjgl.vulkan.*;
 
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -79,6 +80,7 @@ public class Renderer {
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
+            boolean drawStuff = true;
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
                 if (!initialized) {
@@ -91,19 +93,7 @@ public class Renderer {
                     }
                     fillSSBOs();
                     if (reloadTextures) {
-                        reloadTextures = false;
-                        long startTime = System.currentTimeMillis();
-                        Materials.fillTexture(stack);
-                        BlockTypes.fillTexture(stack);
-                        ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
-                        ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
-                        memFree(noisesBuffer);
-                        ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));
-                        ImageHelper.fillImage(stack, Textures.blueNoise, blueNoiseBuffer);
-                        memFree(blueNoiseBuffer);
-                        GUI.fillTexture();
-                        EntityTypes.fillTexture(stack);
-                        System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
+                        reloadTextures(stack);
                     }
                     initialized = true;
                 } else {
@@ -116,7 +106,10 @@ public class Renderer {
                     }
                     //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
                     ssboBarriers();
-                    if (reloadAtlas) {
+                    if (reloadTextures) {
+                        reloadTextures(stack);
+                        drawStuff = false;
+                    } else if (reloadAtlas) {
                         reloadAtlas = false;
                         long startTime = System.currentTimeMillis();
                         Materials.fillTexture(stack);
@@ -125,54 +118,58 @@ public class Renderer {
                         System.out.println("Atlas reloading took "+(System.currentTimeMillis()-startTime)+"ms");
                     }
                 }
-                globalUBO.update(stack);
-                globalUBO.push(stack);
-                vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
-                vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
+                if (drawStuff) {
+                    globalUBO.update(stack);
+                    globalUBO.push(stack);
+                    vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
+                    vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
 
-                VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("Rstr"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawRaster(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawDDA(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawSSAO(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawAA(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawBlur(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                labelInfo.pLabelName(MemoryUtil.memUTF8("GUI"));
-                EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                drawGUI(stack);
-                EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("Rstr"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawRaster(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawDDA(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawSSAO(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawAA(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawBlur(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                    labelInfo.pLabelName(MemoryUtil.memUTF8("GUI"));
+                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                    drawGUI(stack);
+                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
 
-                pushUBO.updateTex(Textures.colors1);
-                pushUBO.push();
-                bindPresentImage(stack);
-                vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
-                unbindPresentImage(stack);
-
+                    pushUBO.updateTex(Textures.colors1);
+                    pushUBO.push();
+                    bindPresentImage(stack);
+                    vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
+                    unbindPresentImage(stack);
+                } else {
+                    bindPresentImage(stack);
+                    unbindPresentImage(stack);
+                }
                 submitCommandBuffers(stack);
                 if (Settings.taaEnabled) {
                     Main.window.jitterX=(xOffsets[jitterFrame]/Settings.width);
@@ -184,6 +181,21 @@ public class Renderer {
         }
     }
 
+    public static void reloadTextures(MemoryStack stack) throws IOException {
+        reloadTextures = false;
+        long startTime = System.currentTimeMillis();
+        Materials.fillTexture(stack);
+        BlockTypes.fillTexture(stack);
+        ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
+        ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
+        memFree(noisesBuffer);
+        ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));
+        ImageHelper.fillImage(stack, Textures.blueNoise, blueNoiseBuffer);
+        memFree(blueNoiseBuffer);
+        GUI.fillTexture();
+        EntityTypes.fillTexture(stack);
+        System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
+    }
     public static void updateChunk(Vector3i chunkPos) {
         int packedChunkPos = packChunkPos(chunkPos);
         Chunk chunk = chunks[packedChunkPos];
@@ -346,6 +358,7 @@ public class Renderer {
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
+    public static final int swizzle = 16;
     public static void drawDDA(MemoryStack stack) {
         pushUBO.updateTex(Textures.colors2, Textures.depth2, Textures.norms2);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, null);
@@ -353,7 +366,9 @@ public class Renderer {
         updateComputePipeline(0);
         bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
         float scale = Settings.upscaled ? 16.f : 8.f;
-        vkCmdDispatch(currentCmdBuffer, ((int)Math.ceil(eWidth/scale))*((int)Math.ceil(eHeight/scale)), 1, 1);
+        int x = ((int)Math.ceil(eWidth/scale)), y = ((int)Math.ceil(eHeight/scale));
+        int tilesPerRow = (x+swizzle-1)/swizzle;
+        vkCmdDispatch(currentCmdBuffer, tilesPerRow*swizzle*y, 1, 1);
         unbindComputeImages(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
@@ -425,9 +440,10 @@ public class Renderer {
 
     public static void drawClouds() {
         Random cloudRand = new Random(911);
-        float brightness = Math.clamp((640 + StarSystem.relativePos.y()) / 640, 0.3f, 1.f);
+        float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
+        float brightness = 1+Math.clamp((Math.min(0, StarSystem.relativePos.y()/(0.001f*dist)))/300, -0.7f, -0.01f);
         for (int i = 0; i < 196; i++) {
-            float b = Math.max(0.25f, brightness - (cloudRand.nextFloat() / 2));
+            float b = Math.max(0.25f, brightness - (cloudRand.nextFloat()*0.34f));
             Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
             drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
         }
@@ -532,7 +548,9 @@ public class Renderer {
                 .pImageIndices(stack.ints(imageIdx));
         int result = vkQueuePresentKHR(graphicsQueue, presentInfo);
         if (result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {throw new RuntimeException("Failed to queue present!");}
-
+        incFrameIdx();
+    }
+    public static void incFrameIdx() {
         frameIdx++;
         if (imageIdx >= Swapchain.images.length) {
             firstImages = false;

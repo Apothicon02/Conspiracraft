@@ -256,7 +256,6 @@ public class BlockTypes {
         blockTypeMap = null;
         return arr;
     }
-    public static boolean reloading = false;
     public static Buffer atlasBuffer;
     public static void fillTexture(MemoryStack stack) throws IOException {
         int sliceSize = Textures.atlas.width*Textures.atlas.height;
@@ -312,8 +311,7 @@ public class BlockTypes {
             }
             memFree(blockBuf);
         }
-        ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer, reloading);
-        reloading = true;
+        ImageHelper.fillImage(stack, Textures.atlas, atlasBuffer);
     }
     public static void copyTexture(ByteBuffer buf, int i, int height, long offset, long dstOffset) {
         for (long row = offset; row < height; row++) {

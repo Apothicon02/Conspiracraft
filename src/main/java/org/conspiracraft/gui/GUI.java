@@ -432,7 +432,7 @@ public class GUI {
         }
         try (MemoryStack stack = MemoryStack.stackPush()) {
             Buffer stagingBuffer = new Buffer(stack, Textures.gui.width*Textures.gui.height*((Texture3D)Textures.gui).depth*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-
+            guiTexDepth = 0;
             loadImage(stagingBuffer, "texture/font");
             loadImage(stagingBuffer, "texture/hotbar");
             loadImage(stagingBuffer, "texture/selected_slot");
@@ -446,7 +446,7 @@ public class GUI {
         }
     }
 
-    public static int guiTexDepth = 0;
+    public static long guiTexDepth = 0;
     public static int layerSize = 4*Textures.gui.width*Textures.gui.height;
     public static ByteBuffer layerBuffer = ByteBuffer.allocateDirect(layerSize);
     public static void loadImage(Buffer stagingBuffer, String path) throws IOException {

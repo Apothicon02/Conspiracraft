@@ -62,7 +62,8 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
     vec4 view = invProj*clip;
     return view.xyz/view.w;
 }
-float getAO(float depth, vec4 normal) {
+vec4 normal = vec4(0);
+float getAO(float depth) {
     float radius = AO_RADIUS;//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.1f);
@@ -88,7 +89,6 @@ float getAO(float depth, vec4 normal) {
     occlusion = 1.0 - occlusion / KERNEL_SIZE;
     return pow(clamp(occlusion, 0.f, 1), 2.25f);
 }
-vec4 normal = vec4(0);
 float shade = 1.f;
 bool sampleShade(int x, int y) {
     ivec2 offCoords = ivec2(gl_FragCoord.x+x, gl_FragCoord.y+y);
@@ -126,5 +126,5 @@ void main() {
 //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     float antiAO = normal.a;
-    outColor = antiAO > 0.95f ? vec4(color.rgb, 1) : vec4(color.rgb, mix(getAO(depth, normal), 1, antiAO));
+    outColor = antiAO > 0.95f ? vec4(color.rgb, 1) : vec4(color.rgb, mix(getAO(depth), 1, antiAO));
 }

@@ -28,6 +28,7 @@ import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
+import static org.lwjgl.vulkan.EXTValidationFeatures.*;
 import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRFragmentShadingRate.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
 import static org.lwjgl.vulkan.KHRSurface.*;
@@ -201,11 +202,18 @@ public class Device {
                 .apiVersion(VK14.VK_API_VERSION_1_4);
         PointerBuffer layers = stack.mallocPointer(1);
         layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation")); //disable when not in dev env
+        IntBuffer features = stack.mallocInt(1)
+                .put(VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT)
+                .flip();
+        VkValidationFeaturesEXT validationFeatures = VkValidationFeaturesEXT.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT)
+                .pEnabledValidationFeatures(features);
         VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
+                //.pNext(validationFeatures.address()) //disable when not in dev env
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
-                .ppEnabledLayerNames(layers);
+                ;//.ppEnabledLayerNames(layers); //disable when not in dev env
 //        System.out.println("Enabled instance extensions:");
 //        for (int i = 0; i < extensions.capacity(); i++) {
 //            long addr = extensions.get(i);

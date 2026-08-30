@@ -118,7 +118,6 @@ public class Materials {
         materialsList = null;
         return newArr;
     }
-    public static boolean reloading = false;
     public static Buffer materialBuffer;
     public static void fillTexture(MemoryStack stack) throws IOException {
         int texSize = Textures.materials.width*Textures.materials.height;
@@ -148,8 +147,7 @@ public class Materials {
                 copyTexture(matBuf, i, materialHeight, 0, 0);
             }
         }
-        ImageHelper.fillImage(stack, Textures.materials, materialBuffer, reloading);
-        reloading = true;
+        ImageHelper.fillImage(stack, Textures.materials, materialBuffer);
     }
     public static void copyTexture(ByteBuffer buf, int i, int height, long srcOffset, long dstOffset) {
         long loopedI = i * materialWidthL;
