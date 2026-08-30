@@ -439,13 +439,15 @@ public class Renderer {
     }
 
     public static void drawClouds() {
-        Random cloudRand = new Random(911);
-        float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
-        float brightness = 1+Math.clamp((Math.min(0, StarSystem.relativePos.y()/(0.001f*dist)))/300, -0.7f, -0.01f);
-        for (int i = 0; i < 196; i++) {
-            float b = Math.max(0.25f, brightness - (cloudRand.nextFloat()*0.34f));
-            Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
-            drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
+        if (worldType.getFogginess() > 0.5f) {
+            Random cloudRand = new Random(911);
+            float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
+            float brightness = 1+Math.clamp((Math.min(0, StarSystem.relativePos.y()/(0.001f*dist)))/300, -0.7f, -0.01f);
+            for (int i = 0; i < 196; i++) {
+                float b = Math.max(0.25f, brightness - (cloudRand.nextFloat()*0.34f));
+                Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
+                drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
+            }
         }
     }
     public static Vector3f[] starColors = new Vector3f[]{new Vector3f(1.0f, 1.05f, 1.1f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
