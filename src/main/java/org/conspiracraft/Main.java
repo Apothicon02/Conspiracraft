@@ -90,6 +90,7 @@ public class Main {
             }
             interpolationTime = timeAccum/ tickTimeNs;
 
+            World.worldType.tickWorldgen();
             LightHelper.iterateLightQueue();
             Renderer.render();
             AudioController.tick();

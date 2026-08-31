@@ -2,6 +2,7 @@ package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.drops.BlockDrops;
@@ -107,7 +108,7 @@ public class World {
         out.close();
 
         int size = 0;
-        for (Chunk chunk : World.chunks) {
+        for (Chunk chunk : World.oldchunks) {
             int[] blockData = chunk.getBlockData();
             int[] lightData = chunk.getLightData();
             size += 4+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length)+chunk.lightPalette.size()+(lightData == null ? 0 : lightData.length);
@@ -118,7 +119,7 @@ public class World {
         IntBuffer chunkData = data.asIntBuffer();
 
         int[] emptyData = new int[0];
-        for (Chunk chunk : World.chunks) {
+        for (Chunk chunk : World.oldchunks) {
             int[] subdata  = chunk.getBlockData();
             subdata = subdata == null ? emptyData : subdata;
             int[] palette = chunk.getBlockPalette();
@@ -172,7 +173,7 @@ public class World {
         if (previouslyGenerated) {
             Arrays.fill(lods, 0L);
             Arrays.fill(regions, 0L);
-            Arrays.fill(chunks, null);
+            Arrays.fill(oldchunks, null);
         }
         previouslyGenerated = true;
         boolean didExist = Files.exists(Path.of(path));
@@ -205,7 +206,7 @@ public class World {
             data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
             data.order(ByteOrder.BIG_ENDIAN);
             IntBuffer chunkData = data.asIntBuffer();
-            for (int chunkPos = 0; chunkPos < chunks.length; chunkPos++) {
+            for (int chunkPos = 0; chunkPos < oldchunks.length; chunkPos++) {
                 Chunk chunk = new Chunk(chunkPos);
 
                 int dataSize = chunkData.get();
@@ -228,7 +229,7 @@ public class World {
                 chunkData.get(subdata);
                 chunk.setLightData(subdata);
 
-                chunks[chunkPos] = chunk;
+                oldchunks[chunkPos] = chunk;
             }
             Utils.unmap(data);
             in.close();
@@ -286,20 +287,24 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
-    public static final Chunk[] chunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
+    public static final Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>();
+    public static final Chunk[] oldchunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static final long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
     public static final long[] lods = new long[sizeLods*sizeLods*heightLods];
     public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
     public static int packLodPos(Vector3i pos) {return pos.x()+pos.y()*sizeLods+pos.z()*sizeLods*heightLods;}
-    public static int packChunkPos(Vector3i pos) {
+    public static int oldpackChunkPos(Vector3i pos) {
         return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
     }
-    public static int packChunkPos(int x, int y, int z) {
+    public static int oldpackChunkPos(int x, int y, int z) {
         return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
     }
-    public static int packChunkPos(int x, int z) {
+    public static long packChunkPos(long x, long y, long z) {
+        return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
+    }
+    public static int oldpackChunkPos(int x, int z) {
         return (x*World.sizeChunks)+z;
     }
     public static Light getLight(Vector3i pos) {
@@ -311,7 +316,8 @@ public class World {
             return new Light(0, 0, 0, maxSunlightLevel);
         }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
+        if (chunk == null) {return new Light(0, 0, 0, maxSunlightLevel);}
         int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getLight(pos);
@@ -323,13 +329,14 @@ public class World {
             return;
         }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        if (!generating && !updateSet.contains(chunkPos)) {
-            updateSet.add(chunkPos);
-            updateQueue.addLast(chunkPos);
+        if (!generating && !oldupdateSet.contains(chunkPos)) {
+            oldupdateSet.add(chunkPos);
+            oldupdateQueue.addLast(chunkPos);
         }
         synchronized (chunk) {
             chunk.setLight(lX, lY, lZ, light);
@@ -337,7 +344,7 @@ public class World {
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
         int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
@@ -351,14 +358,17 @@ public class World {
             return new Vector2i(0);
         }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks[packChunkPos(cX, cY, cZ)];
+        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
+        if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getBlock(pos);
         }
     }
-    public static final ArrayDeque<Vector3i> updateQueue = new ArrayDeque<>();
-    public static final HashSet<Vector3i> updateSet = new HashSet<>();
+    public static final ArrayDeque<Long> updateQueue = new ArrayDeque<>();
+    public static final HashSet<Long> updateSet = new HashSet<>();
+    public static final ArrayDeque<Vector3i> oldupdateQueue = new ArrayDeque<>();
+    public static final HashSet<Vector3i> oldupdateSet = new HashSet<>();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
         if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
@@ -366,7 +376,8 @@ public class World {
             return;
         }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
@@ -377,9 +388,9 @@ public class World {
         updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         updateHeightmap(x, y, z);
         LightHelper.queueLightUpdate(new Vector3i(x, y, z));
-        if (!updateSet.contains(chunkPos)) {
-            updateSet.add(chunkPos);
-            updateQueue.addLast(chunkPos);
+        if (!oldupdateSet.contains(chunkPos)) {
+            oldupdateSet.add(chunkPos);
+            oldupdateQueue.addLast(chunkPos);
         }
         if (updateNeighbors) {
             updateNeighbors(x, y, z);
@@ -394,7 +405,8 @@ public class World {
             return;
         }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
@@ -425,9 +437,9 @@ public class World {
                     LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
                 }
             }
-            if (!updateSet.contains(chunkPos)) {
-                updateSet.add(chunkPos);
-                updateQueue.addLast(chunkPos);
+            if (!oldupdateSet.contains(chunkPos)) {
+                oldupdateSet.add(chunkPos);
+                oldupdateQueue.addLast(chunkPos);
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);
@@ -443,7 +455,8 @@ public class World {
             return;
         }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks[packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z())];
+        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
@@ -462,9 +475,9 @@ public class World {
                 updateHeightmap(x, y, z);
                 LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
             }
-            if (!updateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
-                updateSet.add(chunkPos);
-                updateQueue.addLast(chunkPos);
+            if (!oldupdateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
+                oldupdateSet.add(chunkPos);
+                oldupdateQueue.addLast(chunkPos);
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);

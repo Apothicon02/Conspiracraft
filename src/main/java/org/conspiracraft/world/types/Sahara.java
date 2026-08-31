@@ -173,8 +173,8 @@ public class Sahara extends WorldType {
                                 }
                             }
                         }
-                        chunksMinElevations[packChunkPos(cX, cZ)] = minElevation;
-                        chunksMaxElevations[packChunkPos(cX, cZ)] = maxElevation;
+                        chunksMinElevations[oldpackChunkPos(cX, cZ)] = minElevation;
+                        chunksMaxElevations[oldpackChunkPos(cX, cZ)] = maxElevation;
                     }
                 }
             });
@@ -206,7 +206,7 @@ public class Sahara extends WorldType {
                                         biomes[packedPos] = biome == Biomes.DESERT.id || biome == Biomes.SAVANNA.id ? Biomes.OASIS.id :
                                                 ((biome == Biomes.RAINFOREST.id || biome == Biomes.PALMY_PLAINS.id || biome == Biomes.PALMY_HILLS.id) ? Biomes.POND.id : Biomes.LAKE.id);
                                     }
-                                    int packedCP = packChunkPos(x>>chunkBits, z>>chunkBits);
+                                    int packedCP = oldpackChunkPos(x>>chunkBits, z>>chunkBits);
                                     chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
                                     lakesMaxElevations[packedPos] = (short) Math.max(lake.pos.y(), lakesMaxElevations[packedPos]);
                                 }
@@ -232,12 +232,12 @@ public class Sahara extends WorldType {
                 final Random rand = new Random(World.seed+threadId);
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        final int minChunkElevation = chunksMinElevations[packChunkPos(cX, cZ)]>>chunkBits;
+                        final int minChunkElevation = chunksMinElevations[oldpackChunkPos(cX, cZ)]>>chunkBits;
                         for (int cY = 0; cY < minChunkElevation; cY++) {
-                            final int packedCP = World.packChunkPos(cX, cY, cZ);
+                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
                             final Chunk chunk = new Chunk(packedCP);
                             chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
-                            World.chunks[packedCP] = chunk;
+                            World.oldchunks[packedCP] = chunk;
                             updateRegion(cX, cY, cZ, false);
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
                                 for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
@@ -248,9 +248,9 @@ public class Sahara extends WorldType {
                                 }
                             }
                         }
-                        final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[packChunkPos(cX, cZ)])>>chunkBits;
+                        final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[oldpackChunkPos(cX, cZ)])>>chunkBits;
                         for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {
-                            final int packedCP = World.packChunkPos(cX, cY, cZ);
+                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
                             final Chunk chunk = new Chunk(packedCP);
                             boolean setAnything = false;
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
@@ -325,12 +325,12 @@ public class Sahara extends WorldType {
                                     }
                                 }
                             }
-                            World.chunks[packedCP] = chunk;
+                            World.oldchunks[packedCP] = chunk;
                             if (setAnything) {updateRegion(cX, cY, cZ, false);}
                         }
                         for (int cY = maxChunkElevation+1; cY < heightChunks; cY++) {
-                            int packedCP = World.packChunkPos(cX, cY, cZ);
-                            World.chunks[packedCP] = new Chunk(packedCP);
+                            int packedCP = World.oldpackChunkPos(cX, cY, cZ);
+                            World.oldchunks[packedCP] = new Chunk(packedCP);
                         }
                     }
                 }
@@ -610,18 +610,18 @@ public class Sahara extends WorldType {
             for (int cZ = 0; cZ < sizeChunks; cZ++) {
                 boolean foundMax = false;
                 for (short cY = (short) (heightChunks - 1); cY >= 0; cY--) {
-                    Chunk chunk = World.chunks[packChunkPos(cX, cY, cZ)];
+                    Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
                     if (chunk.blockPalette != null) {
                         for (int data : chunk.blockPalette) {
                             Vector2i block = Chunk.unpackInt(data);
                             boolean obstructingHeightmap = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
                             if (!foundMax && obstructingHeightmap) {
                                 foundMax = true;
-                                chunksMaxElevations[packChunkPos(cX, cZ)] = cY;
-                                chunksMinElevations[packChunkPos(cX, cZ)] = cY;
+                                chunksMaxElevations[oldpackChunkPos(cX, cZ)] = cY;
+                                chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
                                 break;
                             } else if (foundMax && !obstructingHeightmap) {
-                                chunksMinElevations[packChunkPos(cX, cZ)] = cY;
+                                chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
                                 break;
                             }
                         }
@@ -641,11 +641,11 @@ public class Sahara extends WorldType {
             pool.execute(() -> {
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int packedHorizontalCP = packChunkPos(cX, cZ);
+                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
                         int maxCy = chunksMaxElevations[packedHorizontalCP];
                         int minCy = chunksMinElevations[packedHorizontalCP];
                         for (int cY = maxCy; cY >= minCy; cY--) {
-                            Chunk chunk = World.chunks[packChunkPos(cX, cY, cZ)];
+                            Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
                             for (int x = 0; x < chunkSize; x++) {
                                 for (int z = 0; z < chunkSize; z++) {
                                     for (int y = chunkSize - 1; y >= 0; y--) {
@@ -682,7 +682,7 @@ public class Sahara extends WorldType {
             pool.execute(() -> {
                 for (int cX = startX; cX < endX; cX++) {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int packedHorizontalCP = packChunkPos(cX, cZ);
+                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
                         int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {

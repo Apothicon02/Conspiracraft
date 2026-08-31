@@ -63,12 +63,13 @@ public class WorldType {
         }
     }
     public void tick() {}
+    public void tickWorldgen() {}
     public void generate() throws InterruptedException {
         for (int cX = 0; cX < World.sizeChunks; cX++) {
             for (int cZ = 0; cZ < World.sizeChunks; cZ++) {
                 for (int cY = 0; cY < World.heightChunks; cY++) {
-                    int packedCP = World.packChunkPos(cX, cY, cZ);
-                    World.chunks[packedCP] = new Chunk(packedCP);
+                    int packedCP = World.oldpackChunkPos(cX, cY, cZ);
+                    World.oldchunks[packedCP] = new Chunk(packedCP);
                 }
             }
         }

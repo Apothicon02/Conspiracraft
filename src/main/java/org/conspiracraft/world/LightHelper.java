@@ -21,8 +21,8 @@ public class LightHelper {
     public static final ConcurrentLinkedDeque<Chunk> dirtyChunks = new ConcurrentLinkedDeque<>();
 
     public static void queueLightUpdate(Vector3i pos) {
-        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-        Chunk chunk = chunks[packedCp];
+        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+        Chunk chunk = oldchunks[packedCp];
         int packedLp = Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
         boolean exists = chunk.lightUpdateArr()[packedLp];
         if (!exists) {
@@ -33,8 +33,8 @@ public class LightHelper {
         }
     }
     public static void queueLightUpdate(ArrayDeque<Vector3i> queue, Vector3i pos) {
-        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-        Chunk chunk = chunks[packedCp];
+        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+        Chunk chunk = oldchunks[packedCp];
         int packedLp = Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
         boolean exists = chunk.lightUpdateArr()[packedLp];
         if (!exists) {
@@ -48,8 +48,8 @@ public class LightHelper {
             Vector3i pos = lightQueue.pollFirst();
             if (inBounds(1, pos.x(), pos.y(), pos.z())) {
                 updateLight(lightQueue, pos, getBlock(pos), getLight(pos));
-                int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-                Chunk chunk = chunks[packedCp];
+                int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                Chunk chunk = oldchunks[packedCp];
                 chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
             }
         }
@@ -74,8 +74,8 @@ public class LightHelper {
                     Vector3i pos = queue.pollFirst();
                     if (inBounds(1, pos.x(), pos.y(), pos.z())) {
                         updateLight(queue, pos, getBlock(pos), getLight(pos));
-                        int packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-                        Chunk chunk = chunks[packedCp];
+                        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                        Chunk chunk = oldchunks[packedCp];
                         chunk.lightUpdateArr[Chunk.condenseLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
                     }
                 }
@@ -180,8 +180,8 @@ public class LightHelper {
                     }) {
                         if (removalSet.add(neighborPos)) {
                             lightQueue.add(neighborPos);
-                            int packedCp = World.packChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
-                            Chunk chunk = chunks[packedCp];
+                            int packedCp = World.oldpackChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
+                            Chunk chunk = oldchunks[packedCp];
                             chunk.lightUpdateArr()[Chunk.condenseLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
                             Light nLight = getLight(neighborPos);
                             if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
