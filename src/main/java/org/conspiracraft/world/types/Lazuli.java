@@ -243,14 +243,14 @@ public class Lazuli extends WorldType {
                             chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.OBSIDIAN.id, 0));
                             World.oldchunks[packedCP] = chunk;
                             updateRegion(cX, cY, cZ, false);
-                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
-                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
-                                    for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
-                                        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
-                                        lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
-                                    }
-                                }
-                            }
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
+//                                    for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
+//                                        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
+//                                        lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
+//                                    }
+//                                }
+//                            }
                         }
                         final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[oldpackChunkPos(cX, cZ)])>>chunkBits;
                         for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {

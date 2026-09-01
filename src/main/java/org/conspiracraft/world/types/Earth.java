@@ -153,7 +153,7 @@ public class Earth extends WorldType {
         long startTime = System.currentTimeMillis();
         while (generationIdx < generationOffsets.length && System.currentTimeMillis()-startTime < 10) {
             int cX = generationOffsets[generationIdx++]+playerCX, cY = generationOffsets[generationIdx++]+playerCY, cZ = generationOffsets[generationIdx++]+playerCZ;
-            if (cX >= 0 && cY >= 0 && cZ >= 0 && cX < sizeChunks && cY < heightChunks && cZ < sizeChunks) {
+            if (cX >= 0 && cY >= 0 && cZ >= 0) {// && cX < sizeChunks && cY < heightChunks && cZ < sizeChunks) {
                 long cP = packChunkPos(cX, cY, cZ);
                 if (!chunks.containsKey(cP)) {
                     Chunk chunk = new Chunk(cP);
@@ -180,10 +180,11 @@ public class Earth extends WorldType {
                         }
                     }
                     if (setAnything) {
+                        //System.out.print(" Chunk cX: "+cX+" cY: "+cY+" cZ: "+cZ);
                         chunks.put(cP, chunk);
                         updateSet.add(cP);
                         updateQueue.addLast(cP);
-                        updateRegion(cX, cY, cZ, false);
+                        //updateRegion(cX, cY, cZ, false);
 //                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
 //                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
 //                                for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {

@@ -28,10 +28,9 @@ public class Chunk {
 
     public Chunk(long compressedChunkPos) {
         this.condensedChunkPos = compressedChunkPos;
-        this.cY = compressedChunkPos % World.heightChunks;
-        long xz = compressedChunkPos / World.heightChunks;
-        this.cZ = xz % World.sizeChunks;
-        this.cX = xz / World.sizeChunks;
+        this.cX = (compressedChunkPos >> 42) & 0x3FFFFF;
+        this.cZ = (compressedChunkPos >> 20) & 0x3FFFFF;
+        this.cY = compressedChunkPos & 0xFFFFF;
         this.cXI = (int)this.cX;
         this.cYI = (int)this.cY;
         this.cZI = (int)this.cZ;

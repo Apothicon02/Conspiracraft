@@ -201,10 +201,11 @@ public class Renderer {
     public static void updateChunk(long packedChunkPos) {
         Chunk chunk = chunks.get(packedChunkPos);
         Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
-        updateChunkBlocks(chunkPos, packedChunkPos, chunk);
-        updateChunkLights(chunkPos, packedChunkPos, chunk);
+        long wrappedPackedChunkPos = ((((chunk.cX%sizeChunks)*sizeChunks)+(chunk.cZ%sizeChunks))*heightChunks)+(chunk.cY%heightChunks);
+        updateChunkBlocks(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
+        updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
     }
-    public static void updateChunkBlocks(Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
+    public static void updateChunkBlocks(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
         long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
         long voxelPtr = voxelSSBO.stagingBuffer.pointer.get(0);
         if (initialized) {
@@ -227,7 +228,7 @@ public class Renderer {
         if (res == VK_SUCCESS) {
             chunkBlockAllocs.put(packedChunkPos, alloc.get());
             int pointer = (int) offset.get(0);
-            long chunkBufOffset = (long)packedChunkPos*chunkByteSize;
+            long chunkBufOffset = (long)wPackedChunkPos*chunkByteSize;
             MemoryUtil.memIntBuffer(chunkPtr+chunkBufOffset, 4)
                     .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue).put(3, valueMask);
             MemoryUtil.memIntBuffer(voxelPtr+pointer, paletteSize)
@@ -244,14 +245,14 @@ public class Renderer {
                     VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(pointer).dstOffset(pointer).size((paletteSize + compressedBlocks.length) * 4L);
                     vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
                 }
-                Vector3i ogLodPos = new Vector3i(chunkPos).mul(lodSize);
-                for (int z = ogLodPos.z(); z < ogLodPos.z() + lodSize; z++) {
-                    for (int x = ogLodPos.x(); x < ogLodPos.x() + lodSize; x++) {
-                        for (int y = ogLodPos.y(); y < ogLodPos.y() + lodSize; y++) {
-                            updateLOD(World.packLodPos(new Vector3i(x, y, z)));
-                        }
-                    }
-                }
+//                Vector3i ogLodPos = new Vector3i(chunkPos).mul(lodSize);
+//                for (int z = ogLodPos.z(); z < ogLodPos.z() + lodSize; z++) {
+//                    for (int x = ogLodPos.x(); x < ogLodPos.x() + lodSize; x++) {
+//                        for (int y = ogLodPos.y(); y < ogLodPos.y() + lodSize; y++) {
+//                            updateLOD(World.packLodPos(new Vector3i(x, y, z)));
+//                        }
+//                    }
+//                }
             }
         } else {
             System.out.print("blocksSSBO ran out of space! \n");
@@ -259,7 +260,7 @@ public class Renderer {
         }
     }
     public static long allocated = 0;
-    public static void updateChunkLights(Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
+    public static void updateChunkLights(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
         long chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
         long lightPtr = lightSSBO.stagingBuffer.pointer.get(0);
         if (initialized) {
@@ -283,7 +284,7 @@ public class Renderer {
         if (res == VK_SUCCESS) {
             chunkLightBlockAllocs.put(packedChunkPos, alloc.get());
             int pointer = (int) offset.get(0);
-            long chunkBufOffset = (long)packedChunkPos*chunkByteSize;
+            long chunkBufOffset = (long)wPackedChunkPos*chunkByteSize;
             MemoryUtil.memIntBuffer(chunkPtr+chunkBufOffset, 4)
                     .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue).put(3, valueMask);
             MemoryUtil.memIntBuffer(lightPtr+pointer, paletteSize)
@@ -306,18 +307,18 @@ public class Renderer {
         }
     }
     public static void updateRegion(int packedRegionPos) {
-        long regionBufOffset = packedRegionPos * 8L;
-        long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memLongBuffer(regionPtr + regionBufOffset, 1).put(regions, packedRegionPos, 1).rewind();
-        VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(regionBufOffset).dstOffset(regionBufOffset).size(8L);
-        vkCmdCopyBuffer(currentCmdBuffer, regionSSBO.stagingBuffer.buffer[0], regionSSBO.buffer.buffer[0], regionBufferCopy);
+//        long regionBufOffset = packedRegionPos * 8L;
+//        long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
+//        MemoryUtil.memLongBuffer(regionPtr + regionBufOffset, 1).put(regions, packedRegionPos, 1).rewind();
+//        VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(regionBufOffset).dstOffset(regionBufOffset).size(8L);
+//        vkCmdCopyBuffer(currentCmdBuffer, regionSSBO.stagingBuffer.buffer[0], regionSSBO.buffer.buffer[0], regionBufferCopy);
     }
     public static void updateLOD(int packedLodPos) {
-        long lodBufOffset = packedLodPos * 8L;
-        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memLongBuffer(lodPtr + lodBufOffset, 1).put(lods, packedLodPos, 1).rewind();
-        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(lodBufOffset).dstOffset(lodBufOffset).size(8L);
-        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
+//        long lodBufOffset = packedLodPos * 8L;
+//        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
+//        MemoryUtil.memLongBuffer(lodPtr + lodBufOffset, 1).put(lods, packedLodPos, 1).rewind();
+//        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(lodBufOffset).dstOffset(lodBufOffset).size(8L);
+//        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
     }
 
     public static void drawRaster(MemoryStack stack){
@@ -442,25 +443,27 @@ public class Renderer {
     }
 
     public static void drawChunkDebug() {
+        int playerCX = (int)(player.pos.x()/chunkSize), playerCY = (int)(player.pos.y()/chunkSize), playerCZ = (int)(player.pos.z()/chunkSize);
         //long playerCp = packChunkPos((int)(player.pos.x()/chunkSize), (int)(player.pos.y()/chunkSize), (int)(player.pos.z()/chunkSize));
         for (Chunk chunk : chunks.values()) {
-            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
-            if (dist < chunkSize*96) {
-                if (dist < chunkSize * 5) {
-                    for (int x = 0; x < chunkSize; x++) {
-                        for (int z = 0; z < chunkSize; z++) {
-                            for (int y = chunkSize - 1; y >= 0; y--) {
-                                if (chunk.getBlock(Chunk.condenseLocalPos(x, y, z)).x() > 0) {
-                                    drawCube(new Matrix4f().setTranslation((chunk.cX * chunkSize) + x + 0.5f, (chunk.cY * chunkSize) + y + 0.5f, (chunk.cZ * chunkSize) + z + 0.5f).scale(1),
-                                            new Vector4f(((float) x) / chunkSize, ((float) y) / chunkSize, ((float) z) / chunkSize, 1));
-                                }
-                            }
-                        }
-                    }
-                } else if (chunk.blockPalette.size() > 1) {
-                    drawCube(new Matrix4f().setTranslation((chunk.cX + 0.5f) * chunkSize, (chunk.cY + 0.5f) * chunkSize, (chunk.cZ + 0.5f) * chunkSize).scale(chunkSize), new Vector4f(((float) chunk.cX) / sizeChunks, ((float) chunk.cY) / heightChunks, ((float) chunk.cZ) / sizeChunks, 1));
+//            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
+//            if (dist < chunkSize*96) {
+//                if (dist < chunkSize * 5) {
+//                    for (int x = 0; x < chunkSize; x++) {
+//                        for (int z = 0; z < chunkSize; z++) {
+//                            for (int y = chunkSize - 1; y >= 0; y--) {
+//                                if (chunk.getBlock(Chunk.condenseLocalPos(x, y, z)).x() > 0) {
+//                                    drawCube(new Matrix4f().setTranslation((chunk.cX * chunkSize) + x + 0.5f, (chunk.cY * chunkSize) + y + 0.5f, (chunk.cZ * chunkSize) + z + 0.5f).scale(1),
+//                                            new Vector4f(((float) x) / chunkSize, ((float) y) / chunkSize, ((float) z) / chunkSize, 1));
+//                                }
+//                            }
+//                        }
+//                    }
+//                } else if (chunk.blockPalette.size() > 1) {
+                if (chunk.blockPalette.size() > 1) {
+                    drawCube(new Matrix4f().setTranslation((chunk.cX + 0.5f) * chunkSize, (chunk.cY + 0.5f) * chunkSize, (chunk.cZ + 0.5f) * chunkSize).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
                 }
-            }
+//            }
         }
     }
     public static void drawClouds() {
@@ -768,7 +771,7 @@ public class Renderer {
     }
 
     public static int regionSSBOByteSize = regions.length*8;
-    public static int lodSSBOByteSize = lods.length*8;
+    //public static int lodSSBOByteSize = lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte/2;
     public static int lightSSBOSize = gigabyte*2;
@@ -797,14 +800,14 @@ public class Renderer {
         chunkLightBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
 
         for (Chunk chunk : chunks.values()) {
-            updateChunk(packChunkPos(chunk.cX, chunk.cY, chunk.cZ));
+            updateChunk(chunk.condensedChunkPos);
         }
         System.out.println("Allocated "+allocated+" bytes for light data.");
 
         long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
         MemoryUtil.memLongBuffer(regionPtr, regions.length).put(regions).rewind();
-        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memLongBuffer(lodPtr, lods.length).put(lods).rewind();
+//        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
+//        MemoryUtil.memLongBuffer(lodPtr, lods.length).put(lods).rewind();
 
         VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(regionSSBOByteSize);
         vkCmdCopyBuffer(currentCmdBuffer, regionSSBO.stagingBuffer.buffer[0], regionSSBO.buffer.buffer[0], regionBufferCopy);
@@ -812,8 +815,8 @@ public class Renderer {
         vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
         VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
-        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lodSSBOByteSize);
-        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
+//        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lodSSBOByteSize);
+//        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
         VkBufferCopy.Buffer lightChunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], lightChunkBufferCopy);
         VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lightSSBOSize);
@@ -847,14 +850,14 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(voxelSSBO.buffer.buffer[0])
                 .offset(0).size(voxelSSBOSize);
-        barrierBuf.get(3)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
-                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                .buffer(lodSSBO.buffer.buffer[0])
-                .offset(0).size(lodSSBOByteSize);
+//        barrierBuf.get(3)
+//                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+//                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+//                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+//                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+//                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+//                .buffer(lodSSBO.buffer.buffer[0])
+//                .offset(0).size(lodSSBOByteSize);
         barrierBuf.get(4)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)

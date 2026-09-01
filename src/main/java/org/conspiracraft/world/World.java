@@ -52,8 +52,8 @@ public class World {
     public static final int heightRegions = heightChunks>>regionBits;
     public static final byte lodSize = 4;
     public static final int lodBits = Integer.numberOfTrailingZeros(lodSize);
-    public static final int sizeLods = size >>lodBits;
-    public static final int heightLods = height >>lodBits;
+//    public static final int sizeLods = size >>lodBits;
+//    public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
     public static WorldType worldType = WorldTypes.EARTH;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
@@ -87,18 +87,18 @@ public class World {
         out.close();
 
         out = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 2L);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, heightmap.length * 2L);
         data.order(ByteOrder.BIG_ENDIAN);
         data.asShortBuffer().put(heightmap);
         Utils.unmap(data);
         out.close();
 
-        out = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 8L);
-        data.order(ByteOrder.BIG_ENDIAN);
-        data.asLongBuffer().put(lods);
-        Utils.unmap(data);
-        out.close();
+//        out = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+//        data = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 8L);
+//        data.order(ByteOrder.BIG_ENDIAN);
+//        data.asLongBuffer().put(lods);
+//        Utils.unmap(data);
+//        out.close();
 
         out = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         data = out.map(FileChannel.MapMode.READ_WRITE, 0, regions.length * 8L);
@@ -171,7 +171,7 @@ public class World {
     public static void load(String path) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
         if (previouslyGenerated) {
-            Arrays.fill(lods, 0L);
+            //Arrays.fill(lods, 0L);
             Arrays.fill(regions, 0L);
             Arrays.fill(oldchunks, null);
         }
@@ -188,12 +188,12 @@ public class World {
             Utils.unmap(data);
             in.close();
 
-            in = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ);
-            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
-            data.order(ByteOrder.BIG_ENDIAN);
-            data.asLongBuffer().get(lods);
-            Utils.unmap(data);
-            in.close();
+//            in = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ);
+//            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+//            data.order(ByteOrder.BIG_ENDIAN);
+//            data.asLongBuffer().get(lods);
+//            Utils.unmap(data);
+//            in.close();
 
             in = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ);
             data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
@@ -292,9 +292,9 @@ public class World {
     public static final long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
-    public static final long[] lods = new long[sizeLods*sizeLods*heightLods];
-    public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
-    public static int packLodPos(Vector3i pos) {return pos.x()+pos.y()*sizeLods+pos.z()*sizeLods*heightLods;}
+//    public static final long[] lods = new long[sizeLods*sizeLods*heightLods];
+//    public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
+//    public static int packLodPos(Vector3i pos) {return pos.x()+pos.y()*sizeLods+pos.z()*sizeLods*heightLods;}
     public static int oldpackChunkPos(Vector3i pos) {
         return (((pos.x*World.sizeChunks)+pos.z)*World.heightChunks)+pos.y;
     }
@@ -302,7 +302,7 @@ public class World {
         return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
     }
     public static long packChunkPos(long x, long y, long z) {
-        return (((x*World.sizeChunks)+z)*World.heightChunks)+y;
+        return (x << 42) | (z << 20) | y;
     }
     public static int oldpackChunkPos(int x, int z) {
         return (x*World.sizeChunks)+z;
@@ -539,10 +539,10 @@ public class World {
         }
     }
     public static void updateLod(int x, int y, int z, boolean empty) {
-        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
-        int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
-        long mask = 1L << bitIdx;
-        if (empty) {lods[lodIdx] &= ~mask;} else {lods[lodIdx] |= mask;}
+//        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
+//        int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
+//        long mask = 1L << bitIdx;
+//        if (empty) {lods[lodIdx] &= ~mask;} else {lods[lodIdx] |= mask;}
     }
     public static void updateRegion(int cX, int cY, int cZ, boolean empty) {
         int regionIdx = packRegionPos(cX >>regionBits, cY >>regionBits, cZ >>regionBits);
