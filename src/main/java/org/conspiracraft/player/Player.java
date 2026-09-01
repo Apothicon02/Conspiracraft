@@ -20,12 +20,10 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import java.io.*;
+import java.lang.Math;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -99,7 +97,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(1000000, 152, 1000000);
+            Main.player.pos.set(500000, 500150, 500000);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
@@ -163,37 +161,37 @@ public class Player {
 
         }
         doSounds();
-        if (World.worldType.space() != null) { //going from surface to planet orbit
-            if (pos.y() >= 1000) {
-                changePlanet(new Vector3f(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
-            }
-        } else if (World.worldType == WorldTypes.SPACE) { //going from space to planet orbit
-            if (pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
-                WorldType nearestType = nearestPlanet.type == EntityTypes.EARTH ? WorldTypes.EARTH.space() : (
-                        nearestPlanet.type == EntityTypes.LAZULI ? WorldTypes.LAZULI.space() : (
-                            nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA.space() : (
-                                    nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB.space() : (
-                                            nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA.space() : null
-                                    )
-                            )
-                        )
-                );
-                changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
-            }
-        } else if (pos.y() <= -200) { //going from planet orbit to planet surface
-            WorldType nearestType = World.worldType == WorldTypes.EARTH.space() ? WorldTypes.EARTH : (
-                    World.worldType == WorldTypes.LAZULI.space() ? WorldTypes.LAZULI : (
-                        World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
-                                World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (
-                                        World.worldType == WorldTypes.VERA.space() ? WorldTypes.VERA : null
-                                )
-                        )
-                    )
-            );
-            changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
-        } else if (pos.y() >= 1000) { //going from planet orbit to space
-            changePlanet(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
-        }
+//        if (World.worldType.space() != null) { //going from surface to planet orbit
+//            if (pos.y() >= 1000) {
+//                changePlanet(new Vector3f(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
+//            }
+//        } else if (World.worldType == WorldTypes.SPACE) { //going from space to planet orbit
+//            if (pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
+//                WorldType nearestType = nearestPlanet.type == EntityTypes.EARTH ? WorldTypes.EARTH.space() : (
+//                        nearestPlanet.type == EntityTypes.LAZULI ? WorldTypes.LAZULI.space() : (
+//                            nearestPlanet.type == EntityTypes.AKSALA ? WorldTypes.AKSALA.space() : (
+//                                    nearestPlanet.type == EntityTypes.MARB ? WorldTypes.MARB.space() : (
+//                                            nearestPlanet.type == EntityTypes.VERA ? WorldTypes.VERA.space() : null
+//                                    )
+//                            )
+//                        )
+//                );
+//                changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+//            }
+//        } else if (pos.y() <= -200) { //going from planet orbit to planet surface
+//            WorldType nearestType = World.worldType == WorldTypes.EARTH.space() ? WorldTypes.EARTH : (
+//                    World.worldType == WorldTypes.LAZULI.space() ? WorldTypes.LAZULI : (
+//                        World.worldType == WorldTypes.AKSALA.space() ? WorldTypes.AKSALA : (
+//                                World.worldType == WorldTypes.MARB.space() ? WorldTypes.MARB : (
+//                                        World.worldType == WorldTypes.VERA.space() ? WorldTypes.VERA : null
+//                                )
+//                        )
+//                    )
+//            );
+//            changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+//        } else if (pos.y() >= 1000) { //going from planet orbit to space
+//            changePlanet(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
+//        }
     }
 
     public void changePlanet(Vector3f newPos, WorldType newWorldType) throws IOException, InterruptedException {
@@ -448,7 +446,8 @@ public class Player {
     public Vector3f getCameraTranslation() {
         Vector3f translation = new Vector3f();
         camera.getViewMatrix().getTranslation(translation);
-        return translation.add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
+        //Vector3i iPos = new Vector3i((int)pos.x(), (int)pos.y(), (int)pos.z());
+        return translation.add(pos.x()%World.size, (pos.y()%World.height) + eyeHeight + (bobbing * 1.5f), pos.z()%World.size);
     }
 
     public Matrix4f getCameraMatrix() {

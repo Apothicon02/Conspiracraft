@@ -143,6 +143,8 @@ public class Earth extends WorldType {
     }
     public static long prevPlayerCPos = -1;
     public static int generationIdx = 0;
+    public static final int SEA_LEVEL = 500096;
+    public static final int GROUND_LEVEL = 500000;
     @Override
     public void tickWorldgen() {
         final Random rand = new Random(World.seed);
@@ -168,7 +170,7 @@ public class Earth extends WorldType {
                             int topType = dunes > hills ? BlockTypes.SAND.id : BlockTypes.GRASS.id;
                             int midType = topType == BlockTypes.SAND.id ? BlockTypes.SANDSTONE.id : BlockTypes.DIRT.id;
                             int topDepth = topType == BlockTypes.SAND.id ? 7 : 1;
-                            int elevation = (int)Math.max(dunes, hills)+96;
+                            int elevation = (int)Math.max(dunes, hills)+SEA_LEVEL;
                             for (int lY = 0; lY < chunkSize; lY++) {
                                 int y = (cY * chunkSize) + lY;
                                 if (y <= elevation) {

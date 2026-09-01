@@ -474,13 +474,13 @@ public class Renderer {
             for (int i = 0; i < 196; i++) {
                 float b = Math.max(0.25f, brightness - (cloudRand.nextFloat()*0.34f));
                 Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
-                drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x + World.halfSize, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z + World.halfSize)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
+                drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
             }
         }
     }
     public static Vector3f[] starColors = new Vector3f[]{new Vector3f(1.0f, 1.05f, 1.1f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
     public static void drawStars() {
-        Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
+        //Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
         float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
@@ -491,7 +491,7 @@ public class Renderer {
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)
                     .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
-            starPos.set(starPos.x + (starDist / 2f) + interpolatedPlayerPos.x(), starPos.y + interpolatedPlayerPos.y(), starPos.z + (starDist / 2f) + interpolatedPlayerPos.z());
+            starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
             Matrix4f starMatrix = new Matrix4f()
                     .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
                     .setTranslation(starPos)
