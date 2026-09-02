@@ -462,7 +462,7 @@ public class Vera extends WorldType {
                             for (int x = 0; x < chunkSize; x++) {
                                 for (int z = 0; z < chunkSize; z++) {
                                     for (int y = chunkSize - 1; y >= 0; y--) {
-                                        int localPos = Chunk.condenseLocalPos(x, y, z);
+                                        int localPos = Chunk.packLocalPos(x, y, z);
                                         Vector2i block = chunk.getBlock(localPos);
                                         int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
                                         int gY = (cY*chunkSize)+y;

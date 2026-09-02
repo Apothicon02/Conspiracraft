@@ -40,18 +40,19 @@ public class World {
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
     public static final int eigthSize = size/8;
-    public static final int height = 640;
+    public static final int height = 512;
+    public static final int halfHeight = height/2;
     public static final long heightL = height;
     public static final byte chunkSize = 16;
     public static final int chunkBits = Integer.numberOfTrailingZeros(chunkSize);
     public static final int sizeChunks = size>>chunkBits;
+    public static final int halfSizeChunks = sizeChunks/2;
     public static final int heightChunks = height>>chunkBits;
+    public static final int halfHeightChunks = heightChunks/2;
     public static final byte regionSizeChunks = 4;
     public static final int regionBits = Integer.numberOfTrailingZeros(regionSizeChunks);
     public static final int sizeRegions = sizeChunks>>regionBits;
     public static final int heightRegions = heightChunks>>regionBits;
-    public static final byte lodSize = 4;
-    public static final int lodBits = Integer.numberOfTrailingZeros(lodSize);
 //    public static final int sizeLods = size >>lodBits;
 //    public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
@@ -318,7 +319,7 @@ public class World {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Light(0, 0, 0, maxSunlightLevel);}
-        int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+        int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getLight(pos);
         }
@@ -345,7 +346,7 @@ public class World {
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
-        int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+        int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
@@ -360,7 +361,7 @@ public class World {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Vector2i(0);}
-        int pos = Chunk.condenseLocalPos(x&15, y&15, z&15);
+        int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getBlock(pos);
         }
@@ -381,7 +382,7 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+        int pos = Chunk.packLocalPos(lX, lY, lZ);
         BlockDrops.dropDrops(chunk.getBlock(pos), x, y, z);
         chunk.setBlock(lX, lY, lZ, 0, 0);
         updateLod(x, y, z, true);
@@ -430,7 +431,7 @@ public class World {
                     LightHelper.queueLightUpdate(new Vector3i(x, y, z));
                 }
                 if (blocksLight || isSlab) {
-                    int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+                    int pos = Chunk.packLocalPos(lX, lY, lZ);
                     Light oldLight = chunk.getLight(pos);
                     chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
                     updateHeightmap(x, y, z);
@@ -460,7 +461,7 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        int pos = Chunk.condenseLocalPos(lX, lY, lZ);
+        int pos = Chunk.packLocalPos(lX, lY, lZ);
         synchronized (chunk) {
             if (BlockTypes.blockTypes[chunk.getBlock(pos).x()].blockProperties.isFluidReplaceable) {
                 chunk.setBlock(lX, lY, lZ, type, subType);

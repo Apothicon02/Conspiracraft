@@ -119,15 +119,25 @@ public class Earth extends WorldType {
     public void tick() {}
     public static final int[] generationOffsets = createGenerationOffsets();
     public static int[] createGenerationOffsets() {
-        int radius = 96;
+//        int radius = 96;
+//        float verticalFactor = ((float)height)/size;
+//        int verticalRadius = (int)(radius*verticalFactor);
+//        List<Vector3i> positions = new ArrayList<>();
+//        for (int cX = -radius; cX <= radius; cX++) {
+//            for (int cY = -verticalRadius; cY <= verticalRadius; cY++) {
+//                for (int cZ = -radius; cZ <= radius; cZ++) {
+//                    float dist = new Vector3f(cX, cY/verticalFactor, cZ).distance(0, 0, 0);
+//                    if (dist < radius) {
+//                        positions.add(new Vector3i(cX, cY, cZ));
+//                    }
+//                }
+//            }
+//        }
         List<Vector3i> positions = new ArrayList<>();
-        for (int cX = -radius; cX <= radius; cX++) {
-            for (int cY = -radius; cY <= radius; cY++) {
-                for (int cZ = -radius; cZ <= radius; cZ++) {
-                    float dist = new Vector3f(cX, cY, cZ).distance(0, 0, 0);
-                    if (dist < radius) {
-                        positions.add(new Vector3i(cX, cY, cZ));
-                    }
+        for (int cX = -halfSizeChunks; cX < halfSizeChunks; cX++) {
+            for (int cY = -halfHeightChunks; cY < halfHeightChunks; cY++) {
+                for (int cZ = -halfSizeChunks; cZ < halfSizeChunks; cZ++) {
+                    positions.add(new Vector3i(cX, cY, cZ));
                 }
             }
         }

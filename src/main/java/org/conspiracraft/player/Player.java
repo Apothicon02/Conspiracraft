@@ -243,7 +243,7 @@ public class Player {
         }
         newMovement.mul(speed * (downward ? 0.65f : 1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
-        newMovement.mul(superSprinting ? 10.f : 1.f);
+        newMovement.mul(superSprinting ? 25.f : 1.f);
         if (World.worldType == WorldTypes.SPACE && timeMs-enteredWorld > 2000) {
             newMovement.mul(1000000);
         }

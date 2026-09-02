@@ -301,7 +301,7 @@ public class Sahara extends WorldType {
                                             final int blockSubtype = block & 0xFFFF;
                                             final int lX = x & 15, lY = y & 15, lZ = z & 15;
                                             if (y == seafloor) {
-                                                if (blockType == BlockTypes.GRASS.id || blockType == BlockTypes.DIRT.id || (blockType == BlockTypes.MUD.id && chunk.getBlock(Chunk.condenseLocalPos(lX, lY, lZ)).x() == 0)) {
+                                                if (blockType == BlockTypes.GRASS.id || blockType == BlockTypes.DIRT.id || (blockType == BlockTypes.MUD.id && chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ)).x() == 0)) {
                                                     if (rand.nextBoolean() && rand.nextFloat() < foliageNoise - 0.2f && biome != Biomes.SAVANNA.id) {
                                                         setAnything = true;
                                                         updateLod(x, y, z, false);
@@ -649,7 +649,7 @@ public class Sahara extends WorldType {
                             for (int x = 0; x < chunkSize; x++) {
                                 for (int z = 0; z < chunkSize; z++) {
                                     for (int y = chunkSize - 1; y >= 0; y--) {
-                                        int localPos = Chunk.condenseLocalPos(x, y, z);
+                                        int localPos = Chunk.packLocalPos(x, y, z);
                                         Vector2i block = chunk.getBlock(localPos);
                                         int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
                                         int gY = (cY*chunkSize)+y;

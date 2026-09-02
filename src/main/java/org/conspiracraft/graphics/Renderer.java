@@ -52,6 +52,7 @@ import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffers;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
 import static org.conspiracraft.graphics.SyncObjects.*;
+import static org.conspiracraft.world.Chunk.lodsPerChunk;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.system.MemoryUtil.memAddress;
@@ -205,6 +206,7 @@ public class Renderer {
         updateChunkBlocks(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
         updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
     }
+    public static final int lodsByteSize = lodsPerChunk*8;
     public static void updateChunkBlocks(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
         long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
         long voxelPtr = voxelSSBO.stagingBuffer.pointer.get(0);
@@ -212,6 +214,7 @@ public class Renderer {
             vmaVirtualFree(blocks.get(0), chunkBlockAllocs.get(packedChunkPos));
         }
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        allocCreateInfo.alignment(4);
         int paletteSize = chunk.getBlockPaletteSize();
         int bitsPerValue = chunk.bitsPerBlock();
         int valueMask = chunk.blockValueMask();
@@ -219,7 +222,7 @@ public class Renderer {
         if (compressedBlocks == null) {
             allocCreateInfo.size((paletteSize) * 4L);
         } else {
-            allocCreateInfo.size((paletteSize + compressedBlocks.length) * 4L);
+            allocCreateInfo.size(((paletteSize + compressedBlocks.length) * 4L)+lodsByteSize);
         }
 
         PointerBuffer alloc = BufferUtils.createPointerBuffer(1);
@@ -236,13 +239,15 @@ public class Renderer {
             if (compressedBlocks != null) {
                 MemoryUtil.memIntBuffer(voxelPtr+pointer+(paletteSize*4L), compressedBlocks.length)
                         .put(0, compressedBlocks);
+                MemoryUtil.memLongBuffer(voxelPtr+pointer+((paletteSize+compressedBlocks.length)*4L), lodsPerChunk)
+                        .put(0, chunk.getLodData());
             }
             if (initialized) {
                 updateRegion(World.packRegionPos(new Vector3i(chunkPos).div(regionSizeChunks)));
                 VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(16L);
                 vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
                 if (compressedBlocks != null) {
-                    VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(pointer).dstOffset(pointer).size((paletteSize + compressedBlocks.length) * 4L);
+                    VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(pointer).dstOffset(pointer).size(((paletteSize + compressedBlocks.length) * 4L)+lodsByteSize);
                     vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
                 }
 //                Vector3i ogLodPos = new Vector3i(chunkPos).mul(lodSize);
@@ -267,6 +272,7 @@ public class Renderer {
             vmaVirtualFree(lights.get(0), chunkLightBlockAllocs.get(packedChunkPos));
         }
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        allocCreateInfo.alignment(4);
         int paletteSize = chunk.getLightPaletteSize();
         int bitsPerValue = chunk.bitsPerLight();
         int valueMask = chunk.lightValueMask();
@@ -773,7 +779,7 @@ public class Renderer {
     public static int regionSSBOByteSize = regions.length*8;
     //public static int lodSSBOByteSize = lods.length*8;
     public static int gigabyte = 1000000000;
-    public static int voxelSSBOSize = gigabyte/2;
+    public static int voxelSSBOSize = gigabyte*2;
     public static int lightSSBOSize = gigabyte*2;
     public static int chunkArrSize = sizeChunks*sizeChunks*heightChunks;
     public static int chunkByteSize = 4*4;
