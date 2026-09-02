@@ -40,6 +40,7 @@ public class Player {
     public Camera camera = new Camera();
     public Vector3f prevPos = new Vector3f();
     public Vector3f pos = new Vector3f();
+    public Vector3f localPos = new Vector3f();
     public Vector3f movement = new Vector3f();
     public Vector3f vel = new Vector3f();
     public Inventory inv = new Inventory();
@@ -97,7 +98,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(500000, 500150, 500000);
+            Main.player.pos.set(500000, 500900, 500000);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
@@ -380,6 +381,7 @@ public class Player {
         }
         prevPos.set(pos);
         pos.set(playerAABB.xMin + width, playerAABB.yMin + height, playerAABB.zMin + width);
+        localPos.set(pos.x()%World.size, pos.y()%World.height, pos.z()%World.size);
         dynamicSpeedOld = dynamicSpeed;
         dynamicSpeed = Math.clamp((movement.length() - 0.1f) * 4, 0, 1);
     }
@@ -447,10 +449,13 @@ public class Player {
         Vector3f translation = new Vector3f();
         camera.getViewMatrix().getTranslation(translation);
         //Vector3i iPos = new Vector3i((int)pos.x(), (int)pos.y(), (int)pos.z());
-        return translation.add(pos.x()%World.size, (pos.y()%World.height) + eyeHeight + (bobbing * 1.5f), pos.z()%World.size);
+        return translation.add(localPos.x(), localPos.y() + eyeHeight + (bobbing * 1.5f), localPos.z());
+    }
+    public Vector3f getCameraTranslationInterpolated() {
+        return Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslation());
     }
 
     public Matrix4f getCameraMatrix() {
-        return new Matrix4f(camera.getViewMatrix()).setTranslation(Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslation())).invert();
+        return new Matrix4f(camera.getViewMatrix()).setTranslation(getCameraTranslationInterpolated()).invert();
     }
 }

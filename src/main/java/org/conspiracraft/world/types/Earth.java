@@ -153,8 +153,8 @@ public class Earth extends WorldType {
     }
     public static long prevPlayerCPos = -1;
     public static int generationIdx = 0;
-    public static final int SEA_LEVEL = 500096;
-    public static final int GROUND_LEVEL = 500000;
+    public static final int SEA_LEVEL = 500832;
+    public static final int GROUND_LEVEL = 500736;
     @Override
     public void tickWorldgen() {
         final Random rand = new Random(World.seed);
@@ -169,29 +169,50 @@ public class Earth extends WorldType {
                 long cP = packChunkPos(cX, cY, cZ);
                 if (!chunks.containsKey(cP)) {
                     Chunk chunk = new Chunk(cP);
-                    boolean setAnything = false;
                     for (int lX = 0; lX < chunkSize; lX++) {
                         for (int lZ = 0; lZ < chunkSize; lZ++) {
                             int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
+                            double continentsNoise = Math.abs(SimplexNoise.noise(x / 15000.f, z / 15000.f));
+                            double oceans = 10*(0.1f-Math.min(0.1f, continentsNoise));
                             double temperature = SimplexNoise.noise(x / 2000.f, z / 2000.f);
                             double desertness = ((Math.clamp(temperature, 0.2f, 0.4f)-0.3f)*10);
-                            double dunes = (4+(45*noisePipeline.evaluateNoise(x / 525.d, z / 525.d)))*desertness;
-                            double hills = (SimplexNoise.noise(x / 100.f, z / 100.f) * 5) + Math.max(0, SimplexNoise.noise(z / 800.f, x / 800.f) * 125);
-                            int topType = dunes > hills ? BlockTypes.SAND.id : BlockTypes.GRASS.id;
-                            int midType = topType == BlockTypes.SAND.id ? BlockTypes.SANDSTONE.id : BlockTypes.DIRT.id;
-                            int topDepth = topType == BlockTypes.SAND.id ? 7 : 1;
-                            int elevation = (int)Math.max(dunes, hills)+SEA_LEVEL;
+                            double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
+                            double dunes = (4+(45*dunesNoise))*desertness;
+                            double detailNoise = SimplexNoise.noise(z / 50.f, x / 50.f);
+                            double plainsNoise = SimplexNoise.noise(x / 150.f, z / 150.f);
+                            double hillCracks = ((Math.max(0.25f, dunesNoise)-0.25f))*Math.min(1.f, 100*(0.15f-Math.min(0.15f, continentsNoise)));
+                            double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f)-hillCracks;//-(dunesNoise*0.2f);
+                            double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, hillsNoise * 125);
+                            int elevation = (int)Math.max(SEA_LEVEL-2, Utils.mix(Math.max(dunes, hills)+8+SEA_LEVEL, GROUND_LEVEL, oceans));
+                            Biome biome = dunes > hills ? Biomes.DESERT : Biomes.TEMPERATE;
+                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL+3 || biome == Biomes.DESERT ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : BlockTypes.GRASS.id));
+                            int midType = topType == BlockTypes.GRASS.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
+                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : 7;
+                            double foliageNoise = Math.abs(plainsNoise);
+                            double foliageChance = Math.abs(whitenoisePipeline.evaluateNoise(x, z));
                             for (int lY = 0; lY < chunkSize; lY++) {
                                 int y = (cY * chunkSize) + lY;
-                                if (y <= elevation) {
+                                if (y > elevation && y > SEA_LEVEL) {
+                                    if (topType == BlockTypes.GRASS.id) {
+                                        if (foliageChance < foliageNoise*0.01f && y < elevation+12+(foliageChance*3000)) {
+                                            chunk.setBlock(lX, lY, lZ, y <= elevation+10 ? BlockTypes.SPRUCE_LOG.id : BlockTypes.SPRUCE_LEAVES.id, 0);
+                                        } else if (foliageChance < 0.3f && y == elevation+1) {
+                                            chunk.setBlock(lX, lY, lZ, foliageChance < 0.01f ? BlockTypes.ROSE.id : (foliageChance < 0.0166f ? BlockTypes.HYDRANGEA.id : BlockTypes.TALL_GRASS.id), rand.nextInt(4));
+                                        }
+                                    } else if (topType == BlockTypes.SAND.id && biome == Biomes.DESERT) {
+                                        if (foliageChance < foliageNoise*0.002f && y < elevation+3+(foliageChance*3000)) {
+                                            chunk.setBlock(lX, lY, lZ, BlockTypes.CACTUS.id, 0);
+                                        }
+                                    }
+                                } else if (y <= elevation) {
                                     chunk.setBlock(lX, lY, lZ, y > elevation-topDepth ? topType : midType, 0);
-                                    updateLod(x, elevation, z, false);
-                                    setAnything = true;
+                                } else if (y <= SEA_LEVEL) {
+                                    chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, y == SEA_LEVEL ? 13 : 15);
                                 }
                             }
                         }
                     }
-                    if (setAnything) {
+                    if (chunk.blockPalette.size() > 1) {
                         //System.out.print(" Chunk cX: "+cX+" cY: "+cY+" cZ: "+cZ);
                         chunks.put(cP, chunk);
                         updateSet.add(cP);
@@ -212,6 +233,7 @@ public class Earth extends WorldType {
     }
     public JNoise noisePipeline = JNoise.newBuilder().fastSimplex(3301, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
+    public JNoise whitenoisePipeline = JNoise.newBuilder().white(3301).build();
     public JNoise detailNoisePipeline = JNoise.newBuilder().fastSimplex(135131, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
 

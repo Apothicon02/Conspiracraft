@@ -333,6 +333,6 @@ public class Menu {
         float xOffset = ((((menuPos.x()+(x*guiScaleMul))*2)-width)/width) + (centeredX ? 0 : xScale);
         float yOffset = ((((menuPos.y()+(y*guiScaleMul))*-2)+height)/height) - (centeredY ? 0 : yScale);
         pushUBO.updateSize(new Vector2i(scaleX, scaleY));
-        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color);
+        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color, false);
     }
 }

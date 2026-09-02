@@ -26,7 +26,6 @@ layout(push_constant) uniform PushUBO {
     int regions;
     int chunks;
     int voxels;
-    int lods;
     int lightChunks;
     int lights;
 } pushUbo;

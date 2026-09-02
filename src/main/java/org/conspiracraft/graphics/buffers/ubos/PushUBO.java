@@ -56,7 +56,10 @@ public class PushUBO {
         }
         buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
-    public void update(Matrix4f modelMatrix, Vector4f color) {
+    public void update(Matrix4f modelMatrix, Vector4f color, boolean threeD) {
+        if (threeD) {
+            modelMatrix.setTranslation(modelMatrix.getTranslation(new Vector3f()).add(Renderer.viewPos));
+        }
         ((Matrix4f)uniformStorage[0]).set(modelMatrix);
         ((Vector4f)uniformStorage[1]).set(color);
     }

@@ -40,7 +40,7 @@ public class World {
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
     public static final int eigthSize = size/8;
-    public static final int height = 512;
+    public static final int height = 1024;
     public static final int halfHeight = height/2;
     public static final long heightL = height;
     public static final byte chunkSize = 16;

@@ -5,8 +5,6 @@ import org.conspiracraft.utils.BitBuffer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import java.util.Arrays;
-
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.chunkSize;
 

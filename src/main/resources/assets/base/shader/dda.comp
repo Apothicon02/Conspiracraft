@@ -34,7 +34,6 @@ layout(push_constant) uniform PushUBO {
     int regions;
     int chunks;
     int voxels;
-    int lods;
     int lightChunks;
     int lights;
 } pushUbo;
@@ -48,49 +47,28 @@ struct LongStruct {
     int first;
     int second;
 };
-layout(std430, set = 0, binding = 1) readonly buffer RegionBuffer {
-    LongStruct[] regions;
-} regionData[];
+layout(std430, set = 0, binding = 1) readonly buffer LongBuffer {
+    LongStruct[] data;
+} longBuf[];
 layout(std430, set = 0, binding = 1) readonly buffer ChunkBuffer {
-    ChunkStruct[] chunks;
-} chunkData[];
-layout(std430, set = 0, binding = 1) readonly buffer VoxelBuffer {
-    int[] voxels;
-} voxelData[];
-layout(std430, set = 0, binding = 1) readonly buffer LODBuffer {
-    LongStruct[] lods;
-} lodData[];
-layout(std430, set = 0, binding = 1) readonly buffer LightChunkBuffer {
-    ChunkStruct[] chunks;
-} lightChunkData[];
-layout(std430, set = 0, binding = 1) readonly buffer LightBuffer {
-    int[] lights;
-} lightData[];
+    ChunkStruct[] data;
+} chunkBuf[];
+layout(std430, set = 0, binding = 1) readonly buffer IntBuffer {
+    int[] data;
+} intBuf[];
 layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(set = 0, binding = 2) uniform sampler3D Sampler3D[];
 layout(set = 0, binding = 3, rgba16f) uniform image2D Image2D[];
 layout(set = 0, binding = 3, r32f) uniform image2D DepthImage2D[];
 const int size = 4096;
-const int height = 640;
-const vec3 worldSize = vec3(size, height, size);
+const int height = 1024;
+const float verticalFactor = mix(512.f/size, 1.f, 0.5f);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
 const int heightChunks = height / chunkSize;
 const int regionSize = 4;
 const int sizeRegions = sizeChunks / regionSize;
 const int heightRegions = heightChunks / regionSize;
-const int lodSize = 4;
-const int sizeLods = size / lodSize;
-const int heightLods = height / lodSize;
-int packLodPos(int x, int y, int z) {
-    return x+y*sizeLods+z*sizeLods*heightLods;
-}
-int packLodPos(ivec3 pos) {
-    return packLodPos(pos.x, pos.y, pos.z);
-}
-LongStruct getLod(ivec3 lodPos) {
-    return lodData[nonuniformEXT(pushUbo.lods)].lods[packLodPos(lodPos)];
-}
 int packRegionPos(int x, int y, int z) {
     return x+y*sizeRegions+z*sizeRegions*heightRegions;
 }
@@ -98,16 +76,25 @@ int packRegionPos(ivec3 pos) {
     return packRegionPos(pos.x, pos.y, pos.z);
 }
 LongStruct getRegion(ivec3 regionPos) {
-    return regionData[nonuniformEXT(pushUbo.regions)].regions[packRegionPos(regionPos)];
+    return LongStruct(0xFFFFFFFF, 0xFFFFFFFF);//longBuf[nonuniformEXT(pushUbo.regions)].data[packRegionPos(regionPos)];
 }
 int packPos(vec3 pos) {
     return int(pos.x)+int(pos.y)*size+int(pos.z)*(size*height);
 }
+int packLocalPos(vec3 pos) {
+    return ((((int(pos.x)*chunkSize)+int(pos.z))*chunkSize)+int(pos.y));//int(pos.x)+int(pos.y)*chunkSize+int(pos.z)*(chunkSize*chunkSize);
+}
+int packLocalPos(ivec3 pos) {
+    return ((((pos.x*chunkSize)+pos.z)*chunkSize)+pos.y);//pos.x+pos.y*chunkSize+pos.z*(chunkSize*chunkSize);
+}
+int wrapCoord(int v, int coordScale) {
+    return v & (coordScale-1);
+}
 ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0);
 int lightValuesPerInt = -1;
 void updateLightChunkData(ivec3 chunkPos) {
-    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-    lightChunk = lightChunkData[nonuniformEXT(pushUbo.lightChunks)].chunks[condensedChunkPos];
+    int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
+    lightChunk = chunkBuf[nonuniformEXT(pushUbo.lightChunks)].data[condensedChunkPos];
     lightValuesPerInt = lightChunk.bitsPerValue <= 0 ? 0 : 32/lightChunk.bitsPerValue;
 }
 void updateLightChunkData(int x, int y, int z) {
@@ -121,14 +108,14 @@ int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
     if (lightValuesPerInt <= 0) {return fullSunlight;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
-    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    int condensedLocalPos = packLocalPos(localPos);//((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex = condensedLocalPos/lightValuesPerInt;
     int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightChunk.bitsPerValue;
 
     int index = lightChunk.pointer+lightChunk.paletteSize+intIndex;
     if (index < 0 || index >= 500000000) return fullSunlight;
-    int key = (lightData[nonuniformEXT(pushUbo.lights)].lights[index] >> bitIndex) & lightChunk.valueMask;
-    return lightData[nonuniformEXT(pushUbo.lights)].lights[lightChunk.pointer+key];
+    int key = (intBuf[nonuniformEXT(pushUbo.lights)].data[index] >> bitIndex) & lightChunk.valueMask;
+    return intBuf[nonuniformEXT(pushUbo.lights)].data[lightChunk.pointer+key];
 }
 vec4 getLight(int x, int y, int z) {
     //return vec4(0, 0, 0, 0xFF & fullSunlight >> 24);
@@ -145,26 +132,25 @@ vec4 getLight(vec3 pos) {
 ChunkStruct chunk = ChunkStruct(0, 0, 0, 0);
 int blockValuesPerInt = 0;
 void updateChunkData(ivec3 chunkPos) {
-    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
-    chunk = chunkData[nonuniformEXT(pushUbo.chunks)].chunks[condensedChunkPos];
+    int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
+    chunk = chunkBuf[nonuniformEXT(pushUbo.chunks)].data[condensedChunkPos];
     blockValuesPerInt = chunk.bitsPerValue <= 0 ? 0 : 32/chunk.bitsPerValue;
 }
 void updateChunkData(int x, int y, int z) {
     updateChunkData(ivec3(x, y, z) >> 4);
 }
 int getBlockData(int x, int y, int z) {
-    updateChunkData(x, y, z);
     //if (blockValuesPerInt <= 0) {return 0;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
-    int condensedLocalPos = ((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
+    int condensedLocalPos = packLocalPos(localPos);//((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
     int intIndex = condensedLocalPos/blockValuesPerInt;
     int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * chunk.bitsPerValue;
 
     int index = chunk.pointer+chunk.paletteSize+intIndex;
     if (index < 0 || index >= 500000000) return 0;
 
-    int key = (voxelData[nonuniformEXT(pushUbo.voxels)].voxels[index] >> bitIndex) & chunk.valueMask;
-    return voxelData[nonuniformEXT(pushUbo.voxels)].voxels[chunk.pointer+key];
+    int key = (intBuf[nonuniformEXT(pushUbo.voxels)].data[index] >> bitIndex) & chunk.valueMask;
+    return intBuf[nonuniformEXT(pushUbo.voxels)].data[chunk.pointer+key];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -174,6 +160,23 @@ ivec2 getBlock(int x, int y, int z) {
 ivec2 getBlock(vec3 pos) {
     return getBlock(int(pos.x), int(pos.y), int(pos.z));
 }
+
+const int lodSize = 4;
+const int sizeLods = chunkSize / lodSize;
+int packLodPos(int x, int y, int z) {
+    return x+y*sizeLods+z*sizeLods*sizeLods;
+}
+int packLodPos(ivec3 pos) {
+    return packLodPos(pos.x, pos.y, pos.z);
+}
+const int blocksPerChunk = chunkSize*chunkSize*chunkSize;
+LongStruct getLod(ivec3 lodPos) {
+    int pointer = chunk.pointer+chunk.paletteSize+int(ceil(float(blocksPerChunk)/blockValuesPerInt));
+    int index = pointer+(packLodPos(lodPos)*2);
+    return LongStruct(intBuf[nonuniformEXT(pushUbo.voxels)].data[index], intBuf[nonuniformEXT(pushUbo.voxels)].data[index+1]);
+    //return LongStruct(0xFFFFFFFF, 0xFFFFFFFF);//lodData[nonuniformEXT(pushUbo.lods)].lods[packLodPos(lodPos)];
+}
+
 const float alphaMax = 0.95f;
 ivec3 blockPos = ivec3(0);
 const int blockSize = 16;
@@ -226,7 +229,11 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
 vec4 getBlockAndVoxel(float x, float y, float z) {
-    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
+//    int iX = int(x) % size;
+//    int iY = int(y) % height;
+//    int iZ = int(z) % size;
+//    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
+    updateChunkData(int(x), int(y), int(z));
     int blockData = getBlockData(int(x), int(y), int(z));
     int type = (blockData >> 16) & 0xFFFF;
     ivec2 block = ivec2(type, min(16, blockData & 0xFFFF));
@@ -272,7 +279,7 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-const int renderDistance = int(min(size, 2048)*0.75f);
+const int renderDistance = 1024;//int(min(size, 2048)*0.75f);
 const float maxChunkDist = (renderDistance/chunkSize)*(renderDistance/chunkSize);
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
@@ -282,7 +289,9 @@ vec3 sunColor = vec3(0);
 float skyWhiteline = 0.9f;
 float skyDensity = 1.f;
 float sunBrightnessMul = 1.1f;
+const int groundLevel = 500000;
 vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
+    //lightPos.y -= groundLevel;
     vec3 maxedSun = globalUbo.sun;
     maxedSun.y = max(0, maxedSun.y);
     float sunHeight = globalUbo.fogginess < 0 ? 1 : abs(dot(normalize(maxedSun - lightPos), vec3(0, 1, 0)));
@@ -291,7 +300,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     float sunDepth = globalUbo.fogginess < 0 ? 1 : abs(dot(normalize(minnedSun - lightPos), vec3(0, 1, 0)));
     sunColor = mix(globalUbo.atmosphere.rgb, globalUbo.nightAtmosphere.rgb, (clamp(sunDepth, 0.1f, 0.2f)-0.1f)*10);
     vec3 horizonColor = mix(mix(globalUbo.sunsetAtmosphere.rgb, globalUbo.deepSunsetAtmosphere.rgb, min(sunDepth, 0.1f)*10), vec3(1), min(max(max(0.f, sunDepth-0.5f), sunHeight), 0.1f)*10);
-    float whiteness = 1.05f-clamp(lightPos.y/(isSky ? 640 : 1000), 0, 1);
+    float whiteness = 1.05f-clamp(lightPos.y/(isSky ? 512 : 1000), 0, 1);
     sunColor = mix(sunColor, horizonColor, whiteness);
     sunColor=mix(sunColor*globalUbo.skylightMul.rgb, sunColor*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2), 0.5f);
     //sunColor*=max(vec3(0.45f, 0.45f, 0.55f), globalUbo.skylightMul.rgb);
@@ -303,7 +312,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     //    if (!isSky && globalUbo.skylight.w >= 1.f) {
     //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
     //    }
-    float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, height-max(0, sunHeight*height), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
+    float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, 512-max(0, sunHeight*512), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
     vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.w), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
@@ -357,7 +366,7 @@ const int materialAtlasWidth = 512;
 const int materialsPerRow = materialAtlasWidth/materialWidth;
 vec4 getMaterialColor(vec4 model) {
     vec3 unoffsetHitPos = hitPos-(flatNormal*0.0006f);
-    vec3 floatingHitPos = unoffsetHitPos-ivec3(unoffsetHitPos);
+    vec3 floatingHitPos = unoffsetHitPos-floor(unoffsetHitPos);
     vec3 absNorm = abs(flatNormal);
     vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
     int yOff = 0; //top
@@ -452,28 +461,27 @@ vec4 dda(bool shadow) {
         //steps++;
         bool stepAnything = true;
         if (stage == 3) {
-            if (abs(dot(ddaPos-ogChunkPos, ogChunkPos-ddaPos)) >= maxChunkDist || ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) { break; }
-            if (ddaPos.y >= heightChunks && rayDir.y < 0) {
-                //no need to do any checks
-            } else {
-                if (ddaPos.y < 0 || ddaPos.y >= heightChunks) { break; }
-                region = getRegion(ddaPos/regionSize);
-                ivec3 chunkRayPos = ddaPos % regionSize;
-                int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
-                int regionToUse = region.first;
-                if (bitIdx >= 32) {
-                    bitIdx-=32;
-                    regionToUse = region.second;
-                }
-                int mask = 1 << bitIdx;
-                if ((regionToUse & mask) != 0) {
-                    updateChunkData(ddaPos);
+            vec3 renderDistCheck = ddaPos-ogChunkPos;
+            renderDistCheck.y/=verticalFactor;
+            if (abs(dot(renderDistCheck, -renderDistCheck)) >= maxChunkDist) { break; }
+            region = getRegion(ddaPos/regionSize);
+            ivec3 chunkRayPos = ddaPos % regionSize;
+            int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
+            int regionToUse = region.first;
+            if (bitIdx >= 32) {
+                bitIdx-=32;
+                regionToUse = region.second;
+            }
+            int mask = 1 << bitIdx;
+            if ((regionToUse & mask) != 0) {
+                updateChunkData(ddaPos);
+                if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
                     stage = 2;
                     stepAnything = false;
                     chunkPos = ddaPos;
                     chunkSideDist = sideDist;
 
-                    chunkWorldPos = ddaPos*chunkSize;
+                    chunkWorldPos = ddaPos * chunkSize;
                     lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
                     ddaPos = ivec3(lodStartPos);
                     sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
@@ -486,7 +494,7 @@ vec4 dda(bool shadow) {
                 sideDist = chunkSideDist;
             } else {
                 lodPos = (chunkWorldPos/lodSize)+ddaPos;
-                lod = getLod(ivec3(lodPos));
+                lod = getLod(ddaPos);
                 if (lod != LongStruct(0, 0)) {
                     stage = 1;
                     stepAnything = false;
@@ -668,8 +676,12 @@ void main() {
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(0));
     } else {
         vec2 uv = coords/vec2(res);
+//        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0).rgb, 1));
+//        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r, 0, 0, 0));
+//        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0).xyz, 1));
         vec3 camPos = invView[3].xyz;
-        ogPos = camPos;
+        ivec3 iCamPos = ivec3(camPos);
+        ogPos = camPos;//vec3(iCamPos.x%size, iCamPos.y%height, iCamPos.z%size)+(camPos-iCamPos);
         ogChunkPos = ogPos/chunkSize;
         ogDir = getDir(uv);
         rayPos = ogPos;
@@ -690,6 +702,7 @@ void main() {
                 color.a = 1;
             } else {
                 reflectivity = 1-materialColor.a;
+                color.rgb *= flatNormal.y > 0 ? 1.f : (flatNormal.y < 0 ? 0.75f : (abs(flatNormal.x) > abs(flatNormal.z) ? 0.9f : 0.8f));
             }
         }
         if (tint.a < 1) {reflectivity = 1.f;}
@@ -736,9 +749,11 @@ void main() {
                     fogginessMul = 0.f;
                     color.rgb *= 1.25f+(dot(primaryNormal, normalize(globalUbo.sun))/2);
                 }
+            } else {
+                color.rgb *= primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.75f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.9f : 0.8f));
             }
         } else if (!isSky || tint.a < 1) {
-            color.rgb = mipmap(color.rgb);
+            //color.rgb = mipmap(color.rgb);
             //        float factor = clamp((shadowPos.y-72)/66, 0, 1);
             //        if (factor < 0.5f) {
             //            color.rgb = vec3(0, mix(vec2(0, 1), vec2(1, 0), factor*2));

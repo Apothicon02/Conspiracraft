@@ -79,6 +79,7 @@ public class Renderer {
     public static HaltonSequenceGenerator halton = new HaltonSequenceGenerator(2);
     public static float[] xOffsets = new float[8];
     public static float[] yOffsets = new float[8];
+    public static final Vector3f viewPos = new Vector3f();
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -122,6 +123,7 @@ public class Renderer {
                     }
                 }
                 if (drawStuff) {
+                    viewPos.set(Main.player.getCameraTranslationInterpolated());
                     globalUBO.update(stack);
                     globalUBO.push(stack);
                     vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
@@ -364,7 +366,7 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
         for (Item item : World.items) {
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
-            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f));
+            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f), true);
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
@@ -434,7 +436,7 @@ public class Renderer {
         pushUBO.push();
         updatePipeline(1);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
-        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
+        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f), false);
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
     }
@@ -515,22 +517,22 @@ public class Renderer {
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color);
+        pushUBO.update(modelMatrix, color, true);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
     public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color);
+        pushUBO.update(modelMatrix, color, true);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
-    public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color);
+    public static void drawQuad(Matrix4f modelMatrix, Vector4f color, boolean threeD) {
+        pushUBO.update(modelMatrix, color, threeD);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
-    public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color);
+    public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color, boolean threeD) {
+        pushUBO.update(modelMatrix, color, threeD);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD_CENTERED.indexCount, 1, Models.QUAD_CENTERED.indexOffset/Index.SIZE, Models.QUAD_CENTERED.vertexOffset/Vertex.SIZE, 0);
     }
