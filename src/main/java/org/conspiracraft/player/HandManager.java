@@ -62,7 +62,7 @@ public class HandManager {
             blockStartedBreaking.set(0, 0, 0, 0);
             tiltTarget = 0;
         }
-        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslation(), player.camera.getForward(), 1000);
+        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslationGlobal(), player.camera.getForward(), 1000);
         if (ddaResult != null && ddaResult.hitAnything) {
             player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
             player.prevSelectedBlock.set(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z());
@@ -88,7 +88,7 @@ public class HandManager {
                     player.inv.menu.setItem(hotbarSlot, selectedItem);
                 }
                 if (delay == 0) { //if item did no interaction
-                    if (lmbDown && World.inBounds(player.selectedBlock)) {
+                    if (lmbDown) {
                         delay = mine(4);
                     }
                 }

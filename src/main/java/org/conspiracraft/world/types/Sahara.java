@@ -115,7 +115,7 @@ public class Sahara extends WorldType {
 
     public static boolean fillLake(int x, int y, int z, Lake lake) {
         int packedPos = packPos(x, z);
-        if (!inBounds(6, x, y, z) || lake.pos.distance(x, y, z) > 100) {
+        if (lake.pos.distance(x, y, z) > 100) {
             return false;
         }
         if (!lake.visited.get(packedPos)) {

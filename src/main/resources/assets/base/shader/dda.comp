@@ -821,7 +821,7 @@ void main() {
 
                 //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
                 //color.rgb*=(((normDot*0.3f/min(1, skylight.w*2))+(0.1f+(0.6f*skylight.w)))*(0.05f+(skylight.w*0.95f)));
-                bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
+                bool inBounds = true;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
                 if (inBounds) {
                     blockLighting = min(vec4(1), getLight(primaryLightPos) / maxLightLevel);
                     if (globalUbo.season == 2 && airAbove && blockLighting.w > 0.75f && blockLighting.r <= 0.f && blockLighting.g <= 0.f && blockLighting.b <= 0.f) { //snow

@@ -39,7 +39,7 @@ public class SquareCanopy extends Canopy {
         int maxZ = pos.z()+radius;
         for (int x = pos.x()-radius; x <= maxX; x++) {
             for (int z = pos.z()-radius; z <= maxZ; z++) {
-                if (inBounds(x, pos.y(), z) && (!((x == minX || x == maxX) && (z == minZ || z == maxZ)) || corners)) {
+                if ((!((x == minX || x == maxX) && (z == minZ || z == maxZ)) || corners)) {
                     addToMap(map, new BlockPos(x, pos.y(), z), blockType, blockSubType);
                     Vector3i bPos = new Vector3i(x, pos.y()-1, z);
                     Vector3i aPos = new Vector3i(x, pos.y(), z);

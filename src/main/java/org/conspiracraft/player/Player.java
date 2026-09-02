@@ -248,10 +248,9 @@ public class Player {
         if (World.worldType == WorldTypes.SPACE && timeMs-enteredWorld > 2000) {
             newMovement.mul(1000000);
         }
-        boolean inBounds = World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z());
-        Vector2i blockIn = inBounds ? World.getBlock(pos.x(), pos.y(), pos.z()) : new Vector2i(0);
+        Vector2i blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin - 0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
-        blockOn.set(inBounds ? PhysicsHelper.getAnyBlock(footAABB).block() : new Vector2i(0));
+        blockOn.set(PhysicsHelper.getAnyBlock(footAABB).block());
         boolean prevOnSolid = onSolid;
         onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
         if (!onSolid) {
@@ -445,6 +444,11 @@ public class Player {
         camera.rotate((float) -Math.toRadians(pitch), (float) -Math.toRadians(yaw));
     }
 
+    public Vector3f getCameraTranslationGlobal() {
+        Vector3f translation = new Vector3f();
+        camera.getViewMatrix().getTranslation(translation);
+        return translation.add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
+    }
     public Vector3f getCameraTranslation() {
         Vector3f translation = new Vector3f();
         camera.getViewMatrix().getTranslation(translation);

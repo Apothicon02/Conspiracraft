@@ -46,12 +46,10 @@ public class LightHelper {
     public static void iterateLightQueue() {
         while (!lightQueue.isEmpty()) {
             Vector3i pos = lightQueue.pollFirst();
-            if (inBounds(1, pos.x(), pos.y(), pos.z())) {
-                updateLight(lightQueue, pos, getBlock(pos), getLight(pos));
-                int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-                Chunk chunk = oldchunks[packedCp];
-                chunk.lightUpdateArr[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
-            }
+            updateLight(lightQueue, pos, getBlock(pos), getLight(pos));
+            int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+            Chunk chunk = oldchunks[packedCp];
+            chunk.lightUpdateArr[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
         }
         for (Chunk chunk : dirtyChunks) {chunk.lightUpdateArr = null;}
         dirtyChunks.clear();
@@ -71,13 +69,11 @@ public class LightHelper {
         for (final ArrayDeque<Vector3i> queue : queues) {
             pool.submit(() -> {
                 while (!queue.isEmpty()) {
-                    Vector3i pos = queue.pollFirst();
-                    if (inBounds(1, pos.x(), pos.y(), pos.z())) {
-                        updateLight(queue, pos, getBlock(pos), getLight(pos));
-                        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-                        Chunk chunk = oldchunks[packedCp];
-                        chunk.lightUpdateArr[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
-                    }
+                Vector3i pos = queue.pollFirst();
+                    updateLight(queue, pos, getBlock(pos), getLight(pos));
+                    int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+                    Chunk chunk = oldchunks[packedCp];
+                    chunk.lightUpdateArr[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
                 }
             });
         }
@@ -164,36 +160,34 @@ public class LightHelper {
         recalculateLight(ogPos, light.r(), light.g(), light.b(), light.s());
     }
     public static void recalculateLight(Vector3i ogPos, int r, int g, int b, int s) {
-        if (World.inBounds(ogPos)) {
-            removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
-            removalSet.add(ogPos);
+        removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
+        removalSet.add(ogPos);
 
-            while (!removalQueue.isEmpty()) {
-                lightNode node = removalQueue.pollFirst();
-                Vector3i pos = new Vector3i(node.x, node.y, node.z);
-                Light light = new Light(node.r(), node.g(), node.b(), node.s());
-                if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
-                    setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
-                    for (Vector3i neighborPos : new Vector3i[]{
-                            new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
-                            new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
-                    }) {
-                        if (removalSet.add(neighborPos)) {
-                            lightQueue.add(neighborPos);
-                            int packedCp = World.oldpackChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
-                            Chunk chunk = oldchunks[packedCp];
-                            chunk.lightUpdateArr()[Chunk.packLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
-                            Light nLight = getLight(neighborPos);
-                            if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
-                                    (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
-                                removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
-                            }
+        while (!removalQueue.isEmpty()) {
+            lightNode node = removalQueue.pollFirst();
+            Vector3i pos = new Vector3i(node.x, node.y, node.z);
+            Light light = new Light(node.r(), node.g(), node.b(), node.s());
+            if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
+                setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
+                for (Vector3i neighborPos : new Vector3i[]{
+                        new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
+                        new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
+                }) {
+                    if (removalSet.add(neighborPos)) {
+                        lightQueue.add(neighborPos);
+                        int packedCp = World.oldpackChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
+                        Chunk chunk = oldchunks[packedCp];
+                        chunk.lightUpdateArr()[Chunk.packLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
+                        Light nLight = getLight(neighborPos);
+                        if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
+                                (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
+                            removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
                         }
                     }
                 }
             }
-            removalSet.clear();
         }
+        removalSet.clear();
     }
 //    public static void recalculateLight(Vector3i ogPos, int r, int g, int b, int s) {
 //        if (World.inBounds(ogPos)) {

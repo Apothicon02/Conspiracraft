@@ -156,7 +156,7 @@ public class GUI {
                 pushUBO.updateSize(new Vector2i(3840, 2160));
                 //glUniform2i(Renderer.gui.uniforms.get("scale"), width, (int) (height * aspectRatio));
                 pushUBO.updateAtlasOffset(new Vector2i(0));
-                Renderer.drawQuadCentered(new Matrix4f(), new Vector4f(1), false);
+                Renderer.drawQuadCentered(new Matrix4f(), new Vector4f(1));
             }
         }
 
@@ -407,7 +407,7 @@ public class GUI {
             drawingSlider.width = scaleX;
             sliders.add(drawingSlider);
         }
-        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color, false);
+        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color);
         if (iScale > 1) {
             updateScale(1);
         }

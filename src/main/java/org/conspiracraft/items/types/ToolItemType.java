@@ -30,7 +30,7 @@ public class ToolItemType extends ItemType {
     public int maxDurability() {return maxDurability;}
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (lmbDown && World.inBounds(player.selectedBlock) && item instanceof DurableItem durableItem) {
+        if (lmbDown && item instanceof DurableItem durableItem) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             boolean rightTool = false;
             for (BlockTag tag : uses) {

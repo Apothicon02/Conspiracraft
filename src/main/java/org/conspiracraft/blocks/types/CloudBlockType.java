@@ -22,13 +22,11 @@ public class CloudBlockType extends BlockType {
 
     @Override
     public void tick(Vector4i pos) {
-        if (inBounds(pos.x, pos.y, pos.z)) {
-            if (pos.w == 1) {
-                ScheduledTicker.scheduleTick(Main.currentTick+1200, pos.xyz(new Vector3i()), 1);
-                //setBlock(pos.x, pos.y - 1, pos.z, 1, 15, false, false, 1, false);
-            }
-            updateSupport(new Vector3i(pos.x, pos.y, pos.z));
+        if (pos.w == 1) {
+            ScheduledTicker.scheduleTick(Main.currentTick+1200, pos.xyz(new Vector3i()), 1);
+            //setBlock(pos.x, pos.y - 1, pos.z, 1, 15, false, false, 1, false);
         }
+        updateSupport(new Vector3i(pos.x, pos.y, pos.z));
     }
 
     @Override

@@ -26,7 +26,6 @@ public class FireballEntity extends Entity {
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
         Vector3f pos = new Vector3f(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
-        if (!World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z())) {return true;}
         PhysicsHelper.BlockResult blockIn = PhysicsHelper.getClosestBlock(aabb.copy().grow(0.1f), new Vector3f(pos).sub(vel));
         if (blockIn != null && blockIn.block() != null && blockIn.block().x() > 0) {
             World.setBlock((int) blockIn.x(), (int) blockIn.y(), (int) blockIn.z(), blockIn.block().x() == BlockTypes.WATER.id ? BlockTypes.OBSIDIAN.id : BlockTypes.MAGMA.id, 0);

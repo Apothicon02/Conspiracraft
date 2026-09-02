@@ -80,6 +80,7 @@ public class Renderer {
     public static float[] xOffsets = new float[8];
     public static float[] yOffsets = new float[8];
     public static final Vector3f viewPos = new Vector3f();
+    public static final Vector3f modelOffset = new Vector3f();
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -339,9 +340,11 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
         pushUBO.updateTex(null); //use no texture
         //drawChunkDebug();
+        modelOffset.set(viewPos);
         drawClouds();
         drawStars();
         StarSystem.render(stack);
+        modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
@@ -358,7 +361,8 @@ public class Renderer {
             Matrix4f interpolatedMatrix = new Matrix4f(entity.matrix);
             Vector3f pos = new Vector3f();
             entity.matrix.getTranslation(pos);
-            interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(entity.prevPos, pos));
+            pos.set(Utils.getInterpolatedVec(entity.prevPos, pos));
+            interpolatedMatrix.setTranslation(pos.x()%size, pos.y()%height, pos.z()%size);
             drawCube(interpolatedMatrix, new Vector4f(1.f));
         }
         updatePipeline(4);
@@ -366,7 +370,7 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
         for (Item item : World.items) {
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
-            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f), true);
+            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f));
         }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
@@ -436,7 +440,7 @@ public class Renderer {
         pushUBO.push();
         updatePipeline(1);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
-        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f), false);
+        Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
     }
@@ -517,22 +521,22 @@ public class Renderer {
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color, true);
+        pushUBO.update(modelMatrix, color);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
     }
     public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
-        pushUBO.update(modelMatrix, color, true);
+        pushUBO.update(modelMatrix, color);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
-    public static void drawQuad(Matrix4f modelMatrix, Vector4f color, boolean threeD) {
-        pushUBO.update(modelMatrix, color, threeD);
+    public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
     }
-    public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color, boolean threeD) {
-        pushUBO.update(modelMatrix, color, threeD);
+    public static void drawQuadCentered(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.QUAD_CENTERED.indexCount, 1, Models.QUAD_CENTERED.indexOffset/Index.SIZE, Models.QUAD_CENTERED.vertexOffset/Vertex.SIZE, 0);
     }

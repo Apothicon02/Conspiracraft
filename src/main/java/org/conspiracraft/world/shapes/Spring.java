@@ -16,16 +16,14 @@ public class Spring {
         ArrayList<Vector3i> blocks = new ArrayList<>();
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
-                if (World.inBounds(lX, y, lZ)) {
-                    int xDist = lX - x;
-                    int zDist = lZ - z;
-                    int dist = xDist * xDist + zDist * zDist;
-                    if (dist <= radius * 2) {
-                        Vector2i belowBlock = getBlock(lX, y-1, lZ);
-                        Vector2i block = getBlock(lX, y, lZ);
-                        if ((belowBlock.x() == BlockTypes.GRASS.id || belowBlock.x() == BlockTypes.DIRT.id || belowBlock.x() == BlockTypes.SNOW.id) && BlockTypes.blockTypes[block.x()].blockProperties.isFluidReplaceable) {
-                            blocks.add(new Vector3i(lX, y, lZ));
-                        }
+                int xDist = lX - x;
+                int zDist = lZ - z;
+                int dist = xDist * xDist + zDist * zDist;
+                if (dist <= radius * 2) {
+                    Vector2i belowBlock = getBlock(lX, y-1, lZ);
+                    Vector2i block = getBlock(lX, y, lZ);
+                    if ((belowBlock.x() == BlockTypes.GRASS.id || belowBlock.x() == BlockTypes.DIRT.id || belowBlock.x() == BlockTypes.SNOW.id) && BlockTypes.blockTypes[block.x()].blockProperties.isFluidReplaceable) {
+                        blocks.add(new Vector3i(lX, y, lZ));
                     }
                 }
             }

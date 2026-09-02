@@ -28,7 +28,6 @@ public class Particle extends Effect {
                 return true;
             }
         }
-        if (!World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z())) {return true;}
         prevPos.set(pos);
         float modifiedGrav = World.worldType.gravity()/3;
         vel.y -= modifiedGrav;

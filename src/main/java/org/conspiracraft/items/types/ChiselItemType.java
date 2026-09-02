@@ -18,7 +18,7 @@ public class ChiselItemType extends ToolItemType {
     }
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (lmbDown && World.inBounds(player.selectedBlock) && item instanceof DurableItem durableItem) {
+        if (lmbDown && item instanceof DurableItem durableItem) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             int delay = 0;
             //if (BlockTypes.blockTypes[block.x()].blockProperties.hasSlab) {

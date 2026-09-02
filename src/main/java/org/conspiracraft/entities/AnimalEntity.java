@@ -24,8 +24,6 @@ public class AnimalEntity extends Entity {
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
-        Vector3f pos = new Vector3f(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
-        if (!World.inBounds(1, (int) pos.x(), (int) pos.y(), (int) pos.z())) {return true;}
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
         Vector2i blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;

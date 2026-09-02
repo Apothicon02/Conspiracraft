@@ -38,26 +38,24 @@ public class SpruceTree {
         }
         if (!colliding.get()) {
             blocks.forEach((pos, block) -> {
-                if (inBounds(pos)) {
-                    int subtype = block.y();
-                    if (snowy && block.x() == leafType) {
-                        AtomicBoolean airAbove = new AtomicBoolean(true);
-                        blocks.forEach((nPos, nBlock) -> {
-                            if (nPos.x() == pos.x() && nPos.z() == pos.z() && nPos.y == pos.y()+1) {
-                                airAbove.set(false);
-                            }
-                        });
-                        if (airAbove.get()) {
-                            subtype+=8;
+                int subtype = block.y();
+                if (snowy && block.x() == leafType) {
+                    AtomicBoolean airAbove = new AtomicBoolean(true);
+                    blocks.forEach((nPos, nBlock) -> {
+                        if (nPos.x() == pos.x() && nPos.z() == pos.z() && nPos.y == pos.y()+1) {
+                            airAbove.set(false);
                         }
+                    });
+                    if (airAbove.get()) {
+                        subtype+=8;
                     }
-                    World.setBlock(pos.x, pos.y, pos.z, block.x, subtype);
-                    int condensedPos = packPos(pos.x, pos.z);
-                    int surfaceY = heightmap[condensedPos];
-                    heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
-                    for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-                        //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-                    }
+                }
+                World.setBlock(pos.x, pos.y, pos.z, block.x, subtype);
+                int condensedPos = packPos(pos.x, pos.z);
+                int surfaceY = heightmap[condensedPos];
+                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
+                    //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
                 }
             });
         }

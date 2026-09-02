@@ -109,7 +109,6 @@ public class PhysicsHelper {
 
         float travelled = 0;
         for (int i = 0; i < maxDist*2; i++) {
-            if (!World.inBounds(ddaPos.x(), ddaPos.y(), ddaPos.z())) {return new DDAResult(prevDDAPos, ddaPos, false);}
             if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
@@ -153,9 +152,9 @@ public class PhysicsHelper {
         if (vel.x() < 0) {regionAABB.xMin+=vel.x();} else {regionAABB.xMax+=vel.x();}
         if (vel.y() < 0) {regionAABB.yMin+=vel.y();} else {regionAABB.yMax+=vel.y();}
         if (vel.z() < 0) {regionAABB.zMin+=vel.z();} else {regionAABB.zMax+=vel.z();}
-        for (float x = Math.max(0, regionAABB.xMin); x < Math.min(World.size-1, regionAABB.xMax); x+=1) {
-            for (float y = Math.max(0, regionAABB.yMin); y < Math.min(World.height-1, regionAABB.yMax); y+=1) {
-                for (float z = Math.max(0, regionAABB.zMin); z < Math.min(World.size-1, regionAABB.zMax); z+=1) {
+        for (float x = regionAABB.xMin; x < regionAABB.xMax; x+=1) {
+            for (float y = regionAABB.yMin; y < regionAABB.yMax; y+=1) {
+                for (float z = regionAABB.zMin; z < regionAABB.zMax; z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     if (blockType.blockProperties.isCollidable) {

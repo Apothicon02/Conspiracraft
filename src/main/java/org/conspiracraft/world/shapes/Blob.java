@@ -10,26 +10,24 @@ public class Blob {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 for (int lY = y - radius; lY <= y + radius; lY++) {
-                    if (World.inBounds(lX, lY, lZ)) {
-                        int xDist = lX - x;
-                        int yDist = lY - y;
-                        int zDist = lZ - z;
-                        int dist = xDist * xDist + zDist * zDist + yDist * yDist;
-                        if (dist <= radius * 3) {
-                            boolean canReplace = true;
-                            if (replace.length > 0) {
-                                canReplace = false;
-                                int replacing = getBlock(lX, lY, lZ).x;
-                                for (int replaceable : replace) {
-                                    if (replaceable == replacing) {
-                                        canReplace = true;
-                                        break;
-                                    }
+                    int xDist = lX - x;
+                    int yDist = lY - y;
+                    int zDist = lZ - z;
+                    int dist = xDist * xDist + zDist * zDist + yDist * yDist;
+                    if (dist <= radius * 3) {
+                        boolean canReplace = true;
+                        if (replace.length > 0) {
+                            canReplace = false;
+                            int replacing = getBlock(lX, lY, lZ).x;
+                            for (int replaceable : replace) {
+                                if (replaceable == replacing) {
+                                    canReplace = true;
+                                    break;
                                 }
                             }
-                            if (canReplace) {
-                                World.setBlock(lX, lY, lZ, blockType, blockSubType);
-                            }
+                        }
+                        if (canReplace) {
+                            World.setBlock(lX, lY, lZ, blockType, blockSubType);
                         }
                     }
                 }

@@ -19,7 +19,7 @@ public class LightningItemType extends ItemType {
     }
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (player.inputHandler.leftButtonPressed && World.inBounds(player.selectedBlock)) {
+        if (player.inputHandler.leftButtonPressed) {
             Vector3f lightningPos = new Vector3f(player.selectedBlock).max(new Vector3f(0, World.height, 0));
             for (int i = 1; i < World.height; i++) {
                 lightningPos.sub(0, 1, 0);

@@ -269,21 +269,6 @@ public class World {
         }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
-    public static boolean inBounds(float x, float y, float z) {
-        return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
-    }
-    public static boolean inBounds(Vector3f pos) {
-        return inBounds(pos.x(), pos.y(), pos.z());
-    }
-    public static boolean inBounds(int x, int y, int z) {
-        return !(x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size);
-    }
-    public static boolean inBounds(Vector3i pos) {
-        return inBounds(pos.x(), pos.y(), pos.z());
-    }
-    public static boolean inBounds(int padding, int x, int y, int z) {
-        return !(x < padding || x >= size-padding || y < padding || y >= height-padding || z < padding || z >= size-padding);
-    }
     public static final short[] heightmap = new short[size*size];
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
@@ -312,12 +297,8 @@ public class World {
         return getLight(pos.x(), pos.y(), pos.z());
     }
     public static Light getLight(int x, int y, int z) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried getting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return new Light(0, 0, 0, maxSunlightLevel);
-        }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
+        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Light(0, 0, 0, maxSunlightLevel);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
@@ -325,12 +306,8 @@ public class World {
         }
     }
     public static void setLight(int x, int y, int z, Light light) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return;
-        }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -345,7 +322,7 @@ public class World {
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
+        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
@@ -354,12 +331,8 @@ public class World {
         return getBlock((int)x, (int)y, (int)z);
     }
     public static Vector2i getBlock(int x, int y, int z) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried getting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return new Vector2i(0);
-        }
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(oldpackChunkPos(cX, cY, cZ));
+        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
@@ -372,12 +345,8 @@ public class World {
     public static final HashSet<Vector3i> oldupdateSet = new HashSet<>();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return;
-        }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -401,12 +370,8 @@ public class World {
     public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors, boolean silent) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried setting block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return;
-        }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -451,12 +416,8 @@ public class World {
         replaceBlock(x, y, z, type, subType, true, true);
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
-        if (x < 0 || x >= size || y < 0 || y >= height || z < 0 || z >= size) {
-            //System.out.print("Tried replacing block that's out of bounds: x"+x+", y"+y+", z"+z);
-            return;
-        }
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(oldpackChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;

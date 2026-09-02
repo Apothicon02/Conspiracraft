@@ -106,10 +106,8 @@ public class BlockType {
     }
 
     public void tick(Vector4i pos) {
-        if (inBounds(pos.x, pos.y, pos.z)) {
-            Vector3i justPos = new Vector3i(pos.x, pos.y, pos.z);
-            updateSupport(justPos);
-        }
+        Vector3i justPos = new Vector3i(pos.x, pos.y, pos.z);
+        updateSupport(justPos);
     }
 
     public boolean whilePlayerBreaking(Vector3i pos, Vector2i blockBreaking, Vector2i hand) {
