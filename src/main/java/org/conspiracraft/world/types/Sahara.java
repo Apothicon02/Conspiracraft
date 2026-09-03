@@ -6,33 +6,17 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
 import org.conspiracraft.Main;
-import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
-import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
-import org.conspiracraft.world.shapes.*;
-import org.conspiracraft.world.trees.*;
-import org.conspiracraft.world.trees.OakTree;
 import org.joml.*;
 
 import java.lang.Math;
-import java.lang.Runtime;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Queue;
-import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.conspiracraft.Main.timeNs;
-import static org.conspiracraft.world.LightHelper.iterateLightQueueMultithreaded;
-import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.*;
 
 public class Sahara extends WorldType {
@@ -120,10 +104,10 @@ public class Sahara extends WorldType {
         }
         if (!lake.visited.get(packedPos)) {
             lake.visited.set(packedPos,  true);
-            if (heightmap[packPos(x + 1, z)] < y) {if (!fillLake(x + 1, y, z, lake)) {return false;}}
-            if (heightmap[packPos(x - 1, z)] < y) {if (!fillLake(x - 1, y, z, lake)) {return false;}}
-            if (heightmap[packPos(x, z + 1)] < y) {if (!fillLake(x, y, z + 1, lake)) {return false;}}
-            if (heightmap[packPos(x, z - 1)] < y) {if (!fillLake(x, y, z - 1, lake)) {return false;}}
+            if (oldHeightmap[packPos(x + 1, z)] < y) {if (!fillLake(x + 1, y, z, lake)) {return false;}}
+            if (oldHeightmap[packPos(x - 1, z)] < y) {if (!fillLake(x - 1, y, z, lake)) {return false;}}
+            if (oldHeightmap[packPos(x, z + 1)] < y) {if (!fillLake(x, y, z + 1, lake)) {return false;}}
+            if (oldHeightmap[packPos(x, z - 1)] < y) {if (!fillLake(x, y, z - 1, lake)) {return false;}}
         }
         return true;
     }

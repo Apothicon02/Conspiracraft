@@ -149,7 +149,7 @@ public class Earth extends WorldType {
         }
         return offsets;
     }
-    public static long prevPlayerCPos = -1;
+    public static int prevPlayerRX = -1, prevPlayerRY = -1, prevPlayerRZ = -1;
     public static final int[] generationIdxs = new int[wgThreads];
     public static final int GROUND_LEVEL = 500736, SEA_LEVEL = GROUND_LEVEL+96, SKY_LEVEL = GROUND_LEVEL+512;
     public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
@@ -158,10 +158,8 @@ public class Earth extends WorldType {
         if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads);}
         if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
         int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
-        int playerCX = (int)(Main.player.pos.x()/chunkSize), playerCY = (int)(Main.player.pos.y()/chunkSize), playerCZ = (int)(Main.player.pos.z()/chunkSize);
-        long playerCPos = packChunkPos(playerCX, playerCY, playerCZ);
-        if (prevPlayerCPos != playerCPos) {Arrays.fill(generationIdxs, 0);}
-        prevPlayerCPos = playerCPos;
+        if (prevPlayerRX != playerRX || prevPlayerRY != playerRY || prevPlayerRZ != playerRZ) {Arrays.fill(generationIdxs, 0);}
+        prevPlayerRX = playerRX; prevPlayerRY = playerRY; prevPlayerRZ = playerRZ;
         for (int thread = 0; thread < wgThreads; thread++) {
             int t = thread;
             wgPool.submit(() -> {
@@ -343,10 +341,10 @@ public class Earth extends WorldType {
         }
         if (!lake.visited.get(packedPos)) {
             lake.visited.set(packedPos,  true);
-            if (heightmap[packPos(x + 1, z)] < y) {if (!fillLake(x + 1, y, z, lake)) {return false;}}
-            if (heightmap[packPos(x - 1, z)] < y) {if (!fillLake(x - 1, y, z, lake)) {return false;}}
-            if (heightmap[packPos(x, z + 1)] < y) {if (!fillLake(x, y, z + 1, lake)) {return false;}}
-            if (heightmap[packPos(x, z - 1)] < y) {if (!fillLake(x, y, z - 1, lake)) {return false;}}
+            if (oldHeightmap[packPos(x + 1, z)] < y) {if (!fillLake(x + 1, y, z, lake)) {return false;}}
+            if (oldHeightmap[packPos(x - 1, z)] < y) {if (!fillLake(x - 1, y, z, lake)) {return false;}}
+            if (oldHeightmap[packPos(x, z + 1)] < y) {if (!fillLake(x, y, z + 1, lake)) {return false;}}
+            if (oldHeightmap[packPos(x, z - 1)] < y) {if (!fillLake(x, y, z - 1, lake)) {return false;}}
         }
         return true;
     }

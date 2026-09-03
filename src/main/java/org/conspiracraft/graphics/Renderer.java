@@ -786,7 +786,7 @@ public class Renderer {
         return attachmentInfo;
     }
 
-    public static int regionSSBOByteSize = regions.length*8;
+    public static int regionSSBOByteSize = oldRegions.length*8;
     //public static int lodSSBOByteSize = lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte*2;
@@ -821,7 +821,7 @@ public class Renderer {
         System.out.println("Allocated "+allocated+" bytes for light data.");
 
         long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memLongBuffer(regionPtr, regions.length).put(regions).rewind();
+        MemoryUtil.memLongBuffer(regionPtr, oldRegions.length).put(oldRegions).rewind();
 //        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
 //        MemoryUtil.memLongBuffer(lodPtr, lods.length).put(lods).rewind();
 

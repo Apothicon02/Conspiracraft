@@ -14,7 +14,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.conspiracraft.world.World.heightmap;
+import static org.conspiracraft.world.World.oldHeightmap;
 import static org.conspiracraft.world.World.packPos;
 
 public class AcaciaTree {
@@ -40,8 +40,8 @@ public class AcaciaTree {
             blocks.forEach((pos, block) -> {
                 World.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
                 int condensedPos = packPos(pos.x, pos.z);
-                int surfaceY = heightmap[condensedPos];
-                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                int surfaceY = oldHeightmap[condensedPos];
+                oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], pos.y - 1);
 //                        for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
 //                            setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
 //                        }

@@ -13,8 +13,8 @@ public class Pillar {
         }
         if (BlockTypes.blockTypes[blockType].obstructingHeightmap(new Vector2i(blockType, blockSubType))) {
             int condensedPos = packPos(x, z);
-            int surfaceY = heightmap[condensedPos];
-            heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], maxHeight);
+            int surfaceY = oldHeightmap[condensedPos];
+            oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], maxHeight);
 //                for (int newY = maxHeight; newY >= surfaceY; newY--) {
 //                    setLight(x, newY, z, new Vector4i(0, 0, 0, 0));
 //                }

@@ -51,8 +51,8 @@ public class PineTree {
                 }
                 World.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, subtype);
                 int condensedPos = packPos(pos.x, pos.z);
-                int surfaceY = heightmap[condensedPos];
-                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
+                int surfaceY = oldHeightmap[condensedPos];
+                oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], pos.y - 1);
                 for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
                     //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
                 }

@@ -93,9 +93,9 @@ public class World {
         out.close();
 
         out = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, heightmap.length * 2L);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldHeightmap.length * 2L);
         data.order(ByteOrder.BIG_ENDIAN);
-        data.asShortBuffer().put(heightmap);
+        data.asShortBuffer().put(oldHeightmap);
         Utils.unmap(data);
         out.close();
 
@@ -107,9 +107,9 @@ public class World {
 //        out.close();
 
         out = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, regions.length * 8L);
+        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldRegions.length * 8L);
         data.order(ByteOrder.BIG_ENDIAN);
-        data.asLongBuffer().put(regions);
+        data.asLongBuffer().put(oldRegions);
         Utils.unmap(data);
         out.close();
 
@@ -178,7 +178,7 @@ public class World {
         long start = System.currentTimeMillis();
         if (previouslyGenerated) {
             //Arrays.fill(lods, 0L);
-            Arrays.fill(regions, 0L);
+            Arrays.fill(oldRegions, 0L);
             Arrays.fill(oldchunks, null);
         }
         previouslyGenerated = true;
@@ -190,7 +190,7 @@ public class World {
             FileChannel in = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ);
             MappedByteBuffer data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
             data.order(ByteOrder.BIG_ENDIAN);
-            data.asShortBuffer().get(heightmap);
+            data.asShortBuffer().get(oldHeightmap);
             Utils.unmap(data);
             in.close();
 
@@ -204,7 +204,7 @@ public class World {
             in = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ);
             data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
             data.order(ByteOrder.BIG_ENDIAN);
-            data.asLongBuffer().get(regions);
+            data.asLongBuffer().get(oldRegions);
             Utils.unmap(data);
             in.close();
 
@@ -274,13 +274,13 @@ public class World {
         }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
-    public static final short[] heightmap = new short[size*size];
+    public static final short[] oldHeightmap = new short[1];
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
     public static final Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>();
     public static final Chunk[] oldchunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
-    public static final long[] regions = new long[sizeRegions*sizeRegions*heightRegions];
+    public static final long[] oldRegions = new long[1];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
 //    public static final long[] lods = new long[sizeLods*sizeLods*heightLods];

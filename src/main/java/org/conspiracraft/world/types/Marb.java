@@ -153,7 +153,7 @@ public class Marb extends WorldType {
                                 surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
 
                                 biomes[x * size + z] = (byte)(inCrater ? Biomes.MARB_CRATER.id : Biomes.MARB_HIGHLANDS.id);
-                                heightmap[packPos(x, z)] = (short)surface;
+                                oldHeightmap[packPos(x, z)] = (short)surface;
                                 minElevation = (short) Math.min(minElevation, surface);
                                 maxElevation = (short) Math.max(maxElevation, surface);
                             }
@@ -204,13 +204,13 @@ public class Marb extends WorldType {
                             for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                                 for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                     final int packedPos = packPos(x, z);
-                                    final short elevation = heightmap[packedPos];
+                                    final short elevation = oldHeightmap[packedPos];
                                     final byte biome = biomes[packedPos];
                                     int maxSteepness = 0;
                                     for (int i = 0; i < xOffset.length; i++) {
                                         int packedOffPos = packPos(x + xOffset[i], z + zOffset[i]);
-                                        if (packedOffPos >= 0 && packedOffPos < heightmap.length) {
-                                            int nY = heightmap[packedOffPos];
+                                        if (packedOffPos >= 0 && packedOffPos < oldHeightmap.length) {
+                                            int nY = oldHeightmap[packedOffPos];
                                             int steepness = Math.abs(elevation - nY);
                                             maxSteepness = Math.max(maxSteepness, steepness);
                                         }
@@ -266,7 +266,7 @@ public class Marb extends WorldType {
                     for (int cZ = 0; cZ < sizeChunks; cZ++) {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                int elevation = heightmap[(x * size) + z];
+                                int elevation = oldHeightmap[(x * size) + z];
                                 //byte biome = biomes[x * size + z];
                                 Vector2i blockOn = getBlock(x, elevation, z);
                                 float randomNumber = rand.nextFloat();
@@ -312,7 +312,7 @@ public class Marb extends WorldType {
             }
         }
 
-        Arrays.fill(heightmap, (short) 0);
+        Arrays.fill(oldHeightmap, (short) 0);
 
         threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
         pool = Executors.newFixedThreadPool(threads);
@@ -335,9 +335,9 @@ public class Marb extends WorldType {
                                         Vector2i block = chunk.getBlock(localPos);
                                         int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
                                         int gY = (cY*chunkSize)+y;
-                                        short elevation = heightmap[pos];
+                                        short elevation = oldHeightmap[pos];
                                         if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
-                                            heightmap[pos] = (short) Math.max(elevation, gY);
+                                            oldHeightmap[pos] = (short) Math.max(elevation, gY);
                                             chunk.setLight(x, y, z, 0);
                                         } else if (gY <= elevation) {
                                             chunk.setLight(x, y, z, 0);
@@ -369,7 +369,7 @@ public class Marb extends WorldType {
                         for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
                             for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
                                 int packedHorizontalPos = packPos(x, z);
-                                int maxY = heightmap[packedHorizontalPos];
+                                int maxY = oldHeightmap[packedHorizontalPos];
                                 boolean prevBlocking = false;
                                 for (int y = maxY; y >= minY; y--) {
                                     Vector2i block = World.getBlock(x, y, z);
