@@ -1,6 +1,7 @@
 package org.conspiracraft;
 
 import org.conspiracraft.audio.AudioController;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.gui.Languages;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;

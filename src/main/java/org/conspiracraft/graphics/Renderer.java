@@ -544,7 +544,7 @@ public class Renderer {
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
-        //long startTime = System.currentTimeMillis();
+//        long startTime = System.currentTimeMillis();
         VkSemaphoreWaitInfo semaphoreWaitInfo = VkSemaphoreWaitInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO)
                 .flags(0)
@@ -553,6 +553,10 @@ public class Renderer {
                 .pValues(stack.longs(timeline));
         int waitResult = vkWaitSemaphores(vkDevice, semaphoreWaitInfo, Long.MAX_VALUE);
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for timeline semaphore: "+waitResult);}
+//        long took = (System.currentTimeMillis()-startTime);
+//        if (took > 50) {
+//            System.out.println("Took " + took + "ms to start cmd buffer. ");
+//        }
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
@@ -566,7 +570,6 @@ public class Renderer {
         currentCmdBuffer = cmdBuffers[frameIdx];
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
-        //System.out.println("Took "+(System.currentTimeMillis()-startTime)+"ms to start cmd buffer. ");
         return true;
     }
     public static void submitCommandBuffers(MemoryStack stack) {

@@ -232,7 +232,8 @@ public class Earth extends WorldType {
                                 for (int lY = 0; lY < chunkSize; lY++) {
                                     int y = (cY * chunkSize) + lY;
                                     if (y <= elevation) {
-                                        chunk.setBlock(lX, lY, lZ, y > elevation - topDepth ? topType : midType, topType == BlockTypes.GRASS.id ? (biomeNoise > 0.f ? 1 : 3) : 0);
+                                        int type = y > elevation - topDepth ? topType : midType;
+                                        chunk.setBlock(lX, lY, lZ, type, type == BlockTypes.GRASS.id ? (biomeNoise > 0.f ? 1 : 3) : 0);
                                     } else if (y <= SEA_LEVEL) {
                                         chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, y == SEA_LEVEL ? 13 : 15);
                                     }
