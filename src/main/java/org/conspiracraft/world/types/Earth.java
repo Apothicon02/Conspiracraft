@@ -13,13 +13,17 @@ import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
+import org.conspiracraft.world.trees.OakTree;
+import org.conspiracraft.world.trees.SpruceTree;
 import org.joml.*;
 
 import java.lang.Math;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.conspiracraft.world.World.*;
 
@@ -117,115 +121,210 @@ public class Earth extends WorldType {
     public int getSeason() {return 0;};
     @Override
     public void tick() {}
-    public static final int[] generationOffsets = createGenerationOffsets();
-    public static int[] createGenerationOffsets() {
-//        int radius = 96;
-//        float verticalFactor = ((float)height)/size;
-//        int verticalRadius = (int)(radius*verticalFactor);
-//        List<Vector3i> positions = new ArrayList<>();
-//        for (int cX = -radius; cX <= radius; cX++) {
-//            for (int cY = -verticalRadius; cY <= verticalRadius; cY++) {
-//                for (int cZ = -radius; cZ <= radius; cZ++) {
-//                    float dist = new Vector3f(cX, cY/verticalFactor, cZ).distance(0, 0, 0);
-//                    if (dist < radius) {
-//                        positions.add(new Vector3i(cX, cY, cZ));
-//                    }
-//                }
-//            }
-//        }
-        List<Vector3i> positions = new ArrayList<>();
-        for (int cX = -halfSizeChunks; cX < halfSizeChunks; cX++) {
-            for (int cY = -halfHeightChunks; cY < halfHeightChunks; cY++) {
-                for (int cZ = -halfSizeChunks; cZ < halfSizeChunks; cZ++) {
-                    positions.add(new Vector3i(cX, cY, cZ));
+    public static final int[][] generationOffsets = createGenerationOffsets();
+    public static int[][] createGenerationOffsets() {
+        ArrayList<Vector3i>[] positions = new ArrayList[wgThreads];
+        for (int i = 0; i < positions.length; i++) {positions[i] = new ArrayList<>();}
+        int intsPerThread = 0;
+        int thread = 0;
+        for (int rX = -halfSizeRegions; rX < halfSizeRegions; rX++) {
+            for (int rY = -halfHeightRegions; rY < halfHeightRegions; rY++) {
+                for (int rZ = -halfSizeRegions; rZ < halfSizeRegions; rZ++) {
+                    if (thread >= wgThreads) {thread = 0;}
+                    if (thread == 0) {intsPerThread+=3;}
+                    positions[thread++].add(new Vector3i(rX, rY, rZ));
                 }
             }
         }
-        positions.sort(Comparator.comparingInt(v -> v.x * v.x + v.y * v.y + v.z * v.z));
-        int[] offsets = new int[positions.size()*3];
-        int i = 0;
-        for (Vector3i pos : positions) {
-            offsets[i++] = pos.x();
-            offsets[i++] = pos.y();
-            offsets[i++] = pos.z();
+        int[][] offsets = new int[wgThreads][intsPerThread];
+        for (int t = 0; t < wgThreads; t++) {
+            ArrayList<Vector3i> list = positions[t];
+            list.sort(Comparator.comparingInt(v -> v.x * v.x + v.y * v.y + v.z * v.z));
+            int i = 0;
+            for (Vector3i pos : list) {
+                offsets[t][i++] = pos.x();
+                offsets[t][i++] = pos.y();
+                offsets[t][i++] = pos.z();
+            }
         }
         return offsets;
     }
     public static long prevPlayerCPos = -1;
-    public static int generationIdx = 0;
-    public static final int SEA_LEVEL = 500832;
-    public static final int GROUND_LEVEL = 500736;
+    public static final int[] generationIdxs = new int[wgThreads];
+    public static final int GROUND_LEVEL = 500736, SEA_LEVEL = GROUND_LEVEL+96, SKY_LEVEL = GROUND_LEVEL+512;
+    public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
     @Override
     public void tickWorldgen() {
-        final Random rand = new Random(World.seed);
+        if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads);}
+        if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
+        int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
         int playerCX = (int)(Main.player.pos.x()/chunkSize), playerCY = (int)(Main.player.pos.y()/chunkSize), playerCZ = (int)(Main.player.pos.z()/chunkSize);
         long playerCPos = packChunkPos(playerCX, playerCY, playerCZ);
-        if (prevPlayerCPos != playerCPos) {generationIdx = 0;}
+        if (prevPlayerCPos != playerCPos) {Arrays.fill(generationIdxs, 0);}
         prevPlayerCPos = playerCPos;
-        long startTime = System.currentTimeMillis();
-        while (generationIdx < generationOffsets.length && System.currentTimeMillis()-startTime < 10) {
-            int cX = generationOffsets[generationIdx++]+playerCX, cY = generationOffsets[generationIdx++]+playerCY, cZ = generationOffsets[generationIdx++]+playerCZ;
-            if (cX >= 0 && cY >= 0 && cZ >= 0) {// && cX < sizeChunks && cY < heightChunks && cZ < sizeChunks) {
-                long cP = packChunkPos(cX, cY, cZ);
-                if (!chunks.containsKey(cP)) {
-                    Chunk chunk = new Chunk(cP);
+        for (int thread = 0; thread < wgThreads; thread++) {
+            int t = thread;
+            wgPool.submit(() -> {
+                try {
+                    generateRegion(t, playerRX, playerRY, playerRZ);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        //pool.shutdown();
+    }
+    private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) {
+        final java.util.Random rand = new java.util.Random(seed + t);
+        int rX = generationOffsets[t][generationIdxs[t]++] + playerRX, rY = generationOffsets[t][generationIdxs[t]++] + playerRY, rZ = generationOffsets[t][generationIdxs[t]++] + playerRZ;
+        int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+        int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+        boolean crust = false;
+        if (cYStart >= GROUND_LEVEL_C && cYStart < SKY_LEVEL_C) {
+            cYStart = GROUND_LEVEL_C;
+            cYEnd = SKY_LEVEL_C - 1;
+            crust = true;
+        }
+        RegionNoises regionNoises = new RegionNoises(regionSize * regionSize);
+        for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
+            for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z++) {
+                int rlX = x - (cXStart * chunkSize), rlZ = z - (cZStart * chunkSize);
+                int packed = (rlX * regionSize) + rlZ;
+                regionNoises.continents()[packed] = SimplexNoise.noise(x / 15000.f, z / 15000.f);
+                regionNoises.temperature()[packed] = SimplexNoise.noise(x / 2000.f, z / 2000.f);
+                regionNoises.humidity()[packed] = SimplexNoise.noise(x / 1200.f, z / 1200.f);
+                regionNoises.dunes()[packed] = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
+                regionNoises.detail()[packed] = SimplexNoise.noise(z / 50.f, x / 50.f);
+                regionNoises.plains()[packed] = SimplexNoise.noise(x / 150.f, z / 150.f);
+                regionNoises.hills()[packed] = SimplexNoise.noise(z / 800.f, x / 800.f);
+                regionNoises.whiteNoise()[packed] = whitenoisePipeline.evaluateNoise(x, z);
+            }
+        }
+        boolean continueGenerating = false;
+        short[] heights = new short[regionSize * regionSize];
+        for (int cX = cXStart; cX < cXEnd; cX++) {
+            for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+                for (int cY = cYStart; cY < cYEnd; cY++) {
+                    long cP = packChunkPos(cX, cY, cZ);
+                    if (!chunks.containsKey(cP)) {
+                        continueGenerating = continueGenerating || crust;
+                        Chunk chunk = new Chunk(cP);
+                        for (int lX = 0; lX < chunkSize; lX++) {
+                            for (int lZ = 0; lZ < chunkSize; lZ++) {
+                                int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
+                                int rlX = (x - (cXStart * chunkSize)), rlZ = (z - (cZStart * chunkSize));
+                                int packed = (rlX * regionSize) + rlZ;
+                                double continentsNoise = Math.abs(regionNoises.continents()[packed]);
+                                double oceans = 10 * (0.1f - Math.min(0.1f, continentsNoise));
+                                double temperature = regionNoises.temperature()[packed];
+                                double desertness = ((Math.clamp(temperature, 0.2f, 0.4f) - 0.3f) * 10);
+                                double dunesNoise = regionNoises.dunes()[packed];
+                                double dunes = (4 + (45 * dunesNoise)) * desertness;
+                                double detailNoise = regionNoises.detail()[packed];
+                                double plainsNoise = regionNoises.plains()[packed];
+                                double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continentsNoise)));
+                                double hillsNoise = regionNoises.hills()[packed] - hillCracks;//-(dunesNoise*0.2f);
+                                double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, hillsNoise * 125);
+                                double biomeNoise = regionNoises.humidity()[packed];
+                                int elevation = (int) Math.max(SEA_LEVEL - 2, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
+                                Biome biome = dunes > hills ? Biomes.DESERT : Biomes.TEMPERATE;
+                                int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biome == Biomes.DESERT ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : BlockTypes.GRASS.id));
+                                int midType = topType == BlockTypes.GRASS.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
+                                int topDepth = topType == BlockTypes.GRASS.id ? 1 : 7;
+                                for (int lY = 0; lY < chunkSize; lY++) {
+                                    int y = (cY * chunkSize) + lY;
+                                    if (y <= elevation) {
+                                        chunk.setBlock(lX, lY, lZ, y > elevation - topDepth ? topType : midType, topType == BlockTypes.GRASS.id ? (biomeNoise > 0.f ? 1 : 3) : 0);
+                                    } else if (y <= SEA_LEVEL) {
+                                        chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, y == SEA_LEVEL ? 13 : 15);
+                                    }
+                                }
+                                if (elevation < SKY_LEVEL && elevation >= GROUND_LEVEL) {
+                                    heights[packed] = (short) (elevation - GROUND_LEVEL);
+                                }
+                            }
+                        }
+                        //if (chunk.blockPalette.size() > 1) {
+                        synchronized (lock) {
+                            chunks.put(cP, chunk);
+                        }
+                        //}
+                    }
+                }
+            }
+        }
+        Bounds bounds = new Bounds(cXStart * chunkSize, cXEnd * chunkSize, cYStart * chunkSize, cYEnd * chunkSize, cZStart * chunkSize, cZEnd * chunkSize);
+        if (continueGenerating) {
+            //features
+            for (int cX = cXStart; cX < cXEnd; cX++) {
+                for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                     for (int lX = 0; lX < chunkSize; lX++) {
                         for (int lZ = 0; lZ < chunkSize; lZ++) {
                             int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
-                            double continentsNoise = Math.abs(SimplexNoise.noise(x / 15000.f, z / 15000.f));
-                            double oceans = 10*(0.1f-Math.min(0.1f, continentsNoise));
-                            double temperature = SimplexNoise.noise(x / 2000.f, z / 2000.f);
-                            double desertness = ((Math.clamp(temperature, 0.2f, 0.4f)-0.3f)*10);
-                            double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
-                            double dunes = (4+(45*dunesNoise))*desertness;
-                            double detailNoise = SimplexNoise.noise(z / 50.f, x / 50.f);
-                            double plainsNoise = SimplexNoise.noise(x / 150.f, z / 150.f);
-                            double hillCracks = ((Math.max(0.25f, dunesNoise)-0.25f))*Math.min(1.f, 100*(0.15f-Math.min(0.15f, continentsNoise)));
-                            double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f)-hillCracks;//-(dunesNoise*0.2f);
-                            double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, hillsNoise * 125);
-                            int elevation = (int)Math.max(SEA_LEVEL-2, Utils.mix(Math.max(dunes, hills)+8+SEA_LEVEL, GROUND_LEVEL, oceans));
-                            Biome biome = dunes > hills ? Biomes.DESERT : Biomes.TEMPERATE;
-                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL+3 || biome == Biomes.DESERT ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : BlockTypes.GRASS.id));
-                            int midType = topType == BlockTypes.GRASS.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
-                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : 7;
-                            double foliageNoise = Math.abs(plainsNoise);
-                            double foliageChance = Math.abs(whitenoisePipeline.evaluateNoise(x, z));
-                            for (int lY = 0; lY < chunkSize; lY++) {
-                                int y = (cY * chunkSize) + lY;
-                                if (y > elevation && y > SEA_LEVEL) {
-                                    if (topType == BlockTypes.GRASS.id) {
-                                        if (foliageChance < foliageNoise*0.01f && y < elevation+12+(foliageChance*3000)) {
-                                            chunk.setBlock(lX, lY, lZ, y <= elevation+10 ? BlockTypes.SPRUCE_LOG.id : BlockTypes.SPRUCE_LEAVES.id, 0);
-                                        } else if (foliageChance < 0.3f && y == elevation+1) {
-                                            chunk.setBlock(lX, lY, lZ, foliageChance < 0.01f ? BlockTypes.ROSE.id : (foliageChance < 0.0166f ? BlockTypes.HYDRANGEA.id : BlockTypes.TALL_GRASS.id), rand.nextInt(4));
+                            int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
+                            int surface = GROUND_LEVEL + heights[packed];
+                            if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
+                                double biomeNoise = regionNoises.humidity()[packed];
+                                double foliageNoise = Math.abs(regionNoises.plains()[packed]);
+                                double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
+                                Vector2i blockOn = getBlockWorldgen(x, surface, z);
+                                if (blockOn.x() == BlockTypes.GRASS.id) {
+                                    if (biomeNoise > 0.f) {
+                                        if (foliageChance < foliageNoise * 0.05f * biomeNoise) {
+                                            int maxHeight = rand.nextInt(6) + 12;
+                                            SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
-                                    } else if (topType == BlockTypes.SAND.id && biome == Biomes.DESERT) {
-                                        if (foliageChance < foliageNoise*0.002f && y < elevation+3+(foliageChance*3000)) {
-                                            chunk.setBlock(lX, lY, lZ, BlockTypes.CACTUS.id, 0);
+                                    } else {
+                                        if (foliageChance < foliageNoise * 0.002f) {
+                                            int maxHeight = rand.nextInt(24, 30);
+                                            int radius = rand.nextInt(26, 34);
+                                            int count = rand.nextInt(6, 8);
+                                            OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
                                         }
                                     }
-                                } else if (y <= elevation) {
-                                    chunk.setBlock(lX, lY, lZ, y > elevation-topDepth ? topType : midType, 0);
-                                } else if (y <= SEA_LEVEL) {
-                                    chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, y == SEA_LEVEL ? 13 : 15);
                                 }
                             }
                         }
                     }
-                    if (chunk.blockPalette.size() > 1) {
-                        //System.out.print(" Chunk cX: "+cX+" cY: "+cY+" cZ: "+cZ);
-                        chunks.put(cP, chunk);
-                        updateSet.add(cP);
+                }
+            }
+            //cover
+            for (int cX = cXStart; cX < cXEnd; cX++) {
+                for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+                    for (int lX = 0; lX < chunkSize; lX++) {
+                        for (int lZ = 0; lZ < chunkSize; lZ++) {
+                            int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
+                            int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
+                            int surface = GROUND_LEVEL + heights[packed];
+                            if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
+                                double foliageNoise = Math.abs(regionNoises.plains()[packed]);
+                                double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
+                                Vector2i blockOn = getBlockWorldgen(x, surface, z);
+                                Vector2i blockIn = getBlockWorldgen(x, surface + 1, z);
+                                if (blockIn.x() == 0) {
+                                    if (blockOn.x() == BlockTypes.GRASS.id) {
+                                        if (foliageChance < 0.3f) {
+                                            setBlockWorldgen(x, surface + 1, z, foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.HYDRANGEA.id : BlockTypes.TALL_GRASS.id), rand.nextInt(4));
+                                        }
+                                    } else if (blockOn.x() == BlockTypes.SAND.id) {
+                                        if (foliageChance < foliageNoise * 0.002f) {
+                                            int height = surface + rand.nextInt(5) + 2;
+                                            for (int y = surface + 1; y <= height; y++) {
+                                                setBlockWorldgen(x, y, z, BlockTypes.CACTUS.id, 0);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int cX = cXStart; cX < cXEnd; cX++) {
+                for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+                    for (int cY = cYStart; cY < cYEnd; cY++) {
+                        long cP = packChunkPos(cX, cY, cZ);
                         updateQueue.addLast(cP);
-                        //updateRegion(cX, cY, cZ, false);
-//                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
-//                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
-//                                for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
-//                                    int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
-//                                    lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
-//                                }
-//                            }
-//                        }
                     }
                 }
             }

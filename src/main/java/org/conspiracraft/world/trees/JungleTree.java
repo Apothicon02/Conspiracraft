@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.conspiracraft.world.World.*;
-import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class JungleTree {
     public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int minCanopyHeight, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
@@ -23,7 +22,7 @@ public class JungleTree {
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
-            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                 colliding.set(true);
             }
         });
@@ -31,14 +30,14 @@ public class JungleTree {
         int minCollisionY = y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
             Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
-            if (!integrateCanopy(canopy, blocks, minCollisionY)) {
+            if (!TreeHelper.oldIntegrateCanopy(canopy, blocks, minCollisionY)) {
                 colliding.set(true);
                 break;
             }
         }
         if (!colliding.get()) {
             blocks.forEach((pos, block) -> {
-                setBlock(pos.x, pos.y, pos.z, block.x, block.y);
+                setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
                 int condensedPos = packPos(pos.x, pos.z);
                 int surfaceY = heightmap[condensedPos];
                 heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);

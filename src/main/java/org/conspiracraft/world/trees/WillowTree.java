@@ -5,7 +5,6 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.trees.canopies.DroopingCanopy;
 import org.conspiracraft.world.trees.trunks.BendingTrunk;
-import org.conspiracraft.world.trees.trunks.ThickTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -16,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.conspiracraft.world.World.*;
-import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class WillowTree {
     public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int count) {
@@ -24,7 +22,7 @@ public class WillowTree {
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
-            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                 colliding.set(true);
             }
         });
@@ -36,14 +34,14 @@ public class WillowTree {
                 eLeavesHeight /= 2;
             }
             Map<Vector3i, Vector2i> canopy = DroopingCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, canopyPos.y()-y, new Vector3i(canopyPos.x, canopyPos.y, canopyPos.z), eLeavesHeight, radius, 0.3f);
-            if (!integrateCanopy(canopy, blocks, minCollisionY)) {
+            if (!TreeHelper.oldIntegrateCanopy(canopy, blocks, minCollisionY)) {
                 colliding.set(true);
                 break;
             }
         }
         if (!colliding.get()) {
             blocks.forEach((pos, block) -> {
-                setBlock(pos.x, pos.y, pos.z, block.x, block.y);
+                setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
                 int condensedPos = packPos(pos.x, pos.z);
                 int surfaceY = heightmap[condensedPos];
                 heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);

@@ -29,6 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
 
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 
@@ -49,10 +51,13 @@ public class World {
     public static final int halfSizeChunks = sizeChunks/2;
     public static final int heightChunks = height>>chunkBits;
     public static final int halfHeightChunks = heightChunks/2;
-    public static final byte regionSizeChunks = 4;
+    public static final int regionSizeChunks = 8;
+    public static final int regionSize = regionSizeChunks*chunkSize;
     public static final int regionBits = Integer.numberOfTrailingZeros(regionSizeChunks);
     public static final int sizeRegions = sizeChunks>>regionBits;
+    public static final int halfSizeRegions = sizeRegions/2;
     public static final int heightRegions = heightChunks>>regionBits;
+    public static final int halfHeightRegions = heightRegions/2;
 //    public static final int sizeLods = size >>lodBits;
 //    public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
@@ -298,7 +303,7 @@ public class World {
     }
     public static Light getLight(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Light(0, 0, 0, maxSunlightLevel);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
@@ -307,22 +312,22 @@ public class World {
     }
     public static void setLight(int x, int y, int z, Light light) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
-        if (!generating && !oldupdateSet.contains(chunkPos)) {
-            oldupdateSet.add(chunkPos);
-            oldupdateQueue.addLast(chunkPos);
-        }
         synchronized (chunk) {
+            if (!generating && !updateSet.add(cP)) {
+                updateQueue.addLast(cP);
+            }
             chunk.setLight(lX, lY, lZ, light);
         }
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
@@ -332,21 +337,20 @@ public class World {
     }
     public static Vector2i getBlock(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = chunks.get(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getBlock(pos);
         }
     }
-    public static final ArrayDeque<Long> updateQueue = new ArrayDeque<>();
+    public static final ConcurrentLinkedDeque<Long> updateQueue = new ConcurrentLinkedDeque<>();
     public static final HashSet<Long> updateSet = new HashSet<>();
-    public static final ArrayDeque<Vector3i> oldupdateQueue = new ArrayDeque<>();
-    public static final HashSet<Vector3i> oldupdateSet = new HashSet<>();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -358,20 +362,55 @@ public class World {
         updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         updateHeightmap(x, y, z);
         LightHelper.queueLightUpdate(new Vector3i(x, y, z));
-        if (!oldupdateSet.contains(chunkPos)) {
-            oldupdateSet.add(chunkPos);
-            oldupdateQueue.addLast(chunkPos);
+        synchronized (chunk) {
+            if (!updateSet.contains(cP) && !updateSet.add(cP)) {
+                updateQueue.addLast(cP);
+            }
         }
         if (updateNeighbors) {
             updateNeighbors(x, y, z);
         }
+    }
+    public static final int wgThreads = 8;
+    public static ExecutorService wgPool = null;
+    public static final Object lock = new Object();
+    public static Chunk getChunk(long cP) {
+        Chunk returnChunk;
+        synchronized (lock) {
+            returnChunk = chunks.get(cP);
+        }
+        return returnChunk;
+    }
+    public static Vector2i getBlockWorldgen(Vector3i pos) {
+        return getBlockWorldgen(pos.x(), pos.y(), pos.z());
+    }
+    public static Vector2i getBlockWorldgen(int x, int y, int z) {
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
+        if (chunk == null) {return new Vector2i();}
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
+    }
+    public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
+        if (chunk == null) {return;}
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        chunk.setBlock(lX, lY, lZ, type, subType);
     }
     public static void setBlock(int x, int y, int z, int type, int subType, boolean idk, boolean idk2, int idk3, boolean idk4) {setBlock(x, y, z, type, subType, true, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors, boolean silent) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -403,9 +442,10 @@ public class World {
                     LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
                 }
             }
-            if (!oldupdateSet.contains(chunkPos)) {
-                oldupdateSet.add(chunkPos);
-                oldupdateQueue.addLast(chunkPos);
+            synchronized (chunk) {
+                if (!updateSet.contains(cP) && !updateSet.add(cP)) {
+                    updateQueue.addLast(cP);
+                }
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);
@@ -417,7 +457,8 @@ public class World {
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        Chunk chunk = chunks.get(packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z()));
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunk(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -437,9 +478,10 @@ public class World {
                 updateHeightmap(x, y, z);
                 LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
             }
-            if (!oldupdateSet.contains(chunkPos)) { //may not need to do this since the light recalculation will prob do it
-                oldupdateSet.add(chunkPos);
-                oldupdateQueue.addLast(chunkPos);
+            synchronized (chunk) {
+                if (!updateSet.contains(cP) && !updateSet.add(cP)) { //may not need to do this since the light recalculation will prob do it
+                    updateQueue.addLast(cP);
+                }
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);
@@ -460,45 +502,45 @@ public class World {
         BlockTypes.blockTypes[block.x()].neighborUpdated(x, y, z, block);
     }
     public static void updateHeightmap(int x, int newY, int z) {
-        int packedPos = packPos(x, z);
-        int elevation = heightmap[packedPos];
-        if (newY >= elevation) {
-            int newElevation = elevation;
-            boolean setHeightmap = false;
-            for (int y = newY; y >= 0; y--) {
-                if (!setHeightmap) {
-                    Vector2i block = getBlock(x, y, z);
-                    BlockType type = BlockTypes.blockTypes[block.x()];
-                    boolean isBottomSlab = type.blockProperties.hasSlab && block.y() == 2;
-                    if (!type.obstructingHeightmap(block) || isBottomSlab) {
-                        Light light = getLight(x, y, z);
-                        if (light.s() < maxSunlightLevel) {
-                            Light newLight = new Light(light.s(), light.s(), light.s(), maxSunlightLevel);
-                            setLight(x, y, z, newLight);
-                        }
-                        if (isBottomSlab) {
-                            setHeightmap = true;
-                            newElevation = y-1;
-                            heightmap[packedPos] = (short) (y-1);
-                        }
-                    } else {
-                        setHeightmap = true;
-                        newElevation = y;
-                        heightmap[packedPos] = (short) y;
-                    }
-                } else {
-                    Light light = getLight(x, y, z);
-                    if (light.s() > 0) {
-                        Light newLight = new Light(light.s(), light.s(), light.s(), 0);
-                        setLight(x, y, z, newLight);
-                        LightHelper.recalculateLight(new Vector3i(x, y, z), light);
-                    }
-                }
-            }
-            for (int y = elevation - 1; y > newElevation; y--) {
-                LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
-            }
-        }
+//        int packedPos = packPos(x, z);
+//        int elevation = heightmap[packedPos];
+//        if (newY >= elevation) {
+//            int newElevation = elevation;
+//            boolean setHeightmap = false;
+//            for (int y = newY; y >= 0; y--) {
+//                if (!setHeightmap) {
+//                    Vector2i block = getBlock(x, y, z);
+//                    BlockType type = BlockTypes.blockTypes[block.x()];
+//                    boolean isBottomSlab = type.blockProperties.hasSlab && block.y() == 2;
+//                    if (!type.obstructingHeightmap(block) || isBottomSlab) {
+//                        Light light = getLight(x, y, z);
+//                        if (light.s() < maxSunlightLevel) {
+//                            Light newLight = new Light(light.s(), light.s(), light.s(), maxSunlightLevel);
+//                            setLight(x, y, z, newLight);
+//                        }
+//                        if (isBottomSlab) {
+//                            setHeightmap = true;
+//                            newElevation = y-1;
+//                            heightmap[packedPos] = (short) (y-1);
+//                        }
+//                    } else {
+//                        setHeightmap = true;
+//                        newElevation = y;
+//                        heightmap[packedPos] = (short) y;
+//                    }
+//                } else {
+//                    Light light = getLight(x, y, z);
+//                    if (light.s() > 0) {
+//                        Light newLight = new Light(light.s(), light.s(), light.s(), 0);
+//                        setLight(x, y, z, newLight);
+//                        LightHelper.recalculateLight(new Vector3i(x, y, z), light);
+//                    }
+//                }
+//            }
+//            for (int y = elevation - 1; y > newElevation; y--) {
+//                LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
+//            }
+//        }
     }
     public static void updateLod(int x, int y, int z, boolean empty) {
 //        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
@@ -507,10 +549,10 @@ public class World {
 //        if (empty) {lods[lodIdx] &= ~mask;} else {lods[lodIdx] |= mask;}
     }
     public static void updateRegion(int cX, int cY, int cZ, boolean empty) {
-        int regionIdx = packRegionPos(cX >>regionBits, cY >>regionBits, cZ >>regionBits);
-        int bitIdx = (cX % regionSizeChunks) + (cY % regionSizeChunks) * regionSizeChunks + (cZ % regionSizeChunks) * regionSizeChunks * regionSizeChunks;
-        long mask = 1L << bitIdx;
-        if (empty) {regions[regionIdx] &= ~mask;} else {regions[regionIdx] |= mask;}
+//        int regionIdx = packRegionPos(cX >>regionBits, cY >>regionBits, cZ >>regionBits);
+//        int bitIdx = (cX % regionSizeChunks) + (cY % regionSizeChunks) * regionSizeChunks + (cZ % regionSizeChunks) * regionSizeChunks * regionSizeChunks;
+//        long mask = 1L << bitIdx;
+//        if (empty) {regions[regionIdx] &= ~mask;} else {regions[regionIdx] |= mask;}
     }
 
     public static final ArrayDeque<Entity> entitiesAddQueue = new ArrayDeque<>();

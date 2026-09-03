@@ -104,10 +104,12 @@ public class Renderer {
                     //long startTime = System.nanoTime();
                     //boolean wasEmpty = updateQueue.isEmpty();
                     long startTime = System.currentTimeMillis();
-                    while (!updateQueue.isEmpty() && System.currentTimeMillis()-startTime < 10) {
+                    while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
                         updateChunk(chunkPos);
-                        updateSet.remove(chunkPos);
+                        synchronized (lock) {
+                            updateSet.remove(chunkPos);
+                        }
                     }
                     //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
                     ssboBarriers();
@@ -203,7 +205,7 @@ public class Renderer {
         System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
     }
     public static void updateChunk(long packedChunkPos) {
-        Chunk chunk = chunks.get(packedChunkPos);
+        Chunk chunk = getChunk(packedChunkPos);
         Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
         long wrappedPackedChunkPos = ((((chunk.cX%sizeChunks)*sizeChunks)+(chunk.cZ%sizeChunks))*heightChunks)+(chunk.cY%heightChunks);
         updateChunkBlocks(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
@@ -542,6 +544,7 @@ public class Renderer {
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
+        //long startTime = System.currentTimeMillis();
         VkSemaphoreWaitInfo semaphoreWaitInfo = VkSemaphoreWaitInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO)
                 .flags(0)
@@ -563,6 +566,7 @@ public class Renderer {
         currentCmdBuffer = cmdBuffers[frameIdx];
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
+        //System.out.println("Took "+(System.currentTimeMillis()-startTime)+"ms to start cmd buffer. ");
         return true;
     }
     public static void submitCommandBuffers(MemoryStack stack) {
@@ -811,9 +815,9 @@ public class Renderer {
         vmaCreateVirtualBlock(lightBlockCreateInfo, lights);
         chunkLightBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
 
-        for (Chunk chunk : chunks.values()) {
-            updateChunk(chunk.condensedChunkPos);
-        }
+//        for (Chunk chunk : chunks.values()) {
+//            updateChunk(chunk.condensedChunkPos);
+//        }
         System.out.println("Allocated "+allocated+" bytes for light data.");
 
         long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);

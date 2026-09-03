@@ -21,26 +21,26 @@ public class LightHelper {
     public static final ConcurrentLinkedDeque<Chunk> dirtyChunks = new ConcurrentLinkedDeque<>();
 
     public static void queueLightUpdate(Vector3i pos) {
-        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-        Chunk chunk = oldchunks[packedCp];
-        int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
-        boolean exists = chunk.lightUpdateArr()[packedLp];
-        if (!exists) {
-            chunk.lightUpdateArr[packedLp] = true;
-            synchronized (lightQueue) {
-                lightQueue.add(pos);
-            }
-        }
+//        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+//        Chunk chunk = oldchunks[packedCp];
+//        int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
+//        boolean exists = chunk.lightUpdateArr()[packedLp];
+//        if (!exists) {
+//            chunk.lightUpdateArr[packedLp] = true;
+//            synchronized (lightQueue) {
+//                lightQueue.add(pos);
+//            }
+//        }
     }
     public static void queueLightUpdate(ArrayDeque<Vector3i> queue, Vector3i pos) {
-        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
-        Chunk chunk = oldchunks[packedCp];
-        int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
-        boolean exists = chunk.lightUpdateArr()[packedLp];
-        if (!exists) {
-            chunk.lightUpdateArr[packedLp] = true;
-            queue.add(pos);
-        }
+//        int packedCp = World.oldpackChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
+//        Chunk chunk = oldchunks[packedCp];
+//        int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
+//        boolean exists = chunk.lightUpdateArr()[packedLp];
+//        if (!exists) {
+//            chunk.lightUpdateArr[packedLp] = true;
+//            queue.add(pos);
+//        }
     }
 
     public static void iterateLightQueue() {
@@ -87,65 +87,65 @@ public class LightHelper {
         updateLight(lightQueue, pos, block, light);
     }
     public static void updateLight(ArrayDeque<Vector3i> queue, Vector3i pos, Vector2i block, Light light) {
-        BlockType blockType = BlockTypes.blockTypes[block.x()];
-        boolean isLight = blockType instanceof LightBlockType;
-        boolean isSlab = blockType.blockProperties.hasSlab, isTopSlab = false, isBottomSlab = false;
-        if (isSlab) {
-            if (block.y() == 1) {
-                isTopSlab = true;
-            } else if (block.y() == 2) {
-                isBottomSlab = true;
-            } else {
-                isSlab = false;
-            }
-        }
-        if (!blocksLight(block) || isLight || isSlab) {
-            int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
-            int g = Math.max(light.g(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
-            int b = Math.max(light.b(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
-            int s = (pos.y > heightmap[packPos(pos.x, pos.z)] ? maxSunlightLevel : light.s());
-            for (Vector3i neighborPos : new Vector3i[]{
-                    new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
-                    new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
-            }) {
-                if (!((isTopSlab && neighborPos.y() > pos.y()) || (isBottomSlab && neighborPos.y() < pos.y()))) { //don't spread light to neighbors the slab blocks
-                    Vector2i neighbor = getBlock(neighborPos);
-                    Light neighborLight = getLight(neighborPos);
-                    BlockType neighborBlockType = BlockTypes.blockTypes[neighbor.x];
-                    boolean isNLight = neighborBlockType instanceof LightBlockType;
-                    boolean isNSlab = neighborBlockType.blockProperties.hasSlab;
-                    if (isNSlab) {
-                        if (neighbor.y() == 1) { //top slab
-                            if (neighborPos.y() < pos.y()) {
-                                isNSlab = false;
-                            }
-                        } else if (neighbor.y() == 2) { //bottom slab
-                            if (neighborPos.y() > pos.y()) {
-                                isNSlab = false;
-                            }
-                        } else {
-                            isNSlab = false;
-                        }
-                    }
-                    if (!blocksLight(neighbor) || isNLight || isNSlab) {
-                        r = Math.max(r, Math.max(neighborLight.r(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0) - 1);
-                        g = Math.max(g, Math.max(neighborLight.g(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().g : 0) - 1);
-                        b = Math.max(b, Math.max(neighborLight.b(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().b : 0) - 1);
-                        s = Math.max(s, neighborLight.s() - 1);
-                    }
-                }
-            }
-            setLight(pos.x, pos.y, pos.z, new Light(r, g, b, s));
-            for (Vector3i neighborPos : new Vector3i[]{
-                    new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
-                    new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
-            }) {
-                Light nLight = getLight(neighborPos);
-                if (isDarker(r, g, b, s, nLight)) {
-                    queueLightUpdate(queue, neighborPos);
-                }
-            }
-        }
+//        BlockType blockType = BlockTypes.blockTypes[block.x()];
+//        boolean isLight = blockType instanceof LightBlockType;
+//        boolean isSlab = blockType.blockProperties.hasSlab, isTopSlab = false, isBottomSlab = false;
+//        if (isSlab) {
+//            if (block.y() == 1) {
+//                isTopSlab = true;
+//            } else if (block.y() == 2) {
+//                isBottomSlab = true;
+//            } else {
+//                isSlab = false;
+//            }
+//        }
+//        if (!blocksLight(block) || isLight || isSlab) {
+//            int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
+//            int g = Math.max(light.g(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
+//            int b = Math.max(light.b(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
+//            int s = (pos.y > heightmap[packPos(pos.x, pos.z)] ? maxSunlightLevel : light.s());
+//            for (Vector3i neighborPos : new Vector3i[]{
+//                    new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
+//                    new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
+//            }) {
+//                if (!((isTopSlab && neighborPos.y() > pos.y()) || (isBottomSlab && neighborPos.y() < pos.y()))) { //don't spread light to neighbors the slab blocks
+//                    Vector2i neighbor = getBlock(neighborPos);
+//                    Light neighborLight = getLight(neighborPos);
+//                    BlockType neighborBlockType = BlockTypes.blockTypes[neighbor.x];
+//                    boolean isNLight = neighborBlockType instanceof LightBlockType;
+//                    boolean isNSlab = neighborBlockType.blockProperties.hasSlab;
+//                    if (isNSlab) {
+//                        if (neighbor.y() == 1) { //top slab
+//                            if (neighborPos.y() < pos.y()) {
+//                                isNSlab = false;
+//                            }
+//                        } else if (neighbor.y() == 2) { //bottom slab
+//                            if (neighborPos.y() > pos.y()) {
+//                                isNSlab = false;
+//                            }
+//                        } else {
+//                            isNSlab = false;
+//                        }
+//                    }
+//                    if (!blocksLight(neighbor) || isNLight || isNSlab) {
+//                        r = Math.max(r, Math.max(neighborLight.r(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().r : 0) - 1);
+//                        g = Math.max(g, Math.max(neighborLight.g(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().g : 0) - 1);
+//                        b = Math.max(b, Math.max(neighborLight.b(), isNLight ? ((LightBlockType) neighborBlockType).lightBlockProperties().b : 0) - 1);
+//                        s = Math.max(s, neighborLight.s() - 1);
+//                    }
+//                }
+//            }
+//            setLight(pos.x, pos.y, pos.z, new Light(r, g, b, s));
+//            for (Vector3i neighborPos : new Vector3i[]{
+//                    new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
+//                    new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
+//            }) {
+//                Light nLight = getLight(neighborPos);
+//                if (isDarker(r, g, b, s, nLight)) {
+//                    queueLightUpdate(queue, neighborPos);
+//                }
+//            }
+//        }
     }
     public static boolean isDarker(int r, int g, int b, int s, Light darker) {
         return r-2 > darker.r() || g-2 > darker.g() || b-2 > darker.b() || s-2 > darker.s();
@@ -160,34 +160,34 @@ public class LightHelper {
         recalculateLight(ogPos, light.r(), light.g(), light.b(), light.s());
     }
     public static void recalculateLight(Vector3i ogPos, int r, int g, int b, int s) {
-        removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
-        removalSet.add(ogPos);
-
-        while (!removalQueue.isEmpty()) {
-            lightNode node = removalQueue.pollFirst();
-            Vector3i pos = new Vector3i(node.x, node.y, node.z);
-            Light light = new Light(node.r(), node.g(), node.b(), node.s());
-            if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
-                setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
-                for (Vector3i neighborPos : new Vector3i[]{
-                        new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
-                        new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
-                }) {
-                    if (removalSet.add(neighborPos)) {
-                        lightQueue.add(neighborPos);
-                        int packedCp = World.oldpackChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
-                        Chunk chunk = oldchunks[packedCp];
-                        chunk.lightUpdateArr()[Chunk.packLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
-                        Light nLight = getLight(neighborPos);
-                        if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
-                                (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
-                            removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
-                        }
-                    }
-                }
-            }
-        }
-        removalSet.clear();
+//        removalQueue.add(new lightNode(ogPos.x(), ogPos.y(), ogPos.z(), r, g, b, s));
+//        removalSet.add(ogPos);
+//
+//        while (!removalQueue.isEmpty()) {
+//            lightNode node = removalQueue.pollFirst();
+//            Vector3i pos = new Vector3i(node.x, node.y, node.z);
+//            Light light = new Light(node.r(), node.g(), node.b(), node.s());
+//            if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
+//                setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
+//                for (Vector3i neighborPos : new Vector3i[]{
+//                        new Vector3i(pos.x, pos.y, pos.z + 1), new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1),
+//                        new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
+//                }) {
+//                    if (removalSet.add(neighborPos)) {
+//                        lightQueue.add(neighborPos);
+//                        int packedCp = World.oldpackChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
+//                        Chunk chunk = oldchunks[packedCp];
+//                        chunk.lightUpdateArr()[Chunk.packLocalPos(neighborPos.x() & 15, neighborPos.y() & 15, neighborPos.z() & 15)] = true;
+//                        Light nLight = getLight(neighborPos);
+//                        if ((nLight.r() > 0 && nLight.r() == light.r() - 1) || (nLight.g() > 0 && nLight.g() == light.g() - 1) ||
+//                                (nLight.b() > 0 && nLight.b() == light.b() - 1) || (nLight.s() > 0 && nLight.s() == light.s() - 1)) {
+//                            removalQueue.add(new lightNode(neighborPos.x(), neighborPos.y(), neighborPos.z(), nLight.r(), nLight.g(), nLight.b(), nLight.s()));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        removalSet.clear();
     }
 //    public static void recalculateLight(Vector3i ogPos, int r, int g, int b, int s) {
 //        if (World.inBounds(ogPos)) {

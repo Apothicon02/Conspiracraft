@@ -46,8 +46,8 @@ public class SquareCanopy extends Canopy {
                     for (int i = 0; i <= 24; i++) {
                         bPos.sub(0, 1, 0);
                         aPos.sub(0, 1, 0);
-                        if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((!BlockTypes.blockTypes[getBlockWorldgen(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                             break;
                         }

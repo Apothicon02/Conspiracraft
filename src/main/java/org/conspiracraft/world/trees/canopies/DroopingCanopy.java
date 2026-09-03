@@ -11,7 +11,7 @@ import org.joml.Vector3i;
 import java.util.Map;
 import java.util.Random;
 
-import static org.conspiracraft.world.World.getBlock;
+import static org.conspiracraft.world.World.getBlockWorldgen;
 
 public class DroopingCanopy extends Canopy {
     private static Vector2i getLeaves(Random random, Vector3i pos, int blockType, int blockSubType) {return new Vector2i(blockType, blockSubType);}
@@ -74,8 +74,8 @@ public class DroopingCanopy extends Canopy {
                     for (int i = 0; i <= 24; i++) {
                         bPos.sub(0, 1, 0);
                         aPos.sub(0, 1, 0);
-                        if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((!BlockTypes.blockTypes[getBlockWorldgen(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(map, new Vector3i(aPos), random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                             break;
                         }

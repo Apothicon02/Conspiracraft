@@ -9,7 +9,7 @@ import org.joml.Vector3i;
 import java.util.Map;
 import java.util.Random;
 
-import static org.conspiracraft.world.World.getBlock;
+import static org.conspiracraft.world.World.getBlockWorldgen;
 
 public class BlobDrippyCanopy extends Canopy {
 
@@ -44,8 +44,8 @@ public class BlobDrippyCanopy extends Canopy {
                         if (aPos.y() >= droop) {
                             addToMap(map, new Vector3i(aPos), blockType, blockSubType);
                         } else if (BlockTags.leaves.tagged.contains(blockType)) {
-                            if ((!BlockTypes.blockTypes[getBlock(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
-                                    (BlockTypes.blockTypes[getBlock(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                            if ((!BlockTypes.blockTypes[getBlockWorldgen(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
+                                    (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                                 addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                                 break;
                             }

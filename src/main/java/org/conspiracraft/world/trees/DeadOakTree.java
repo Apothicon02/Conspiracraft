@@ -21,13 +21,13 @@ public class DeadOakTree {
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         AtomicBoolean colliding = new AtomicBoolean(false);
         blocks.forEach((pos, block) -> {
-            if (World.getBlock(pos).x() == BlockTypes.WATER.id) {
+            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                 colliding.set(true);
             }
         });
         if (colliding.get()) {return;}
         blocks.forEach((pos, block) -> {
-            setBlock(pos.x, pos.y, pos.z, block.x, block.y);
+            setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
             int condensedPos = packPos(pos.x, pos.z);
             int surfaceY = heightmap[condensedPos];
             heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);

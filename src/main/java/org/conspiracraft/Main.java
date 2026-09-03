@@ -4,7 +4,6 @@ import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.gui.Languages;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
-import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.world.World;
@@ -19,10 +18,12 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import static org.conspiracraft.Settings.*;
+import static org.conspiracraft.world.World.wgPool;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -71,6 +72,7 @@ public class Main {
             timeMs = timeNs/1000000d;
             timeMsLong = (long)timeMs;
             window.pollEvents();
+            World.worldType.tickWorldgen();
             player.inputHandler.update();
 
             long targetFrameTime = 1000000000L / targetFps;
@@ -90,7 +92,6 @@ public class Main {
             }
             interpolationTime = timeAccum/ tickTimeNs;
 
-            World.worldType.tickWorldgen();
             LightHelper.iterateLightQueue();
             Renderer.render();
             AudioController.tick();
@@ -112,6 +113,8 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
+        wgPool.shutdown();
+        wgPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         Window.graphics.cleanup();
     }
 
