@@ -648,7 +648,7 @@ void main() {
     bool yOdd = bool(int(coords.y*oddMul) % 2 == 1);
     bool isChecker = (xOdd && yOdd) || (!xOdd && !yOdd);
     bool doReflections = bool(int((coords.x/localSize)*oddMul) % 2 == 1); //every other group
-    ivec2 ogCoords = coords;
+    ivec2 ogCoords = clamp(coords, ivec2(0), globalUbo.res-ivec2(1));
     if (isChecker && doReflections) {
         coords.x+=localSize;
         if (coords.x >= globalUbo.res.x) {

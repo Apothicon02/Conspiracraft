@@ -100,6 +100,7 @@ public class Renderer {
                         reloadTextures(stack);
                     }
                     initialized = true;
+                    drawStuff = false;
                 } else {
                     //long startTime = System.nanoTime();
                     boolean wasEmpty = updateQueue.isEmpty();
@@ -571,9 +572,9 @@ public class Renderer {
 
         currentCmdBuffer = cmdBuffers[frameIdx];
 
-        waitResult = vkWaitForFences(vkDevice, cmdFences[frameIdx], true, Long.MAX_VALUE);
-        if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for cmd fence: "+waitResult);}
-        vkResetFences(vkDevice, cmdFences[frameIdx]);
+//        waitResult = vkWaitForFences(vkDevice, cmdFences[frameIdx], true, Long.MAX_VALUE);
+//        if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for cmd fence: "+waitResult);}
+//        vkResetFences(vkDevice, cmdFences[frameIdx]);
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
         return true;
@@ -593,7 +594,7 @@ public class Renderer {
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
                 .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx], timelineSemaphore));
-        vkQueueSubmit(graphicsQueue, submitInfo, cmdFences[frameIdx]);
+        vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE); //cmdFences[frameIdx]
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)

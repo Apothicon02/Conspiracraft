@@ -12,7 +12,7 @@ import static org.conspiracraft.graphics.Swapchain.FRAMES_IN_FLIGHT;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class SyncObjects {
-    public static long[] cmdFences;
+    //public static long[] cmdFences;
     public static long[] imageAvailableSemaphores;
     public static long[] renderFinishedSemaphores;
     public static long timelineSemaphore;
@@ -23,7 +23,7 @@ public class SyncObjects {
     }
 
     public static void createSyncObjects(MemoryStack stack) {
-        cmdFences = new long[FRAMES_IN_FLIGHT];
+        //cmdFences = new long[FRAMES_IN_FLIGHT];
         imageAvailableSemaphores = new long[FRAMES_IN_FLIGHT];
         renderFinishedSemaphores = new long[Swapchain.images.length];
 
@@ -46,11 +46,11 @@ public class SyncObjects {
             }
             imageAvailableSemaphores[i] = imageAvailableSemBuf.get(0);
 
-            LongBuffer cmdFenceBuf = stack.mallocLong(1);
-            if (vkCreateFence(vkDevice, fenceInfo, null, cmdFenceBuf) != VK_SUCCESS) {
-                throw new RuntimeException("Failed to create fences!");
-            }
-            cmdFences[i] = cmdFenceBuf.get(0);
+//            LongBuffer cmdFenceBuf = stack.mallocLong(1);
+//            if (vkCreateFence(vkDevice, fenceInfo, null, cmdFenceBuf) != VK_SUCCESS) {
+//                throw new RuntimeException("Failed to create fences!");
+//            }
+//            cmdFences[i] = cmdFenceBuf.get(0);
         }
 
         VkSemaphoreTypeCreateInfo timelineInfo = VkSemaphoreTypeCreateInfo.calloc(stack)
