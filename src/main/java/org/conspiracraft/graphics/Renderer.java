@@ -95,7 +95,7 @@ public class Renderer {
                         xOffsets[i] = (float) (haltonVec[0]-0.5f)*0.25f;
                         yOffsets[i] = (float) (haltonVec[1]-0.5f)*0.25f;
                     }
-                    fillSSBOs();
+                    fillSSBOs(stack);
                     if (reloadTextures) {
                         reloadTextures(stack);
                     }
@@ -112,7 +112,7 @@ public class Renderer {
                         }
                     }
                     //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
-                    ssboBarriers();
+                    ssboBarriers(stack);
                     if (reloadTextures) {
                         reloadTextures(stack);
                         drawStuff = false;
@@ -801,7 +801,7 @@ public class Renderer {
     public static PointerBuffer lights;
     public static Long2LongOpenHashMap chunkBlockAllocs;;
     public static Long2LongOpenHashMap chunkLightBlockAllocs;
-    public static void fillSSBOs() {
+    public static void fillSSBOs(MemoryStack stack) {
         long startTime = System.currentTimeMillis();
         if (blocks != null) {
             vmaDestroyVirtualBlock(blocks.get(0));
@@ -840,11 +840,11 @@ public class Renderer {
         vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], lightChunkBufferCopy);
         VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lightSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightSSBO.stagingBuffer.buffer[0], lightSSBO.buffer.buffer[0], lightBufferCopy);
-        ssboBarriers();
+        ssboBarriers(stack);
         System.out.println("Took "+(System.currentTimeMillis()-startTime)+"ms to fill SSBOs.");
     }
-    public static void ssboBarriers() {
-        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(6);
+    public static void ssboBarriers(MemoryStack stack) {
+        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(5);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -869,15 +869,7 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(voxelSSBO.buffer.buffer[0])
                 .offset(0).size(voxelSSBOSize);
-//        barrierBuf.get(3)
-//                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-//                .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-//                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
-//                .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-//                .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-//                .buffer(lodSSBO.buffer.buffer[0])
-//                .offset(0).size(lodSSBOByteSize);
-        barrierBuf.get(4)
+        barrierBuf.get(3)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
@@ -885,7 +877,7 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(lightChunkSSBO.buffer.buffer[0])
                 .offset(0).size(chunkSSBOSize);
-        barrierBuf.get(5)
+        barrierBuf.get(4)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
@@ -893,10 +885,13 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(lightSSBO.buffer.buffer[0])
                 .offset(0).size(lightSSBOSize);
-        vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
+        VkDependencyInfo dependencyInfo = VkDependencyInfo.calloc(stack)
+                .sType(VK13.VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
+                .pBufferMemoryBarriers(barrierBuf);
+        vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
     }
-    public static void atlasBarriers() {
-        VkBufferMemoryBarrier.Buffer barrierBuf = VkBufferMemoryBarrier.calloc(1);
+    public static void atlasBarriers(MemoryStack stack) {
+        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(1);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -905,6 +900,9 @@ public class Renderer {
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(BlockTypes.atlasBuffer.buffer[0])
                 .offset(0).size(BlockTypes.atlasBuffer.size);
-        vkCmdPipelineBarrier(currentCmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, null, barrierBuf, null);
+        VkDependencyInfo dependencyInfo = VkDependencyInfo.calloc(stack)
+                .sType(VK13.VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
+                .pBufferMemoryBarriers(barrierBuf);
+        vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
     }
 }

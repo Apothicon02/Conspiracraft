@@ -54,7 +54,6 @@ public class Graphics {
     public static UniformBuffer globalUBOBuf;
     public static ShaderStorageBuffer voxelSSBO;
     public static ShaderStorageBuffer chunkSSBO;
-    //public static ShaderStorageBuffer lodSSBO;
     public static ShaderStorageBuffer regionSSBO;
     public static ShaderStorageBuffer lightChunkSSBO;
     public static ShaderStorageBuffer lightSSBO;
@@ -75,7 +74,6 @@ public class Graphics {
         regionSSBO = new ShaderStorageBuffer(stack, regionSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
-        //lodSSBO = new ShaderStorageBuffer(stack, lodSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         lightSSBO = new ShaderStorageBuffer(stack, lightSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         pushUBO.updateSSBOs();

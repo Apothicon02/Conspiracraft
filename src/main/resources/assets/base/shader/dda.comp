@@ -229,10 +229,10 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
 vec4 getBlockAndVoxel(float x, float y, float z) {
-//    int iX = int(x) % size;
-//    int iY = int(y) % height;
-//    int iZ = int(z) % size;
-//    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
+    //    int iX = int(x) % size;
+    //    int iY = int(y) % height;
+    //    int iZ = int(z) % size;
+    //    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
     updateChunkData(int(x), int(y), int(z));
     int blockData = getBlockData(int(x), int(y), int(z));
     int type = (blockData >> 16) & 0xFFFF;
@@ -318,16 +318,9 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
 }
 
 vec3 unzeroVec(vec3 dir) {
-    if (dir.x == 0.0f) {
-        dir.x = 0.001f;
-    }
-    if (dir.y == 0.0f) {
-        dir.y = 0.001f;
-    }
-    if (dir.z == 0.0f) {
-        dir.z = 0.001f;
-    }
-    return dir;
+    vec3 newDir = sign(dir);
+    newDir = mix(vec3(1.f), newDir, step(vec3(0.0001f), abs(newDir)));
+    return newDir * max(abs(dir), vec3(0.0001f));
 }
 
 vec3 hitPos = vec3(0);
@@ -429,7 +422,6 @@ vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
 vec4 dda(bool shadow) {
-    rayDir = unzeroVec(rayDir);
     rayDirDivved = 1.f/rayDir;
     ogRayPos = rayPos;
     ogRayDir = rayDir;
@@ -676,9 +668,9 @@ void main() {
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(0));
     } else {
         vec2 uv = coords/vec2(res);
-//        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0).rgb, 1));
-//        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r, 0, 0, 0));
-//        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0).xyz, 1));
+        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0).rgb, 1));
+        //        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r, 0, 0, 0));
+        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0).xyz, 1));
         vec3 camPos = invView[3].xyz;
         ivec3 iCamPos = ivec3(camPos);
         ogPos = camPos;//vec3(iCamPos.x%size, iCamPos.y%height, iCamPos.z%size)+(camPos-iCamPos);
@@ -743,7 +735,7 @@ void main() {
             reflectivity = 0.f;
             roughness = 0.0f;
             voxelRayPos = ivec3((ivec3(primaryLightPos)-primaryLightPos)*blockSize);
-            if (primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size) {
+            if (distance(camPos, primaryLightPos) > size*2) {
                 celestial = true;
                 if (!isGlowing) {
                     fogginessMul = 0.f;
@@ -775,7 +767,7 @@ void main() {
         vec3 primaryTintNormal = tintNormal;
         vec4 primaryTint = tint;
         float shadowFactor = 1.f;
-        bool celestialSource = globalUbo.skylight.x < 0 || globalUbo.skylight.x >= size || globalUbo.skylight.y < 0 || globalUbo.skylight.y >= height || globalUbo.skylight.z < 0 || globalUbo.skylight.z >= size;;
+        bool celestialSource = distance(camPos, globalUbo.skylight.xyz) > size*2;//globalUbo.skylight.x < 0 || globalUbo.skylight.x >= size || globalUbo.skylight.y < 0 || globalUbo.skylight.y >= height || globalUbo.skylight.z < 0 || globalUbo.skylight.z >= size;
         vec4 blockLighting = vec4(0, 0, 0, 1);
         if (!emissive) {
             if (!celestial) {
@@ -821,7 +813,7 @@ void main() {
 
                 //float normDot = (dot(bentNormal*(reverseNormShading ? -1 : 1), normalize(skylight.xyz))/2)+0.5f;
                 //color.rgb*=(((normDot*0.3f/min(1, skylight.w*2))+(0.1f+(0.6f*skylight.w)))*(0.05f+(skylight.w*0.95f)));
-                bool inBounds = true;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
+                bool inBounds = distance(camPos, primaryLightPos.xyz) > size*2;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
                 if (inBounds) {
                     blockLighting = min(vec4(1), getLight(primaryLightPos) / maxLightLevel);
                     if (globalUbo.season == 2 && airAbove && blockLighting.w > 0.75f && blockLighting.r <= 0.f && blockLighting.g <= 0.f && blockLighting.b <= 0.f) { //snow
@@ -840,7 +832,7 @@ void main() {
                     offsetShadow = true;
                 }
                 vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, primaryShadowPos.y + 9) : globalUbo.skylight.y, globalUbo.skylight.z);
-                vec3 sunDir = normalize(source - primaryShadowPos);
+                vec3 sunDir = unzeroVec(normalize(source - primaryShadowPos));
                 if (!isSky && !doReflections) {
                     rayPos = primaryShadowPos;
                     rayDir = sunDir;

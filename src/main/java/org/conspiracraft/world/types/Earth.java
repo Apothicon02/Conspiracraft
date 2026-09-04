@@ -173,6 +173,7 @@ public class Earth extends WorldType {
         //pool.shutdown();
     }
     private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) {
+        if (generationIdxs[t] >= generationOffsets[t].length-3) {return;}
         final java.util.Random rand = new java.util.Random(seed + t);
         int rX = generationOffsets[t][generationIdxs[t]++] + playerRX, rY = generationOffsets[t][generationIdxs[t]++] + playerRY, rZ = generationOffsets[t][generationIdxs[t]++] + playerRZ;
         int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;

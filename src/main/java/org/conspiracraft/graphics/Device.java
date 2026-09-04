@@ -201,7 +201,7 @@ public class Device {
                 .engineVersion(VK14.VK_MAKE_VERSION(1, 0, 0))
                 .apiVersion(VK14.VK_API_VERSION_1_4);
         PointerBuffer layers = stack.mallocPointer(1);
-        layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation")); //disable when not in dev env
+        layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation"));
         IntBuffer features = stack.mallocInt(1)
                 .put(VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT)
                 .flip();
