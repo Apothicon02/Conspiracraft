@@ -210,10 +210,10 @@ public class Device {
                 .pEnabledValidationFeatures(features);
         VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
-                //.pNext(validationFeatures.address()) //disable when not in dev env
+                .pNext(validationFeatures.address()) //disable when not in dev env
                 .pApplicationInfo(appInfo)
                 .ppEnabledExtensionNames(extensions)
-                ;//.ppEnabledLayerNames(layers); //disable when not in dev env
+                .ppEnabledLayerNames(layers); //disable when not in dev env
 //        System.out.println("Enabled instance extensions:");
 //        for (int i = 0; i < extensions.capacity(); i++) {
 //            long addr = extensions.get(i);

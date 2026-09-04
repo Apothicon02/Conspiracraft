@@ -1,6 +1,7 @@
 package org.conspiracraft.graphics;
 
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.VkFenceCreateInfo;
 import org.lwjgl.vulkan.VkSemaphoreCreateInfo;
 import org.lwjgl.vulkan.VkSemaphoreTypeCreateInfo;
 
@@ -11,6 +12,7 @@ import static org.conspiracraft.graphics.Swapchain.FRAMES_IN_FLIGHT;
 import static org.lwjgl.vulkan.VK14.*;
 
 public class SyncObjects {
+    public static long[] cmdFences;
     public static long[] imageAvailableSemaphores;
     public static long[] renderFinishedSemaphores;
     public static long timelineSemaphore;
@@ -21,11 +23,15 @@ public class SyncObjects {
     }
 
     public static void createSyncObjects(MemoryStack stack) {
+        cmdFences = new long[FRAMES_IN_FLIGHT];
         imageAvailableSemaphores = new long[FRAMES_IN_FLIGHT];
         renderFinishedSemaphores = new long[Swapchain.images.length];
 
-        VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack);
-        semaphoreInfo.sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
+        VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO)
+                .flags(VK_FENCE_CREATE_SIGNALED_BIT);
+        VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
 
         for (int i = 0; i < Swapchain.images.length; i++) {
             LongBuffer renderFinishedSemBuf = stack.mallocLong(1);
@@ -39,6 +45,12 @@ public class SyncObjects {
                 throw new RuntimeException("Failed to create semaphores!");
             }
             imageAvailableSemaphores[i] = imageAvailableSemBuf.get(0);
+
+            LongBuffer cmdFenceBuf = stack.mallocLong(1);
+            if (vkCreateFence(vkDevice, fenceInfo, null, cmdFenceBuf) != VK_SUCCESS) {
+                throw new RuntimeException("Failed to create fences!");
+            }
+            cmdFences[i] = cmdFenceBuf.get(0);
         }
 
         VkSemaphoreTypeCreateInfo timelineInfo = VkSemaphoreTypeCreateInfo.calloc(stack)

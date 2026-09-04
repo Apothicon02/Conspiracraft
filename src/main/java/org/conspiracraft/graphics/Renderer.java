@@ -102,7 +102,7 @@ public class Renderer {
                     initialized = true;
                 } else {
                     //long startTime = System.nanoTime();
-                    //boolean wasEmpty = updateQueue.isEmpty();
+                    boolean wasEmpty = updateQueue.isEmpty();
                     long startTime = System.currentTimeMillis();
                     while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
@@ -111,8 +111,10 @@ public class Renderer {
                             updateSet.remove(chunkPos);
                         }
                     }
-                    //if (!wasEmpty) {System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");}
-                    ssboBarriers(stack);
+                    if (!wasEmpty) {
+                        ssboBarriers(stack);
+                        //System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");
+                    }
                     if (reloadTextures) {
                         reloadTextures(stack);
                         drawStuff = false;
@@ -568,6 +570,10 @@ public class Renderer {
         imageIdx = imageIdxBuf.get(0);
 
         currentCmdBuffer = cmdBuffers[frameIdx];
+
+        waitResult = vkWaitForFences(vkDevice, cmdFences[frameIdx], true, Long.MAX_VALUE);
+        if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for cmd fence: "+waitResult);}
+        vkResetFences(vkDevice, cmdFences[frameIdx]);
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
         return true;
@@ -587,7 +593,7 @@ public class Renderer {
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
                 .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx], timelineSemaphore));
-        vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
+        vkQueueSubmit(graphicsQueue, submitInfo, cmdFences[frameIdx]);
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
@@ -658,55 +664,6 @@ public class Renderer {
                 VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_SHADER_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
-    }
-    public static VkRenderingFragmentShadingRateAttachmentInfoKHR getRateAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
-        if (tex.isLayoutUnset()) {
-            int totalPixels = tex.width * tex.height;
-            ByteBuffer data = memAlloc(totalPixels);
-            int fullResPixels = 0;
-            byte value = (byte)(4 | 1); //2x2
-            for (int y = 0; y < tex.height; y++) {
-                for (int x = 0; x < tex.width; x++) {
-                    int i = y * tex.width + x;
-                    if (x < tex.width*0.33f || x >= tex.width*0.67f || ((x-2 < tex.width*0.33f || x+2 >= tex.width*0.67f) && Math.random() < 0.34)) {
-                        data.put(i, value);
-                    } else {
-                        fullResPixels++;
-                        data.put(i, (byte) 0);
-                    }
-                }
-            }
-            data.rewind();
-            System.out.println(((((float)fullResPixels)/((float)totalPixels))*100)+"% of pixels are native quality.");
-            Buffer stagingBuffer = new Buffer(stack, data.remaining(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-            memCopy(memAddress(data), stagingBuffer.pointer.get(0), data.remaining());
-            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
-                    VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                    0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                    VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-            tex.layoutUnset = false;
-            VkBufferImageCopy.Buffer imageCopy = VkBufferImageCopy.calloc(1, stack)
-                    .bufferOffset(0)
-                    .bufferRowLength(0)
-                    .bufferImageHeight(0)
-                    .imageSubresource(s -> s
-                            .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
-                            .mipLevel(0)
-                            .baseArrayLayer(0)
-                            .layerCount(1))
-                    .imageOffset(o -> o.set(0, 0, 0))
-                    .imageExtent(e -> e.set(tex.width, tex.height, 1));
-            vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.buffer[0], tex.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
-            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
-                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR,
-                    VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR,
-                    VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-        }
-        return VkRenderingFragmentShadingRateAttachmentInfoKHR.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR)
-                .imageView(tex.imageView)
-                .imageLayout(VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR)
-                .shadingRateAttachmentTexelSize(VkExtent2D.calloc(stack).width(16).height(16));
     }
     public static VkRenderingAttachmentInfo.Buffer getColorAttachments(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture[] textures, boolean clear) {
         VkRenderingAttachmentInfo.Buffer attachmentInfo = VkRenderingAttachmentInfo.calloc(textures.length, stack);
@@ -846,41 +803,47 @@ public class Renderer {
     public static void ssboBarriers(MemoryStack stack) {
         VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(5);
         barrierBuf.get(0)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(regionSSBO.buffer.buffer[0])
                 .offset(0).size(regionSSBOByteSize);
         barrierBuf.get(1)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(chunkSSBO.buffer.buffer[0])
                 .offset(0).size(chunkSSBOSize);
         barrierBuf.get(2)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(voxelSSBO.buffer.buffer[0])
                 .offset(0).size(voxelSSBOSize);
         barrierBuf.get(3)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(lightChunkSSBO.buffer.buffer[0])
                 .offset(0).size(chunkSSBOSize);
         barrierBuf.get(4)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(lightSSBO.buffer.buffer[0])
@@ -893,9 +856,10 @@ public class Renderer {
     public static void atlasBarriers(MemoryStack stack) {
         VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(1);
         barrierBuf.get(0)
-                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+                .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
+                .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
                 .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+                .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT)
                 .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .buffer(BlockTypes.atlasBuffer.buffer[0])
