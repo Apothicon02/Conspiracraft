@@ -245,6 +245,9 @@ public class Utils {
     public static double gradient(int y, int fromY, int toY, float toValue, float fromValue) {
         return clampedLerp(fromValue, toValue, inverseLerp(y, fromY, toY));
     }
+    public static double gradient(double y, int fromY, int toY, float toValue, float fromValue) {
+        return clampedLerp(fromValue, toValue, inverseLerp(y, fromY, toY));
+    }
     public static double inverseLerp(double y, double fromY, double toY) {
         return (y - fromY) / (toY - fromY);
     }

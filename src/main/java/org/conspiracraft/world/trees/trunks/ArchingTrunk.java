@@ -15,7 +15,7 @@ public class ArchingTrunk extends Trunk {
         map.put(pos, block);
     }
     
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius, int miBranchHeight) {
+    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius, int minBranchHeight, float bendMul) {
         Vector3i origin = new Vector3i(oX, oY, oZ);
         Vector2i wood = new Vector2i(blockType, blockSubType);
         Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
@@ -42,7 +42,7 @@ public class ArchingTrunk extends Trunk {
                 highestHeight = maxHeight;
             }
             for (int height = origin.y()-1; height <= maxHeight; height++) {
-                float bendFactor = ((float) maxHeight /height)*2F;
+                float bendFactor = ((float) maxHeight /height)*bendMul;
                 Vector3i pos = new Vector3i(offsetX, height, offsetZ);
                 addToMap(map, pos, wood);
                 double heightFactor = Math.pow((((float)height / maxHeight)-0.4f)*2, 5);
@@ -85,7 +85,7 @@ public class ArchingTrunk extends Trunk {
                     }
                     if (heightFactor > 0.66f && random.nextFloat() < 0.25f) {
                         height--;
-                        if (random.nextFloat() < 0.125f && pos.y() >= miBranchHeight) {
+                        if (random.nextFloat() < 0.125f && pos.y()-oY >= minBranchHeight) {
                             for (int y = height+1; y < height+halfLeafRadius; y++) {
                                 addToMap(map, new Vector3i(offsetX, y, offsetZ), wood);
                                 addToMap(map, new Vector3i(offsetX+1, y, offsetZ+1), wood);

@@ -137,393 +137,393 @@ public class Vera extends WorldType {
     static final int[] zOffset = { 0, 0, 3, -3, 3, -3, 3, -3 };
     @Override
     public void generate() throws InterruptedException {
-        generating = true;
-        long startTime = System.currentTimeMillis();
-        Random seededRand = new Random(35311350L);
-        Vector3i[] craters = new Vector3i[20];
-        for (int i = 0; i < craters.length; i++) {
-            int radius = seededRand.nextInt(90) + 10;
-            int borderOffset = radius*2;
-            int x = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
-            int z = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
-            craters[i] = new Vector3i(x, radius, z);
-        }
-        final byte[] biomes = new byte[size*size];
-        final short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
-        final short[] chunksMaxElevations = new short[sizeChunks*sizeChunks];
-        final short[] lakesMaxElevations = new short[size*size];
-        final Queue<Lake> lakes = new ConcurrentLinkedQueue<>();
-        int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-        final int heightmapInterval = sizeChunks/threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int threadId = thread;
-            final int startX = thread * heightmapInterval;
-            final int endX  = Math.min(startX + heightmapInterval, sizeChunks);
-            pool.execute(() -> {
-                final Random rand = new Random(World.seed+threadId);
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        short minElevation = (short) (height - 1);
-                        short maxElevation = (short) 0;
-                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
-                                double mountainness = ogMoutainness;
-                                if (mountainness < 0.f) {
-                                    mountainness *= 0.25f;
-                                }
-                                double elevationNoise = noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
-                                        ((noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f));
-                                double elevation = elevationNoise * (125 * mountainness);
-                                double baseHilliness = SimplexNoise.noise((x + size) / 1500.f, (z + size) / 1500.f)*3;
-                                if (baseHilliness < 0.f) {
-                                    baseHilliness *= -0.5;
-                                }
-                                double hilliness = (Math.max(0, baseHilliness) * 35);
-                                double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d);
-                                double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
-                                int surface = (int) Math.max(60, 10 + (56*Math.min(1, 1+Math.max(0, ogIslandsNoise*0.15f))) + Math.max(0, detailNoise*5) + hilliness + elevation);
-                                double craterSurfMul = 1.f;
-                                double craterSurfMaxMul = 1.f;
-                                boolean inCrater = false;
-                                for (Vector3i crater : craters) {
-                                    double craterDist = Utils.distance(crater.x(), crater.z(), x, z);
-                                    int radius = crater.y();
-                                    if (craterDist < radius) {
-                                        inCrater = true;
-                                        craterDist /= radius;
-                                        craterDist = Math.pow(craterDist, 2);
-                                        craterDist *= 0.5f; //depth
-                                        double antiRidge = Utils.gradient(Math.clamp(surface, 70, 96), 70, 96, 0.2f, 0.f);
-                                        craterDist += 0.7f-antiRidge;
-                                        double ridgePeak = 1.1f-(antiRidge/2);
-                                        if (craterDist > ridgePeak) { //ridges
-                                            craterDist -= ((craterDist-ridgePeak)*2.f);
-                                        }
-                                        craterSurfMul = Math.min(craterDist, craterSurfMul);
-                                        craterSurfMaxMul = Math.max(craterDist, craterSurfMaxMul);
-                                    }
-                                }
-                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
-                                byte biome = (byte)(ogMoutainness > 0.1 ? Biomes.VERA_HILLS.id : Biomes.VERA_PLAINS.id);
-                                biomes[x * size + z] = biome;
-                                oldHeightmap[packPos(x, z)] = (short)surface;
-                                minElevation = (short) Math.min(minElevation, surface);
-                                maxElevation = (short) Math.max(maxElevation, surface);
-                                if (rand.nextFloat() < ((inCrater || biome == Biomes.VERA_HILLS.id) ? 0.02f : 0.001f)) {
-                                    lakes.add(new Lake(new Vector3i(x, (int) (surface+1), z)));
-                                }
-                            }
-                        }
-                        chunksMinElevations[oldpackChunkPos(cX, cZ)] = minElevation;
-                        chunksMaxElevations[oldpackChunkPos(cX, cZ)] = maxElevation;
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate heightmap from noise. \n");
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), lakes.size());
-        pool = Executors.newFixedThreadPool(threads);
-        int lakeInterval = lakes.size()/threads;
-        for (int thread = 0; thread < threads; thread++) { //multithreading may break if lakes overlap, but not sure.
-            int iterations = Math.min(lakeInterval, lakes.size());
-            pool.execute(() -> {
-                BitSet threadBitSet = new BitSet(size*size);
-                for (int i = 0; i < iterations; i++) {
-                    Lake lake = lakes.poll();
-                    threadBitSet.clear();
-                    lake.visited = threadBitSet;
-                    boolean filledLake = fillLake(lake.pos.x(), lake.pos.y(), lake.pos.z(), lake);
-                    if (filledLake) {
-                        for (int x = 0; x < size; x++) {
-                            for (int z = 0; z < size; z++) {
-                                int packedPos = packPos(x, z);
-                                if (lake.visited.get(packedPos)) {
-                                    int packedCP = oldpackChunkPos(x>>chunkBits, z>>chunkBits);
-                                    chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
-                                    lakesMaxElevations[packedPos] = (short) Math.max(lake.pos.y(), lakesMaxElevations[packedPos]);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lakes. \n");
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int surfaceInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int threadId = thread;
-            final int startX = thread * surfaceInterval;
-            final int endX  = Math.min(startX + surfaceInterval, sizeChunks);
-            pool.execute(() -> {
-                final Random rand = new Random(World.seed+threadId);
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        final int minChunkElevation = chunksMinElevations[oldpackChunkPos(cX, cZ)]>>chunkBits;
-                        for (int cY = 0; cY < minChunkElevation; cY++) {
-                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
-                            final Chunk chunk = new Chunk(packedCP);
-                            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
-                            World.oldchunks[packedCP] = chunk;
-                            updateRegion(cX, cY, cZ, false);
-//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
-//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
-//                                    for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
-//                                        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
-//                                        lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
+//        generating = true;
+//        long startTime = System.currentTimeMillis();
+//        Random seededRand = new Random(35311350L);
+//        Vector3i[] craters = new Vector3i[20];
+//        for (int i = 0; i < craters.length; i++) {
+//            int radius = seededRand.nextInt(90) + 10;
+//            int borderOffset = radius*2;
+//            int x = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
+//            int z = seededRand.nextInt(size-borderOffset) + (borderOffset/2);
+//            craters[i] = new Vector3i(x, radius, z);
+//        }
+//        final byte[] biomes = new byte[size*size];
+//        final short[] chunksMinElevations = new short[sizeChunks*sizeChunks];
+//        final short[] chunksMaxElevations = new short[sizeChunks*sizeChunks];
+//        final short[] lakesMaxElevations = new short[size*size];
+//        final Queue<Lake> lakes = new ConcurrentLinkedQueue<>();
+//        int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        ExecutorService pool = Executors.newFixedThreadPool(threads);
+//        final int heightmapInterval = sizeChunks/threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int threadId = thread;
+//            final int startX = thread * heightmapInterval;
+//            final int endX  = Math.min(startX + heightmapInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        short minElevation = (short) (height - 1);
+//                        short maxElevation = (short) 0;
+//                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                double ogMoutainness = SimplexNoise.noise(x / 500.f, z / 500.f);
+//                                double mountainness = ogMoutainness;
+//                                if (mountainness < 0.f) {
+//                                    mountainness *= 0.25f;
+//                                }
+//                                double elevationNoise = noisePipeline.evaluateNoise((x - size) / 333.d, (z - size) / 333.d) +
+//                                        ((noisePipeline.evaluateNoise((x - size) / 125.d, (z - size) / 125.d) * 0.33f));
+//                                double elevation = elevationNoise * (125 * mountainness);
+//                                double baseHilliness = SimplexNoise.noise((x + size) / 1500.f, (z + size) / 1500.f)*3;
+//                                if (baseHilliness < 0.f) {
+//                                    baseHilliness *= -0.5;
+//                                }
+//                                double hilliness = (Math.max(0, baseHilliness) * 35);
+//                                double detailNoise = noisePipeline.evaluateNoise(x/150.d, z/150.d);
+//                                double ogIslandsNoise = SimplexNoise.noise(x / 200.f, z / 200.f);
+//                                int surface = (int) Math.max(60, 10 + (56*Math.min(1, 1+Math.max(0, ogIslandsNoise*0.15f))) + Math.max(0, detailNoise*5) + hilliness + elevation);
+//                                double craterSurfMul = 1.f;
+//                                double craterSurfMaxMul = 1.f;
+//                                boolean inCrater = false;
+//                                for (Vector3i crater : craters) {
+//                                    double craterDist = Utils.distance(crater.x(), crater.z(), x, z);
+//                                    int radius = crater.y();
+//                                    if (craterDist < radius) {
+//                                        inCrater = true;
+//                                        craterDist /= radius;
+//                                        craterDist = Math.pow(craterDist, 2);
+//                                        craterDist *= 0.5f; //depth
+//                                        double antiRidge = Utils.gradient(Math.clamp(surface, 70, 96), 70, 96, 0.2f, 0.f);
+//                                        craterDist += 0.7f-antiRidge;
+//                                        double ridgePeak = 1.1f-(antiRidge/2);
+//                                        if (craterDist > ridgePeak) { //ridges
+//                                            craterDist -= ((craterDist-ridgePeak)*2.f);
+//                                        }
+//                                        craterSurfMul = Math.min(craterDist, craterSurfMul);
+//                                        craterSurfMaxMul = Math.max(craterDist, craterSurfMaxMul);
+//                                    }
+//                                }
+//                                surface = (int) Math.max(16, surface*(craterSurfMul >= 1.f ? Math.pow(craterSurfMaxMul, 2) : craterSurfMul));
+//                                byte biome = (byte)(ogMoutainness > 0.1 ? Biomes.VERA_HILLS.id : Biomes.VERA_PLAINS.id);
+//                                biomes[x * size + z] = biome;
+//                                oldHeightmap[packPos(x, z)] = (short)surface;
+//                                minElevation = (short) Math.min(minElevation, surface);
+//                                maxElevation = (short) Math.max(maxElevation, surface);
+//                                if (rand.nextFloat() < ((inCrater || biome == Biomes.VERA_HILLS.id) ? 0.02f : 0.001f)) {
+//                                    lakes.add(new Lake(new Vector3i(x, (int) (surface+1), z)));
+//                                }
+//                            }
+//                        }
+//                        chunksMinElevations[oldpackChunkPos(cX, cZ)] = minElevation;
+//                        chunksMaxElevations[oldpackChunkPos(cX, cZ)] = maxElevation;
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate heightmap from noise. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), lakes.size());
+//        pool = Executors.newFixedThreadPool(threads);
+//        int lakeInterval = lakes.size()/threads;
+//        for (int thread = 0; thread < threads; thread++) { //multithreading may break if lakes overlap, but not sure.
+//            int iterations = Math.min(lakeInterval, lakes.size());
+//            pool.execute(() -> {
+//                BitSet threadBitSet = new BitSet(size*size);
+//                for (int i = 0; i < iterations; i++) {
+//                    Lake lake = lakes.poll();
+//                    threadBitSet.clear();
+//                    lake.visited = threadBitSet;
+//                    boolean filledLake = fillLake(lake.pos.x(), lake.pos.y(), lake.pos.z(), lake);
+//                    if (filledLake) {
+//                        for (int x = 0; x < size; x++) {
+//                            for (int z = 0; z < size; z++) {
+//                                int packedPos = packPos(x, z);
+//                                if (lake.visited.get(packedPos)) {
+//                                    int packedCP = oldpackChunkPos(x>>chunkBits, z>>chunkBits);
+//                                    chunksMaxElevations[packedCP] = (short) Math.max(lake.pos.y(), chunksMaxElevations[packedCP]);
+//                                    lakesMaxElevations[packedPos] = (short) Math.max(lake.pos.y(), lakesMaxElevations[packedPos]);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lakes. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int surfaceInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int threadId = thread;
+//            final int startX = thread * surfaceInterval;
+//            final int endX  = Math.min(startX + surfaceInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        final int minChunkElevation = chunksMinElevations[oldpackChunkPos(cX, cZ)]>>chunkBits;
+//                        for (int cY = 0; cY < minChunkElevation; cY++) {
+//                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
+//                            final Chunk chunk = new Chunk(packedCP);
+//                            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
+//                            World.oldchunks[packedCP] = chunk;
+//                            updateRegion(cX, cY, cZ, false);
+////                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x+=lodSize) {
+////                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z+=lodSize) {
+////                                    for (int y = cY * chunkSize; y < (cY * chunkSize) + chunkSize; y+=lodSize) {
+////                                        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
+////                                        lods[lodIdx] = 0xFFFFFFFFFFFFFFFFL;
+////                                    }
+////                                }
+////                            }
+//                        }
+//                        final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[oldpackChunkPos(cX, cZ)])>>chunkBits;
+//                        for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {
+//                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
+//                            final Chunk chunk = new Chunk(packedCP);
+//                            boolean setAnything = false;
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                    final int packedPos = packPos(x, z);
+//                                    final int waterSurface = lakesMaxElevations[packedPos]-1;
+//                                    final short elevation = oldHeightmap[packedPos];
+//                                    final byte biome = biomes[packedPos];
+//                                    int maxSteepness = 0;
+//                                    for (int i = 0; i < xOffset.length; i++) {
+//                                        int packedOffPos = packPos(x + xOffset[i], z + zOffset[i]);
+//                                        if (packedOffPos >= 0 && packedOffPos < oldHeightmap.length) {
+//                                            int nY = oldHeightmap[packedOffPos];
+//                                            int steepness = Math.abs(elevation - nY);
+//                                            maxSteepness = Math.max(maxSteepness, steepness);
+//                                        }
+//                                    }
+//                                    final boolean flat = maxSteepness < 3;
+//                                    final int floor = (cY * chunkSize);
+//                                    final int ceil = floor + chunkSize;
+//                                    final int seafloor = Math.min(elevation+1, ceil);
+//                                    final int seafloorAbove = Math.min(elevation+2, ceil);
+//                                    double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
+//                                    double eleFactor = elevation + (rockNoise * 50);
+//                                    boolean snowy = eleFactor > 136;
+//                                    for (int y = floor; y < Math.max(waterSurface, seafloorAbove); y++) {
+//                                        final int blockType = y >= seafloorAbove ? (y == waterSurface-1 ? BlockTypes.ACID.id : BlockTypes.MARBLE.id) : waterSurface >= 0 ? (flat ? BlockTypes.STONE.id : BlockTypes.MARBLE.id ): (y < 62 ? BlockTypes.MUD.id : (flat ? (snowy ? BlockTypes.SNOW.id : BlockTypes.MUD.id) : (maxSteepness < 6 ? BlockTypes.MUD.id : BlockTypes.DRY_MUD.id)));
+//                                        if (blockType > 0) {
+//                                            final int lX = x & 15, lY = y & 15, lZ = z & 15;
+//                                            setAnything = true;
+//                                            updateLod(x, y, z, false);
+//                                            chunk.setBlock(lX, lY, lZ, blockType, blockType == BlockTypes.ACID.id ? 14 : 0);
+//                                        }
 //                                    }
 //                                }
 //                            }
-                        }
-                        final int maxChunkElevation = Math.max(seaLevel, chunksMaxElevations[oldpackChunkPos(cX, cZ)])>>chunkBits;
-                        for (int cY = minChunkElevation; cY <= maxChunkElevation; cY++) {
-                            final int packedCP = World.oldpackChunkPos(cX, cY, cZ);
-                            final Chunk chunk = new Chunk(packedCP);
-                            boolean setAnything = false;
-                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                    final int packedPos = packPos(x, z);
-                                    final int waterSurface = lakesMaxElevations[packedPos]-1;
-                                    final short elevation = oldHeightmap[packedPos];
-                                    final byte biome = biomes[packedPos];
-                                    int maxSteepness = 0;
-                                    for (int i = 0; i < xOffset.length; i++) {
-                                        int packedOffPos = packPos(x + xOffset[i], z + zOffset[i]);
-                                        if (packedOffPos >= 0 && packedOffPos < oldHeightmap.length) {
-                                            int nY = oldHeightmap[packedOffPos];
-                                            int steepness = Math.abs(elevation - nY);
-                                            maxSteepness = Math.max(maxSteepness, steepness);
-                                        }
-                                    }
-                                    final boolean flat = maxSteepness < 3;
-                                    final int floor = (cY * chunkSize);
-                                    final int ceil = floor + chunkSize;
-                                    final int seafloor = Math.min(elevation+1, ceil);
-                                    final int seafloorAbove = Math.min(elevation+2, ceil);
-                                    double rockNoise = Math.abs(SimplexNoise.noise(x / 150.f, z / 150.f));
-                                    double eleFactor = elevation + (rockNoise * 50);
-                                    boolean snowy = eleFactor > 136;
-                                    for (int y = floor; y < Math.max(waterSurface, seafloorAbove); y++) {
-                                        final int blockType = y >= seafloorAbove ? (y == waterSurface-1 ? BlockTypes.ACID.id : BlockTypes.MARBLE.id) : waterSurface >= 0 ? (flat ? BlockTypes.STONE.id : BlockTypes.MARBLE.id ): (y < 62 ? BlockTypes.MUD.id : (flat ? (snowy ? BlockTypes.SNOW.id : BlockTypes.MUD.id) : (maxSteepness < 6 ? BlockTypes.MUD.id : BlockTypes.DRY_MUD.id)));
-                                        if (blockType > 0) {
-                                            final int lX = x & 15, lY = y & 15, lZ = z & 15;
-                                            setAnything = true;
-                                            updateLod(x, y, z, false);
-                                            chunk.setBlock(lX, lY, lZ, blockType, blockType == BlockTypes.ACID.id ? 14 : 0);
-                                        }
-                                    }
-                                }
-                            }
-                            World.oldchunks[packedCP] = chunk;
-                            if (setAnything) {updateRegion(cX, cY, cZ, false);}
-                        }
-                        for (int cY = maxChunkElevation+1; cY < heightChunks; cY++) {
-                            int packedCP = World.oldpackChunkPos(cX, cY, cZ);
-                            World.oldchunks[packedCP] = new Chunk(packedCP);
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        int featuresInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            int threadId = thread;
-            int startX = thread * featuresInterval;
-            int endX  = Math.min(startX + featuresInterval, sizeChunks);
-            pool.execute(() -> {
-                final Random rand = new Random(World.seed+threadId);
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                int elevation = oldHeightmap[(x * size) + z];
-                                byte biome = biomes[x * size + z];
-                                Vector2i blockOn = getBlock(x, elevation, z);
-                                float randomNumber = rand.nextFloat();
-                                boolean onMud = blockOn.x() == BlockTypes.MUD.id;
-                                if (biome != Biomes.VERA_HILLS.id && randomNumber < (onMud ? 0.0005f : 0.0001f)) {
-                                        Blob.generate(blockOn, x, elevation, z, randomNumber < 0.00025f ? BlockTypes.STONE.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 14)));
-                                } else if (onMud && World.getBlock(x, elevation+2, z).x() == 0) {
-                                    float randomNoise = SimplexNoise.noise(x/200.f, z/200.f);
-                                    if (Math.abs(randomNoise) < 0.001f) {
-                                        PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), BlockTypes.DEAD_LOG.id, 0, BlockTypes.DEAD_LEAVES.id, 0);
-                                    } else if ((randomNoise > 0.5f && randomNumber < 0.03f) || randomNumber < 0.003f) {
-                                        PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), BlockTypes.DEAD_LOG.id, 0, BlockTypes.DEAD_LEAVES.id, 0);
-                                    } else if (randomNumber < 0.0125f) {
-                                        World.setBlock(x, elevation+2, z, BlockTypes.DEAD_BUSH.id, rand.nextInt(3));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int cloudInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int threadId = thread;
-            final int startX = thread * cloudInterval;
-            final int endX = Math.min(startX + cloudInterval, sizeChunks);
-            pool.execute(() -> {
-                final Random rand = new Random(World.seed+threadId);
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
-                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
-                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
-                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && oldHeightmap[packPos(x, z)] < 166) {
-                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
-                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
-                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
-                                        if (radius > 0) {
-                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
-                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
-                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
-                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
-
-        startTime = System.currentTimeMillis();
-        for (int cX = 0; cX < sizeChunks; cX++) {
-            for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                boolean foundMax = false;
-                for (short cY = (short) (heightChunks - 1); cY >= 0; cY--) {
-                    Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
-                    for (int data : chunk.blockPalette) {
-                        Vector2i block = Chunk.unpackInt(data);
-                        boolean obstructingHeightmap = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
-                        if (!foundMax && obstructingHeightmap) {
-                            foundMax = true;
-                            chunksMaxElevations[oldpackChunkPos(cX, cZ)] = cY;
-                            chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
-                            break;
-                        } else if (foundMax && !obstructingHeightmap) {
-                            chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        Arrays.fill(oldHeightmap, (short) 0);
-
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int heightInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int startX = thread * heightInterval;
-            final int endX = Math.min(startX + heightInterval, sizeChunks);
-            pool.execute(() -> {
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
-                        int maxCy = chunksMaxElevations[packedHorizontalCP];
-                        int minCy = chunksMinElevations[packedHorizontalCP];
-                        for (int cY = maxCy; cY >= minCy; cY--) {
-                            Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
-                            for (int x = 0; x < chunkSize; x++) {
-                                for (int z = 0; z < chunkSize; z++) {
-                                    for (int y = chunkSize - 1; y >= 0; y--) {
-                                        int localPos = Chunk.packLocalPos(x, y, z);
-                                        Vector2i block = chunk.getBlock(localPos);
-                                        int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
-                                        int gY = (cY*chunkSize)+y;
-                                        short elevation = oldHeightmap[pos];
-                                        if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
-                                            oldHeightmap[pos] = (short) Math.max(elevation, gY);
-                                            chunk.setLight(x, y, z, 0);
-                                        } else if (gY <= elevation) {
-                                            chunk.setLight(x, y, z, 0);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to update heightmap. \n");
-
-        startTime = System.currentTimeMillis();
-        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
-        pool = Executors.newFixedThreadPool(threads);
-        final int lightInterval = (sizeChunks + threads - 1) / threads;
-        for (int thread = 0; thread < threads; thread++) {
-            final int startX = thread * lightInterval;
-            final int endX = Math.min(startX + lightInterval, sizeChunks);
-            pool.execute(() -> {
-                for (int cX = startX; cX < endX; cX++) {
-                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
-                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
-                        int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
-                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
-                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
-                                int packedHorizontalPos = packPos(x, z);
-                                int maxY = oldHeightmap[packedHorizontalPos];
-                                boolean prevBlocking = false;
-                                for (int y = maxY; y >= minY; y--) {
-                                    Vector2i block = World.getBlock(x, y, z);
-                                    BlockType blockType = BlockTypes.blockTypes[block.x()];
-                                    boolean blocking = blockType.obstructingHeightmap(block);
-                                    if (prevBlocking != blocking) {
-                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z + 1).s() >= maxSunlightLevel || getLight(x - 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z - 1).s() >= maxSunlightLevel)) {
-                                            LightHelper.queueLightUpdate(new Vector3i(x, y, z));
-                                        }
-                                    }
-                                    prevBlocking = blocking;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        pool.shutdown();
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to init light queue. \n");
-        startTime = System.currentTimeMillis();
-        iterateLightQueueMultithreaded();
-        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
+//                            World.oldchunks[packedCP] = chunk;
+//                            if (setAnything) {updateRegion(cX, cY, cZ, false);}
+//                        }
+//                        for (int cY = maxChunkElevation+1; cY < heightChunks; cY++) {
+//                            int packedCP = World.oldpackChunkPos(cX, cY, cZ);
+//                            World.oldchunks[packedCP] = new Chunk(packedCP);
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate surface. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        int featuresInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            int threadId = thread;
+//            int startX = thread * featuresInterval;
+//            int endX  = Math.min(startX + featuresInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                int elevation = oldHeightmap[(x * size) + z];
+//                                byte biome = biomes[x * size + z];
+//                                Vector2i blockOn = getBlock(x, elevation, z);
+//                                float randomNumber = rand.nextFloat();
+//                                boolean onMud = blockOn.x() == BlockTypes.MUD.id;
+//                                if (biome != Biomes.VERA_HILLS.id && randomNumber < (onMud ? 0.0005f : 0.0001f)) {
+//                                        Blob.generate(blockOn, x, elevation, z, randomNumber < 0.00025f ? BlockTypes.STONE.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 14)));
+//                                } else if (onMud && World.getBlock(x, elevation+2, z).x() == 0) {
+//                                    float randomNoise = SimplexNoise.noise(x/200.f, z/200.f);
+//                                    if (Math.abs(randomNoise) < 0.001f) {
+//                                        PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(8, 22), BlockTypes.DEAD_LOG.id, 0, BlockTypes.DEAD_LEAVES.id, 0);
+//                                    } else if ((randomNoise > 0.5f && randomNumber < 0.03f) || randomNumber < 0.003f) {
+//                                        PalmTree.generate(rand, blockOn, x, elevation, z, rand.nextInt(2, 3), BlockTypes.DEAD_LOG.id, 0, BlockTypes.DEAD_LEAVES.id, 0);
+//                                    } else if (randomNumber < 0.0125f) {
+//                                        World.setBlock(x, elevation+2, z, BlockTypes.DEAD_BUSH.id, rand.nextInt(3));
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate features. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int cloudInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int threadId = thread;
+//            final int startX = thread * cloudInterval;
+//            final int endX = Math.min(startX + cloudInterval, sizeChunks);
+//            pool.execute(() -> {
+//                final Random rand = new Random(World.seed+threadId);
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        if (cX > 0 && cX < sizeChunks-1 && cZ > 0 && cZ < sizeChunks-1) { //skip outer chunks
+//                            for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                                for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                    double cloudNoise = Math.abs(SimplexNoise.noise(x / 400.f, z / 400.f));
+//                                    double cloudSecondaryNoise = Math.abs(SimplexNoise.noise(x / 600.f, z / 600.f));
+//                                    if (cloudNoise < 0.4f && cloudSecondaryNoise > 0.5f && rand.nextFloat() > 0.95f && oldHeightmap[packPos(x, z)] < 166) {
+//                                        int cloudHeight = 216 + (int) Math.abs(SimplexNoise.noise(x/800.f, z/800.f) * 84);
+//                                        boolean isRainCloud = rand.nextFloat() < 0.0005f;
+//                                        int radius = (int) ((((isRainCloud ? 6 : 0) + rand.nextInt(2, 6)) * (1+(150*Math.pow(0.4f-Math.min(0.4f, cloudNoise), 2))))/15);
+//                                        if (radius > 0) {
+//                                            Cloud.generate(x, cloudHeight, z, isRainCloud ? 32 : 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+75, z, 31, 0, radius);
+//                                            Cloud.generate(x, cloudHeight+150, size-z, 31, 0, radius);
+//                                            Cloud.generate(size-x, cloudHeight+200, size-z, 31, 0, radius+1);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to generate clouds. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        for (int cX = 0; cX < sizeChunks; cX++) {
+//            for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                boolean foundMax = false;
+//                for (short cY = (short) (heightChunks - 1); cY >= 0; cY--) {
+//                    Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
+//                    for (int data : chunk.blockPalette) {
+//                        Vector2i block = Chunk.unpackInt(data);
+//                        boolean obstructingHeightmap = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+//                        if (!foundMax && obstructingHeightmap) {
+//                            foundMax = true;
+//                            chunksMaxElevations[oldpackChunkPos(cX, cZ)] = cY;
+//                            chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
+//                            break;
+//                        } else if (foundMax && !obstructingHeightmap) {
+//                            chunksMinElevations[oldpackChunkPos(cX, cZ)] = cY;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        Arrays.fill(oldHeightmap, (short) 0);
+//
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int heightInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int startX = thread * heightInterval;
+//            final int endX = Math.min(startX + heightInterval, sizeChunks);
+//            pool.execute(() -> {
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
+//                        int maxCy = chunksMaxElevations[packedHorizontalCP];
+//                        int minCy = chunksMinElevations[packedHorizontalCP];
+//                        for (int cY = maxCy; cY >= minCy; cY--) {
+//                            Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
+//                            for (int x = 0; x < chunkSize; x++) {
+//                                for (int z = 0; z < chunkSize; z++) {
+//                                    for (int y = chunkSize - 1; y >= 0; y--) {
+//                                        int localPos = Chunk.packLocalPos(x, y, z);
+//                                        Vector2i block = chunk.getBlock(localPos);
+//                                        int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
+//                                        int gY = (cY*chunkSize)+y;
+//                                        short elevation = oldHeightmap[pos];
+//                                        if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+//                                            oldHeightmap[pos] = (short) Math.max(elevation, gY);
+//                                            chunk.setLight(x, y, z, 0);
+//                                        } else if (gY <= elevation) {
+//                                            chunk.setLight(x, y, z, 0);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to update heightmap. \n");
+//
+//        startTime = System.currentTimeMillis();
+//        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeChunks);
+//        pool = Executors.newFixedThreadPool(threads);
+//        final int lightInterval = (sizeChunks + threads - 1) / threads;
+//        for (int thread = 0; thread < threads; thread++) {
+//            final int startX = thread * lightInterval;
+//            final int endX = Math.min(startX + lightInterval, sizeChunks);
+//            pool.execute(() -> {
+//                for (int cX = startX; cX < endX; cX++) {
+//                    for (int cZ = 0; cZ < sizeChunks; cZ++) {
+//                        int packedHorizontalCP = oldpackChunkPos(cX, cZ);
+//                        int minY = chunksMinElevations[packedHorizontalCP] * chunkSize;
+//                        for (int x = cX * chunkSize; x < (cX * chunkSize) + chunkSize; x++) {
+//                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
+//                                int packedHorizontalPos = packPos(x, z);
+//                                int maxY = oldHeightmap[packedHorizontalPos];
+//                                boolean prevBlocking = false;
+//                                for (int y = maxY; y >= minY; y--) {
+//                                    Vector2i block = World.getBlock(x, y, z);
+//                                    BlockType blockType = BlockTypes.blockTypes[block.x()];
+//                                    boolean blocking = blockType.obstructingHeightmap(block);
+//                                    if (prevBlocking != blocking) {
+//                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z + 1).s() >= maxSunlightLevel || getLight(x - 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z - 1).s() >= maxSunlightLevel)) {
+//                                            LightHelper.queueLightUpdate(new Vector3i(x, y, z));
+//                                        }
+//                                    }
+//                                    prevBlocking = blocking;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//        pool.shutdown();
+//        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to init light queue. \n");
+//        startTime = System.currentTimeMillis();
+//        iterateLightQueueMultithreaded();
+//        System.out.print("Took "+(System.currentTimeMillis()-startTime)+"ms to fill lighting. \n");
     }
 }

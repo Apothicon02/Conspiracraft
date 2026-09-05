@@ -462,6 +462,7 @@ public class Renderer {
     public static void drawChunkDebug() {
         int playerCX = (int)(player.pos.x()/chunkSize), playerCY = (int)(player.pos.y()/chunkSize), playerCZ = (int)(player.pos.z()/chunkSize);
         //long playerCp = packChunkPos((int)(player.pos.x()/chunkSize), (int)(player.pos.y()/chunkSize), (int)(player.pos.z()/chunkSize));
+        int i = 0;
         for (Chunk chunk : chunks.values()) {
 //            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
 //            if (dist < chunkSize*96) {
@@ -477,9 +478,10 @@ public class Renderer {
 //                        }
 //                    }
 //                } else if (chunk.blockPalette.size() > 1) {
-                if (chunk.blockPalette.size() > 1) {
-                    drawCube(new Matrix4f().setTranslation((chunk.cX + 0.5f) * chunkSize, (chunk.cY + 0.5f) * chunkSize, (chunk.cZ + 0.5f) * chunkSize).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
+                if (chunk != null && chunk.blockPalette.size() > 1) {
+                    drawCube(new Matrix4f().setTranslation(((chunk.cX + 0.5f) * chunkSize)%size, ((chunk.cY + 0.5f) * chunkSize)%height, ((chunk.cZ + 0.5f) * chunkSize)%size).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
                 }
+                //if (i++ > 100000) {break;}
 //            }
         }
     }
