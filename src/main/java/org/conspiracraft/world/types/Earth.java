@@ -5,10 +5,13 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
@@ -16,6 +19,8 @@ import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
+import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.vulkan.VkBufferCopy;
 
 import java.lang.Math;
 import java.nio.file.Path;
@@ -25,7 +30,12 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static org.conspiracraft.graphics.Graphics.chunkSSBO;
+import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
+import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
 import static org.conspiracraft.world.World.*;
+import static org.lwjgl.util.vma.Vma.vmaVirtualFree;
+import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
 
 public class Earth extends WorldType {
     public static class EarthSpace extends WorldType {
@@ -155,10 +165,13 @@ public class Earth extends WorldType {
     public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
     @Override
     public void tickWorldgen() {
+        int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
         if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads);}
         if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
-        int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
-        if (prevPlayerRX != playerRX || prevPlayerRY != playerRY || prevPlayerRZ != playerRZ) {Arrays.fill(generationIdxs, 0);}
+        if (prevPlayerRX != playerRX || prevPlayerRY != playerRY || prevPlayerRZ != playerRZ) {
+            Arrays.fill(generationIdxs, 0);
+            //unloadChunks(prevPlayerRX*regionSizeChunksL, playerRX*regionSizeChunksL, prevPlayerRY*regionSizeChunksL, playerRY*regionSizeChunksL, prevPlayerRZ*regionSizeChunksL, playerRZ*regionSizeChunksL);
+        }
         prevPlayerRX = playerRX; prevPlayerRY = playerRY; prevPlayerRZ = playerRZ;
         for (int thread = 0; thread < wgThreads; thread++) {
             int t = thread;
@@ -258,6 +271,7 @@ public class Earth extends WorldType {
                         }
                         //if (chunk.blockPalette.size() > 1) {
                         synchronized (lock) {
+                            unloadChunk(wrapChunkPos(cX, cY, cZ));
                             chunks.put(cP, chunk);
                         }
                         //}

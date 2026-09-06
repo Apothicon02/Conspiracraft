@@ -73,7 +73,6 @@ public class Main {
             timeMs = timeNs/1000000d;
             timeMsLong = (long)timeMs;
             window.pollEvents();
-            World.worldType.tickWorldgen();
             player.inputHandler.update();
 
             long targetFrameTime = 1000000000L / targetFps;

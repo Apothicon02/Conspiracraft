@@ -63,6 +63,7 @@ import static org.lwjgl.vulkan.KHRSynchronization2.VK_PIPELINE_STAGE_2_FRAGMENT_
 import static org.lwjgl.vulkan.VK14.*;
 
 public class Renderer {
+    public static int totalFrames = 0;
 
     public static int imageIdx = 0;
     public static int frameIdx = 0;
@@ -102,15 +103,17 @@ public class Renderer {
                     initialized = true;
                     drawStuff = false;
                 } else {
+                    World.worldType.tickWorldgen();
                     //long startTime = System.nanoTime();
                     boolean wasEmpty = updateQueue.isEmpty();
                     long startTime = System.currentTimeMillis();
                     while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
                         updateChunk(chunkPos);
-                        synchronized (lock) {
-                            updateSet.remove(chunkPos);
-                        }
+                        //updateSet.remove(chunkPos);
+                    }
+                    synchronized (lock) {
+                        updateSet.clear();
                     }
                     if (!wasEmpty) {
                         ssboBarriers(stack);
@@ -210,7 +213,7 @@ public class Renderer {
     public static void updateChunk(long packedChunkPos) {
         Chunk chunk = getChunk(packedChunkPos);
         Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
-        long wrappedPackedChunkPos = ((((chunk.cX%sizeChunks)*sizeChunks)+(chunk.cZ%sizeChunks))*heightChunks)+(chunk.cY%heightChunks);
+        long wrappedPackedChunkPos = World.wrapChunkPos(chunk.cX, chunk.cY, chunk.cZ);
         updateChunkBlocks(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
         updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
     }
@@ -549,7 +552,7 @@ public class Renderer {
     }
 
     public static boolean startCommandBuffers(MemoryStack stack) {
-//        long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         VkSemaphoreWaitInfo semaphoreWaitInfo = VkSemaphoreWaitInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO)
                 .flags(0)
@@ -558,10 +561,10 @@ public class Renderer {
                 .pValues(stack.longs(timeline));
         int waitResult = vkWaitSemaphores(vkDevice, semaphoreWaitInfo, Long.MAX_VALUE);
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for timeline semaphore: "+waitResult);}
-//        long took = (System.currentTimeMillis()-startTime);
-//        if (took > 50) {
-//            System.out.println("Took " + took + "ms to start cmd buffer. ");
-//        }
+        long took = (System.currentTimeMillis()-startTime);
+        if (took > 100) {
+            System.out.println("Took " + took + "ms to start cmd buffer on frame "+totalFrames+" with frame idx "+frameIdx+" and image idx "+imageIdx+". ");
+        }
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);
@@ -596,7 +599,8 @@ public class Renderer {
                 .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                 .pCommandBuffers(stack.pointers(currentCmdBuffer.address()))
                 .pSignalSemaphores(stack.longs(renderFinishedSemaphores[imageIdx], timelineSemaphore));
-        vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE); //cmdFences[frameIdx]
+        int result = vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE); //cmdFences[frameIdx]
+        if (result != VK_SUCCESS) {throw new RuntimeException("Failed to submit queue: "+result);}
 
         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
@@ -604,11 +608,12 @@ public class Renderer {
                 .swapchainCount(1)
                 .pSwapchains(stack.longs(vkSwapchain))
                 .pImageIndices(stack.ints(imageIdx));
-        int result = vkQueuePresentKHR(graphicsQueue, presentInfo);
+        result = vkQueuePresentKHR(graphicsQueue, presentInfo);
         if (result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {throw new RuntimeException("Failed to queue present!");}
         incFrameIdx();
     }
     public static void incFrameIdx() {
+        totalFrames++;
         frameIdx++;
         if (imageIdx >= Swapchain.images.length) {
             firstImages = false;
@@ -749,7 +754,7 @@ public class Renderer {
         return attachmentInfo;
     }
 
-    public static int regionSSBOByteSize = oldRegions.length*8;
+    public static int regionSSBOByteSize = 1;//oldRegions.length*8;
     //public static int lodSSBOByteSize = lods.length*8;
     public static int gigabyte = 1000000000;
     public static int voxelSSBOSize = gigabyte*2;
@@ -783,19 +788,14 @@ public class Renderer {
 //        }
         System.out.println("Allocated "+allocated+" bytes for light data.");
 
-        long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
-        MemoryUtil.memLongBuffer(regionPtr, oldRegions.length).put(oldRegions).rewind();
-//        long lodPtr = lodSSBO.stagingBuffer.pointer.get(0);
-//        MemoryUtil.memLongBuffer(lodPtr, lods.length).put(lods).rewind();
-
-        VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(regionSSBOByteSize);
-        vkCmdCopyBuffer(currentCmdBuffer, regionSSBO.stagingBuffer.buffer[0], regionSSBO.buffer.buffer[0], regionBufferCopy);
+//        long regionPtr = regionSSBO.stagingBuffer.pointer.get(0);
+//        MemoryUtil.memLongBuffer(regionPtr, oldRegions.length).put(oldRegions).rewind();
+//        VkBufferCopy.Buffer regionBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(regionSSBOByteSize);
+//        vkCmdCopyBuffer(currentCmdBuffer, regionSSBO.stagingBuffer.buffer[0], regionSSBO.buffer.buffer[0], regionBufferCopy);
         VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
         VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
-//        VkBufferCopy.Buffer lodBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lodSSBOByteSize);
-//        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
         VkBufferCopy.Buffer lightChunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], lightChunkBufferCopy);
         VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lightSSBOSize);

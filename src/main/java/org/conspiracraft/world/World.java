@@ -11,6 +11,7 @@ import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
@@ -19,6 +20,8 @@ import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.vulkan.VkBufferCopy;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -32,7 +35,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 
+import static org.conspiracraft.graphics.Graphics.chunkSSBO;
+import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
+import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
+import static org.lwjgl.util.vma.Vma.vmaVirtualFree;
+import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
 
 public class World {
     public static final int seed = 67;
@@ -52,6 +60,7 @@ public class World {
     public static final int heightChunks = height>>chunkBits;
     public static final int halfHeightChunks = heightChunks/2;
     public static final int regionSizeChunks = 8;
+    public static final long regionSizeChunksL = regionSizeChunks;
     public static final int regionSize = regionSizeChunks*chunkSize;
     public static final int regionBits = Integer.numberOfTrailingZeros(regionSizeChunks);
     public static final int sizeRegions = sizeChunks>>regionBits;
@@ -279,6 +288,46 @@ public class World {
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
     public static final Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>();
+    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
+        synchronized (lock) {
+            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
+            long newMinX = newX - halfSizeChunks, newMaxX = newX + halfSizeChunks, newMinY = newY - halfHeightChunks, newMaxY = newY + halfHeightChunks, newMinZ = newZ - halfSizeChunks, newMaxZ = newZ + halfSizeChunks;
+            for (long x = oldMinX; x < oldMaxX; x++) {
+                for (long y = oldMinY; y < oldMaxY; y++) {
+                    for (long z = oldMinZ; z < oldMaxZ; z++) {
+                        if (!(x >= newMinX && x < newMaxX && y >= newMinY && y < newMaxY && z >= newMinZ && z < newMaxZ)) {
+                            unloadChunk(packChunkPos(x, y, z));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public static void unloadChunk(long cp) {
+        Chunk chunk = chunks.get(cp);
+        if (chunk != null) {
+            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(chunk.condensedChunkPos));
+            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(chunk.condensedChunkPos));
+            long wPackedChunkPos = ((((chunk.cX % sizeChunks) * sizeChunks) + (chunk.cZ % sizeChunks)) * heightChunks) + (chunk.cY % heightChunks);
+            long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
+            long chunkBufOffset = wPackedChunkPos * Renderer.chunkByteSize;
+            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 4)
+                    .put(0, 0).put(1, 0).put(2, 0).put(3, 0);
+            VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(16L);
+            vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
+
+            chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
+            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 4)
+                    .put(0, 0).put(1, 0).put(2, 0).put(3, 0);
+            vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
+            chunks.remove(cp);
+            updateQueue.remove(cp);
+            updateSet.remove(cp);
+        }
+    }
+    public static long wrapChunkPos(long cX, long cY, long cZ) {
+        return ((((cX%sizeChunks)*sizeChunks)+(cZ%sizeChunks))*heightChunks)+(cY%heightChunks);
+    }
     public static final Chunk[] oldchunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
     public static final long[] oldRegions = new long[1];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
