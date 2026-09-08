@@ -42,6 +42,9 @@ struct ChunkStruct {
     int paletteSize;
     int bitsPerValue;
     int valueMask;
+    int x;
+    int y;
+    int z;
 };
 struct LongStruct {
     int first;
@@ -89,7 +92,7 @@ int packLocalPos(ivec3 pos) {
 int wrapCoord(int v, int coordScale) {
     return (v+coordScale)%coordScale;
 }
-ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0);
+ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0, 0, 0, 0);
 int lightValuesPerInt = -1;
 void updateLightChunkData(ivec3 chunkPos) {
     int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
@@ -128,7 +131,7 @@ vec4 getLight(vec3 pos) {
     return getLight(int(pos.x), int(pos.y), int(pos.z));
 }
 
-ChunkStruct chunk = ChunkStruct(0, 0, 0, 0);
+ChunkStruct chunk = ChunkStruct(0, 0, 0, 0, 0, 0, 0);
 int blockValuesPerInt = 0;
 void updateChunkData(ivec3 chunkPos) {
     int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
@@ -330,6 +333,7 @@ vec3 ddaMask = vec3(0);
 void stepMask(vec3 sideDist) {
     ddaMask = step(sideDist, vec3(min(min(sideDist.x, sideDist.y), sideDist.z) + 0.000000001));
 }
+vec3 globalPos = inverse(pushUbo.model)[3].xyz;
 mat4 invProj = inverse(globalUbo.proj);
 mat4 invView = inverse(globalUbo.view);
 vec3 getDir(vec2 pos) {
@@ -452,10 +456,11 @@ vec4 dda(bool shadow) {
         //steps++;
         bool stepAnything = true;
         if (stage == 3) {
-            if (abs(ddaPos.x-ogChunkPos.x) > (sizeChunks/2)-regionSize || abs(ddaPos.y-ogChunkPos.y) > (heightChunks/2)-regionSize || ddaPos.y >= heightChunks || abs(ddaPos.z-ogChunkPos.z) > (sizeChunks/2)-regionSize) {break;}
+            //if (abs(ddaPos.x-ogChunkPos.x) >= sizeChunks/2 || abs(ddaPos.y-ogChunkPos.y) >= heightChunks/4 || abs(ddaPos.z-ogChunkPos.z) >= sizeChunks/2) {break;}
             ivec3 chunkRayPos = ddaPos;
             updateChunkData(ddaPos);
-            if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
+            if (abs(chunk.x-globalPos.x) >= sizeChunks/2 || abs(chunk.y-globalPos.y) >= heightChunks/2 || abs(chunk.z-globalPos.z) >= sizeChunks/2) {break;}
+            else if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
                 stage = 2;
                 stepAnything = false;
                 chunkPos = ddaPos;
