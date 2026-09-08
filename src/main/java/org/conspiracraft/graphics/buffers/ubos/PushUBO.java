@@ -17,7 +17,7 @@ import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class PushUBO {
-    private Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, new Vector4i(), new Vector4i(), 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    public Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, new Vector4i(), new Vector4i(), 0, 0, 0, 0, 0, 0, 0, 0, 0};
     public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     private int offset = 0;

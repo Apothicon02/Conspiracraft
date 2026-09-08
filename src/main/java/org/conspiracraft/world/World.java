@@ -45,7 +45,7 @@ import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
 public class World {
     public static final int seed = 67;
     public static final int seaLevel = 63;
-    public static final int size = 4096;
+    public static final int size = 2048;
     public static final long sizeL = size;
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
@@ -67,6 +67,7 @@ public class World {
     public static final int halfSizeRegions = sizeRegions/2;
     public static final int heightRegions = heightChunks>>regionBits;
     public static final int halfHeightRegions = heightRegions/2;
+    public static final int quarterHeightRegions = heightRegions/2;
 //    public static final int sizeLods = size >>lodBits;
 //    public static final int heightLods = height >>lodBits;
     public static boolean generating = false;
@@ -306,23 +307,19 @@ public class World {
     public static void unloadChunk(long cp) {
         Chunk chunk = chunks.get(cp);
         if (chunk != null) {
-            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(chunk.condensedChunkPos));
-            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(chunk.condensedChunkPos));
+            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(cp));
+            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(cp));
             long wPackedChunkPos = ((((chunk.cX % sizeChunks) * sizeChunks) + (chunk.cZ % sizeChunks)) * heightChunks) + (chunk.cY % heightChunks);
             long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
             long chunkBufOffset = wPackedChunkPos * Renderer.chunkByteSize;
-            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 4)
-                    .put(0, 0).put(1, 0).put(2, 0).put(3, 0);
-            VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(16L);
+            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
+            VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(Renderer.chunkByteSize);
             vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
 
             chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
-            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 4)
-                    .put(0, 0).put(1, 0).put(2, 0).put(3, 0);
+            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
             vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
             chunks.remove(cp);
-            updateQueue.remove(cp);
-            updateSet.remove(cp);
         }
     }
     public static long wrapChunkPos(long cX, long cY, long cZ) {
@@ -420,7 +417,7 @@ public class World {
             updateNeighbors(x, y, z);
         }
     }
-    public static final int wgThreads = 8;
+    public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
     public static final Object lock = new Object();
     public static Chunk getChunk(long cP) {

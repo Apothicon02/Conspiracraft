@@ -60,13 +60,12 @@ layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(set = 0, binding = 2) uniform sampler3D Sampler3D[];
 layout(set = 0, binding = 3, rgba16f) uniform image2D Image2D[];
 layout(set = 0, binding = 3, r32f) uniform image2D DepthImage2D[];
-const int size = 4096;
+const int size = 2048;
 const int height = 1024;
-const float verticalFactor = mix(512.f/size, 1.f, 0.5f);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
 const int heightChunks = height / chunkSize;
-const int regionSize = 4;
+const int regionSize = 8;
 const int sizeRegions = sizeChunks / regionSize;
 const int heightRegions = heightChunks / regionSize;
 int packRegionPos(int x, int y, int z) {
@@ -88,7 +87,7 @@ int packLocalPos(ivec3 pos) {
     return ((((pos.x*chunkSize)+pos.z)*chunkSize)+pos.y);//pos.x+pos.y*chunkSize+pos.z*(chunkSize*chunkSize);
 }
 int wrapCoord(int v, int coordScale) {
-    return v & (coordScale-1);
+    return (v+coordScale)%coordScale;
 }
 ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0);
 int lightValuesPerInt = -1;
@@ -279,8 +278,8 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-const int renderDistance = 1024;//int(min(size, 2048)*0.75f);
-const float maxChunkDist = (renderDistance/chunkSize)*(renderDistance/chunkSize);
+const int renderDistance = int(size*0.5f);//-(regionSize*chunkSize);
+//const float maxChunkDist = ((renderDistance/chunkSize)*(renderDistance/chunkSize))-regionSize;
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 ogRayPos = vec3(0);
@@ -453,31 +452,19 @@ vec4 dda(bool shadow) {
         //steps++;
         bool stepAnything = true;
         if (stage == 3) {
-            vec3 renderDistCheck = ddaPos-ogChunkPos;
-            renderDistCheck.y/=verticalFactor;
-            if (abs(dot(renderDistCheck, -renderDistCheck)) >= maxChunkDist) { break; }
-            region = getRegion(ddaPos/regionSize);
-            ivec3 chunkRayPos = ddaPos % regionSize;
-            int bitIdx = (chunkRayPos.x & (regionSize-1)) + (chunkRayPos.y & (regionSize-1)) * regionSize + (chunkRayPos.z & (regionSize-1)) * regionSize * regionSize;
-            int regionToUse = region.first;
-            if (bitIdx >= 32) {
-                bitIdx-=32;
-                regionToUse = region.second;
-            }
-            int mask = 1 << bitIdx;
-            if ((regionToUse & mask) != 0) {
-                updateChunkData(ddaPos);
-                if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
-                    stage = 2;
-                    stepAnything = false;
-                    chunkPos = ddaPos;
-                    chunkSideDist = sideDist;
+            if (abs(ddaPos.x-ogChunkPos.x) > (sizeChunks/2)-regionSize || abs(ddaPos.y-ogChunkPos.y) > (heightChunks/2)-regionSize || ddaPos.y >= heightChunks || abs(ddaPos.z-ogChunkPos.z) > (sizeChunks/2)-regionSize) {break;}
+            ivec3 chunkRayPos = ddaPos;
+            updateChunkData(ddaPos);
+            if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
+                stage = 2;
+                stepAnything = false;
+                chunkPos = ddaPos;
+                chunkSideDist = sideDist;
 
-                    chunkWorldPos = ddaPos * chunkSize;
-                    lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
-                    ddaPos = ivec3(lodStartPos);
-                    sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
-                }
+                chunkWorldPos = ddaPos * chunkSize;
+                lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
+                ddaPos = ivec3(lodStartPos);
+                sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
             }
         } else if (stage == 2) {
             if (ddaPos.x < 0 || ddaPos.x >= lodSize || ddaPos.y < 0 || ddaPos.y >= lodSize || ddaPos.z < 0 || ddaPos.z >= lodSize) {

@@ -5,13 +5,10 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
-import it.unimi.dsi.fastutil.longs.LongIterator;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
@@ -19,8 +16,6 @@ import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.VkBufferCopy;
 
 import java.lang.Math;
 import java.nio.file.Path;
@@ -30,12 +25,7 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static org.conspiracraft.graphics.Graphics.chunkSSBO;
-import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
-import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
 import static org.conspiracraft.world.World.*;
-import static org.lwjgl.util.vma.Vma.vmaVirtualFree;
-import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
 
 public class Earth extends WorldType {
     public static class EarthSpace extends WorldType {
@@ -138,7 +128,7 @@ public class Earth extends WorldType {
         int intsPerThread = 0;
         int thread = 0;
         for (int rX = -halfSizeRegions; rX < halfSizeRegions; rX++) {
-            for (int rY = -halfHeightRegions; rY < halfHeightRegions; rY++) {
+            for (int rY = -quarterHeightRegions; rY < quarterHeightRegions; rY++) {
                 for (int rZ = -halfSizeRegions; rZ < halfSizeRegions; rZ++) {
                     if (thread >= wgThreads) {thread = 0;}
                     if (thread == 0) {intsPerThread+=3;}
@@ -194,6 +184,7 @@ public class Earth extends WorldType {
         int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
         boolean crust = false;
         if (cYStart >= GROUND_LEVEL_C && cYStart < SKY_LEVEL_C) {
+            if (cYStart != GROUND_LEVEL_C) {return;} //ensure column doesnt generate multiple times
             cYStart = GROUND_LEVEL_C;
             cYEnd = SKY_LEVEL_C - 1;
             crust = true;
@@ -233,12 +224,14 @@ public class Earth extends WorldType {
                 regionNoises.whiteNoise()[packed] = whitenoisePipeline.evaluateNoise(x, z);
             }
         }
+        boolean existed = true;
         boolean continueGenerating = false;
         for (int cX = cXStart; cX < cXEnd; cX++) {
             for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
                     long cP = packChunkPos(cX, cY, cZ);
                     if (!chunks.containsKey(cP)) {
+                        existed = false;
                         continueGenerating = continueGenerating || crust;
                         Chunk chunk = new Chunk(cP);
                         for (int lX = 0; lX < chunkSize; lX++) {
@@ -366,6 +359,143 @@ public class Earth extends WorldType {
                     }
                 }
             }
+//            for (int cX = cXStart; cX < cXEnd; cX++) {
+//                for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+//                    for (int lX = 0; lX < chunkSize; lX++) {
+//                        for (int lZ = 0; lZ < chunkSize; lZ++) {
+//                            int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
+//                            int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
+//                            int surface = GROUND_LEVEL + heights[packed];
+//                            if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
+//                                double foliageNoise = regionNoises.plains()[packed];
+//                                double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
+//                                Vector2i blockOn = getBlockWorldgen(x, surface, z);
+//                                if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.SNOW.id) {
+//                                    if (foliageChance < 0.05f*foliageNoise && lX >= 2 && lZ >= 2 && lX < chunkSize-2 && lZ < chunkSize-2) {
+//                                        int maxHeight = rand.nextInt(5, 8);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight+1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight+1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z+1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z-1, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z+2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z-2, BlockTypes.OAK_LEAVES.id, 0);
+//                                        for (int y = surface+1; y < surface+1+maxHeight; y++) {
+//                                            World.setBlockWorldgen(x, y, z, BlockTypes.OAK_LOG.id, 0);
+//                                        }
+//                                    } else if (foliageChance < 0.058f*foliageNoise && lX >= 2 && lZ >= 2 && lX < chunkSize-2 && lZ < chunkSize-2) {
+//                                        int maxHeight = rand.nextInt(9, 12);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight+1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight+1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight+1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-1, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-1, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-1, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-1, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-1, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x, surface+maxHeight-2, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z+1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+2, surface+maxHeight-2, z-1, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-1, surface+maxHeight-2, z+2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x+1, surface+maxHeight-2, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        World.setBlockWorldgen(x-2, surface+maxHeight-2, z-2, BlockTypes.BIRCH_LEAVES.id, 0);
+//                                        for (int y = surface+1; y < surface+1+maxHeight; y++) {
+//                                            World.setBlockWorldgen(x, y, z, BlockTypes.BIRCH_LOG.id, 0);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             //cover
             for (int cX = cXStart; cX < cXEnd; cX++) {
                 for (int cZ = cZStart; cZ < cZEnd; cZ++) {
@@ -398,6 +528,8 @@ public class Earth extends WorldType {
                     }
                 }
             }
+        }
+        if (!existed) {
             for (int cX = cXStart; cX < cXEnd; cX++) {
                 for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                     for (int cY = cYStart; cY < cYEnd; cY++) {

@@ -188,7 +188,7 @@ public class Chunk {
         if (key > -1) {
             setBlockKey(x, y, z, key);
         } else {
-            blockPalette.addLast(block);
+            blockPalette.add(blockPalette.size(), block);
             setBlockKey(x, y, z, blockPalette.size() - 1);
         }
     }
@@ -284,7 +284,7 @@ public class Chunk {
         if (key > -1) {
             setLightKey(x, y, z, key);
         } else {
-            lightPalette.addLast(light);
+            lightPalette.add(lightPalette.size(), light);
             setLightKey(x, y, z, lightPalette.size() - 1);
         }
     }
