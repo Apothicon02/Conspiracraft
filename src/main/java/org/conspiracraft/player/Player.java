@@ -4,7 +4,6 @@ import org.conspiracraft.Main;
 import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
-import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.physics.AABB;
@@ -141,7 +140,7 @@ public class Player {
     public Vector3f oldCamTranslation = new Vector3f();
     public int itemPickupDelayMs = 2000;
     public void tick() throws IOException, InterruptedException {
-        oldCamTranslation.set(getCameraTranslation());
+        oldCamTranslation.set(getCameraTranslationGlobal());
         nearestPlanet = StarSystem.getNearestPlanet(pos);
         inv.tick();
         if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
@@ -380,7 +379,6 @@ public class Player {
         }
         prevPos.set(pos);
         pos.set(playerAABB.xMin + width, playerAABB.yMin + height, playerAABB.zMin + width);
-        localPos.set(pos.x()%World.size, pos.y()%World.height, pos.z()%World.size);
         dynamicSpeedOld = dynamicSpeed;
         dynamicSpeed = Math.clamp((movement.length() - 0.1f) * 4, 0, 1);
     }
@@ -447,16 +445,13 @@ public class Player {
     public Vector3f getCameraTranslationGlobal() {
         Vector3f translation = new Vector3f();
         camera.getViewMatrix().getTranslation(translation);
+        //Vector3i iPos = new Vector3i((int)pos.x(), (int)pos.y(), (int)pos.z());
         return translation.add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
     }
-    public Vector3f getCameraTranslation() {
-        Vector3f translation = new Vector3f();
-        camera.getViewMatrix().getTranslation(translation);
-        //Vector3i iPos = new Vector3i((int)pos.x(), (int)pos.y(), (int)pos.z());
-        return translation.add(localPos.x(), localPos.y() + eyeHeight + (bobbing * 1.5f), localPos.z());
-    }
     public Vector3f getCameraTranslationInterpolated() {
-        return Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslation());
+        Vector3f interpolated = Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslationGlobal());
+        interpolated.set(interpolated.x()%World.size, interpolated.y()%World.height, interpolated.z()%World.size);
+        return interpolated;
     }
 
     public Matrix4f getCameraMatrix() {
