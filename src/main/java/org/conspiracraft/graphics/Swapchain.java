@@ -90,14 +90,14 @@ public class Swapchain {
         }
 
         int chosenPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR; // always supported
-//        for (int i = 0; i < presentModes.capacity(); i++) {
-//            int mode = presentModes.get(i);
-//            if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-//                chosenPresentMode = mode;
-//                break;
-//            }
-//        }
-        int imageCount = 2;
+        for (int i = 0; i < presentModes.capacity(); i++) {
+            int mode = presentModes.get(i);
+            if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                chosenPresentMode = mode;
+                break;
+            }
+        }
+        int imageCount = 4;
         int imgFormat = vkSurfFormat.format();
         int imgColorSpace = vkSurfFormat.colorSpace();
         VkSwapchainCreateInfoKHR swapInfo = VkSwapchainCreateInfoKHR.calloc(stack)

@@ -13,8 +13,8 @@ import static org.conspiracraft.audio.AudioController.*;
 public class Settings {
     public static int language = 0;
     public static float mouseSensitivity = 0.1f;
-    public static int width = 2560;
-    public static int height = 1440;
+    public static int width = 1280;
+    public static int height = 720;
     public static float fov = 73;
     public static int targetFps = 4200;
     public static boolean shadowsEnabled = true;

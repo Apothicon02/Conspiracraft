@@ -3,7 +3,7 @@ package org.conspiracraft;
 import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.player.InputHandler;
 import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryStack;
+import org.lwjgl.sdl.SDL_DisplayMode;
 
 import static org.conspiracraft.Main.events;
 import static org.conspiracraft.Settings.*;
@@ -17,6 +17,9 @@ public class Window {
 
     public Window() {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {throw new IllegalStateException("Unable to initialize SDL");}
+        SDL_DisplayMode mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+        width = mode.w();
+        height = mode.h();
         graphics = new Graphics();
     }
 
