@@ -11,6 +11,7 @@ import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.shapes.Cube;
 import org.joml.Vector2i;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -29,13 +30,13 @@ public class WorldType {
     public float getLongitude() {return 0.f;}
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/none");}
     public Planet getPlanet(){return null;}
-    public static Vector3f nearestLightning = new Vector3f();
+    public static Vector3d nearestLightning = new Vector3d();
     public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                Vector3f lightningPos = lightning.pos;
+                Vector3d lightningPos = lightning.pos;
                 if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
                     nearestLightning.set(lightningPos);
                 }
@@ -43,7 +44,7 @@ public class WorldType {
         }
         if (nearestLightning.x() >= 0) {
             skylightMul.set(1.f, 0.95f, 0.f);
-            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+            return new Vector4f((float) nearestLightning.x(), (float) nearestLightning.y(), (float) nearestLightning.z(), 4);
         }
         skylightMul.set(1);
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);

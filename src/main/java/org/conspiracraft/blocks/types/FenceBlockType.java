@@ -11,7 +11,7 @@ public class FenceBlockType extends BlockType {
     }
 
     @Override
-    public AABB[] getAABB(int subType, float x, float y, float z, boolean forCollision) {
+    public AABB[] getAABB(int subType, double x, double y, double z, boolean forCollision) {
         return switch (subType) {
             case 1 -> new AABB[]{new AABB(((int) x) + 0.45f, ((int) (x + 1)), (int) y, ((int) (y + 1)) + 0.5f, ((int) z) + 0.45f, ((int) (z + 1)) - 0.45f)};
             case 2 -> new AABB[]{new AABB(((int)x)+0.45f, ((int)(x+1))-0.45f, (int)y, ((int)(y+1))+0.5f, ((int)z)+0.45f, ((int)(z+1)))};

@@ -87,7 +87,7 @@ public class World {
     public static void dropItem(Item item) {
         Item newItem = item.clone().timeExisted(-2000).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0));
         World.items.add(newItem);
-        newItem.playSound(newItem.pos);
+        newItem.playSound(new Vector3f(newItem.pos));
     }
 
     public static void save(String path) throws IOException {
@@ -378,6 +378,9 @@ public class World {
         return chunk.getBlockType(pos);
     }
     public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
+    public static Vector2i getBlock(double x, double y, double z) {
+        return getBlock((int)x, (int)y, (int)z);
+    }
     public static Vector2i getBlock(float x, float y, float z) {
         return getBlock((int)x, (int)y, (int)z);
     }

@@ -61,7 +61,7 @@ public class Vera extends WorldType {
     @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/vera");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
-            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
+            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0);
     public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
 
     @Override
@@ -69,7 +69,7 @@ public class Vera extends WorldType {
         nearestLightning.set(-100000);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                Vector3f lightningPos = lightning.pos;
+                Vector3d lightningPos = lightning.pos;
                 if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
                     nearestLightning.set(lightningPos);
                 }
@@ -77,7 +77,7 @@ public class Vera extends WorldType {
         }
         if (nearestLightning.x() >= 0) {
             skylightMul.set(0.35f, 0.0f, 1.0f);
-            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+            return new Vector4f((float)nearestLightning.x(), (float)nearestLightning.y(), (float)nearestLightning.z(), 4);
         }
         skylightMul.set(1);
         Vector4f skylight = StarSystem.relativePos.y() < 0 && StarSystem.relativePos.y() < parent.rotatedPos.y() ? new Vector4f(parent.rotatedPos, 1.5f) : new Vector4f(StarSystem.relativePos, 1);

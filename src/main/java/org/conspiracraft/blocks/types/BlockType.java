@@ -4,10 +4,7 @@ import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.utils.Utils;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
-import org.joml.Vector4i;
+import org.joml.*;
 import org.conspiracraft.blocks.BlockTag;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +22,7 @@ public class BlockType {
         return this;
     }
 
-    public AABB[] getAABB(int subType, float x, float y, float z, boolean forCollision) {
+    public AABB[] getAABB(int subType, double x, double y, double z, boolean forCollision) {
         if (blockProperties.hasSlab) {
             if (subType == 1) {
                 return new AABB[]{new AABB((int)x, (int)(x+1), ((int)y)+0.5f, (int)(y+1), (int)z, (int)(z+1))};
@@ -78,7 +75,7 @@ public class BlockType {
         this.blockProperties = blockProperties;
     }
 
-    public int use(Vector3f pos, Vector2i block) {return use((int)pos.x(), (int)pos.y(), (int)pos.z(), block);}
+    public int use(Vector3d pos, Vector2i block) {return use((int)pos.x(), (int)pos.y(), (int)pos.z(), block);}
     public int use(int x, int y, int z, Vector2i block) {return 0;}
     public void neighborUpdated(int x, int y, int z, Vector2i block) {}
 

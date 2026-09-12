@@ -10,13 +10,14 @@ import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 
 public class AshEntity extends Entity {
-    public AshEntity(EntityType type, Matrix4f matrix, float scaleOffset) {
-        super(type, matrix, scaleOffset);
+    public AshEntity(EntityType type, Vector3d pos, Matrix4f matrix, float scaleOffset) {
+        super(type, pos, matrix, scaleOffset);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class AshEntity extends Entity {
                 return true;
             }
         }
-        matrix.getTranslation(prevPos);
+        prevPos.set(pos);
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
@@ -54,7 +55,8 @@ public class AshEntity extends Entity {
         vel.mul(friction);
         PhysicsHelper.move(aabb, vel, new ArrayList<>());
         Vector3f dir = new Vector3f(vel).normalize().negate();
-        matrix.identity().lookAlong(dir, up).invert().setTranslation(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z()).scale(scale);
+        matrix.identity().lookAlong(dir, up).invert().scale(scale);
+        pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         return false;
     }
 }

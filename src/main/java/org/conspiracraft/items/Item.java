@@ -7,6 +7,7 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -15,7 +16,7 @@ import java.nio.IntBuffer;
 public class Item implements Cloneable {
     public static int dataLength = 9; //excludes this int
     public ItemType type = ItemTypes.AIR;
-    public Vector3f pos = new Vector3f();
+    public Vector3d pos = new Vector3d();
     public int amount = 1;
     public float rot = 0.f;
     public float hover = 0.f;
@@ -54,7 +55,7 @@ public class Item implements Cloneable {
         long time = Main.timeMsLong;
         if (prevTickTime != 0) {
             long dif = time - prevTickTime;
-            Vector2i block = World.getBlock(pos.x(), pos.y()-0.125f, pos.z());
+            Vector2i block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
             if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {
                 this.pos.y -= 0.125f;
             }
@@ -95,11 +96,15 @@ public class Item implements Cloneable {
         prevTickTime = time;
     }
     public Item moveTo(Vector3i pos) {
-        this.pos = new Vector3f(pos.x, pos.y, pos.z);
+        this.pos = new Vector3d(pos.x, pos.y, pos.z);
+        return this;
+    }
+    public Item moveTo(Vector3d pos) {
+        this.pos = new Vector3d(pos.x, pos.y, pos.z);
         return this;
     }
     public Item moveTo(Vector3f pos) {
-        this.pos = new Vector3f(pos.x, pos.y, pos.z);
+        this.pos = new Vector3d(pos.x, pos.y, pos.z);
         return this;
     }
     public Item type(ItemType type) {

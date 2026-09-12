@@ -54,7 +54,7 @@ public class Earth extends WorldType {
         nearestLightning.set(-100000);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                Vector3f lightningPos = lightning.pos;
+                Vector3d lightningPos = lightning.pos;
                 if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
                     nearestLightning.set(lightningPos);
                 }
@@ -62,7 +62,7 @@ public class Earth extends WorldType {
         }
         if (nearestLightning.x() >= 0) {
             skylightMul.set(1.f, 0.95f, 0.0f, 0);
-            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+            return new Vector4f((float) nearestLightning.x(), (float) nearestLightning.y(), (float) nearestLightning.z(), 4);
         }
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
         float starDist = getPlanet().pos.distance(StarSystem.pos);
@@ -72,7 +72,7 @@ public class Earth extends WorldType {
             float mostProminent = 0.f;
             Vector3f pos = new Vector3f();
             for (Planet planet : StarSystem.planets) {
-                float dist = planet.rotatedPos.distance(Main.player.pos);
+                float dist = planet.rotatedPos.distance(new Vector3f(Main.player.pos));
                 if (dist > 0.f && planet.rotatedPos.y() > 0 && planet != getPlanet()) {
                     float prominence = (float) ((planet.scale/dist)*Utils.gradient((int) planet.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0));
 //                    if (prominence > mostProminent) {
@@ -83,7 +83,7 @@ public class Earth extends WorldType {
                     skylightMul.add(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
                 }
                 for (Planet moon : planet.moons) {
-                    dist = moon.rotatedPos.distance(Main.player.pos);
+                    dist = moon.rotatedPos.distance(new Vector3f(Main.player.pos));
                     if (dist > 0.f && moon.rotatedPos.y() > 0) {
                         float prominence = (float) ((moon.scale/dist)*(Utils.gradient((int) moon.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0)));
 //                        if (prominence > mostProminent) {

@@ -17,11 +17,16 @@ tasks.test {
 }
 
 group = "org.apothicon"
-version = "0.8-SNAPSHOT"
+version = "0.8.1-SNAPSHOT"
 
 val lwjglVersion = "3.4.1"
 val jomlVersion = "1.10.8"
-val lwjglNatives = "natives-windows"
+val lwjglNatives = arrayListOf(
+    "natives-linux", "natives-linux-arm32", "natives-linux-arm64",
+    "natives-linux-ppc64le", "natives-linux-riscv64", "natives-freebsd",
+    "natives-windows", "natives-windows-x86", "natives-windows-arm64",
+    "natives-macos", "natives-macos-arm64"
+)
 
 repositories {
     mavenCentral()
@@ -47,13 +52,15 @@ dependencies {
     implementation("org.lwjgl", "lwjgl-stb")
     implementation("org.lwjgl", "lwjgl-vma")
     implementation("org.lwjgl", "lwjgl-vulkan")
-    implementation("org.lwjgl", "lwjgl", classifier = lwjglNatives)
-    implementation("org.lwjgl", "lwjgl-assimp", classifier = lwjglNatives)
-    implementation("org.lwjgl", "lwjgl-openal", classifier = lwjglNatives)
-    implementation("org.lwjgl", "lwjgl-sdl", classifier = lwjglNatives)
-    implementation ("org.lwjgl", "lwjgl-shaderc", classifier = lwjglNatives)
-    implementation("org.lwjgl", "lwjgl-stb", classifier = lwjglNatives)
-    implementation("org.lwjgl", "lwjgl-vma", classifier = lwjglNatives)
+    for (eachNative in lwjglNatives) {
+        implementation("org.lwjgl", "lwjgl", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-assimp", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-openal", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-sdl", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-shaderc", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-stb", classifier = eachNative)
+        implementation("org.lwjgl", "lwjgl-vma", classifier = eachNative)
+    }
     implementation("org.joml", "joml", jomlVersion)
 }
 

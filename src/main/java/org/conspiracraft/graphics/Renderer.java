@@ -360,7 +360,8 @@ public class Renderer {
                 drawCube(lightning.matrix, lightning.color);
             } else if (effect instanceof Particle particle) {
                 Matrix4f interpolatedMatrix = new Matrix4f(particle.matrix);
-                interpolatedMatrix.setTranslation(Utils.getInterpolatedVec(particle.prevPos, particle.pos));
+                Vector3d pos = Utils.getInterpolatedVec(particle.prevPos, particle.pos);
+                interpolatedMatrix.setTranslation((float) (pos.x()%size), (float) (pos.y()%height), (float) (pos.z()%size));
                 drawCube(interpolatedMatrix, particle.color);
             }
         }
@@ -368,10 +369,8 @@ public class Renderer {
         for (Entity entity : entities) {
             pushUBO.updateAtlasOffset(entity.type.atlasOffset);
             Matrix4f interpolatedMatrix = new Matrix4f(entity.matrix);
-            Vector3f pos = new Vector3f();
-            entity.matrix.getTranslation(pos);
-            pos.set(Utils.getInterpolatedVec(entity.prevPos, pos));
-            interpolatedMatrix.setTranslation(pos.x()%size, pos.y()%height, pos.z()%size);
+            Vector3d pos = Utils.getInterpolatedVec(entity.prevPos, entity.pos);
+            interpolatedMatrix.setTranslation((float) (pos.x()%size), (float) (pos.y()%height), (float) (pos.z()%size));
             drawCube(interpolatedMatrix, new Vector4f(1.f));
         }
         updatePipeline(4);
@@ -387,7 +386,7 @@ public class Renderer {
     public static void drawDDA(MemoryStack stack) {
         pushUBO.updateTex(Textures.colors2, Textures.depth2, Textures.norms2);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, null);
-        ((Matrix4f)pushUBO.uniformStorage[0]).set(new Matrix4f().setTranslation(player.pos.x()/chunkSize, player.pos.y()/chunkSize, player.pos.z()/chunkSize).invert());
+        ((Matrix4f)pushUBO.uniformStorage[0]).set(new Matrix4f().setTranslation((float) (player.pos.x()/chunkSize), (float) (player.pos.y()/chunkSize), (float) (player.pos.z()/chunkSize)).invert());
         pushUBO.push();
         updateComputePipeline(0);
         bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
@@ -529,7 +528,7 @@ public class Renderer {
         Vector3f dir = new Vector3f(dest).sub(og);
         float length = dir.length();
         Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
-        width *= Math.max(1, (Math.max(og.distance(player.pos), dest.distance(player.pos))/(width*300f))-1.5f);
+        width *= Math.max(1, (Math.max(og.distance((float) player.pos.x(), (float) player.pos.y(), (float) player.pos.z()), dest.distance((float) player.pos.x(), (float) player.pos.y(), (float) player.pos.z()))/(width*300f))-1.5f);
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {

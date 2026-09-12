@@ -9,13 +9,11 @@ import org.conspiracraft.entities.AshEntity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.WorldTypes;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 
+import java.lang.Math;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,10 +22,9 @@ import static org.conspiracraft.world.World.entitiesAddQueue;
 
 public class Lightning extends Effect {
     public int lifetime = 0;
-    public final Vector3f pos = new Vector3f();
     public final Vector3i intPos = new Vector3i();
     public final Vector4f color = new Vector4f(0);
-    public Lightning(Matrix4f matrix) {
+    public Lightning(Vector3d pos, Matrix4f matrix) {
         super(matrix);
         if (World.worldType == WorldTypes.EARTH) {
             color.set(2.f, 1.9f, 0.2f, 4.f);
@@ -38,11 +35,11 @@ public class Lightning extends Effect {
         } else {
             color.set(2.f, 1.9f, 0.2f, 4.f);
         }
-        matrix.getTranslation(pos);
+        this.pos.set(pos);
         intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());
-        matrix.setTranslation(pos.x()+0.5f, pos.y()+matrix.getScale(new Vector3f()).y()/2.f, pos.z()+0.5f);
+        pos.add(+0.5f, matrix.getScale(new Vector3f()).y()/2.f, 0.5f);
         SFX sfx = Math.random() < 0.5f ? Sounds.THUNDER_1 : Sounds.THUNDER_2;
-        Source source = new Source(pos, 2.f, 1.f, 1.f, 0);
+        Source source = new Source(new Vector3f(pos), 2.f, 1.f, 1.f, 0);
         AL11.alSourcef(source.sourceID, AL10.AL_ROLLOFF_FACTOR, 0.3f);
         source.play(sfx);
         AudioController.disposableSources.add(source);
@@ -50,7 +47,7 @@ public class Lightning extends Effect {
         Vector3i iPos = new Vector3i(intPos);
         int blockStruck = World.getBlock(iPos).x();
         if (BlockTags.leaves.tagged.contains(blockStruck)) {
-            Source sizzleSource = new Source(new Vector3f(pos.x(), pos.y(), pos.z()), 1.f, 1.f, 0, 0);
+            Source sizzleSource = new Source(new Vector3f((float) pos.x(), (float) pos.y(), (float) pos.z()), 1.f, 1.f, 0, 0);
             sizzleSource.play(Math.random() < 0.5f ? Sounds.SIZZLE1 : Sounds.SIZZLE2);
             AudioController.disposableSources.add(sizzleSource);
             spawnAsh(iPos);
@@ -76,8 +73,8 @@ public class Lightning extends Effect {
     }
 
     public void spawnAsh(Vector3i pos) {
-        AshEntity ashEntity = new AshEntity(EntityTypes.ASH, new Matrix4f().translate(pos.x(), pos.y(), pos.z()), (float) (Math.random() * -0.1f));
-        ashEntity.vel = new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+        AshEntity ashEntity = new AshEntity(EntityTypes.ASH, new Vector3d(pos.x(), pos.y(), pos.z()), new Matrix4f(), (float) (Math.random() * -0.1f));
+        ashEntity.vel = new Vector3d(Math.random(), Math.random(), Math.random());
         entitiesAddQueue.addLast(ashEntity);
     }
 

@@ -166,7 +166,7 @@ public class Pipelines {
                     .layout(pipelineLayout)
                     .renderPass(VK_NULL_HANDLE)
                     .pNext(renderingInfo.address()) //shadeState.address()
-                    .flags(VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR)
+                    //.flags(VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR)
                     .subpass(0)
                     .basePipelineHandle(VK_NULL_HANDLE) // Optional
                     .basePipelineIndex(-1); // Optional

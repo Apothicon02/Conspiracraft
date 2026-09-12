@@ -2,22 +2,22 @@ package org.conspiracraft.effects;
 
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public class Particle extends Effect {
     public int randomTicksAlive = 0;
-    public final Vector3f prevPos = new Vector3f();
-    public final Vector3f pos = new Vector3f();
-    public final Vector3f vel = new Vector3f();
+    public final Vector3d prevPos = new Vector3d();
+    public final Vector3d pos;
+    public final Vector3d vel = new Vector3d();
     public final Vector4f color = new Vector4f();
     public final static Vector3f up = new Vector3f(0, 1, 0);
-    public Particle(Matrix4f matrix, Vector4f color) {
+    public Particle(Vector3d pos, Matrix4f matrix, Vector4f color) {
         super(matrix);
         this.color.set(color);
+        this.pos = pos;
         prevPos.set(pos);
-        matrix.getTranslation(pos);
-        matrix.setTranslation(pos.x(), pos.y(), pos.z());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Particle extends Effect {
         Vector3f dir = new Vector3f(vel).normalize().negate();
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
-        matrix.identity().lookAlong(dir, up).invert().setTranslation(pos).scale(scale);
+        matrix.identity().lookAlong(dir, up).invert().scale(scale);
         return false;
     }
 }

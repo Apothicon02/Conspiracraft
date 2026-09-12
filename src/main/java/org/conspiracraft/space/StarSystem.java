@@ -42,7 +42,8 @@ public class StarSystem {
             }),
     };
 
-    public static Planet getNearestPlanet(Vector3f pos) {
+    public static Planet getNearestPlanet(Vector3d posD) {
+        Vector3f pos = new Vector3f(posD);
         Planet nearestPlanet = null;
         double nearestDist = Long.MAX_VALUE;
         for (Planet planet : planets) {

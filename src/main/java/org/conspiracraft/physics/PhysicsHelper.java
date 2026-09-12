@@ -14,19 +14,19 @@ import static org.conspiracraft.utils.Utils.sign;
 import static org.conspiracraft.world.World.entities;
 
 public class PhysicsHelper {
-    public static float voxelSize = 1;//0.125f;
-    public record BlockResult(float x, float y, float z, Vector2i block){};
-    public static BlockResult getClosestBlock(AABB aabb, Vector3f ref) {
+    public static double voxelSize = 1;//0.125f;
+    public record BlockResult(double x, double y, double z, Vector2i block){};
+    public static BlockResult getClosestBlock(AABB aabb, Vector3d ref) {
         //final float mX = aabb.xMin+((aabb.xMax-aabb.xMin)/2), mY = aabb.yMin+((aabb.yMax-aabb.yMin)/2), mZ = aabb.zMin+((aabb.zMax-aabb.zMin)/2);
         BlockResult closestBlock = null;
-        float closestDist = Float.MAX_VALUE;
+        double closestDist = Double.MAX_VALUE;
         BlockResult closestBlockUncollidable = null;
-        float closestUncollidableDist = Float.MAX_VALUE;
-        for (float x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
-            for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
-                for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
-                    float dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
-                    float dist = (dX*dX)+(dY*dY)+(dZ*dZ);
+        double closestUncollidableDist = Double.MAX_VALUE;
+        for (double x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
+            for (double y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
+                for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
+                    double dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
+                    double dist = (dX*dX)+(dY*dY)+(dZ*dZ);
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     boolean collided = false;
@@ -54,10 +54,10 @@ public class PhysicsHelper {
     }
     public static BlockResult getAnyBlock(AABB aabb) {
         Vector2i block = new Vector2i();
-        float hX = -1, hY = -1, hZ = -1;
-        for (float x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
-            for (float y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
-                for (float z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
+        double hX = -1, hY = -1, hZ = -1;
+        for (double x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
+            for (double y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
+                for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     if (blockType.blockProperties.isCollidable) {
@@ -95,19 +95,19 @@ public class PhysicsHelper {
         }
         return null;
     }
-    public static DDAResult dda(Vector3f pos, Vector3f ogDir, float maxDist) {
+    public static DDAResult dda(Vector3d pos, Vector3d ogDir, double maxDist) {
         Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector3i prevDDAPos = new Vector3i(ddaPos);
-        Vector3f dir = Utils.unzeroVec(ogDir.normalize());
-        Vector3f raySign = sign(dir);
-        Vector3f dist = new Vector3f(1.0f).div(new Vector3f(dir).absolute());
-        Vector3f sideDist = new Vector3f();
+        Vector3d dir = Utils.unzeroVec(ogDir.normalize());
+        Vector3d raySign = sign(dir);
+        Vector3d dist = new Vector3d(1.0f).div(new Vector3d(dir).absolute());
+        Vector3d sideDist = new Vector3d();
         sideDist.x = (raySign.x > 0 ? (ddaPos.x + 1 - pos.x) : (pos.x - ddaPos.x)) * dist.x;
         sideDist.y = (raySign.y > 0 ? (ddaPos.y + 1 - pos.y) : (pos.y - ddaPos.y)) * dist.y;
         sideDist.z = (raySign.z > 0 ? (ddaPos.z + 1 - pos.z) : (pos.z - ddaPos.z)) * dist.z;
-        Vector3f mask = new Vector3f(0);
+        Vector3d mask = new Vector3d(0);
 
-        float travelled = 0;
+        double travelled = 0;
         for (int i = 0; i < maxDist*2; i++) {
             if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
@@ -124,27 +124,27 @@ public class PhysicsHelper {
         }
         return null;
     }
-    public static void moveWithStepping(AABB objAABB, Vector3f vel) {
+    public static void moveWithStepping(AABB objAABB, Vector3d vel) {
         moveWithStepping(objAABB, vel, new ArrayList<>(), 1.f);
     }
-    public static void moveWithStepping(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs) {
+    public static void moveWithStepping(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs) {
         moveWithStepping(objAABB, vel, aabbs, 1.f);
     }
-    public static void moveWithStepping(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs, float stepHeight) {
-        Vector3f ogVel = new Vector3f(vel);
+    public static void moveWithStepping(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs, double stepHeight) {
+        Vector3d ogVel = new Vector3d(vel);
         move(objAABB, vel, new ArrayList<>(aabbs));
         if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
             vel.set(ogVel);
-            move(objAABB, new Vector3f(0, stepHeight, 0), new ArrayList<>(aabbs));
+            move(objAABB, new Vector3d(0, stepHeight, 0), new ArrayList<>(aabbs));
             move(objAABB, vel, new ArrayList<>(aabbs));
-            move(objAABB, new Vector3f(0, -stepHeight, 0), new ArrayList<>(aabbs));
+            move(objAABB, new Vector3d(0, -stepHeight, 0), new ArrayList<>(aabbs));
         }
     }
 
-    public static void move(AABB objAABB, Vector3f vel) {
+    public static void move(AABB objAABB, Vector3d vel) {
         move(objAABB, vel, new ArrayList<>());
     }
-    public static void move(AABB objAABB, Vector3f vel, ArrayList<AABB> aabbs) {
+    public static void move(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs) {
         AABB regionAABB = new AABB(
                 objAABB.xMin-1, objAABB.xMax+1,
                 objAABB.yMin-1, objAABB.yMax+1,
@@ -152,9 +152,9 @@ public class PhysicsHelper {
         if (vel.x() < 0) {regionAABB.xMin+=vel.x();} else {regionAABB.xMax+=vel.x();}
         if (vel.y() < 0) {regionAABB.yMin+=vel.y();} else {regionAABB.yMax+=vel.y();}
         if (vel.z() < 0) {regionAABB.zMin+=vel.z();} else {regionAABB.zMax+=vel.z();}
-        for (float x = regionAABB.xMin; x < regionAABB.xMax; x+=1) {
-            for (float y = regionAABB.yMin; y < regionAABB.yMax; y+=1) {
-                for (float z = regionAABB.zMin; z < regionAABB.zMax; z+=1) {
+        for (double x = regionAABB.xMin; x < regionAABB.xMax; x+=1) {
+            for (double y = regionAABB.yMin; y < regionAABB.yMax; y+=1) {
+                for (double z = regionAABB.zMin; z < regionAABB.zMax; z+=1) {
                     Vector2i blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
                     if (blockType.blockProperties.isCollidable) {
@@ -169,7 +169,7 @@ public class PhysicsHelper {
             }
         }
 
-        Vector3f moveVec = new Vector3f(vel);
+        Vector3d moveVec = new Vector3d(vel);
         for (AABB aabb : aabbs) {
             moveVec.x = objAABB.clipX(aabb, moveVec.x());
         }

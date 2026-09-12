@@ -12,7 +12,7 @@ public class GateBlockType extends BlockType {
     }
 
     @Override
-    public AABB[] getAABB(int subType, float x, float y, float z, boolean forCollision) {
+    public AABB[] getAABB(int subType, double x, double y, double z, boolean forCollision) {
         boolean isEven = (subType | 1) > subType;
         return (isEven && forCollision) ? null : (subType < 4 ? new AABB[]{new AABB((int)x, (int)(x+1), (int)y, (int)(y+1), ((int)z)+0.45f, ((int)(z+1))-0.45f)} : new AABB[]{new AABB(((int)x)+0.45f, ((int)(x+1))-0.45f, (int)y, (int)(y+1), (int)z, (int)(z+1))});
     }
@@ -31,8 +31,8 @@ public class GateBlockType extends BlockType {
         }
         Vector2i existing = World.getBlock(x, y, z);
         if (existing.x() != blockType) {
-            float zDist = z-Main.player.pos.z(), xDist = x-Main.player.pos.x();
-            float zDistAbs = Math.abs(z-Main.player.pos.z()), xDistAbs = Math.abs(x-Main.player.pos.x());
+            double zDist = z-Main.player.pos.z(), xDist = x-Main.player.pos.x();
+            double zDistAbs = Math.abs(z-Main.player.pos.z()), xDistAbs = Math.abs(x-Main.player.pos.x());
             if (zDistAbs > xDistAbs) {
                 if (zDist > 0) {
                     blockSubType = 2;

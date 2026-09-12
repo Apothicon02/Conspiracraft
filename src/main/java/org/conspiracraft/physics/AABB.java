@@ -1,8 +1,8 @@
 package org.conspiracraft.physics;
 
 public class AABB {
-    public float xMin, xMax, yMin, yMax, zMin, zMax;
-    public AABB(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
+    public double xMin, xMax, yMin, yMax, zMin, zMax;
+    public AABB(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
@@ -22,7 +22,7 @@ public class AABB {
         this.zMax = source.zMax;
         return this;
     }
-    public AABB set(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
+    public AABB set(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
@@ -31,16 +31,16 @@ public class AABB {
         this.zMax = zMax;
         return this;
     }
-    public AABB expand(float x, float y, float z) {
+    public AABB expand(double x, double y, double z) {
         if (x > 0) {xMax += x;} else {xMin += x;}
         if (y > 0) {yMax += y;} else {yMin += y;}
         if (z > 0) {zMax += z;} else {zMax += z;}
         return this;
     }
-    public AABB grow(float xyz) {
+    public AABB grow(double xyz) {
         return grow(xyz, xyz, xyz);
     }
-    public AABB grow(float x, float y, float z) {
+    public AABB grow(double x, double y, double z) {
         this.xMin -= x;
         this.xMax += x;
         this.yMin -= y;
@@ -49,7 +49,7 @@ public class AABB {
         this.zMax += z;
         return this;
     }
-    public AABB move(float x, float y, float z) {
+    public AABB move(double x, double y, double z) {
         this.xMin += x;
         this.xMax += x;
         this.yMin += y;
@@ -71,16 +71,20 @@ public class AABB {
     public boolean intersects(AABB against) {
         return intersectsX(against) && intersectsY(against) && intersectsZ(against);
     }
-    public float clipX(AABB against, float deltaX) {
+    public double clipX(AABB against, double deltaX) {
         if(intersectsY(against) && intersectsZ(against)) {
+            if (xMin < against.xMax && xMax > against.xMin) { //push out of AABB if embedded in.
+                double up = against.xMax - xMin, down = xMax - against.xMin;
+                return (up < down) ? up : -down;
+            }
             if(deltaX > 0 && xMax <= against.xMin) {
-                float clip = against.xMin - xMax;
+                double clip = against.xMin - xMax;
                 if (deltaX > clip) {
                     deltaX = clip;
                 }
             }
             if (deltaX < 0 && xMin >= against.xMax) {
-                float clip = against.xMax - xMin;
+                double clip = against.xMax - xMin;
                 if (deltaX < clip) {
                     deltaX = clip;
                 }
@@ -89,16 +93,20 @@ public class AABB {
         }
         return deltaX;
     }
-    public float clipY(AABB against, float deltaY) {
+    public double clipY(AABB against, double deltaY) {
         if (intersectsX(against) && intersectsZ(against)) {
+            if (yMin < against.yMax && yMax > against.yMin) { //push out of AABB if embedded in.
+                double up = against.yMax - yMin, down = yMax - against.yMin;
+                return (up < down) ? up : -down;
+            }
             if (deltaY > 0 && yMax <= against.yMin) {
-                float clip = against.yMin - yMax;
+                double clip = against.yMin - yMax;
                 if (deltaY > clip) {
                     deltaY = clip;
                 }
             }
             if (deltaY < 0 && yMin >= against.yMax) {
-                float clip = against.yMax - yMin;
+                double clip = against.yMax - yMin;
                 if (deltaY < clip) {
                     deltaY = clip;
                 }
@@ -107,16 +115,20 @@ public class AABB {
         }
         return deltaY;
     }
-    public float clipZ(AABB against, float deltaZ) {
+    public double clipZ(AABB against, double deltaZ) {
         if (intersectsX(against) && intersectsY(against)) {
+            if (zMin < against.zMax && zMax > against.zMin) { //push out of AABB if embedded in.
+                double up = against.zMax - zMin, down = zMax - against.zMin;
+                return (up < down) ? up : -down;
+            }
             if (deltaZ > 0 && zMax <= against.zMin) {
-                float clip = against.zMin - zMax;
+                double clip = against.zMin - zMax;
                 if (deltaZ > clip) {
                     deltaZ = clip;
                 }
             }
             if (deltaZ < 0 && zMin >= against.zMax) {
-                float clip = against.zMax - zMin;
+                double clip = against.zMax - zMin;
                 if (deltaZ < clip) {
                     deltaZ = clip;
                 }

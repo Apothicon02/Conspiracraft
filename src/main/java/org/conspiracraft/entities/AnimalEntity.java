@@ -7,20 +7,21 @@ import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AnimalEntity extends Entity {
-    public AnimalEntity(EntityType type, Matrix4f matrix, float scaleOffset) {
-        super(type, matrix, scaleOffset);
+    public AnimalEntity(EntityType type, Vector3d pos, Matrix4f matrix, float scaleOffset) {
+        super(type, pos, matrix, scaleOffset);
     }
 
     public final static Vector3f up = new Vector3f(0, 1, 0);
     @Override
     public boolean tick() {
-        matrix.getTranslation(prevPos);
+        prevPos.set(pos);
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
@@ -41,7 +42,8 @@ public class AnimalEntity extends Entity {
         }
         PhysicsHelper.moveWithStepping(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
         Vector3f dir = new Vector3f(vel).normalize().negate();
-        matrix.identity().lookAlong(dir, up).invert().setTranslation(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z()).scale(scale);
+        matrix.identity().lookAlong(dir, up).invert().scale(scale);
+        pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         return false;
     }
 }

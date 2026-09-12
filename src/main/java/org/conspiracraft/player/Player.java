@@ -37,23 +37,22 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
-    public Vector3f prevPos = new Vector3f();
-    public Vector3f pos = new Vector3f();
-    public Vector3f localPos = new Vector3f();
-    public Vector3f movement = new Vector3f();
-    public Vector3f vel = new Vector3f();
+    public Vector3d prevPos = new Vector3d();
+    public Vector3d pos = new Vector3d();
+    public Vector3d movement = new Vector3d();
+    public Vector3d vel = new Vector3d();
     public Inventory inv = new Inventory();
-    public Vector3f selectedBlock = new Vector3f();
-    public Vector3f prevSelectedBlock = new Vector3f();
+    public Vector3d selectedBlock = new Vector3d();
+    public Vector3d prevSelectedBlock = new Vector3d();
     public AABB playerAABB = new AABB(0, 0, 0, 0, 0, 0);
 
     public float breath = 10000;
     public int creativeInvScroll = 0;
     public boolean creative = true;
     public boolean bobbingDir = true;
-    public float bobbing = 0f;
-    public float dynamicSpeedOld = 0;
-    public float dynamicSpeed = 0;
+    public double bobbing = 0d;
+    public double dynamicSpeedOld = 0;
+    public double dynamicSpeed = 0;
     public float jumpStrength = 0.425f;
     public float scale = 1;
     public float baseEyeHeight = 0.86f * scale;
@@ -67,13 +66,13 @@ public class Player {
     public float sprintSpeed = 1.75f;
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
     public static Entity entityOn = null;
-    public static Vector3f prevEntityOnPos = new Vector3f();
+    public static Vector3d prevEntityOnPos = new Vector3d();
 
     public static final Random playerRand = new Random();
     public final Source breakingSource;
 
     public Player() {
-        breakingSource = new Source(pos, 1, 1, 0, 1);
+        breakingSource = new Source(new Vector3f(pos), 1, 1, 0, 1);
     }
 
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
@@ -85,7 +84,7 @@ public class Player {
         if (Files.exists(plrPath)) {
             int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));
             int i = 0;
-            pos.set(new Vector3f(plrData[i++] / 1000f, plrData[i++] / 1000f, plrData[i++] / 1000f));
+            pos.set(new Vector3d(plrData[i++] / 1000f, plrData[i++] / 1000f, plrData[i++] / 1000f));
             float[] camMatrix = new float[16];
             for (int cI = 0; cI < 16; cI++) {
                 camMatrix[cI] = plrData[i++] / 1000f;
@@ -137,7 +136,7 @@ public class Player {
 
     public double enteredWorld = 0;
     public Planet nearestPlanet = null;
-    public Vector3f oldCamTranslation = new Vector3f();
+    public Vector3d oldCamTranslation = new Vector3d();
     public int itemPickupDelayMs = 2000;
     public void tick() throws IOException, InterruptedException {
         oldCamTranslation.set(getCameraTranslationGlobal());
@@ -163,7 +162,7 @@ public class Player {
         doSounds();
 //        if (World.worldType.space() != null) { //going from surface to planet orbit
 //            if (pos.y() >= 1000) {
-//                changePlanet(new Vector3f(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
+//                changePlanet(new Vector3d(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
 //            }
 //        } else if (World.worldType == WorldTypes.SPACE) { //going from space to planet orbit
 //            if (pos.distance(nearestPlanet.pos) < nearestPlanet.scale - 100) {
@@ -176,7 +175,7 @@ public class Player {
 //                            )
 //                        )
 //                );
-//                changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+//                changePlanet(new Vector3d(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
 //            }
 //        } else if (pos.y() <= -200) { //going from planet orbit to planet surface
 //            WorldType nearestType = World.worldType == WorldTypes.EARTH.space() ? WorldTypes.EARTH : (
@@ -188,13 +187,13 @@ public class Player {
 //                        )
 //                    )
 //            );
-//            changePlanet(new Vector3f(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
+//            changePlanet(new Vector3d(World.size / 2.f, World.height + 2, World.size / 2.f), nearestType);
 //        } else if (pos.y() >= 1000) { //going from planet orbit to space
-//            changePlanet(new Vector3f(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
+//            changePlanet(new Vector3d(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
 //        }
     }
 
-    public void changePlanet(Vector3f newPos, WorldType newWorldType) throws IOException, InterruptedException {
+    public void changePlanet(Vector3d newPos, WorldType newWorldType) throws IOException, InterruptedException {
         if (newWorldType != null && timeMs-enteredWorld > 5000) { //5 second cooldown
             pos.set(newPos);
             prevPos.set(pos);
@@ -217,7 +216,7 @@ public class Player {
         bobbingScale = (height * -0.05f) / scale;
         Vector3f forwardDir = camera.getForwardWithoutPitch();
         Vector3f rightDir = camera.getRightWithoutPitch();
-        Vector3f newMovement = new Vector3f();
+        Vector3d newMovement = new Vector3d();
         if (forward) {
             newMovement.add(forwardDir);
         }
@@ -271,8 +270,8 @@ public class Player {
                 addParticle(color);
             } else {
                 float factor = (float) (0.0002f * timeAccum);
-                float actualSpeed = Utils.getInterpolatedFloat(dynamicSpeedOld, dynamicSpeed) * 0.02f;
-                float bobbingInc = actualSpeed;//(float) (actualSpeed*(height*factor*1.2f)*timeMul);//((float) (factor*(1.5f+playerRand.nextFloat())))));
+                double actualSpeed = Utils.getInterpolatedDouble(dynamicSpeedOld, dynamicSpeed) * 0.02f;
+                double bobbingInc = actualSpeed;//(float) (actualSpeed*(height*factor*1.2f)*timeMul);//((float) (factor*(1.5f+playerRand.nextFloat())))));
                 if (bobbingDir) {
                     bobbing += bobbingInc;
                     if (bobbing >= 0) {
@@ -335,13 +334,12 @@ public class Player {
                 }
             }
         }
-        vel.max(new Vector3f(-3)).min((new Vector3f(3)));
-        Vector3f entityMoveFactor = new Vector3f();
+        vel.max(new Vector3d(-3)).min((new Vector3d(3)));
+        Vector3d entityMoveFactor = new Vector3d();
         if (entityOn != null) {
-            Vector3f entityOnPos = new Vector3f();
-            entityOn.matrix.getTranslation(entityOnPos);
+            Vector3d entityOnPos = new Vector3d(entityOn.pos);
             if (prevEntityOnPos != null) {
-                entityMoveFactor.set(new Vector3f(entityOnPos).sub(prevEntityOnPos));
+                entityMoveFactor.set(new Vector3d(entityOnPos).sub(prevEntityOnPos));
             }
             prevEntityOnPos = entityOnPos;
         } else {
@@ -351,7 +349,7 @@ public class Player {
                 pos.x() - width, pos.x() + width,
                 pos.y() - height, pos.y() + height,
                 pos.z() - width, pos.z() + width);
-        Vector3f totalVel = new Vector3f(movement).add(vel).add(entityMoveFactor);
+        Vector3d totalVel = new Vector3d(movement).add(vel).add(entityMoveFactor);
         ArrayList<AABB> aabbs = new ArrayList<>();
         for (Entity entity : World.entities) {
             if (entity.playerCollidesWith()) {
@@ -359,9 +357,11 @@ public class Player {
             }
         }
         if (sprinting && !flying) {
-            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
+            //PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
+            PhysicsHelper.move(playerAABB, totalVel, aabbs);
         } else if (onSolid) {
-            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 0.5f);
+            //PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 0.5f);
+            PhysicsHelper.move(playerAABB, totalVel, aabbs);
         } else {
             PhysicsHelper.move(playerAABB, totalVel, aabbs);
         }
@@ -386,9 +386,9 @@ public class Player {
     public void stepFx() {
         BlockSFX stepSFX = BlockTypes.blockTypes[blockOn.x()].blockProperties.blockSFX;
         if (stepSFX != null && stepSFX.stepIds.length > 0) {
-            Source stepSource = new Source(pos, stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
+            Source stepSource = new Source(new Vector3f(pos), stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
             AudioController.disposableSources.add(stepSource);
-            stepSource.setVel(new Vector3f(vel).add(movement));
+            stepSource.setVel(new Vector3f(vel).add(new Vector3f(movement)));
             stepSource.play((stepSFX.stepIds[stepSFX.stepIds.length == 1 ? 0 : playerRand.nextInt(stepSFX.stepIds.length - 1)]), true);
         }
     }
@@ -420,7 +420,7 @@ public class Player {
     }
 
     public void addParticle(Vector4f color) {
-        Particle particle = new Particle(new Matrix4f().translate(pos).scale(0.075f + (float) (0.05f * Math.random())), color);
+        Particle particle = new Particle(pos, new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())), color);
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         effects.addLast(particle);
     }
@@ -431,7 +431,7 @@ public class Player {
         Vector3f up = new Vector3f();
         cam.positiveZ(forward).negate();
         cam.positiveY(up);
-        AudioController.setListenerData(new Vector3f(pos.x(), pos.y() + eyeHeight, pos.z()), vel, new float[]{forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z()});
+        AudioController.setListenerData(new Vector3f((float) pos.x(), (float) (pos.y() + eyeHeight), (float) pos.z()), new Vector3f(vel), new float[]{forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z()});
     }
 
     public Planet getPlanet() {
@@ -442,16 +442,15 @@ public class Player {
         camera.rotate((float) -Math.toRadians(pitch), (float) -Math.toRadians(yaw));
     }
 
-    public Vector3f getCameraTranslationGlobal() {
+    public Vector3d getCameraTranslationGlobal() {
         Vector3f translation = new Vector3f();
         camera.getViewMatrix().getTranslation(translation);
         //Vector3i iPos = new Vector3i((int)pos.x(), (int)pos.y(), (int)pos.z());
-        return translation.add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
+        return new Vector3d(translation).add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
     }
     public Vector3f getCameraTranslationInterpolated() {
-        Vector3f interpolated = Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslationGlobal());
-        interpolated.set(interpolated.x()%World.size, interpolated.y()%World.height, interpolated.z()%World.size);
-        return interpolated;
+        Vector3d interpolated = Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslationGlobal());
+        return new Vector3f((float) (interpolated.x()%World.size), (float) (interpolated.y()%World.height), (float) (interpolated.z()%World.size));
     }
 
     public Matrix4f getCameraMatrix() {

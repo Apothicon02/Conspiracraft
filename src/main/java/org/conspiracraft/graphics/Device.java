@@ -62,18 +62,18 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
-        PointerBuffer deviceExtensions = stack.mallocPointer(3)
-                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
-                .put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME))
-                .put(2, stack.UTF8(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME));
+        PointerBuffer deviceExtensions = stack.mallocPointer(1)
+                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
+                //.put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME))
+                //.put(2, stack.UTF8(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME));
 
-        VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
-                .shaderImageInt64Atomics(true);
+//        VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT int64 = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT.calloc(stack)
+//                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT)
+//                .shaderImageInt64Atomics(true);
         VkPhysicalDeviceSynchronization2Features sync2 = VkPhysicalDeviceSynchronization2Features.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES)
                 .synchronization2(true)
-                .pNext(int64.address());
+                ;//.pNext(int64.address());
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering = VkPhysicalDeviceDynamicRenderingFeatures.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES)
                 .dynamicRendering(true)
@@ -95,23 +95,23 @@ public class Device {
                 .descriptorBindingSampledImageUpdateAfterBind(true)
                 .descriptorBindingStorageImageUpdateAfterBind(true)
                 .pNext(timeline.address());
-        VkPhysicalDeviceFragmentShadingRateFeaturesKHR shadingRate = VkPhysicalDeviceFragmentShadingRateFeaturesKHR.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR)
-                .pipelineFragmentShadingRate(false)
-                .primitiveFragmentShadingRate(false)
-                .attachmentFragmentShadingRate(false)
-                .pNext(descriptorIndexing.address());
+//        VkPhysicalDeviceFragmentShadingRateFeaturesKHR shadingRate = VkPhysicalDeviceFragmentShadingRateFeaturesKHR.calloc(stack)
+//                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR)
+//                .pipelineFragmentShadingRate(false)
+//                .primitiveFragmentShadingRate(false)
+//                .attachmentFragmentShadingRate(false)
+//                .pNext(descriptorIndexing.address());
 
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
-                .shaderInt64(true)
-                .shaderFloat64(true);
+                .shaderInt64(false)
+                .shaderFloat64(false);
         VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
                 .pQueueCreateInfos(queueInfo)
                 .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
-                .pNext(shadingRate.address());
+                .pNext(descriptorIndexing.address()); //shadingRate.address()
 
         PointerBuffer pDevice = stack.mallocPointer(1);
         int deviceCreateErr = vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);

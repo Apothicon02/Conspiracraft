@@ -42,13 +42,13 @@ public class Sahara extends WorldType {
 @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/sahara");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
-            prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
+            prevMunPos = new Vector3f(0, World.height*-2, 0), munPos = new Vector3f(0, World.height*-2, 0);
     @Override
     public Vector4f getSkylight() {
         nearestLightning.set(-100000);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                Vector3f lightningPos = lightning.pos;
+                Vector3d lightningPos = lightning.pos;
                 if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
                     nearestLightning.set(lightningPos);
                 }
@@ -56,7 +56,7 @@ public class Sahara extends WorldType {
         }
         if (nearestLightning.x() >= 0) {
             skylightMul.set(0.f, 0.95f, 1.0f);
-            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+            return new Vector4f((float)nearestLightning.x(), (float)nearestLightning.y(), (float)nearestLightning.z(), 4);
         }
         skylightMul.set(1);
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);

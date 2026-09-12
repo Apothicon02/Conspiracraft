@@ -1,6 +1,7 @@
 package org.conspiracraft.utils;
 
 import org.conspiracraft.Main;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import sun.misc.Unsafe;
@@ -185,6 +186,18 @@ public class Utils {
         }
         return intArr;
     }
+    public static Vector3d unzeroVec(Vector3d dir) {
+        if (dir.x() == 0.0d) {
+            dir.x = 0.001d;
+        }
+        if (dir.y() == 0.0d) {
+            dir.y = 0.001d;
+        }
+        if (dir.z() == 0.0d) {
+            dir.z = 0.001d;
+        }
+        return dir;
+    }
     public static Vector3f unzeroVec(Vector3f dir) {
         if (dir.x() == 0.0f) {
             dir.x = 0.001f;
@@ -197,11 +210,24 @@ public class Utils {
         }
         return dir;
     }
+    public static double step(double edge, double d) {
+        return d >= edge ? 1.d : 0.d;
+    }
+    public static Vector3d step(Vector3d edge, double d) {
+        return new Vector3d(step(edge.x(), d), step(edge.y(), d), step(edge.z(), d));
+    }
     public static float step(float edge, float f) {
         return f >= edge ? 1.f : 0.f;
     }
     public static Vector3f step(Vector3f edge, float f) {
         return new Vector3f(step(edge.x(), f), step(edge.y(), f), step(edge.z(), f));
+    }
+    public static double sign(double d) {
+        double signum = Math.signum(d);
+        return signum == -0.0d ? 0.0d : signum;
+    }
+    public static Vector3d sign(Vector3d vec) {
+        return new Vector3d(sign(vec.x()), sign(vec.y()), sign(vec.z()));
     }
     public static float sign(float f) {
         float signum = Math.signum(f);
@@ -216,6 +242,9 @@ public class Utils {
     public static float furthestFromZeroMix(float first, float second, float mix) {
         return mix(first, Math.abs(first) > Math.abs(second) ? first : second, mix);
     }
+    public static double furthestFromZero(double first, double second) {
+        return Math.abs(first) > Math.abs(second) ? first : second;
+    }
     public static float furthestFromZero(float first, float second) {
         return Math.abs(first) > Math.abs(second) ? first : second;
     }
@@ -224,6 +253,12 @@ public class Utils {
     }
     public static double mix(double min, double max, double factor) {
         return min * (1 - factor) + max * factor;
+    }
+    public static Vector3d getInterpolatedVec(Vector3d old, Vector3d current) {
+        return new Vector3d(mix(old.x, current.x, Main.interpolationTime), mix(old.y, current.y, Main.interpolationTime), mix(old.z, current.z, Main.interpolationTime));
+    }
+    public static double getInterpolatedDouble(double old, double current) {
+        return mix(old, current, Main.interpolationTime);
     }
     public static Vector3f getInterpolatedVec(Vector3f old, Vector3f current) {
         return new Vector3f(mix(old.x, current.x, (float) Main.interpolationTime), mix(old.y, current.y, (float) Main.interpolationTime), mix(old.z, current.z, (float) Main.interpolationTime));

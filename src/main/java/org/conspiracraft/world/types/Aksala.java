@@ -58,7 +58,7 @@ public class Aksala extends WorldType {
 @Override
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/aksala");}
     public static Vector3f prevSunPos = new Vector3f(0, World.height*2, 0), sunPos = new Vector3f(0, World.height*2, 0),
-            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0), nearestLightning = new Vector3f();
+            prevOliviusPos = new Vector3f(0, World.height*-2, 0), oliviusPos = new Vector3f(0, World.height*-2, 0);
     public static Vector4f oliviusColor = new Vector4f(0.34f, 0.949f, 0.475f, 1);
 
     @Override
@@ -66,7 +66,7 @@ public class Aksala extends WorldType {
         nearestLightning.set(-100000);
         for (Effect effect : effects) {
             if (effect instanceof Lightning lightning) {
-                Vector3f lightningPos = lightning.pos;
+                Vector3d lightningPos = lightning.pos;
                 if (Main.player.pos.distance(lightningPos) <= Main.player.pos.distance(nearestLightning)) {
                     nearestLightning.set(lightningPos);
                 }
@@ -74,7 +74,7 @@ public class Aksala extends WorldType {
         }
         if (nearestLightning.x() >= 0) {
             skylightMul.set(1.f, 0.1f, 0.0f);
-            return new Vector4f(nearestLightning.x(), nearestLightning.y(), nearestLightning.z(), 4);
+            return new Vector4f((float) nearestLightning.x(), (float) nearestLightning.y(), (float) nearestLightning.z(), 4);
         }
         skylightMul.set(1);
         Vector4f skylight = new Vector4f(StarSystem.relativePos, 1);
