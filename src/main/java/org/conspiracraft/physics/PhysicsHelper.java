@@ -96,6 +96,7 @@ public class PhysicsHelper {
         return null;
     }
     public static DDAResult dda(Vector3d pos, Vector3d ogDir, double maxDist) {
+        Vector3d ddaPosD = new Vector3d(pos.x(), pos.y(), pos.z());
         Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector3i prevDDAPos = new Vector3i(ddaPos);
         Vector3d dir = Utils.unzeroVec(ogDir.normalize());
@@ -109,7 +110,9 @@ public class PhysicsHelper {
 
         double travelled = 0;
         for (int i = 0; i < maxDist*2; i++) {
-            if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, true);}
+            ddaPosD.set(dir).mul(travelled).add(pos);
+            if (travelled > maxDist) {return new DDAResult(prevDDAPos, ddaPos, ddaPosD, false);}
+            if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, ddaPosD, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
 
@@ -117,10 +120,6 @@ public class PhysicsHelper {
             travelled = sideDist.get(axis);
             sideDist.setComponent(axis, travelled + dist.get(axis));
             ddaPos.setComponent(axis, ddaPos.get(axis) + (int) raySign.get(axis));
-
-            if (travelled > maxDist) {
-                return new DDAResult(prevDDAPos, ddaPos, false);
-            }
         }
         return null;
     }

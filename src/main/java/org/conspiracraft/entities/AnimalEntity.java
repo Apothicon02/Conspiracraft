@@ -33,6 +33,10 @@ public class AnimalEntity extends Entity {
             friction *= 0.75f;
             if (Math.random() < 0.05f) {
                 vel.add(new Vector3f((float) (Math.random()-0.5f), 0, (float) (Math.random()-0.5f)));
+                addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
+                addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
+                addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
+                addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
             }
         }
         vel.mul(friction);

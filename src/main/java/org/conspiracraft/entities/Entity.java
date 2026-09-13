@@ -1,18 +1,26 @@
 package org.conspiracraft.entities;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.blocks.Material;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.effects.Particle;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.*;
 
+import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.conspiracraft.graphics.Renderer.drawCube;
+import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.World.size;
 
 public class Entity {
     public static int dataLength = 20; //excludes this int
@@ -86,5 +94,25 @@ public class Entity {
         PhysicsHelper.move(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         return false;
+    }
+
+    public void addParticle(Vector3d particlePos, Vector2i blockOn) {
+        Particle particle = new Particle(new Vector3d(particlePos), new Matrix4f().scale(0.075f + (float) (0.1f * Math.random())));
+        particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
+        particle.tex = Textures.materials;
+        Material[] mats = BlockTypes.blockTypes[blockOn.x()].materialsArr;
+        int id = mats[(int) (Math.random()*mats.length)].id();
+        particle.texOffset.set((id* Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
+        effects.addLast(particle);
+    }
+
+    public void draw() {
+        pushUBO.updateTex(Textures.entities);
+        pushUBO.updateAtlasOffset(type.atlasOffset);
+        pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
+        Matrix4f interpolatedMatrix = new Matrix4f(matrix);
+        Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
+        interpolatedMatrix.setTranslation((float) (interpolatedPos.x()%size), (float) (interpolatedPos.y()%height), (float) (interpolatedPos.z()%size));
+        drawCube(interpolatedMatrix, new Vector4f(1.f));
     }
 }

@@ -5,7 +5,9 @@ import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.effects.Particle;
+import org.conspiracraft.player.HandManager;
 import org.conspiracraft.player.Player;
+import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -16,7 +18,6 @@ import static org.conspiracraft.world.World.effects;
 public class CracksEntity extends Entity {
     public CracksEntity(EntityType type, Vector3d pos, Matrix4f matrix, float scaleOffset) {
         super(type, pos, matrix, scaleOffset);
-        prevPos.set(pos);
         minedLast = Main.currentTick;
         spawnParticle(); spawnParticle(); spawnParticle(); spawnParticle(); spawnParticle(); spawnParticle();
     }
@@ -28,6 +29,7 @@ public class CracksEntity extends Entity {
     public boolean tick() {
         if (Main.currentTick-minedLast > 5) {durability+=50;}
         if (durability <= 0 || durability > 1000) {return true;}
+        prevPos.set(pos);
         updateType();
         return false;
     }
@@ -53,9 +55,9 @@ public class CracksEntity extends Entity {
     }
 
     public void spawnParticle() {
-        Particle particle = new Particle(new Vector3d(prevPos.x(), prevPos.y()-0.5f, prevPos.z()), new Matrix4f().scale(0.075f+(float)(0.05f*Math.random())));
-        particle.vel.set((float) (Math.random()-0.5f)/2, (float) (0.5f+Math.random())/3, (float) (Math.random()-0.5f)/2);
-        effects.addLast(particle);
+        if (HandManager.ddaResult != null && HandManager.ddaResult.hitAnything) {
+            addParticle(new Vector3d(HandManager.ddaResult.hitD), World.getBlock(pos.x(), pos.y(), pos.z()));
+        }
     }
 
     public void updateType() {

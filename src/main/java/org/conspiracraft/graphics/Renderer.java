@@ -251,8 +251,11 @@ public class Renderer {
             if (compressedBlocks != null) {
                 MemoryUtil.memIntBuffer(voxelPtr+pointer+(paletteSize*4L), compressedBlocks.length)
                         .put(0, compressedBlocks);
-                MemoryUtil.memLongBuffer(voxelPtr+pointer+((paletteSize+compressedBlocks.length)*4L), lodsPerChunk)
-                        .put(0, chunk.getLodData());
+                long[] lodData = chunk.getLodData();
+                if (lodData != null) {
+                    MemoryUtil.memLongBuffer(voxelPtr + pointer + ((paletteSize + compressedBlocks.length) * 4L), lodsPerChunk)
+                            .put(0, chunk.getLodData());
+                }
             }
             if (initialized) {
                 updateRegion(World.packRegionPos(new Vector3i(chunkPos).div(regionSizeChunks)));
@@ -356,17 +359,8 @@ public class Renderer {
         StarSystem.render(stack);
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
-        for (Effect effect : effects) {
-            effect.draw();
-        }
-        pushUBO.updateTex(Textures.entities);
-        for (Entity entity : entities) {
-            pushUBO.updateAtlasOffset(entity.type.atlasOffset);
-            Matrix4f interpolatedMatrix = new Matrix4f(entity.matrix);
-            Vector3d pos = Utils.getInterpolatedVec(entity.prevPos, entity.pos);
-            interpolatedMatrix.setTranslation((float) (pos.x()%size), (float) (pos.y()%height), (float) (pos.z()%size));
-            drawCube(interpolatedMatrix, new Vector4f(1.f));
-        }
+        for (Effect effect : effects) {effect.draw();}
+        for (Entity entity : entities) {entity.draw();}
         updatePipeline(4);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));

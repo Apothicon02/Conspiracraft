@@ -54,6 +54,7 @@ public class HandManager {
         mmbDown = mmbDown || player.inputHandler.middleButtonPressed;
         rmbDown = rmbDown || player.inputHandler.rightButtonPressed;
     }
+    public static DDAResult ddaResult = null;
     public static void useHands(Window window) {
         Item selectedItem = player.inv.getSelectedItem(true);
         Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();
@@ -62,7 +63,7 @@ public class HandManager {
             blockStartedBreaking.set(0, 0, 0, 0);
             tiltTarget = 0;
         }
-        DDAResult ddaResult = PhysicsHelper.dda(player.getCameraTranslationGlobal(), new Vector3d(player.camera.getForward()), 1000);
+        ddaResult = PhysicsHelper.dda(player.getCameraTranslationGlobal(), new Vector3d(player.camera.getForward()), 1000);
         if (ddaResult != null && ddaResult.hitAnything) {
             player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
             player.prevSelectedBlock.set(ddaResult.prevHit.x(), ddaResult.prevHit.y(), ddaResult.prevHit.z());
@@ -120,7 +121,7 @@ public class HandManager {
         float resistance = BlockTypes.blockTypes[block.x()].getResistance();
         if (resistance <= 0) {damage = 10000000;} else {damage = (int)(((float)damage)/resistance);}
         if (entity == null) {
-            entity = new CracksEntity(EntityTypes.SLIGHTLY_CRACKED, new Vector3d(player.selectedBlock), new Matrix4f().translate(0.5f, 0.5f, 0.5f).scale(1.01f), 0);
+            entity = new CracksEntity(EntityTypes.SLIGHTLY_CRACKED, new Vector3d(player.selectedBlock).add(0.5d, 0.5d, 0.5d), new Matrix4f().translate(0.5f, 0.5f, 0.5f).scale(1.01f), 0);
             World.entities.add(entity);
         } else if (entity.mine(damage, BlockTypes.blockTypes[block.x()].blockProperties.blockSFX)) {
             World.breakBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());

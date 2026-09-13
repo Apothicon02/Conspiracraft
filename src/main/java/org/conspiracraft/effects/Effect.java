@@ -19,6 +19,7 @@ public class Effect {
     public final Vector4f color = new Vector4f(0.95f, 0.95f, 0.95f, 1.f);
     public Texture tex = null;
     public final Vector2i texOffset = new Vector2i();
+    public final Vector2i texSize = new Vector2i(16);
     public Effect(Vector3d pos, Matrix4f matrix) {
         prevPos.set(pos);
         this.pos = pos;
@@ -30,6 +31,7 @@ public class Effect {
     public void draw() {
         pushUBO.updateTex(tex);
         pushUBO.updateAtlasOffset(texOffset);
+        pushUBO.updateSize(texSize);
         Matrix4f interpolatedMatrix = new Matrix4f(matrix);
         Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
         interpolatedMatrix.setTranslation((float) (interpolatedPos.x()%size), (float) (interpolatedPos.y()%height), (float) (interpolatedPos.z()%size));
