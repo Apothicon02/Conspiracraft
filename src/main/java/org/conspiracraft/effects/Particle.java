@@ -1,24 +1,15 @@
 package org.conspiracraft.effects;
 
 import org.conspiracraft.world.World;
-import org.joml.Matrix4f;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class Particle extends Effect {
     public int randomTicksAlive = 0;
-    public final Vector3d prevPos = new Vector3d();
-    public final Vector3d pos;
     public final Vector3d vel = new Vector3d();
-    public final Vector4f color = new Vector4f();
     public final static Vector3f up = new Vector3f(0, 1, 0);
-    public Particle(Vector3d pos, Matrix4f matrix, Vector4f color) {
-        super(matrix);
-        this.color.set(color);
-        this.pos = pos;
-        prevPos.set(pos);
-    }
+    public Particle(Vector3d pos, Matrix4f matrix) {super(pos, matrix);}
 
     @Override
     public boolean tick() {

@@ -17,7 +17,7 @@ tasks.test {
 }
 
 group = "org.apothicon"
-version = "0.8.2-SNAPSHOT"
+version = "0.8.3-SNAPSHOT"
 
 val lwjglVersion = "3.4.1"
 val jomlVersion = "1.10.8"

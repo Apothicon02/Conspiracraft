@@ -53,7 +53,7 @@ public class CracksEntity extends Entity {
     }
 
     public void spawnParticle() {
-        Particle particle = new Particle(new Vector3d(prevPos.x(), prevPos.y()-0.5f, prevPos.z()), new Matrix4f().scale(0.075f+(float)(0.05f*Math.random())), new Vector4f(0.8f, 0.85f, 0.85f, 1.f));
+        Particle particle = new Particle(new Vector3d(prevPos.x(), prevPos.y()-0.5f, prevPos.z()), new Matrix4f().scale(0.075f+(float)(0.05f*Math.random())));
         particle.vel.set((float) (Math.random()-0.5f)/2, (float) (0.5f+Math.random())/3, (float) (Math.random()-0.5f)/2);
         effects.addLast(particle);
     }

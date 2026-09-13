@@ -2,9 +2,12 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.audio.BlockSFX;
+import org.conspiracraft.blocks.Material;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
+import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
 import static org.conspiracraft.world.World.effects;
 import static org.lwjgl.sdl.SDLScancode.*;
@@ -257,17 +261,15 @@ public class Player {
                 onSolid = true;
             }
         }
-        Vector4f color = new Vector4f(1.f);
         if (onSolid) {
-            color.set(0.8f, 0.85f, 0.85f, 1.f);
             if (!prevOnSolid) { //when landing from a fall
                 bobbing = bobbingScale;
                 bobbingDir = false;
-                addParticle(color);
-                addParticle(color);
-                addParticle(color);
-                addParticle(color);
-                addParticle(color);
+                addParticle();
+                addParticle();
+                addParticle();
+                addParticle();
+                addParticle();
             } else {
                 float factor = (float) (0.0002f * timeAccum);
                 double actualSpeed = Utils.getInterpolatedDouble(dynamicSpeedOld, dynamicSpeed) * 0.02f;
@@ -284,8 +286,8 @@ public class Player {
                         bobbing = bobbingScale;
                         bobbingDir = true;
                         stepFx();
-                        addParticle(color);
-                        addParticle(color);
+                        addParticle();
+                        addParticle();
                     }
                 }
             }
@@ -326,11 +328,11 @@ public class Player {
                     bobbing = bobbingScale;
                     bobbingDir = false;
                     stepFx();
-                    addParticle(color);
-                    addParticle(color);
-                    addParticle(color);
-                    addParticle(color);
-                    addParticle(color);
+                    addParticle();
+                    addParticle();
+                    addParticle();
+                    addParticle();
+                    addParticle();
                 }
             }
         }
@@ -419,9 +421,12 @@ public class Player {
         }
     }
 
-    public void addParticle(Vector4f color) {
-        Particle particle = new Particle(new Vector3d(pos), new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())), color);
+    public void addParticle() {
+        Particle particle = new Particle(new Vector3d(pos), new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())));
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
+        particle.tex = Textures.materials;
+        int id = ((Material) BlockTypes.blockTypes[blockOn.x()].materials.values().toArray()[0]).id();
+        particle.texOffset.set((id*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);
     }
 

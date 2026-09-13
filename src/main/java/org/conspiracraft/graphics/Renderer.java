@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
+import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
@@ -356,14 +357,7 @@ public class Renderer {
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
         for (Effect effect : effects) {
-            if (effect instanceof Lightning lightning) {
-                drawCube(lightning.matrix, lightning.color);
-            } else if (effect instanceof Particle particle) {
-                Matrix4f interpolatedMatrix = new Matrix4f(particle.matrix);
-                Vector3d pos = Utils.getInterpolatedVec(particle.prevPos, particle.pos);
-                interpolatedMatrix.setTranslation((float) (pos.x()%size), (float) (pos.y()%height), (float) (pos.z()%size));
-                drawCube(interpolatedMatrix, particle.color);
-            }
+            effect.draw();
         }
         pushUBO.updateTex(Textures.entities);
         for (Entity entity : entities) {

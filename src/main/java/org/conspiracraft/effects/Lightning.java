@@ -23,9 +23,8 @@ import static org.conspiracraft.world.World.entitiesAddQueue;
 public class Lightning extends Effect {
     public int lifetime = 0;
     public final Vector3i intPos = new Vector3i();
-    public final Vector4f color = new Vector4f(0);
     public Lightning(Vector3d pos, Matrix4f matrix) {
-        super(matrix);
+        super(pos, matrix);
         if (World.worldType == WorldTypes.EARTH) {
             color.set(2.f, 1.9f, 0.2f, 4.f);
         } else if (World.worldType == WorldTypes.AKSALA) {
@@ -35,7 +34,6 @@ public class Lightning extends Effect {
         } else {
             color.set(2.f, 1.9f, 0.2f, 4.f);
         }
-        this.pos.set(pos);
         intPos.set((int)pos.x(), (int)pos.y()-1, (int)pos.z());
         pos.add(+0.5f, matrix.getScale(new Vector3f()).y()/2.f, 0.5f);
         SFX sfx = Math.random() < 0.5f ? Sounds.THUNDER_1 : Sounds.THUNDER_2;
