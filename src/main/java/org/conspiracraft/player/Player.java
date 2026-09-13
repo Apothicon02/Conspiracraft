@@ -420,7 +420,7 @@ public class Player {
     }
 
     public void addParticle(Vector4f color) {
-        Particle particle = new Particle(pos, new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())), color);
+        Particle particle = new Particle(new Vector3d(pos), new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())), color);
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         effects.addLast(particle);
     }

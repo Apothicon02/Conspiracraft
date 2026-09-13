@@ -280,7 +280,7 @@ public class World {
                 in.close();
             }
         } else {
-            worldType.generate();
+            //worldType.generate();
         }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
@@ -365,7 +365,7 @@ public class World {
         int lY = y&15;
         int lZ = z&15;
         synchronized (chunk) {
-            if (!generating && !updateSet.add(cP)) {
+            if (!generating && updateSet.add(cP)) {
                 updateQueue.addLast(cP);
             }
             chunk.setLight(lX, lY, lZ, light);
@@ -412,7 +412,7 @@ public class World {
         updateHeightmap(x, y, z);
         LightHelper.queueLightUpdate(new Vector3i(x, y, z));
         synchronized (chunk) {
-            if (!updateSet.contains(cP) && !updateSet.add(cP)) {
+            if (updateSet.add(cP)) {
                 updateQueue.addLast(cP);
             }
         }
@@ -492,7 +492,7 @@ public class World {
                 }
             }
             synchronized (chunk) {
-                if (!updateSet.contains(cP) && !updateSet.add(cP)) {
+                if (updateSet.add(cP)) {
                     updateQueue.addLast(cP);
                 }
             }
@@ -528,7 +528,7 @@ public class World {
                 LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
             }
             synchronized (chunk) {
-                if (!updateSet.contains(cP) && !updateSet.add(cP)) { //may not need to do this since the light recalculation will prob do it
+                if (updateSet.add(cP)) { //may not need to do this since the light recalculation will prob do it
                     updateQueue.addLast(cP);
                 }
             }

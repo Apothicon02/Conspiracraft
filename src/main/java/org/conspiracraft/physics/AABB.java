@@ -73,10 +73,6 @@ public class AABB {
     }
     public double clipX(AABB against, double deltaX) {
         if(intersectsY(against) && intersectsZ(against)) {
-            if (xMin < against.xMax && xMax > against.xMin) { //push out of AABB if embedded in.
-                double up = against.xMax - xMin, down = xMax - against.xMin;
-                return (up < down) ? up : -down;
-            }
             if(deltaX > 0 && xMax <= against.xMin) {
                 double clip = against.xMin - xMax;
                 if (deltaX > clip) {
@@ -95,10 +91,6 @@ public class AABB {
     }
     public double clipY(AABB against, double deltaY) {
         if (intersectsX(against) && intersectsZ(against)) {
-            if (yMin < against.yMax && yMax > against.yMin) { //push out of AABB if embedded in.
-                double up = against.yMax - yMin, down = yMax - against.yMin;
-                return (up < down) ? up : -down;
-            }
             if (deltaY > 0 && yMax <= against.yMin) {
                 double clip = against.yMin - yMax;
                 if (deltaY > clip) {
@@ -117,10 +109,6 @@ public class AABB {
     }
     public double clipZ(AABB against, double deltaZ) {
         if (intersectsX(against) && intersectsY(against)) {
-            if (zMin < against.zMax && zMax > against.zMin) { //push out of AABB if embedded in.
-                double up = against.zMax - zMin, down = zMax - against.zMin;
-                return (up < down) ? up : -down;
-            }
             if (deltaZ > 0 && zMax <= against.zMin) {
                 double clip = against.zMin - zMax;
                 if (deltaZ > clip) {
