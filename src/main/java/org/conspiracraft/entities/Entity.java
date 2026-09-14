@@ -113,6 +113,6 @@ public class Entity {
         Matrix4f interpolatedMatrix = new Matrix4f(matrix);
         Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
         interpolatedMatrix.setTranslation((float) (interpolatedPos.x()%size), (float) (interpolatedPos.y()%height), (float) (interpolatedPos.z()%size));
-        drawCube(interpolatedMatrix, new Vector4f(1.f));
+        drawCube(interpolatedMatrix, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
     }
 }

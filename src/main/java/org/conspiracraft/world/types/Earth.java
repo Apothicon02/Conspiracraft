@@ -512,7 +512,8 @@ public class Earth extends WorldType {
                                 if (blockIn.x() == 0) {
                                     if (blockOn.x() == BlockTypes.GRASS.id) {
                                         if (foliageChance < 0.3f) {
-                                            setBlockWorldgen(x, surface + 1, z, foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.HYDRANGEA.id : BlockTypes.TALL_GRASS.id), rand.nextInt(4));
+                                            int type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.HYDRANGEA.id : BlockTypes.TALL_GRASS.id);
+                                            setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? (blockOn.y()*4) : 0)+rand.nextInt(4));
                                         }
                                     } else if (blockOn.x() == BlockTypes.SAND.id) {
                                         if (foliageChance < foliageNoise * 0.002f) {

@@ -63,9 +63,9 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 }
 vec4 normal = vec4(0);
 float getAO(float depth) {
-    float radius = AO_RADIUS;//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
+    float radius = AO_RADIUS*max(0.0625f, sqrt(noise(ivec2(gl_FragCoord.xy)).r));//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
-    vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.1f);
+    vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.02f);
     vec3 randVec = randomVec(ivec2(gl_FragCoord.xy));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
@@ -86,7 +86,7 @@ float getAO(float depth) {
         }
     }
     occlusion = 1.0 - occlusion / KERNEL_SIZE;
-    return pow(clamp(occlusion, 0.f, 1), 2.25f);
+    return pow(clamp(occlusion, 0.f, 1), 3);//mix(5.f, 2.25f, radius));
 }
 float shade = 1.f;
 bool sampleShade(int x, int y) {

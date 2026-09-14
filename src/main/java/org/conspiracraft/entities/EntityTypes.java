@@ -15,8 +15,8 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class EntityTypes {
-    public static int entityTexWidth = 8;
-    public static int entityTexHeight = 48;
+    public static int entityTexWidth = 16;
+    public static int entityTexHeight = entityTexWidth*6;
     public static Map<Integer, EntityType> entityTypeMap = new HashMap<>(Map.of());
 
     public static int getId(EntityType type) {
