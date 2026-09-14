@@ -90,7 +90,7 @@ public class HandManager {
                 }
                 if (delay == 0) { //if item did no interaction
                     if (lmbDown) {
-                        delay = mine(4);
+                        delay = mine(player.creative ? 400 : 4);
                     }
                 }
             }
