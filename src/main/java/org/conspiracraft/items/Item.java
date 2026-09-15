@@ -145,6 +145,10 @@ public class Item implements Cloneable {
         return type.blockToPlace;
     }
 
+    public float useSpeed() {
+        return this.type.useSpeed;
+    }
+
     public ItemUseResult use(DDAResult dda) {
         return type.use(dda, this);
     }

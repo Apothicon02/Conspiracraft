@@ -1,5 +1,9 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.audio.AudioController;
+import org.conspiracraft.audio.BlockSFX;
+import org.conspiracraft.audio.SFX;
+import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.CracksEntity;
@@ -21,17 +25,13 @@ import org.conspiracraft.items.Item;
 import java.lang.Math;
 
 import static org.conspiracraft.Main.player;
+import static org.conspiracraft.Main.window;
 
 public class HandManager {
-    public static long lastBlockBrokenOrPlaced = 0L;
-    public static long lastBlockPlaced = 0L;
-    public static long lastBlockBreakCheck = 0;
     public static int hotbarSlot = 0;
     public static float prevTilt = 0;
     public static float tilt = 0;
     public static float tiltTarget = 0;
-    public static int tiltDelay = 0;
-    public static Vector4i blockStartedBreaking = new Vector4i();
     public static long delayStart = 0;
     public static int delay = 0;
 
@@ -57,11 +57,6 @@ public class HandManager {
     public static DDAResult ddaResult = null;
     public static void useHands(Window window) {
         Item selectedItem = player.inv.getSelectedItem(true);
-        Vector2i blockToPlace = selectedItem == null ? new Vector2i(0) : selectedItem.place();
-        if (!lmbDown) {
-            player.breakingSource.stop();
-            blockStartedBreaking.set(0, 0, 0, 0);
-        }
         ddaResult = PhysicsHelper.dda(player.getCameraTranslationGlobal(), new Vector3d(player.camera.getForward()), 1000);
         if (ddaResult != null && ddaResult.hitAnything) {
             player.selectedBlock.set(ddaResult.hit.x(), ddaResult.hit.y(), ddaResult.hit.z());
@@ -73,8 +68,8 @@ public class HandManager {
         if (Main.timeMsLong - delayStart >= delay) {
             delayStart = Main.timeMsLong;
             delay = 0;
+            Vector2i block = World.getBlock(player.selectedBlock.x(), player.selectedBlock.y(), player.selectedBlock.z());
             if (rmbDown && !player.crouching) {
-                Vector2i block = World.getBlock(player.selectedBlock.x(), player.selectedBlock.y(), player.selectedBlock.z());
                 BlockType blockType = BlockTypes.blockTypes[block.x()];
                 if (blockType != null) {
                     delay = blockType.use(player.selectedBlock, block);
@@ -89,21 +84,17 @@ public class HandManager {
                 }
                 if (delay == 0) { //if item did no interaction
                     if (lmbDown) {
-                        delay = mine(player.creative ? 400 : 4);
+                        delay = mine(player.creative ? 2400 : 24);
                     }
+                }
+                if (delay != 0) {
+                    BlockSFX sfx = BlockTypes.blockTypes[block.x()].blockProperties.blockSFX;
+                    Source source = new Source(new Vector3f(ddaResult.hitD), sfx.placeGain + ((sfx.placeGain * Player.playerRand.nextFloat()) / 3), sfx.placePitch + ((sfx.placePitch * Player.playerRand.nextFloat()) / 3), 0.f, 0);
+                    source.play(sfx.placeIds[sfx.placeIds.length == 1 ? 0 : Player.playerRand.nextInt(sfx.placeIds.length - 1)], true);
+                    AudioController.disposableSources.add(source);
                 }
             }
         }
-        if (lmbDown) {
-            if (tiltTarget == 0) {
-                tiltTarget = 30;
-            }
-        } else {
-            tiltTarget = 0;
-        }
-        lmbDown = false;
-        mmbDown = false;
-        rmbDown = false;
     }
 
     public static int mine(int damage) {
@@ -130,26 +121,38 @@ public class HandManager {
     }
 
     public static void tick() {
-        if (tiltDelay >= 0) {
-            tiltDelay--;
+        if (lmbDown) {
+            if (tiltTarget == 0) {
+                tiltTarget = 30;
+            }
+        } else {
+            tiltTarget = 0;
         }
         prevTilt = tilt;
-        if (tiltDelay <= 0) {
-            if (tiltTarget == 0 && Math.abs(tilt - tiltTarget) < 10f) {
-                tilt = 0;
-            } else {
-                if (tilt < tiltTarget) {
-                    tilt += 10f;
-                } else if (tilt > tiltTarget) {
-                    tilt -= 10f;
-                }
-                if (tilt >= 30) {
-                    tiltTarget = -30;
-                } else if (tilt <= -30) {
-                    tiltTarget = 30;
-                }
+        if (tiltTarget == 0 && Math.abs(tilt - tiltTarget) < 10f) {
+            tilt = 0;
+        } else {
+            Item selectedItem = player.inv.getSelectedItem(true);
+            float tiltSpeed = 10.f;
+            if (!(selectedItem == null || selectedItem.amount <= 0)) {
+                tiltSpeed = selectedItem.useSpeed();
+            }
+            if (tilt < tiltTarget) {
+                tilt += tiltSpeed;
+            } else if (tilt > tiltTarget) {
+                tilt -= tiltSpeed;
+            }
+            if (tilt >= 30) {
+                tiltTarget = -30;
+                if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
+            } else if (tilt <= -30) {
+                tiltTarget = 30;
             }
         }
+
+        lmbDown = false;
+        mmbDown = false;
+        rmbDown = false;
     }
 
     public static float getTilt() {

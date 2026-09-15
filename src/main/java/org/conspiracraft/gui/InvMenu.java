@@ -14,9 +14,9 @@ public class InvMenu extends Menu {
             addSlot(new Slot().setPos(GUI.slotSize*i, 0));
         }
         this.items = new Item[slotAmt];
-        setItem(0, new Item().type(ItemTypes.STEEL_SCYTHE).amount(1));
-        setItem(1, new Item().type(ItemTypes.STEEL_PICK).amount(1));
-        setItem(2, new Item().type(ItemTypes.STEEL_HATCHET).amount(1));
-        setItem(3, new Item().type(ItemTypes.STEEL_SPADE).amount(1));
+        setItem(0, ItemTypes.STEEL_SCYTHE.createItem().amount(1));
+        setItem(1, ItemTypes.STEEL_PICK.createItem().amount(1));
+        setItem(2, ItemTypes.STEEL_HATCHET.createItem().amount(1));
+        setItem(3, ItemTypes.STEEL_SPADE.createItem().amount(1));
     }
 }

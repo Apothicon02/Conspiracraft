@@ -20,6 +20,7 @@ public class ItemType {
     public List<ItemTag> tags = List.of();
     public String name;
     public int maxStackSize = 1;
+    public float useSpeed = 10.f;
     public Vector2i atlasOffset = null;
     public Vector2i blockToPlace = new Vector2i(0);
     public ItemSFX sound = new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.2f, 1);
@@ -33,6 +34,10 @@ public class ItemType {
     }
     public ItemType maxStackSize(int size) {
         maxStackSize = size;
+        return this;
+    }
+    public ItemType useSpeed(float speed) {
+        useSpeed = speed;
         return this;
     }
     public ItemType atlasOffset(int x, int y) {

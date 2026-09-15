@@ -16,8 +16,8 @@ public class BarrelMenu extends Menu {
             addSlot(new Slot().setPos(GUI.slotSize*(i%slotsPerRow), (GUI.slotSize*(i/slotsPerRow))));
         }
         this.items = new Item[slotAmt];
-        setItem(0, new Item().type(ItemTypes.STICK).amount(64));
-        setItem(1, new Item().type(ItemTypes.PAPER).amount(32));
-        setItem(2, new Item().type(ItemTypes.STEEL_HATCHET).amount(1));
+        setItem(0, ItemTypes.STICK.createItem().amount(64));
+        setItem(1, ItemTypes.PAPER.createItem().amount(32));
+        setItem(2, ItemTypes.STEEL_HATCHET.createItem().amount(1));
     }
 }

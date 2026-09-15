@@ -56,6 +56,7 @@ public class Player {
     public int creativeInvScroll = 0;
     public boolean creative = true;
     public boolean bobbingDir = true;
+    public double prevBobbing = 0d;
     public double bobbing = 0d;
     public double dynamicSpeedOld = 0;
     public double dynamicSpeed = 0;
@@ -75,10 +76,8 @@ public class Player {
     public static Vector3d prevEntityOnPos = new Vector3d();
 
     public static final Random playerRand = new Random();
-    public final Source breakingSource;
 
     public Player() {
-        breakingSource = new Source(new Vector3f(pos), 1, 1, 0, 1);
     }
 
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
@@ -143,7 +142,8 @@ public class Player {
     public void draw() {
         updatePipeline(5);
         pushUBO.updateTex(null);
-        Matrix4f matrix = new Matrix4f().rotationXYZ((float) (0.5f+Math.toRadians(Utils.getInterpolatedFloat(HandManager.prevTilt, HandManager.tilt)*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, -0.3f, 0.3f);
+        float bob = (float)Utils.getInterpolatedDouble(prevBobbing, bobbing);
+        Matrix4f matrix = new Matrix4f().rotationXYZ((float) (bob+0.5f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, (-0.3f)+bob, 0.3f);
         Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
         Renderer.drawCube(new Matrix4f(matrix).translate(-0.134f, 0, 0).scale(1.f, 0.155f, 0.155f), new Vector4f(0.7f, 0.25f, 0.25f, 1.f));
         Item selItem = inv.getSelectedItem(true);
@@ -152,7 +152,7 @@ public class Player {
             pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
             pushUBO.updateAtlasOffset(selItem.type.atlasOffset);
             Renderer.drawQuad(matrix.rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
-            //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(Utils.getInterpolatedFloat(HandManager.prevTilt, HandManager.tilt)*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
+            //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
         }
     }
 
@@ -161,10 +161,10 @@ public class Player {
     public Vector3d oldCamTranslation = new Vector3d();
     public int itemPickupDelayMs = 2000;
     public void tick() throws IOException, InterruptedException {
+        prevBobbing = bobbing;
         oldCamTranslation.set(getCameraTranslationGlobal());
         nearestPlanet = StarSystem.getNearestPlanet(pos);
         inv.tick();
-        if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
         for (Item item : World.items) {
             if (pos.distance(item.pos) < 1 && (Main.timeMsLong-item.timeSpawned) > itemPickupDelayMs) {
                 Item newItem = inv.menu.addItem(item);

@@ -25,7 +25,7 @@ public class CreativeMenu extends Menu {
             for (int i = 0; i < items.length; i++) {
                 ItemType type = ItemTypes.itemTypeMap.get(1+i+(scroll*slotsPerRow));
                 if (type != null) {
-                    setItem(i, new Item().type(type).amount(type.maxStackSize));
+                    setItem(i, type.createItem().amount(type.maxStackSize));
                 } else {
                     setItem(i, null);
                 }
