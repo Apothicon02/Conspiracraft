@@ -77,7 +77,7 @@ public class World {
 
     public static void tickItems() {
         for (Item item : World.items) {
-            if (item.timeExisted >= 600000) { //600000ms = 10m
+            if ((Main.timeMsLong-item.timeSpawned) >= 600000) { //600000ms = 10m
                 World.items.remove(item);
             } else {
                 item.tick();
@@ -85,7 +85,7 @@ public class World {
         }
     }
     public static void dropItem(Item item) {
-        Item newItem = item.clone().timeExisted(-2000).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0));
+        Item newItem = item.clone().timeSpawned((int)Main.timeMsLong).moveTo(new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0));
         World.items.add(newItem);
         newItem.playSound(new Vector3f(newItem.pos));
     }

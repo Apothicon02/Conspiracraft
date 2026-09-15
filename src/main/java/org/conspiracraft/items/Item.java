@@ -16,19 +16,20 @@ import java.nio.IntBuffer;
 public class Item implements Cloneable {
     public static int dataLength = 9; //excludes this int
     public ItemType type = ItemTypes.AIR;
+    public Vector3d prevPos = new Vector3d();
     public Vector3d pos = new Vector3d();
     public int amount = 1;
     public float rot = 0.f;
     public float hover = 0.f;
     public boolean hoverMeridiem = false;
-    public int timeExisted = 0;
+    public int timeSpawned = (int)Main.timeMsLong;
     public long prevTickTime = 0;
 
     public Item load(IntBuffer data) {
-        return new Item().type(ItemTypes.itemTypeMap.get(data.get())).moveTo(new Vector3f(data.get()/1000f, data.get()/1000f, data.get()/1000f)).rot(data.get()/1000f).hover(data.get()/1000f, data.get()>0).amount(data.get()).timeExisted(data.get());
+        return new Item().type(ItemTypes.itemTypeMap.get(data.get())).moveTo(new Vector3f(data.get()/1000f, data.get()/1000f, data.get()/1000f)).rot(data.get()/1000f).hover(data.get()/1000f, data.get()>0).amount(data.get()).timeSpawned(data.get());
     }
     public int[] getData() {
-        return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeExisted};
+        return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeSpawned};
     }
 
     public String amountString() {
@@ -52,48 +53,42 @@ public class Item implements Cloneable {
     }
 
     public void tick() {
-        long time = Main.timeMsLong;
-        if (prevTickTime != 0) {
-            long dif = time - prevTickTime;
-            Vector2i block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
-            if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {
-                this.pos.y -= 0.125f;
-            }
+        prevPos.set(pos);
+        Vector2i block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
+        if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {
+            this.pos.y -= 0.125f;
+        }
 //            int start = (int)(Math.random()*Math.max(1, World.items.size()-10));
 //            int end = Math.min(start+10, World.items.size());
-            for (Item randomItem : World.items) {
-                //Item randomItem = World.items.get(i);
-                if (randomItem.type == type && randomItem.amount < randomItem.type.maxStackSize && Math.abs(randomItem.pos.x() - pos.x()) < 1.f && Math.abs(randomItem.pos.y() - pos.y()) < 1.f && Math.abs(randomItem.pos.z() - pos.z()) < 1.f) {
-                    int flow = Math.min(amount, randomItem.type.maxStackSize - randomItem.amount);
-                    randomItem.amount += flow;
-                    amount -= flow;
-                    if (amount <= 0) {
-                        World.items.remove(this);
-                    }
-                    break;
+        for (Item randomItem : World.items) {
+            //Item randomItem = World.items.get(i);
+            if (randomItem.type == type && randomItem.amount < randomItem.type.maxStackSize && Math.abs(randomItem.pos.x() - pos.x()) < 1.f && Math.abs(randomItem.pos.y() - pos.y()) < 1.f && Math.abs(randomItem.pos.z() - pos.z()) < 1.f) {
+                int flow = Math.min(amount, randomItem.type.maxStackSize - randomItem.amount);
+                randomItem.amount += flow;
+                amount -= flow;
+                if (amount <= 0) {
+                    World.items.remove(this);
                 }
-            }
-            timeExisted += dif;
-            rot += (dif / 50f) * Math.random();
-            if (rot >= 360) {
-                rot = 0;
-            }
-            double hoverInc = (dif / 1750f) * Math.min(Math.max(0.01f, 0.1f - hover) * 10, Math.max(0.01f, 0.1f - Math.abs(hover - 0.1f)) * 10) * Math.random();
-            if (hoverMeridiem) {
-                hover += hoverInc;
-                if (hover >= 0.1) {
-                    hover = 0.1f;
-                    hoverMeridiem = false;
-                }
-            } else {
-                hover -= hoverInc;
-                if (hover < 0.f) {
-                    hover = 0.f;
-                    hoverMeridiem = true;
-                }
+                break;
             }
         }
-        prevTickTime = time;
+        rot += Math.random();
+        if (rot >= 360) {
+            rot = 0;
+        }
+        if (hoverMeridiem) {
+            hover += Math.random()*0.01f;
+            if (hover >= 0.1) {
+                hover = 0.1f;
+                hoverMeridiem = false;
+            }
+        } else {
+            hover -= Math.random()*0.01f;
+            if (hover < 0.f) {
+                hover = 0.f;
+                hoverMeridiem = true;
+            }
+        }
     }
     public Item moveTo(Vector3i pos) {
         this.pos = new Vector3d(pos.x, pos.y, pos.z);
@@ -115,8 +110,8 @@ public class Item implements Cloneable {
         this.amount = amount;
         return this;
     }
-    public Item timeExisted(int newTime) {
-        this.timeExisted = newTime;
+    public Item timeSpawned(int newTime) {
+        this.timeSpawned = newTime;
         return this;
     }
     public Item rot(float rot) {

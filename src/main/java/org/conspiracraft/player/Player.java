@@ -9,6 +9,7 @@ import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.audio.AudioController;
@@ -32,9 +33,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.conspiracraft.graphics.Renderer.*;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
-import static org.conspiracraft.world.World.effects;
+import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.World.size;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -138,6 +140,22 @@ public class Player {
         inv.save();
     }
 
+    public void draw() {
+        updatePipeline(5);
+        pushUBO.updateTex(null);
+        Matrix4f matrix = new Matrix4f().rotationXYZ((float) (0.5f+Math.toRadians(Utils.getInterpolatedFloat(HandManager.prevTilt, HandManager.tilt)*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, -0.3f, 0.3f);
+        Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
+        Renderer.drawCube(new Matrix4f(matrix).translate(-0.134f, 0, 0).scale(1.f, 0.155f, 0.155f), new Vector4f(0.7f, 0.25f, 0.25f, 1.f));
+        Item selItem = inv.getSelectedItem(true);
+        if (selItem != null && selItem.type != ItemTypes.AIR) {
+            pushUBO.updateTex(Textures.items);
+            pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
+            pushUBO.updateAtlasOffset(selItem.type.atlasOffset);
+            Renderer.drawQuad(matrix.rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
+            //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(Utils.getInterpolatedFloat(HandManager.prevTilt, HandManager.tilt)*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
+        }
+    }
+
     public double enteredWorld = 0;
     public Planet nearestPlanet = null;
     public Vector3d oldCamTranslation = new Vector3d();
@@ -148,7 +166,7 @@ public class Player {
         inv.tick();
         if (!GUI.inventoryOpen && !GUI.pauseMenuOpen) {HandManager.useHands(window);}
         for (Item item : World.items) {
-            if (pos.distance(item.pos) < 1 && item.timeExisted > itemPickupDelayMs) {
+            if (pos.distance(item.pos) < 1 && (Main.timeMsLong-item.timeSpawned) > itemPickupDelayMs) {
                 Item newItem = inv.menu.addItem(item);
                 if (newItem == null || newItem.amount <= 0) {
                     World.items.remove(item);
@@ -157,6 +175,7 @@ public class Player {
                 }
             }
         }
+        HandManager.tick();
         movementTick();
         if (breath > 0) {
             breath--;

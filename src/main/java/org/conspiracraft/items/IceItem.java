@@ -34,7 +34,6 @@ public class IceItem extends Item implements Cloneable {
                     break;
                 }
             }
-            timeExisted += dif;
             rot += (dif / 50f) * Math.random();
             if (rot >= 360) {
                 rot = 0;

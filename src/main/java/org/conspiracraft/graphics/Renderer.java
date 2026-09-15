@@ -366,8 +366,10 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
         for (Item item : World.items) {
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
-            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation(new Vector3f(item.pos).add(0, item.hover, 0)).scale(0.5f), new Vector4f(1.f));
+            Vector3d interpolatedPos = Utils.getInterpolatedVec(item.prevPos, item.pos).add(0, item.hover, 0);
+            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float)(interpolatedPos.x()%size), (float)(interpolatedPos.y()%height), (float)(interpolatedPos.z()%size)).scale(0.5f), new Vector4f(1.f));
         }
+        player.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
     }
     public static final int swizzle = 16;
@@ -394,7 +396,7 @@ public class Renderer {
     }
     public static void drawAA(MemoryStack stack) {
         if (Settings.taaEnabled || Settings.upscaled) {
-            updatePipeline(7);
+            updatePipeline(8);
             bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, false);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
@@ -407,7 +409,7 @@ public class Renderer {
 
             pushUBO.updateTex(Textures.colors1, Textures.depth1, null);
             pushUBO.push();
-            updatePipeline(8);
+            updatePipeline(9);
             bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
@@ -420,13 +422,13 @@ public class Renderer {
     public static void drawBlur(MemoryStack stack) {
         pushUBO.updateTex(Textures.colors2, null, null);
         pushUBO.push();
-        updatePipeline(5);
+        updatePipeline(6);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally, Textures.bloom_horizontally}, Textures.depth2, 4, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image, Textures.bloom_horizontally.image}, Textures.depth2.image);
         pushUBO.updateTex(Textures.bloom_horizontally, Textures.blurred_horizontally, null);
         pushUBO.push();
-        updatePipeline(6);
+        updatePipeline(7);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred, Textures.bloom}, Textures.depth2, 4, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image, Textures.bloom.image}, Textures.depth2.image);

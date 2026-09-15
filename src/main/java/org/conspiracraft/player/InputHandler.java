@@ -150,7 +150,7 @@ public class InputHandler {
                             Item item = player.inv.getSelectedItem(false);
                             if (item != null) {
                                 World.dropItem(item);
-                                item.amount(0).type(ItemTypes.AIR).timeExisted(0);
+                                item.amount(0).type(ItemTypes.AIR).timeSpawned((int) timeMsLong);
                             }
                         }
                         if (keyRelease(SDL_SCANCODE_T)) {

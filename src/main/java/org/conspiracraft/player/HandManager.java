@@ -61,7 +61,6 @@ public class HandManager {
         if (!lmbDown) {
             player.breakingSource.stop();
             blockStartedBreaking.set(0, 0, 0, 0);
-            tiltTarget = 0;
         }
         ddaResult = PhysicsHelper.dda(player.getCameraTranslationGlobal(), new Vector3d(player.camera.getForward()), 1000);
         if (ddaResult != null && ddaResult.hitAnything) {
