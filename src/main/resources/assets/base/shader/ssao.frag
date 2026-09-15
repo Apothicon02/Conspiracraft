@@ -63,6 +63,7 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
 }
 vec4 normal = vec4(0);
 float getAO(float depth) {
+    if (depth >= 1.f) {return 1.f;}
     float radius = AO_RADIUS*max(0.0625f, sqrt(noise(ivec2(gl_FragCoord.xy)).r));//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.02f);
@@ -78,7 +79,7 @@ float getAO(float depth) {
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
-            vec3 sampleVS = reconstructViewPos(sampleUV, textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], sampleUV, 0).r);
+            vec3 sampleVS = reconstructViewPos(sampleUV, texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], ivec2(sampleUV*globalUbo.res), 0).r);
             float rangeCheck = smoothstep(0, 1, radius/(length(posVS-sampleVS)+0.001f));
             if (sampleVS.z+0.01f < sampleVec.z) {
                 occlusion += rangeCheck;
@@ -102,9 +103,10 @@ bool sampleShade(int x, int y) {
     return true;
 }
 void main() {
-    vec4 color = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0);
-    float depth = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r;
-    normal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0);
+    ivec2 coords = ivec2(uv*globalUbo.res);
+    vec4 color = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0);
+    float depth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], coords, 0).r;
+    normal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0);
     shade = color.a;
     if (shade > 2) { // && scaledCoords.x > 0 && scaledCoords.y > 0 && scaledCoords.x < globalUbo.res.x-1 && scaledCoords.y < globalUbo.res.y-1
         shade = 1.f;

@@ -11,10 +11,12 @@ public class Pipeline {
     public long frag;
     public int colorAttachments;
     public long vkPipeline = -1;
-    public Pipeline(String vert, String frag, int colorAttachments) {
+    public boolean depthEnabled = true;
+    public Pipeline(String vert, String frag, int colorAttachments, boolean depthEnabled) {
         vertName = vert;
         fragName = frag;
         this.colorAttachments = colorAttachments;
+        this.depthEnabled = depthEnabled;
     }
     public void compile() throws IOException {
         this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));

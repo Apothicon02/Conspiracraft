@@ -387,7 +387,9 @@ vec4 getMaterialColor(vec4 model) {
     int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
     int materialY = int(materialId/materialsPerRow);
     materialId-=(materialY*materialsPerRow);
-    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+(matUV*materialWidth)), 0);
+    ivec2 localTexel = ivec2(floor(matUV*float(materialWidth)));
+    localTexel = clamp(localTexel, ivec2(0), ivec2(materialWidth-1));
+    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
 }
 vec3 firstTintAddition = vec3(0);
 vec4 prevTintAddition = vec4(0);
@@ -434,7 +436,7 @@ vec4 dda(bool shadow) {
     LongStruct region = LongStruct(0, 0);
 
     vec3 chunkStartPos = rayPos/chunkSize;
-    ivec3 chunkPos = ivec3(chunkStartPos);
+    ivec3 chunkPos = ivec3(floor(chunkStartPos));
     ivec3 ddaPos = chunkPos;
     vec3 dist = 1.0/rayDir;
     vec3 sideDist = ((ddaPos - chunkStartPos) + 0.5 + raySign * 0.5) * dist;
@@ -468,7 +470,7 @@ vec4 dda(bool shadow) {
 
                 chunkWorldPos = ddaPos * chunkSize;
                 lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
-                ddaPos = ivec3(lodStartPos);
+                ddaPos = ivec3(floor(lodStartPos));
                 sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
             }
         } else if (stage == 2) {
@@ -486,7 +488,7 @@ vec4 dda(bool shadow) {
 
                     lodWorldPos = ivec3(lodPos*lodSize);
                     blockStartPos = uv3d(lodWorldPos, float(lodSize), lodSize);
-                    ddaPos = ivec3(blockStartPos);
+                    ddaPos = ivec3(floor(blockStartPos));
                     sideDist = ((ddaPos - blockStartPos) + 0.5 + raySign * 0.5) * dist;
                 }
             }
@@ -531,7 +533,7 @@ vec4 dda(bool shadow) {
                         stepAnything = false;
                         blockRayPos = ddaPos;
 
-                        ddaPos = ivec3(voxelStartPos);
+                        ddaPos = ivec3(floor(voxelStartPos));
                         sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
                     }
                 }
@@ -660,9 +662,9 @@ void main() {
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(0));
     } else {
         vec2 uv = coords/vec2(res);
-        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0).rgb, 1));
-        //        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r, 0, 0, 0));
-        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0).xyz, 1));
+        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0).rgb, 1));
+        //        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], coords, 0).r, 0, 0, 0));
+        //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0).xyz, 1));
         vec3 camPos = invView[3].xyz;
         ivec3 iCamPos = ivec3(camPos);
         ogPos = camPos;//vec3(iCamPos.x%size, iCamPos.y%height, iCamPos.z%size)+(camPos-iCamPos);
@@ -701,21 +703,24 @@ void main() {
             primaryLightPos = ogPos + ogDir * renderDistance;
         } else {
             vec4 clipPos = globalUbo.proj * (globalUbo.view * vec4(primaryLightPos-(primaryFlatNormal*0.0003f), 1.0));
-            depth = clipPos.z/clipPos.w;
+            depth = min(0.9f, clipPos.z/clipPos.w);
         }
         bool airAbove = false;
-        float rasterDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], uv, 0).r;
+        float infrontDepth = min(1.f, texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0).r);
+        if (infrontDepth > 0) {infrontDepth = (infrontDepth*0.1f)+0.9f;}
+        float rasterDepth = max(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], coords, 0).r, infrontDepth);
         float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
         float fogginessMul = 1.f;
-        if (rasterDepth > depth) {
+        vec4 rasterColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0);
+        if (rasterDepth > depth && rasterColor.a > 0) { //|| rasterDepth >= 0.0115f
             isSky = false;
             reverseNormShading = false;
-            depth = rasterDepth;
-            color = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], uv, 0);
+            depth = rasterDepth > depth ? rasterDepth : 1.f;
+            color = rasterColor;
             bool isGlowing = color.r >= 1 || color.g > 1 || color.b > 1;
             if (isGlowing) {celestial = true; emissive = true;}
             color.rgb = color.rgb;
-            primaryNormal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], uv, 0).xyz;
+            primaryNormal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0).xyz;
             primaryFlatNormal = primaryNormal;
             vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
             vec4 view = invProj*clip;

@@ -345,7 +345,7 @@ public class Renderer {
 
     public static void drawRaster(MemoryStack stack){
         updatePipeline(3);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
@@ -369,12 +369,15 @@ public class Renderer {
             Vector3d interpolatedPos = Utils.getInterpolatedVec(item.prevPos, item.pos).add(0, item.hover, 0);
             drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float)(interpolatedPos.x()%size), (float)(interpolatedPos.y()%height), (float)(interpolatedPos.z()%size)).scale(0.5f), new Vector4f(1.f));
         }
-        player.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
+        updatePipeline(5);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth3, 1, false, true);
+        player.draw();
+        unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth3.image);
     }
     public static final int swizzle = 16;
     public static void drawDDA(MemoryStack stack) {
-        pushUBO.updateTex(Textures.colors2, Textures.depth2, Textures.norms2);
+        pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, null);
         ((Matrix4f)pushUBO.uniformStorage[0]).set(new Matrix4f().setTranslation((float) (player.pos.x()/chunkSize), (float) (player.pos.y()/chunkSize), (float) (player.pos.z()/chunkSize)).invert());
         pushUBO.push();
@@ -390,31 +393,31 @@ public class Renderer {
         pushUBO.updateTex(Textures.blueNoise, Textures.colors1, Textures.depth1, Textures.norms1);
         pushUBO.push();
         updatePipeline(2);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
     }
     public static void drawAA(MemoryStack stack) {
         if (Settings.taaEnabled || Settings.upscaled) {
             updatePipeline(8);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, false);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, false, false);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
             pushUBO.updateTex(Textures.colors2, Textures.depth1, Textures.norms1);
             pushUBO.updateWriteTex(Textures.colorsOld, Textures.depthOld, null, null);
             pushUBO.push();
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
 
             pushUBO.updateTex(Textures.colors1, Textures.depth1, null);
             pushUBO.push();
             updatePipeline(9);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colorsOld}, Textures.depthOld, 1, true, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colorsOld.image}, Textures.depthOld.image);
 
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true);
+            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true, true);
             vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
             unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image}, Textures.depth2.image);
         }
@@ -423,13 +426,13 @@ public class Renderer {
         pushUBO.updateTex(Textures.colors2, null, null);
         pushUBO.push();
         updatePipeline(6);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally, Textures.bloom_horizontally}, Textures.depth2, 4, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally, Textures.bloom_horizontally}, Textures.depth2, 4, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred_horizontally.image, Textures.bloom_horizontally.image}, Textures.depth2.image);
         pushUBO.updateTex(Textures.bloom_horizontally, Textures.blurred_horizontally, null);
         pushUBO.push();
         updatePipeline(7);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred, Textures.bloom}, Textures.depth2, 4, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred, Textures.bloom}, Textures.depth2, 4, true, true);
         vkCmdDraw(currentCmdBuffer, 3, 1, 0, 0);
         unbindImagesDrawingTo(stack, new long[]{Textures.blurred.image, Textures.bloom.image}, Textures.depth2.image);
     }
@@ -438,7 +441,7 @@ public class Renderer {
         pushUBO.updateWriteTex(Textures.gui, Textures.items, null, null);
         pushUBO.push();
         updatePipeline(1);
-        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true, true);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
         GUI.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
@@ -624,9 +627,9 @@ public class Renderer {
                 VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
-    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, int upscaling, boolean clear) {
-        VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures, clear);
-        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, clear);
+    public static void bindImagesToDrawTo(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex, int upscaling, boolean clearColor, boolean clearDepth) {
+        VkRenderingAttachmentInfo.Buffer colorAttachments = getColorAttachments(stack, currentCmdBuffer, textures, clearColor);
+        VkRenderingAttachmentInfo depthAttachment = getDepthAttachment(stack, currentCmdBuffer, depthTex.image, depthTex.imageView, depthTex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, clearDepth);
         depthTex.layoutUnset = false;
         int w = eWidth/upscaling, h = eHeight/upscaling;
         VkRect2D renderArea = VkRect2D.calloc(stack)

@@ -25,6 +25,8 @@ import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
+import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME;
+import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTSwapchainColorspace.VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME;
@@ -36,6 +38,7 @@ import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
 import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
+import static org.lwjgl.vulkan.VK13.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
 import static org.lwjgl.vulkan.VK14.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
 
@@ -63,7 +66,8 @@ public class Device {
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
         PointerBuffer deviceExtensions = stack.mallocPointer(1)
-                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
+                .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+                ;//.put(1, stack.UTF8(VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME));
                 //.put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME))
                 //.put(2, stack.UTF8(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME));
 
@@ -95,6 +99,14 @@ public class Device {
                 .descriptorBindingSampledImageUpdateAfterBind(true)
                 .descriptorBindingStorageImageUpdateAfterBind(true)
                 .pNext(timeline.address());
+//        VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT interlock = VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT.calloc(stack)
+//                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT)
+//                .fragmentShaderPixelInterlock(true)
+//                .pNext(descriptorIndexing.address());
+//        VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT demoteToHelper = VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT.calloc(stack)
+//                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES)
+//                .shaderDemoteToHelperInvocation(true)
+//                .pNext(interlock.address());
 //        VkPhysicalDeviceFragmentShadingRateFeaturesKHR shadingRate = VkPhysicalDeviceFragmentShadingRateFeaturesKHR.calloc(stack)
 //                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR)
 //                .pipelineFragmentShadingRate(false)

@@ -101,7 +101,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(500000, 500900, 500000);
+            Main.player.pos.set(499563, 500926, 500002);//Main.player.pos.set(500000, 500900, 500000);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
@@ -140,20 +140,19 @@ public class Player {
     }
 
     public void draw() {
-        updatePipeline(5);
-        pushUBO.updateTex(null);
         float bob = (float)Utils.getInterpolatedDouble(prevBobbing, bobbing);
         Matrix4f matrix = new Matrix4f().rotationXYZ((float) (bob+0.5f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, (-0.3f)+bob, 0.3f);
-        Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
-        Renderer.drawCube(new Matrix4f(matrix).translate(-0.134f, 0, 0).scale(1.f, 0.155f, 0.155f), new Vector4f(0.7f, 0.25f, 0.25f, 1.f));
         Item selItem = inv.getSelectedItem(true);
         if (selItem != null && selItem.type != ItemTypes.AIR) {
             pushUBO.updateTex(Textures.items);
             pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
             pushUBO.updateAtlasOffset(selItem.type.atlasOffset);
-            Renderer.drawQuad(matrix.rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
+            Renderer.drawQuad(new Matrix4f(matrix).rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
             //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
         }
+        pushUBO.updateTex(null);
+        Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
+        Renderer.drawCube(new Matrix4f(matrix).translate(-0.134f, 0, 0).scale(1.f, 0.155f, 0.155f), new Vector4f(0.7f, 0.25f, 0.25f, 1.f));
     }
 
     public double enteredWorld = 0;

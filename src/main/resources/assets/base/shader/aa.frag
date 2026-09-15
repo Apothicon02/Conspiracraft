@@ -46,10 +46,11 @@ const float Z_NEAR = 0.01f;
 void main() {
     float scale = globalUbo.renderToggles.z == 1 ? 0.5f : 1.f;
     vec2 scaledCoords = gl_FragCoord.xy*scale;
+    ivec2 scaledCoordsI = ivec2(scaledCoords);
     vec2 scaledUv = uv*scale;
-    float baseDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], scaledUv, 0).r;
+    float baseDepth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], scaledCoordsI, 0).r;
     vec4 baseColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], scaledUv, 0);
-    vec4 baseNormal = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.w)], scaledUv, 0);
+    vec4 baseNormal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], scaledCoordsI, 0);
     vec4 color = baseColor;
     vec2 uvNdc = (uv * 2.0) - 1.0;
     vec4 ndc = vec4(uvNdc, baseDepth, 1.0);
@@ -59,7 +60,7 @@ void main() {
     worldPos /= worldPos.w;
     vec2 reprojectedPos = reproject(worldPos.xyz);
     if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
-    float oldDepth = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], reprojectedPos, 0).r;
+    float oldDepth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], ivec2(reprojectedPos*globalUbo.res), 0).r;
     if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
         float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
         int radius = velocity < 0.6f ? 2 : 1;

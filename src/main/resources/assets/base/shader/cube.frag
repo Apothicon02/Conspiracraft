@@ -1,4 +1,5 @@
 #extension GL_EXT_nonuniform_qualifier : require
+//#extension GL_EXT_fragment_shader_barycentric : enable
 layout(set = 0, binding = 0) readonly uniform GlobalUBO {
     mat4 view;
     mat4 proj;
@@ -33,13 +34,13 @@ layout(push_constant) uniform PushUBO {
 layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
+//layout(location = 2) pervertexEXT in vec3 vPos[];
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outNormal;
 
 void main() {
-    vec3 normal = normalize(cross(dFdx(pos), dFdy(pos)));
-    outNormal = vec4(normal, 0);
+    outNormal = vec4(normalize(cross(dFdx(pos), dFdy(pos))), 0);//vec4(normalize(cross(vPos[1] - vPos[0], vPos[2] - vPos[0])), 0);
     outColor = pushUbo.color;
     if (pushUbo.tex.x >= 0) {
         vec3 localNorm = normalize(cross(dFdx(localPos), dFdy(localPos)));

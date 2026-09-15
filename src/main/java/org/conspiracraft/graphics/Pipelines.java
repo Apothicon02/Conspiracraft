@@ -23,11 +23,11 @@ public class Pipelines {
     private static ExecutorService pool;
     public static void init(MemoryStack stack) {
         pipelines = new Pipeline[]{
-                new Pipeline("fullscreen.vert", "present.frag", 1), new Pipeline("gui.vert", "gui.frag", 1),
-                new Pipeline("fullscreen.vert", "ssao.frag", 1),
-                new Pipeline("raster.vert", "cube.frag", 2), new Pipeline("raster.vert", "raster.frag", 2), new Pipeline("raster_view.vert", "raster.frag", 2),
-                new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2),
-                new Pipeline("fullscreen.vert", "aa.frag", 1), new Pipeline("fullscreen.vert", "aa_history.frag", 1)};
+                new Pipeline("fullscreen.vert", "present.frag", 1, false), new Pipeline("gui.vert", "gui.frag", 1, false),
+                new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
+                new Pipeline("raster.vert", "cube.frag", 2, true), new Pipeline("raster.vert", "raster.frag", 2, true), new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),
+                new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2, false), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2, false),
+                new Pipeline("fullscreen.vert", "aa.frag", 1, false), new Pipeline("fullscreen.vert", "aa_history.frag", 1, false)};
         computePipelines = new ComputePipeline[]{new ComputePipeline("dda.comp")};
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
@@ -105,16 +105,17 @@ public class Pipelines {
         if (err != VK_SUCCESS) {throw new RuntimeException("Failed to create pipeline layout: " + err);}
         pipelineLayout = pPipelineLayout.get(0);
 
-        VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
-                .depthTestEnable(true)
-                .depthWriteEnable(true)
-                .depthCompareOp(VK_COMPARE_OP_GREATER_OR_EQUAL)
-                .depthBoundsTestEnable(false)
-                .stencilTestEnable(false);
-
         for (int i = 0; i < pipelines.length; i++) {
             Pipeline pipeline = pipelines[i];
+
+            VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
+                    .depthTestEnable(true)
+                    .depthWriteEnable(true)
+                    .depthCompareOp(pipeline.depthEnabled ? VK_COMPARE_OP_GREATER : VK_COMPARE_OP_ALWAYS)
+                    .depthBoundsTestEnable(false)
+                    .stencilTestEnable(false);
+
             VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachments = VkPipelineColorBlendAttachmentState.calloc(pipeline.colorAttachments, stack);
             IntBuffer formats = stack.callocInt(pipeline.colorAttachments);
             for (int f = 0; f < formats.limit(); f++) {
