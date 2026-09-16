@@ -436,7 +436,7 @@ vec4 dda(bool shadow) {
     LongStruct region = LongStruct(0, 0);
 
     vec3 chunkStartPos = rayPos/chunkSize;
-    ivec3 chunkPos = ivec3(floor(chunkStartPos));
+    ivec3 chunkPos = ivec3(chunkStartPos);
     ivec3 ddaPos = chunkPos;
     vec3 dist = 1.0/rayDir;
     vec3 sideDist = ((ddaPos - chunkStartPos) + 0.5 + raySign * 0.5) * dist;
@@ -470,7 +470,7 @@ vec4 dda(bool shadow) {
 
                 chunkWorldPos = ddaPos * chunkSize;
                 lodStartPos = uv3d(chunkWorldPos, float(chunkSize), lodSize);
-                ddaPos = ivec3(floor(lodStartPos));
+                ddaPos = ivec3(lodStartPos);
                 sideDist = ((ddaPos - lodStartPos) + 0.5 + raySign * 0.5) * dist;
             }
         } else if (stage == 2) {
@@ -488,7 +488,7 @@ vec4 dda(bool shadow) {
 
                     lodWorldPos = ivec3(lodPos*lodSize);
                     blockStartPos = uv3d(lodWorldPos, float(lodSize), lodSize);
-                    ddaPos = ivec3(floor(blockStartPos));
+                    ddaPos = ivec3(blockStartPos);
                     sideDist = ((ddaPos - blockStartPos) + 0.5 + raySign * 0.5) * dist;
                 }
             }
@@ -533,7 +533,7 @@ vec4 dda(bool shadow) {
                         stepAnything = false;
                         blockRayPos = ddaPos;
 
-                        ddaPos = ivec3(floor(voxelStartPos));
+                        ddaPos = ivec3(voxelStartPos);
                         sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
                     }
                 }

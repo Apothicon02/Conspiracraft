@@ -288,6 +288,7 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
+    public static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>();
     public static final Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>();
     public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
         synchronized (lock) {
@@ -325,7 +326,7 @@ public class World {
     public static long wrapChunkPos(long cX, long cY, long cZ) {
         return ((((cX%sizeChunks)*sizeChunks)+(cZ%sizeChunks))*heightChunks)+(cY%heightChunks);
     }
-    public static final Chunk[] oldchunks = new Chunk[sizeChunks*sizeChunks*heightChunks];
+    public static final Chunk[] oldchunks = new Chunk[1];
     public static final long[] oldRegions = new long[1];
     public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
     public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}

@@ -101,7 +101,7 @@ public class Player {
             creative = plrData[i++] != 0;
             flying = plrData[i++] != 0;
         } else {
-            Main.player.pos.set(499563, 500926, 500002);//Main.player.pos.set(500000, 500900, 500000);
+            Main.player.pos.set(499563, 500929, 500002);//Main.player.pos.set(500000, 500900, 500000);
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
