@@ -4,15 +4,11 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
-import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
-import org.conspiracraft.effects.Lightning;
-import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
-import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -209,7 +205,7 @@ public class Renderer {
         System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
     }
     public static void updateChunk(long packedChunkPos) {
-        Chunk chunk = getChunk(packedChunkPos);
+        Chunk chunk = getChunkGlobalPos(packedChunkPos);
         if (chunk != null) {
             Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
             long wrappedPackedChunkPos = World.wrapChunkPos(chunk.cX, chunk.cY, chunk.cZ);
@@ -258,7 +254,7 @@ public class Renderer {
                 }
             }
             if (initialized) {
-                updateRegion(World.packRegionPos(new Vector3i(chunkPos).div(regionSizeChunks)));
+                //updateRegion(World.packRegionPos(new Vector3i(chunkPos).div(regionSizeChunks)));
                 VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(chunkByteSize);
                 vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
                 if (compressedBlocks != null) {
@@ -456,32 +452,32 @@ public class Renderer {
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, currentComputePipeline.vkPipeline);
     }
 
-    public static void drawChunkDebug() {
-        int playerCX = (int)(player.pos.x()/chunkSize), playerCY = (int)(player.pos.y()/chunkSize), playerCZ = (int)(player.pos.z()/chunkSize);
-        //long playerCp = packChunkPos((int)(player.pos.x()/chunkSize), (int)(player.pos.y()/chunkSize), (int)(player.pos.z()/chunkSize));
-        int i = 0;
-        for (Chunk chunk : chunks.values()) {
-//            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
-//            if (dist < chunkSize*96) {
-//                if (dist < chunkSize * 5) {
-//                    for (int x = 0; x < chunkSize; x++) {
-//                        for (int z = 0; z < chunkSize; z++) {
-//                            for (int y = chunkSize - 1; y >= 0; y--) {
-//                                if (chunk.getBlock(Chunk.condenseLocalPos(x, y, z)).x() > 0) {
-//                                    drawCube(new Matrix4f().setTranslation((chunk.cX * chunkSize) + x + 0.5f, (chunk.cY * chunkSize) + y + 0.5f, (chunk.cZ * chunkSize) + z + 0.5f).scale(1),
-//                                            new Vector4f(((float) x) / chunkSize, ((float) y) / chunkSize, ((float) z) / chunkSize, 1));
-//                                }
-//                            }
-//                        }
-//                    }
-//                } else if (chunk.blockPalette.size() > 1) {
-                if (chunk != null && chunk.blockPalette.size() > 1) {
-                    drawCube(new Matrix4f().setTranslation(((chunk.cX + 0.5f) * chunkSize)%size, ((chunk.cY + 0.5f) * chunkSize)%height, ((chunk.cZ + 0.5f) * chunkSize)%size).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
-                }
-                //if (i++ > 100000) {break;}
-//            }
-        }
-    }
+//    public static void drawChunkDebug() {
+//        int playerCX = (int)(player.pos.x()/chunkSize), playerCY = (int)(player.pos.y()/chunkSize), playerCZ = (int)(player.pos.z()/chunkSize);
+//        //long playerCp = packChunkPos((int)(player.pos.x()/chunkSize), (int)(player.pos.y()/chunkSize), (int)(player.pos.z()/chunkSize));
+//        int i = 0;
+//        for (Chunk chunk : chunks.values()) {
+////            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
+////            if (dist < chunkSize*96) {
+////                if (dist < chunkSize * 5) {
+////                    for (int x = 0; x < chunkSize; x++) {
+////                        for (int z = 0; z < chunkSize; z++) {
+////                            for (int y = chunkSize - 1; y >= 0; y--) {
+////                                if (chunk.getBlock(Chunk.condenseLocalPos(x, y, z)).x() > 0) {
+////                                    drawCube(new Matrix4f().setTranslation((chunk.cX * chunkSize) + x + 0.5f, (chunk.cY * chunkSize) + y + 0.5f, (chunk.cZ * chunkSize) + z + 0.5f).scale(1),
+////                                            new Vector4f(((float) x) / chunkSize, ((float) y) / chunkSize, ((float) z) / chunkSize, 1));
+////                                }
+////                            }
+////                        }
+////                    }
+////                } else if (chunk.blockPalette.size() > 1) {
+//                if (chunk != null && chunk.blockPalette.size() > 1) {
+//                    drawCube(new Matrix4f().setTranslation(((chunk.cX + 0.5f) * chunkSize)%size, ((chunk.cY + 0.5f) * chunkSize)%height, ((chunk.cZ + 0.5f) * chunkSize)%size).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
+//                }
+//                //if (i++ > 100000) {break;}
+////            }
+//        }
+//    }
     public static void drawClouds() {
         if (worldType.getFogginess() > 0.5f) {
             Random cloudRand = new Random(911);

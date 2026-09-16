@@ -11,7 +11,6 @@ import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
-import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
@@ -20,8 +19,6 @@ import org.conspiracraft.world.types.WorldTypes;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.VkBufferCopy;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -35,12 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 
-import static org.conspiracraft.graphics.Graphics.chunkSSBO;
-import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
-import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
-import static org.lwjgl.util.vma.Vma.vmaVirtualFree;
-import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
 
 public class World {
     public static final int seed = 67;
@@ -62,10 +54,11 @@ public class World {
     public static final int regionSizeChunks = 8;
     public static final long regionSizeChunksL = regionSizeChunks;
     public static final int regionSize = regionSizeChunks*chunkSize;
-    public static final int regionBits = Integer.numberOfTrailingZeros(regionSizeChunks);
-    public static final int sizeRegions = sizeChunks>>regionBits;
+    public static final int regionBits = Integer.numberOfTrailingZeros(regionSize);
+    public static final int regionBitsChunks = Integer.numberOfTrailingZeros(regionSizeChunks);
+    public static final int sizeRegions = sizeChunks>> regionBitsChunks;
     public static final int halfSizeRegions = sizeRegions/2;
-    public static final int heightRegions = heightChunks>>regionBits;
+    public static final int heightRegions = heightChunks>> regionBitsChunks;
     public static final int halfHeightRegions = heightRegions/2;
     public static final int quarterHeightRegions = heightRegions/2;
 //    public static final int sizeLods = size >>lodBits;
@@ -288,48 +281,50 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
-    public static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>();
-    public static final Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>();
-    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
-        synchronized (lock) {
-            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
-            long newMinX = newX - halfSizeChunks, newMaxX = newX + halfSizeChunks, newMinY = newY - halfHeightChunks, newMaxY = newY + halfHeightChunks, newMinZ = newZ - halfSizeChunks, newMaxZ = newZ + halfSizeChunks;
-            for (long x = oldMinX; x < oldMaxX; x++) {
-                for (long y = oldMinY; y < oldMaxY; y++) {
-                    for (long z = oldMinZ; z < oldMaxZ; z++) {
-                        if (!(x >= newMinX && x < newMaxX && y >= newMinY && y < newMaxY && z >= newMinZ && z < newMaxZ)) {
-                            unloadChunk(packChunkPos(x, y, z));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    public static void unloadChunk(long cp) {
-        Chunk chunk = chunks.get(cp);
-        if (chunk != null) {
-            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(cp));
-            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(cp));
-            long wPackedChunkPos = ((((chunk.cX % sizeChunks) * sizeChunks) + (chunk.cZ % sizeChunks)) * heightChunks) + (chunk.cY % heightChunks);
-            long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
-            long chunkBufOffset = wPackedChunkPos * Renderer.chunkByteSize;
-            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
-            VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(Renderer.chunkByteSize);
-            vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
-
-            chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
-            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
-            vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
-            chunks.remove(cp);
-        }
-    }
+    private static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>();
+//    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
+//        synchronized (lock) {
+//            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
+//            long newMinX = newX - halfSizeChunks, newMaxX = newX + halfSizeChunks, newMinY = newY - halfHeightChunks, newMaxY = newY + halfHeightChunks, newMinZ = newZ - halfSizeChunks, newMaxZ = newZ + halfSizeChunks;
+//            for (long x = oldMinX; x < oldMaxX; x++) {
+//                for (long y = oldMinY; y < oldMaxY; y++) {
+//                    for (long z = oldMinZ; z < oldMaxZ; z++) {
+//                        if (!(x >= newMinX && x < newMaxX && y >= newMinY && y < newMaxY && z >= newMinZ && z < newMaxZ)) {
+//                            unloadChunk(packChunkPos(x, y, z));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    public static void unloadChunk(long cp) {
+//        Chunk chunk = chunks.get(cp);
+//        if (chunk != null) {
+//            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(cp));
+//            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(cp));
+//            long wPackedChunkPos = ((((chunk.cX % sizeChunks) * sizeChunks) + (chunk.cZ % sizeChunks)) * heightChunks) + (chunk.cY % heightChunks);
+//            long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
+//            long chunkBufOffset = wPackedChunkPos * Renderer.chunkByteSize;
+//            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
+//            VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(Renderer.chunkByteSize);
+//            vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
+//
+//            chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
+//            MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
+//            vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
+//            chunks.remove(cp);
+//        }
+//    }
     public static long wrapChunkPos(long cX, long cY, long cZ) {
         return ((((cX%sizeChunks)*sizeChunks)+(cZ%sizeChunks))*heightChunks)+(cY%heightChunks);
     }
     public static final Chunk[] oldchunks = new Chunk[1];
     public static final long[] oldRegions = new long[1];
-    public static int packRegionPos(int x, int y, int z) {return x+y*sizeRegions+z*sizeRegions*heightRegions;}
-    public static int packRegionPos(Vector3i pos) {return pos.x()+pos.y()*sizeRegions+pos.z()*sizeRegions*heightRegions;}
+    public static long wrapRegionPos(long rX, long rY, long rZ) {
+        return ((((rX%sizeRegions)*sizeRegions)+(rZ%sizeRegions))*heightRegions)+(rY%heightRegions);
+    }
+    public static long packRegionPos(int x, int y, int z) {return ((long)x << 42) | ((long)z << 20) | (long)y;}
+    public static long packRegionPos(Vector3i pos) {return ((long)pos.x() << 42) | ((long)pos.z() << 20) | (long)pos.y();}
 //    public static final long[] lods = new long[sizeLods*sizeLods*heightLods];
 //    public static int packLodPos(int x, int y, int z) {return x+y*sizeLods+z*sizeLods*heightLods;}
 //    public static int packLodPos(Vector3i pos) {return pos.x()+pos.y()*sizeLods+pos.z()*sizeLods*heightLods;}
@@ -350,7 +345,7 @@ public class World {
     }
     public static Light getLight(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Light(0, 0, 0, maxSunlightLevel);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
@@ -360,7 +355,7 @@ public class World {
     public static void setLight(int x, int y, int z, Light light) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -374,7 +369,7 @@ public class World {
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
@@ -387,7 +382,7 @@ public class World {
     }
     public static Vector2i getBlock(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
-        Chunk chunk = getChunk(packChunkPos(cX, cY, cZ));
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
         if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
@@ -400,7 +395,7 @@ public class World {
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -424,12 +419,25 @@ public class World {
     public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
     public static final Object lock = new Object();
-    public static Chunk getChunk(long cP) {
-        Chunk returnChunk;
+    public static Region getRegion(long cRP) {
+        Region returnRegion;
         synchronized (lock) {
-            returnChunk = chunks.get(cP);
+            returnRegion = regions.get(cRP);
         }
-        return returnChunk;
+        return returnRegion;
+    }
+    public static void putRegion(long cRP, Region region) {
+        synchronized (lock) {
+            regions.put(cRP, region);
+        }
+    }
+    public static Chunk getChunkGlobalPos(long globalCP) {
+        int cX = (int)((globalCP >> 42) & 0x3FFFFF), cZ = (int)((globalCP >> 20) & 0x3FFFFF), cY = (int)(globalCP & 0xFFFFF);
+        int rX = cX>> regionBitsChunks, rY = cY>> regionBitsChunks, rZ = cZ>> regionBitsChunks;
+        long cRP = packRegionPos(rX, rY, rZ);
+        Region region = getRegion(cRP);
+        if (region == null) {return null;}
+        return region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
     }
     public static Vector2i getBlockWorldgen(Vector3i pos) {
         return getBlockWorldgen(pos.x(), pos.y(), pos.z());
@@ -437,7 +445,7 @@ public class World {
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return new Vector2i();}
         int lX = x&15;
         int lY = y&15;
@@ -447,7 +455,7 @@ public class World {
     public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -460,7 +468,7 @@ public class World {
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors, boolean silent) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;
@@ -508,7 +516,7 @@ public class World {
     public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
-        Chunk chunk = getChunk(cP);
+        Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
         int lY = y&15;

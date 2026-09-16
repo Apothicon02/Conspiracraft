@@ -9,7 +9,7 @@ import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {
-    public final long condensedChunkPos;
+    public final long cCP;
     public final long cX, cY, cZ;
     public final int cXI, cYI, cZI;
     public static final int totalVoxels = chunkSize*chunkSize*chunkSize;
@@ -27,7 +27,7 @@ public class Chunk {
     }
 
     public Chunk(long compressedChunkPos) {
-        this.condensedChunkPos = compressedChunkPos;
+        this.cCP = compressedChunkPos;
         this.cX = (compressedChunkPos >> 42) & 0x3FFFFF;
         this.cZ = (compressedChunkPos >> 20) & 0x3FFFFF;
         this.cY = compressedChunkPos & 0xFFFFF;
