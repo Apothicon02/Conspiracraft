@@ -9,7 +9,7 @@ import static org.conspiracraft.gui.GUI.slotSize;
 
 public class CreativeMenu extends Menu {
     public int slotsPerRow = 14;
-    public int rows = 4;
+    public int rows = 7;
     public int slotAmt = slotsPerRow*rows;
     public CreativeMenu() {
         this.menuSizeRaw = new Vector2i(slotSize*slotsPerRow, slotSize*rows);

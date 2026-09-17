@@ -9,7 +9,7 @@ public class GUIScaleButton extends Button {
     @Override
     public void clicked() {
         Settings.guiScale += 0.25f;
-        if (Settings.guiScale > 2) {Settings.guiScale = 0.5f;}
+        if (Settings.guiScale > 1.25f) {Settings.guiScale = 0.5f;}
         AudioController.playButtonSound();
     }
 }

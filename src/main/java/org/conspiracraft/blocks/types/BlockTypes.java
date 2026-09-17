@@ -226,7 +226,7 @@ public class BlockTypes {
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             OAK_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.OAK_PLANK, Utils.packColor(255, 0, 0, 255), Materials.OAK_PLANK),
                     OAK_FENCE.blockProperties.copy())),
-            OAK_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.OAK_PLANK, Utils.packColor(255, 0, 0, 255), Materials.OAK_LOG),
+            OAK_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.OAK_PLANK),
                     new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             OAK_CRATE = create(List.of(BlockTags.hatchetEfficient), new CrateBlockType(blockTypeMap.size(), "crafted/crate/texture/oak", Map.of(Utils.packColor(255), Materials.BARREL),  new BlockProperties().blockSFX(
@@ -238,34 +238,58 @@ public class BlockTypes {
                     OAK_FENCE.blockProperties.copy())),
             BIRCH_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.BIRCH_PLANK, Utils.packColor(255, 0, 0, 255), Materials.BIRCH_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            BIRCH_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.BIRCH_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             CHERRY_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.CHERRY_PLANK, Utils.packColor(255, 0, 0, 255), Materials.CHERRY_LOG),
                     OAK_FENCE.blockProperties.copy())),
             CHERRY_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.CHERRY_PLANK, Utils.packColor(255, 0, 0, 255), Materials.CHERRY_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            CHERRY_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.CHERRY_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             MAHOGANY_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/picket_fence", Map.of(Utils.packColor(255), Materials.MAHOGANY_PLANK, Utils.packColor(255, 0, 0, 255), Materials.MAHOGANY_LOG),
                     OAK_FENCE.blockProperties.copy())),
             MAHOGANY_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.MAHOGANY_PLANK, Utils.packColor(255, 0, 0, 255), Materials.MAHOGANY_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            MAHOGANY_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.MAHOGANY_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             ACACIA_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.ACACIA_PLANK, Utils.packColor(255, 0, 0, 255), Materials.ACACIA_LOG),
                     OAK_FENCE.blockProperties.copy())),
             ACACIA_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.ACACIA_PLANK, Utils.packColor(255, 0, 0, 255), Materials.ACACIA_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            ACACIA_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.ACACIA_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             PALM_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.PALM_PLANK, Utils.packColor(255, 0, 0, 255), Materials.PALM_LOG),
                     OAK_FENCE.blockProperties.copy())),
             PALM_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.PALM_PLANK, Utils.packColor(255, 0, 0, 255), Materials.PALM_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            PALM_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.PALM_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             SPRUCE_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/picket_fence", Map.of(Utils.packColor(255), Materials.SPRUCE_PLANK, Utils.packColor(255, 0, 0, 255), Materials.SPRUCE_LOG),
                     OAK_FENCE.blockProperties.copy())),
             SPRUCE_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.SPRUCE_PLANK, Utils.packColor(255, 0, 0, 255), Materials.SPRUCE_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            SPRUCE_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.SPRUCE_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             WILLOW_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.WILLOW_PLANK, Utils.packColor(255, 0, 0, 255), Materials.WILLOW_LOG),
                     OAK_FENCE.blockProperties.copy())),
             WILLOW_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.WILLOW_PLANK, Utils.packColor(255, 0, 0, 255), Materials.WILLOW_PLANK),
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
+            WILLOW_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.WILLOW_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             REDWOOD_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/picket_fence", Map.of(Utils.packColor(255), Materials.REDWOOD_PLANK, Utils.packColor(255, 0, 0, 255), Materials.REDWOOD_LOG),
                     OAK_FENCE.blockProperties.copy())),
             REDWOOD_FENCE_STRIPPED = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.REDWOOD_PLANK, Utils.packColor(255, 0, 0, 255), Materials.REDWOOD_PLANK),
-                    OAK_FENCE_STRIPPED.blockProperties.copy()));
+                    OAK_FENCE_STRIPPED.blockProperties.copy())),
+            REDWOOD_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.REDWOOD_PLANK),
+                    new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
