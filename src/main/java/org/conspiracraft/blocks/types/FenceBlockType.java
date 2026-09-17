@@ -1,13 +1,16 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.blocks.Material;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import java.util.Map;
+
 public class FenceBlockType extends BlockType {
-    public FenceBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public FenceBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
     }
 
     @Override

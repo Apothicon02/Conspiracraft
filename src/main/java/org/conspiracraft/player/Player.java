@@ -105,8 +105,6 @@ public class Player {
         }
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
-        } else {
-            Main.player.inv.init();
         }
     }
 

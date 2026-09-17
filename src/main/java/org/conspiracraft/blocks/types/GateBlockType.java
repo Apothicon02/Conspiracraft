@@ -1,14 +1,17 @@
 package org.conspiracraft.blocks.types;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.blocks.Material;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import java.util.Map;
+
 public class GateBlockType extends BlockType {
-	public GateBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+	public GateBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(id, name, materials, blockProperties);
     }
 
     @Override

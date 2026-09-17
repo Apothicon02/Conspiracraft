@@ -12,6 +12,7 @@ import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.ItemUseResult;
+import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
@@ -121,7 +122,7 @@ public class HandManager {
     }
 
     public static void tick() {
-        if (lmbDown) {
+        if (lmbDown || rmbDown) {
             if (tiltTarget == 0) {
                 tiltTarget = 30;
             }
@@ -136,6 +137,8 @@ public class HandManager {
             float tiltSpeed = 10.f;
             if (!(selectedItem == null || selectedItem.amount <= 0)) {
                 tiltSpeed = selectedItem.useSpeed();
+            } else {
+                tiltSpeed = ItemType.DEFAULT_USE_SPEED;
             }
             if (tilt < tiltTarget) {
                 tilt += tiltSpeed;

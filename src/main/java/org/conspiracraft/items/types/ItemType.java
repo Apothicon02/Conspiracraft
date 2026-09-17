@@ -20,7 +20,8 @@ public class ItemType {
     public List<ItemTag> tags = List.of();
     public String name;
     public int maxStackSize = 1;
-    public float useSpeed = 10.f;
+    public static float DEFAULT_USE_SPEED = 50.f;
+    public float useSpeed = DEFAULT_USE_SPEED;
     public Vector2i atlasOffset = null;
     public Vector2i blockToPlace = new Vector2i(0);
     public ItemSFX sound = new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.2f, 1);
@@ -60,7 +61,7 @@ public class ItemType {
             if (blockType.blockProperties.isFluidReplaceable) {
                 World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), blockToPlace.y());
                 if (!player.creative) {item.amount--;}
-                return new ItemUseResult(200, item);
+                return new ItemUseResult(1, item);
             }
         }
         return new ItemUseResult(0, item);
