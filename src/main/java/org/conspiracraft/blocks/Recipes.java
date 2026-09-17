@@ -10,6 +10,17 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Recipes {
+    public static Map<Integer, Integer> strippingRecipes = Map.of(
+            BlockTypes.OAK_FENCE.id, BlockTypes.OAK_FENCE_STRIPPED.id,
+            BlockTypes.BIRCH_FENCE.id, BlockTypes.BIRCH_FENCE_STRIPPED.id,
+            BlockTypes.SPRUCE_FENCE.id, BlockTypes.SPRUCE_FENCE_STRIPPED.id,
+            BlockTypes.MAHOGANY_FENCE.id, BlockTypes.MAHOGANY_FENCE_STRIPPED.id,
+            BlockTypes.ACACIA_FENCE.id, BlockTypes.ACACIA_FENCE_STRIPPED.id,
+            BlockTypes.CHERRY_FENCE.id, BlockTypes.CHERRY_FENCE_STRIPPED.id,
+            BlockTypes.PALM_FENCE.id, BlockTypes.PALM_FENCE_STRIPPED.id,
+            BlockTypes.REDWOOD_FENCE.id, BlockTypes.REDWOOD_FENCE_STRIPPED.id,
+            BlockTypes.WILLOW_FENCE.id, BlockTypes.WILLOW_FENCE_STRIPPED.id);
+
     public static Map<Integer, Map<Item, Float>> siftingRecipes = Map.of( //must have any kind of "guaranteed" drop last.
             BlockTypes.SAND.id, Map.of(ItemTypes.SAND.createItem(), 1.f),
             BlockTypes.GRAVEL.id, Map.of(ItemTypes.FLINT.createItem(), 0.05f, ItemTypes.GRAVEL.createItem(), 1.f),

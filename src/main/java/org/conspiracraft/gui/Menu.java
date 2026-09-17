@@ -4,10 +4,12 @@ import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.Recipes;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.utils.Utils;
 import org.joml.*;
 
 import java.lang.Math;
@@ -290,6 +292,13 @@ public class Menu {
             pushUBO.updateTex(Textures.items);
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
             drawQuad(x, y, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+            if (item instanceof DurableItem durableItem && durableItem.durability < item.type.maxDurability()) {
+                pushUBO.updateTex(null); //use no texture
+                float durabilityPercent = (float) durableItem.durability / item.type.maxDurability();
+                color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);
+                drawQuad(x, y, (int)(ItemTypes.itemTexSize*durabilityPercent), 2, 1);
+                color.set(1);
+            }
             if (item.amount > 1) {
                 pushUBO.updateTex(Textures.gui); //use gui atlas
                 char[] chars = item.amountString().toCharArray();
