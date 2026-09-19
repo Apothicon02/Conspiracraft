@@ -63,5 +63,6 @@ public class Region {
             MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
             vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
         }
+        World.removeRegion(condensedRegionPos);
     }
 }

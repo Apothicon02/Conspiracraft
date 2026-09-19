@@ -25,7 +25,9 @@ import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.space.StarSystem;
+import org.conspiracraft.world.Region2D;
 import org.conspiracraft.world.World;
+import org.conspiracraft.world.types.Earth;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -348,13 +350,13 @@ public class Renderer {
         pushUBO.updateAtlasOffset(new Vector2i(0));
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
         pushUBO.updateTex(null); //use no texture
-        //drawChunkDebug();
         modelOffset.set(viewPos);
         drawClouds();
         drawStars();
         StarSystem.render(stack);
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
+        //drawHeightmapDebug();
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
         updatePipeline(4);
@@ -452,32 +454,19 @@ public class Renderer {
         vkCmdBindPipeline(currentCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, currentComputePipeline.vkPipeline);
     }
 
-//    public static void drawChunkDebug() {
-//        int playerCX = (int)(player.pos.x()/chunkSize), playerCY = (int)(player.pos.y()/chunkSize), playerCZ = (int)(player.pos.z()/chunkSize);
-//        //long playerCp = packChunkPos((int)(player.pos.x()/chunkSize), (int)(player.pos.y()/chunkSize), (int)(player.pos.z()/chunkSize));
-//        int i = 0;
-//        for (Chunk chunk : chunks.values()) {
-////            float dist = player.pos.distance(chunk.cX*chunkSize, chunk.cY*chunkSize, chunk.cZ*chunkSize);
-////            if (dist < chunkSize*96) {
-////                if (dist < chunkSize * 5) {
-////                    for (int x = 0; x < chunkSize; x++) {
-////                        for (int z = 0; z < chunkSize; z++) {
-////                            for (int y = chunkSize - 1; y >= 0; y--) {
-////                                if (chunk.getBlock(Chunk.condenseLocalPos(x, y, z)).x() > 0) {
-////                                    drawCube(new Matrix4f().setTranslation((chunk.cX * chunkSize) + x + 0.5f, (chunk.cY * chunkSize) + y + 0.5f, (chunk.cZ * chunkSize) + z + 0.5f).scale(1),
-////                                            new Vector4f(((float) x) / chunkSize, ((float) y) / chunkSize, ((float) z) / chunkSize, 1));
-////                                }
-////                            }
-////                        }
-////                    }
-////                } else if (chunk.blockPalette.size() > 1) {
-//                if (chunk != null && chunk.blockPalette.size() > 1) {
-//                    drawCube(new Matrix4f().setTranslation(((chunk.cX + 0.5f) * chunkSize)%size, ((chunk.cY + 0.5f) * chunkSize)%height, ((chunk.cZ + 0.5f) * chunkSize)%size).scale(chunkSize), new Vector4f(Math.abs(chunk.cX-playerCX)/10.f, Math.abs(chunk.cY-playerCY)/10.f, Math.abs(chunk.cZ-playerCZ)/10.f, 1));
-//                }
-//                //if (i++ > 100000) {break;}
-////            }
-//        }
-//    }
+    public static void drawHeightmapDebug() {
+        int playerRX = (int)(player.pos.x()/regionSize), playerRZ = (int)(player.pos.z()/regionSize);
+        long rP2D = packRegionPos(playerRX, 0, playerRZ);
+        Region2D region2D = getRegion2D(rP2D);
+        if (region2D != null) {
+            int offX = region2D.rXI*regionSize, offZ = region2D.rZI*regionSize;
+            for (int x = 0; x < regionSize; x++) {
+                for (int z = 0; z < regionSize; z++) {
+                    drawCube(new Matrix4f().setTranslation((float)((offX+x+0.5d)%size), (float)((Earth.GROUND_LEVEL+region2D.heights[Region2D.packLocalPos(x, z)]+0.5d)%height), (float)((offZ+z+0.5d)%size)).scale(1.05f), new Vector4f(((float)x)/regionSize, 0.5f, ((float)z)/regionSize, 1.f));
+                }
+            }
+        }
+    }
     public static void drawClouds() {
         if (worldType.getFogginess() > 0.5f) {
             Random cloudRand = new Random(911);

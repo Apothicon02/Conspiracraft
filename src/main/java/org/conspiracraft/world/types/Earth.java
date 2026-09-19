@@ -180,44 +180,95 @@ public class Earth extends WorldType {
     private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) {
         if (generationIdxs[t] >= generationOffsets[t].length-3) {return;}
         final java.util.Random rand = new java.util.Random(seed + t);
-        int rXStart = generationOffsets[t][generationIdxs[t]++] + playerRX, rYStart = generationOffsets[t][generationIdxs[t]++] + playerRY, rZStart = generationOffsets[t][generationIdxs[t]++] + playerRZ;
-        int rXEnd = rXStart, rYEnd = rYStart, rZEnd = rZStart;
+        int rX = generationOffsets[t][generationIdxs[t]++] + playerRX, rYStart = generationOffsets[t][generationIdxs[t]++] + playerRY, rZ = generationOffsets[t][generationIdxs[t]++] + playerRZ;
+        int rYEnd = rYStart;
         boolean crust = false;
+        Region2D region2D = null;
         if (rYStart >= GROUND_LEVEL_R && rYStart < SKY_LEVEL_R) {
             if (rYStart != GROUND_LEVEL_R) {return;} //ensure column doesnt generate multiple times
             rYEnd = SKY_LEVEL_R - 1;
             crust = true;
+            Region2D oldRegion2D = getRegion2D(World.wrapRegionPos(rX, 0, rZ));
+            if (oldRegion2D != null) {oldRegion2D.unload();}
+            long r2DPos = packRegionPos(rX, 0, rZ);
+            region2D = getRegion2D(r2DPos);
+            if (region2D == null) {
+                region2D = new Region2D(r2DPos);
+                putRegion2D(r2DPos, region2D);
+            }
         }
-        for (int rX = rXStart; rX <= rXEnd; rX++) {
-            for (int rZ = rZStart; rZ <= rZEnd; rZ++) {
-                for (int rY = rYStart; rY <= rYEnd; rY++) {
-                    Region oldRegion = getRegion(World.wrapRegionPos(rX, rY, rZ));
-                    if (oldRegion != null) {oldRegion.unload();}
-                    long cRP = World.packRegionPos(rX, rY, rZ);
-                    Region region = getRegion(cRP);
-                    if (region == null) {
-                        region = new Region(cRP);
-                        putRegion(cRP, region);
-                    } else {return;}
+        for (int rY = rYStart; rY <= rYEnd; rY++) {
+            Region oldRegion = getRegion(World.wrapRegionPos(rX, rY, rZ));
+            if (oldRegion != null) {oldRegion.unload();}
+            long cRP = World.packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            if (region == null) {
+                region = new Region(cRP);
+                putRegion(cRP, region);
+            } else {return;}
+        }
+        Bounds bounds = new Bounds(rX * regionSize, (rX+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZ * regionSize, (rZ+1) * regionSize);
+        for (int rY = rYStart; rY <= rYEnd; rY++) {
+            long cRP = World.packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+            int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+            if (crust) {
+                generateCrustRegion(rand, region, region2D, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
+            } else if (cYEnd < GROUND_LEVEL_C) {
+                //generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
+            }
+        }
+        if (crust) {
+            Arrays.fill(region2D.heights, (short)-1);
+            for (int rY = SKY_LEVEL_R-1; rY >= GROUND_LEVEL_R; rY--) {
+                long cRP = packRegionPos(rX, rY, rZ);
+                Region region = getRegion(cRP);
+                for (int cX = 0; cX < regionSizeChunks; cX++) {
+                    for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                        for (int cY = regionSizeChunks-1; cY >= 0; cY--) {
+                            int cP = Region.packLocalPos(cX, cY, cZ);
+                            Chunk chunk = region.getChunk(cP);
+                            Vector2i firstBlock = chunk.getBlock(0);
+                            if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock.x()].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
+                                for (int x = 0; x < chunkSize; x++) {
+                                    for (int z = 0; z < chunkSize; z++) {
+                                        int rlX = x + (cX * chunkSize), rlZ = z + (cZ * chunkSize);
+                                        int packed = (rlX * regionSize) + rlZ;
+                                        if (region2D.heights[packed] == -1) {
+                                            for (int y = chunkSize - 1; y >= 0; y--) {
+                                                Vector2i block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
+                                                if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+                                                    Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
+                                                    region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
+                                                    //LightHelper.queueLightUpdate(globalPos);
+                                                    break;
+                                                } else {
+                                                    chunk.setLight(x, y, z, (byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-        Bounds bounds = new Bounds(rXStart * regionSize, (rXEnd+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZStart * regionSize, (rZEnd+1) * regionSize);
-        for (int rX = rXStart; rX <= rXEnd; rX++) {
-            for (int rZ = rZStart; rZ <= rZEnd; rZ++) {
-                for (int rY = rYStart; rY <= rYEnd; rY++) {
-                    long cRP = World.packRegionPos(rX, rY, rZ);
-                    Region region = getRegion(cRP);
-                    int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
-                    int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
-                    generateRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, crust, bounds);
+        int cXStart = rX * regionSizeChunks, cYStart = rYStart * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+        int cXEnd = cXStart + regionSizeChunks, cYEnd = (rYEnd*regionSizeChunks) + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+        for (int cX = cXStart; cX < cXEnd; cX++) {
+            for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+                for (int cY = cYStart; cY < cYEnd; cY++) {
+                    long cP = packChunkPos(cX, cY, cZ);
+                    updateQueue.addLast(cP);
                 }
             }
         }
     }
-    public void generateRegion(java.util.Random rand, Region region, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, boolean crust, Bounds bounds) {
+    public void generateCrustRegion(java.util.Random rand, Region region, Region2D region2D, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
         RegionNoises regionNoises = new RegionNoises(regionSize * regionSize);
-        short[] heights = new short[regionSize * regionSize];
         byte[] biomes = new byte[regionSize * regionSize];
         for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
             for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z++) {
@@ -238,7 +289,7 @@ public class Earth extends WorldType {
                 double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (hillsNoise - hillCracks) * 125);
                 double vegetationNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
                 int elevation = (int) Math.max(SEA_LEVEL - 2, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
-                heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
+                region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
                 Biome biome = dunes > hills ? Biomes.DESERT : (temperature > 0.1f ? Biomes.RAINFOREST : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (vegetationNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id;
 
@@ -255,7 +306,7 @@ public class Earth extends WorldType {
         for (int cX = cXStart; cX < cXEnd; cX++) {
             for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
-                    continueGenerating = continueGenerating || crust;
+                    continueGenerating = true;
                     int cP = Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks);
                     Chunk chunk = region.getChunk(cP);
                     for (int lX = 0; lX < chunkSize; lX++) {
@@ -267,7 +318,7 @@ public class Earth extends WorldType {
                             double dunesNoise = regionNoises.dunes()[packed];
                             double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continentsNoise)));
                             double hillsNoise = regionNoises.hills()[packed] - hillCracks;//-(dunesNoise*0.2f);
-                            int elevation = heights[packed]+GROUND_LEVEL;
+                            int elevation = region2D.heights[packed]+GROUND_LEVEL;
                             byte biome = biomes[packed];
                             int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biome == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biome == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
                             int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
@@ -282,7 +333,7 @@ public class Earth extends WorldType {
                                 }
                             }
                             if (elevation < SKY_LEVEL && elevation >= GROUND_LEVEL) {
-                                heights[packed] = (short) (elevation - GROUND_LEVEL);
+                                region2D.heights[packed] = (short) (elevation - GROUND_LEVEL);
                             }
                         }
                     }
@@ -297,7 +348,7 @@ public class Earth extends WorldType {
                         for (int lZ = 0; lZ < chunkSize; lZ++) {
                             int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
                             int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
-                            int surface = GROUND_LEVEL + heights[packed];
+                            int surface = GROUND_LEVEL + region2D.heights[packed];
                             if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
                                 byte biome = biomes[packed];
                                 double vegetationNoise = regionNoises.vegetation()[packed];
@@ -381,7 +432,7 @@ public class Earth extends WorldType {
 //                        for (int lZ = 0; lZ < chunkSize; lZ++) {
 //                            int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
 //                            int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
-//                            int surface = GROUND_LEVEL + heights[packed];
+//                            int surface = GROUND_LEVEL + region2D.heights[packed];
 //                            if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
 //                                double foliageNoise = regionNoises.plains()[packed];
 //                                double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
@@ -519,7 +570,7 @@ public class Earth extends WorldType {
                         for (int lZ = 0; lZ < chunkSize; lZ++) {
                             int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
                             int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
-                            int surface = GROUND_LEVEL + heights[packed];
+                            int surface = GROUND_LEVEL + region2D.heights[packed];
                             if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
                                 double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                                 double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
@@ -546,11 +597,20 @@ public class Earth extends WorldType {
                 }
             }
         }
+    }
+    public void generateUndergroundRegion(java.util.Random rand, Region region, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
         for (int cX = cXStart; cX < cXEnd; cX++) {
             for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
-                    long cP = packChunkPos(cX, cY, cZ);
-                    updateQueue.addLast(cP);
+                    int cP = Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks);
+                    Chunk chunk = region.getChunk(cP);
+                    for (int lX = 0; lX < chunkSize; lX++) {
+                        for (int lZ = 0; lZ < chunkSize; lZ++) {
+                            for (int lY = 0; lY < chunkSize; lY++) {
+                                chunk.setBlock(lX, lY, lZ, BlockTypes.STONE.id, 0);
+                            }
+                        }
+                    }
                 }
             }
         }

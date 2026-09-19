@@ -281,8 +281,9 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
-    private static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>(); //convert to fixed size array
-//    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
+    private static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>();
+    private static final Long2ObjectOpenHashMap<Region2D> regions2D = new Long2ObjectOpenHashMap<>();
+    //    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
 //        synchronized (lock) {
 //            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
 //            long newMinX = newX - halfSizeChunks, newMaxX = newX + halfSizeChunks, newMinY = newY - halfHeightChunks, newMaxY = newY + halfHeightChunks, newMinZ = newZ - halfSizeChunks, newMaxZ = newZ + halfSizeChunks;
@@ -429,6 +430,28 @@ public class World {
     public static void putRegion(long cRP, Region region) {
         synchronized (lock) {
             regions.put(cRP, region);
+        }
+    }
+    public static void removeRegion(long cRP) {
+        synchronized (lock) {
+            regions.remove(cRP);
+        }
+    }
+    public static Region2D getRegion2D(long cRP) {
+        Region2D returnRegion;
+        synchronized (lock) {
+            returnRegion = regions2D.get(cRP);
+        }
+        return returnRegion;
+    }
+    public static void putRegion2D(long cRP, Region2D region) {
+        synchronized (lock) {
+            regions2D.put(cRP, region);
+        }
+    }
+    public static void removeRegion2D(long cRP) {
+        synchronized (lock) {
+            regions2D.remove(cRP);
         }
     }
     public static Chunk getChunkGlobalPos(long globalCP) {

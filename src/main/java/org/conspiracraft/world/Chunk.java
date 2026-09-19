@@ -36,7 +36,7 @@ public class Chunk {
         this.cZI = (int)this.cZ;
         blockPalette = new IntArrayList(new int[]{0});
         blockData = new BitBuffer(totalVoxels, 0);
-        lightPalette = new IntArrayList(new int[]{fullSunlight});
+        lightPalette = new IntArrayList(new int[]{0});
         lightData = new BitBuffer(totalVoxels, 0);
     }
 
