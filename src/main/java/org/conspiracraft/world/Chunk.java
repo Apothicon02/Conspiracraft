@@ -36,7 +36,7 @@ public class Chunk {
         this.cZI = (int)this.cZ;
         blockPalette = new IntArrayList(new int[]{0});
         blockData = new BitBuffer(totalVoxels, 0);
-        lightPalette = new IntArrayList(new int[]{0});
+        lightPalette = new IntArrayList(new int[]{fullSunlight});
         lightData = new BitBuffer(totalVoxels, 0);
     }
 
@@ -145,12 +145,13 @@ public class Chunk {
         blockData.setValue(pos, key);
         if (blockPalette.get(key) == 0) {
             boolean isEmpty = true;
+            loop:
             for (int x = 0; x < chunkSize && isEmpty; x++) {
-                for (int z = 0; z < chunkSize && isEmpty; z++) {
+                for (int z = 0; z < chunkSize; z++) {
                     for (int y = 0; y < chunkSize; y++) {
                         if (blockPalette.get(getBlockKey(packLocalPos(x, y, z))) != 0) {
                             isEmpty = false;
-                            break;
+                            break loop;
                         }
                     }
                 }
@@ -158,6 +159,7 @@ public class Chunk {
             if (isEmpty) {
                 blockPalette.clear();
                 blockPalette.add(0);
+                blockData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
             }
         }
     }
@@ -247,19 +249,21 @@ public class Chunk {
         lightData.setValue(pos, key);
         if (lightPalette.get(key) == fullSunlight) {
             boolean isEmpty = true;
-            for (int x = 0; x < chunkSize && isEmpty; x++) {
-                for (int z = 0; z < chunkSize && isEmpty; z++) {
+            loop:
+            for (int x = 0; x < chunkSize; x++) {
+                for (int z = 0; z < chunkSize; z++) {
                     for (int y = 0; y < chunkSize; y++) {
                         if (lightPalette.get(getLightKey(packLocalPos(x, y, z))) != fullSunlight) {
                             isEmpty = false;
-                            break;
+                            break loop;
                         }
                     }
                 }
             }
             if (isEmpty) {
                 lightPalette.clear();
-                lightPalette.add(fullSunlight);
+                lightPalette.add(0);
+                lightData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
             }
         }
     }

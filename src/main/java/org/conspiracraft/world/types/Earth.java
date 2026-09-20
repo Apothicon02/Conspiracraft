@@ -266,6 +266,13 @@ public class Earth extends WorldType {
                 }
             }
         }
+        for (int rY = rYStart; rY <= rYEnd; rY++) {
+            long cRP = World.packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            if (region != null) {
+                region.generated = true;
+            }
+        }
     }
     public void generateCrustRegion(java.util.Random rand, Region region, Region2D region2D, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
         RegionNoises regionNoises = new RegionNoises(regionSize * regionSize);

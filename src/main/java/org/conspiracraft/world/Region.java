@@ -18,6 +18,7 @@ public class Region {
     public final int rXI, rYI, rZI;
     public static final int totalChunks = regionSizeChunks*regionSizeChunks*regionSizeChunks;
     public final Chunk[] chunks;
+    public boolean generated = false;
 
     public Region(long condensedRegionPos) {
         this.condensedRegionPos = condensedRegionPos;
