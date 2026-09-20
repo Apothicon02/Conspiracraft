@@ -103,9 +103,9 @@ void updateLightChunkData(int x, int y, int z) {
     updateLightChunkData(ivec3(x, y, z) >> 4);
 }
 const int maxBlocklightLevel = 31;
-const int maxSunlightLevel = 31;
+const int maxSunlightLevel = 19;
 const vec4 maxLightLevel = vec4(maxBlocklightLevel, maxBlocklightLevel, maxBlocklightLevel, maxSunlightLevel);
-const int fullSunlight = 520093696;
+const int fullSunlight = 318767104;
 int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
     if (lightValuesPerInt <= 0) {return fullSunlight;}
@@ -230,6 +230,15 @@ vec4 sampleAtlasTiled(int x, int y, int z, int blockType, int blockSubtype) {
     if (pos.z < 0) {pos.z+=blockSize;} else if (pos.z >= blockSize) {pos.z-=blockSize;}
     return sampleAtlas(pos.x, pos.y, pos.z, blockType, blockSubtype);
 }
+int getBlockType(float x, float y, float z) {
+    //    int iX = int(x) % size;
+    //    int iY = int(y) % height;
+    //    int iZ = int(z) % size;
+    //    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
+    updateChunkData(int(x), int(y), int(z));
+    int blockData = getBlockData(int(x), int(y), int(z));
+    return (blockData >> 16) & 0xFFFF;
+}
 vec4 getBlockAndVoxel(float x, float y, float z) {
     //    int iX = int(x) % size;
     //    int iY = int(y) % height;
@@ -304,7 +313,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     vec3 horizonColor = mix(mix(globalUbo.sunsetAtmosphere.rgb, globalUbo.deepSunsetAtmosphere.rgb, min(sunDepth, 0.1f)*10), vec3(1), min(max(max(0.f, sunDepth-0.5f), sunHeight), 0.1f)*10);
     float whiteness = 1.05f-clamp(lightPos.y/(isSky ? 512 : 1000), 0, 1);
     sunColor = mix(sunColor, horizonColor, whiteness);
-    sunColor=mix(sunColor*globalUbo.skylightMul.rgb, sunColor*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2), 0.5f);
+    sunColor=sunColor*globalUbo.skylightMul.rgb*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2);//mix(sunColor*globalUbo.skylightMul.rgb, sunColor*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2), 0.5f);
     //sunColor*=max(vec3(0.45f, 0.45f, 0.55f), globalUbo.skylightMul.rgb);
     //sunColor *= hsv2rgb(mix(rgb2hsv(sunColor), rgb2hsv(globalUbo.skylightMul.rgb), vec3(1.f, 0.f, 0.f)));
     if (!isSky && !celestialSource) {
@@ -617,6 +626,50 @@ vec3 mipmap(vec3 color) {
     }
     return color;
 }
+//float ao() {
+//    float brightness = 2.f;
+//    float radius = 20.f;
+//    float halfRadius = 10.f;
+//    vec3 low = hitPos-vec3(halfRadius, halfRadius, halfRadius);
+//    vec3 high = hitPos+vec3(halfRadius, halfRadius, halfRadius);
+////    vec3 low = hitPos;
+////    vec3 high = hitPos;
+////    if (abs(flatNormal.x) > 0.5f) {
+////        if (flatNormal.x >= 0.f) {
+////            high += vec3(radius, halfRadius, halfRadius);
+////            low -= vec3(0, halfRadius, halfRadius);
+////        } else {
+////            high += vec3(0, halfRadius, halfRadius);
+////            low -= vec3(radius, halfRadius, halfRadius);
+////        }
+////    } else if (abs(flatNormal.y) > 0.5f) {
+////        if (flatNormal.y >= 0.f) {
+////            high += vec3(halfRadius, radius, halfRadius);
+////            low -= vec3(halfRadius, 0, halfRadius);
+////        } else {
+////            high += vec3(halfRadius, 0, halfRadius);
+////            low -= vec3(halfRadius, radius, halfRadius);
+////        }
+////    } else if (abs(flatNormal.z) > 0.5f) {
+////        if (flatNormal.z >= 0.f) {
+////            high += vec3(halfRadius, halfRadius, radius);
+////            low -= vec3(halfRadius, halfRadius, 0);
+////        } else {
+////            high += vec3(halfRadius, halfRadius, 0);
+////            low -= vec3(halfRadius, halfRadius, radius);
+////        }
+////    }
+//    for (float x = low.x; x <= high.x; x+=4) {
+//        for (float y = low.y; y <= high.y; y+=4) {
+//            for (float z = low.z; z <= high.z; z+=4) {
+//                if (getBlockType(x, y, z).x > 1) {
+//                    brightness-=0.025f*(1-clamp(distance(vec3(x, y, z), hitPos)/radius, 0, 1));
+//                }
+//            }
+//        }
+//    }
+//    return clamp(brightness, 0.14f, 1.f);
+//}
 vec3 desaturate(vec3 color, float factor){
     return color+((vec3(max(color.r, max(color.g, color.b)))-color)*factor);
 }
@@ -712,6 +765,7 @@ void main() {
         float roughness = block.x == 1 ? 0.2f : ((tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f)));
         float fogginessMul = 1.f;
         vec4 rasterColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0);
+        float ambient = 1.f;
         if (rasterDepth > depth && rasterColor.a > 0) { //|| rasterDepth >= 0.0115f
             isSky = false;
             reverseNormShading = false;
@@ -742,6 +796,8 @@ void main() {
                 color.rgb *= primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.75f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.9f : 0.8f));
             }
         } else if (!isSky || tint.a < 1) {
+            //ambient = ao();
+            //color.rgb = vec3(ambient);
             //color.rgb = mipmap(color.rgb);
             //        float factor = clamp((shadowPos.y-72)/66, 0, 1);
             //        if (factor < 0.5f) {
@@ -820,6 +876,7 @@ void main() {
                         blockLighting.a = pow(blockLighting.a, 2);
                     }
                 }
+                blockLighting.a*=ambient;
                 //blockLighting.a *= 1-abs(causticness/50);
                 float fogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(primaryLightPos.y, 63, 80, 1, 1 + abs(noise(primaryLightPos.xz) * 0.67f)) * fogginessMul, 0.f, maxFogginess));
                 bool offsetShadow = false;
