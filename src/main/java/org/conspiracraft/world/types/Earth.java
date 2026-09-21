@@ -241,7 +241,6 @@ public class Earth extends WorldType {
                                                 if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
                                                     Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
                                                     region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
-                                                    //LightHelper.queueLightUpdate(globalPos);
                                                     break;
                                                 } else {
                                                     chunk.setLight(x, y, z, (byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel);
@@ -252,6 +251,20 @@ public class Earth extends WorldType {
                                 }
                             }
                         }
+                    }
+                }
+            }
+            for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
+                for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
+                    int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
+                    int gY = height+Earth.GROUND_LEVEL;
+                    Vector3i globalPos = new Vector3i(x, gY, z);
+                    Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
+                    if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
+                            (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
+                            (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
+                            (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
+                        LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
                     }
                 }
             }
