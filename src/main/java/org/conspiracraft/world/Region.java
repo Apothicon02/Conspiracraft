@@ -5,6 +5,8 @@ import org.joml.Vector3i;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.VkBufferCopy;
 
+import java.util.ArrayDeque;
+
 import static org.conspiracraft.graphics.Graphics.chunkSSBO;
 import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
 import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
@@ -20,6 +22,8 @@ public class Region {
     public final Chunk[] chunks;
     public boolean generated = false;
     public boolean neighborsGenerated = false;
+    public final ArrayDeque<Vector3i> lightQueueSkipWG = new ArrayDeque<>();
+    public final ArrayDeque<Vector3i> lightQueueSkip = new ArrayDeque<>();
     public void setGenerated() {
         generated = true;
         updateNeighborsGeneratedAndTheirNeighbors();
@@ -38,21 +42,31 @@ public class Region {
         }
     }
     public void updateNeighborsGenerated() {
-        boolean safe = true;
-        loop:
-        for (int x = rXI-1; x <= rXI+1; x++) {
-            for (int y = rYI-1; y <= rYI+1; y++) {
-                for (int z = rZI-1; z <= rZI+1; z++) {
-                    long cRP = World.packRegionPos(x, y, z);
-                    Region region = getRegion(cRP);
-                    if (region == null || !region.generated) {
-                        safe = false;
-                        break loop;
+        if (!neighborsGenerated) {
+            boolean safe = true;
+            loop:
+            for (int x = rXI - 1; x <= rXI + 1; x++) {
+                for (int y = rYI - 1; y <= rYI + 1; y++) {
+                    for (int z = rZI - 1; z <= rZI + 1; z++) {
+                        long cRP = World.packRegionPos(x, y, z);
+                        Region region = getRegion(cRP);
+                        if (region == null || !region.generated) {
+                            safe = false;
+                            break loop;
+                        }
                     }
                 }
             }
+            neighborsGenerated = safe;
+            if (neighborsGenerated) {
+                while (!lightQueueSkip.isEmpty()) {
+                    LightHelper.queueLightUpdate(lightQueueSkip.pollFirst());
+                }
+                while (!lightQueueSkipWG.isEmpty()) {
+                    LightHelper.queueLightUpdate(LightHelper.lightQueueWG, lightQueueSkipWG.pollFirst());
+                }
+            }
         }
-        neighborsGenerated = safe;
     }
 
     public Region(long condensedRegionPos) {

@@ -18,10 +18,9 @@ import static org.conspiracraft.world.World.*;
 
 public class LightHelper {
     public static final int maxSunlightLevel = 23;
+    public static int fullSunlight = Chunk.packLight(0, 0, 0, maxSunlightLevel);
     public static final ArrayDeque<Vector3i> lightQueueWG = new ArrayDeque<>();
-    public static final ArrayDeque<Vector3i> lightQueueSkipWG = new ArrayDeque<>();
     public static final ArrayDeque<Vector3i> lightQueue = new ArrayDeque<>();
-    public static final ArrayDeque<Vector3i> lightQueueSkip = new ArrayDeque<>();
     public static final ConcurrentLinkedDeque<Chunk> dirtyChunks = new ConcurrentLinkedDeque<>();
 
     public static void queueLightUpdate(Vector3i pos) {
@@ -55,7 +54,7 @@ public class LightHelper {
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
             Region region = getRegion(packRegionPos(rX, rY, rZ));
             if (!region.neighborsGenerated) {
-                lightQueueSkip.add(pos);
+                region.lightQueueSkip.add(pos);
             } else {
                 updateLight(lightQueue, pos, getBlock(pos), getLight(pos));
                 long cCP = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
@@ -63,14 +62,12 @@ public class LightHelper {
                 chunk.lightUpdateArr()[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
             }
         }
-        int i = 0;
         while (!lightQueueWG.isEmpty()) {
-            if (i++ >= 5000) {break;}
             Vector3i pos = lightQueueWG.pollFirst();
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
             Region region = getRegion(packRegionPos(rX, rY, rZ));
             if (!region.neighborsGenerated) {
-                lightQueueSkipWG.add(pos);
+                region.lightQueueSkipWG.add(pos);
             } else {
                 updateLight(lightQueueWG, pos, getBlock(pos), getLight(pos));
                 long cCP = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
@@ -83,12 +80,6 @@ public class LightHelper {
             updateQueue.add(chunk.cCP);
         }
         dirtyChunks.clear();
-        while (!lightQueueSkip.isEmpty()) {
-            queueLightUpdate(lightQueueSkip.pollFirst());
-        }
-        while (!lightQueueSkipWG.isEmpty()) {
-            queueLightUpdate(lightQueueWG, lightQueueSkipWG.pollFirst());
-        }
     }
     public static void iterateLightQueueMultithreaded() throws InterruptedException {
         final int threads = Runtime.getRuntime().availableProcessors();

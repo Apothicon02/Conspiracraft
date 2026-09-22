@@ -277,6 +277,9 @@ public class Renderer {
     }
     public static long allocated = 0;
     public static void updateChunkLights(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
+        if (!getRegion(packRegionPos(chunkPos.x()>>regionBitsChunks, chunkPos.y()>>regionBitsChunks, chunkPos.z()>>regionBitsChunks)).neighborsGenerated) {
+            return;
+        }
         long chunkPtr = lightChunkSSBO.stagingBuffer.pointer.get(0);
         long lightPtr = lightSSBO.stagingBuffer.pointer.get(0);
         if (initialized) {

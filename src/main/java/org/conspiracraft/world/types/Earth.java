@@ -249,6 +249,8 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 }
+                            } else {
+                                chunk.lightPalette.set(0, LightHelper.fullSunlight);
                             }
                         }
                     }
@@ -397,7 +399,7 @@ public class Earth extends WorldType {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);
-                                            OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 4, 2.75f);
+                                            CherryTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 4, 2.75f);
                                         } else if (foliageChance < 0.0022f) {
                                             int maxHeight = rand.nextInt(16, 19);
                                             int radius = rand.nextInt(9, 12);
@@ -409,7 +411,7 @@ public class Earth extends WorldType {
                                         if (foliageChance < 0.002f) {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
-                                            int count = rand.nextInt(4, 6);
+                                            int count = rand.nextInt(4, 5);
                                             OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f);
                                         } else if (foliageChance < 0.0023f) {
                                             int maxHeight = rand.nextInt(16, 19);
@@ -1173,7 +1175,7 @@ public class Earth extends WorldType {
 //                                                int maxHeight = rand.nextInt(24, 30);
 //                                                int radius = rand.nextInt(26, 34);
 //                                                int count = rand.nextInt(6, 8);
-//                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
+//                                                CherryTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
 //                                            }
 //                                        } else if (biome == Biomes.SAVANNA.id) {
 //                                            if (randomNumber < 0.0003f) {
@@ -1192,7 +1194,7 @@ public class Earth extends WorldType {
 //                                                int maxHeight = rand.nextInt(24, 30);
 //                                                int radius = rand.nextInt(26, 34);
 //                                                int count = rand.nextInt(6, 8);
-//                                                OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
+//                                                CherryTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 3);
 //                                            }
 //                                        } else {
 //                                            if (randomNumber < 0.001f) {
@@ -1208,7 +1210,7 @@ public class Earth extends WorldType {
 //                                                    int maxHeight = rand.nextInt(24, 30);
 //                                                    int radius = rand.nextInt(26, 34);
 //                                                    int count = rand.nextInt(6, 8);
-//                                                    OakTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 3);
+//                                                    CherryTree.generate(rand, blockOn, x, elevation, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 3);
 //                                                }
 //                                            } else if (randomNumber > 0.002 && randomNumber < 0.00212f) {
 //                                                int maxHeight = rand.nextInt(20, 23);

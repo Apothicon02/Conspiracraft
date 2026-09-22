@@ -5,6 +5,7 @@ import org.conspiracraft.utils.BitBuffer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import static org.conspiracraft.world.LightHelper.fullSunlight;
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.chunkSize;
 
@@ -36,7 +37,7 @@ public class Chunk {
         this.cZI = (int)this.cZ;
         blockPalette = new IntArrayList(new int[]{0});
         blockData = new BitBuffer(totalVoxels, 0);
-        lightPalette = new IntArrayList(new int[]{fullSunlight});
+        lightPalette = new IntArrayList(new int[]{0});
         lightData = new BitBuffer(totalVoxels, 0);
     }
 
@@ -143,25 +144,25 @@ public class Chunk {
     public void setBlockKey(int pos, int key) {
         updateBlockPaletteKeySize();
         blockData.setValue(pos, key);
-        if (blockPalette.get(key) == 0) {
-            boolean isEmpty = true;
-            loop:
-            for (int x = 0; x < chunkSize && isEmpty; x++) {
-                for (int z = 0; z < chunkSize; z++) {
-                    for (int y = 0; y < chunkSize; y++) {
-                        if (blockPalette.get(getBlockKey(packLocalPos(x, y, z))) != 0) {
-                            isEmpty = false;
-                            break loop;
-                        }
-                    }
-                }
-            }
-            if (isEmpty) {
-                blockPalette.clear();
-                blockPalette.add(0);
-                blockData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
-            }
-        }
+//        if (blockPalette.get(key) == 0) {
+//            boolean isEmpty = true;
+//            loop:
+//            for (int x = 0; x < chunkSize && isEmpty; x++) {
+//                for (int z = 0; z < chunkSize; z++) {
+//                    for (int y = 0; y < chunkSize; y++) {
+//                        if (blockPalette.get(getBlockKey(packLocalPos(x, y, z))) != 0) {
+//                            isEmpty = false;
+//                            break loop;
+//                        }
+//                    }
+//                }
+//            }
+//            if (isEmpty) {
+//                blockPalette.clear();
+//                blockPalette.add(0);
+//                blockData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
+//            }
+//        }
     }
     public void setBlockKey(int x, int y, int z, int keys) {
         setBlockKey(packLocalPos(x, y, z), keys);
@@ -243,29 +244,28 @@ public class Chunk {
             lightData = newData;
         }
     }
-    public static int fullSunlight = packLight(0, 0, 0, maxSunlightLevel);
     public void setLightKey(int pos, int key) {
         updateLightPaletteKeySize();
         lightData.setValue(pos, key);
-        if (lightPalette.get(key) == fullSunlight) {
-            boolean isEmpty = true;
-            loop:
-            for (int x = 0; x < chunkSize; x++) {
-                for (int z = 0; z < chunkSize; z++) {
-                    for (int y = 0; y < chunkSize; y++) {
-                        if (lightPalette.get(getLightKey(packLocalPos(x, y, z))) != fullSunlight) {
-                            isEmpty = false;
-                            break loop;
-                        }
-                    }
-                }
-            }
-            if (isEmpty) {
-                lightPalette.clear();
-                lightPalette.add(0);
-                lightData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
-            }
-        }
+//        if (lightPalette.get(key) == fullSunlight) {
+//            boolean isEmpty = true;
+//            loop:
+//            for (int x = 0; x < chunkSize; x++) {
+//                for (int z = 0; z < chunkSize; z++) {
+//                    for (int y = 0; y < chunkSize; y++) {
+//                        if (lightPalette.get(getLightKey(packLocalPos(x, y, z))) != fullSunlight) {
+//                            isEmpty = false;
+//                            break loop;
+//                        }
+//                    }
+//                }
+//            }
+//            if (isEmpty) {
+//                lightPalette.clear();
+//                lightPalette.add(0);
+//                lightData = new BitBuffer(totalVoxels, getNeededBitsPerValue(1));
+//            }
+//        }
     }
     public void setLightKey(int x, int y, int z, int keys) {
         setLightKey(packLocalPos(x, y, z), keys);
