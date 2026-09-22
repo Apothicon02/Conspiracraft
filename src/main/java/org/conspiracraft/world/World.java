@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 
@@ -281,8 +282,8 @@ public class World {
     public static int packPos(int x, int z) {return (x*size)+z;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
     public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
-    private static final Long2ObjectOpenHashMap<Region> regions = new Long2ObjectOpenHashMap<>();
-    private static final Long2ObjectOpenHashMap<Region2D> regions2D = new Long2ObjectOpenHashMap<>();
+    private static final ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Region2D> regions2D = new ConcurrentHashMap<>();
     //    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
 //        synchronized (lock) {
 //            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
@@ -361,10 +362,10 @@ public class World {
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
+        if (!generating && updateSet.add(cP)) {
+            updateQueue.addLast(cP);
+        }
         synchronized (chunk) {
-            if (!generating && updateSet.add(cP)) {
-                updateQueue.addLast(cP);
-            }
             chunk.setLight(lX, lY, lZ, light);
         }
     }
@@ -408,10 +409,8 @@ public class World {
         updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         updateHeightmap(x, y, z);
         LightHelper.queueLightUpdate(new Vector3i(x, y, z));
-        synchronized (chunk) {
-            if (updateSet.add(cP)) {
-                updateQueue.addLast(cP);
-            }
+        if (updateSet.add(cP)) {
+            updateQueue.addLast(cP);
         }
         if (updateNeighbors) {
             updateNeighbors(x, y, z);
@@ -419,48 +418,45 @@ public class World {
     }
     public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
-    public static final Object lock = new Object();
     public static Region getRegion(long cRP) {
-        Region returnRegion;
-        synchronized (lock) {
-            returnRegion = regions.get(cRP);
-        }
-        return returnRegion;
+        return regions.get(cRP);
     }
     public static void putRegion(long cRP, Region region) {
-        synchronized (lock) {
-            regions.put(cRP, region);
-        }
+        regions.put(cRP, region);
     }
     public static void removeRegion(long cRP) {
-        synchronized (lock) {
-            regions.remove(cRP);
-        }
+        Region region = regions.get(cRP);
+        region.updateNeighborsGeneratedAndTheirNeighbors();
+        regions.remove(cRP);
     }
     public static Region2D getRegion2D(long cRP) {
-        Region2D returnRegion;
-        synchronized (lock) {
-            returnRegion = regions2D.get(cRP);
-        }
-        return returnRegion;
+        return regions2D.get(cRP);
     }
     public static void putRegion2D(long cRP, Region2D region) {
-        synchronized (lock) {
-            regions2D.put(cRP, region);
-        }
+        regions2D.put(cRP, region);
     }
     public static void removeRegion2D(long cRP) {
-        synchronized (lock) {
-            regions2D.remove(cRP);
-        }
+        regions2D.remove(cRP);
     }
+//    public static final Object prevChunkLock = new Object();
+//    public static long prevChunkPos = -1;
+//    public static Chunk prevChunk = null;
     public static Chunk getChunkGlobalPos(long globalCP) {
+//        synchronized (prevChunkLock) {
+//            if (prevChunkPos == globalCP && prevChunk != null) {
+//                return prevChunk;
+//            }
+//            prevChunkPos = globalCP;
+//        }
         int cX = (int)((globalCP >> 42) & 0x3FFFFF), cZ = (int)((globalCP >> 20) & 0x3FFFFF), cY = (int)(globalCP & 0xFFFFF);
         int rX = cX>> regionBitsChunks, rY = cY>> regionBitsChunks, rZ = cZ>> regionBitsChunks;
         long cRP = packRegionPos(rX, rY, rZ);
         Region region = getRegion(cRP);
         if (region == null) {return null;}
         return region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
+//        Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
+//        prevChunk = chunk;
+//        return chunk;
     }
     public static Vector2i getBlockWorldgen(Vector3i pos) {
         return getBlockWorldgen(pos.x(), pos.y(), pos.z());
@@ -523,10 +519,8 @@ public class World {
                     LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
                 }
             }
-            synchronized (chunk) {
-                if (updateSet.add(cP)) {
-                    updateQueue.addLast(cP);
-                }
+            if (updateSet.add(cP)) {
+                updateQueue.addLast(cP);
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);
@@ -559,10 +553,8 @@ public class World {
                 updateHeightmap(x, y, z);
                 LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
             }
-            synchronized (chunk) {
-                if (updateSet.add(cP)) { //may not need to do this since the light recalculation will prob do it
-                    updateQueue.addLast(cP);
-                }
+            if (updateSet.add(cP)) { //may not need to do this since the light recalculation will prob do it
+                updateQueue.addLast(cP);
             }
             if (updateNeighbors) {
                 updateNeighbors(x, y, z);

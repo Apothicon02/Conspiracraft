@@ -19,6 +19,41 @@ public class Region {
     public static final int totalChunks = regionSizeChunks*regionSizeChunks*regionSizeChunks;
     public final Chunk[] chunks;
     public boolean generated = false;
+    public boolean neighborsGenerated = false;
+    public void setGenerated() {
+        generated = true;
+        updateNeighborsGeneratedAndTheirNeighbors();
+    }
+    public void updateNeighborsGeneratedAndTheirNeighbors() {
+        for (int x = rXI-1; x <= rXI+1; x++) {
+            for (int y = rYI - 1; y <= rYI + 1; y++) {
+                for (int z = rZI - 1; z <= rZI + 1; z++) {
+                    long cRP = World.packRegionPos(x, y, z);
+                    Region region = getRegion(cRP);
+                    if (region != null) {
+                        region.updateNeighborsGenerated();
+                    }
+                }
+            }
+        }
+    }
+    public void updateNeighborsGenerated() {
+        boolean safe = true;
+        loop:
+        for (int x = rXI-1; x <= rXI+1; x++) {
+            for (int y = rYI-1; y <= rYI+1; y++) {
+                for (int z = rZI-1; z <= rZI+1; z++) {
+                    long cRP = World.packRegionPos(x, y, z);
+                    Region region = getRegion(cRP);
+                    if (region == null || !region.generated) {
+                        safe = false;
+                        break loop;
+                    }
+                }
+            }
+        }
+        neighborsGenerated = safe;
+    }
 
     public Region(long condensedRegionPos) {
         this.condensedRegionPos = condensedRegionPos;

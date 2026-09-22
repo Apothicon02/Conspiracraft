@@ -103,9 +103,9 @@ void updateLightChunkData(int x, int y, int z) {
     updateLightChunkData(ivec3(x, y, z) >> 4);
 }
 const int maxBlocklightLevel = 31;
-const int maxSunlightLevel = 19;
+const int maxSunlightLevel = 23;
 const vec4 maxLightLevel = vec4(maxBlocklightLevel, maxBlocklightLevel, maxBlocklightLevel, maxSunlightLevel);
-const int fullSunlight = 318767104;
+const int fullSunlight = 385875968;
 int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
     if (lightValuesPerInt <= 0) {return fullSunlight;}

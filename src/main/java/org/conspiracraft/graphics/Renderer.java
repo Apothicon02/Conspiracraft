@@ -103,14 +103,12 @@ public class Renderer {
                     //long startTime = System.nanoTime();
                     boolean wasEmpty = updateQueue.isEmpty();
                     long startTime = System.currentTimeMillis();
-                    synchronized (lock) {
-                        while (!updateQueue.isEmpty()) {
-                            long chunkPos = updateQueue.pollFirst();
-                            updateChunk(chunkPos);
-                            //updateSet.remove(chunkPos);
-                        }
-                        updateSet.clear();
+                    while (!updateQueue.isEmpty()) {
+                        long chunkPos = updateQueue.pollFirst();
+                        updateChunk(chunkPos);
+                        //updateSet.remove(chunkPos);
                     }
+                    updateSet.clear();
                     if (!wasEmpty) {
                         ssboBarriers(stack);
                         //System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");
@@ -747,22 +745,20 @@ public class Renderer {
     public static Long2LongOpenHashMap chunkLightBlockAllocs;
     public static void fillSSBOs(MemoryStack stack) {
         long startTime = System.currentTimeMillis();
-        synchronized (lock) {
-            if (blocks != null) {
-                vmaDestroyVirtualBlock(blocks.get(0));
-                vmaDestroyVirtualBlock(lights.get(0));
-            }
-            blocks = BufferUtils.createPointerBuffer(1);
-            lights = BufferUtils.createPointerBuffer(1);
-            VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
-            blockCreateInfo.size(voxelSSBOSize);
-            vmaCreateVirtualBlock(blockCreateInfo, blocks);
-            chunkBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
-            VmaVirtualBlockCreateInfo lightBlockCreateInfo = VmaVirtualBlockCreateInfo.create();
-            lightBlockCreateInfo.size(lightSSBOSize);
-            vmaCreateVirtualBlock(lightBlockCreateInfo, lights);
-            chunkLightBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
+        if (blocks != null) {
+            vmaDestroyVirtualBlock(blocks.get(0));
+            vmaDestroyVirtualBlock(lights.get(0));
         }
+        blocks = BufferUtils.createPointerBuffer(1);
+        lights = BufferUtils.createPointerBuffer(1);
+        VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
+        blockCreateInfo.size(voxelSSBOSize);
+        vmaCreateVirtualBlock(blockCreateInfo, blocks);
+        chunkBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
+        VmaVirtualBlockCreateInfo lightBlockCreateInfo = VmaVirtualBlockCreateInfo.create();
+        lightBlockCreateInfo.size(lightSSBOSize);
+        vmaCreateVirtualBlock(lightBlockCreateInfo, lights);
+        chunkLightBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
 
 //        for (Chunk chunk : chunks.values()) {
 //            updateChunk(chunk.condensedChunkPos);
