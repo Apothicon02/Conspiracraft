@@ -2,18 +2,15 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.audio.BlockSFX;
-import org.conspiracraft.audio.SFX;
 import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.entities.CracksEntity;
 import org.conspiracraft.entities.Entity;
-import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.items.types.ItemType;
-import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.utils.Utils;
@@ -51,9 +48,9 @@ public class HandManager {
                 }
             }
         }
-        lmbDown = lmbDown || player.inputHandler.leftButtonPressed;
-        mmbDown = mmbDown || player.inputHandler.middleButtonPressed;
-        rmbDown = rmbDown || player.inputHandler.rightButtonPressed;
+        lmbDown = player.inputHandler.leftButtonPressed;
+        mmbDown = player.inputHandler.middleButtonPressed;
+        rmbDown = player.inputHandler.rightButtonPressed;
     }
     public static DDAResult ddaResult = null;
     public static void useHands(Window window) {
@@ -77,20 +74,23 @@ public class HandManager {
                 }
             }
             if (delay == 0) { //if block did no interaction
+                float blockSoundGain = 0.f;
                 if (!(selectedItem == null || selectedItem.amount <= 0)) {
                     ItemUseResult result = selectedItem.use(ddaResult);
                     delay = result.delay();
                     selectedItem = result.item();
+                    blockSoundGain = result.blockSoundGain();
                     player.inv.menu.setItem(hotbarSlot, selectedItem);
                 }
                 if (delay == 0) { //if item did no interaction
                     if (lmbDown) {
                         delay = mine(player.creative ? 2400 : 24);
+                        blockSoundGain = 1.f;
                     }
                 }
-                if (delay != 0) {
+                if (blockSoundGain > 0.f) {
                     BlockSFX sfx = BlockTypes.blockTypes[block.x()].blockProperties.blockSFX;
-                    Source source = new Source(new Vector3f(ddaResult.hitD), sfx.placeGain + ((sfx.placeGain * Player.playerRand.nextFloat()) / 3), sfx.placePitch + ((sfx.placePitch * Player.playerRand.nextFloat()) / 3), 0.f, 0);
+                    Source source = new Source(new Vector3f(ddaResult.hitD), blockSoundGain*(sfx.placeGain + ((sfx.placeGain * Player.playerRand.nextFloat()) / 3)), sfx.placePitch + ((sfx.placePitch * Player.playerRand.nextFloat()) / 3), 0.f, 0);
                     source.play(sfx.placeIds[sfx.placeIds.length == 1 ? 0 : Player.playerRand.nextInt(sfx.placeIds.length - 1)], true);
                     AudioController.disposableSources.add(source);
                 }
@@ -122,6 +122,10 @@ public class HandManager {
     }
 
     public static void tick() {
+        Item selectedItem = player.inv.getSelectedItem(true);
+        if (selectedItem != null) {
+            selectedItem.tick();
+        }
         if (lmbDown || rmbDown) {
             if (tiltTarget == 0) {
                 tiltTarget = 30;
@@ -133,7 +137,6 @@ public class HandManager {
         if (tiltTarget == 0 && Math.abs(tilt - tiltTarget) < 10f) {
             tilt = 0;
         } else {
-            Item selectedItem = player.inv.getSelectedItem(true);
             float tiltSpeed = 10.f;
             if (!(selectedItem == null || selectedItem.amount <= 0)) {
                 tiltSpeed = selectedItem.useSpeed();
@@ -152,10 +155,6 @@ public class HandManager {
                 tiltTarget = 30;
             }
         }
-
-        lmbDown = false;
-        mmbDown = false;
-        rmbDown = false;
     }
 
     public static float getTilt() {

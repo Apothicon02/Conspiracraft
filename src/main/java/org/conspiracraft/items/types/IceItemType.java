@@ -38,9 +38,9 @@ public class IceItemType extends ItemType {
                 if (!player.creative) {
                     item.amount -= 1000;
                 }
-                return new ItemUseResult(200, item);
+                return new ItemUseResult(200, item, 1.f);
             }
         }
-        return new ItemUseResult(0, item);
+        return new ItemUseResult(0, item, 0.f);
     }
 }

@@ -33,10 +33,14 @@ public class Sounds {
     public static SFX METAL_SMALL_PLACE1 = AudioController.loadSound("generic/sound/metal_small_place1.wav");
     public static SFX METAL_SMALL_PLACE2 = AudioController.loadSound("generic/sound/metal_small_place2.wav");
     public static SFX GEARS_TURNING = AudioController.loadSound("generic/sound/gears_turning.wav");
+    public static SFX GEAR_CLICK1 = AudioController.loadSound("generic/sound/gear_click1.wav");
+    public static SFX GEAR_CLICK2 = AudioController.loadSound("generic/sound/gear_click2.wav");
+    public static SFX GEAR_CLICK3 = AudioController.loadSound("generic/sound/gear_click3.wav");
     public static SFX THUNDER_1 = AudioController.loadSound("generic/sound/thunder_1.wav");
     public static SFX THUNDER_2 = AudioController.loadSound("generic/sound/thunder_2.wav");
     public static SFX FIREBALL = AudioController.loadSound("generic/sound/fireball.wav");
     public static SFX FIREBALL_SLOW = AudioController.loadSound("generic/sound/fireball_slow.wav");
     public static SFX FIREBALL_QUICK = AudioController.loadSound("generic/sound/fireball_quick.wav");
     public static SFX ASH = AudioController.loadSound("generic/sound/ash.wav");
+    public static SFX HOOK = AudioController.loadSound("generic/sound/hook.wav");
 }

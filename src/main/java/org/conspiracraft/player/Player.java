@@ -2,6 +2,7 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.audio.BlockSFX;
+import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.effects.Particle;
@@ -74,6 +75,7 @@ public class Player {
     public boolean flying = true, forward = false, backward = false, leftward = false, rightward = false, upward = false, downward = false, sprinting = false, superSprinting = false, crouching = false, crawling = false;
     public static Entity entityOn = null;
     public static Vector3d prevEntityOnPos = new Vector3d();
+    public Source speedWindSource = null;
 
     public static final Random playerRand = new Random();
 
@@ -106,6 +108,8 @@ public class Player {
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
         }
+        speedWindSource = new Source(new Vector3f(0), 0.f, 1.f, 0.f, 1);
+        speedWindSource.play(Sounds.WIND);
     }
 
     public void save() throws IOException {
@@ -138,15 +142,18 @@ public class Player {
     }
 
     public void draw() {
+        Matrix4f matrix = new Matrix4f().setTranslation(new Vector3f(viewPos).add(new Vector3f(camera.getForward()).mul(0.1f)).add(new Vector3f(camera.getRightWithoutPitch()).mul(0.15f)));
+        Item selItem = inv.getSelectedItem(true);
+        if (selItem != null && selItem.type != ItemTypes.AIR) {
+            selItem.drawHeld(matrix);
+        }
+    }
+    public void drawView() {
         float bob = (float)Utils.getInterpolatedDouble(prevBobbing, bobbing);
         Matrix4f matrix = new Matrix4f().rotationXYZ((float) (bob+0.5f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, (-0.3f)+bob, 0.3f);
         Item selItem = inv.getSelectedItem(true);
         if (selItem != null && selItem.type != ItemTypes.AIR) {
-            pushUBO.updateTex(Textures.items);
-            pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
-            pushUBO.updateAtlasOffset(selItem.type.atlasOffset);
-            Renderer.drawQuad(new Matrix4f(matrix).rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
-            //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
+            selItem.drawHeldView(matrix);
         }
         pushUBO.updateTex(null);
         Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
@@ -172,8 +179,9 @@ public class Player {
                 }
             }
         }
-        HandManager.tick();
         movementTick();
+        HandManager.tick();
+        movementTickFinish();
         if (breath > 0) {
             breath--;
         } else {
@@ -353,6 +361,8 @@ public class Player {
             }
         }
         vel.max(new Vector3d(-3)).min((new Vector3d(3)));
+    }
+    public void movementTickFinish() {
         Vector3d entityMoveFactor = new Vector3d();
         if (entityOn != null) {
             Vector3d entityOnPos = new Vector3d(entityOn.pos);
@@ -399,6 +409,8 @@ public class Player {
         pos.set(playerAABB.xMin + width, playerAABB.yMin + height, playerAABB.zMin + width);
         dynamicSpeedOld = dynamicSpeed;
         dynamicSpeed = Math.clamp((movement.length() - 0.1f) * 4, 0, 1);
+
+        speedWindSource.setGain(Utils.mix((float)Math.max(0.f, (vel.length()*0.15f)-0.15f), speedWindSource.baseGain, 0.9f));
     }
 
     public void stepFx() {
@@ -470,8 +482,11 @@ public class Player {
         return new Vector3d(translation).add(pos.x(), pos.y() + eyeHeight + (bobbing * 1.5f), pos.z());
     }
     public Vector3f getCameraTranslationInterpolated() {
-        Vector3d interpolated = Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslationGlobal());
+        Vector3d interpolated = getCameraTranslationInterpolatedUnwrapped();
         return new Vector3f((float) (interpolated.x()%World.size), (float) (interpolated.y()%World.height), (float) (interpolated.z()%World.size));
+    }
+    public Vector3d getCameraTranslationInterpolatedUnwrapped() {
+        return Utils.getInterpolatedVec(oldCamTranslation, getCameraTranslationGlobal());
     }
 
     public Matrix4f getCameraMatrix() {

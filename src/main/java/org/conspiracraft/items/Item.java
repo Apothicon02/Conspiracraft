@@ -2,16 +2,18 @@ package org.conspiracraft.items;
 
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
-import org.joml.Vector2i;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.*;
 
+import java.lang.Math;
 import java.nio.IntBuffer;
+
+import static org.conspiracraft.graphics.Renderer.pushUBO;
 
 public class Item implements Cloneable {
     public static int dataLength = 9; //excludes this int
@@ -30,6 +32,16 @@ public class Item implements Cloneable {
     }
     public int[] getData() {
         return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeSpawned};
+    }
+
+    public void drawHeld(Matrix4f handMatrix) {
+    }
+    public void drawHeldView(Matrix4f handMatrix) {
+        pushUBO.updateTex(Textures.items);
+        pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
+        pushUBO.updateAtlasOffset(type.atlasOffset);
+        Renderer.drawQuad(new Matrix4f(handMatrix).rotateXYZ(0.05f, 0.f, -0.1f).scale(0.5f), new Vector4f(1.f));
+        //Renderer.drawQuad(new Matrix4f().rotateXYZ((float) (1.05f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.f).setTranslation(0.7f, -0.15f, 0.35f).scale(0.5f), new Vector4f(1.f));
     }
 
     public String amountString() {
@@ -53,6 +65,9 @@ public class Item implements Cloneable {
     }
 
     public void tick() {
+        baseTick();
+    }
+    public void baseTick() {
         prevPos.set(pos);
         Vector2i block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
         if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {

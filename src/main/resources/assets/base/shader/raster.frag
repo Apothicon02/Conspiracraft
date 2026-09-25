@@ -34,6 +34,7 @@ layout(push_constant) uniform PushUBO {
 layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
+layout(location = 2) in vec3 scale;
 //layout(location = 2) pervertexEXT in vec3 vPos[];
 
 layout(location = 0) out vec4 outColor;
@@ -43,8 +44,22 @@ void main() {
     outNormal = vec4(normalize(cross(dFdx(pos), dFdy(pos))), 0);//vec4(normalize(cross(vPos[1] - vPos[0], vPos[2] - vPos[0])), 0);
     outColor = pushUbo.color;
     if (pushUbo.tex.x >= 0) {
-        vec2 uv = localPos.xy+0.5f;
-        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y));
+        ivec2 absSize = abs(pushUbo.size);
+        vec2 uv;
+        if (pushUbo.size.x > -1) {
+            uv = localPos.xy+0.5f;
+        } else {
+            vec4 absNorm = abs(vec4(normalize(cross(dFdx(localPos), dFdy(localPos))), 0));
+            if (absNorm.x > absNorm.y && absNorm.x > absNorm.z) {
+                uv = localPos.yz*(scale.yz*absSize);
+            } else if (absNorm.y > absNorm.z) {
+                uv = localPos.xz*(scale.xz*absSize);
+            } else {
+                uv = localPos.xy*(scale.xy*absSize);
+            }
+            uv = fract(uv);
+        }
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*absSize.x), pushUbo.atlasOffset.y+(uv.y*absSize.y));
         outColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0)*outColor;
         if (outColor.a <= 0) {
             discard;

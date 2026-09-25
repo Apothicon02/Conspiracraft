@@ -51,7 +51,7 @@ public class Texture {
     }
 
     public void create(MemoryStack stack) {
-        boolean isDepth = format == VK_FORMAT_D32_SFLOAT;
+        boolean isDepth = format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_R32_SFLOAT;
         long[] imageData = ImageHelper.createImage(stack, width, height, this instanceof Texture3D tex3D ? tex3D.depth : 1, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         image = imageData[0];
         //System.out.println("Created image: 0x"+Long.toHexString(image));

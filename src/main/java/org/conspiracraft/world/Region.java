@@ -65,6 +65,9 @@ public class Region {
                 while (!lightQueueSkipWG.isEmpty()) {
                     LightHelper.queueLightUpdate(LightHelper.lightQueueWG, lightQueueSkipWG.pollFirst());
                 }
+                for (Chunk chunk : chunks) {
+                    updateQueue.addLast(chunk.cCP);
+                }
             }
         }
     }

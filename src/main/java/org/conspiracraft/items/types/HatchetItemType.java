@@ -30,19 +30,19 @@ public class HatchetItemType extends ToolItemType {
             }
             int delay = HandManager.mine(rightTool ? strength : 24);
             if (rightTool && delay > 1) {item = durableItem.damage(1);}
-            return new ItemUseResult(delay, item);
+            return new ItemUseResult(delay, item, 1.f);
         } else if (rmbDown && item instanceof DurableItem durableItem) {
             Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             Integer result = Recipes.strippingRecipes.get(block.x());
             if (result != null) {
                 World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), result, block.y());
                 item = durableItem.damage(1);
-                return new ItemUseResult(1, item);
+                return new ItemUseResult(1, item, 1.f);
             } else {
-                return new ItemUseResult(1, item);
+                return new ItemUseResult(1, item, 1.f);
             }
         } else {
-            return new ItemUseResult(0, item);
+            return new ItemUseResult(0, item, 0.f);
         }
     }
 }

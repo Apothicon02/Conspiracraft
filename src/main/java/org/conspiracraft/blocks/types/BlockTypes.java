@@ -70,7 +70,7 @@ public class BlockTypes {
             LIME_STAINED_GLASS = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "crafted/model/lime_stained_glass", Map.of(Utils.packColor(154, 191, 64, 88), Materials.LIME_GLASS),
                     GLASS.blockProperties)),
             PORECAP = create(List.of(BlockTags.scytheEfficient, BlockTags.sediment), new PlantLightBlockType(blockTypeMap.size(), "plant/model/porecap", Map.of(Utils.packColor(255), Materials.PORECAP, Utils.packColor(255, 0, 0, 255), Materials.PORECAP_STEM),
-                    ((LightBlockProperties)TORCH.blockProperties.copy().resistance(0.f)).r(0).g(12).b(6))),
+                    ((LightBlockProperties)TORCH.blockProperties.copy().resistance(0.f)).r(0).g(8).b(4))),
             OAK_PLANK = create(List.of(BlockTags.hatchetEfficient, BlockTags.planks), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.OAK_PLANK),
                     new BlockProperties().hasSlab().resistance(0.8f).blockSFX(
                     new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))), //15

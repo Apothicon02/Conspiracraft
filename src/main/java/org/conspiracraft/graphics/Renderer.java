@@ -78,6 +78,7 @@ public class Renderer {
     public static float[] yOffsets = new float[8];
     public static final Vector3f viewPos = new Vector3f();
     public static final Vector3f modelOffset = new Vector3f();
+    public static final Vector3d warpOffset = new Vector3d();
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -127,6 +128,8 @@ public class Renderer {
                 }
                 if (drawStuff) {
                     viewPos.set(Main.player.getCameraTranslationInterpolated());
+                    warpOffset.set(Main.player.getCameraTranslationInterpolatedUnwrapped());
+                    warpOffset.set(((int)(warpOffset.x()/size))*size, ((int)(warpOffset.y()/height))*height, ((int)(warpOffset.z()/size))*size);
                     globalUBO.update(stack);
                     globalUBO.push(stack);
                     vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
@@ -306,7 +309,7 @@ public class Renderer {
             int pointer = (int) offset.get(0);
             long chunkBufOffset = (long)wPackedChunkPos*chunkByteSize;
             MemoryUtil.memIntBuffer(chunkPtr+chunkBufOffset, 7)
-                    .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue).put(3, valueMask)
+                    .put(0, pointer/4).put(1, paletteSize).put(2, bitsPerValue == 0 ? (chunk.blockPalette.getFirst() == 0 ? -1 : 0) : bitsPerValue).put(3, valueMask)
                     .put(4, chunkPos.x()).put(5, chunkPos.y()).put(6, chunkPos.z());
             MemoryUtil.memIntBuffer(lightPtr+pointer, paletteSize)
                     .put(0, chunk.getLightPalette());
@@ -342,7 +345,7 @@ public class Renderer {
 //        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
     }
 
-    public static void drawRaster(MemoryStack stack){
+    public static void drawRaster(MemoryStack stack) {
         updatePipeline(3);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
@@ -352,9 +355,11 @@ public class Renderer {
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
         pushUBO.updateTex(null); //use no texture
         modelOffset.set(viewPos);
-        drawClouds();
-        drawStars();
-        StarSystem.render(stack);
+        if (player.pos.y() > Earth.GROUND_LEVEL) {
+            drawClouds();
+            drawStars();
+            StarSystem.render(stack);
+        }
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
         //drawHeightmapDebug();
@@ -366,19 +371,20 @@ public class Renderer {
         for (Item item : World.items) {
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
             Vector3d interpolatedPos = Utils.getInterpolatedVec(item.prevPos, item.pos).add(0, item.hover, 0);
-            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float)(interpolatedPos.x()%size), (float)(interpolatedPos.y()%height), (float)(interpolatedPos.z()%size)).scale(0.5f), new Vector4f(1.f));
+            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z())).scale(0.5f), new Vector4f(1.f));
         }
+        player.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
         updatePipeline(5);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth3, 1, false, true);
-        player.draw();
+        player.drawView();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth3.image);
     }
     public static final int swizzle = 16;
     public static void drawDDA(MemoryStack stack) {
+        pushUBO.update(new Matrix4f().setTranslation(((int)player.pos.x())+0.5f, ((int)player.pos.y())+0.5f, ((int)player.pos.z())+0.5f), new Vector4f(1));
         pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, null);
-        ((Matrix4f)pushUBO.uniformStorage[0]).set(new Matrix4f().setTranslation((float) (player.pos.x()/chunkSize), (float) (player.pos.y()/chunkSize), (float) (player.pos.z()/chunkSize)).invert());
         pushUBO.push();
         updateComputePipeline(0);
         bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
@@ -463,7 +469,7 @@ public class Renderer {
             int offX = region2D.rXI*regionSize, offZ = region2D.rZI*regionSize;
             for (int x = 0; x < regionSize; x++) {
                 for (int z = 0; z < regionSize; z++) {
-                    drawCube(new Matrix4f().setTranslation((float)((offX+x+0.5d)%size), (float)((Earth.GROUND_LEVEL+region2D.heights[Region2D.packLocalPos(x, z)]+0.5d)%height), (float)((offZ+z+0.5d)%size)).scale(1.05f), new Vector4f(((float)x)/regionSize, 0.5f, ((float)z)/regionSize, 1.f));
+                    drawCube(new Matrix4f().setTranslation((float)((offX+x+0.5d)-warpOffset.x()), (float)((Earth.GROUND_LEVEL+region2D.heights[Region2D.packLocalPos(x, z)]+0.5d)-warpOffset.y()), (float)((offZ+z+0.5d)-warpOffset.z())).scale(1.05f), new Vector4f(((float)x)/regionSize, 0.5f, ((float)z)/regionSize, 1.f));
                 }
             }
         }
@@ -508,6 +514,12 @@ public class Renderer {
         float length = dir.length();
         Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
         width *= Math.max(1, (Math.max(og.distance((float) player.pos.x(), (float) player.pos.y(), (float) player.pos.z()), dest.distance((float) player.pos.x(), (float) player.pos.y(), (float) player.pos.z()))/(width*300f))-1.5f);
+        Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
+    }
+    public static void drawLineFixedWidth(Vector3f og, Vector3f dest, float width, Vector4f color) {
+        Vector3f dir = new Vector3f(dest).sub(og);
+        float length = dir.length();
+        Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {

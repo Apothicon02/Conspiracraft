@@ -17,8 +17,8 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.conspiracraft.graphics.Renderer.drawCube;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.conspiracraft.graphics.Renderer.*;
+import static org.conspiracraft.graphics.Renderer.warpOffset;
 import static org.conspiracraft.world.World.*;
 import static org.conspiracraft.world.World.size;
 
@@ -112,7 +112,7 @@ public class Entity {
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
         Matrix4f interpolatedMatrix = new Matrix4f(matrix);
         Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
-        interpolatedMatrix.setTranslation((float) (interpolatedPos.x()%size), (float) (interpolatedPos.y()%height), (float) (interpolatedPos.z()%size));
+        interpolatedMatrix.setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z()));
         drawCube(interpolatedMatrix, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
     }
 }

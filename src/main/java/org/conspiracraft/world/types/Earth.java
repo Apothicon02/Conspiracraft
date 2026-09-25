@@ -11,9 +11,11 @@ import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Lightning;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
+import org.conspiracraft.utils.CavernNoise;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
+import org.conspiracraft.world.shapes.CoveredBlob;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
 
@@ -215,8 +217,8 @@ public class Earth extends WorldType {
             int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
             if (crust) {
                 generateCrustRegion(rand, region, region2D, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
-            } else if (cYEnd < GROUND_LEVEL_C) {
-                //generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
+            } else if (cYEnd <= GROUND_LEVEL_C) {
+                generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
             }
         }
         if (crust) {
@@ -259,14 +261,16 @@ public class Earth extends WorldType {
             for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
                 for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
                     int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
-                    int gY = height+Earth.GROUND_LEVEL;
-                    Vector3i globalPos = new Vector3i(x, gY, z);
-                    Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
-                    if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
-                            (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
-                            (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
-                            (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
-                        LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
+                    if (height > 0) {
+                        int gY = height+Earth.GROUND_LEVEL;
+                        Vector3i globalPos = new Vector3i(x, gY, z);
+                        Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
+                        if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
+                                (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
+                            LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
+                        }
                     }
                 }
             }
@@ -626,10 +630,29 @@ public class Earth extends WorldType {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
                     int cP = Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks);
                     Chunk chunk = region.getChunk(cP);
+                    chunk.lightPalette.set(0, 0);
                     for (int lX = 0; lX < chunkSize; lX++) {
+                        int x = (cX * chunkSize) + lX;
                         for (int lZ = 0; lZ < chunkSize; lZ++) {
+                            int z = (cZ * chunkSize) + lZ;
+                            double foliageNoise = noisePipeline.evaluateNoise(x / 275.d, z / 275.d);
                             for (int lY = 0; lY < chunkSize; lY++) {
-                                chunk.setBlock(lX, lY, lZ, BlockTypes.STONE.id, 0);
+                                int y = (cY * chunkSize) + lY;
+                                //int caveY = (int)(y+(spikeNoise*Utils.gradient(y, GROUND_LEVEL, GROUND_LEVEL-24, 10, 0)));
+                                double caveNoise = CavernNoise.sample(x*4, y, z*4);//Math.abs(SimplexNoise.noise(x / 500.f, caveY / 500.f, z / 500.f));
+                                if (caveNoise > 0.5f) {} else { //if (Main.player.creative) {Main.player.creative = false; Main.player.pos.set(x, y, z);}
+                                    chunk.setBlock(lX, lY, lZ, caveNoise > 0.2f ? BlockTypes.MARBLE.id : BlockTypes.STONE.id, 0);
+                                    float materialChance = rand.nextFloat();
+                                    if (rand.nextFloat()*0.2f > foliageNoise+0.05f || rand.nextFloat() < 0.00034f) {
+                                        if (materialChance < 0.975f) {
+                                            CoveredBlob.generate(bounds, x, y, z, BlockTypes.DIRT.id, 0, BlockTypes.PORECAP.id, 0, (int) (2 + (rand.nextFloat() * 5)), 0.2f);
+                                        } else {
+                                            Blob.generate(bounds, x, y, z, materialChance < 0.985f ? BlockTypes.FLINT.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                        }
+                                    } else if (materialChance < 0.0001f) {
+                                        chunk.setBlock(lX, lY, lZ, BlockTypes.KYANITE.id, 0);
+                                    }
+                                }
                             }
                         }
                     }

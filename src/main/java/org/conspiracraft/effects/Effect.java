@@ -7,8 +7,8 @@ import org.joml.Vector2i;
 import org.joml.Vector3d;
 import org.joml.Vector4f;
 
-import static org.conspiracraft.graphics.Renderer.drawCube;
-import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.conspiracraft.graphics.Renderer.*;
+import static org.conspiracraft.graphics.Renderer.warpOffset;
 import static org.conspiracraft.world.World.height;
 import static org.conspiracraft.world.World.size;
 
@@ -34,7 +34,7 @@ public class Effect {
         pushUBO.updateSize(texSize);
         Matrix4f interpolatedMatrix = new Matrix4f(matrix);
         Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
-        interpolatedMatrix.setTranslation((float) (interpolatedPos.x()%size), (float) (interpolatedPos.y()%height), (float) (interpolatedPos.z()%size));
+        interpolatedMatrix.setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z()));
         drawCube(interpolatedMatrix, color);
     }
 }

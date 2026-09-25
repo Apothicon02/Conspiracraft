@@ -41,9 +41,9 @@ public class ToolItemType extends ItemType {
             }
             int delay = HandManager.mine(rightTool ? strength : 24);
             if (rightTool && delay > 1) {item = durableItem.damage(1);}
-            return new ItemUseResult(delay, item);
+            return new ItemUseResult(delay, item, 1.f);
         } else {
-            return new ItemUseResult(0, item);
+            return new ItemUseResult(0, item, 0.f);
         }
     }
 }

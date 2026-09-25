@@ -36,9 +36,9 @@ public class WallMountableItemType extends ItemType {
                 }
                 World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), subType);
                 if (!player.creative) {item.amount--;}
-                return new ItemUseResult(200, item);
+                return new ItemUseResult(200, item, 1.f);
             }
         }
-        return new ItemUseResult(0, item);
+        return new ItemUseResult(0, item, 0.f);
     }
 }

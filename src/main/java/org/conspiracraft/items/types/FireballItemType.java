@@ -38,9 +38,9 @@ public class FireballItemType extends ItemType {
             source.play(Sounds.MAGMA);
             AudioController.disposableSources.add(source);
             entity.sfxSource = source;
-            return new ItemUseResult(500, item);
+            return new ItemUseResult(500, item, 0.f);
         } else {
-            return new ItemUseResult(0, item);
+            return new ItemUseResult(0, item, 0.f);
         }
     }
 }

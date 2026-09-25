@@ -31,9 +31,9 @@ public class LightningItemType extends ItemType {
                     break;
                 }
             }
-            return new ItemUseResult(500, item);
+            return new ItemUseResult(500, item, 1.f);
         } else {
-            return new ItemUseResult(0, item);
+            return new ItemUseResult(0, item, 0.f);
         }
     }
 }

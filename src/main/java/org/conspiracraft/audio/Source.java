@@ -14,10 +14,10 @@ public class Source {
         this.threshold = threshold;
         sourceID = AL10.alGenSources();
         AL10.alSourcei(sourceID, AL10.AL_LOOPING, loop);
-        AL10.alSourcef(sourceID, AL10.AL_MAX_GAIN, gain);
+        AL10.alSourcef(sourceID, AL10.AL_MAX_GAIN, Math.max(1, gain));
         AL10.alSourcef(sourceID, AL10.AL_GAIN, gain);
         AL10.alSourcef(sourceID, AL10.AL_PITCH, pitch);
-        AL10.alSourcef(sourceID, AL10.AL_REFERENCE_DISTANCE, 3);
+        AL10.alSourcef(sourceID, AL10.AL_REFERENCE_DISTANCE, 9);
         AL10.alSourcef(sourceID, AL10.AL_MIN_GAIN, 0);
         baseGain = gain;
         basePitch = pitch;

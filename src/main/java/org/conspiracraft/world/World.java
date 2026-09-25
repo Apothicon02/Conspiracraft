@@ -5,22 +5,26 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
+import org.conspiracraft.blocks.Material;
+import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.drops.BlockDrops;
 import org.conspiracraft.blocks.entities.BlockEntity;
 import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.blocks.types.LightBlockType;
 import org.conspiracraft.effects.Effect;
+import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.*;
 
 import java.io.*;
+import java.lang.Math;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -471,6 +475,13 @@ public class World {
         int lZ = z&15;
         return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
     }
+    public static void setBlockWorldgenPotentiallyGlowing(int x, int y, int z, int type, int subType) {
+        setBlockWorldgen(x, y, z, type, subType);
+        if (BlockTypes.blockTypes[type] instanceof LightBlockType) {
+            Region region = getRegion(packRegionPos(x>>regionBits, y>>regionBits, z>>regionBits));
+            region.lightQueueSkipWG.addLast(new Vector3i(x, y, z));
+        }
+    }
     public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
@@ -560,6 +571,15 @@ public class World {
                 updateNeighbors(x, y, z);
             }
         }
+    }
+    public static void spawnParticle(Vector3d particlePos, Vector2i block) {
+        Particle particle = new Particle(new Vector3d(particlePos), new Matrix4f().scale(0.075f + (float) (0.1f * Math.random())));
+        particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
+        particle.tex = Textures.materials;
+        Material[] mats = BlockTypes.blockTypes[block.x()].materialsArr;
+        int id = mats[(int) (Math.random()*mats.length)].id();
+        particle.texOffset.set((id* Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
+        effects.addLast(particle);
     }
     public static void updateNeighbors(int x, int y, int z) {
         updateNeighbor(x, y, z+1);

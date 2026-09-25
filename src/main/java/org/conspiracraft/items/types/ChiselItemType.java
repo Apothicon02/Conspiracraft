@@ -26,9 +26,9 @@ public class ChiselItemType extends ToolItemType {
                 World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), block.x(), block.y()+1, true); //block.y() >= 2 ? 0 :
                 item = durableItem.damage(1);
             //}
-            return new ItemUseResult(delay, item);
+            return new ItemUseResult(delay, item, 1.f);
         } else {
-            return new ItemUseResult(0, item);
+            return new ItemUseResult(0, item, 0.f);
         }
     }
 }

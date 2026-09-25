@@ -64,6 +64,7 @@ public class LightHelper {
         }
         while (!lightQueueWG.isEmpty()) {
             Vector3i pos = lightQueueWG.pollFirst();
+            if (pos == null) {continue;}
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
             Region region = getRegion(packRegionPos(rX, rY, rZ));
             if (!region.neighborsGenerated) {
@@ -136,7 +137,14 @@ public class LightHelper {
             int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
             int g = Math.max(light.g(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
             int b = Math.max(light.b(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
-            boolean aboveHeightmap = pos.y > Earth.GROUND_LEVEL+getRegion2D(packRegionPos(pos.x()>>regionBits, 0, pos.z()>>regionBits)).heights[Region2D.packLocalPos(pos.x()%regionSize, pos.z()%regionSize)];
+            boolean aboveHeightmap;
+            if (pos.y() < Earth.GROUND_LEVEL) {
+                aboveHeightmap = false;
+            } else if (pos.y() >= Earth.SKY_LEVEL) {
+                aboveHeightmap = true;
+            } else {
+                aboveHeightmap = pos.y() > Earth.GROUND_LEVEL+getRegion2D(packRegionPos(pos.x()>>regionBits, 0, pos.z()>>regionBits)).heights[Region2D.packLocalPos(pos.x()%regionSize, pos.z()%regionSize)];
+            }
             int s = (aboveHeightmap ? maxSunlightLevel : light.s());
             for (int i = 0; i < 6; i++) {
                 Vector3i neighborPos = neighborPositions[i];
