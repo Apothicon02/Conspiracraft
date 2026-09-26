@@ -49,7 +49,9 @@ public class LightHelper {
     }
 
     public static void iterateLightQueue() {
+        int i = 0;
         while (!lightQueue.isEmpty()) {
+            //i++;
             Vector3i pos = lightQueue.pollFirst();
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
             Region region = getRegion(packRegionPos(rX, rY, rZ));
@@ -63,6 +65,7 @@ public class LightHelper {
             }
         }
         while (!lightQueueWG.isEmpty()) {
+            //if (i++ > 15000) {break;}
             Vector3i pos = lightQueueWG.pollFirst();
             if (pos == null) {continue;}
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
