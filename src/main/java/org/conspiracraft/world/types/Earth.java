@@ -72,38 +72,53 @@ public class Earth extends WorldType {
         if (sunniness <= 0) {
             skylightMul.set(0);
             float mostProminent = 0.f;
-            Vector3f pos = new Vector3f();
+            Vector3f pos = new Vector3f(skylight.x(), skylight.y(), skylight.z());
+//            for (Planet planet : StarSystem.planets) {
+//                float dist = planet.rotatedPos.distance(new Vector3f(Main.player.pos));
+//                if (dist > 0.f && planet.rotatedPos.y() > 0 && planet != getPlanet()) {
+//                    float prominence = (float) ((planet.scale/dist)*Utils.gradient((int) planet.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0));
+////                    if (prominence > mostProminent) {
+////                        mostProminent = prominence; pos.set(planet.rotatedPos);
+////                        skylightMul.set(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
+////                    }
+//                    if (prominence > mostProminent) {mostProminent = prominence; pos.set(planet.rotatedPos);}
+//                    skylightMul.add(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
+//                }
+//                for (Planet moon : planet.moons) {
+//                    dist = moon.rotatedPos.distance(new Vector3f(Main.player.pos));
+//                    if (dist > 0.f && moon.rotatedPos.y() > 0) {
+//                        float prominence = (float) ((moon.scale/dist)*(Utils.gradient((int) moon.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0)));
+////                        if (prominence > mostProminent) {
+////                            mostProminent = prominence; pos.set(moon.rotatedPos);
+////                            skylightMul.set(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
+////                        }
+//                        if (prominence > mostProminent) {mostProminent = prominence; pos.set(moon.rotatedPos);}
+//                        skylightMul.add(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
+//                    }
+//                }
+//            }
+//            float rgbDiv = Math.max(skylightMul.x(), Math.max(skylightMul.y(), skylightMul.z()));
+////            if (rgbDiv > 1) {
+//                skylightMul.set(skylightMul.x() / rgbDiv, skylightMul.y() / rgbDiv, skylightMul.z() / rgbDiv, 0.99f);//skylightMul.w());
+////            }
+//            //skylightMul.set(Utils.mix(skylightMul.x(), 1, sunniness), Utils.mix(skylightMul.y(), 1, sunniness), Utils.mix(skylightMul.z(), 1, sunniness), sunniness);
+//            return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), 0.99f);//Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
             for (Planet planet : StarSystem.planets) {
                 float dist = planet.rotatedPos.distance(new Vector3f(Main.player.pos));
                 if (dist > 0.f && planet.rotatedPos.y() > 0 && planet != getPlanet()) {
                     float prominence = (float) ((planet.scale/dist)*Utils.gradient((int) planet.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0));
-//                    if (prominence > mostProminent) {
-//                        mostProminent = prominence; pos.set(planet.rotatedPos);
-//                        skylightMul.set(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
-//                    }
                     if (prominence > mostProminent) {mostProminent = prominence; pos.set(planet.rotatedPos);}
-                    skylightMul.add(planet.sourceColor.x()*prominence, planet.sourceColor.y()*prominence, planet.sourceColor.z()*prominence, planet.sourceColor.w()*prominence);
                 }
                 for (Planet moon : planet.moons) {
                     dist = moon.rotatedPos.distance(new Vector3f(Main.player.pos));
                     if (dist > 0.f && moon.rotatedPos.y() > 0) {
                         float prominence = (float) ((moon.scale/dist)*(Utils.gradient((int) moon.rotatedPos.y(), 0, (int) (dist*0.1f), 5, 0)));
-//                        if (prominence > mostProminent) {
-//                            mostProminent = prominence; pos.set(moon.rotatedPos);
-//                            skylightMul.set(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
-//                        }
                         if (prominence > mostProminent) {mostProminent = prominence; pos.set(moon.rotatedPos);}
-                        skylightMul.add(moon.sourceColor.x()*prominence, moon.sourceColor.y()*prominence, moon.sourceColor.z()*prominence, moon.sourceColor.w()*prominence);
                     }
                 }
             }
-            float rgbDiv = Math.max(skylightMul.x(), Math.max(skylightMul.y(), skylightMul.z()));
-//            if (rgbDiv > 1) {
-                skylightMul.set(skylightMul.x() / rgbDiv, skylightMul.y() / rgbDiv, skylightMul.z() / rgbDiv, 0.99f);//skylightMul.w());
-//            }
-            skylightMul.set(Utils.mix(skylightMul.x(), 1, sunniness), Utils.mix(skylightMul.y(), 1, sunniness), Utils.mix(skylightMul.z(), 1, sunniness), sunniness);
-
-            return new Vector4f(pos.x(), Math.max(Math.max(Math.abs(pos.x()), Math.abs(pos.z()))/4, pos.y()), pos.z(), 0.99f);//Math.min(0.99f, mostProminent > 0.f ? Math.max(0.5f, mostProminent) : 0.f));
+            skylightMul.set(0.5f, 0.375f, 1, 0.5f);
+            return new Vector4f(pos.x(), Math.max(starDist*0.2f, pos.y()), pos.z(), 0.99f);
         } else {
             skylightMul.set(1);
             return new Vector4f(skylight.x(), Math.max(starDist*0.2f, skylight.y()), skylight.z(), skylight.w());
@@ -114,7 +129,7 @@ public class Earth extends WorldType {
     @Override
     public Vector4f getAtmosphereColor() {return new Vector4f(0.36f, 0.54f, 1.2f, 1.f);}
     @Override
-    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.3f, 0.48f, 1.2f, 1.f);}
+    public Vector4f getNightAtmosphereColor() {return new Vector4f(0.48f, 0.3f, 1.2f, 1.f);}
     @Override
     public Vector4f getSunsetAtmosphereColor() {return new Vector4f(1, 0.65f, 0.25f, 1.f);}
     @Override
