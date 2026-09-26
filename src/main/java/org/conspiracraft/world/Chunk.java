@@ -5,8 +5,6 @@ import org.conspiracraft.utils.BitBuffer;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import static org.conspiracraft.world.LightHelper.fullSunlight;
-import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {

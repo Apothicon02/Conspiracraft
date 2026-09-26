@@ -36,7 +36,7 @@ public class BlockTypes {
             AIR = create(new BlockType(blockTypeMap.size(), "misc/model/air", Map.of(0, Materials.AIR), new BlockProperties().blockSFX(
                     new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f, new SFX[]{Sounds.CLOUD}, 0.75f, 0.75f)
                     .isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).obstructsHeightmap(false))),
-            WATER = create(new BlockType(blockTypeMap.size(), "natural/model/water", Map.of(Utils.packColor(0, 44, 255, 150), Materials.WATER),
+            WATER = create(new BlockType(blockTypeMap.size(), "natural/model/water", Map.of(Utils.packColor(0, 44, 255, 255), Materials.WATER),
                     new BlockProperties().isSolid(false).blocksLight(false).isCollidable(false).isFluid(true).obstructsHeightmap(false).blockSFX(
                     new SFX[]{Sounds.SPLASH1}, 1f, 1.25f, new SFX[]{Sounds.SPLASH1}, 0f, 1f))),
             GRASS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType(blockTypeMap.size(), "plant/model/grass", Map.of(Utils.packColor(255), Materials.GRASS, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS),

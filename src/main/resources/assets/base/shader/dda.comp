@@ -335,9 +335,9 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
     //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, 512-max(0, sunHeight*512), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
-    //    if (globalPos.y <= GROUND_LEVEL) {
-    //        return vec4(max(vec3(isSky ? 0.f : minBrightness), lighting.rgb), thickness);
-    //    }
+//    if (globalPos.y <= GROUND_LEVEL) {
+//        return vec4(max(vec3(isSky ? 0.f : minBrightness), lighting.rgb), thickness);
+//    }
     vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.w), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
@@ -824,9 +824,9 @@ void main() {
         float fogDist = pow(globalUbo.fogginess, 4);
         float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
         float primaryFogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(primaryLightPos.y, 63, 80, 1, 1 + abs(noise(primaryLightPos.xz) * 0.67f)) * fogginessMul, 0.f, maxFogginess));
-        //        bool isNight = globalUbo.skylight.w < 1.f;
-        //        float nightness = 1-globalUbo.skylightMul.w;
-        //        float desaturationFactor = min(0.05f, nightness);
+//        bool isNight = globalUbo.skylight.w < 1.f;
+//        float nightness = 1-globalUbo.skylightMul.w;
+//        float desaturationFactor = min(0.05f, nightness);
 
         vec3 primaryFirstBlockPos = firstBlockPos;
         vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
@@ -864,11 +864,11 @@ void main() {
                 float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz) + (causticVoxelPos.xz / blockSizeF)) :
                 (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy) + (causticVoxelPos.xy / blockSizeF)) :
                 getCaustic(animated, vec2(causticPos.yz) + (causticVoxelPos.yz / blockSizeF)));
-                if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
-                    color = vec4(1);
-                    tint = vec4(1);
-                    primaryTint = vec4(1);
-                }
+//                if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
+//                    color = vec4(1);
+//                    tint = vec4(1);
+//                    primaryTint = vec4(1);
+//                }
                 if (causticness > 0) {
                     causticness *= -2;
                 } else {
