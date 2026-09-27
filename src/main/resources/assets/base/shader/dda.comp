@@ -190,7 +190,7 @@ float noise(vec2 coords) {
     return (textureLod(Sampler2D[nonuniformEXT(pushUbo.noises)], vec2(coords/1024), 0).r*2)-0.5f;
 }
 float getCaustic(bool animated, vec2 checkPos) {
-    float time = animated ? globalUbo.time/1000 : 0.f;
+    float time = animated ? globalUbo.time/10000.f : 0.f;
     return noise((checkPos+time)*32);
 }
 vec4 sampleAtlas(int x, int y, int z, int blockType, int blockSubtype) {
@@ -335,9 +335,9 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
     //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, 512-max(0, sunHeight*512), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
-//    if (globalPos.y <= GROUND_LEVEL) {
-//        return vec4(max(vec3(isSky ? 0.f : minBrightness), lighting.rgb), thickness);
-//    }
+    //    if (globalPos.y <= GROUND_LEVEL) {
+    //        return vec4(max(vec3(isSky ? 0.f : minBrightness), lighting.rgb), thickness);
+    //    }
     vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.w), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
@@ -348,6 +348,8 @@ vec3 unzeroVec(vec3 dir) {
     return newDir * max(abs(dir), vec3(0.0001f));
 }
 
+vec3 waterExitPos = vec3(0);
+vec3 waterExitNorm = vec3(0);
 vec3 hitPos = vec3(0);
 vec3 shadowPos = vec3(0);
 vec3 flatNormal = vec3(0);
@@ -437,6 +439,7 @@ void addTint(vec4 voxelColor, vec3 normal, bool shadow) {
 
 bool isGlass(int block) {return block == 11 || block == 12 || block == 13 || block == 66 || block == 67;}
 
+const int WATER_RENDER_DIST = 64;
 int steps = 0;
 ivec3 firstVoxelRayPos = ivec3(0);
 ivec3 firstBlockPos = ivec3(0);
@@ -448,7 +451,8 @@ vec3 raySign = vec3(0);
 vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
-vec4 dda(bool shadow) {
+vec4 dda(bool shadow, bool underwater) {
+    waterExitPos.x = -1;
     rayDirDivved = 1.f/rayDir;
     ogRayPos = rayPos;
     ogRayDir = rayDir;
@@ -478,6 +482,7 @@ vec4 dda(bool shadow) {
     vec3 voxelPos = vec3(0);
     while (true) {
         //steps++;
+        bool exitedWater = false;
         bool stepAnything = true;
         if (stage == 3) {
             //if (abs(ddaPos.x-ogChunkPos.x) >= sizeChunks/2 || abs(ddaPos.y-ogChunkPos.y) >= heightChunks/4 || abs(ddaPos.z-ogChunkPos.z) >= sizeChunks/2) {break;}
@@ -530,33 +535,39 @@ vec4 dda(bool shadow) {
                 if ((lodToUse & mask) != 0) {
                     blockPos = lodWorldPos+ddaPos;
                     block = getBlock(blockPos);
-                    //if (shadow && block.x == 4) {block.x = 0;}
                     voxelStartPos = uv3d(blockPos, 1.f, blockSize);
-                    vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
-                    if (voxelColor.a > 0) {
-                        flatNormal = -ddaMask*raySign;
-                        normal = flatNormal;
-                        hitPos = blockPos+(voxelStartPos*voxelSize)+(flatNormal*0.0003f);
-                        voxelPos = hitPos;
-                        if (firstBlock.x == 0) {
-                            firstBlockPos = blockPos;
-                            firstVoxelRayPos = ivec3(voxelStartPos);
-                            firstBlock = block;
-                            firstHitPos = hitPos;
-                        }
-                        if (voxelColor.a > alphaMax) {
-                            shadowPos = hitPos;
-                            return voxelColor;
+                    if (block.x != 1 || !underwater) {
+                        //if (shadow && block.x == 4) {block.x = 0;}
+                        vec4 voxelColor = sampleAtlas(int(voxelStartPos.x), int(voxelStartPos.y), int(voxelStartPos.z), block.x, block.y);
+                        if (voxelColor.a > 0) {
+                            flatNormal = -ddaMask * raySign;
+                            normal = flatNormal;
+                            hitPos = blockPos + (voxelStartPos * voxelSize) + (flatNormal * 0.0003f);
+                            voxelPos = hitPos;
+                            if (firstBlock.x == 0) {
+                                firstBlockPos = blockPos;
+                                firstVoxelRayPos = ivec3(voxelStartPos);
+                                firstBlock = block;
+                                firstHitPos = hitPos;
+                            }
+                            if (voxelColor.a > alphaMax) {
+                                shadowPos = hitPos;
+                                return voxelColor;
+                            } else {
+                                addTint(voxelColor, normal, shadow);
+                            }
                         } else {
-                            addTint(voxelColor, normal, shadow);
-                        }
-                    } else {
-                        stage = 0;
-                        stepAnything = false;
-                        blockRayPos = ddaPos;
+                            stage = 0;
+                            stepAnything = false;
+                            blockRayPos = ddaPos;
 
-                        ddaPos = ivec3(voxelStartPos);
-                        sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
+                            ddaPos = ivec3(voxelStartPos);
+                            sideDist = ((ddaPos - voxelStartPos) + 0.5 + raySign * 0.5) * dist;
+                        }
+                    } else if (distance(ogRayPos, blockPos) > WATER_RENDER_DIST) {
+                        break;
+                    } else {
+                        exitedWater = block.x == 1;
                     }
                 }
             }
@@ -594,6 +605,12 @@ vec4 dda(bool shadow) {
             stepMask(sideDist);
             sideDist += ddaMask * raySign * dist;
             ddaPos += ivec3(ddaMask * raySign);
+            if (exitedWater) {
+                waterExitNorm = -ddaMask * raySign;
+                blockPos = lodWorldPos+ddaPos;
+                voxelStartPos = uv3d(blockPos, 1.f, blockSize);
+                waterExitPos = blockPos + (voxelStartPos * voxelSize) + (waterExitNorm * 0.0003f);
+            }
         }
     }
     return vec4(0);
@@ -738,10 +755,13 @@ void main() {
         rayPos = ogPos;
         rayDir = ogDir;
 
+        updateChunkData(ivec3(ogChunkPos));
+        ivec2 blockIn = getBlock(iCamPos);
+        bool underwater = (blockIn.x == 1 && sampleAtlas(int(int(camPos.x-iCamPos.x)*blockSize), int(int(camPos.y-iCamPos.y)*blockSize), int(int(camPos.z-iCamPos.z)*blockSize), blockIn.x, blockIn.y).a > 0);
         bool celestial = false;
         bool emissive = false;
         vec4 outNormal = vec4(0);
-        vec4 color = dda(false);
+        vec4 color = dda(false, underwater);
         float reflectivity = 0;//(tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
         if (color.a > 0.f) {
             vec4 materialColor = getMaterialColor(color);
@@ -824,10 +844,15 @@ void main() {
         float fogDist = pow(globalUbo.fogginess, 4);
         float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
         float primaryFogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(primaryLightPos.y, 63, 80, 1, 1 + abs(noise(primaryLightPos.xz) * 0.67f)) * fogginessMul, 0.f, maxFogginess));
-//        bool isNight = globalUbo.skylight.w < 1.f;
-//        float nightness = 1-globalUbo.skylightMul.w;
-//        float desaturationFactor = min(0.05f, nightness);
+        //        bool isNight = globalUbo.skylight.w < 1.f;
+        //        float nightness = 1-globalUbo.skylightMul.w;
+        //        float desaturationFactor = min(0.05f, nightness);
 
+        vec3 primaryWaterExitPos = waterExitPos;
+        vec3 primaryWaterExitNorm = waterExitNorm;
+        ivec2 primaryBlock = block;
+        ivec3 primaryBlockPos = blockPos;
+        ivec3 primaryVoxelRayPos = voxelRayPos;
         vec3 primaryFirstBlockPos = firstBlockPos;
         vec3 primaryFirstVoxelRayPos = firstVoxelRayPos;
         vec3 primaryTintNormal = tintNormal;
@@ -837,7 +862,6 @@ void main() {
         vec4 blockLighting = vec4(0, 0, 0, 1.f);
         if (!emissive) {
             if (!celestial) {
-                ivec2 primaryBlock = block;
                 if (globalUbo.season == 1) { //autumn
                     if (primaryBlock.x == 17) { color.rgb = max(hueShift(color.rgb, -2.f), vec3(0)); } else if (primaryBlock.x == 48) { color.rgb = max(hueShift(color.rgb, -1.34f), vec3(0)); } else
                     if (primaryBlock.x == 21) { color.rgb = max(hueShift(color.rgb, -1.2f), vec3(0)); } else
@@ -852,8 +876,6 @@ void main() {
                     if (primaryBlock.x == 17) { color.rgb = max(hueShift(color.rgb, 0.2f), vec3(0)); } else if (primaryBlock.x == 48) { color.rgb = max(hueShift(color.rgb, 0.67f), vec3(0)); } else
                     if ((primaryBlock.x == 2 && primaryBlock.y == 0) || (primaryBlock.x == 4 && primaryBlock.y < 4)) { color.rgb = max(hueShift(color.rgb, 0.425f), vec3(0)); }
                 }
-                ivec3 primaryBlockPos = blockPos;
-                ivec3 primaryVoxelRayPos = voxelRayPos;
                 vec3 causticPos = (firstBlock.x == 1 || firstBlock.x == 90) ? vec3(primaryTint.a < 1 ? primaryFirstBlockPos : primaryBlockPos) : (primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos);
                 vec3 causticVoxelPos = primaryTint.a < 1 ? primaryFirstVoxelRayPos : primaryVoxelRayPos;
                 if (firstBlock.x != 1 && firstBlock.x != 90) {
@@ -864,11 +886,11 @@ void main() {
                 float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(animated, vec2(causticPos.xz) + (causticVoxelPos.xz / blockSizeF)) :
                 (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(animated, vec2(causticPos.xy) + (causticVoxelPos.xy / blockSizeF)) :
                 getCaustic(animated, vec2(causticPos.yz) + (causticVoxelPos.yz / blockSizeF)));
-//                if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
-//                    color = vec4(1);
-//                    tint = vec4(1);
-//                    primaryTint = vec4(1);
-//                }
+                //                if (firstBlock.x == 1 && abs(causticness) < 0.033f) {
+                //                    color = vec4(1);
+                //                    tint = vec4(1);
+                //                    primaryTint = vec4(1);
+                //                }
                 if (causticness > 0) {
                     causticness *= -2;
                 } else {
@@ -909,7 +931,9 @@ void main() {
                     if (globalUbo.skylight.w <= 0.1f || (primaryBlock.x != 4 && primaryBlock.x > 0 && !offsetShadow && dot(primaryFlatNormal, normalize(source)) <= 0.f)) {
                         shadowColor.a = 1.f;
                     } else if (globalUbo.renderToggles.x > 0) {
-                        shadowColor = dda(true);
+                        updateChunkData(ivec3(rayPos/chunkSize));
+                        ivec2 shadowBlockIn = getBlock(rayPos);
+                        shadowColor = dda(true, (shadowBlockIn.x == 1 && sampleAtlas(int(fract(rayPos.x)*blockSize), int(fract(rayPos.y)*blockSize), int(fract(rayPos.z)*blockSize), shadowBlockIn.x, shadowBlockIn.y).a > 0));
                         //weakShadow = ((block.x == 31 || block.x == 32) && blockLighting.a >= 1);
                     }
                     if (shadowColor.a > 0.0f) {
@@ -931,7 +955,10 @@ void main() {
                     vec3 reflectPos = primaryTint.a < 1 ? primaryTintLightPos : primaryLightPos;
                     rayPos = reflectPos;
                     rayDir = reflectDir;
-                    vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
+                    updateChunkData(ivec3(rayPos/chunkSize));
+                    ivec2 reflectBlockIn = getBlock(rayPos);
+                    bool reflectionUnderwater = (reflectBlockIn.x == 1 && sampleAtlas(int(fract(rayPos.x)*blockSize), int(fract(rayPos.y)*blockSize), int(fract(rayPos.z)*blockSize), reflectBlockIn.x, reflectBlockIn.y).a > 0);
+                    vec4 reflectColor = globalUbo.renderToggles.y > 0 ? dda(false, reflectionUnderwater) : vec4(0);
                     if (reflectColor.a > 0.f) {
                         reflectColor.rgb = getMaterialColor(reflectColor).rgb;
                     }
@@ -950,10 +977,10 @@ void main() {
                 if (isSky) {
                     blockLighting.w = 0;
                 }
-                vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, isSky, primaryFogginess, false).rgb;
+                vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, underwater ? false : isSky, primaryFogginess, false).rgb;
                 color.rgb*=lighting;
                 color.rgb = mix(color.rgb, lighting, primaryFogginess);
-                float grey = max(color.r, max(color.g, color.b));
+                //float grey = max(color.r, max(color.g, color.b));
                 //color.rgb += (vec3(grey) - color.rgb) * mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)));
                 outNormal = vec4(primaryFlatNormal, primaryFogginess);
             } else {
@@ -969,9 +996,35 @@ void main() {
         float fogginess = globalUbo.fogginess <= 0 ? 0 : clamp((sqrt(distance(ogPos, primaryTintLightPos)/(renderDistance*0.66f*fogDist))-0.25f)*gradient(primaryTintLightPos.y, 63, 80, 1, 1+abs(noise(primaryTintLightPos.xz)*0.67f)), 0.f, maxFogginess);
         primaryTint.rgb = mix(primaryTint.rgb, getLightingColor(celestialSource, primaryTintLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
         float tintAmt = abs(1-primaryTint.a);
-        float grey = max(primaryTint.r, max(primaryTint.g, primaryTint.b));
+        //float grey = max(primaryTint.r, max(primaryTint.g, primaryTint.b));
         //primaryTint.rgb += (vec3(grey)-primaryTint.rgb)*mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)));
         color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);
+        if (underwater) {
+            updateChunkData(ivec3(primaryLightPos/chunkSize));
+            ivec2 prevBlock = getBlock(primaryLightPos);
+            float waterFogginess = clamp(sqrt(distance(ogPos, primaryWaterExitPos) / WATER_RENDER_DIST)+0.1f, prevBlock.x != 1 ? 0.85f : 0.1f, 1.f);
+            vec3 waterColor = getLightingColor(celestialSource, vec3(primaryWaterExitPos.x, GROUND_LEVEL + height, primaryWaterExitPos.z), blockLighting, false, waterFogginess, false).rgb;//vec3(primaryWaterExitPos.x, GROUND_LEVEL + height, primaryWaterExitPos.z)
+            color.rgb = mix(color.rgb, waterColor, waterFogginess);
+
+            vec3 absNorm = abs(tint.a < 1 ? primaryTintNormal : (prevBlock.x != 1 ? primaryWaterExitNorm : primaryFlatNormal));
+            vec3 causticPos = (floor((primaryTint.a < 1 ? primaryTintLightPos : (prevBlock.x != 1 ? primaryWaterExitPos : primaryLightPos))*blockSize)+0.5f)/blockSizeF;
+            float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz) :
+            (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) :
+            getCaustic(true, causticPos.yz));
+            causticness = 1-min(1, sqrt(sqrt(abs(causticness-0.5f))));
+            causticness *= 1-waterFogginess;
+            color.rgb+=vec3(0.15f, 0.25f, 0.5f)*causticness*(prevBlock.x != 1 ? 5 : 1);
+            primaryFogginess = max(primaryFogginess, waterFogginess);
+            outNormal.a = primaryFogginess;
+        } else if (primaryBlock.x == 1) {
+            vec3 absNorm = abs(primaryFlatNormal);
+            vec3 causticPos = (floor(primaryLightPos*blockSize)+0.5f)/blockSizeF;
+            float causticness = absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz) :
+            (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) :
+            getCaustic(true, causticPos.yz));
+            causticness = 1-min(1, sqrt(sqrt(abs(causticness-0.5f))));
+            color.rgb=mix(color.rgb, vec3(0.7f, 0.85f, 1.f)*(max(color.r, max(color.g, color.b))+0.1f), causticness/2);
+        }
         //color.rgb = desaturate(color.rgb, 1-clamp(blockLighting.a*globalUbo.skylightMul.w, fogginess, 1));
         outNormal.a = emissive || celestial ? 1 : mix(outNormal.a, 1, tintAmt);
         //    color = vec4(mix(vec3(0, 1, 0), vec3(1, 0, 0), clamp(steps/200.f, 0, 1)), 1);

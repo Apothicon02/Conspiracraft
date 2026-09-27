@@ -329,7 +329,7 @@ public class Earth extends WorldType {
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
                 double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (hillsNoise - hillCracks) * 125);
                 double vegetationNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
-                int elevation = (int) Math.max(SEA_LEVEL - 2, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
+                int elevation = (int) Math.max(GROUND_LEVEL + 6, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
                 Biome biome = dunes > hills ? Biomes.DESERT : (temperature > 0.1f ? Biomes.RAINFOREST : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (vegetationNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id;
@@ -395,6 +395,7 @@ public class Earth extends WorldType {
                                 double vegetationNoise = regionNoises.vegetation()[packed];
                                 double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                                 double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
+                                Vector2i blockIn = getBlockWorldgen(x, surface+1, z);
                                 Vector2i blockOn = getBlockWorldgen(x, surface, z);
                                 if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.SNOW.id) {
                                     if (biome == Biomes.SNOWY_TAIGA.id) {
@@ -460,6 +461,14 @@ public class Earth extends WorldType {
                                                 Blob.generate(bounds, x, surface + 1, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.GRASS.id}, true);
                                             }
                                         }
+                                    }
+                                } else if (blockIn.x() == BlockTypes.WATER.id) {
+                                    if (foliageChance < 0.001f) {
+                                        Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.WET_SAND.id}, true);
+                                    } else if (foliageChance < 0.003f) {
+                                        Blob.generate(bounds, x, surface+rand.nextInt((int) Math.max(1, (SEA_LEVEL-surface)*0.25f)), z, BlockTypes.MARBLE.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 30)), true);
+                                    } else if (foliageChance < 0.0034f) {
+                                        CoveredBlob.generate(bounds, x, surface, z, BlockTypes.MAGMA.id, 0, BlockTypes.MAGMA.id, 0, rand.nextInt(2, 5), 0.f, true);
                                     }
                                 }
                             }
