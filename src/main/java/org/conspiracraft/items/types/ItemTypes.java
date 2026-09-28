@@ -48,14 +48,14 @@ public class ItemTypes {
 
     public static final ItemType
             AIR = create(new ItemType("misc/texture/air").maxStackSize(1)),
-            APPLE = create(new ItemType("food/texture/apple").maxStackSize(2)),
+            APPLE = create(new ItemType("food/texture/apple").maxStackSize(2).blockToPlace(1, 15)),
             ORANGE = create(new ItemType("food/texture/orange").maxStackSize(2)),
             CHERRY = create(new ItemType("food/texture/cherry").maxStackSize(2)),
             FURNACE = create(new ItemType("machine/texture/furnace").maxStackSize(standardStackSize).blockToPlace(BlockTypes.STONE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 0.75f))),
             KILN = create(new ItemType("machine/texture/kiln").maxStackSize(standardStackSize).blockToPlace(BlockTypes.CLAY.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.ROCK_PLACE1, Sounds.ROCK_PLACE2}, 0.5f, 0.75f))),
             FORGE = create(new ItemType("machine/texture/forge").maxStackSize(standardStackSize).blockToPlace(BlockTypes.STEEL_PLATING.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
             RESEARCH_TABLE = create(new ItemType("machine/texture/research_table").maxStackSize(standardStackSize).blockToPlace(BlockTypes.RESEARCH_TABLE.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.METAL_SMALL_PLACE1, Sounds.METAL_SMALL_PLACE2}, 0.6f, 1.0f))),
-            BLUEPRINT = create(new ItemType("misc/texture/blueprint").maxStackSize(1)),
+            BLUEPRINT = create(new BlueprintItemType("misc/texture/blueprint").maxStackSize(1)),
             OAK_LOG = create(List.of(ItemTags.log), new ItemType("wood/oak/texture/log").maxStackSize(standardStackSize).blockToPlace(BlockTypes.OAK_LOG.id, 0).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.1f))),
             OAK_PLANK = create(new ItemType("wood/oak/texture/plank").blockToPlace(BlockTypes.OAK_PLANK.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.1f))),
             OAK_BEAM = create(new ItemType("wood/oak/texture/beam").blockToPlace(BlockTypes.OAK_FENCE.id, 0).maxStackSize(standardStackSize).sfx(new ItemSFX(new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 0.5f, 1.1f))),

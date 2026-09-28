@@ -1,6 +1,5 @@
 package org.conspiracraft.gui;
 
-import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.Settings;
 import org.conspiracraft.audio.AudioController;
@@ -11,12 +10,8 @@ import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.buttons.*;
 import org.conspiracraft.gui.sliders.*;
-import org.conspiracraft.items.DurableItem;
-import org.conspiracraft.items.Item;
-import org.conspiracraft.items.Recipes;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
-import org.conspiracraft.player.HandManager;
 import org.conspiracraft.utils.Utils;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -133,7 +128,6 @@ public class GUI {
                 pushUBO.updateAtlasOffset(new Vector2i(0));
                 color.set(1.f);
                 drawQuad(true, true, 0.5f, 0.5f, 1, 1); //crosshair
-                drawInventory();
             }
             drawDebug();
         }
@@ -252,23 +246,6 @@ public class GUI {
         drawText(false, 0, 1, -0.5f-pauseOff, 1+pauseOff - charHeight, (String.format("%.2f", ms) + "ms").toCharArray(), 3);
         if (showDebug && !pauseMenuOpen) {
             drawText(false, 0, 1, 1.5f, -1.34f - (charHeight*1.33f), ((int) Main.player.pos.x + "x," + (int) Main.player.pos.y + "y," + (int) Main.player.pos.z + "z").toCharArray(), 3);
-        }
-    }
-    public static void drawInventory() {
-        color.set(1.f);
-        pushUBO.updateTex(Textures.items); //use item atlas
-        if (Main.player.inv.cursorItem != null) { //cursor item
-            ItemType itemType = Main.player.inv.cursorItem.type;
-            pushUBO.updateAtlasOffset(itemType.atlasOffset);
-            float offX = Main.player.inputHandler.currentPos.x() / width;
-            float offY = Math.abs(height - (Main.player.inputHandler.currentPos.y())) / height;
-            drawQuad(true, true, offX, offY, ItemTypes.itemTexSize, ItemTypes.itemTexSize);
-            if (Main.player.inv.cursorItem.amount > 1) {
-                pushUBO.updateTex(Textures.gui); //use gui atlas
-                char[] chars = Main.player.inv.cursorItem.amountString().toCharArray();
-                float startOffset = 16 - (chars.length * (charWidth/2.f));
-                drawText(false, offX, offY, 1 + startOffset - (charWidth * 1.5f), 1 - charHeight, chars, 2);
-            }
         }
     }
     public static void drawSlider(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, Vector4f bgColor, Vector4f txtColor) {

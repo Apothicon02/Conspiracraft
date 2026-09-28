@@ -7,10 +7,22 @@ import org.conspiracraft.items.types.ItemTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Recipes {
-    public static Map<Pair<Object, Object>, Product> recipes = Map.of(
+//    public static Map<Pair<Object, Object>, Product> recipes = Map.of(
+//            new Pair<>(ItemTypes.DIRT, ItemTypes.GRASS), new Product(ItemTypes.GRASSY_DIRT, true),
+//            new Pair<>(ItemTypes.PEBBLE, ItemTypes.PEBBLE), new Product(ItemTypes.STONE, true),
+//            new Pair<>(ItemTags.log, ItemTypes.PAPER), new Product(ItemTypes.RESEARCH_TABLE, true),
+//            new Pair<>(ItemTypes.STICK, ItemTypes.PAPER), new Product(ItemTypes.SHOJI, true),
+//            new Pair<>(ItemTypes.STICK, ItemTypes.PEBBLE), new Product(ItemTypes.STONE_HATCHET, true),
+//            new Pair<>(ItemTags.axe, ItemTags.log), new Product(ItemTypes.STICK, false),
+//            new Pair<>(ItemTags.axe, ItemTypes.BAMBOO), new Product(ItemTypes.PAPER, false),
+//            new Pair<>(ItemTags.stone, ItemTypes.FLINT), new Product(ItemTypes.FURNACE, true),
+//            new Pair<>(ItemTypes.CLAY, ItemTypes.FLINT), new Product(ItemTypes.KILN, true),
+//            new Pair<>(ItemTypes.IRON_PLATE, ItemTypes.FLINT), new Product(ItemTypes.FORGE, true)
+//    );
+
+    public static Map<Pair<Object, Object>, Product> handRecipes = Map.of(
             new Pair<>(ItemTypes.DIRT, ItemTypes.GRASS), new Product(ItemTypes.GRASSY_DIRT, true),
             new Pair<>(ItemTypes.PEBBLE, ItemTypes.PEBBLE), new Product(ItemTypes.STONE, true),
             new Pair<>(ItemTags.log, ItemTypes.PAPER), new Product(ItemTypes.RESEARCH_TABLE, true),
@@ -24,37 +36,37 @@ public class Recipes {
     );
     public record Product(ItemType itemType, boolean consume) {}
     public static Product getProduct(Item cursorItem, Item selItem) {
-        Recipes.Product product = Recipes.recipes.get(new Pair<>(cursorItem.type, selItem.type));
+        Recipes.Product product = Recipes.handRecipes.get(new Pair<>(cursorItem.type, selItem.type));
         if (product == null) {
-            product = Recipes.recipes.get(new Pair<>(selItem.type, cursorItem.type));
+            product = Recipes.handRecipes.get(new Pair<>(selItem.type, cursorItem.type));
         }
         if (product == null) {
             for (ItemTag tag : cursorItem.type.tags) {
                 for (ItemTag selTag : selItem.type.tags) {
-                    product = Recipes.recipes.get(new Pair<>(tag, selTag));
+                    product = Recipes.handRecipes.get(new Pair<>(tag, selTag));
                     if (product != null) {return product;}
-                    product = Recipes.recipes.get(new Pair<>(selTag, tag));
+                    product = Recipes.handRecipes.get(new Pair<>(selTag, tag));
                     if (product != null) {if (product.consume()) {return product;} else {product = null;}}
                 }
             }
             for (ItemTag tag : cursorItem.type.tags) {
-                product = Recipes.recipes.get(new Pair<>(tag, selItem.type));
+                product = Recipes.handRecipes.get(new Pair<>(tag, selItem.type));
                 if (product != null) {return product;}
-                product = Recipes.recipes.get(new Pair<>(selItem.type, tag));
+                product = Recipes.handRecipes.get(new Pair<>(selItem.type, tag));
                 if (product != null) {if (product.consume()) {return product;} else {product = null;}}
             }
             for (ItemTag selTag : selItem.type.tags) {
-                product = Recipes.recipes.get(new Pair<>(cursorItem.type, selTag));
+                product = Recipes.handRecipes.get(new Pair<>(cursorItem.type, selTag));
                 if (product != null) {return product;}
-                product = Recipes.recipes.get(new Pair<>(selTag, cursorItem.type));
+                product = Recipes.handRecipes.get(new Pair<>(selTag, cursorItem.type));
                 if (product != null) {if (product.consume()) {return product;} else {product = null;}}
             }
         }
         return product;
     }
-    public static List<Pair<ItemType, ItemType>> getUses(ItemType item) {
+    public static List<Pair<ItemType, ItemType>> getHandcraftingUses(ItemType item) {
         List<Pair<ItemType, ItemType>> uses = new ArrayList<>();
-        recipes.forEach((ingredients, product) -> {
+        handRecipes.forEach((ingredients, product) -> {
             boolean matchFirst = ingredients.component1() == item, matchLast = ingredients.component2() == item;
             ItemTag firstTag = ingredients.component1() instanceof ItemTag ? (ItemTag) ingredients.component1() : null,
                     lastTag = ingredients.component2() instanceof ItemTag ? (ItemTag) ingredients.component2() : null;

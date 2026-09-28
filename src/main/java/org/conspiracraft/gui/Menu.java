@@ -4,6 +4,7 @@ import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.items.BlueprintItem;
 import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.Recipes;
@@ -230,8 +231,8 @@ public class Menu {
             if (selectedSlot.id < items.length && inventoryOpen) {
                 Item item = getItem(selectedSlot.id);
                 if (item != null && item.type != ItemTypes.AIR) {
-                    int y = selectedSlot.posRaw.y() + (GUI.slotSizeY-5);
-                    drawItemHoverDetails(selectedSlot.posRaw.x() + (GUI.slotSize/2), y, item);
+                    int x = (int)((cursorPxX()-menuPos.x())/guiScaleMul), y = (int)((cursorPxY()-menuPos.y()+(enlargedSlotSize * 0.5f))/guiScaleMul);
+                    drawItemHoverDetails(x, y, item);
                 }
             }
         }
@@ -240,25 +241,33 @@ public class Menu {
     public void drawItemHoverDetails(int offX, int offY, Item item) {
         pushUBO.updateTex(null); //use no texture
         color.set(0.015f, 0.023f, 0.027f, 1.f);
-        List<Pair<ItemType, ItemType>> uses = Recipes.getUses(item.type);
-        if (!uses.isEmpty()) {
-            drawSlot(offX, offY, enlargedSlotSize*0.5f, 3-(GUI.enlargedSlotSize * (uses.size())), 0, 0, (GUI.enlargedSlotSize * 3) + 2, (GUI.enlargedSlotSize * uses.size()) + 2, 1);
-            int offPxY = 0;
-            for (int i = 0; i < uses.size(); i++) {
-                Pair<ItemType, ItemType> recipe = uses.get(i);
-                drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond());
-                offPxY-=GUI.enlargedSlotSize;
+        int detailsWidth = 0;
+        if (item instanceof BlueprintItem bpItem) {
+            detailsWidth = (GUI.enlargedSlotSize * 4) + 2;
+            drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - GUI.enlargedSlotSize, 0, 0, detailsWidth, GUI.enlargedSlotSize + 2, 1);
+            drawBlueprint(offX, offY, 0, ItemTypes.FORGE, ItemTypes.STEEL_FRAME);
+        } else {
+            List<Pair<ItemType, ItemType>> uses = Recipes.getHandcraftingUses(item.type);
+            if (!uses.isEmpty()) {
+                detailsWidth = (GUI.enlargedSlotSize * 3) + 2;
+                drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - (GUI.enlargedSlotSize * (uses.size())), 0, 0, detailsWidth, (GUI.enlargedSlotSize * uses.size()) + 2, 1);
+                int offPxY = 0;
+                for (int i = 0; i < uses.size(); i++) {
+                    Pair<ItemType, ItemType> recipe = uses.get(i);
+                    drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond());
+                    offPxY -= GUI.enlargedSlotSize;
+                }
             }
         }
 
-        offX -= enlargedSlotSize+1;
+        //offX -= enlargedSlotSize+1;
         char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
         color.set(1.f);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
         pushUBO.updateAtlasOffset(new Vector2i(0, 22));
         drawSlot(offX, offY, (charWidth*2) - 1, charHeight - 4, 0, 0, 10, 16, 1);
-        int centerWidth = Math.max(0, (charWidth*chars.length)-12);
+        int centerWidth = Math.max(detailsWidth-20, (charWidth*chars.length)-12);
         if (centerWidth > 0) {
             pushUBO.updateAtlasOffset(new Vector2i(10, 22));
             drawSlot(offX, offY, ((charWidth * 2) - 1) + 10, charHeight - 4, 0, 0, centerWidth, 16, 1);
@@ -266,7 +275,7 @@ public class Menu {
         pushUBO.updateAtlasOffset(new Vector2i(201, 22));
         drawSlot(offX, offY, ((charWidth*2) - 1)+10+centerWidth, charHeight - 4, 0, 0, 10, 16, 1);
         pushUBO.updateLayer(0); //text
-        drawText(false, offX, offY, charWidth*2, charHeight, chars, 1);
+        drawText(false, offX, offY, charWidth*2, charHeight, chars, 1, true);
     }
     public void drawRecipe(int offX, int offY, int offPxY, ItemType ingredient, ItemType product) {
         pushUBO.updateTex(Textures.gui); //use gui atlas
@@ -285,7 +294,28 @@ public class Menu {
         drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(0); //text
-        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1);
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
+    }
+    public void drawBlueprint(int offX, int offY, int offPxY, ItemType station, ItemType product) {
+        pushUBO.updateTex(Textures.gui); //use gui atlas
+        pushUBO.updateLayer(2); //selector
+        color.set(1, 1, 1, 0.85f);
+        pushUBO.updateAtlasOffset(new Vector2i(44, 0));
+        drawSlot(offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        pushUBO.updateAtlasOffset(new Vector2i(22, 0));
+        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        color.set(1.f);
+        pushUBO.updateTex(Textures.items); //items
+        pushUBO.updateAtlasOffset(station.atlasOffset);
+        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        pushUBO.updateAtlasOffset(product.atlasOffset);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        pushUBO.updateTex(Textures.gui); //use gui atlas
+        pushUBO.updateLayer(0); //text
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*0.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
     }
     public void drawItem(Item item, int x, int y) {
         if (item != null) {
@@ -308,6 +338,9 @@ public class Menu {
         }
     }
     public void drawText(boolean centered, int offsetX, int offsetY, float offsetPX, float offsetPY, char[] chars, int iScale) {
+        drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars, iScale, false);
+    }
+    public void drawText(boolean centered, int offsetX, int offsetY, float offsetPX, float offsetPY, char[] chars, int iScale, boolean inverted) {
         int scaledCharWidth = charWidth/iScale;
         float size = chars.length * scaledCharWidth;
         float centeredOffset = centered ? size*0.5f : 0.f;
@@ -315,7 +348,7 @@ public class Menu {
         for (char character : chars) {
             int charAtlasOffset = getCharAtlasOffset(character);
             if (charAtlasOffset >= 0) {
-                pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, 0));
+                pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, inverted ? charHeight : 0));
                 drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : scaledCharWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight, iScale);
             }
             offset += scaledCharWidth;
