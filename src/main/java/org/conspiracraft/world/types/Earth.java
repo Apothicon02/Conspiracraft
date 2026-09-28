@@ -332,7 +332,7 @@ public class Earth extends WorldType {
                 int elevation = (int) Math.max(GROUND_LEVEL + 6, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
                 Biome biome = dunes > hills ? Biomes.DESERT : (temperature > 0.1f ? Biomes.RAINFOREST : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (vegetationNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
-                biomes[packed] = biome.id;
+                biomes[packed] = biome.id();
 
                 regionNoises.continents()[packed] = continentsNoise;
                 regionNoises.vegetation()[packed] = vegetationNoise;
@@ -360,18 +360,62 @@ public class Earth extends WorldType {
                             double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continentsNoise)));
                             double hillsNoise = regionNoises.hills()[packed] - hillCracks;//-(dunesNoise*0.2f);
                             int elevation = region2D.heights[packed]+GROUND_LEVEL;
-                            byte biome = biomes[packed];
-                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biome == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biome == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
-                            int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
-                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
-                            for (int lY = 0; lY < chunkSize; lY++) {
-                                int y = (cY * chunkSize) + lY;
-                                if (y <= elevation) {
-                                    int type = y > elevation - topDepth ? topType : midType;
-                                    chunk.setBlock(lX, lY, lZ, type, type == BlockTypes.GRASS.id ? (biome == Biomes.TAIGA.id ? 1 : biome == Biomes.CHERRY_GROVE.id ? 3 : 0) : 0);
-                                } else if (y <= SEA_LEVEL) {
-                                    chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, y == SEA_LEVEL ? 13 : 15);
-                                }
+                            byte biomeId = biomes[packed];
+                            Biome biome = Biomes.biomes[biomeId];
+//                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biomeId == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biomeId == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
+//                            int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
+//                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
+                            int topType = biome.surfaceBlockType();
+                            int topSubtype = biome.surfaceBlockSubtype();
+                            int midType = biome.subsurfaceBlockType();
+                            int midSubtype = biome.subsurfaceBlockSubtype();
+                            int groundType = biome.groundBlockType();
+                            int groundSubtype = biome.groundBlockSubtype();
+                            if (elevation <= SEA_LEVEL) {
+                                topType = BlockTypes.WET_SAND.id;
+                                topSubtype = 0;
+                                midType = BlockTypes.WET_SAND.id;
+                                midSubtype = 0;
+                                groundType = BlockTypes.SANDSTONE.id;
+                                groundSubtype = 0;
+                            } else if (elevation <= SEA_LEVEL+3) {
+                                topType = BlockTypes.SAND.id;
+                                topSubtype = 0;
+                                midType = BlockTypes.SAND.id;
+                                midSubtype = 0;
+                                groundType = BlockTypes.SANDSTONE.id;
+                                groundSubtype = 0;
+                            } else if (hillCracks > 0.02f && hillsNoise > 0.02f) {
+                                topType = groundType;
+                                topSubtype = 0;
+                                midType = groundType;
+                                midSubtype = 0;
+                            }
+                            int surfaceDepth = biome.surfaceDepth();
+                            int subsurfaceDepth = biome.subsurfaceDepth();
+                            if (SEA_LEVEL < ((cY+1) * chunkSize)-1 && SEA_LEVEL >= (cY*chunkSize) && SEA_LEVEL > elevation) {
+                                chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                            }
+                            int localYOffset = cY*chunkSize;
+                            int startY = Math.min(((cY+1) * chunkSize)-1, SEA_LEVEL-1)-localYOffset;
+                            int endY = Math.max(elevation+1, cY * chunkSize)-localYOffset;
+                            for (int lY = startY; lY >= endY; lY--) {
+                                chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, 15);
+                            }
+                            startY = Math.min(((cY+1) * chunkSize)-1, elevation)-localYOffset;
+                            endY = Math.max(elevation+1-surfaceDepth, cY * chunkSize)-localYOffset;
+                            for (int lY = startY; lY >= endY; lY--) {
+                                chunk.setBlock(lX, lY, lZ, topType, topSubtype);
+                            }
+                            startY = Math.min(((cY+1) * chunkSize)-1, elevation-surfaceDepth)-localYOffset;
+                            endY = Math.max(elevation+1-subsurfaceDepth, cY * chunkSize)-localYOffset;
+                            for (int lY = startY; lY >= endY; lY--) {
+                                chunk.setBlock(lX, lY, lZ, midType, midSubtype);
+                            }
+                            startY = Math.min(((cY+1) * chunkSize)-1, elevation-subsurfaceDepth)-localYOffset;
+                            endY = Math.max(cY * chunkSize, GROUND_LEVEL)-localYOffset;
+                            for (int lY = startY; lY >= endY; lY--) {
+                                chunk.setBlock(lX, lY, lZ, groundType, groundSubtype);
                             }
                             if (elevation < SKY_LEVEL && elevation >= GROUND_LEVEL) {
                                 region2D.heights[packed] = (short) (elevation - GROUND_LEVEL);
@@ -398,7 +442,7 @@ public class Earth extends WorldType {
                                 Vector2i blockIn = getBlockWorldgen(x, surface+1, z);
                                 Vector2i blockOn = getBlockWorldgen(x, surface, z);
                                 if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.SNOW.id) {
-                                    if (biome == Biomes.SNOWY_TAIGA.id) {
+                                    if (biome == Biomes.SNOWY_TAIGA.id()) {
                                         if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
@@ -406,7 +450,7 @@ public class Earth extends WorldType {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
-                                    } else if (biome == Biomes.TAIGA.id) {
+                                    } else if (biome == Biomes.TAIGA.id()) {
                                         if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
@@ -414,7 +458,7 @@ public class Earth extends WorldType {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0);
                                         }
-                                    } else if (biome == Biomes.CHERRY_GROVE.id) {
+                                    } else if (biome == Biomes.CHERRY_GROVE.id()) {
                                         if (foliageChance < foliageNoise * 0.002f) {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
@@ -427,7 +471,7 @@ public class Earth extends WorldType {
                                             int count = rand.nextInt(3, 6);
                                             WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
                                         }
-                                    } else if (biome == Biomes.TEMPERATE.id) {
+                                    } else if (biome == Biomes.TEMPERATE.id()) {
                                         if (foliageChance < 0.002f) {
                                             int maxHeight = rand.nextInt(24, 30);
                                             int radius = rand.nextInt(26, 34);
@@ -449,7 +493,7 @@ public class Earth extends WorldType {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0);
                                         }
-                                    } else if (biome == Biomes.RAINFOREST.id) {
+                                    } else if (biome == Biomes.RAINFOREST.id()) {
                                         if (foliageChance < 0.0034f) {
                                             Blob.generate(bounds, x, surface + 1, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
                                         } else if (foliageChance < 0.0075f) {

@@ -17,7 +17,10 @@ public class Recipes {
             new Pair<>(ItemTypes.STICK, ItemTypes.PAPER), new Product(ItemTypes.SHOJI, true),
             new Pair<>(ItemTypes.STICK, ItemTypes.PEBBLE), new Product(ItemTypes.STONE_HATCHET, true),
             new Pair<>(ItemTags.axe, ItemTags.log), new Product(ItemTypes.STICK, false),
-            new Pair<>(ItemTags.axe, ItemTypes.BAMBOO), new Product(ItemTypes.PAPER, false)
+            new Pair<>(ItemTags.axe, ItemTypes.BAMBOO), new Product(ItemTypes.PAPER, false),
+            new Pair<>(ItemTags.stone, ItemTypes.FLINT), new Product(ItemTypes.FURNACE, true),
+            new Pair<>(ItemTypes.CLAY, ItemTypes.FLINT), new Product(ItemTypes.KILN, true),
+            new Pair<>(ItemTypes.IRON_PLATE, ItemTypes.FLINT), new Product(ItemTypes.FORGE, true)
     );
     public record Product(ItemType itemType, boolean consume) {}
     public static Product getProduct(Item cursorItem, Item selItem) {

@@ -1,8 +1,3 @@
 package org.conspiracraft.world;
 
-public class Biome {
-    public byte id;
-    public Biome(byte id) {
-        this.id = id;
-    }
-}
+public record Biome(byte id, int surfaceDepth, int surfaceBlockType, int surfaceBlockSubtype, int subsurfaceDepth, int subsurfaceBlockType, int subsurfaceBlockSubtype, int groundBlockType, int groundBlockSubtype) {}
