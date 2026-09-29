@@ -40,7 +40,7 @@ public class Inventory {
         creativeMenu.setName("Creative").setPos(0.5f, 0.65f);
         //containerMenu = new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f);
         menu = new InvMenu();
-        menu.setName("Inventory").setPos(0.5f, 0.0075f).setCentered(true, false);
+        menu.setName("Inventory").setPos(0.5f, 0.0075f).setCentered(true, false).disableBackground();
         GUI.menus.add(menu);
     }
 
