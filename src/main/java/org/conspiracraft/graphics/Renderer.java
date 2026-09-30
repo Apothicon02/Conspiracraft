@@ -384,7 +384,7 @@ public class Renderer {
     public static void drawDDA(MemoryStack stack) {
         pushUBO.update(new Matrix4f().setTranslation(((int)player.pos.x())+0.5f, ((int)player.pos.y())+0.5f, ((int)player.pos.z())+0.5f), new Vector4f(1));
         pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
-        pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, null);
+        pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, Textures.reflections);
         pushUBO.push();
         updateComputePipeline(0);
         bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
@@ -396,6 +396,7 @@ public class Renderer {
     }
     public static void drawSSAO(MemoryStack stack) {
         pushUBO.updateTex(Textures.blueNoise, Textures.colors1, Textures.depth1, Textures.norms1);
+        pushUBO.updateWriteTex(Textures.reflections, Textures.reflections, Textures.reflections, Textures.reflections);
         pushUBO.push();
         updatePipeline(2);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2}, Textures.depth2, 1, true, true);

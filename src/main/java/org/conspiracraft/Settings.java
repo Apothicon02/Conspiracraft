@@ -23,6 +23,7 @@ public class Settings {
     public static boolean dynamicFoVEnabled = true;
     public static boolean upscaled = false;
     public static float guiScale = 1.25f;
+    public static float minBrightness = 0.f;
 
     public static void load() throws IOException {
         Path path = Path.of(Main.mainFolder + "settings.json");
@@ -44,6 +45,11 @@ public class Settings {
             fov = data.get("fov").getAsFloat();
         } else {
             data.addProperty("fov", fov);
+        }
+        if (data.get("minBrightness") != null) {
+            minBrightness = data.get("minBrightness").getAsFloat();
+        } else {
+            data.addProperty("minBrightness", minBrightness);
         }
         if (data.get("dynamicFoVEnabled") != null) {
             dynamicFoVEnabled = data.get("dynamicFoVEnabled").getAsBoolean();
@@ -96,6 +102,7 @@ public class Settings {
         JsonObject data = gson.fromJson(reader, JsonObject.class);
         data.addProperty("mouseSensitivity", mouseSensitivity);
         data.addProperty("fov", fov);
+        data.addProperty("minBrightness", minBrightness);
         data.addProperty("dynamicFoVEnabled", dynamicFoVEnabled);
         data.addProperty("shadowsEnabled", shadowsEnabled);
         data.addProperty("reflectionsEnabled", reflectionsEnabled);
