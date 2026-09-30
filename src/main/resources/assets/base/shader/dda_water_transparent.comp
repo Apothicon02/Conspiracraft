@@ -296,7 +296,7 @@ vec3 desaturate(vec3 color, float factor){
 const int renderDistance = int(size*0.5f);//-(regionSize*chunkSize);
 //const float maxChunkDist = ((renderDistance/chunkSize)*(renderDistance/chunkSize))-regionSize;
 
-float minBrightness = 0.11f;
+float ambientLight = 0.11f;
 vec3 globalPos = (pushUbo.model)[3].xyz;
 vec3 globalChunkPos = globalPos/chunkSize;
 vec3 ogPos = vec3(0);
@@ -336,7 +336,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, 512-max(0, sunHeight*512), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
     //    if (globalPos.y <= GROUND_LEVEL) {
-    //        return vec4(max(vec3(isSky ? 0.f : minBrightness), lighting.rgb), thickness);
+    //        return vec4(max(vec3(isSky ? 0.f : ambientLight), lighting.rgb), thickness);
     //    }
     vec4 color = vec4(max(lighting.rgb, sunColor*thickness*globalUbo.skylight.w), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
@@ -764,8 +764,8 @@ void main() {
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(0));
     } else {
         vec2 uv = coords/vec2(res);
-        minBrightness -= distance(uv, vec2(0.5f))*0.125f;
-        minBrightness = max(minBrightness, 0.065f);
+        ambientLight -= distance(uv, vec2(0.5f))*0.125f;
+        ambientLight = max(ambientLight, 0.065f);
         //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0).rgb, 1));
         //        imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], coords, 0).r, 0, 0, 0));
         //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0).xyz, 1));
@@ -866,7 +866,7 @@ void main() {
                 airAbove = true;
             }
         }
-        minBrightness-=min(0.175f, distance(camPos, primaryLightPos)/5000.f);
+        ambientLight-=min(0.175f, distance(camPos, primaryLightPos)/5000.f);
         float fogDist = pow(globalUbo.fogginess, 4);
         float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
         float primaryFogginess = globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFogginess : clamp((sqrt(distance(ogPos, primaryLightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(primaryLightPos.y, 63, 80, 1, 1 + abs(noise(primaryLightPos.xz) * 0.67f)) * fogginessMul, 0.f, maxFogginess));
