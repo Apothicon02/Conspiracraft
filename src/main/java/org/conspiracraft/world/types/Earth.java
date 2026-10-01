@@ -19,6 +19,7 @@ import org.conspiracraft.world.shapes.CoveredBlob;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
 
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -194,7 +195,7 @@ public class Earth extends WorldType {
         //pool.shutdown();
     }
     public static final int MID = 500000, HOT = MID-1000, COLD = MID+1000, TEMP_RANGE = 2000;
-    private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) {
+    private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) throws IOException {
         if (generationIdxs[t] >= generationOffsets[t].length-3) {return;}
         final java.util.Random rand = new java.util.Random(seed + t);
         int rX = generationOffsets[t][generationIdxs[t]++] + playerRX, rYStart = generationOffsets[t][generationIdxs[t]++] + playerRY, rZ = generationOffsets[t][generationIdxs[t]++] + playerRZ;
@@ -214,6 +215,7 @@ public class Earth extends WorldType {
                 putRegion2D(r2DPos, region2D);
             }
         }
+        boolean shouldGenerate = true;
         for (int rY = rYStart; rY <= rYEnd; rY++) {
             Region oldRegion = getRegion(World.wrapRegionPos(rX, rY, rZ));
             if (oldRegion != null) {oldRegion.unload();}
@@ -221,70 +223,75 @@ public class Earth extends WorldType {
             Region region = getRegion(cRP);
             if (region == null) {
                 region = new Region(cRP);
+                if (region.load(World.worldType.getWorldPath() + "/")) {
+                    shouldGenerate = false;
+                }
                 putRegion(cRP, region);
             } else {return;}
         }
-        Bounds bounds = new Bounds(rX * regionSize, (rX+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZ * regionSize, (rZ+1) * regionSize);
-        for (int rY = rYStart; rY <= rYEnd; rY++) {
-            long cRP = World.packRegionPos(rX, rY, rZ);
-            Region region = getRegion(cRP);
-            int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
-            int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
-            if (crust) {
-                generateCrustRegion(rand, region, region2D, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
-            } else if (cYEnd <= GROUND_LEVEL_C) {
-                generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
-            }
-        }
-        if (crust) {
-            Arrays.fill(region2D.heights, (short)-1);
-            for (int rY = SKY_LEVEL_R-1; rY >= GROUND_LEVEL_R; rY--) {
-                long cRP = packRegionPos(rX, rY, rZ);
+        if (shouldGenerate) {
+            Bounds bounds = new Bounds(rX * regionSize, (rX+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZ * regionSize, (rZ+1) * regionSize);
+            for (int rY = rYStart; rY <= rYEnd; rY++) {
+                long cRP = World.packRegionPos(rX, rY, rZ);
                 Region region = getRegion(cRP);
-                for (int cX = 0; cX < regionSizeChunks; cX++) {
-                    for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
-                        for (int cY = regionSizeChunks-1; cY >= 0; cY--) {
-                            int cP = Region.packLocalPos(cX, cY, cZ);
-                            Chunk chunk = region.getChunk(cP);
-                            Vector2i firstBlock = chunk.getBlock(0);
-                            if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock.x()].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
-                                for (int x = 0; x < chunkSize; x++) {
-                                    for (int z = 0; z < chunkSize; z++) {
-                                        int rlX = x + (cX * chunkSize), rlZ = z + (cZ * chunkSize);
-                                        int packed = (rlX * regionSize) + rlZ;
-                                        if (region2D.heights[packed] == -1) {
-                                            for (int y = chunkSize - 1; y >= 0; y--) {
-                                                Vector2i block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
-                                                if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
-                                                    Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
-                                                    region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
-                                                    break;
-                                                } else {
-                                                    chunk.setLight(x, y, z, (byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel);
+                int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+                int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+                if (crust) {
+                    generateCrustRegion(rand, region, region2D, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
+                } else if (cYEnd <= GROUND_LEVEL_C) {
+                    generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
+                }
+            }
+            if (crust) {
+                Arrays.fill(region2D.heights, (short)-1);
+                for (int rY = SKY_LEVEL_R-1; rY >= GROUND_LEVEL_R; rY--) {
+                    long cRP = packRegionPos(rX, rY, rZ);
+                    Region region = getRegion(cRP);
+                    for (int cX = 0; cX < regionSizeChunks; cX++) {
+                        for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                            for (int cY = regionSizeChunks-1; cY >= 0; cY--) {
+                                int cP = Region.packLocalPos(cX, cY, cZ);
+                                Chunk chunk = region.getChunk(cP);
+                                Vector2i firstBlock = chunk.getBlock(0);
+                                if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock.x()].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
+                                    for (int x = 0; x < chunkSize; x++) {
+                                        for (int z = 0; z < chunkSize; z++) {
+                                            int rlX = x + (cX * chunkSize), rlZ = z + (cZ * chunkSize);
+                                            int packed = (rlX * regionSize) + rlZ;
+                                            if (region2D.heights[packed] == -1) {
+                                                for (int y = chunkSize - 1; y >= 0; y--) {
+                                                    Vector2i block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
+                                                    if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+                                                        Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
+                                                        region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
+                                                        break;
+                                                    } else {
+                                                        chunk.setLight(x, y, z, (byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
+                                } else {
+                                    chunk.lightPalette.set(0, LightHelper.fullSunlight);
                                 }
-                            } else {
-                                chunk.lightPalette.set(0, LightHelper.fullSunlight);
                             }
                         }
                     }
                 }
-            }
-            for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
-                for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
-                    int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
-                    if (height > 0) {
-                        int gY = height+Earth.GROUND_LEVEL;
-                        Vector3i globalPos = new Vector3i(x, gY, z);
-                        Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
-                        if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
-                                (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
-                                (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
-                                (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
-                            LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
+                for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
+                    for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
+                        int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
+                        if (height > 0) {
+                            int gY = height+Earth.GROUND_LEVEL;
+                            Vector3i globalPos = new Vector3i(x, gY, z);
+                            Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
+                            if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
+                                    (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
+                                    (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
+                                    (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
+                                LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
+                            }
                         }
                     }
                 }

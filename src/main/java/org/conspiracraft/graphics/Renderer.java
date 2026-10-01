@@ -554,10 +554,10 @@ public class Renderer {
                 .pValues(stack.longs(timeline));
         int waitResult = vkWaitSemaphores(vkDevice, semaphoreWaitInfo, Long.MAX_VALUE);
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for timeline semaphore: "+waitResult);}
-        long took = (System.currentTimeMillis()-startTime);
-        if (took > 100) {
-            System.out.println("Took " + took + "ms to start cmd buffer on frame "+totalFrames+" with frame idx "+frameIdx+" and image idx "+imageIdx+". ");
-        }
+//        long took = (System.currentTimeMillis()-startTime);
+//        if (took > 100) {
+//            System.out.println("Took " + took + "ms to start cmd buffer on frame "+totalFrames+" with frame idx "+frameIdx+" and image idx "+imageIdx+". ");
+//        }
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);

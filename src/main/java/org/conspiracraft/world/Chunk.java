@@ -91,6 +91,11 @@ public class Chunk {
 //        }
         return lods;
     }
+    public void setLodData(long[] lods) {
+        if (lods != null && lods.length > 0) {
+            this.lods = lods;
+        }
+    }
     //Blocks start
     public int bitsPerBlock() {
         return blockData.bitsPerValue;
@@ -102,12 +107,14 @@ public class Chunk {
         return blockData.valuesPerInt;
     }
     public void setBlockPalette(int[] data) {
-        int i = 0;
-        for (int integer : data) {
-            if (i == 0) {
-                blockPalette.set(i++, integer);
-            } else {
-                blockPalette.add(i++, integer);
+        if (data.length > 0) {
+            int i = 0;
+            for (int integer : data) {
+                if (i == 0) {
+                    blockPalette.set(i++, integer);
+                } else {
+                    blockPalette.add(i++, integer);
+                }
             }
         }
     }
@@ -123,8 +130,10 @@ public class Chunk {
         return blockPalette.size();
     }
     public void setBlockData(int[] data) {
-        blockData = new BitBuffer(totalVoxels, getNeededBitsPerValue(blockPalette.size()));
-        blockData.setData(data);
+        if (data.length > 0) {
+            blockData = new BitBuffer(totalVoxels, getNeededBitsPerValue(blockPalette.size()));
+            blockData.setData(data);
+        }
     }
     public int[] getBlockData() {
         return blockData.getData();
@@ -205,12 +214,14 @@ public class Chunk {
         return lightData.valuesPerInt;
     }
     public void setLightPalette(int[] data) {
-        int i = 0;
-        for (int integer : data) {
-            if (i == 0) {
-                lightPalette.set(i++, integer);
-            } else {
-                lightPalette.add(i++, integer);
+        if (data.length > 0) {
+            int i = 0;
+            for (int integer : data) {
+                if (i == 0) {
+                    lightPalette.set(i++, integer);
+                } else {
+                    lightPalette.add(i++, integer);
+                }
             }
         }
     }
@@ -226,8 +237,10 @@ public class Chunk {
         return lightPalette.size();
     }
     public void setLightData(int[] data) {
-        lightData = new BitBuffer(totalVoxels, getNeededBitsPerValue(lightPalette.size()));
-        lightData.setData(data);
+        if (data.length > 0) {
+            lightData = new BitBuffer(totalVoxels, getNeededBitsPerValue(lightPalette.size()));
+            lightData.setData(data);
+        }
     }
     public int[] getLightData() {
         return lightData.getData();

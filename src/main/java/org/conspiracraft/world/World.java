@@ -100,12 +100,16 @@ public class World {
         Utils.unmap(data);
         out.close();
 
-        out = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldHeightmap.length * 2L);
-        data.order(ByteOrder.BIG_ENDIAN);
-        data.asShortBuffer().put(oldHeightmap);
-        Utils.unmap(data);
-        out.close();
+        for (Region region : regions.values()) {
+            region.save(path);
+        }
+
+//        out = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+//        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldHeightmap.length * 2L);
+//        data.order(ByteOrder.BIG_ENDIAN);
+//        data.asShortBuffer().put(oldHeightmap);
+//        Utils.unmap(data);
+//        out.close();
 
 //        out = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 //        data = out.map(FileChannel.MapMode.READ_WRITE, 0, lods.length * 8L);
@@ -114,43 +118,43 @@ public class World {
 //        Utils.unmap(data);
 //        out.close();
 
-        out = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldRegions.length * 8L);
-        data.order(ByteOrder.BIG_ENDIAN);
-        data.asLongBuffer().put(oldRegions);
-        Utils.unmap(data);
-        out.close();
+//        out = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+//        data = out.map(FileChannel.MapMode.READ_WRITE, 0, oldRegions.length * 8L);
+//        data.order(ByteOrder.BIG_ENDIAN);
+//        data.asLongBuffer().put(oldRegions);
+//        Utils.unmap(data);
+//        out.close();
 
-        int size = 0;
-        for (Chunk chunk : World.oldchunks) {
-            int[] blockData = chunk.getBlockData();
-            int[] lightData = chunk.getLightData();
-            size += 4+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length)+chunk.lightPalette.size()+(lightData == null ? 0 : lightData.length);
-        }
-        out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        data = out.map(FileChannel.MapMode.READ_WRITE, 0, size*4L);
-        data.order(ByteOrder.BIG_ENDIAN);
-        IntBuffer chunkData = data.asIntBuffer();
-
-        int[] emptyData = new int[0];
-        for (Chunk chunk : World.oldchunks) {
-            int[] subdata  = chunk.getBlockData();
-            subdata = subdata == null ? emptyData : subdata;
-            int[] palette = chunk.getBlockPalette();
-            chunkData.put(palette.length);
-            chunkData.put(palette);
-            chunkData.put(subdata.length);
-            chunkData.put(subdata);
-            subdata = chunk.getLightData();
-            subdata = subdata == null ? emptyData : subdata;
-            palette = chunk.getLightPalette();
-            chunkData.put(palette.length);
-            chunkData.put(palette);
-            chunkData.put(subdata.length);
-            chunkData.put(subdata);
-        }
-        Utils.unmap(data);
-        out.close();
+//        int size = 0;
+//        for (Chunk chunk : World.oldchunks) {
+//            int[] blockData = chunk.getBlockData();
+//            int[] lightData = chunk.getLightData();
+//            size += 4+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length)+chunk.lightPalette.size()+(lightData == null ? 0 : lightData.length);
+//        }
+//        out = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+//        data = out.map(FileChannel.MapMode.READ_WRITE, 0, size*4L);
+//        data.order(ByteOrder.BIG_ENDIAN);
+//        IntBuffer chunkData = data.asIntBuffer();
+//
+//        int[] emptyData = new int[0];
+//        for (Chunk chunk : World.oldchunks) {
+//            int[] subdata  = chunk.getBlockData();
+//            subdata = subdata == null ? emptyData : subdata;
+//            int[] palette = chunk.getBlockPalette();
+//            chunkData.put(palette.length);
+//            chunkData.put(palette);
+//            chunkData.put(subdata.length);
+//            chunkData.put(subdata);
+//            subdata = chunk.getLightData();
+//            subdata = subdata == null ? emptyData : subdata;
+//            palette = chunk.getLightPalette();
+//            chunkData.put(palette.length);
+//            chunkData.put(palette);
+//            chunkData.put(subdata.length);
+//            chunkData.put(subdata);
+//        }
+//        Utils.unmap(data);
+//        out.close();
 
         IntArrayList itemsData = new IntArrayList();
         int i = 0;
@@ -195,12 +199,12 @@ public class World {
             long[] globalData = Utils.flipLongArray(Utils.byteArrayToLongArray(new FileInputStream(path + "global.data").readAllBytes()));
             Main.timeNs = globalData[0];
 
-            FileChannel in = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ);
-            MappedByteBuffer data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
-            data.order(ByteOrder.BIG_ENDIAN);
-            data.asShortBuffer().get(oldHeightmap);
-            Utils.unmap(data);
-            in.close();
+            FileChannel in;// = FileChannel.open(Path.of(path + "heightmap.data"), StandardOpenOption.READ);
+            MappedByteBuffer data;// = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+//            data.order(ByteOrder.BIG_ENDIAN);
+//            data.asShortBuffer().get(oldHeightmap);
+//            Utils.unmap(data);
+//            in.close();
 
 //            in = FileChannel.open(Path.of(path + "lods.data"), StandardOpenOption.READ);
 //            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
@@ -209,44 +213,44 @@ public class World {
 //            Utils.unmap(data);
 //            in.close();
 
-            in = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ);
-            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
-            data.order(ByteOrder.BIG_ENDIAN);
-            data.asLongBuffer().get(oldRegions);
-            Utils.unmap(data);
-            in.close();
+//            in = FileChannel.open(Path.of(path + "regions.data"), StandardOpenOption.READ);
+//            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+//            data.order(ByteOrder.BIG_ENDIAN);
+//            data.asLongBuffer().get(oldRegions);
+//            Utils.unmap(data);
+//            in.close();
 
-            in = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ);
-            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
-            data.order(ByteOrder.BIG_ENDIAN);
-            IntBuffer chunkData = data.asIntBuffer();
-            for (int chunkPos = 0; chunkPos < oldchunks.length; chunkPos++) {
-                Chunk chunk = new Chunk(chunkPos);
-
-                int dataSize = chunkData.get();
-                int[] subdata = new int[dataSize];
-                chunkData.get(subdata);
-                chunk.setBlockPalette(subdata);
-
-                dataSize = chunkData.get();
-                subdata = new int[dataSize];
-                chunkData.get(subdata);
-                chunk.setBlockData(subdata);
-
-                dataSize = chunkData.get();
-                subdata = new int[dataSize];
-                chunkData.get(subdata);
-                chunk.setLightPalette(subdata);
-
-                dataSize = chunkData.get();
-                subdata = new int[dataSize];
-                chunkData.get(subdata);
-                chunk.setLightData(subdata);
-
-                oldchunks[chunkPos] = chunk;
-            }
-            Utils.unmap(data);
-            in.close();
+//            in = FileChannel.open(Path.of(path + "chunks.data"), StandardOpenOption.READ);
+//            data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+//            data.order(ByteOrder.BIG_ENDIAN);
+//            IntBuffer chunkData = data.asIntBuffer();
+//            for (int chunkPos = 0; chunkPos < oldchunks.length; chunkPos++) {
+//                Chunk chunk = new Chunk(chunkPos);
+//
+//                int dataSize = chunkData.get();
+//                int[] subdata = new int[dataSize];
+//                chunkData.get(subdata);
+//                chunk.setBlockPalette(subdata);
+//
+//                dataSize = chunkData.get();
+//                subdata = new int[dataSize];
+//                chunkData.get(subdata);
+//                chunk.setBlockData(subdata);
+//
+//                dataSize = chunkData.get();
+//                subdata = new int[dataSize];
+//                chunkData.get(subdata);
+//                chunk.setLightPalette(subdata);
+//
+//                dataSize = chunkData.get();
+//                subdata = new int[dataSize];
+//                chunkData.get(subdata);
+//                chunk.setLightData(subdata);
+//
+//                oldchunks[chunkPos] = chunk;
+//            }
+//            Utils.unmap(data);
+//            in.close();
 
             if (Files.exists(Path.of(path + "items.data"))) {
                 in = FileChannel.open(Path.of(path + "items.data"), StandardOpenOption.READ);

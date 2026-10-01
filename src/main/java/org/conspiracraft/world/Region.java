@@ -1,11 +1,24 @@
 package org.conspiracraft.world;
 
+import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.utils.Utils;
 import org.joml.Vector3i;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.VkBufferCopy;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 import static org.conspiracraft.graphics.Graphics.chunkSSBO;
 import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
@@ -24,6 +37,84 @@ public class Region {
     public boolean neighborsGenerated = false;
     public final ArrayDeque<Vector3i> lightQueueSkipWG = new ArrayDeque<>();
     public final ArrayDeque<Vector3i> lightQueueSkip = new ArrayDeque<>();
+
+    public void save(String basePath) throws IOException {
+        if (!generated) {return;}
+        String path = basePath+"regions/";
+        new File(path).mkdirs();
+        FileChannel out = FileChannel.open(Path.of(path+condensedRegionPos+".data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        int dataSize = 0;
+        for (Chunk chunk : chunks) {
+            int[] blockData = chunk.getBlockData();
+            int[] lightData = chunk.getLightData();
+            long[] lodData = chunk.lods;
+            dataSize += 5+chunk.blockPalette.size()+(blockData == null ? 0 : blockData.length)+chunk.lightPalette.size()+(lightData == null ? 0 : lightData.length)+(lodData == null ? 0 : lodData.length*2);
+        }
+        MappedByteBuffer data = out.map(FileChannel.MapMode.READ_WRITE, 0, dataSize * 4L);
+        data.order(ByteOrder.BIG_ENDIAN);
+        int[] emptyData = new int[0];
+        long[] emptyDataL = new long[0];
+        for (Chunk chunk : chunks) {
+            int[] subdata  = chunk.getBlockData();
+            subdata = subdata == null ? emptyData : subdata;
+            int[] palette = chunk.getBlockPalette();
+            putInts(data, palette);
+            putInts(data, subdata);
+            subdata = chunk.getLightData();
+            subdata = subdata == null ? emptyData : subdata;
+            palette = chunk.getLightPalette();
+            putInts(data, palette);
+            putInts(data, subdata);
+            long[] subdataL = chunk.lods;
+            subdataL = subdataL == null ? emptyDataL : subdataL;
+            putLongs(data, subdataL);
+        }
+        Utils.unmap(data);
+        out.close();
+    }
+
+    public static void putInts(ByteBuffer buf, int[] ints) {
+        buf.putInt(ints.length);
+        buf.asIntBuffer().put(ints);
+        buf.position(buf.position()+ints.length*4);
+    }
+    public static void putLongs(ByteBuffer buf, long[] longs) {
+        buf.putInt(longs.length);
+        buf.asLongBuffer().put(longs);
+        buf.position(buf.position()+longs.length*8);
+    }
+
+    public boolean load(String basePath) throws IOException {
+        Path path = Path.of(basePath + "regions/" + condensedRegionPos + ".data");
+        if (!Files.exists(path)) {return false;}
+        FileChannel in = FileChannel.open(path, StandardOpenOption.READ);
+        MappedByteBuffer data = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size());
+        data.order(ByteOrder.BIG_ENDIAN);
+        for (Chunk chunk : chunks) {
+            chunk.setBlockPalette(getInts(data));
+            chunk.setBlockData(getInts(data));
+            chunk.setLightPalette(getInts(data));
+            chunk.setLightData(getInts(data));
+            chunk.setLodData(getLongs(data));
+        }
+        Utils.unmap(data);
+        in.close();
+        return true;
+    }
+
+    public static int[] getInts(ByteBuffer buf) {
+        int[] ints = new int[buf.getInt()];
+        buf.asIntBuffer().get(ints);
+        buf.position(buf.position()+ints.length*4);
+        return ints;
+    }
+    public static long[] getLongs(ByteBuffer buf) {
+        long[] longs = new long[buf.getInt()];
+        buf.asLongBuffer().get(longs);
+        buf.position(buf.position()+longs.length*8);
+        return longs;
+    }
+
     public void setGenerated() {
         generated = true;
         updateNeighborsGeneratedAndTheirNeighbors();
@@ -101,7 +192,8 @@ public class Region {
         return chunks[cP];
     }
 
-    public void unload() {
+    public void unload() throws IOException {
+        save(World.worldType.getWorldPath() + "/");
         for (Chunk chunk : chunks) {
             vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(chunk.cCP));
             vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(chunk.cCP));
