@@ -39,7 +39,7 @@ public class Region {
     public final ArrayDeque<Vector3i> lightQueueSkip = new ArrayDeque<>();
 
     public void save(String basePath) throws IOException {
-        if (!generated) {return;}
+        if (!generated || !neighborsGenerated) {return;}
         String path = basePath+"regions/";
         new File(path).mkdirs();
         FileChannel out = FileChannel.open(Path.of(path+condensedRegionPos+".data"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);

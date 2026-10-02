@@ -961,19 +961,26 @@ void main() {
                     ivec2 reflectBlockIn = getBlock(rayPos);
                     bool reflectionUnderwater = (reflectBlockIn.x == 1 && sampleAtlas(int(fract(rayPos.x)*blockSize), int(fract(rayPos.y)*blockSize), int(fract(rayPos.z)*blockSize), reflectBlockIn.x, reflectBlockIn.y).a > 0);
                     reflectColor = globalUbo.renderToggles.y > 0 ? dda(false, reflectionUnderwater) : vec4(0);
-                    if (reflectColor.a > 0.f) {
-                        reflectColor.rgb = getMaterialColor(reflectColor).rgb;
-                    }
+                    bool isReflectEmissive = false;
                     if (reflectColor.a < alphaMax) {
                         if (globalUbo.fogginess > 0) {
                             reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, maxFogginess, false);
                         }
                     } else {
-                        //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
-                        vec3 lightPos = hitPos;// - (flatNormal * voxelSize);
-                        float reflectFogginess = globalUbo.fogginess <= 0 ? 0 : clamp((sqrt(distance(ogPos, lightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(lightPos.y, 63, 80, 1, 1 + abs(noise(lightPos.xz) / 3)), 0.f, maxFogginess);
-                        reflectColor.rgb *= getLightingColor(celestialSource, lightPos, min(vec4(1), getLight(lightPos) / maxLightLevel), false, reflectFogginess, false).rgb;
-                        reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(celestialSource, lightPos, vec4(0, 0, 0, 1.f), false, reflectFogginess, false).rgb, reflectFogginess);
+                        reflectColor = getMaterialColor(reflectColor);
+                        if (reflectColor.a > alphaMax && reflectColor.a < 1.f) {
+                            isReflectEmissive = true;
+                            reflectColor.rgb *= 4;
+                        } else {
+                            //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
+                            vec3 lightPos = hitPos;// - (flatNormal * voxelSize);
+                            float reflectFogginess = globalUbo.fogginess <= 0 ? 0 : clamp((sqrt(distance(ogPos, lightPos) / (renderDistance * 0.66f * fogDist)) - 0.25f) * gradient(lightPos.y, 63, 80, 1, 1 + abs(noise(lightPos.xz) / 3)), 0.f, maxFogginess);
+                            reflectColor.rgb *= getLightingColor(celestialSource, lightPos, min(vec4(1), getLight(lightPos) / maxLightLevel), false, reflectFogginess, false).rgb;
+                            reflectColor.rgb = mix(reflectColor.rgb, getLightingColor(celestialSource, lightPos, vec4(0, 0, 0, 1.f), false, reflectFogginess, false).rgb, reflectFogginess);
+                        }
+                    }
+                    if (!isReflectEmissive) {
+                        reflectColor.rgb = min(reflectColor.rgb, vec3(1));
                     }
                     reflectFrensel = ((frensel * 0.75f) + 0.25f) * reflectivity;
                 }

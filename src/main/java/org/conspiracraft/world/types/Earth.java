@@ -215,7 +215,6 @@ public class Earth extends WorldType {
                 putRegion2D(r2DPos, region2D);
             }
         }
-        boolean shouldGenerate = true;
         for (int rY = rYStart; rY <= rYEnd; rY++) {
             Region oldRegion = getRegion(World.wrapRegionPos(rX, rY, rZ));
             if (oldRegion != null) {oldRegion.unload();}
@@ -224,16 +223,16 @@ public class Earth extends WorldType {
             if (region == null) {
                 region = new Region(cRP);
                 if (region.load(World.worldType.getWorldPath() + "/")) {
-                    shouldGenerate = false;
+                    region.generated = true;
                 }
                 putRegion(cRP, region);
             } else {return;}
         }
-        if (shouldGenerate) {
-            Bounds bounds = new Bounds(rX * regionSize, (rX+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZ * regionSize, (rZ+1) * regionSize);
-            for (int rY = rYStart; rY <= rYEnd; rY++) {
-                long cRP = World.packRegionPos(rX, rY, rZ);
-                Region region = getRegion(cRP);
+        Bounds bounds = new Bounds(rX * regionSize, (rX+1) * regionSize, rYStart * regionSize, (rYEnd+1) * regionSize, rZ * regionSize, (rZ+1) * regionSize);
+        for (int rY = rYStart; rY <= rYEnd; rY++) {
+            long cRP = World.packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            if (!region.generated) {
                 int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
                 int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
                 if (crust) {
@@ -242,14 +241,16 @@ public class Earth extends WorldType {
                     generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
                 }
             }
-            if (crust) {
-                Arrays.fill(region2D.heights, (short)-1);
-                for (int rY = SKY_LEVEL_R-1; rY >= GROUND_LEVEL_R; rY--) {
-                    long cRP = packRegionPos(rX, rY, rZ);
-                    Region region = getRegion(cRP);
+        }
+        if (crust) {
+            Arrays.fill(region2D.heights, (short)-1);
+            for (int rY = SKY_LEVEL_R-1; rY >= GROUND_LEVEL_R; rY--) {
+                long cRP = packRegionPos(rX, rY, rZ);
+                Region region = getRegion(cRP);
+                if (!region.generated) {
                     for (int cX = 0; cX < regionSizeChunks; cX++) {
                         for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
-                            for (int cY = regionSizeChunks-1; cY >= 0; cY--) {
+                            for (int cY = regionSizeChunks - 1; cY >= 0; cY--) {
                                 int cP = Region.packLocalPos(cX, cY, cZ);
                                 Chunk chunk = region.getChunk(cP);
                                 Vector2i firstBlock = chunk.getBlock(0);
@@ -279,19 +280,19 @@ public class Earth extends WorldType {
                         }
                     }
                 }
-                for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
-                    for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
-                        int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
-                        if (height > 0) {
-                            int gY = height+Earth.GROUND_LEVEL;
-                            Vector3i globalPos = new Vector3i(x, gY, z);
-                            Vector2i nBlock1 = getBlock(globalPos.x()+1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()+1), nBlock3 = getBlock(globalPos.x()-1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z()-1);
-                            if ((getLight(globalPos.x()+1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
-                                    (getLight(globalPos.x(), globalPos.y(), globalPos.z()+1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
-                                    (getLight(globalPos.x()-1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
-                                    (getLight(globalPos.x(), globalPos.y(), globalPos.z()-1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
-                                LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
-                            }
+            }
+            for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
+                for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
+                    int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
+                    if (height > 0) {
+                        int gY = height+Earth.GROUND_LEVEL;
+                        Vector3i globalPos = new Vector3i(x, gY, z);
+                        Vector2i nBlock1 = getBlock(globalPos.x() + 1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() + 1), nBlock3 = getBlock(globalPos.x() - 1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() - 1);
+                        if ((getLight(globalPos.x() + 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() + 1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
+                                (getLight(globalPos.x() - 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() - 1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
+                            LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
                         }
                     }
                 }
