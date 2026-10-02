@@ -35,6 +35,7 @@ public class Textures {
     public static Texture materials;
     public static Texture bloom_horizontally;
     public static Texture bloom;
+    public static Texture skybox;
 
     public static Texture create(float resDiv, int width, int height, int channels, int format, int usage, boolean windowResizable) {
         Texture texture = new Texture(resDiv, width, height, channels, format, usage, windowResizable);
@@ -90,6 +91,7 @@ public class Textures {
         materials = create(512, 512, 4, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
         bloom_horizontally = create(4.f, Settings.width, Settings.height, 4, defaultRenderFormat, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
         bloom = create(4.f, Settings.width, Settings.height, 4, defaultRenderFormat, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, true);
+        skybox = create(2048, 12288, 4, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, false);
         textures.forEach((tex) -> {tex.create(stack);});
         pushUBO.updatePermanentTextures();
     }

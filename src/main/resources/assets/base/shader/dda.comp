@@ -806,9 +806,8 @@ void main() {
             emissive = false;
             depth = rasterDepth > depth ? rasterDepth : 1.f;
             color = rasterColor;
-            bool isGlowing = color.r >= 1 || color.g > 1 || color.b > 1;
+            bool isGlowing = color.r >= 1 || color.g >= 1 || color.b >= 1;
             if (isGlowing) {celestial = true; emissive = true;}
-            color.rgb = color.rgb;
             primaryNormal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0).xyz;
             primaryFlatNormal = primaryNormal;
             vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
@@ -824,8 +823,18 @@ void main() {
             if (distance(camPos, primaryLightPos) > size*2) {
                 celestial = true;
                 if (!isGlowing) {
-                    fogginessMul = 0.f;
-                    color.rgb *= 1.25f+(dot(primaryNormal, normalize(globalUbo.sun))/2);
+                    if (distance(camPos, primaryLightPos) < 900000000) {
+                        fogginessMul = 0.f;
+                        color.rgb *= 1.25f + (dot(primaryNormal, normalize(globalUbo.sun)) / 2);
+                    } else {
+                        vec3 lightPos = ogPos + ogDir * renderDistance;
+                        vec3 minnedSun = globalUbo.sun;
+                        minnedSun.y = min(0, minnedSun.y);
+                        fogginessMul = 1-((clamp(abs(dot(normalize(minnedSun - lightPos), vec3(0, 1, 0))), 0.1f, 0.2f)-0.1f)*10);
+                        vec3 lighting = getLightingColor(true, lightPos, vec4(0, 0, 0, 1), true, 1, false).rgb;
+                        if (color.r > 0.75f || color.g > 0.75f || color.b > 0.75f) {color.rgb*=10;}
+                        color.rgb = mix(color.rgb, lighting, min(0.75f, fogginessMul));
+                    }
                 }
             } else {
                 color.rgb *= primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.75f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.9f : 0.8f));

@@ -9,6 +9,7 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -205,6 +206,12 @@ public class Renderer {
         memFree(blueNoiseBuffer);
         GUI.fillTexture();
         EntityTypes.fillTexture(stack);
+        int texSize = Textures.skybox.width*Textures.skybox.height;
+        Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+        ByteBuffer entityBuf = Utils.imageToBuffer(Utils.loadImage("generic/texture/skybox"));
+        memCopy(memAddress(entityBuf), stagingBuffer.pointer.get(0), texSize * 4L);
+        memFree(entityBuf);
+        ImageHelper.fillImage(stack, Textures.skybox, stagingBuffer);
         System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
     }
     public static void updateChunk(long packedChunkPos) {
@@ -359,6 +366,10 @@ public class Renderer {
             drawClouds();
             drawStars();
             StarSystem.render(stack);
+            pushUBO.updateTex(Textures.skybox);
+            pushUBO.updateAtlasOffset(new Vector2i(0));
+            pushUBO.updateSize(new Vector2i(Textures.skybox.width));
+            drawCube(new Matrix4f().scale(Integer.MAX_VALUE), new Vector4f(1));
         }
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
