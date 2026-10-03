@@ -480,26 +480,30 @@ public class Earth extends WorldType {
                                             WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
                                         }
                                     } else if (biome == Biomes.TEMPERATE.id()) {
-                                        if (foliageChance < 0.002f) {
-                                            int maxHeight = rand.nextInt(24, 30);
-                                            int radius = rand.nextInt(26, 34);
-                                            int count = rand.nextInt(4, 5);
-                                            OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f);
-                                        } else if (foliageChance < 0.0023f) {
+                                        if (foliageChance < foliageNoise * 0.005f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(16, 19);
                                             int radius = rand.nextInt(9, 12);
                                             int leavesHeight = maxHeight/3;
                                             int count = rand.nextInt(3, 6);
                                             WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
-                                        } else if (foliageChance < 0.00232f) {
+                                        } else if (foliageChance < foliageNoise * 0.006f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(20, 23);
                                             int radius = rand.nextInt(13, 17);
                                             int leavesHeight = maxHeight/3;
                                             int count = rand.nextInt(3, 6);
                                             WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count);
-                                        } else if (foliageChance < 0.00235f) {
+                                        } else if (foliageChance < foliageNoise * 0.007f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0);
+                                        } else if (foliageChance < foliageNoise * 0.014f * vegetationNoise) {
+                                            int maxHeight = rand.nextInt(24, 30);
+                                            int radius = rand.nextInt(26, 34);
+                                            int count = rand.nextInt(4, 5);
+                                            OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f);
+                                        } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.05f * vegetationNoise)) {
+                                            int maxHeight = rand.nextInt(10, 14);
+                                            int radius = rand.nextInt(6, 8);
+                                            SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0);
                                         }
                                     } else if (biome == Biomes.RAINFOREST.id()) {
                                         if (foliageChance < 0.0034f) {
