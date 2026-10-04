@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static org.conspiracraft.world.Biomes.getBadlandsBands;
 import static org.conspiracraft.world.World.*;
 
 public class Earth extends WorldType {
@@ -316,6 +317,9 @@ public class Earth extends WorldType {
             }
         }
     }
+    public static double getTerrace(double noise) {
+        return ((Math.ceil(noise*0.02f))*50)+(Math.pow((noise*0.02f)%1, 10)*50);
+    }
     public void generateCrustRegion(java.util.Random rand, Region region, Region2D region2D, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
         RegionNoises regionNoises = new RegionNoises(regionSize * regionSize);
         byte[] biomes = new byte[regionSize * regionSize];
@@ -333,9 +337,14 @@ public class Earth extends WorldType {
                 double desertness = ((Math.clamp(temperature, 0.25f, 0.35f) - 0.3f) * 20);
                 double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
                 double dunes = (4 + (45 * dunesNoise)) * desertness;
-                double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continents)));
+                double coastalness = Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continents)));
+                double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * coastalness;
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
-                double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (hillsNoise - hillCracks) * 125);
+                //double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (Utils.mix(hillsNoise, Math.floor(hillsNoise*20)*0.05f, Math.clamp((plainsNoise+detailNoise-0.75f)*4, 0, 1)) - hillCracks) * 125);
+                double hills = Math.max(0, (hillsNoise - hillCracks) * 125);
+                double terraceness = Math.clamp((plainsNoise-0.5f)*3*(1-coastalness), 0, 1.f);
+                hills = Utils.mix(hills, Math.max(hills, getTerrace(hills+(plainsNoise*25))-(plainsNoise*25)), terraceness);
+                hills += (plainsNoise * 3) + ((detailNoise * 5 * Math.max(0.34f, plainsNoise))*(1-terraceness));
                 double vegetationNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
                 int elevation = (int) Math.max(GROUND_LEVEL + 6, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
@@ -373,57 +382,65 @@ public class Earth extends WorldType {
 //                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biomeId == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biomeId == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
 //                            int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
 //                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
-                            int topType = biome.surfaceBlockType();
-                            int topSubtype = biome.surfaceBlockSubtype();
-                            int midType = biome.subsurfaceBlockType();
-                            int midSubtype = biome.subsurfaceBlockSubtype();
-                            int groundType = biome.groundBlockType();
-                            int groundSubtype = biome.groundBlockSubtype();
-                            if (elevation <= SEA_LEVEL) {
-                                topType = BlockTypes.WET_SAND.id;
-                                topSubtype = 0;
-                                midType = BlockTypes.WET_SAND.id;
-                                midSubtype = 0;
-                                groundType = BlockTypes.SANDSTONE.id;
-                                groundSubtype = 0;
-                            } else if (elevation <= SEA_LEVEL+3) {
-                                topType = BlockTypes.SAND.id;
-                                topSubtype = 0;
-                                midType = BlockTypes.SAND.id;
-                                midSubtype = 0;
-                                groundType = BlockTypes.SANDSTONE.id;
-                                groundSubtype = 0;
-                            } else if (hillCracks > 0.02f && hillsNoise > 0.02f) {
-                                topType = groundType;
-                                topSubtype = 0;
-                                midType = groundType;
-                                midSubtype = 0;
-                            }
-                            int surfaceDepth = biome.surfaceDepth();
-                            int subsurfaceDepth = biome.subsurfaceDepth();
-                            if (SEA_LEVEL < ((cY+1) * chunkSize)-1 && SEA_LEVEL >= (cY*chunkSize) && SEA_LEVEL > elevation) {
-                                chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
-                            }
-                            int localYOffset = cY*chunkSize;
-                            int startY = Math.min(((cY+1) * chunkSize)-1, SEA_LEVEL-1)-localYOffset;
-                            int endY = Math.max(elevation+1, cY * chunkSize)-localYOffset;
-                            for (int lY = startY; lY >= endY; lY--) {
-                                chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, 15);
-                            }
-                            startY = Math.min(((cY+1) * chunkSize)-1, elevation)-localYOffset;
-                            endY = Math.max(elevation+1-surfaceDepth, cY * chunkSize)-localYOffset;
-                            for (int lY = startY; lY >= endY; lY--) {
-                                chunk.setBlock(lX, lY, lZ, topType, topSubtype);
-                            }
-                            startY = Math.min(((cY+1) * chunkSize)-1, elevation-surfaceDepth)-localYOffset;
-                            endY = Math.max(elevation+1-subsurfaceDepth, cY * chunkSize)-localYOffset;
-                            for (int lY = startY; lY >= endY; lY--) {
-                                chunk.setBlock(lX, lY, lZ, midType, midSubtype);
-                            }
-                            startY = Math.min(((cY+1) * chunkSize)-1, elevation-subsurfaceDepth)-localYOffset;
-                            endY = Math.max(cY * chunkSize, GROUND_LEVEL)-localYOffset;
-                            for (int lY = startY; lY >= endY; lY--) {
-                                chunk.setBlock(lX, lY, lZ, groundType, groundSubtype);
+                            if (biome == Biomes.BADLANDS) {
+                                int startY = Math.min(((cY + 1) * chunkSize) - 1, elevation);
+                                int endY = Math.max(cY * chunkSize, GROUND_LEVEL);
+                                for (int y = startY; y >= endY; y--) {
+                                    chunk.setBlock(lX, y-(cY * chunkSize), lZ, getBadlandsBands(y), 0);
+                                }
+                            } else {
+                                int topType = biome.surfaceBlockType();
+                                int topSubtype = biome.surfaceBlockSubtype();
+                                int midType = biome.subsurfaceBlockType();
+                                int midSubtype = biome.subsurfaceBlockSubtype();
+                                int groundType = biome.groundBlockType();
+                                int groundSubtype = biome.groundBlockSubtype();
+                                if (elevation <= SEA_LEVEL) {
+                                    topType = BlockTypes.WET_SAND.id;
+                                    topSubtype = 0;
+                                    midType = BlockTypes.WET_SAND.id;
+                                    midSubtype = 0;
+                                    groundType = BlockTypes.SANDSTONE.id;
+                                    groundSubtype = 0;
+                                } else if (elevation <= SEA_LEVEL + 3) {
+                                    topType = BlockTypes.SAND.id;
+                                    topSubtype = 0;
+                                    midType = BlockTypes.SAND.id;
+                                    midSubtype = 0;
+                                    groundType = BlockTypes.SANDSTONE.id;
+                                    groundSubtype = 0;
+                                } else if (hillCracks > 0.02f && hillsNoise > 0.02f) {
+                                    topType = groundType;
+                                    topSubtype = 0;
+                                    midType = groundType;
+                                    midSubtype = 0;
+                                }
+                                int surfaceDepth = biome.surfaceDepth();
+                                int subsurfaceDepth = biome.subsurfaceDepth();
+                                if (SEA_LEVEL < ((cY + 1) * chunkSize) - 1 && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
+                                    chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                                }
+                                int localYOffset = cY * chunkSize;
+                                int startY = Math.min(((cY + 1) * chunkSize) - 1, SEA_LEVEL - 1) - localYOffset;
+                                int endY = Math.max(elevation + 1, cY * chunkSize) - localYOffset;
+                                for (int lY = startY; lY >= endY; lY--) {
+                                    chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, 15);
+                                }
+                                startY = Math.min(((cY + 1) * chunkSize) - 1, elevation) - localYOffset;
+                                endY = Math.max(elevation + 1 - surfaceDepth, cY * chunkSize) - localYOffset;
+                                for (int lY = startY; lY >= endY; lY--) {
+                                    chunk.setBlock(lX, lY, lZ, topType, topSubtype);
+                                }
+                                startY = Math.min(((cY + 1) * chunkSize) - 1, elevation - surfaceDepth) - localYOffset;
+                                endY = Math.max(elevation + 1 - subsurfaceDepth, cY * chunkSize) - localYOffset;
+                                for (int lY = startY; lY >= endY; lY--) {
+                                    chunk.setBlock(lX, lY, lZ, midType, midSubtype);
+                                }
+                                startY = Math.min(((cY + 1) * chunkSize) - 1, elevation - subsurfaceDepth) - localYOffset;
+                                endY = Math.max(cY * chunkSize, GROUND_LEVEL) - localYOffset;
+                                for (int lY = startY; lY >= endY; lY--) {
+                                    chunk.setBlock(lX, lY, lZ, groundType, groundSubtype);
+                                }
                             }
                             if (elevation < SKY_LEVEL && elevation >= GROUND_LEVEL) {
                                 region2D.heights[packed] = (short) (elevation - GROUND_LEVEL);
