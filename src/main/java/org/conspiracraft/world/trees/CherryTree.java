@@ -27,7 +27,7 @@ public class CherryTree {
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
-            if (bounds.out(pos)) {return;}
+            if (bounds.out(pos)) {colliding.set(true); return;}
             if (!ignoreCollision) {
                 if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                     colliding.set(true);

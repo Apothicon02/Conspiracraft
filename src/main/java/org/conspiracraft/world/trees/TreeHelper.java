@@ -11,11 +11,14 @@ import static org.conspiracraft.world.World.getBlockWorldgen;
 
 public class TreeHelper {
     public static boolean integrateCanopy(Bounds bounds, Map<Vector3i, Vector2i> canopy, Map<Vector3i, Vector2i> blocks, int minCollisionY) {
+        return integrateCanopy(bounds, canopy, blocks, minCollisionY, false);
+    }
+    public static boolean integrateCanopy(Bounds bounds, Map<Vector3i, Vector2i> canopy, Map<Vector3i, Vector2i> blocks, int minCollisionY, boolean ignoreWater) {
         for (Vector3i pos : canopy.keySet()) {
             if (bounds.out(pos)) {return false;}
             Vector2i existingBlock = getBlockWorldgen(pos.x, pos.y, pos.z);
             if (!blocks.containsKey(pos)) {
-                if (BlockTypes.blockTypes[existingBlock.x()].blockProperties.isFluidReplaceable) {
+                if (BlockTypes.blockTypes[existingBlock.x()].blockProperties.isFluidReplaceable || (ignoreWater && existingBlock.x() == BlockTypes.WATER.id)) {
                     blocks.put(pos, canopy.get(pos));
                 }
                 if (pos.y > minCollisionY && existingBlock.x() != 0) {

@@ -574,6 +574,18 @@ public class Earth extends WorldType {
                                         Blob.generate(bounds, x, surface+rand.nextInt((int) Math.max(1, (SEA_LEVEL-surface)*0.25f)), z, BlockTypes.MARBLE.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 30)), true);
                                     } else if (foliageChance < 0.0034f) {
                                         CoveredBlob.generate(bounds, x, surface, z, BlockTypes.MAGMA.id, 0, BlockTypes.MAGMA.id, 0, rand.nextInt(2, 5), 0.f, true);
+                                    } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.006f * vegetationNoise)) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                            Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                        }
+                                    } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.03f * vegetationNoise) || foliageChance > 0.9999f) {
+                                        int maxHeight = rand.nextInt(10, 16);
+                                        int radius = rand.nextInt(12, 16);
+                                        if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
+                                            Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                        }
                                     }
                                 }
                             }

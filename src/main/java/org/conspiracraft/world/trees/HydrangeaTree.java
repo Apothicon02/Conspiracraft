@@ -29,7 +29,7 @@ public class HydrangeaTree {
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
-            if (bounds.out(pos)) {return;}
+            if (bounds.out(pos)) {colliding.set(true); return;}
             if (!ignoreCollision) {
                 if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                     colliding.set(true);
@@ -40,7 +40,7 @@ public class HydrangeaTree {
         int minCollisionY = ignoreCollision ? Integer.MAX_VALUE : y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
             Map<Vector3i, Vector2i> canopy = DiamondCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y() - y);
-            if (!integrateCanopy(bounds, canopy, blocks, minCollisionY)) {
+            if (!integrateCanopy(bounds, canopy, blocks, minCollisionY, false)) {
                 colliding.set(true);
                 break;
             }

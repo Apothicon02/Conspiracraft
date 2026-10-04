@@ -29,7 +29,7 @@ public class OakTree {
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
         blocks.putAll(ThickTrunk.generateTrunk(random, x, y, z, maxHeight, true, maxHeight, 0, logType, logSubType).getFirst());
         blocks.forEach((pos, block) -> {
-            if (bounds.out(pos)) {return;}
+            if (bounds.out(pos)) {colliding.set(true); return;}
             if (!ignoreCollision) {
                 if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
                     colliding.set(true);
