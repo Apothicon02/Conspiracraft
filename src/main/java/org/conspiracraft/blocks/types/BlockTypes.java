@@ -47,7 +47,7 @@ public class BlockTypes {
                     new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1, new SFX[]{Sounds.DIRT_STEP1, Sounds.DIRT_STEP2, Sounds.DIRT_STEP3}, 1, 1))),
             TALL_GRASS = create(List.of(BlockTags.scytheEfficient, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/tall_grass", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.DARK_GRASS_TOP, Utils.packColor(0, 255, 0, 255), Materials.DRY_GRASS_TOP, Utils.packColor(0, 0, 255, 255), Materials.LIME_GRASS_TOP),
                     GRASS.blockProperties.copy().resistance(0.f).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true))),
-            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.DARK_GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
+            ROSE = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.ROSE),
                     TALL_GRASS.blockProperties)), //5
             TORCH = create(List.of(BlockTags.hatchetEfficient, BlockTags.smallBlock), new LightBlockType(blockTypeMap.size(), "crafted/model/torch", Map.of(Utils.packColor(255), Materials.OAK_LOG, Utils.packColor(255, 0, 0, 255), Materials.TORCH_FLAME, Utils.packColor(0, 255, 0, 255), Materials.STEEL),
                     (LightBlockProperties) new LightBlockProperties().r(31).g(29).b(19).resistance(0.f).obstructsHeightmap(false).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true).needsSupport(true).resistance(0.f).blockSFX(
@@ -80,7 +80,7 @@ public class BlockTypes {
             OAK_LEAVES = create(List.of(BlockTags.hatchetEfficient, BlockTags.leaves), new LeafBlockType(blockTypeMap.size(), "tree/model/oak_leaves", Map.of(Utils.packColor(255), Materials.OAK_LEAVES),
                     new BlockProperties().resistance(0.2f).blockSFX(
                     new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1).isSolid(false).blocksLight(false).isCollidable(false).isFluidReplaceable(true))),
-            HYDRANGEA = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/hydrangea", Map.of(Utils.packColor(255), Materials.GRASS_TOP, Utils.packColor(255, 0, 0, 255), Materials.HYDRANGEA),
+            HYDRANGEA = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/hydrangea", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.HYDRANGEA),
                     ROSE.blockProperties)),
             MAGMA = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new LightBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.MAGMA),  ((LightBlockProperties)(KYANITE.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1, new SFX[]{Sounds.SIZZLE1, Sounds.SIZZLE2}, 1, 1))).r(16).g(6).b(0))),
@@ -289,7 +289,14 @@ public class BlockTypes {
                     OAK_FENCE_STRIPPED.blockProperties.copy())),
             REDWOOD_GATE = create(List.of(BlockTags.hatchetEfficient), new GateBlockType(blockTypeMap.size(), "crafted/model/gate", Map.of(Utils.packColor(255), Materials.REDWOOD_PLANK),
                     new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
-                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1)));
+                            new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
+            STEM = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STEM),
+                    new BlockProperties().resistance(0.f).blockSFX(
+                            new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
+            ROSE_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ROSE),
+                    STEM.blockProperties.copy())),
+            HYDRAMGEA_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.HYDRANGEA),
+                    ROSE_PETALS.blockProperties.copy()));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {

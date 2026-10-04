@@ -51,6 +51,7 @@ public class Materials {
             RED_SANDSTONE = create("geological/material/red_sandstone"),
             GRAVEL = create("natural/material/gravel"),
             FLINT = create("geological/material/flint"),
+            STEM = create("plant/material/stem"),
             ROSE = create("plant/material/rose"),
             BAMBOO = create("plant/material/bamboo"),
             BAMBOO_RING = create("plant/material/bamboo_ring"),

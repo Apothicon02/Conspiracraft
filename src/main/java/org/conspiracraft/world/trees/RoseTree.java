@@ -4,9 +4,9 @@ import kotlin.Pair;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Bounds;
 import org.conspiracraft.world.World;
-import org.conspiracraft.world.trees.canopies.BlobDrippyCanopy;
-import org.conspiracraft.world.trees.trunks.ArchingTrunk;
-import org.conspiracraft.world.trees.trunks.ThickTrunk;
+import org.conspiracraft.world.trees.canopies.BlobCanopy;
+import org.conspiracraft.world.trees.canopies.RoseCanopy;
+import org.conspiracraft.world.trees.trunks.OakTrunk;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -16,18 +16,17 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.World.setBlockWorldgen;
 import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
-public class OakTree {
-    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count, int minBranchHeight, float bendMul) {
-        return generate(random, bounds, x, y, z, maxHeight, radius, logType, logSubType, leafType, leafSubType, count, minBranchHeight, bendMul, false);
+public class RoseTree {
+    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType) {
+        return generate(random, bounds, x, y, z, maxHeight, radius, logType, logSubType, leafType, leafSubType, false);
     }
-    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count, int minBranchHeight, float bendMul, boolean ignoreCollision) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ArchingTrunk.generateTrunk(random, x, y, z, count, maxHeight-5, maxHeight, logType, logSubType, radius/2, minBranchHeight, bendMul);
+    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, boolean ignoreCollision) {
+        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = OakTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, radius/2);
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-        blocks.putAll(ThickTrunk.generateTrunk(random, x, y, z, maxHeight, true, maxHeight, 0, logType, logSubType).getFirst());
         blocks.forEach((pos, block) -> {
             if (bounds.out(pos)) {return;}
             if (!ignoreCollision) {
@@ -39,7 +38,7 @@ public class OakTree {
         if (colliding.get()) {return false;}
         int minCollisionY = ignoreCollision ? Integer.MAX_VALUE : y+5;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-            Map<Vector3i, Vector2i> canopy = BlobDrippyCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y() - y);
+            Map<Vector3i, Vector2i> canopy = RoseCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, canopyPos.y() - y);
             if (!integrateCanopy(bounds, canopy, blocks, minCollisionY)) {
                 colliding.set(true);
                 break;

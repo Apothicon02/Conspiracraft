@@ -32,7 +32,7 @@ public class ArchingTrunk extends Trunk {
             extra = count;
         }
         int highestHeight = 0;
-
+        boolean mirrored = random.nextBoolean();
         for (int trunks = 0; trunks <= extra+1; trunks++) {
             int offsetX = origin.x();
             int offsetZ = origin.z();
@@ -45,15 +45,34 @@ public class ArchingTrunk extends Trunk {
                 float bendFactor = ((float) maxHeight /height)*bendMul;
                 Vector3i pos = new Vector3i(offsetX, height, offsetZ);
                 addToMap(map, pos, wood);
+                boolean straight = !(height > origin.y()+(actualHeight*0.425f));
                 double heightFactor = Math.pow((((float)height / maxHeight)-0.4f)*2, 5);
-                if (heightFactor < 0.1f) {
-                    addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
-                    addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
-                    addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                if (heightFactor < 0.1f || straight) {
+                    if (mirrored) {
+                        addToMap(map, new Vector3i(pos).add(-1, 0, 0), wood);
+                        addToMap(map, new Vector3i(pos).add(0, 0, -1), wood);
+                        addToMap(map, new Vector3i(pos).add(-1, 0, -1), wood);
+                    } else {
+                        addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
+                        addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
+                        addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                    }
+                    boolean thick = !(height > origin.y()+(actualHeight*0.2f));
+                    if (thick) {
+                        if (mirrored) {
+                            addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
+                            addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
+                            addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                        } else {
+                            addToMap(map, new Vector3i(pos).add(-1, 0, 0), wood);
+                            addToMap(map, new Vector3i(pos).add(0, 0, -1), wood);
+                            addToMap(map, new Vector3i(pos).add(-1, 0, -1), wood);
+                        }
+                    }
                 }
                 if (height == maxHeight) {
                     canopies.add(Utils.addVec(pos, 0, 1, 0));
-                } else if (height < maxHeight-4 && random.nextFloat() < heightFactor) {
+                } else if (height < maxHeight-4 && !straight && random.nextFloat() < heightFactor) {
                     if (trunks == 0 || trunks == 4) {
                         if (random.nextInt(0, 5) < 3-bendFactor) {
                             offsetX += 1;
