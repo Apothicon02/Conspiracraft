@@ -293,10 +293,24 @@ public class BlockTypes {
             STEM = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STEM),
                     new BlockProperties().resistance(0.f).blockSFX(
                             new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
+            STEM_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.STEM),
+                    OAK_FENCE.blockProperties.copy())),
             ROSE_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.ROSE),
                     STEM.blockProperties.copy())),
             HYDRAMGEA_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.HYDRANGEA),
-                    ROSE_PETALS.blockProperties.copy()));
+                    ROSE_PETALS.blockProperties.copy())),
+            DANDELION_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DANDELION),
+                    ROSE_PETALS.blockProperties.copy())),
+            DAISY_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.DAISY),
+                    ROSE_PETALS.blockProperties.copy())),
+            LILY_PETALS = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.LILY),
+                    ROSE_PETALS.blockProperties.copy())),
+            DANDELION = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/hydrangea", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.DANDELION),
+                    ROSE.blockProperties)),
+            DAISY = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.DAISY),
+                    ROSE.blockProperties)),
+            LILY = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType(blockTypeMap.size(), "plant/model/rose", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.LILY),
+                    ROSE.blockProperties));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
