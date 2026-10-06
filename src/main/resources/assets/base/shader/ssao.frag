@@ -66,7 +66,9 @@ float getAO(float depth) {
     if (depth >= 1.f) {return 1.f;}
     float radius = AO_RADIUS*max(0.0625f, sqrt(noise(ivec2(gl_FragCoord.xy)).r));//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
-    vec3 posVS = reconstructViewPos(uv, depth)+(normalize(normalVS)*0.02f);
+    vec3 posVS = reconstructViewPos(uv, depth);
+    float bias = 0.0001f + (0.0004f * abs(posVS.z));
+    posVS+=(normalize(normalVS)*bias);
     vec3 randVec = randomVec(ivec2(gl_FragCoord.xy));
     vec3 tangent = normalize(randVec - normalVS * dot(randVec, normalVS));
     vec3 bitangent = cross(normalVS, tangent);
@@ -81,7 +83,7 @@ float getAO(float depth) {
         if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
             vec3 sampleVS = reconstructViewPos(sampleUV, texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], ivec2(sampleUV*globalUbo.res), 0).r);
             float rangeCheck = smoothstep(0, 1, radius/(length(posVS-sampleVS)+0.001f));
-            if (sampleVS.z+0.01f < sampleVec.z) {
+            if (sampleVS.z+bias < sampleVec.z) {
                 occlusion += rangeCheck;
             }
         }

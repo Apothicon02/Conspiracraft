@@ -398,7 +398,7 @@ public class Renderer {
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, Textures.reflections);
         pushUBO.push();
         updateComputePipeline(0);
-        bindComputeImages(stack, currentComputePipeline.vkPipeline, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
+        bindComputeImages(stack, new Texture[]{Textures.colors1, Textures.norms1}, Textures.depth1);
         float scale = Settings.upscaled ? 16.f : 8.f;
         int x = ((int)Math.ceil(eWidth/scale)), y = ((int)Math.ceil(eHeight/scale));
         int tilesPerRow = (x+swizzle-1)/swizzle;
@@ -659,11 +659,18 @@ public class Renderer {
         vkCmdSetViewport(currentCmdBuffer, 0, VkViewport.calloc(1, stack).x(0).y(0).width(w).height(h).minDepth(0).maxDepth(1));
         vkCmdSetScissor(currentCmdBuffer, 0, VkRect2D.calloc(1, stack).offset(VkOffset2D.calloc(stack).set(0, 0)).extent(VkExtent2D.calloc(stack).width(w).height(h)));
     }
-    public static void bindComputeImages(MemoryStack stack, long pipeline, Texture[] textures, Texture depthTex) {
+    public static void bindComputeImages(MemoryStack stack, Texture[] textures, Texture depthTex) {
+//        VkImageSubresourceRange range = VkImageSubresourceRange.calloc(stack)
+//                .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+//                .levelCount(1)
+//                .layerCount(1);
+//        VkClearColorValue clearColor = VkClearColorValue.calloc(stack).float32(stack.floats(0.f, 0.f, 0.f, 0.f));
         for (Texture tex : textures) {
             ImageHelper.transitionStorageWrite(stack, currentCmdBuffer, tex);
+//            vkCmdClearColorImage(currentCmdBuffer, tex.image, VK_IMAGE_LAYOUT_GENERAL, clearColor, range);
         }
         ImageHelper.transitionStorageWrite(stack, currentCmdBuffer, depthTex);
+//        vkCmdClearColorImage(currentCmdBuffer, depthTex.image, VK_IMAGE_LAYOUT_GENERAL, clearColor, range);
     }
     public static void unbindComputeImages(MemoryStack stack, long[] images, long depthImage) {
         for (long image : images) {

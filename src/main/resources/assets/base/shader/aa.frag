@@ -61,7 +61,7 @@ void main() {
     vec2 reprojectedPos = reproject(worldPos.xyz);
     if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
     float oldDepth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], ivec2(reprojectedPos*globalUbo.res), 0).r;
-    if (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f)) {
+    if (baseDepth < 0.9f && (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f))) {
         float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
         int radius = velocity < 0.6f ? 2 : 1;
         vec4 boxMin = vec4(1000);
