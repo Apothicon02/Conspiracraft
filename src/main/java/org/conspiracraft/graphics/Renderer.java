@@ -23,11 +23,8 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
-import org.conspiracraft.world.Chunk;
-import org.conspiracraft.world.LightHelper;
+import org.conspiracraft.world.*;
 import org.conspiracraft.space.StarSystem;
-import org.conspiracraft.world.Region2D;
-import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.Earth;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
@@ -43,6 +40,7 @@ import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.Collection;
 
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
@@ -376,13 +374,28 @@ public class Renderer {
         //drawHeightmapDebug();
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
+        //if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
+        pushUBO.updateTex(Textures.materials);
+        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+        pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
+        //            for (Region region : World.getAllRegions()) {
+        //                for (Chunk chunk : region.chunks) {
+        //                    chunk.drawFluids();
+        //                }
+        //            }
+        Region region = getRegion(packRegionPos(((int) player.pos.x()) >> regionBits, ((int) player.pos.y()) >> regionBits, ((int) player.pos.z()) >> regionBits));
+        for (Chunk chunk : region.chunks) {
+            //chunk.updateFluidMesh(region);
+            chunk.drawFluids();
+        }
+        //}
         updatePipeline(4);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
         for (Item item : World.items) {
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
             Vector3d interpolatedPos = Utils.getInterpolatedVec(item.prevPos, item.pos).add(0, item.hover, 0);
-            drawQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z())).scale(0.5f), new Vector4f(1.f));
+            drawDoubleQuad(new Matrix4f().rotateY((float) Math.toRadians(item.rot)).setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z())).scale(0.5f), new Vector4f(1.f));
         }
         player.draw();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth2.image);
@@ -542,7 +555,7 @@ public class Renderer {
     public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
         pushUBO.push();
-        vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.QUAD.indexOffset/Index.SIZE, Models.QUAD.vertexOffset/Vertex.SIZE, 0);
+        vkCmdDrawIndexed(currentCmdBuffer, Models.DOUBLE_QUAD.indexCount, 1, Models.DOUBLE_QUAD.indexOffset/Index.SIZE, Models.DOUBLE_QUAD.vertexOffset/Vertex.SIZE, 0);
     }
     public static void drawQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);

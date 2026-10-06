@@ -9,8 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.conspiracraft.world.World.getBlock;
-import static org.conspiracraft.world.World.setBlockWorldgen;
+import static org.conspiracraft.world.World.*;
 
 public class Pond {
     public static void generate(Random random, Bounds bounds, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
@@ -55,7 +54,7 @@ public class Pond {
             }
         }
         blocks.forEach((pos, block) -> {
-            setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+            setBlockOrFluidWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
         });
     }
 

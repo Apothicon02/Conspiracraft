@@ -1,10 +1,15 @@
 package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.BitBuffer;
+import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 
+import static org.conspiracraft.graphics.Renderer.warpOffset;
 import static org.conspiracraft.world.World.chunkSize;
 
 public class Chunk {
@@ -12,18 +17,6 @@ public class Chunk {
     public final long cX, cY, cZ;
     public final int cXI, cYI, cZI;
     public static final int totalVoxels = chunkSize*chunkSize*chunkSize;
-    public final IntArrayList blockPalette;
-    public BitBuffer blockData;
-    public final IntArrayList lightPalette;
-    public BitBuffer lightData;
-    public boolean[] lightUpdateArr;
-    public boolean[] lightUpdateArr() {
-        if (lightUpdateArr == null) {
-            lightUpdateArr = new boolean[totalVoxels];
-            LightHelper.dirtyChunks.add(this);
-        }
-        return lightUpdateArr;
-    }
 
     public Chunk(long compressedChunkPos) {
         this.cCP = compressedChunkPos;
@@ -37,6 +30,8 @@ public class Chunk {
         blockData = new BitBuffer(totalVoxels, 0);
         lightPalette = new IntArrayList(new int[]{0});
         lightData = new BitBuffer(totalVoxels, 0);
+        fluidPalette = new IntArrayList(new int[]{0});
+        fluidData = new BitBuffer(totalVoxels, 0);
     }
 
     public static int packLocalPos(int x, int y, int z) {
@@ -56,6 +51,7 @@ public class Chunk {
         return 32-Integer.numberOfLeadingZeros(uniqueValues);
     }
 
+    //Blocks start
     public static final byte lodSize = 4;
     public static final int lodBits = Integer.numberOfTrailingZeros(lodSize);
     public static final int sizeLods = chunkSize/lodSize;
@@ -96,7 +92,9 @@ public class Chunk {
             this.lods = lods;
         }
     }
-    //Blocks start
+
+    public final IntArrayList blockPalette;
+    public BitBuffer blockData;
     public int bitsPerBlock() {
         return blockData.bitsPerValue;
     }
@@ -204,6 +202,16 @@ public class Chunk {
     }
     //Blocks end
     //Lights start
+    public final IntArrayList lightPalette;
+    public BitBuffer lightData;
+    public boolean[] lightUpdateArr;
+    public boolean[] lightUpdateArr() {
+        if (lightUpdateArr == null) {
+            lightUpdateArr = new boolean[totalVoxels];
+            LightHelper.dirtyChunks.add(this);
+        }
+        return lightUpdateArr;
+    }
     public int bitsPerLight() {
         return lightData.bitsPerValue;
     }
@@ -316,4 +324,158 @@ public class Chunk {
         return new Light(0xFF & color >> 16, 0xFF & color >> 8, 0xFF & color, 0xFF & color >> 24);
     }
     //Lights end
+    //Fluids start
+    public void drawFluids() {
+        if (!fluidPalette.isEmpty()) {
+            int offX = cXI*chunkSize, offY = cYI*chunkSize, offZ = cZI*chunkSize;
+            for (int x = 0; x < chunkSize; x++) {
+                for (int y = 0; y < chunkSize; y++) {
+                    for (int z = 0; z < chunkSize; z++) {
+                        Vector2i fluid = getFluid(packLocalPos(x, y, z));
+                        if (fluid.y() > 0) {
+                            float level = fluid.y() / 15.f;
+                            if (x == 0 || faceUnoccluded(x-1, y, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (x == chunkSize-1 || faceUnoccluded(x+1, y, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (z == 0 || faceUnoccluded(x, y, z-1, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (z == chunkSize-1 || faceUnoccluded(x, y, z+1, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (y == 0 || faceUnoccluded(x, y-1, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1), new Vector4f(1));
+                            }
+                            if (y == chunkSize-1 || faceUnoccluded(x, y+1, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1), new Vector4f(1));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public void updateFluidMesh(Region region) {
+        if (!fluidPalette.isEmpty()) {
+            int offX = cXI*chunkSize, offY = cYI*chunkSize, offZ = cZI*chunkSize;
+            for (int x = 0; x < chunkSize; x++) {
+                for (int y = 0; y < chunkSize; y++) {
+                    for (int z = 0; z < chunkSize; z++) {
+                        Vector2i fluid = getFluid(packLocalPos(x, y, z));
+                        if (fluid.y() > 0) {
+                            float level = fluid.y() / 15.f;
+                            if (x == 0 || faceUnoccluded(x-1, y, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (x == chunkSize-1 || faceUnoccluded(x+1, y, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (z == 0 || faceUnoccluded(x, y, z-1, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (z == chunkSize-1 || faceUnoccluded(x, y, z+1, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
+                            }
+                            if (y == 0 || faceUnoccluded(x, y-1, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1), new Vector4f(1));
+                            }
+                            if (y == chunkSize-1 || faceUnoccluded(x, y+1, z, fluid)) {
+                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1), new Vector4f(1));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public boolean faceUnoccluded(int x, int y, int z, Vector2i fluid) {
+        int pos = packLocalPos(x, y, z);
+        Vector2i block = getBlock(pos);
+        return getFluid(pos).x() != fluid.x() && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
+    }
+    public final IntArrayList fluidPalette;
+    public BitBuffer fluidData;
+    public int bitsPerFluid() {
+        return fluidData.bitsPerValue;
+    }
+    public int fluidValueMask() {
+        return fluidData.valueMask;
+    }
+    public int fluidValuesPerInt() {
+        return fluidData.valuesPerInt;
+    }
+    public void setFluidPalette(int[] data) {
+        if (data.length > 0) {
+            int i = 0;
+            for (int integer : data) {
+                if (i == 0) {
+                    fluidPalette.set(i++, integer);
+                } else {
+                    fluidPalette.add(i++, integer);
+                }
+            }
+        }
+    }
+    public int[] getFluidPalette() {
+        int[] returnObj = new int[fluidPalette.size()];
+        int i = 0;
+        for (int fluid : fluidPalette) {
+            returnObj[i++] = fluid;
+        }
+        return returnObj;
+    }
+    public int getFluidPaletteSize() {
+        return fluidPalette.size();
+    }
+    public void setFluidData(int[] data) {
+        if (data.length > 0) {
+            fluidData = new BitBuffer(totalVoxels, getNeededBitsPerValue(fluidPalette.size()));
+            fluidData.setData(data);
+        }
+    }
+    public int[] getFluidData() {
+        return fluidData.getData();
+    }
+    public void updateFluidPaletteKeySize() {
+        int neededBitsPerValue = getNeededBitsPerValue(fluidPalette.size());
+        if (neededBitsPerValue != fluidData.bitsPerValue) {
+            BitBuffer newData = new BitBuffer(totalVoxels, neededBitsPerValue);
+            for (int i = 0; i < totalVoxels; i++) {
+                newData.setValue(i, fluidData.getValue(i));
+            }
+            fluidData = newData;
+        }
+    }
+    public void setFluidKey(int pos, int key) {
+        updateFluidPaletteKeySize();
+        fluidData.setValue(pos, key);
+    }
+    public void setFluidKey(int x, int y, int z, int keys) {
+        setFluidKey(packLocalPos(x, y, z), keys);
+    }
+    public int getFluidKey(int pos) {
+        return fluidData.getValue(pos);
+    }
+    public Vector2i getFluid(int pos) {
+        int index = getFluidKey(pos);
+        return unpackInt(fluidPalette.get(index));
+    }
+    public int getFluidType(int pos) {
+        int index = getFluidKey(pos);
+        return fluidPalette.get(index) >> 16;
+    }
+    public void setFluid(int x, int y, int z, int type, int subType) {
+        int fluid = packInts(type, subType);
+        int key = fluidPalette.indexOf(fluid);
+        if (key > -1) {
+            setFluidKey(x, y, z, key);
+        } else {
+            fluidPalette.add(fluidPalette.size(), fluid);
+            setFluidKey(x, y, z, fluidPalette.size() - 1);
+        }
+    }
+    //Fluids end
 }

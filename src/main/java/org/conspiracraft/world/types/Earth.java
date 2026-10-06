@@ -424,13 +424,13 @@ public class Earth extends WorldType {
                                 int surfaceDepth = biome.surfaceDepth();
                                 int subsurfaceDepth = biome.subsurfaceDepth();
                                 if (SEA_LEVEL < ((cY + 1) * chunkSize) - 1 && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
-                                    chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                                    chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
                                 }
                                 int localYOffset = cY * chunkSize;
                                 int startY = Math.min(((cY + 1) * chunkSize) - 1, SEA_LEVEL - 1) - localYOffset;
                                 int endY = Math.max(elevation + 1, cY * chunkSize) - localYOffset;
                                 for (int lY = startY; lY >= endY; lY--) {
-                                    chunk.setBlock(lX, lY, lZ, BlockTypes.WATER.id, 15);
+                                    chunk.setFluid(lX, lY, lZ, BlockTypes.WATER.id, 15);
                                 }
                                 startY = Math.min(((cY + 1) * chunkSize) - 1, elevation) - localYOffset;
                                 endY = Math.max(elevation + 1 - surfaceDepth, cY * chunkSize) - localYOffset;

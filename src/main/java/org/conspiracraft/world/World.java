@@ -377,6 +377,21 @@ public class World {
             chunk.setLight(lX, lY, lZ, light);
         }
     }
+    public static Vector2i getFluid(double x, double y, double z) {
+        return getFluid((int)x, (int)y, (int)z);
+    }
+    public static Vector2i getFluid(float x, float y, float z) {
+        return getFluid((int)x, (int)y, (int)z);
+    }
+    public static Vector2i getFluid(int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
+        if (chunk == null) {return new Vector2i(0);}
+        int pos = Chunk.packLocalPos(x&15, y&15, z&15);
+        synchronized (chunk) {
+            return chunk.getFluid(pos);
+        }
+    }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
@@ -426,6 +441,9 @@ public class World {
     }
     public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
+    public static Collection<Region> getAllRegions() {
+        return regions.values();
+    }
     public static Region getRegion(long cRP) {
         return regions.get(cRP);
     }
@@ -486,6 +504,21 @@ public class World {
             region.lightQueueSkipWG.addLast(new Vector3i(x, y, z));
         }
     }
+    public static void setBlockOrFluidWorldgen(int x, int y, int z, int type, int subType) {
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunkGlobalPos(cP);
+        if (chunk == null) {return;}
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        if (BlockTypes.blockTypes[type].blockProperties.isFluid) {
+            chunk.setFluid(lX, lY, lZ, type, subType);
+            chunk.setBlock(lX, lY, lZ, 0, subType);
+        } else {
+            chunk.setBlock(lX, lY, lZ, type, subType);
+        }
+    }
     public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
@@ -513,13 +546,17 @@ public class World {
             type = newBlock.x();
             subType = newBlock.y();
         }
+        BlockType blockType = BlockTypes.blockTypes[type];
         synchronized (chunk) {
-            chunk.setBlock(lX, lY, lZ, type, subType);
-            updateLod(x, y, z, type == 0);
-            updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+            if (blockType.blockProperties.isFluid) {
+                chunk.setFluid(lX, lY, lZ, type, subType);
+            } else {
+                chunk.setBlock(lX, lY, lZ, type, subType);
+                updateLod(x, y, z, type == 0);
+                updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+            }
         }
         if (!generating) {
-            BlockType blockType = BlockTypes.blockTypes[type];
             if (updateLighting) {
                 boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
                 boolean blocksLight = blockType.blocksLight(type, subType);

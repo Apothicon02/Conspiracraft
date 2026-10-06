@@ -106,16 +106,17 @@ public class Menu {
         setItem(existingId, existing);
         return item;
     }
-    public void setItem(int slotId, Item item) {
+    public void setItem(int slotId, Item item) {setItem(slotId, item, false);}
+    public void setItem(int slotId, Item item, boolean silent) {
         if (Renderer.initialized) {
             Vector3f earPos = new Vector3f(Main.player.pos).add(0, Main.player.eyeHeight, 0);
             Item existing = items[slotId];
             if (item != null) {
-                if (existing == null || item.type != existing.type || item.amount != existing.amount) {
+                if ((existing == null || item.type != existing.type || item.amount != existing.amount) && !silent) {
                     item.playSound(earPos);
                 }
                 item.prevTickTime(Main.timeMsLong);
-            } else if (existing != null) {
+            } else if (existing != null && !silent) {
                 existing.playSound(earPos);
             }
         }
