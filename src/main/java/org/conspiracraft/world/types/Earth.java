@@ -171,7 +171,7 @@ public class Earth extends WorldType {
     }
     public static int prevPlayerRX = -1, prevPlayerRY = -1, prevPlayerRZ = -1;
     public static final int[] generationIdxs = new int[wgThreads];
-    public static final int GROUND_LEVEL = 500736, SEA_LEVEL = GROUND_LEVEL+96, SKY_LEVEL = GROUND_LEVEL+512;
+    public static final int GROUND_LEVEL = 500736, SEA_LEVEL = GROUND_LEVEL+95, SKY_LEVEL = GROUND_LEVEL+512;
     public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
     public static final int GROUND_LEVEL_R = GROUND_LEVEL>>regionBits, SEA_LEVEL_R = SEA_LEVEL>>regionBits, SKY_LEVEL_R = SKY_LEVEL>>regionBits;
     @Override
@@ -423,7 +423,7 @@ public class Earth extends WorldType {
                                 }
                                 int surfaceDepth = biome.surfaceDepth();
                                 int subsurfaceDepth = biome.subsurfaceDepth();
-                                if (SEA_LEVEL < ((cY + 1) * chunkSize) - 1 && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
+                                if (SEA_LEVEL < ((cY + 1) * chunkSize) && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
                                     chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
                                 }
                                 int localYOffset = cY * chunkSize;

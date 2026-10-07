@@ -1,6 +1,7 @@
 package org.conspiracraft.graphics;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
@@ -54,6 +55,7 @@ import static org.conspiracraft.world.Chunk.lodsPerChunk;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.util.vma.Vma.*;
+import static org.lwjgl.vulkan.EXTExtendedDynamicState3.vkCmdSetPolygonModeEXT;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK14.*;
 
@@ -375,6 +377,7 @@ public class Renderer {
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
         //if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
+        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
         pushUBO.updateTex(Textures.materials);
         pushUBO.updateSize(new Vector2i(Materials.materialWidth));
         pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
@@ -384,10 +387,19 @@ public class Renderer {
         //                }
         //            }
         Region region = getRegion(packRegionPos(((int) player.pos.x()) >> regionBits, ((int) player.pos.y()) >> regionBits, ((int) player.pos.z()) >> regionBits));
+        LongArrayList times = new LongArrayList();
         for (Chunk chunk : region.chunks) {
             //chunk.updateFluidMesh(region);
+            long started = System.nanoTime();
             chunk.drawFluids();
+            times.add((System.nanoTime()-started));
         }
+        double avg = 0;
+        for (long time : times) {
+            avg+= (double) time/times.size();
+        }
+        System.out.println("Took "+(avg*1000000)+"ms on avg to mesh a chunk");
+        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
         //}
         updatePipeline(4);
         pushUBO.updateTex(Textures.items);

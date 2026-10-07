@@ -25,6 +25,7 @@ import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
+import static org.lwjgl.vulkan.EXTExtendedDynamicState3.VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
@@ -65,8 +66,9 @@ public class Device {
                 .sType(VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO)
                 .queueFamilyIndex(vkQueueFamilyIdx)
                 .pQueuePriorities(priorities);
-        PointerBuffer deviceExtensions = stack.mallocPointer(1)
+        PointerBuffer deviceExtensions = stack.mallocPointer(2)
                 .put(0, stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+                .put(1, stack.UTF8(VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME))
                 ;//.put(1, stack.UTF8(VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME));
                 //.put(1, stack.UTF8(VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME))
                 //.put(2, stack.UTF8(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME));
@@ -117,7 +119,8 @@ public class Device {
         VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
                 .samplerAnisotropy(true)
                 .shaderInt64(false)
-                .shaderFloat64(false);
+                .shaderFloat64(false)
+                .fillModeNonSolid(true);
         VkDeviceCreateInfo deviceInfo = VkDeviceCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
                 .pQueueCreateInfos(queueInfo)
