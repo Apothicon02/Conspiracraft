@@ -11,6 +11,7 @@ import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
+import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
@@ -102,15 +103,18 @@ public class Renderer {
                     drawStuff = false;
                 } else {
                     World.worldType.tickWorldgen();
-                    //long startTime = System.nanoTime();
                     boolean wasEmpty = updateQueue.isEmpty();
-                    long startTime = System.currentTimeMillis();
                     while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
                         updateChunk(chunkPos);
-                        //updateSet.remove(chunkPos);
                     }
                     updateSet.clear();
+                    while (!fluidUpdateQueue.isEmpty()) {
+                        long cRP = fluidUpdateQueue.pollFirst();
+                        Region region = getRegion(cRP);
+                        if (region != null) {region.updateFluidMesh(stack);}
+                    }
+                    fluidUpdateSet.clear();
                     if (!wasEmpty) {
                         ssboBarriers(stack);
                         //System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");
@@ -120,7 +124,7 @@ public class Renderer {
                         drawStuff = false;
                     } else if (reloadAtlas) {
                         reloadAtlas = false;
-                        startTime = System.currentTimeMillis();
+                        long startTime = System.currentTimeMillis();
                         Materials.fillTexture(stack);
                         BlockTypes.fillTexture(stack);
                         //atlasBarriers();
@@ -135,6 +139,7 @@ public class Renderer {
                     globalUBO.push(stack);
                     vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
                     vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
+                    vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
 
                     VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                     labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
@@ -352,7 +357,7 @@ public class Renderer {
 //        vkCmdCopyBuffer(currentCmdBuffer, lodSSBO.stagingBuffer.buffer[0], lodSSBO.buffer.buffer[0], lodBufferCopy);
     }
 
-    public static void drawRaster(MemoryStack stack) {
+    public static void drawRaster(MemoryStack stack) throws IOException {
         updatePipeline(3);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth2, 1, true, true);
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
@@ -376,31 +381,19 @@ public class Renderer {
         //drawHeightmapDebug();
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
-        //if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
-        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
-        pushUBO.updateTex(Textures.materials);
-        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-        pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
-        //            for (Region region : World.getAllRegions()) {
-        //                for (Chunk chunk : region.chunks) {
-        //                    chunk.drawFluids();
-        //                }
-        //            }
-        Region region = getRegion(packRegionPos(((int) player.pos.x()) >> regionBits, ((int) player.pos.y()) >> regionBits, ((int) player.pos.z()) >> regionBits));
-        LongArrayList times = new LongArrayList();
-        for (Chunk chunk : region.chunks) {
-            //chunk.updateFluidMesh(region);
-            long started = System.nanoTime();
-            chunk.drawFluids();
-            times.add((System.nanoTime()-started));
+        if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
+//            vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
+            pushUBO.updateTex(null);
+            pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+            pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
+            //Region region = getRegion(packRegionPos(((int) player.pos.x()) >> regionBits, ((int) player.pos.y()) >> regionBits, ((int) player.pos.z()) >> regionBits));
+            for (Region region : World.getAllRegions()) {
+                region.drawFluids(stack);
+            }
+            vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+            vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
+//            vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
         }
-        double avg = 0;
-        for (long time : times) {
-            avg+= (double) time/times.size();
-        }
-        System.out.println("Took "+(avg*1000000)+"ms on avg to mesh a chunk");
-        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
-        //}
         updatePipeline(4);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));

@@ -1,9 +1,15 @@
 package org.conspiracraft.world;
 
-import org.conspiracraft.blocks.types.BlockTypes;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.buffers.Buffer;
+import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.utils.Utils;
+import org.joml.Matrix4f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.VkBufferCopy;
 
@@ -11,21 +17,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 
-import static org.conspiracraft.graphics.Graphics.chunkSSBO;
-import static org.conspiracraft.graphics.Graphics.lightChunkSSBO;
-import static org.conspiracraft.graphics.Renderer.currentCmdBuffer;
+import static org.conspiracraft.graphics.Graphics.*;
+import static org.conspiracraft.graphics.Renderer.*;
 import static org.conspiracraft.world.World.*;
+import static org.lwjgl.system.MemoryUtil.memFloatBuffer;
+import static org.lwjgl.system.MemoryUtil.memIntBuffer;
 import static org.lwjgl.util.vma.Vma.vmaVirtualFree;
-import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
+import static org.lwjgl.vulkan.VK10.*;
 
 public class Region {
     public final long condensedRegionPos;
@@ -117,6 +122,7 @@ public class Region {
 
     public void setGenerated() {
         generated = true;
+        fluidUpdateQueue.addLast(condensedRegionPos);
         updateNeighborsGeneratedAndTheirNeighbors();
     }
     public void updateNeighborsGeneratedAndTheirNeighbors() {
@@ -209,5 +215,40 @@ public class Region {
             vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
         }
         World.removeRegion(condensedRegionPos);
+    }
+    public Buffer fluidVertexStagingBuf;
+    public Buffer fluidIndexStagingBuf;
+    public Buffer fluidVertexBuf;
+    public Buffer fluidIndexBuf;
+    public int indicesAmt = 0;
+    public void updateFluidMesh(MemoryStack stack) throws IOException {
+        int prevIndicesAmt = indicesAmt;
+        FloatArrayList verts = new FloatArrayList();
+        IntArrayList indices = new IntArrayList();
+        for (Chunk chunk : chunks) {
+            chunk.updateFluidMesh(this, verts, indices);
+        }
+        indicesAmt = indices.size();
+        if (indicesAmt <= 0) {return;}
+        if (prevIndicesAmt <= 0 || indicesAmt > prevIndicesAmt) {
+            fluidVertexStagingBuf = new Buffer(stack, verts.size()*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+            fluidIndexStagingBuf = new Buffer(stack, indices.size()*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+            fluidVertexBuf = new Buffer(stack, verts.size()*4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+            fluidIndexBuf = new Buffer(stack, indices.size()*4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+        }
+        memFloatBuffer(fluidVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
+        memIntBuffer(fluidIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
+        BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], verts.size()*4L);
+        BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], indices.size()*4L);
+    }
+    public void drawFluids(MemoryStack stack) {
+        if (indicesAmt > 0) {
+            vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(fluidVertexBuf.buffer), stack.longs(0));
+            vkCmdBindIndexBuffer(currentCmdBuffer, fluidIndexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
+            int offX = rXI*regionSize, offY = rYI*regionSize, offZ = rZI*regionSize;
+            pushUBO.update(new Matrix4f().setTranslation((float) (offX-warpOffset.x()), (float) (offY-warpOffset.y()), (float) (offZ-warpOffset.z())), new Vector4f(1.f));
+            pushUBO.push();
+            vkCmdDrawIndexed(currentCmdBuffer, indicesAmt, 1, 0, 0, 0);
+        }
     }
 }

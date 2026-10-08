@@ -26,6 +26,7 @@ import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
 import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTExtendedDynamicState3.VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME;
+import static org.lwjgl.vulkan.EXTExtendedDynamicState3.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTShaderImageAtomicInt64.VK_EXT_SHADER_IMAGE_ATOMIC_INT64_EXTENSION_NAME;
@@ -101,6 +102,10 @@ public class Device {
                 .descriptorBindingSampledImageUpdateAfterBind(true)
                 .descriptorBindingStorageImageUpdateAfterBind(true)
                 .pNext(timeline.address());
+        VkPhysicalDeviceExtendedDynamicState3FeaturesEXT extendedDynamicState3 = VkPhysicalDeviceExtendedDynamicState3FeaturesEXT.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT)
+                .extendedDynamicState3PolygonMode(true)
+                .pNext(descriptorIndexing.address());
 //        VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT interlock = VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT.calloc(stack)
 //                .sType(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT)
 //                .fragmentShaderPixelInterlock(true)
@@ -126,7 +131,7 @@ public class Device {
                 .pQueueCreateInfos(queueInfo)
                 .pEnabledFeatures(enabledFeatures)
                 .ppEnabledExtensionNames(deviceExtensions)
-                .pNext(descriptorIndexing.address()); //shadingRate.address()
+                .pNext(extendedDynamicState3.address()); //shadingRate.address()
 
         PointerBuffer pDevice = stack.mallocPointer(1);
         int deviceCreateErr = vkCreateDevice(physicalDevice, deviceInfo, null, pDevice);

@@ -1,15 +1,24 @@
 package org.conspiracraft.world;
 
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.models.Index;
+import org.conspiracraft.graphics.models.Models;
+import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.utils.BitBuffer;
 import org.joml.*;
 
+import java.io.IOException;
 import java.lang.Math;
+import java.nio.ByteBuffer;
 
-import static org.conspiracraft.graphics.Renderer.warpOffset;
-import static org.conspiracraft.world.World.chunkSize;
+import static org.conspiracraft.graphics.Graphics.*;
+import static org.conspiracraft.graphics.Renderer.*;
+import static org.conspiracraft.world.World.*;
+import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.vulkan.VK10.vkCmdDrawIndexed;
 
 public class Chunk {
     public final long cCP;
@@ -324,52 +333,24 @@ public class Chunk {
     }
     //Lights end
     //Fluids start
-    public void drawFluids() {
+    public void updateFluidMesh(Region region, FloatArrayList verts, IntArrayList indices) throws IOException {
         if (fluidPalette.size() > 1 || fluidPalette.getFirst() != 0) {
-            int offX = cXI*chunkSize, offY = cYI*chunkSize, offZ = cZI*chunkSize;
+            int offX = (cXI%regionSizeChunks)*chunkSize, offY = (cYI%regionSizeChunks)*chunkSize, offZ = (cZI%regionSizeChunks)*chunkSize;
             for (int y = 0; y < chunkSize; y++) {
                 for (int x = 0; x < chunkSize; x++) {
-                    createUpQuad(offX, offY, offZ, x, y);
-                    createDownQuad(offX, offY, offZ, x, y);
-                    createEastQuad(offX, offY, offZ, x, y);
-                    createWestQuad(offX, offY, offZ, x, y);
+                    createUpQuad(verts, indices, x, y, offX, offY, offZ);
+                    createDownQuad(verts, indices, x, y, offX, offY, offZ);
+                    createEastQuad(verts, indices, x, y, offX, offY, offZ);
+                    createWestQuad(verts, indices, x, y, offX, offY, offZ);
                 }
                 for (int z = 0; z < chunkSize; z++) {
-                    createNorthQuad(offX, offY, offZ, y, z);
-                    createSouthQuad(offX, offY, offZ, y, z);
+                    createNorthQuad(verts, indices, y, z, offX, offY, offZ);
+                    createSouthQuad(verts, indices, y, z, offX, offY, offZ);
                 }
             }
-//            for (int x = 0; x < chunkSize; x++) {
-//                for (int y = 0; y < chunkSize; y++) {
-//                    for (int z = 0; z < chunkSize; z++) {
-//                        Vector2i fluid = getFluid(packLocalPos(x, y, z));
-//                        if (fluid.y() > 0) {
-//                            float level = fluid.y() / 15.f;
-//                            if (x == 0 || faceUnoccluded(x-1, y, z, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-//                            }
-//                            if (x == chunkSize-1 || faceUnoccluded(x+1, y, z, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-//                            }
-//                            if (z == 0 || faceUnoccluded(x, y, z-1, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-//                            }
-//                            if (z == chunkSize-1 || faceUnoccluded(x, y, z+1, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-//                            }
-//                            if (y == 0 || faceUnoccluded(x, y-1, z, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1), new Vector4f(1));
-//                            }
-//                            if (y == chunkSize-1 || faceUnoccluded(x, y+1, z, fluid)) {
-//                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1), new Vector4f(1));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     }
-    public void createUpQuad(int offX, int offY, int offZ, int x, int y) {
+    public void createUpQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
@@ -378,7 +359,7 @@ public class Chunk {
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + prevZ + 1 - warpOffset.z())).scale(1, length+1, 1), new Vector4f(1));
+                addUpQuad(verts, indices, offX+x, offY+y+level, offZ+startFluid.z(), 1, 0, length+1);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -389,11 +370,17 @@ public class Chunk {
         if (startFluid.x() > -1) {
             float level = startFluid.y() / 15.f;
             float length = prevZ - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + prevZ + 1 - warpOffset.z())).scale(1, length+1, 1), new Vector4f(1));
+            addUpQuad(verts, indices, offX+x, offY+y+level, offZ+startFluid.z(), 1, 0, length+1);
             startFluid.set(-1);
         }
     }
-    public void createDownQuad(int offX, int offY, int offZ, int x, int y) {
+    public void addUpQuad(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+2); indices.add(start+1);
+        indices.add(start); indices.add(start+3); indices.add(start+2);
+    }
+    public void createDownQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
@@ -401,7 +388,7 @@ public class Chunk {
             boolean faceUnoccluded = (y == 0 || faceUnoccluded(x, y - 1, z, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float length = prevZ - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ-length - warpOffset.z())).scale(1, length+1, 1), new Vector4f(1));
+                addDownQuad(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 1, 0, length+1);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -411,11 +398,17 @@ public class Chunk {
         }
         if (startFluid.x() > -1) {
             float length = prevZ - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ-length - warpOffset.z())).scale(1, length+1, 1), new Vector4f(1));
+            addDownQuad(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 1, 0, length+1);
             startFluid.set(-1);
         }
     }
-    public void createEastQuad(int offX, int offY, int offZ, int x, int y) {
+    public void addDownQuad(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+1); indices.add(start+2);
+        indices.add(start+2); indices.add(start+3); indices.add(start);
+    }
+    public void createEastQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
@@ -424,7 +417,7 @@ public class Chunk {
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ + 1 - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+                addQuadEast(verts, indices, offX+x+1, offY+y, offZ+startFluid.z(), 0, level, length+1);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -435,11 +428,17 @@ public class Chunk {
         if (startFluid.x() > -1) {
             float level = startFluid.y() / 15.f;
             float length = prevZ - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ + 1 - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+            addQuadEast(verts, indices, offX+x+1, offY+y, offZ+startFluid.z(), 0, level, length+1);
             startFluid.set(-1);
         }
     }
-    public void createWestQuad(int offX, int offY, int offZ, int x, int y) {
+    public void addQuadEast(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+1); indices.add(start+3);
+        indices.add(start); indices.add(start+3); indices.add(start+2);
+    }
+    public void createWestQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
@@ -448,7 +447,7 @@ public class Chunk {
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ - length - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+                addQuadWest(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 0, level, length+1);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -459,11 +458,17 @@ public class Chunk {
         if (startFluid.x() > -1) {
             float level = startFluid.y() / 15.f;
             float length = prevZ - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + prevZ - length - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+            addQuadWest(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 0, level, length+1);
             startFluid.set(-1);
         }
     }
-    public void createNorthQuad(int offX, int offY, int offZ, int y, int z) {
+    public void addQuadWest(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+3); indices.add(start+1);
+        indices.add(start); indices.add(start+2); indices.add(start+3);
+    }
+    public void createNorthQuad(FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
@@ -472,7 +477,7 @@ public class Chunk {
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + x - length - 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+                addQuadNorth(verts, indices, offX+startFluid.z(), offY+y, offZ+z+1, length+1, level, 0);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -483,11 +488,17 @@ public class Chunk {
         if (startFluid.x() > -1) {
             float level = startFluid.y() / 15.f;
             float length = prevX - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + prevX - length - 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+            addQuadNorth(verts, indices, offX+startFluid.z(), offY+y, offZ+z+1, length+1, level, 0);
             startFluid.set(-1);
         }
     }
-    public void createSouthQuad(int offX, int offY, int offZ, int y, int z) {
+    public void addQuadNorth(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+2); indices.add(start+1);
+        indices.add(start); indices.add(start+1); indices.add(start+3);
+    }
+    public void createSouthQuad(FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
@@ -496,7 +507,7 @@ public class Chunk {
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();
-                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+                addQuadSouth(verts, indices, offX+startFluid.z(), offY+y, offZ+z, length+1, level, 0);
                 startFluid.set(-1);
             }
             if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
@@ -507,42 +518,21 @@ public class Chunk {
         if (startFluid.x() > -1) {
             float level = startFluid.y() / 15.f;
             float length = prevX - startFluid.z();
-            Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + prevX - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(length+1, level, 1), new Vector4f(1));
+            addQuadSouth(verts, indices, offX+startFluid.z(), offY+y, offZ+z, length+1, level, 0);
             startFluid.set(-1);
         }
     }
-    public void updateFluidMesh(Region region) {
-        if (!fluidPalette.isEmpty()) {
-            int offX = cXI*chunkSize, offY = cYI*chunkSize, offZ = cZI*chunkSize;
-            for (int x = 0; x < chunkSize; x++) {
-                for (int y = 0; y < chunkSize; y++) {
-                    for (int z = 0; z < chunkSize; z++) {
-                        Vector2i fluid = getFluid(packLocalPos(x, y, z));
-                        if (fluid.y() > 0) {
-                            float level = fluid.y() / 15.f;
-                            if (x == 0 || faceUnoccluded(x-1, y, z, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-                            }
-                            if (x == chunkSize-1 || faceUnoccluded(x+1, y, z, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(90.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-                            }
-                            if (z == 0 || faceUnoccluded(x, y, z-1, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().rotateY((float) Math.toRadians(180.f)).setTranslation((float) (offX + x + 1 - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-                            }
-                            if (z == chunkSize-1 || faceUnoccluded(x, y, z+1, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1, level, 1), new Vector4f(1));
-                            }
-                            if (y == 0 || faceUnoccluded(x, y-1, z, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y - warpOffset.y()), (float) (offZ + z - warpOffset.z())).scale(1), new Vector4f(1));
-                            }
-                            if (y == chunkSize-1 || faceUnoccluded(x, y+1, z, fluid)) {
-                                Renderer.drawQuad(new Matrix4f().rotateX((float) Math.toRadians(-90.f)).setTranslation((float) (offX + x - warpOffset.x()), (float) (offY + y + level - warpOffset.y()), (float) (offZ + z + 1 - warpOffset.z())).scale(1), new Vector4f(1));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    public void addQuadSouth(FloatArrayList verts, IntArrayList indices, float x, float y, float z, float width, float height, float length) {
+        int start = verts.size()/3;
+        addVerts(verts, x, y, z, width, height, length);
+        indices.add(start); indices.add(start+1); indices.add(start+2);
+        indices.add(start); indices.add(start+3); indices.add(start+1);
+    }
+    public void addVerts(FloatArrayList verts, float x, float y, float z, float width, float height, float length) {
+        verts.add(x); verts.add(y); verts.add(z);
+        verts.add(x+width); verts.add(y+height); verts.add(z);
+        verts.add(x+width); verts.add(y); verts.add(z+length);
+        verts.add(x); verts.add(y+height); verts.add(z+length);
     }
     public boolean faceUnoccluded(int x, int y, int z, Vector2i fluid) {
         int pos = packLocalPos(x, y, z);

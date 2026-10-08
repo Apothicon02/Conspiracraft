@@ -58,7 +58,7 @@ public class Pipelines {
 
         VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO)
-                .pDynamicStates(stack.mallocInt(2).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).flip());//.put(VK_DYNAMIC_STATE_POLYGON_MODE_EXT).flip());
+                .pDynamicStates(stack.mallocInt(3).put(VK_DYNAMIC_STATE_VIEWPORT).put(VK_DYNAMIC_STATE_SCISSOR).put(VK_DYNAMIC_STATE_POLYGON_MODE_EXT).flip());
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO)
@@ -79,9 +79,9 @@ public class Pipelines {
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO)
                 .depthClampEnable(false)
                 .rasterizerDiscardEnable(false)
-                .polygonMode(VK_POLYGON_MODE_FILL)
-                .lineWidth(5.0f)
-                .cullMode(VK_CULL_MODE_BACK_BIT)
+                .polygonMode(VK_POLYGON_MODE_LINE)
+                .lineWidth(1.0f)
+                .cullMode(VK_CULL_MODE_BACK_BIT)//VK_CULL_MODE_BACK_BIT
                 .frontFace(VK_FRONT_FACE_CLOCKWISE)
                 .depthBiasEnable(false);
 

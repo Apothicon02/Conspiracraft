@@ -389,7 +389,7 @@ public class World {
         if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
-            return chunk.getFluid(pos);
+            return new Vector2i(15);//chunk.getFluid(pos);
         }
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
@@ -414,6 +414,8 @@ public class World {
             return chunk.getBlock(pos);
         }
     }
+    public static final ConcurrentLinkedDeque<Long> fluidUpdateQueue = new ConcurrentLinkedDeque<>();
+    public static final HashSet<Long> fluidUpdateSet = new HashSet<>();
     public static final ConcurrentLinkedDeque<Long> updateQueue = new ConcurrentLinkedDeque<>();
     public static final HashSet<Long> updateSet = new HashSet<>();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
@@ -550,6 +552,10 @@ public class World {
         synchronized (chunk) {
             if (blockType.blockProperties.isFluid) {
                 chunk.setFluid(lX, lY, lZ, type, subType);
+                long rCP = packRegionPos(x>>regionBits, y>>regionBits, z>>regionBits);
+                if (fluidUpdateSet.add(rCP)) {
+                    fluidUpdateQueue.addLast(rCP);
+                }
             } else {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
