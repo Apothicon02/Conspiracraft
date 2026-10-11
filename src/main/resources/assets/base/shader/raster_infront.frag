@@ -39,7 +39,9 @@ layout(location = 1) in vec3 pos;
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outNormal;
 void main() {
-    outNormal = vec4(normalize(cross(dFdx(pos), dFdy(pos))), 0);//vec4(normalize(cross(vPos[1] - vPos[0], vPos[2] - vPos[0])), 0);
+    vec3 normal = normalize(cross(dFdx(pos), dFdy(pos)));//vec4(normalize(cross(vPos[1] - vPos[0], vPos[2] - vPos[0])), 0);
+    vec3 absNorm = abs(normal);
+    outNormal = vec4(absNorm.x > max(absNorm.y, absNorm.z) ? vec3(sign(normal.x), 0, 0) : (absNorm.y > absNorm.z ? vec3(0, sign(normal.y), 0) : vec3(0, 0, sign(normal.z))), 0);
     outColor = pushUbo.color;
     if (pushUbo.tex.x >= 0) {
         vec2 uv = localPos.xy+0.5f;

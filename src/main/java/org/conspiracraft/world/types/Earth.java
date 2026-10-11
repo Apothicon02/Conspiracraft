@@ -19,6 +19,7 @@ import org.conspiracraft.world.shapes.CoveredBlob;
 import org.conspiracraft.world.shapes.Pond;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.lang.Math;
@@ -314,6 +315,9 @@ public class Earth extends WorldType {
             long cRP = World.packRegionPos(rX, rY, rZ);
             Region region = getRegion(cRP);
             if (region != null) {
+                try (MemoryStack stack = MemoryStack.stackPush()) {
+                    region.updateFluidMesh(stack);
+                }
                 region.setGenerated();
             }
         }

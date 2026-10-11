@@ -106,7 +106,7 @@ public class Renderer {
                     boolean wasEmpty = updateQueue.isEmpty();
                     while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
-                        updateChunk(chunkPos);
+                        updateChunk(stack, chunkPos);
                     }
                     updateSet.clear();
                     while (!fluidUpdateQueue.isEmpty()) {
@@ -219,21 +219,27 @@ public class Renderer {
         ImageHelper.fillImage(stack, Textures.skybox, stagingBuffer);
         System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
     }
-    public static void updateChunk(long packedChunkPos) {
+    public static void updateChunk(MemoryStack stack, long packedChunkPos) {
         Chunk chunk = getChunkGlobalPos(packedChunkPos);
         if (chunk != null) {
             Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
             long wrappedPackedChunkPos = World.wrapChunkPos(chunk.cX, chunk.cY, chunk.cZ);
-            updateChunkBlocks(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
+            updateChunkBlocks(stack, wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
             updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
         }
     }
     public static final int lodsByteSize = lodsPerChunk*8;
-    public static void updateChunkBlocks(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
+    public static void updateChunkBlocks(MemoryStack stack, long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
         long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
         long voxelPtr = voxelSSBO.stagingBuffer.pointer.get(0);
         if (initialized) {
             vmaVirtualFree(blocks.get(0), chunkBlockAllocs.get(packedChunkPos));
+            Region region = getRegion(packRegionPos(chunkPos.x()>>regionBitsChunks, chunkPos.y()>>regionBitsChunks, chunkPos.z()>>regionBitsChunks));
+            if (region.indicesAmt > 0 && region.generated && !region.copiedFluid) {
+                region.copiedFluid = true;
+                BufferHelper.copyBuffer(stack, region.fluidVertexStagingBuf.buffer[0], region.fluidVertexBuf.buffer[0], region.fluidVertexStagingBuf.size);
+                BufferHelper.copyBuffer(stack, region.fluidIndexStagingBuf.buffer[0], region.fluidIndexBuf.buffer[0], region.fluidIndexStagingBuf.size);
+            }
         }
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
         allocCreateInfo.alignment(4);

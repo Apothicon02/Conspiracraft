@@ -291,7 +291,7 @@ public class BlockTypes {
                     new BlockProperties().isSolid(false).blocksLight(false).obstructsHeightmap(false).blockSFX(
                             new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1, new SFX[]{Sounds.WOOD_STEP1, Sounds.WOOD_STEP2}, 1, 1))),
             STEM = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.scytheEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STEM),
-                    new BlockProperties().resistance(0.f).blockSFX(
+                    new BlockProperties().isSolid(true).resistance(0.f).blockSFX(
                             new SFX[]{Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1, new SFX[]{Sounds.GRASS_STEP1, Sounds.GRASS_STEP2, Sounds.GRASS_STEP3}, 1, 1))),
             STEM_FENCE = create(List.of(BlockTags.hatchetEfficient), new FenceBlockType(blockTypeMap.size(), "crafted/model/fence", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.STEM),
                     OAK_FENCE.blockProperties.copy())),

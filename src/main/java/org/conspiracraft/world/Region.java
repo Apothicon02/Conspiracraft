@@ -122,7 +122,6 @@ public class Region {
 
     public void setGenerated() {
         generated = true;
-        fluidUpdateQueue.addLast(condensedRegionPos);
         updateNeighborsGeneratedAndTheirNeighbors();
     }
     public void updateNeighborsGeneratedAndTheirNeighbors() {
@@ -221,7 +220,9 @@ public class Region {
     public Buffer fluidVertexBuf;
     public Buffer fluidIndexBuf;
     public int indicesAmt = 0;
+    public boolean copiedFluid = false;
     public void updateFluidMesh(MemoryStack stack) throws IOException {
+        //long start = System.nanoTime();
         int prevIndicesAmt = indicesAmt;
         FloatArrayList verts = new FloatArrayList();
         IntArrayList indices = new IntArrayList();
@@ -238,11 +239,15 @@ public class Region {
         }
         memFloatBuffer(fluidVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
         memIntBuffer(fluidIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
-        BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], verts.size()*4L);
-        BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], indices.size()*4L);
+        if (generated) {
+            copiedFluid = true;
+            BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], verts.size() * 4L);
+            BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], indices.size() * 4L);
+        }
+        //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
     }
     public void drawFluids(MemoryStack stack) {
-        if (indicesAmt > 0) {
+        if (indicesAmt > 0 && generated) {
             vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(fluidVertexBuf.buffer), stack.longs(0));
             vkCmdBindIndexBuffer(currentCmdBuffer, fluidIndexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
             int offX = rXI*regionSize, offY = rYI*regionSize, offZ = rZI*regionSize;
