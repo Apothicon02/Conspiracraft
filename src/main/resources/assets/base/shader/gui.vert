@@ -18,6 +18,7 @@ layout(push_constant) uniform PushUBO {
     ivec2 size;
     int layer;
     ivec4 tex;
+    ivec4 tex2;
     ivec4 writeTex;
     int atlas;
     int materials;

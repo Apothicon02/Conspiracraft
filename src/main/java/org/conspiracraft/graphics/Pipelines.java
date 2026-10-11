@@ -7,6 +7,8 @@ import org.lwjgl.vulkan.*;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,18 +20,28 @@ import static org.lwjgl.vulkan.VK14.*;
 
 public class Pipelines {
     public static long pipelineLayout;
-    public static Pipeline[] pipelines;
-    public static ComputePipeline[] computePipelines;
+    public static List<Pipeline> pipelines = new ArrayList<>();
+    public static List<ComputePipeline> computePipelines = new ArrayList<>();
     private static ExecutorService pool;
+    
+    public static final Pipeline 
+            PRESENT = new Pipeline("fullscreen.vert", "present.frag", 1, false),
+            GUI = new Pipeline("gui.vert", "gui.frag", 1, false),
+            SSAO = new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
+            CUBE = new Pipeline("raster.vert", "cube.frag", 2, true),
+            FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true),
+            RASTER = new Pipeline("raster.vert", "raster.frag", 2, true),
+            RASTER_VIEW = new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),
+            BLUR_HORIZONTAL = new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2, false),
+            BLUR_VERTICAL = new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2, false),
+            AA = new Pipeline("fullscreen.vert", "aa.frag", 1, false),
+            AA_HISTORY = new Pipeline("fullscreen.vert", "aa_history.frag", 1, false);
+
+    public static final ComputePipeline
+            DDA = new ComputePipeline("dda.comp");
+    
     public static void init(MemoryStack stack) {
-        pipelines = new Pipeline[]{
-                new Pipeline("fullscreen.vert", "present.frag", 1, false), new Pipeline("gui.vert", "gui.frag", 1, false),
-                new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
-                new Pipeline("raster.vert", "cube.frag", 2, true), new Pipeline("raster.vert", "raster.frag", 2, true), new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),
-                new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2, false), new Pipeline("quarterscreen.vert", "blur_vertical.frag", 2, false),
-                new Pipeline("fullscreen.vert", "aa.frag", 1, false), new Pipeline("fullscreen.vert", "aa_history.frag", 1, false)};
-        computePipelines = new ComputePipeline[]{new ComputePipeline("dda.comp")};
-        pool = Executors.newFixedThreadPool(Math.min(1+pipelines.length, Runtime.getRuntime().availableProcessors()));
+        pool = Executors.newFixedThreadPool(Math.min(1+pipelines.size(), Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(() -> {
             try {
@@ -105,8 +117,8 @@ public class Pipelines {
         if (err != VK_SUCCESS) {throw new RuntimeException("Failed to create pipeline layout: " + err);}
         pipelineLayout = pPipelineLayout.get(0);
 
-        for (int i = 0; i < pipelines.length; i++) {
-            Pipeline pipeline = pipelines[i];
+        for (int i = 0; i < pipelines.size(); i++) {
+            Pipeline pipeline = pipelines.get(i);
 
             VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
@@ -178,8 +190,8 @@ public class Pipelines {
             }
             pipeline.vkPipeline = pipelineBuf.get(0);
         }
-        for (int i = 0; i < computePipelines.length; i++) {
-            ComputePipeline pipeline = computePipelines[i];
+        for (int i = 0; i < computePipelines.size(); i++) {
+            ComputePipeline pipeline = computePipelines.get(i);
 
             VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(1, stack);
             shaderStages.get(0)

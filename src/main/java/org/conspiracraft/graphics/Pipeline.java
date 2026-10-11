@@ -4,6 +4,8 @@ import org.lwjgl.util.shaderc.Shaderc;
 
 import java.io.IOException;
 
+import static org.conspiracraft.graphics.Pipelines.pipelines;
+
 public class Pipeline {
     public String vertName;
     public String fragName;
@@ -17,6 +19,7 @@ public class Pipeline {
         fragName = frag;
         this.colorAttachments = colorAttachments;
         this.depthEnabled = depthEnabled;
+        pipelines.add(this);
     }
     public void compile() throws IOException {
         this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));

@@ -3,7 +3,6 @@ package org.conspiracraft.graphics.buffers.ubos;
 import org.conspiracraft.graphics.Graphics;
 import org.conspiracraft.graphics.Pipelines;
 import org.conspiracraft.graphics.Renderer;
-import org.conspiracraft.graphics.buffers.ShaderStorageBuffer;
 import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
@@ -17,7 +16,7 @@ import static org.conspiracraft.graphics.buffers.BufferHelper.*;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class PushUBO {
-    public Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, new Vector4i(), new Vector4i(), 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    public Object[] uniformStorage = new Object[]{new Matrix4f(), new Vector4f(), 0, new Vector2i(), new Vector2i(), 0, new Vector4i(), new Vector4i(), new Vector4i(), 0, 0, 0, 0, 0, 0, 0, 0, 0};
     public Object[] uniforms() {return uniformStorage;}
     private int size = 0;
     private int offset = 0;
@@ -81,20 +80,35 @@ public class PushUBO {
     public void updateTex(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {
         ((Vector4i)uniformStorage[6]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);
     }
-    public void updateWriteTex(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);}
+    public void updateTex2(Texture tex1) {
+        Vector4i textures = ((Vector4i)uniformStorage[7]);
+        ((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, textures.y(), textures.z(), textures.w());
+    }
+    public void updateTex2(Texture tex1, Texture tex2) {
+        Vector4i textures = ((Vector4i)uniformStorage[7]);
+        ((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, textures.z(), textures.w());
+    }
+    public void updateTex2(Texture tex1, Texture tex2, Texture tex3) {
+        Vector4i textures = ((Vector4i)uniformStorage[7]);
+        ((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, textures.w());
+    }
+    public void updateTex2(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {
+        ((Vector4i)uniformStorage[7]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);
+    }
+    public void updateWriteTex(Texture tex1, Texture tex2, Texture tex3, Texture tex4) {((Vector4i)uniformStorage[8]).set(tex1 == null ? -1 : tex1.handle, tex2 == null ? -1 : tex2.handle, tex3 == null ? -1 : tex3.handle, tex4 == null ? -1 : tex4.handle);}
     public void updatePermanentTextures() {
-        uniformStorage[8] = Textures.atlas.handle;
-        uniformStorage[9] = Textures.materials.handle;
-        uniformStorage[10] = Textures.noises.handle;
-        uniformStorage[11] = Textures.blueNoise.handle;
+        uniformStorage[9] = Textures.atlas.handle;
+        uniformStorage[10] = Textures.materials.handle;
+        uniformStorage[11] = Textures.noises.handle;
+        uniformStorage[12] = Textures.blueNoise.handle;
     }
     public void updateSSBOs() {
-        uniformStorage[12] = Graphics.regionSSBO.buffer.handle;
-        uniformStorage[13] = Graphics.chunkSSBO.buffer.handle;
-        uniformStorage[14] = Graphics.voxelSSBO.buffer.handle;
-        //uniformStorage[15] = Graphics.lodSSBO.buffer.handle;
-        uniformStorage[15] = Graphics.lightChunkSSBO.buffer.handle;
-        uniformStorage[16] = Graphics.lightSSBO.buffer.handle;
+        uniformStorage[13] = Graphics.regionSSBO.buffer.handle;
+        uniformStorage[14] = Graphics.chunkSSBO.buffer.handle;
+        uniformStorage[15] = Graphics.voxelSSBO.buffer.handle;
+        //uniformStorage[16] = Graphics.lodSSBO.buffer.handle;
+        uniformStorage[16] = Graphics.lightChunkSSBO.buffer.handle;
+        uniformStorage[17] = Graphics.lightSSBO.buffer.handle;
     }
     public ByteBuffer buf = null;
     public void push() {
