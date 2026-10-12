@@ -475,6 +475,7 @@ public class Earth extends WorldType {
                                 double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                                 double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
                                 Vector2i blockIn = getBlockWorldgen(x, surface+1, z);
+                                Vector2i fluidIn = getFluidWorldgen(x, surface+1, z);
                                 Vector2i blockOn = getBlockWorldgen(x, surface, z);
                                 if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.SNOW.id) {
                                     if (biome == Biomes.SNOWY_TAIGA.id()) {
@@ -638,7 +639,7 @@ public class Earth extends WorldType {
                                             }
                                         }
                                     }
-                                } else if (blockIn.x() == BlockTypes.WATER.id) {
+                                } else if (fluidIn.x() == BlockTypes.WATER.id) {
                                     if (surface < SEA_LEVEL-25) {
                                         if (foliageChance < 0.001f) {
                                             Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.WET_SAND.id}, true);

@@ -15,12 +15,14 @@ public class Models {
     public static List<Model> models = new ArrayList<>(List.of());
 
     public static Model CUBE;
+    public static Model CUBE_INV;
     public static Model QUAD;
     public static Model QUAD_CENTERED;
     public static Model DOUBLE_QUAD;
 
     public static void loadModels(long vertexPtr, long indexPtr) throws IOException {
         CUBE = loadObj(vertexPtr, indexPtr, "generic/model/cube");
+        CUBE_INV = loadObj(vertexPtr, indexPtr, "generic/model/cube_inv");
         QUAD = loadObj(vertexPtr, indexPtr, "generic/model/quad");
         QUAD_CENTERED = loadObj(vertexPtr, indexPtr, "generic/model/quad_centered");
         DOUBLE_QUAD = loadObj(vertexPtr, indexPtr, "generic/model/double_quad");

@@ -93,10 +93,10 @@ float getAO(float depth) {
     return pow(clamp(occlusion, 0.f, 1), 3);//mix(5.f, 2.25f, radius));
 }
 vec4 reflection = vec4(0);
-bool sampleReflection(int x, int y) {
+bool sampleReflection(bool forced, int x, int y) {
     ivec2 offCoords = ivec2(gl_FragCoord.x+x, gl_FragCoord.y+y);
     vec4 offNormal = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], offCoords, 0);
-    if (dot(offNormal.xyz, normal.xyz) >= 0.9f) {
+    if (forced || dot(offNormal.xyz, normal.xyz) >= 0.9f) {
         vec4 potentialReflection = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.w)], offCoords, 0);
         if (potentialReflection.a <= 1) {
             reflection = potentialReflection;
@@ -137,10 +137,11 @@ void main() {
     reflection = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.w)], coords, 0);
     if (reflection.a > 2) {
         reflection.a = 0.f;
-        if (sampleReflection(-1, 0)) {
-            if (sampleReflection(0, -1)) {
-                if (sampleReflection(1, 0)) {
-                    sampleReflection(0, 1);
+        bool forced = depth < 0.02f;
+        if (sampleReflection(forced, -1, 0)) {
+            if (sampleReflection(forced, 0, -1)) {
+                if (sampleReflection(forced, 1, 0)) {
+                    sampleReflection(forced, 0, 1);
                 }
             }
         }

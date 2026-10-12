@@ -499,6 +499,16 @@ public class World {
         int lZ = z&15;
         return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
     }
+    public static Vector2i getFluidWorldgen(int x, int y, int z) {
+        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        Chunk chunk = getChunkGlobalPos(cP);
+        if (chunk == null) {return new Vector2i();}
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        return chunk.getFluid(Chunk.packLocalPos(lX, lY, lZ));
+    }
     public static void setBlockWorldgenPotentiallyGlowing(int x, int y, int z, int type, int subType) {
         setBlockWorldgen(x, y, z, type, subType);
         if (BlockTypes.blockTypes[type] instanceof LightBlockType) {

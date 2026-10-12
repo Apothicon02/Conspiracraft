@@ -20,6 +20,7 @@ import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.space.Planet;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
 import org.conspiracraft.graphics.textures.ImageHelper;
@@ -380,7 +381,12 @@ public class Renderer {
             pushUBO.updateTex(Textures.skybox);
             pushUBO.updateAtlasOffset(new Vector2i(0));
             pushUBO.updateSize(new Vector2i(Textures.skybox.width));
-            drawCube(new Matrix4f().scale(Integer.MAX_VALUE), new Vector4f(1));
+            Planet activePlanet = Main.player.getPlanet();
+            Quaternionf quaternion = new Quaternionf();
+            if (activePlanet != null) {
+                quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
+            }
+            drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE), new Vector4f(1));
         }
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
@@ -515,19 +521,26 @@ public class Renderer {
     }
     public static void drawClouds() {
         if (worldType.getFogginess() > 0.5f) {
+            double yOffset = Main.player.getCameraTranslationInterpolatedUnwrapped().y();
+            float wrapElevationNegation = (float)(yOffset-(yOffset%World.height))+modelOffset.y();
             Random cloudRand = new Random(911);
             float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
             float brightness = 1+Math.clamp((Math.min(0, StarSystem.relativePos.y()/(0.001f*dist)))/300, -0.7f, -0.01f);
             for (int i = 0; i < 196; i++) {
                 float b = Math.max(0.25f, brightness - (cloudRand.nextFloat()*0.34f));
                 Vector3f pos = new Vector3f(0, 0, 2000 * (cloudRand.nextFloat() + 0.05f)).rotateY((float) ((cloudRand.nextFloat() * 10) + ((Main.timeMs*0.000005f) * (3 + cloudRand.nextInt(2)))));
-                drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x, cloudRand.nextInt(200) + 420 - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10), pos.z)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
+                drawCube(new Matrix4f().rotateY(cloudRand.nextFloat() / 10).setTranslation(pos.set(pos.x, cloudRand.nextInt(200) + Earth.SKY_LEVEL - ((Math.abs(pos.x) + Math.abs(pos.z)) / 10) - wrapElevationNegation, pos.z)).scale(50 + cloudRand.nextInt(50), 10 + cloudRand.nextInt(20), 50 + cloudRand.nextInt(50)), new Vector4f(b, b, b, 1.f));
             }
         }
     }
     public static Vector3f[] starColors = new Vector3f[]{new Vector3f(1.0f, 1.05f, 1.1f), new Vector3f(1.f, 0.95f, 0.4f), new Vector3f(1.f, 0.07f, 0), new Vector3f(0.42f, 0.85f, 1.f), new Vector3f(1.f, 1.f, 0.1f)};
     public static void drawStars() {
         //Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
+        Planet activePlanet = Main.player.getPlanet();
+        Quaternionf quaternion = new Quaternionf();
+        if (activePlanet != null) {
+            quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
+        }
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
         float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
@@ -537,7 +550,8 @@ public class Renderer {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)
                     .rotateY(starRand.nextFloat() * 10)
-                    .rotateZ((float) (Main.timeMs*0.00001f) + starRand.nextFloat() * 10);
+                    .rotateZ(starRand.nextFloat() * 10)
+                    .rotate(quaternion);
             starPos.set(starPos.x + (starDist / 2f), starPos.y, starPos.z + (starDist / 2f));
             Matrix4f starMatrix = new Matrix4f()
                     .rotateXYZ(starRand.nextFloat(), starRand.nextFloat(), starRand.nextFloat())
@@ -565,6 +579,11 @@ public class Renderer {
         pushUBO.update(modelMatrix, color);
         pushUBO.push();
         vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE.indexCount, 1, Models.CUBE.indexOffset/Index.SIZE, 0, 0);
+    }
+    public static void drawCubeInv(Matrix4f modelMatrix, Vector4f color) {
+        pushUBO.update(modelMatrix, color);
+        pushUBO.push();
+        vkCmdDrawIndexed(currentCmdBuffer, Models.CUBE_INV.indexCount, 1, Models.CUBE_INV.indexOffset/Index.SIZE, 0, 0);
     }
     public static void drawDoubleQuad(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
