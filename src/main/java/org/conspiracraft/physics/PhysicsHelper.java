@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import static org.conspiracraft.utils.Utils.sign;
 import static org.conspiracraft.world.World.entities;
+import static org.conspiracraft.world.World.regionBits;
 
 public class PhysicsHelper {
     public static double voxelSize = 1;//0.125f;
@@ -130,6 +131,7 @@ public class PhysicsHelper {
         moveWithStepping(objAABB, vel, aabbs, 1.f);
     }
     public static void moveWithStepping(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs, double stepHeight) {
+        if (World.getRegion(World.packRegionPos(((int)objAABB.xMin)>>regionBits, ((int)objAABB.yMin)>>regionBits, ((int)objAABB.zMin)>>regionBits)) == null) {return;}
         Vector3d ogVel = new Vector3d(vel);
         move(objAABB, vel, new ArrayList<>(aabbs));
         if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
@@ -144,6 +146,7 @@ public class PhysicsHelper {
         move(objAABB, vel, new ArrayList<>());
     }
     public static void move(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs) {
+        if (World.getRegion(World.packRegionPos(((int)objAABB.xMin)>>regionBits, ((int)objAABB.yMin)>>regionBits, ((int)objAABB.zMin)>>regionBits)) == null) {return;}
         AABB regionAABB = new AABB(
                 objAABB.xMin-1, objAABB.xMax+1,
                 objAABB.yMin-1, objAABB.yMax+1,

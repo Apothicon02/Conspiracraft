@@ -20,6 +20,7 @@ import org.conspiracraft.graphics.textures.Texture;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.space.Celestials;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.graphics.buffers.CmdBufferHelper;
@@ -212,6 +213,7 @@ public class Renderer {
         memFree(blueNoiseBuffer);
         GUI.fillTexture();
         EntityTypes.fillTexture(stack);
+        Celestials.fillTexture(stack);
         int texSize = Textures.skybox.width*Textures.skybox.height;
         Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
         ByteBuffer entityBuf = Utils.imageToBuffer(Utils.loadImage("generic/texture/skybox"));
@@ -370,14 +372,14 @@ public class Renderer {
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         pushUBO.update(0); //draw non-instanced stuff
-        pushUBO.updateAtlasOffset(new Vector2i(0));
-        pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));
-        pushUBO.updateTex(null); //use no texture
-        modelOffset.set(viewPos);
         if (player.pos.y() > Earth.GROUND_LEVEL) {
+            modelOffset.set(player.pos).mul(-1);
+            pushUBO.updateSize(new Vector2i(Celestials.celestialTexWidth));
+            StarSystem.render(stack);
+            modelOffset.set(viewPos);
+            pushUBO.updateTex(null); //use no texture
             drawClouds();
             drawStars();
-            StarSystem.render(stack);
             pushUBO.updateTex(Textures.skybox);
             pushUBO.updateAtlasOffset(new Vector2i(0));
             pushUBO.updateSize(new Vector2i(Textures.skybox.width));
@@ -538,14 +540,15 @@ public class Renderer {
         //Vector3f interpolatedPlayerPos = Utils.getInterpolatedVec(player.prevPos, player.pos);
         Planet activePlanet = Main.player.getPlanet();
         Quaternionf quaternion = new Quaternionf();
+        int amt = 256;
         if (activePlanet != null) {
             quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
+            float dist = activePlanet.pos.distance(StarSystem.pos);
+            amt = (int) -Math.min(0, StarSystem.relativePos.y()/(0.001f*dist));
+            amt = Math.min(amt, 256);
         }
         int starDist = Constants.CENTER;
         Random starRand = new Random(seed);
-        float dist = worldType.getPlanet().pos.distance(StarSystem.pos);
-        int amt = (int) -Math.min(0, StarSystem.relativePos.y()/(0.001f*dist));
-        amt = Math.min(amt, 256);
         for (int i = 0; i < amt; i++) {
             Vector3f starPos = new Vector3f(0, starDist * 2, 0)
                     .rotateX(starRand.nextFloat() * 10)

@@ -22,6 +22,7 @@ import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
+import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
 import org.joml.*;
@@ -188,6 +189,9 @@ public class Player {
 
         }
         doSounds();
+        if (pos.y() > Earth.SKY_LEVEL && worldType != WorldTypes.SPACE) {
+            changePlanet(new Vector3d(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
+        }
 //        if (World.worldType.space() != null) { //going from surface to planet orbit
 //            if (pos.y() >= 1000) {
 //                changePlanet(new Vector3d(World.size / 2.f, -2.f, World.size / 2.f), World.worldType.space());
@@ -384,7 +388,10 @@ public class Player {
                 aabbs.add(entity.aabb);
             }
         }
-        if (sprinting && !flying) {
+        if (World.worldType == WorldTypes.SPACE) {
+            playerAABB.move(totalVel.x()*10, totalVel.y()*10, totalVel.z()*10);
+            totalVel.set(0);
+        } else if (sprinting && !flying) {
             //PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
             PhysicsHelper.move(playerAABB, totalVel, aabbs);
         } else if (onSolid) {

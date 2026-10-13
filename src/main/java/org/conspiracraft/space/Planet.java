@@ -2,8 +2,8 @@ package org.conspiracraft.space;
 
 import org.conspiracraft.Constants;
 import org.conspiracraft.Main;
-import org.conspiracraft.entities.EntityType;
 import org.conspiracraft.graphics.Renderer;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.WorldTypes;
@@ -16,7 +16,7 @@ import org.lwjgl.system.MemoryStack;
 import static org.conspiracraft.graphics.Renderer.*;
 
 public class Planet {
-    public final EntityType type;
+    public final CelestialType type;
     public final Vector3f pos;
     public final Vector3f localPos;
     public final Vector3f rotatedPos;
@@ -35,7 +35,7 @@ public class Planet {
     public final float lineInc;
     public final int points;
 
-    public Planet(EntityType type, Vector3f pos, Vector4f color, Vector4f sourceColor, float scale, float yearLengthNs, float dayLengthNs, Attachment[] attachments, Planet[] moons) {
+    public Planet(CelestialType type, Vector3f pos, Vector4f color, Vector4f sourceColor, float scale, float yearLengthNs, float dayLengthNs, Attachment[] attachments, Planet[] moons) {
         this.type = type;
         this.pos = pos;
         this.localPos = new Vector3f(pos);
@@ -59,7 +59,6 @@ public class Planet {
         Planet activePlanet = World.worldType.getPlanet();
         if (activePlanet != this) {
             drawOrbit(activeRot, activePos, parent, orbitThickness);
-            pushUBO.updateAtlasOffset(type.atlasOffset);
             tick(Main.timeNs, activeRot, activePos, parent);
             Matrix4f matrix = new Matrix4f()
                     .rotateXYZ(rot)
@@ -69,7 +68,6 @@ public class Planet {
         } else {
             tick(Main.timeNs, new Vector3f(), new Vector3f(), parent);
             if (World.worldType.space() == null) {
-                pushUBO.updateAtlasOffset(type.atlasOffset);
                 Matrix4f matrix = new Matrix4f()
                         .rotateX((float)Math.toRadians(90.f))
                         .setTranslation(0, -scale, 0)
@@ -83,7 +81,9 @@ public class Planet {
     }
 
     public void drawPlanet(MemoryStack stack, Matrix4f matrix) {
-        drawCube(matrix, new Vector4f(1));
+        pushUBO.updateAtlasOffset(type.atlasOffset);
+        pushUBO.updateTex(Textures.celestials);
+        drawCube(new Matrix4f(matrix), new Vector4f(1));
         for (Attachment attachment : attachments) {
             attachment.render(stack, new Matrix4f(matrix));
         }
@@ -92,9 +92,10 @@ public class Planet {
     public void drawOrbit(Vector3f activeRot, Vector3f activePos, Vector3f parent, float orbitThickness) {
         if (World.worldType == WorldTypes.SPACE && GUI.showUI) {
             pushUBO.updateLayer(-1);
+            pushUBO.updateTex(null); //use no texture
             float mul = 0.f;
             Vector3f prevPoint = new Vector3f();
-            for (int i = 0; i <= points; i++) {
+            for (int i = 0; i <= points+1; i++) {
                 tick(yearLengthNs * mul, activeRot, activePos, parent);
                 if (i > 0) {
                     Renderer.drawLine(prevPoint, rotatedPos, orbitThickness, color);

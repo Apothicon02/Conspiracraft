@@ -31,7 +31,6 @@ public class EntityTypes {
     }
 
     public static EntityType
-            MUN = create(new EntityType("celestial/texture/mun")),
             COW = create(new EntityType("animal/texture/cow")),
             SHEEP = create(new EntityType("animal/texture/sheep")),
             FIREBALL = create(new EntityType("magic/texture/fireball")),
@@ -40,18 +39,6 @@ public class EntityTypes {
             CRACKED = create(new EntityType("misc/texture/cracked")),
             VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
             COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked")),
-            OLIVIUS = create(new EntityType("celestial/texture/olivius")),
-            OLIVIUS_CLOUDS = create(new EntityType("celestial/texture/olivius_clouds")),
-            MARB = create(new EntityType("celestial/texture/marb")),
-            VERA = create(new EntityType("celestial/texture/vera")),
-            VERA_CLOUDS = create(new EntityType("celestial/texture/vera_clouds")),
-            VERA_ORANGE_CLOUDS = create(new EntityType("celestial/texture/vera_orange_clouds")),
-            AKSALA = create(new EntityType("celestial/texture/aksala")),
-            AKSALA_AURORAS = create(new EntityType("celestial/texture/aksala_auroras")),
-            SUN = create(new EntityType("celestial/texture/sun")),
-            LAZULI = create(new EntityType("celestial/texture/lazuli")),
-            EARTH = create(new EntityType("celestial/texture/earth")),
-            EARTH_CLOUDS = create(new EntityType("celestial/texture/earth_clouds")),
             ROPE = create(new EntityType("misc/texture/rope"));
 
     private static EntityType create(EntityType type) {
