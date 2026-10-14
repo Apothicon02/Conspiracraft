@@ -5,6 +5,8 @@ import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
+import org.conspiracraft.effects.AmbientParticle;
+import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.Renderer;
@@ -21,6 +23,7 @@ import org.conspiracraft.gui.GUI;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.Directions;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
@@ -32,6 +35,8 @@ import java.lang.Math;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
@@ -165,6 +170,13 @@ public class Player {
     public Planet nearestPlanet = null;
     public Vector3d oldCamTranslation = new Vector3d();
     public int itemPickupDelayMs = 2000;
+//    public final AmbientParticle[] ambientParticles = initAmbientParticles();
+//    public AmbientParticle[] initAmbientParticles() {
+//        AmbientParticle[] particles = new AmbientParticle[10000];
+//        Arrays.fill(particles, new AmbientParticle(new Vector3d(pos), new Matrix4f()));
+//        return particles;
+//    }
+//    public int ambientParticleIdx = 0;
     public void tick() throws IOException, InterruptedException {
         prevBobbing = bobbing;
         oldCamTranslation.set(getCameraTranslationGlobal());
@@ -180,6 +192,22 @@ public class Player {
                 }
             }
         }
+
+//        if (currentTick > 50) {
+//            Vector3f dir = new Vector3f(worldType.getSkylight().xyz(new Vector3f())).normalize().negate();
+//            Matrix4f baseMatrix = new Matrix4f().lookAlong(dir, Directions.UPF).invert();
+//            for (int i = 0; i < 50; i++) {
+//                ambientParticleIdx++;
+//                if (ambientParticleIdx >= ambientParticles.length) {
+//                    ambientParticleIdx = 0;
+//                }
+//                Vector3d particlePos = new Vector3d(pos).add(playerRand.nextFloat(-150, 150), playerRand.nextFloat(-75, 150), playerRand.nextFloat(-150, 150));
+//                AmbientParticle particle = new AmbientParticle(particlePos, new Matrix4f(baseMatrix).scale(Math.clamp((float) particlePos.distance(pos) / 5.f, 1.f, 10.f) * (0.015f + (float) (0.01f * Math.random()))).scale(1, 1, 50));
+//                particle.tex = null;
+//                particle.color.set(0.94f, 0.94f, 0.9f, 1.f);
+//                ambientParticles[ambientParticleIdx] = particle;
+//            }
+//        }
         movementTick();
         HandManager.tick();
         movementTickFinish();

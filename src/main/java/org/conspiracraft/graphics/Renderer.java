@@ -393,6 +393,7 @@ public class Renderer {
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
         //drawHeightmapDebug();
+        //for (AmbientParticle particle : Main.player.ambientParticles) {particle.draw();}
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
         updatePipeline(Pipelines.RASTER);

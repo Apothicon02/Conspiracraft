@@ -17,7 +17,7 @@ public class Settings {
     public static int height = 720;
     public static float fov = 73;
     public static int targetFps = 4200;
-    public static boolean shadowsEnabled = true;
+    public static int shadows = 1;
     public static boolean reflectionsEnabled = true;
     public static boolean taaEnabled = true;
     public static boolean dynamicFoVEnabled = true;
@@ -56,10 +56,10 @@ public class Settings {
         } else {
             data.addProperty("dynamicFoVEnabled", dynamicFoVEnabled);
         }
-        if (data.get("shadowsEnabled") != null) {
-            shadowsEnabled = data.get("shadowsEnabled").getAsBoolean();
+        if (data.get("shadows") != null) {
+            shadows = data.get("shadows").getAsInt();
         } else {
-            data.addProperty("shadowsEnabled", shadowsEnabled);
+            data.addProperty("shadows", shadows);
         }
         if (data.get("reflectionsEnabled") != null) {
             reflectionsEnabled = data.get("reflectionsEnabled").getAsBoolean();
@@ -104,7 +104,7 @@ public class Settings {
         data.addProperty("fov", fov);
         data.addProperty("ambientLight", ambientLight);
         data.addProperty("dynamicFoVEnabled", dynamicFoVEnabled);
-        data.addProperty("shadowsEnabled", shadowsEnabled);
+        data.addProperty("shadows", shadows);
         data.addProperty("reflectionsEnabled", reflectionsEnabled);
         data.addProperty("taaEnabled", taaEnabled);
         data.addProperty("upscaled", upscaled);

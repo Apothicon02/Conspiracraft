@@ -8,7 +8,8 @@ public class ShadowsButton extends Button {
 
     @Override
     public void clicked() {
-        Settings.shadowsEnabled = !Settings.shadowsEnabled;
+        Settings.shadows++;
+        if (Settings.shadows > 2) {Settings.shadows = 0;}
         AudioController.playButtonSound();
     }
 }
