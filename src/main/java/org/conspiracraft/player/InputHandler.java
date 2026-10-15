@@ -10,7 +10,9 @@ import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.gui.Menu;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.world.Bounds;
 import org.conspiracraft.world.World;
+import org.conspiracraft.world.shapes.Blob;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.sdl.SDL_DisplayMode;
@@ -88,6 +90,9 @@ public class InputHandler {
                 for (Menu menu : menus) {if (menu != null) {menu.tick();}}
 
                 if (isKeyDown(SDL_SCANCODE_F3)) {
+                    if (isKeyDown(SDL_SCANCODE_DELETE)) {
+                        Blob.generatePostWorldgen((int) player.pos.x(), (int) player.pos.y(), (int) player.pos.z(), 0, 0, 20);
+                    }
                     float r = 0.f;
                     if (isKeyDown(SDL_SCANCODE_R)) {
                         r = (float) Math.toRadians(45);

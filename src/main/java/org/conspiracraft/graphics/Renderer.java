@@ -430,7 +430,7 @@ public class Renderer {
     public static void drawDDA(MemoryStack stack) {
         pushUBO.update(new Matrix4f().setTranslation(((int)player.pos.x())+0.5f, ((int)player.pos.y())+0.5f, ((int)player.pos.z())+0.5f), new Vector4f(1));
         pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
-        pushUBO.updateTex2(Textures.fluid, Textures.fluidDepth);
+        pushUBO.updateTex2(Textures.fluid, Textures.fluidDepth, Textures.emissive);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, Textures.reflections);
         pushUBO.push();
         updateComputePipeline(Pipelines.DDA);
@@ -476,7 +476,7 @@ public class Renderer {
         }
     }
     public static void drawBlur(MemoryStack stack) {
-        pushUBO.updateTex(Textures.colors2, null, null);
+        pushUBO.updateTex(Textures.colors2, Textures.emissive, null);
         pushUBO.push();
         updatePipeline(Pipelines.BLUR_HORIZONTAL);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.blurred_horizontally, Textures.bloom_horizontally}, Textures.depth2, 4, true, true);

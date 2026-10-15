@@ -19,6 +19,7 @@ import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
 import org.joml.*;
@@ -572,27 +573,26 @@ public class World {
                 updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
             }
         }
-        if (!generating) {
-            if (updateLighting) {
-                boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
-                boolean blocksLight = blockType.blocksLight(type, subType);
-                if (!blocksLight || isSlab) {
-                    LightHelper.queueLightUpdate(new Vector3i(x, y, z));
-                }
-                if (blocksLight || isSlab) {
-                    int pos = Chunk.packLocalPos(lX, lY, lZ);
-                    Light oldLight = chunk.getLight(pos);
-                    chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
-                    updateHeightmap(x, y, z);
-                    LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
-                }
+        if (updateLighting) {
+            boolean isSlab = blockType.blockProperties.hasSlab && (subType == 1 || subType == 2);
+            boolean blocksLight = blockType.blocksLight(type, subType);
+            if (!blocksLight || isSlab) {
+                updateHeightmap(x, y, z);
+                LightHelper.queueLightUpdate(new Vector3i(x, y, z));
             }
-            if (updateSet.add(cP)) {
-                updateQueue.addLast(cP);
+            if (blocksLight || isSlab) {
+                int pos = Chunk.packLocalPos(lX, lY, lZ);
+                Light oldLight = chunk.getLight(pos);
+                chunk.setLight(lX, lY, lZ, new Light(0, 0, 0, 0));
+                updateHeightmap(x, y, z);
+                LightHelper.recalculateLight(new Vector3i(x, y, z), oldLight);
             }
-            if (updateNeighbors) {
-                updateNeighbors(x, y, z);
-            }
+        }
+        if (updateSet.add(cP)) {
+            updateQueue.addLast(cP);
+        }
+        if (updateNeighbors) {
+            updateNeighbors(x, y, z);
         }
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType) {
@@ -652,45 +652,18 @@ public class World {
         BlockTypes.blockTypes[block.x()].neighborUpdated(x, y, z, block);
     }
     public static void updateHeightmap(int x, int newY, int z) {
-//        int packedPos = packPos(x, z);
-//        int elevation = heightmap[packedPos];
-//        if (newY >= elevation) {
-//            int newElevation = elevation;
-//            boolean setHeightmap = false;
-//            for (int y = newY; y >= 0; y--) {
-//                if (!setHeightmap) {
-//                    Vector2i block = getBlock(x, y, z);
-//                    BlockType type = BlockTypes.blockTypes[block.x()];
-//                    boolean isBottomSlab = type.blockProperties.hasSlab && block.y() == 2;
-//                    if (!type.obstructingHeightmap(block) || isBottomSlab) {
-//                        Light light = getLight(x, y, z);
-//                        if (light.s() < maxSunlightLevel) {
-//                            Light newLight = new Light(light.s(), light.s(), light.s(), maxSunlightLevel);
-//                            setLight(x, y, z, newLight);
-//                        }
-//                        if (isBottomSlab) {
-//                            setHeightmap = true;
-//                            newElevation = y-1;
-//                            heightmap[packedPos] = (short) (y-1);
-//                        }
-//                    } else {
-//                        setHeightmap = true;
-//                        newElevation = y;
-//                        heightmap[packedPos] = (short) y;
-//                    }
-//                } else {
-//                    Light light = getLight(x, y, z);
-//                    if (light.s() > 0) {
-//                        Light newLight = new Light(light.s(), light.s(), light.s(), 0);
-//                        setLight(x, y, z, newLight);
-//                        LightHelper.recalculateLight(new Vector3i(x, y, z), light);
-//                    }
-//                }
-//            }
-//            for (int y = elevation - 1; y > newElevation; y--) {
-//                LightHelper.updateLight(new Vector3i(x, y, z), getBlock(x, y, z), getLight(x, y, z));
-//            }
-//        }
+        Region2D region2D = getRegion2D(packRegionPos(x>>regionBits, 0, z>>regionBits));
+        int rlX = x%regionSize, rlZ = z%regionSize;
+        int packed = (rlX * regionSize) + rlZ;
+        for (int y = Earth.SKY_LEVEL-1; y >= Earth.GROUND_LEVEL; y--) {
+            Vector2i block = getBlock(x, y, z);
+            if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {;
+                region2D.heights[packed] = (short) (y - Earth.GROUND_LEVEL);
+                break;
+            } else {
+                setLight(x, y, z, new Light((byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel));
+            }
+        }
     }
     public static void updateLod(int x, int y, int z, boolean empty) {
 //        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);

@@ -113,17 +113,59 @@ const float WEIGHTS[33] = float[33](
 0.0021358760555438526
 );
 
+const int BLOOM_SAMPLE_COUNT = 17;
+
+const float BLOOM_OFFSETS[17] = float[17](
+        -15.346909207858602,
+        -13.365627698915883,
+        -11.384761163998304,
+        -9.404257830790623,
+        -7.424061486151752,
+        -5.444112063278785,
+        -3.4643463291660286,
+        -1.4846986569306182,
+        0.49489813625671,
+        2.474511907946322,
+        4.454210290251928,
+        6.4340597960291035,
+        8.414124956354735,
+        10.394467512779414,
+        12.375145685251502,
+        14.356213533140359,
+        16
+);
+
+const float BLOOM_WEIGHTS[17] = float[17](
+        0.0012517257681854414,
+        0.004040871986347448,
+        0.011097033360260742,
+        0.02592497813028862,
+        0.05152541588643619,
+        0.08712164004625919,
+        0.12532555872881074,
+        0.15337962869524363,
+        0.15970302346247828,
+        0.14147399561150745,
+        0.10662433187548813,
+        0.0683672427682228,
+        0.037294547143433006,
+        0.017307701309883655,
+        0.006833124732987503,
+        0.0022949452994699,
+        0.0004342351946974114
+);
+
 const float Z_NEAR = 0.01f;
 void main() {
     vec4 color = vec4(0);
     vec4 bloom = vec4(0);
     for (int i = 0; i < SAMPLE_COUNT; ++i) {
-        vec2 offset = vec2(0, OFFSETS[i])*0.25f;
+        vec2 offset = vec2(0, OFFSETS[i]);
         float weight = WEIGHTS[i];
-        vec2 samplePos = vec2(gl_FragCoord.xy+offset+0.125f)/(globalUbo.res/4);
+        vec2 samplePos = vec2(gl_FragCoord.xy+(offset*0.25f)+0.125f)/(globalUbo.res/4);
         if (samplePos.x >= 0 && samplePos.x < 1 && samplePos.y >= 0 && samplePos.y < 1) {
             color += textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], samplePos, 0) * weight;
-            bloom += textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], samplePos, 0) * weight;
+            bloom += textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], samplePos, 0) * weight;//mix(weight, 0.2f, 0.025f);
         }
     }
     outColor = color;

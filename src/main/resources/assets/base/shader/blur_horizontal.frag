@@ -122,9 +122,11 @@ void main() {
         if (samplePos.x >= 0 && samplePos.x < 1 && samplePos.y >= 0 && samplePos.y < 1) {
             vec4 newResult = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.y)], samplePos, 0);
             color += newResult*weight;
-            if (newResult.r > 1.f || newResult.g > 1.f || newResult.b > 1.f) {
-                bloom += newResult*weight;
-            }
+            newResult = textureLod(Sampler2D[nonuniformEXT(pushUbo.tex.z)], samplePos, 0);
+            bloom += newResult * weight;//mix(weight, 0.2f, 0.025f);
+//            if (newResult.r > 1.f || newResult.g > 1.f || newResult.b > 1.f) {
+//                bloom += newResult*weight;
+//            }
         }
     }
     outColor = color;

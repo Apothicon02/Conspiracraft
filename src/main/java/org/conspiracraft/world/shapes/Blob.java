@@ -1,6 +1,7 @@
 package org.conspiracraft.world.shapes;
 
 import org.conspiracraft.world.Bounds;
+import org.conspiracraft.world.Light;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -8,8 +9,7 @@ import org.joml.Vector3i;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.conspiracraft.world.World.getBlock;
-import static org.conspiracraft.world.World.setBlockWorldgen;
+import static org.conspiracraft.world.World.*;
 
 public class Blob {
     public static void generate(Bounds bounds, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
@@ -56,5 +56,25 @@ public class Blob {
 
     public static void generate(Bounds bounds, int x, int y, int z, int blockType, int blockSubType, int radius) {
         generate(bounds, x, y, z, blockType, blockSubType, radius, new int[0], false);
+    }
+
+    public static void generatePostWorldgen(int x, int y, int z, int blockType, int blockSubType, int radius) {
+        Map<Vector3i, Vector2i> blocks = new HashMap<>();
+        for (int lX = x - radius; lX <= x + radius; lX++) {
+            for (int lZ = z - radius; lZ <= z + radius; lZ++) {
+                for (int lY = y - radius; lY <= y + radius; lY++) {
+                    int xDist = lX - x;
+                    int yDist = lY - y;
+                    int zDist = lZ - z;
+                    int dist = xDist * xDist + zDist * zDist + yDist * yDist;
+                    if (dist <= radius * 3) {
+                        blocks.put(new Vector3i(lX, lY, lZ), new Vector2i(blockType, blockSubType));
+                    }
+                }
+            }
+        }
+        blocks.forEach((pos, block) -> {
+            setBlock(pos.x, pos.y, pos.z, block.x, block.y, true, false, true);
+        });
     }
 }
