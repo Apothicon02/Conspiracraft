@@ -88,7 +88,10 @@ public class InputHandler {
                     HandManager.input();
                 }
                 for (Menu menu : menus) {if (menu != null) {menu.tick();}}
-
+                if (keyRelease(SDL_SCANCODE_F3)) {
+                    GUI.showDebug = !GUI.showDebug;
+                    //System.out.println(GUI.guiMS+"ms");
+                }
                 if (isKeyDown(SDL_SCANCODE_F3)) {
                     if (isKeyDown(SDL_SCANCODE_DELETE)) {
                         Blob.generatePostWorldgen((int) player.pos.x(), (int) player.pos.y(), (int) player.pos.z(), 0, 0, 20);

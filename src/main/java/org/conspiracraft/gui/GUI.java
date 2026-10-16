@@ -115,9 +115,11 @@ public class GUI {
         }
     }
     public static boolean showUI = true;
+    public static List<Long> guiTimes = new ArrayList<>(List.of());
+    public static double guiMS = 0;
     public static void draw() {
-        //long startTime = System.nanoTime();
         update();
+        long startTime = System.nanoTime();
         if (showUI) {
             for (Menu menu : menus) {if (menu != null) {menu.update(); menu.draw();}}
             if (!GUI.pauseMenuOpen) {
@@ -131,7 +133,12 @@ public class GUI {
             drawDebug();
         }
         drawAlwaysVisible();
-        //System.out.println((System.nanoTime() - startTime) + "ns to draw gui");
+        guiTimes.addLast(System.nanoTime()-startTime);
+        if (guiTimes.size() > 60) {
+            guiTimes.removeFirst();
+            double avgNs = Utils.averageLongs(guiTimes);
+            guiMS = avgNs/1000000;
+        }
         tick();
     }
     public static Vector4f menuBgColor = new Vector4f(1.f);
@@ -248,6 +255,7 @@ public class GUI {
         drawText(false, 0, 1, -0.5f-pauseOff, 1+pauseOff - charHeight, (String.format("%.2f", ms) + "ms").toCharArray(), 3);
         if (showDebug && !pauseMenuOpen) {
             drawText(false, 0, 1, 1.5f, -1.34f - (charHeight*1.33f), ((int) Main.player.pos.x + "x," + (int) Main.player.pos.y + "y," + (int) Main.player.pos.z + "z").toCharArray(), 3);
+            drawText(false, 0, 1, -0.5f-pauseOff, -1.34f - (charHeight*1.67f), ("GUI CPU Drawing: " + String.format("%.2f", guiMS) + "ms").toCharArray(), 3);
         }
     }
     public static void drawSlider(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, Vector4f bgColor, Vector4f txtColor) {

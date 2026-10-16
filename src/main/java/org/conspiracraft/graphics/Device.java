@@ -222,12 +222,12 @@ public class Device {
                 .apiVersion(VK14.VK_API_VERSION_1_4);
         PointerBuffer layers = stack.mallocPointer(1);
         layers.put(0, stack.UTF8("VK_LAYER_KHRONOS_validation"));
-        IntBuffer features = stack.mallocInt(1)
-                .put(VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT)
-                .flip();
-        VkValidationFeaturesEXT validationFeatures = VkValidationFeaturesEXT.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT)
-                .pEnabledValidationFeatures(features);
+//        IntBuffer features = stack.mallocInt(1)
+//                .put(VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT)
+//                .flip();
+//        VkValidationFeaturesEXT validationFeatures = VkValidationFeaturesEXT.calloc(stack)
+//                .sType(VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT)
+//                .pEnabledValidationFeatures(features);
         VkInstanceCreateInfo createInfo = VkInstanceCreateInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
                 //.pNext(validationFeatures.address()) //disable when not in dev env

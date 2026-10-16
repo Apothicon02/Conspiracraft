@@ -413,7 +413,7 @@ public class Renderer {
         if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
             updatePipeline(Pipelines.FLUID);
             bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.fluid}, Textures.fluidDepth, 1, true, true);
-//            vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
+            //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
             pushUBO.updateTex(null);
             pushUBO.updateSize(new Vector2i(Materials.materialWidth));
             pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
@@ -422,7 +422,7 @@ public class Renderer {
             }
             vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
             vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
-//            vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
+            //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
             unbindImagesDrawingTo(stack, new long[]{Textures.fluid.image}, Textures.fluidDepth.image);
         }
     }
