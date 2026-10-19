@@ -122,6 +122,9 @@ public class Region {
 
     public void setGenerated() {
         generated = true;
+        if (fluidUpdateSet.add(condensedRegionPos)) {
+            fluidUpdateQueue.addLast(condensedRegionPos);
+        }
         updateNeighborsGeneratedAndTheirNeighbors();
     }
     public void updateNeighborsGeneratedAndTheirNeighbors() {
@@ -162,7 +165,9 @@ public class Region {
                     LightHelper.queueLightUpdate(LightHelper.lightQueueWG, lightQueueSkipWG.pollFirst());
                 }
                 for (Chunk chunk : chunks) {
-                    updateQueue.addLast(chunk.cCP);
+                    if (updateSet.add(chunk.cCP)) {
+                        updateQueue.add(chunk.cCP);
+                    }
                 }
             }
         }

@@ -62,9 +62,9 @@ public class GlobalUBO extends UBO {
     }
     public void update(MemoryStack stack) {
         ((Matrix4f)uniformStorage[2]).identity().set((Matrix4f)uniformStorage[0]);
-        ((Matrix4f)uniformStorage[3]).set((Matrix4f)uniformStorage[1]);
+        ((Matrix4f)uniformStorage[3]).identity().set((Matrix4f)uniformStorage[1]);
         ((Matrix4f)uniformStorage[0]).identity().set(Main.player.getCameraMatrix());
-        ((Matrix4f)uniformStorage[1]).set(Main.window.updateProjectionMatrix());
+        ((Matrix4f)uniformStorage[1]).identity().set(Main.window.updateProjectionMatrix());
         ((Vector4i)uniformStorage[4]).set(Settings.shadows, Settings.reflectionsEnabled ? 1 : 0, Settings.upscaled ? 1 : 0, (int)(Settings.ambientLight*1000));
         ((Vector4f)uniformStorage[5]).set(World.worldType.getSkylight());
         ((Vector3f)uniformStorage[6]).set(StarSystem.relativePos);

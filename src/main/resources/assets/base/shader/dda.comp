@@ -175,6 +175,7 @@ int packLodPos(ivec3 pos) {
 }
 const int blocksPerChunk = chunkSize*chunkSize*chunkSize;
 LongStruct getLod(ivec3 lodPos) {
+    //if (blockValuesPerInt <= 0) {return LongStruct(0, 0);}
     int pointer = chunk.pointer+chunk.paletteSize+int(ceil(float(blocksPerChunk)/blockValuesPerInt));
     int index = pointer+(packLodPos(lodPos)*2);
     return LongStruct(intBuf[nonuniformEXT(pushUbo.voxels)].data[index], intBuf[nonuniformEXT(pushUbo.voxels)].data[index+1]);

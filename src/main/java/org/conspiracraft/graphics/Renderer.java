@@ -10,7 +10,6 @@ import org.conspiracraft.effects.Effect;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
-import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Index;
@@ -64,7 +63,7 @@ import static org.lwjgl.vulkan.VK14.*;
 
 public class Renderer {
     public static int totalFrames = 0;
-
+    static final Long2LongOpenHashMap duplicateChunks = new Long2LongOpenHashMap();
     public static int imageIdx = 0;
     public static int frameIdx = 0;
     public static boolean firstImages = true;
@@ -94,8 +93,8 @@ public class Renderer {
                     generating = false;
                     for (int i = 0; i < xOffsets.length; i++) {
                         double[] haltonVec = halton.nextVector();
-                        xOffsets[i] = (float) (haltonVec[0]-0.5f)*0.25f;
-                        yOffsets[i] = (float) (haltonVec[1]-0.5f)*0.25f;
+                        xOffsets[i] = (float) (haltonVec[0]-0.5f)*2;
+                        yOffsets[i] = (float) (haltonVec[1]-0.5f)*2;
                     }
                     fillSSBOs(stack);
                     if (reloadTextures) {
@@ -106,15 +105,18 @@ public class Renderer {
                 } else {
                     World.worldType.tickWorldgen();
                     boolean wasEmpty = updateQueue.isEmpty();
+                    duplicateChunks.clear();
                     while (!updateQueue.isEmpty()) {
                         long chunkPos = updateQueue.pollFirst();
                         updateChunk(stack, chunkPos);
+                        //updateSet.remove(chunkPos);
                     }
                     updateSet.clear();
                     while (!fluidUpdateQueue.isEmpty()) {
                         long cRP = fluidUpdateQueue.pollFirst();
                         Region region = getRegion(cRP);
                         if (region != null) {region.updateFluidMesh(stack);}
+                        //fluidUpdateSet.remove(cRP);
                     }
                     fluidUpdateSet.clear();
                     if (!wasEmpty) {
@@ -227,6 +229,12 @@ public class Renderer {
         if (chunk != null) {
             Vector3i chunkPos = new Vector3i(chunk.cXI, chunk.cYI, chunk.cZI);
             long wrappedPackedChunkPos = World.wrapChunkPos(chunk.cX, chunk.cY, chunk.cZ);
+            Long prev = duplicateChunks.getOrDefault(wrappedPackedChunkPos, Long.MAX_VALUE);
+            if (prev != Long.MAX_VALUE) {
+                System.out.println("Duplicate: x" + (chunkPos.x()+" y"+chunkPos.y()+" z"+chunkPos.z()) + " Current: "+packedChunkPos+" Prev: "+prev);
+                return;
+            }
+            duplicateChunks.put(wrappedPackedChunkPos, packedChunkPos);
             updateChunkBlocks(stack, wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
             updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
         }
@@ -237,12 +245,6 @@ public class Renderer {
         long voxelPtr = voxelSSBO.stagingBuffer.pointer.get(0);
         if (initialized) {
             vmaVirtualFree(blocks.get(0), chunkBlockAllocs.get(packedChunkPos));
-            Region region = getRegion(packRegionPos(chunkPos.x()>>regionBitsChunks, chunkPos.y()>>regionBitsChunks, chunkPos.z()>>regionBitsChunks));
-            if (region.indicesAmt > 0 && region.generated && !region.copiedFluid) {
-                region.copiedFluid = true;
-                BufferHelper.copyBuffer(stack, region.fluidVertexStagingBuf.buffer[0], region.fluidVertexBuf.buffer[0], region.fluidVertexStagingBuf.size);
-                BufferHelper.copyBuffer(stack, region.fluidIndexStagingBuf.buffer[0], region.fluidIndexBuf.buffer[0], region.fluidIndexStagingBuf.size);
-            }
         }
         VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
         allocCreateInfo.alignment(4);
@@ -438,7 +440,18 @@ public class Renderer {
         float scale = Settings.upscaled ? 16.f : 8.f;
         int x = ((int)Math.ceil(eWidth/scale)), y = ((int)Math.ceil(eHeight/scale));
         int tilesPerRow = (x+swizzle-1)/swizzle;
+        VkMemoryBarrier2.Buffer barrier = VkMemoryBarrier2.calloc(1, stack)
+                .sType(VK13.VK_STRUCTURE_TYPE_MEMORY_BARRIER_2)
+                .srcStageMask(VK13.VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT)
+                .srcAccessMask(VK13.VK_ACCESS_2_MEMORY_READ_BIT | VK13.VK_ACCESS_2_MEMORY_WRITE_BIT)
+                .dstStageMask(VK13.VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT)
+                .dstAccessMask(VK13.VK_ACCESS_2_MEMORY_READ_BIT | VK13.VK_ACCESS_2_MEMORY_WRITE_BIT);
+        VkDependencyInfo dependencyInfo = VkDependencyInfo.calloc(stack)
+                .sType(VK13.VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
+                .pMemoryBarriers(barrier);
+        vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
         vkCmdDispatch(currentCmdBuffer, tilesPerRow*swizzle*y, 1, 1);
+        vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
         unbindComputeImages(stack, new long[]{Textures.colors1.image, Textures.norms1.image}, Textures.depth1.image);
     }
     public static void drawSSAO(MemoryStack stack) {
@@ -615,10 +628,10 @@ public class Renderer {
                 .pValues(stack.longs(timeline));
         int waitResult = vkWaitSemaphores(vkDevice, semaphoreWaitInfo, Long.MAX_VALUE);
         if (waitResult != VK_SUCCESS) {throw new RuntimeException("Failed to wait for timeline semaphore: "+waitResult);}
-//        long took = (System.currentTimeMillis()-startTime);
-//        if (took > 100) {
-//            System.out.println("Took " + took + "ms to start cmd buffer on frame "+totalFrames+" with frame idx "+frameIdx+" and image idx "+imageIdx+". ");
-//        }
+        long took = (System.currentTimeMillis()-startTime);
+        if (took > 100) {
+            System.out.println("Took " + took + "ms to start cmd buffer on frame "+totalFrames+" with frame idx "+frameIdx+" and image idx "+imageIdx+". ");
+        }
 
         IntBuffer imageIdxBuf = stack.mallocInt(1);
         int result = vkAcquireNextImageKHR(vkDevice, vkSwapchain, Long.MAX_VALUE, imageAvailableSemaphores[frameIdx], VK_NULL_HANDLE, imageIdxBuf);

@@ -416,9 +416,9 @@ public class World {
         }
     }
     public static final ConcurrentLinkedDeque<Long> fluidUpdateQueue = new ConcurrentLinkedDeque<>();
-    public static final HashSet<Long> fluidUpdateSet = new HashSet<>();
+    public static final Set<Long> fluidUpdateSet = ConcurrentHashMap.newKeySet();
     public static final ConcurrentLinkedDeque<Long> updateQueue = new ConcurrentLinkedDeque<>();
-    public static final HashSet<Long> updateSet = new HashSet<>();
+    public static final Set<Long> updateSet = ConcurrentHashMap.newKeySet();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
         Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);

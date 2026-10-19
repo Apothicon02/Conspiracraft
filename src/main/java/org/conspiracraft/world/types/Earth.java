@@ -148,9 +148,9 @@ public class Earth extends WorldType {
         for (int i = 0; i < positions.length; i++) {positions[i] = new ArrayList<>();}
         int intsPerThread = 0;
         int thread = 0;
-        for (int rX = -halfSizeRegions; rX < halfSizeRegions; rX++) {
-            for (int rY = -quarterHeightRegions; rY < quarterHeightRegions; rY++) {
-                for (int rZ = -halfSizeRegions; rZ < halfSizeRegions; rZ++) {
+        for (int rX = -halfSizeRegions+1; rX < halfSizeRegions; rX++) {
+            for (int rY = -quarterHeightRegions+1; rY < quarterHeightRegions; rY++) {
+                for (int rZ = -halfSizeRegions+1; rZ < halfSizeRegions; rZ++) {
                     if (thread >= wgThreads) {thread = 0;}
                     if (thread == 0) {intsPerThread+=3;}
                     positions[thread++].add(new Vector3i(rX, rY, rZ));
@@ -307,7 +307,9 @@ public class Earth extends WorldType {
             for (int cZ = cZStart; cZ < cZEnd; cZ++) {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
                     long cP = packChunkPos(cX, cY, cZ);
-                    updateQueue.addLast(cP);
+                    if (updateSet.add(cP)) {
+                        updateQueue.addLast(cP);
+                    }
                 }
             }
         }

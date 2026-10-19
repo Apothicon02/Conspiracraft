@@ -81,7 +81,9 @@ public class LightHelper {
         }
         for (Chunk chunk : dirtyChunks) {
             chunk.lightUpdateArr = null;
-            updateQueue.add(chunk.cCP);
+            if (updateSet.add(chunk.cCP)) {
+                updateQueue.add(chunk.cCP);
+            }
         }
         dirtyChunks.clear();
     }
