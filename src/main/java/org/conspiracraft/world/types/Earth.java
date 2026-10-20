@@ -46,9 +46,9 @@ public class Earth extends WorldType {
     public WorldType space() {
         return space;
     }
-    private final float longitude = (float) Math.toRadians(67.f);
+    private final float latitude = (float) Math.toRadians(67.f);
     @Override
-    public float getLongitude() {return longitude;}
+    public float getLatitude() {return latitude;}
     @Override
     public Planet getPlanet(){return StarSystem.planets[4];}
     @Override
@@ -324,8 +324,8 @@ public class Earth extends WorldType {
             }
         }
     }
-    public static double getTerrace(double noise) {
-        return ((Math.ceil(noise*0.02f))*50)+(Math.pow((noise*0.02f)%1, 10)*50);
+    public static double getTerrace(double noise, double pow) {
+        return ((Math.ceil(noise*0.02f))*50)+(Math.pow((noise*0.02f)%1, (int)pow)*50);
     }
     public static double getTerraceSmall(double noise) {
         return ((Math.ceil(noise*0.5f))*2)+(Math.pow((noise*0.5f)%1, 4)*2);
@@ -351,14 +351,18 @@ public class Earth extends WorldType {
                 double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * coastalness;
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
                 //double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (Utils.mix(hillsNoise, Math.floor(hillsNoise*20)*0.05f, Math.clamp((plainsNoise+detailNoise-0.75f)*4, 0, 1)) - hillCracks) * 125);
-                double hills = Math.max(0, (hillsNoise - hillCracks) * 125);
-                double terraceness = Math.clamp((plainsNoise-0.5f)*3*(1-coastalness), 0, 1.f);
-                hills = Utils.mix(hills, Math.max(hills, getTerrace(hills+(plainsNoise*25))-(plainsNoise*25)), terraceness);
+                double hills = Utils.mix(Math.max(dunes, Math.max(0, (hillsNoise - hillCracks) * 125)) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans);
+                double terraceNoise = SimplexNoise.noise(z / 1000.f, x / 1000.f);
+                terraceNoise=Math.min(1, terraceNoise+(0.2f*plainsNoise));
+                terraceNoise+=(1-terraceNoise)*(plainsNoise*Math.max(0, Math.min(hillsNoise, 0.05f)-(0.03f*hillsNoise))*14);
+                double terraceCoastalness = Math.min(1.f, 100 * (0.05f - Math.min(0.05f, continents)));
+                double terraceness = Math.clamp((terraceNoise)*2*((1-terraceCoastalness)+Math.max(0, Math.min(1, terraceCoastalness*10)*(4*(Math.abs(detailNoise)-terraceCoastalness)))), 0, 1.f);
+                hills = Utils.mix(hills, Math.max(hills, getTerrace(hills+(200), 10+Math.clamp(detailNoise*60, 0, 30))-(200)), terraceness);
                 double unhills = (plainsNoise * 3) + ((detailNoise * 5 * Math.max(0.34f, plainsNoise))*(1-terraceness));
                 hills = Math.max(hills, (getTerraceSmall(hills+(detailNoise*4))-(detailNoise*4))*Math.clamp((hills-unhills)*0.125f, 0, 1));
                 hills += unhills;
                 double vegetationNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
-                int elevation = (int) Math.max(GROUND_LEVEL + 6, Utils.mix(Math.max(dunes, hills) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans));
+                int elevation = (int) Math.max(GROUND_LEVEL + 6, hills);
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
                 Biome biome = dunes > hills ? Biomes.DESERT : (temperature > 0.1f ? Biomes.RAINFOREST : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (vegetationNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id();

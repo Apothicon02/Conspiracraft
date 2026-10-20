@@ -72,7 +72,7 @@ public class StarSystem {
         if (activePlanet != null) {
             Quaternionf quaternion = new Quaternionf();
             quaternion.rotationXYZ(-activeRot.x, -activeRot.y, -activeRot.z);
-            quaternion.rotateX(World.worldType.getLongitude());
+            quaternion.rotateX(World.worldType.getLatitude());
             Vector3f rotatedPos = new Vector3f();
             quaternion.transform(relativePos, rotatedPos);
             relativePos.set(rotatedPos);

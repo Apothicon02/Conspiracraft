@@ -27,7 +27,7 @@ public class WorldType {
     public Cell getGlobalAtmo() {return globalAtmo;}
     public ByteArrayList getGlobalElements() {return globalElements;}
     public WorldType space() {return null;}
-    public float getLongitude() {return 0.f;}
+    public float getLatitude() {return 0.f;}
     public Path getWorldPath() {return Path.of(Main.mainFolder+"world0/none");}
     public Planet getPlanet(){return null;}
     public static Vector3d nearestLightning = new Vector3d();

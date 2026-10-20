@@ -67,7 +67,6 @@ void main() {
     worldPos /= worldPos.w;
     vec2 reprojectedPos = reproject(worldPos.xyz);
     if (!(reprojectedPos.x >= 0.f && reprojectedPos.x < scale && reprojectedPos.y >= 0.f && reprojectedPos.y < scale)) { reprojectedPos = uv; }
-    float oldDepth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], ivec2(floor(reprojectedPos*globalUbo.res)+vec2(0.5f)), 0).r;
     if (baseDepth < 0.9f) { // dont do taa on objects too close to the camera. if (baseDepth < 0.9f && (abs(oldDepth-baseDepth)/baseDepth < 0.1f || (baseDepth < 0.00000001f && oldDepth < 0.00000001f))) {
         float velocity = distance((reprojectedPos*globalUbo.res), gl_FragCoord.xy);
         int radius = velocity < 0.6f ? 2 : 1;
@@ -80,7 +79,8 @@ void main() {
                 boxMax = max(boxMax, nearColor);
             }
         }
-        vec4 oldColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.x)], (floor(reprojectedPos*globalUbo.res)+vec2(0.5f))/globalUbo.res, 0);
+        float oldDepth = texelFetch(Sampler2D[nonuniformEXT(pushUbo.writeTex.y)], ivec2(reprojectedPos*globalUbo.res), 0).r;
+        vec4 oldColor = textureLod(Sampler2D[nonuniformEXT(pushUbo.writeTex.x)], reprojectedPos, 0);
         oldColor = clamp(oldColor, boxMin, boxMax);
         float depthDif = abs(oldDepth-baseDepth)/baseDepth;
         outColor = mix(baseColor, oldColor*(1+(max(vec4(0), (baseColor-oldColor)-(10*depthDif)))), 0.95f);

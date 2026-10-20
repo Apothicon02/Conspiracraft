@@ -486,7 +486,7 @@ vec4 dda(bool shadow) {
             //if (abs(ddaPos.x-ogChunkPos.x) >= sizeChunks/2 || abs(ddaPos.y-ogChunkPos.y) >= heightChunks/4 || abs(ddaPos.z-ogChunkPos.z) >= sizeChunks/2) {break;}
             ivec3 chunkRayPos = ddaPos;
             updateChunkData(ddaPos);
-            if (abs(chunk.x-globalChunkPos.x) >= sizeChunks/2 || abs(chunk.y-globalChunkPos.y) >= heightChunks/2 || abs(chunk.z-globalChunkPos.z) >= sizeChunks/2) {break;}
+            if (abs(chunk.x-globalChunkPos.x) >= sizeChunks*0.5f || abs(chunk.y-globalChunkPos.y) >= (heightChunks-1)*0.5f || abs(chunk.z-globalChunkPos.z) >= sizeChunks*0.5f) {break;}
             else if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
                 stage = 2;
                 stepAnything = false;

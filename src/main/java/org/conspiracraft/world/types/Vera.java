@@ -50,9 +50,9 @@ public class Vera extends WorldType {
     public WorldType space() {
         return space;
     }
-    private final float longitude = (float) Math.toRadians(80.f);
+    private final float latitude = (float) Math.toRadians(80.f);
     @Override
-    public float getLongitude() {return longitude;}
+    public float getLatitude() {return latitude;}
     public Planet parent = StarSystem.planets[0];
     @Override
     public Planet getPlanet(){return parent.moons[1];}
