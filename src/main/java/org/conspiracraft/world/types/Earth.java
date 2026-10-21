@@ -346,12 +346,12 @@ public class Earth extends WorldType {
                 double temperature = tempX < HOT ? Utils.gradient(tempX, HOT-TEMP_RANGE, HOT, 0.1f, 1.f) : (tempX < MID ? 0.1f : (tempX > COLD ? -1 : -0.1f));//regionNoises.temperature()[packed];
                 double desertness = ((Math.clamp(temperature, 0.25f, 0.35f) - 0.3f) * 20);
                 double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
-                double dunes = (4 + (45 * dunesNoise)) * desertness;
+                double dunes = ((4 + (45 * dunesNoise)) * desertness)+ 8 + SEA_LEVEL;
                 double coastalness = Math.min(1.f, 100 * (0.15f - Math.min(0.15f, continents)));
                 double hillCracks = ((Math.max(0.25f, dunesNoise) - 0.25f)) * coastalness;
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
                 //double hills = (detailNoise * 5 * Math.max(0.34f, plainsNoise)) + (plainsNoise * 3) + Math.max(0, (Utils.mix(hillsNoise, Math.floor(hillsNoise*20)*0.05f, Math.clamp((plainsNoise+detailNoise-0.75f)*4, 0, 1)) - hillCracks) * 125);
-                double hills = Utils.mix(Math.max(dunes, Math.max(0, (hillsNoise - hillCracks) * 125)) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans);
+                double hills = Utils.mix(Math.max(0, (((hillsNoise - 0.25f)*1.34f) - hillCracks) * 125) + 8 + SEA_LEVEL, GROUND_LEVEL, oceans);
                 double terraceNoise = SimplexNoise.noise(z / 1000.f, x / 1000.f);
                 terraceNoise=Math.min(1, terraceNoise+(0.2f*plainsNoise));
                 terraceNoise+=(1-terraceNoise)*(plainsNoise*Math.max(0, Math.min(hillsNoise, 0.05f)-(0.03f*hillsNoise))*14);
@@ -361,12 +361,15 @@ public class Earth extends WorldType {
                 double unhills = (plainsNoise * 3) + ((detailNoise * 5 * Math.max(0.34f, plainsNoise))*(1-terraceness));
                 hills = Math.max(hills, (getTerraceSmall(hills+(detailNoise*4))-(detailNoise*4))*Math.clamp((hills-unhills)*0.125f, 0, 1));
                 hills += unhills;
-                double vegetationNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
+                boolean isDune = dunes > hills;
+                hills = Math.max(dunes, hills);
+                double biomeNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
                 int elevation = (int) Math.max(GROUND_LEVEL + 6, hills);
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
-                Biome biome = dunes > hills ? Biomes.DESERT : (temperature > 0.1f ? Biomes.RAINFOREST : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (vegetationNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
+                Biome biome = isDune ? Biomes.DESERT : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : Biomes.TEMPERATE) : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id();
 
+                double vegetationNoise =  SimplexNoise.noise(x / 725.f, z / 725.f);
                 regionNoises.continents()[packed] = continentsNoise;
                 regionNoises.vegetation()[packed] = vegetationNoise;
                 regionNoises.dunes()[packed] = dunesNoise;
