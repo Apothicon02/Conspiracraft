@@ -40,6 +40,7 @@ public class LightHelper {
         Chunk chunk = getChunkGlobalPos(packedCp);
         int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
         synchronized (queue) {
+            if (chunk == null || chunk.lightUpdateArr() == null) {return;}
             boolean exists = chunk.lightUpdateArr()[packedLp];
             if (!exists) {
                 chunk.lightUpdateArr[packedLp] = true;

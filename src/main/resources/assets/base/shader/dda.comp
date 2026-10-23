@@ -1032,7 +1032,7 @@ void main() {
             float fluidFogginess = clamp(sqrt(distance(primaryLightPos, fluidPos) / 128) + 0.1f, 0.4f, 1.f);
             primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
-            vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, false, fluidFogginess, false).rgb;
+            vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb;
             color.rgb = mix(color.rgb, fluidColor, fluidFogginess);
 
             float brightness = max(fluidColor.r, max(fluidColor.g, fluidColor.b));
