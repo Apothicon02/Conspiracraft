@@ -90,8 +90,8 @@ public class Biomes {
         return Chunk.packInts(type, subtype);
     }
 
-    public static int getBadlandsBands(int y) {
-        y/=2;
+    public static int getBadlandsBands(int y, int div) {
+        y/=div;
         return (y&5) == 0 ? BlockTypes.SANDSTONE.id : ((y&2) == 0 ? BlockTypes.ORANGE_SANDSTONE.id : BlockTypes.RED_SANDSTONE.id);
     }
 }
