@@ -187,7 +187,7 @@ public class BlockTypes {
             BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/basalt",  STONE.blockProperties.copy())), //75
             GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/granite",  new BlockProperties().hasSlab())),
             CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType(blockTypeMap.size(), "geological/texture/cinnabar",  new BlockProperties().hasSlab())),
-            OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "natural/texture/obsidian_dust",  GRAVEL.blockProperties.copy().blockSFX(
+            OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.OBSIDIAN_DUST), SAND.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),
             STEEL_PLATING = create(List.of(BlockTags.wrenchEfficient), new BlockType(blockTypeMap.size(), "misc/model/cube", Map.of(Utils.packColor(255), Materials.STEEL),
                     new BlockProperties().hasSlab().blockSFX(

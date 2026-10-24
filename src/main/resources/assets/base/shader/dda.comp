@@ -323,7 +323,7 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     float sunDepth = globalUbo.fogginess < 0 ? 1 : abs(dot(normalize(minnedSun - lightPos), vec3(0, 1, 0)));
     sunColor = mix(globalUbo.atmosphere.rgb, globalUbo.nightAtmosphere.rgb, (clamp(sunDepth, 0.1f, 0.2f)-0.1f)*10);
     vec3 horizonColor = mix(mix(globalUbo.sunsetAtmosphere.rgb, globalUbo.deepSunsetAtmosphere.rgb, min(sunDepth, 0.1f)*10), vec3(1), min(max(max(0.f, sunDepth-0.5f), sunHeight), 0.1f)*10);
-    float whiteness = isSky ? (1.f-clamp((lightPos.y/512)-0.25f, 0, 1)) : 1.f;
+    float whiteness = isSky ? (1.f-clamp((((lightPos.y-ogPos.y)+globalPos.y-SEA_LEVEL)/512)-0.25f, 0, 1)) : 1.f;
     sunColor = mix(sunColor, horizonColor, whiteness);
 
     sunColor=sunColor*globalUbo.skylightMul.rgb*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2);//mix(sunColor*globalUbo.skylightMul.rgb, sunColor*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2), 0.5f);
@@ -691,9 +691,9 @@ vec3 mipmap(vec3 color) {
 //    return clamp(brightness, 0.14f, 1.f);
 //}
 float fogDist = pow(globalUbo.fogginess, 4);
-float getFogginess(bool isSky, vec3 pos, float mul, float max) {
-    vec3 globalFogPos = (floor(globalPos/sizeVec)*sizeVec)+pos;
-    return globalUbo.fogginess <= 0 ? 0 : (isSky ? max : clamp((sqrt((abs(ogPos.x-pos.x)+abs(ogPos.y-pos.y)+abs(ogPos.z-pos.z)) / (renderDistance * fogDist))-0.25f) * (gradient(globalFogPos.y, SEA_LEVEL, SEA_LEVEL+32, 0, abs(noise(pos.xz).r * 0.67f))+gradient(globalFogPos.y, SEA_LEVEL+32, SEA_LEVEL+320, 0, 1)) * mul, 0.f, max));
+float getFogginess(bool isSky, vec3 pos, float mul, float maxFog) {
+    float elevation = (floor(globalPos.y/height)*height)+pos.y;
+    return globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFog : clamp((sqrt(max(abs(ogPos.x-pos.x), max(abs(ogPos.y-pos.y), abs(ogPos.z-pos.z))) / (renderDistance * fogDist))-0.25f) * (gradient(elevation, SEA_LEVEL, SEA_LEVEL+32, 0, abs(noise(pos.xz).r * 0.67f))+gradient(elevation, SEA_LEVEL+32, SEA_LEVEL+320, 0.75f, 1)) * mul, 0.f, maxFog));
 }
 vec3 hueShift(vec3 color, float hue) {
     const vec3 k = vec3(0.57735, 0.57735, 0.57735);
@@ -893,7 +893,7 @@ void main() {
                 rayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
                 float dist = distance(ogPos, rayPos)/(0.5f*renderDistance);
-                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f));
+                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*0.5f*globalUbo.skylightMul.w;
                 vec3 globalFogPos = floor((((floor(globalPos/sizeVec)*sizeVec)+ogPos) + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).x*5)+(noise(globalFogPos.zx*0.015f).x*485);
                 if (globalFogPos.y > SEA_LEVEL) {
@@ -911,6 +911,7 @@ void main() {
             }
             minLight = prevMinLight;
         }
+        clouds = min(clouds, 1);
         if (!emissive) {
             if (!celestial || fluidInfront) {
                 if (globalUbo.season == 1) { //autumn
@@ -1024,6 +1025,9 @@ void main() {
                 vec3 lighting = getLightingColor(celestialSource, primaryLightPos, blockLighting, isSky, primaryFogginess, false).rgb;
                 color.rgb*=lighting;
                 color.rgb = mix(color.rgb, lighting, primaryFogginess);
+                float borderFogginess = (clamp(max(abs(ogPos.x-primaryLightPos.x), max(abs(ogPos.y-primaryLightPos.y), abs(ogPos.z-primaryLightPos.z)))/renderDistance, 0.9f, 1.f)-0.9f)*10;
+                color.rgb = mix(color.rgb, getLightingColor(celestialSource, ogPos + ogDir * renderDistance, vec4(0, 0, 0, 1), true, 1.f, false).rgb, borderFogginess);
+                primaryFogginess = max(primaryFogginess, borderFogginess);
                 //float grey = max(color.r, max(color.g, color.b));
                 //color.rgb += (vec3(grey) - color.rgb) * mix(desaturationFactor, 0.f, max(blockLighting.r, max(blockLighting.g, blockLighting.b)));
                 outNormal = vec4(primaryFlatNormal, primaryFogginess);
@@ -1038,6 +1042,7 @@ void main() {
             }
         }
         color.rgb = mix(color.rgb, vec3(1), clouds);
+        outNormal.a = max(outNormal.a, clouds);
         primaryTint.rgb = mix(primaryTint.rgb, firstTintAddition, 0.5f);
         float fogginess = getFogginess(isSky, primaryTintLightPos, fogginessMul, maxFogginess);
         primaryTint.rgb = mix(primaryTint.rgb, getLightingColor(celestialSource, primaryTintLightPos, vec4(0, 0, 0, 1.f), isSky, fogginess, false).rgb, fogginess);
@@ -1096,10 +1101,11 @@ void main() {
             color.rgb /= colMax;
         }
         color.rgb+=lightshaft*0.75f;
+        color.rgb = max(vec3(0), color.rgb);
         imageStore(Image2D[nonuniformEXT(pushUbo.tex2.z)], coords, vec4((emissive ? color.rgb : vec3(0)), 0));
         vec4 sunOnly = getLightingColor(celestialSource, primaryLightPos, vec4(0, 0, 0, blockLighting.w), false, 0, false);
         float sunBrightness = max(sunOnly.r, max(sunOnly.g, sunOnly.b));
-        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(max(0.5f, shadowFactor-maxLightshaft), 1, max(primaryFogginess, (1-min(1, sunBrightness))+(0.5f*max(blockLighting.r, max(blockLighting.g, blockLighting.b)))))) : 3)));
+        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(max(0.5f, shadowFactor-maxLightshaft), 1, max(max(clouds, primaryFogginess), (1-min(1, sunBrightness))+(0.5f*max(blockLighting.r, max(blockLighting.g, blockLighting.b)))))) : 3)));
         imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], coords, vec4(depth, 0, 0, 0));
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], coords, outNormal);
     }

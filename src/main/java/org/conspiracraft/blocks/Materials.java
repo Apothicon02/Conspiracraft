@@ -108,7 +108,8 @@ public class Materials {
             PAPER = create("crafted/material/paper"),
             SHOJI = create("crafted/material/shoji"),
             BLUEPRINT = create("machine/material/blueprint"),
-            STEEL = create("crafted/material/steel");
+            STEEL = create("crafted/material/steel"),
+            OBSIDIAN_DUST = create("natural/material/obsidian_dust");
 
     private static Material create(String path) {
         Material material = new Material(path, materialsList.size());

@@ -16,6 +16,7 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.CoveredBlob;
+import org.conspiracraft.world.shapes.Pillar;
 import org.conspiracraft.world.shapes.Pond;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
@@ -344,13 +345,13 @@ public class Earth extends WorldType {
                 double oceans = 4 * (0.25f - Math.min(0.25f, continents));
                 double tempX = (plainsNoise*50)+x;
                 double temperature = tempX < HOT ? Utils.gradient(tempX, HOT-TEMP_RANGE, HOT, 0.1f, 1.f) : (tempX < MID ? 0.1f : (tempX > COLD ? -1 : -0.1f));//regionNoises.temperature()[packed];
-                double geographicNoise = (SimplexNoise.noise(x / 8000.f, z / 8000.f)*2)-1;
+                double geographicNoise = SimplexNoise.noise(x / 8000.f, z / 8000.f);
                 double desertness = ((Math.clamp(temperature, 0.25f, 0.35f) - 0.3f) * 20);
                 double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
                 double ridgesNoise = noisePipeline.evaluateNoise(x / 1250.d, z / 1250.d);
                 double base = Utils.mix(100+plainsNoise+detailNoise, 8, oceans);
-                double ridges = 128*Math.max(0, Utils.mix(Math.pow(ridgesNoise, 3), 0, Math.clamp((geographicNoise-0.34f)*50, 0, 1)));
+                double ridges = (128*(1+desertness))*Math.max(0, Utils.mix(Math.pow(ridgesNoise, 3+(desertness*2)), 0, Math.clamp((geographicNoise-0.34f)*50, 0, 1)));
                 base += ridges;
                 double hilliness = (geographicNoise+0.34f)*-50;
                 double hillCutouts = (Math.min(1, oceans*50)*0.175f*detailNoise);
@@ -359,7 +360,7 @@ public class Earth extends WorldType {
                 base = Math.max(base, (getTerraceSmall(base+detailNoise)-detailNoise)*Math.clamp(base*0.125f, 0, 1));
                 double continentalTerraceOffset = ((plainsNoise+detailNoise)*2)+118;
                 double prevBase = base;
-                base += Math.max(0, getTerrace(Utils.mix(0, (geographicNoise+0.5f)*134, Math.clamp((continents-0.125f)*4, 0, 1))+continentalTerraceOffset, 10)-continentalTerraceOffset);
+                base += Math.max(0, getTerrace(Utils.mix(0, (geographicNoise+0.5f)*200, Math.clamp((continents-0.125f)*4, 0, 1))+continentalTerraceOffset, 10)-continentalTerraceOffset);
                 double continentalTerrace = base-prevBase;
                 double dunes = Utils.mix(((4 + (45 * dunesNoise)) * desertness)+108, 0, oceans);
                 double badlands = Utils.mix(((4 + (80 * Math.clamp((hillsNoise - Math.abs(dunesNoise*0.5f) - 0.34f - Math.max(0, continentalTerrace*0.01f))*10, 0, 1))) * desertness)+108-Math.max(0, 0.5f*(dunes-110)), 8, oceans);
@@ -370,7 +371,7 @@ public class Earth extends WorldType {
                 double biomeNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
                 int elevation = (int) Math.max(GROUND_LEVEL + 6, GROUND_LEVEL+base);
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
-                Biome biome = isBadlands ? Biomes.BADLANDS : isDune ? Biomes.DESERT : ridges+(10*detailNoise) > 30 ? Biomes.STONY_RIDGE : ridges-(5*detailNoise) > 24 ? Biomes.GRAVELLY_HILL : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : Biomes.TEMPERATE) : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
+                Biome biome = isBadlands ? Biomes.BADLANDS : !isDune && ridges+(10*detailNoise) > 30 ? Biomes.STONY_RIDGE : !isDune && ridges-(5*detailNoise) > 24 ? Biomes.GRAVELLY_HILL :  isDune || geographicNoise < -0.5f ? (geographicNoise+(dunesNoise*0.06f) <= -0.85f ? Biomes.PALMY_PLAINS : Biomes.DESERT) : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : Biomes.TEMPERATE) : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id();
 
                 double vegetationNoise =  SimplexNoise.noise(x / 725.f, z / 725.f);
@@ -480,6 +481,8 @@ public class Earth extends WorldType {
                             int surface = GROUND_LEVEL + region2D.heights[packed];
                             if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
                                 byte biome = biomes[packed];
+                                double detailNoise = regionNoises.detail()[packed];
+                                double absDetailNoise = Math.abs(detailNoise);
                                 double vegetationNoise = regionNoises.vegetation()[packed];
                                 double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                                 double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
@@ -659,12 +662,67 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 } else if (blockOn.x() == BlockTypes.WET_SAND.id) {
-                                    if (foliageChance > 0.999f) {
+                                    if (foliageChance > 0.99f) {
                                         PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                     }
                                 } else if (blockOn.x() == BlockTypes.SAND.id) {
-                                    if (foliageChance+0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
-                                        PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                     if (foliageChance+0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
+                                        if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
+                                            Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.SAND.id}, true);
+                                        }
+                                    }
+                                } else if (blockOn.x() == BlockTypes.ORANGE_SAND.id) {
+                                    if (biome == Biomes.PALMY_PLAINS.id()) {
+                                        if (absDetailNoise > 0.7f) {
+                                            int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
+                                            for (int y = surface; y <= height; y++) {
+                                                setBlockWorldgen(x, y, z, BlockTypes.ORANGE_SANDSTONE.id, 0);
+                                            }
+                                        } else if (absDetailNoise > 0.2f) {
+                                            setBlockWorldgen(x, surface, z, BlockTypes.GRASS.id, 3);
+                                        } else {
+                                            setBlockWorldgen(x, surface, z, 0, 0);
+                                        }
+                                        if (foliageChance < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99996f) {
+                                            if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id}, true);
+                                            }
+                                        } else if (foliageChance+0.02f < foliageNoise * 0.015f * (1-vegetationNoise) || foliageChance > 0.99965f) {
+                                            if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id}, true);
+                                            }
+                                        } else if (foliageChance > 0.9996f) {
+                                            int maxHeight = rand.nextInt(6, 10);
+                                            int radius = rand.nextInt(5, 7);
+                                            if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                            }
+                                        } else if (foliageChance > 0.99955f) {
+                                            int maxHeight = rand.nextInt(6, 10);
+                                            int radius = rand.nextInt(4, 6);
+                                            if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                            }
+                                        } else if (foliageChance > 0.99952f) {
+                                            int maxHeight = rand.nextInt(6, 10);
+                                            int radius = rand.nextInt(2, 4);
+                                            if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                            }
+                                        }
+                                    }
+                                } else if (blockOn.x() == BlockTypes.MAGMA.id) {
+                                    if (absDetailNoise > 0.7f) {
+                                        int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
+                                        for (int y = surface-3; y <= height; y++) {
+                                            setBlockWorldgen(x, y, z, BlockTypes.FLINT.id, 0);
+                                        }
+                                    } else if (absDetailNoise > 0.2f) {
+                                        for (int y = surface-3; y <= surface; y++) {
+                                            setBlockWorldgen(x, y, z, BlockTypes.OBSIDIAN_DUST.id, 0);
+                                        }
+                                    } else {
+                                        setBlockWorldgen(x, surface, z, 0, 0);
                                     }
                                 }
                             }
@@ -825,7 +883,14 @@ public class Earth extends WorldType {
                                 if (blockIn.x() == 0) {
                                     if (blockOn.x() == BlockTypes.GRASS.id) {
                                         if (foliageChance < 0.3f) {
-                                            int type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
+                                            int type;
+                                            if (blockOn.y() == 3) {
+                                                type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.032f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
+                                            } else if (blockOn.y() == 1) {
+                                                type = foliageNoise < 0.06f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
+                                            } else {
+                                                type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
+                                            }
                                             setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? (blockOn.y()*4) : 0)+rand.nextInt(4));
                                         }
                                     } else if (blockOn.x() == BlockTypes.SAND.id) {
