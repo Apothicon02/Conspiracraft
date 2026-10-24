@@ -155,6 +155,7 @@ public class Player {
         }
     }
     public void drawView() {
+        if (!GUI.showUI) {return;}
         float bob = (float)Utils.getInterpolatedDouble(prevBobbing, bobbing);
         Matrix4f matrix = new Matrix4f().rotationXYZ((float) (bob+0.5f+Math.toRadians(HandManager.getTilt()*0.34f)), 4.7124f, 0.1f).setTranslation(0.75f, (-0.3f)+bob, 0.3f);
         Item selItem = inv.getSelectedItem(true);
@@ -217,7 +218,7 @@ public class Player {
 
         }
         doSounds();
-        if (pos.y() > Earth.SKY_LEVEL && worldType != WorldTypes.SPACE) {
+        if (pos.y() > Earth.SKY_LEVEL+1000 && worldType != WorldTypes.SPACE) {
             changePlanet(new Vector3d(World.worldType.getPlanet().pos).add(0, World.worldType.getPlanet().scale, 0), WorldTypes.SPACE);
         }
 //        if (World.worldType.space() != null) { //going from surface to planet orbit

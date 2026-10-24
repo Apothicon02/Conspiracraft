@@ -390,7 +390,7 @@ public class World {
         if (chunk == null) {return new Vector2i(0);}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
-            return new Vector2i(15);//chunk.getFluid(pos);
+            return chunk.getFluid(pos);
         }
     }
     public static int getBlockTypeUnchecked(int x, int y, int z) {

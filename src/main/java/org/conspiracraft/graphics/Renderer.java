@@ -380,7 +380,7 @@ public class Renderer {
             StarSystem.render(stack);
             modelOffset.set(viewPos);
             pushUBO.updateTex(null); //use no texture
-            drawClouds();
+            //drawClouds();
             drawStars();
             pushUBO.updateTex(Textures.skybox);
             pushUBO.updateAtlasOffset(new Vector2i(0));
@@ -412,21 +412,27 @@ public class Renderer {
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors2, Textures.norms2}, Textures.depth3, 1, false, true);
         player.drawView();
         unbindImagesDrawingTo(stack, new long[]{Textures.colors2.image, Textures.norms2.image}, Textures.depth3.image);
-        if (getFluid(player.pos.x(), player.pos.y()+player.eyeHeight, player.pos.z()).y() > 0) {
-            updatePipeline(Pipelines.FLUID);
-            bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.fluid}, Textures.fluidDepth, 1, true, true);
-            //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
-            pushUBO.updateTex(null);
-            pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-            pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
+        updatePipeline(Pipelines.FLUID);
+        bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.fluid}, Textures.fluidDepth, 1, true, true);
+        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
+        pushUBO.updateTex(null);
+        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+        pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
+        Vector3d globalCam = player.getCameraTranslationInterpolatedUnwrapped();
+        if (getFluid(globalCam.x(), globalCam.y(), globalCam.z()).y() > 0) {
+//            Vector3f forward = player.camera.getForward().mul(0.05f);
+//            drawQuad(new Matrix4f().lookAlong(forward, Directions.UPF).invert().setTranslation((float) (globalCam.x()+forward.x()-warpOffset.x()), (float) (globalCam.y()+forward.y()-warpOffset.y()), (float) (globalCam.z()+forward.z()-warpOffset.z())).translate(-2.5f, -2.5f, 0.f).scale(5), new Vector4f(1));
+            pushUBO.updateAtlasOffset(new Vector2i(10));
+        } else {
+            pushUBO.updateAtlasOffset(new Vector2i(0));
             for (Region region : World.getAllRegions()) {
                 region.drawFluids(stack);
             }
-            vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
-            vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
-            //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
-            unbindImagesDrawingTo(stack, new long[]{Textures.fluid.image}, Textures.fluidDepth.image);
         }
+        vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+        vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
+        //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_FILL);
+        unbindImagesDrawingTo(stack, new long[]{Textures.fluid.image}, Textures.fluidDepth.image);
     }
     public static final int swizzle = 16;
     public static void drawDDA(MemoryStack stack) {
