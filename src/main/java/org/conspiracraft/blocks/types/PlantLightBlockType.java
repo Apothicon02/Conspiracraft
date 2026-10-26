@@ -22,10 +22,10 @@ public class PlantLightBlockType extends LightBlockType {
         return new Vector2i(blockType, blockSubType);
     }
 
-    public PlantLightBlockType(int id, String name, Map<Integer, Material> materials, LightBlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public PlantLightBlockType(String name, Map<Integer, Material> materials, LightBlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
-    public PlantLightBlockType(int id, String name, LightBlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public PlantLightBlockType(String name, LightBlockProperties blockProperties) {
+        super(name, blockProperties);
     }
 }

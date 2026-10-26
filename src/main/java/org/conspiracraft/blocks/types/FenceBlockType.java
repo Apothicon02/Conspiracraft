@@ -9,8 +9,8 @@ import org.joml.Vector3i;
 import java.util.Map;
 
 public class FenceBlockType extends BlockType {
-    public FenceBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public FenceBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
 
     @Override

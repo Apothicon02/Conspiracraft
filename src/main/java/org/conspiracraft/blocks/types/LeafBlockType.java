@@ -20,10 +20,10 @@ public class LeafBlockType extends BlockType {
         return subType == 0 ? blockProperties.blocksLight : false;
     }
 
-    public LeafBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public LeafBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
-    public LeafBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public LeafBlockType(String name, BlockProperties blockProperties) {
+        super(name, blockProperties);
     }
 }

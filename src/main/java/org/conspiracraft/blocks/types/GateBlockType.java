@@ -10,8 +10,8 @@ import org.joml.Vector3f;
 import java.util.Map;
 
 public class GateBlockType extends BlockType {
-	public GateBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+	public GateBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
 
     @Override

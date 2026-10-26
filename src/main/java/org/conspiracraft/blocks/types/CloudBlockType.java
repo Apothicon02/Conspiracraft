@@ -13,11 +13,11 @@ import java.util.Map;
 import static org.conspiracraft.world.World.*;
 
 public class CloudBlockType extends BlockType {
-    public CloudBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public CloudBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
-    public CloudBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public CloudBlockType(String name, BlockProperties blockProperties) {
+        super(name, blockProperties);
     }
 
     @Override

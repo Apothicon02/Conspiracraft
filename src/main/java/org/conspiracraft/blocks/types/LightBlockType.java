@@ -9,6 +9,6 @@ public class LightBlockType extends BlockType {
         return (LightBlockProperties) blockProperties;
     }
 
-    public LightBlockType(int id, String name, Map<Integer, Material> materials, LightBlockProperties blockProperties) {super(id, name, materials, blockProperties);}
-    public LightBlockType(int id, String name, LightBlockProperties blockProperties) {super(id, name, blockProperties);}
+    public LightBlockType(String name, Map<Integer, Material> materials, LightBlockProperties blockProperties) {super(name, materials, blockProperties);}
+    public LightBlockType(String name, LightBlockProperties blockProperties) {super(name, blockProperties);}
 }

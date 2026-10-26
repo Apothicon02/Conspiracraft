@@ -6,8 +6,8 @@ import org.joml.Vector2i;
 import java.util.Map;
 
 public class CrateBlockType extends BlockType {
-	public CrateBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+	public CrateBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
 
     @Override

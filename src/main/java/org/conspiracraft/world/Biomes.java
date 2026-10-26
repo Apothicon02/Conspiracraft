@@ -19,7 +19,7 @@ public class Biomes {
     public static final Biome DESERT = create(1, BlockTypes.SAND.id, 0, 7, BlockTypes.SAND.id, 0, BlockTypes.SANDSTONE.id, 0);
     public static final Biome PALMY_PLAINS = create(1, BlockTypes.ORANGE_SAND.id, 0, 7, BlockTypes.ORANGE_SAND.id, 0, BlockTypes.ORANGE_SANDSTONE.id, 0);
     public static final Biome TROPICAL_ISLAND = create(1, BlockTypes.GRASS.id, 3, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
-    public static final Biome BEACH = create(1, BlockTypes.GRASS.id, 0, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
+    public static final Biome BEACH = create(1, BlockTypes.SAND.id, 0, 4, BlockTypes.SAND.id, 0, BlockTypes.SANDSTONE.id, 0);
     public static final Biome SAVANNA = create(1, BlockTypes.GRASS.id, 2, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome BADLANDS = create(1, BlockTypes.ORANGE_SAND.id, 0, 64, BlockTypes.ORANGE_SANDSTONE.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome STONY_RIDGE = create(1, BlockTypes.FLINT.id, 0, 4, BlockTypes.FLINT.id, 0, BlockTypes.STONE.id, 0);

@@ -35,10 +35,10 @@ public class PowderBlockType extends BlockType {
         return blockProperties.blocksLight && subType == 0;
     }
 
-    public PowderBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public PowderBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
-    public PowderBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public PowderBlockType(String name, BlockProperties blockProperties) {
+        super(name, blockProperties);
     }
 }

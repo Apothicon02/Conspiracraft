@@ -9,6 +9,7 @@ import org.conspiracraft.blocks.BlockTag;
 import java.util.List;
 import java.util.Map;
 
+import static org.conspiracraft.blocks.types.BlockTypes.blockTypeMap;
 import static org.conspiracraft.world.World.*;
 
 public class BlockType {
@@ -63,16 +64,16 @@ public class BlockType {
     public static final Map<Integer, Material> defaultMaterials = Map.of(Utils.packColor(255), Materials.KYANITE);
     public Map<Integer, Material> materials;
     public Material[] materialsArr;
-    public BlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        this.id = id;
+    public BlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        this.id = blockTypeMap.size();
         this.name = name;
         this.materials = materials;
         materialsArr = new Material[materials.size()];
         materials.values().toArray(materialsArr);
         this.blockProperties = blockProperties;
     }
-    public BlockType(int id, String name, BlockProperties blockProperties) {
-        this.id = id;
+    public BlockType(String name, BlockProperties blockProperties) {
+        this.id = blockTypeMap.size();
         this.name = name;
         this.materials = defaultMaterials;
         materialsArr = new Material[materials.size()];

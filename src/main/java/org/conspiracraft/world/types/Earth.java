@@ -326,7 +326,7 @@ public class Earth extends WorldType {
         }
     }
     public static double getTerrace(double noise, double pow) {
-        return ((Math.ceil(noise*0.02f))*50)+(Math.pow((noise*0.02f)%1, pow)*50);
+        return ((Math.ceil(noise*0.01f))*100)+(Math.pow((noise*0.01f)%1, pow)*100);
     }
     public static double getTerraceSmall(double noise) {
         return ((Math.ceil(noise*0.5f))*2)+(Math.pow((noise*0.5f)%1, 4)*2);
@@ -341,11 +341,13 @@ public class Earth extends WorldType {
                 double detailNoise = SimplexNoise.noise(z / 50.f, x / 50.f);
                 double plainsNoise = SimplexNoise.noise(x / 150.f, z / 150.f);
                 double continentsNoise = SimplexNoise.noise(x / 15000.f, z / 15000.f);
-                double continents = Math.abs((continentsNoise*0.985f)+(plainsNoise*0.005f)+(detailNoise*0.005f));
+                double continents = Math.abs((continentsNoise*0.985f)+(plainsNoise*0.005f));
+                double beachiness = Math.min(1, 13*(Math.clamp(continents, 0.1, 1.0)-0.1f));
+                continents += Math.abs(detailNoise*0.005f);
                 double oceans = 4 * (0.25f - Math.min(0.25f, continents));
                 double tempX = (plainsNoise*50)+x;
                 double temperature = tempX < HOT ? Utils.gradient(tempX, HOT-TEMP_RANGE, HOT, 0.1f, 1.f) : (tempX < MID ? 0.1f : (tempX > COLD ? -1 : -0.1f));//regionNoises.temperature()[packed];
-                double geographicNoise = SimplexNoise.noise(x / 8000.f, z / 8000.f);
+                double geographicNoise = SimplexNoise.noise(x / 2500.f, z / 2500.f);
                 double desertness = ((Math.clamp(temperature, 0.25f, 0.35f) - 0.3f) * 20);
                 double dunesNoise = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
                 double hillsNoise = SimplexNoise.noise(z / 800.f, x / 800.f);
@@ -354,24 +356,28 @@ public class Earth extends WorldType {
                 double ridges = (128*(1+desertness))*Math.max(0, Utils.mix(Math.pow(ridgesNoise, 3+(desertness*2)), 0, Math.clamp((geographicNoise-0.34f)*50, 0, 1)));
                 base += ridges;
                 double hilliness = (geographicNoise+0.34f)*-50;
-                double hillCutouts = (Math.min(1, oceans*50)*0.175f*detailNoise);
-                double hills = Math.max(0, (100+(32*Math.max(0, Utils.mix(hillsNoise, 0, Math.clamp(hilliness, 0, 1)))))-Math.max(0, 500*(oceans-((plainsNoise+(detailNoise*0.1f))*(1-oceans))-hillCutouts)));
-                base = Math.max(base, hills);
-                base = Math.max(base, (getTerraceSmall(base+detailNoise)-detailNoise)*Math.clamp(base*0.125f, 0, 1));
-                double continentalTerraceOffset = ((plainsNoise+detailNoise)*2)+118;
+                double coastalness = Utils.mix(oceans, 1-beachiness, Math.clamp((geographicNoise+0.5f)*-2, 0, 1));
+                double hillCutouts = (Math.min(1, coastalness*50)*0.175f*detailNoise);
+                double hills = Math.max(0, (32*Utils.mix(Math.abs(hillsNoise), hillsNoise*0.5f, Math.clamp(hilliness, 0, 1)))-Math.max(0, 500*(coastalness-hillCutouts)));
+                base += hills;
+                double continentalTerraceOffset = (detailNoise*Math.max(0.5f, plainsNoise)*2)+278;
                 double prevBase = base;
-                base += Math.max(0, getTerrace(Utils.mix(0, (geographicNoise+0.5f)*200, Math.clamp((continents-0.125f)*4, 0, 1))+continentalTerraceOffset, 10)-continentalTerraceOffset);
+                base += Utils.mix(0, Math.max(0, getTerrace((Math.max(0, geographicNoise+0.7f)*100)+continentalTerraceOffset, Math.max(5, 90*((1-ridgesNoise)-0.5f)))-continentalTerraceOffset-30), Math.clamp((continents-0.125f)*(16+Math.max(0, 200*plainsNoise)), 0, 1));
+                base = Math.max(base, (getTerraceSmall(base+detailNoise)-detailNoise)*Math.clamp(base*0.125f, 0, 1));
                 double continentalTerrace = base-prevBase;
                 double dunes = Utils.mix(((4 + (45 * dunesNoise)) * desertness)+108, 0, oceans);
-                double badlands = Utils.mix(((4 + (80 * Math.clamp((hillsNoise - Math.abs(dunesNoise*0.5f) - 0.34f - Math.max(0, continentalTerrace*0.01f))*10, 0, 1))) * desertness)+108-Math.max(0, 0.5f*(dunes-110)), 8, oceans);
+                double badlands = Utils.mix(((112 + (80 * Math.clamp((hillsNoise - Math.abs(dunesNoise*0.5f) - 0.34f - Math.max(0, continentalTerrace*0.01f))*10, 0, 1))) * desertness)-Math.max(0, 0.5f*(dunes-110)), 0, oceans);
                 boolean isBadlands = badlands > base && badlands > dunes;
                 base = Math.max(badlands, base);
                 boolean isDune = dunes > base;
                 base = Math.max(dunes, base);
-                double biomeNoise =  SimplexNoise.noise(x / 1200.f, z / 1200.f);
+                double beaches = (96+(Math.max(-1, 1+(2*detailNoise))))*beachiness;
+                boolean isBeach = beaches > base;
+                base = Math.max(beaches, base);
+                double biomeNoise = SimplexNoise.noise(x / 1200.f, z / 1200.f);
                 int elevation = (int) Math.max(GROUND_LEVEL + 6, GROUND_LEVEL+base);
                 region2D.heights[packed] = (short) Math.clamp(elevation - GROUND_LEVEL, 0, halfHeight-1);
-                Biome biome = isBadlands ? Biomes.BADLANDS : !isDune && ridges+(10*detailNoise) > 30 ? Biomes.STONY_RIDGE : !isDune && ridges-(5*detailNoise) > 24 ? Biomes.GRAVELLY_HILL :  isDune || geographicNoise < -0.5f ? (geographicNoise+(dunesNoise*0.06f) <= -0.85f ? Biomes.PALMY_PLAINS : Biomes.DESERT) : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : Biomes.TEMPERATE) : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
+                Biome biome = isBadlands ? Biomes.BADLANDS : !isDune && ridges+(10*detailNoise) > 30 ? Biomes.STONY_RIDGE : !isDune && ridges-(5*detailNoise) > 24 ? Biomes.GRAVELLY_HILL : isBeach ? Biomes.BEACH : isDune || (geographicNoise < -0.9f && desertness > 0.015f) ? ((dunesNoise*0.06f)+continents <= 0.3f ? Biomes.PALMY_PLAINS : Biomes.DESERT) : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : Biomes.TEMPERATE) : (temperature > 0 ? Biomes.TEMPERATE : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
                 biomes[packed] = biome.id();
 
                 double vegetationNoise =  SimplexNoise.noise(x / 725.f, z / 725.f);
@@ -406,10 +412,19 @@ public class Earth extends WorldType {
 //                            int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biomeId == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biomeId == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
 //                            int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
 //                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
+                            if (SEA_LEVEL < ((cY + 1) * chunkSize) && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
+                                chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                            }
+                            int localYOffset = cY * chunkSize;
+                            int startY = Math.min(((cY + 1) * chunkSize) - 1, SEA_LEVEL - 1) - localYOffset;
+                            int endY = Math.max(elevation + 1, cY * chunkSize) - localYOffset;
+                            for (int lY = startY; lY >= endY; lY--) {
+                                chunk.setFluid(lX, lY, lZ, BlockTypes.WATER.id, 15);
+                            }
                             if (biome == Biomes.BADLANDS) {
                                 double plainsNoise = regionNoises.plains()[packed];
-                                int startY = Math.min(((cY + 1) * chunkSize) - 1, elevation);
-                                int endY = Math.max(cY * chunkSize, GROUND_LEVEL);
+                                startY = Math.min(((cY + 1) * chunkSize) - 1, elevation);
+                                endY = Math.max(cY * chunkSize, GROUND_LEVEL);
                                 for (int y = startY; y >= endY; y--) {
                                     chunk.setBlock(lX, y-(cY * chunkSize), lZ, getBadlandsBands((int) (y+(((24*plainsNoise+y))%8)), (int) (3+Math.abs(hillsNoise*3))), 0);
                                 }
@@ -427,25 +442,9 @@ public class Earth extends WorldType {
                                     midSubtype = 0;
                                     groundType = BlockTypes.SANDSTONE.id;
                                     groundSubtype = 0;
-                                } else if (elevation <= SEA_LEVEL + 3) {
-                                    topType = BlockTypes.SAND.id;
-                                    topSubtype = 0;
-                                    midType = BlockTypes.SAND.id;
-                                    midSubtype = 0;
-                                    groundType = BlockTypes.SANDSTONE.id;
-                                    groundSubtype = 0;
                                 }
                                 int surfaceDepth = biome.surfaceDepth();
                                 int subsurfaceDepth = biome.subsurfaceDepth();
-                                if (SEA_LEVEL < ((cY + 1) * chunkSize) && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
-                                    chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
-                                }
-                                int localYOffset = cY * chunkSize;
-                                int startY = Math.min(((cY + 1) * chunkSize) - 1, SEA_LEVEL - 1) - localYOffset;
-                                int endY = Math.max(elevation + 1, cY * chunkSize) - localYOffset;
-                                for (int lY = startY; lY >= endY; lY--) {
-                                    chunk.setFluid(lX, lY, lZ, BlockTypes.WATER.id, 15);
-                                }
                                 startY = Math.min(((cY + 1) * chunkSize) - 1, elevation) - localYOffset;
                                 endY = Math.max(elevation + 1 - surfaceDepth, cY * chunkSize) - localYOffset;
                                 for (int lY = startY; lY >= endY; lY--) {
@@ -662,13 +661,27 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 } else if (blockOn.x() == BlockTypes.WET_SAND.id) {
-                                    if (foliageChance > 0.99f) {
-                                        PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                    if (biome == Biomes.DESERT.id()) {
+                                        if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.998f) {
+                                            PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0);
+                                        }
+                                    } else if (biome == Biomes.BEACH.id()) {
+                                        if (foliageChance > 0.998f) {
+                                            PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                        }
                                     }
                                 } else if (blockOn.x() == BlockTypes.SAND.id) {
-                                     if (foliageChance+0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
-                                        if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
-                                            Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.SAND.id}, true);
+                                    if (biome == Biomes.DESERT.id()) {
+                                        if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
+                                            if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), new int[]{BlockTypes.SAND.id}, true);
+                                            }
+                                        }
+                                    } else if (biome == Biomes.BEACH.id()) {
+                                        if (foliageChance > 0.99998f) {
+                                            if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0)) {
+                                                Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), new int[]{BlockTypes.SAND.id}, true);
+                                            }
                                         }
                                     }
                                 } else if (blockOn.x() == BlockTypes.ORANGE_SAND.id) {

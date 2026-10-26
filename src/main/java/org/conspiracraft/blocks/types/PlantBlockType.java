@@ -42,10 +42,10 @@ public class PlantBlockType extends BlockType {
         return new Vector2i(blockType, blockSubType);
     }
 
-    public PlantBlockType(int id, String name, BlockProperties blockProperties) {
-        super(id, name, blockProperties);
+    public PlantBlockType(String name, BlockProperties blockProperties) {
+        super(name, blockProperties);
     }
-    public PlantBlockType(int id, String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
-        super(id, name, materials, blockProperties);
+    public PlantBlockType(String name, Map<Integer, Material> materials, BlockProperties blockProperties) {
+        super(name, materials, blockProperties);
     }
 }
