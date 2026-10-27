@@ -16,7 +16,7 @@ import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.*;
 import org.conspiracraft.world.shapes.Blob;
 import org.conspiracraft.world.shapes.CoveredBlob;
-import org.conspiracraft.world.shapes.Pillar;
+import org.conspiracraft.world.shapes.Disc;
 import org.conspiracraft.world.shapes.Pond;
 import org.conspiracraft.world.trees.*;
 import org.joml.*;
@@ -494,48 +494,48 @@ public class Earth extends WorldType {
                                         if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             if (PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < 0.00003f) {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             if (SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99995f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9999f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     } else if (biome == Biomes.TAIGA.id()) {
                                         if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
                                             int maxHeight = rand.nextInt(6) + 12;
                                             if (SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < 0.00003f) {
                                             int maxHeight = rand.nextInt(19) + 5;
                                             if (PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99995f) {
                                             int maxHeight = rand.nextInt(10, 16);
                                             int radius = rand.nextInt(12, 16);
                                             if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9999f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     } else if (biome == Biomes.CHERRY_GROVE.id()) {
@@ -544,7 +544,7 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(26, 34);
                                             int count = rand.nextInt(6, 8);
                                             if (CherryTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 4, 2.75f)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (3 + (rand.nextFloat()*3)), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (3 + (rand.nextFloat()*3)), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < 0.0022f) {
                                             int maxHeight = rand.nextInt(16, 19);
@@ -552,25 +552,25 @@ public class Earth extends WorldType {
                                             int leavesHeight = maxHeight/3;
                                             int count = rand.nextInt(3, 6);
                                             if (WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (3 + (rand.nextFloat()*3)), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (3 + (rand.nextFloat()*3)), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99995f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9999f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(2, 4);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99985f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     } else if (biome == Biomes.TEMPERATE.id()) {
@@ -579,13 +579,13 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(36, 44);
                                             int count = rand.nextInt(7, 8);
                                             if (OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (7 + (5*rand.nextFloat())), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (80 + (35*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < foliageNoise * 0.0015f * vegetationNoise || foliageChance > 0.99995f) {
                                             int maxHeight = rand.nextInt(10, 14);
                                             int radius = rand.nextInt(6, 8);
                                             if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.006f * vegetationNoise)) {
                                             float variant = rand.nextFloat();
@@ -593,32 +593,32 @@ public class Earth extends WorldType {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(2, 4);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.67f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.85f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(5, 7);
                                                 if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             }
                                         } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.03f * vegetationNoise) || foliageChance > 0.9999f) {
                                             int maxHeight = rand.nextInt(10, 16);
                                             int radius = rand.nextInt(12, 16);
                                             if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9995f) {
                                             int radius = rand.nextInt(8, 15);
@@ -630,7 +630,7 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(36, 44);
                                             int count = rand.nextInt(7, 8);
                                             if (OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (7 + (5*rand.nextFloat())), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (50 + (20*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.001f * vegetationNoise)) {
                                             float variant = rand.nextFloat();
@@ -638,32 +638,32 @@ public class Earth extends WorldType {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(2, 4);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.67f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.85f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(5, 7);
                                                 if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             }
                                         } else if (foliageChance > 0.995f) {
                                             int maxHeight = rand.nextInt(10, 14);
                                             int radius = rand.nextInt(6, 8);
                                             if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     } else if (biome == Biomes.TEMPERATE_FOREST.id()) {
@@ -672,7 +672,7 @@ public class Earth extends WorldType {
                                             int radius = rand.nextInt(36, 44);
                                             int count = rand.nextInt(7, 8);
                                             if (OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 3.f)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (7 + (5*rand.nextFloat())), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (50 + (20*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.001f * vegetationNoise)) {
                                             float variant = rand.nextFloat();
@@ -680,25 +680,25 @@ public class Earth extends WorldType {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(2, 4);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.67f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else if (variant < 0.85f) {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(4, 6);
                                                 if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else {
                                                 int maxHeight = rand.nextInt(6, 10);
                                                 int radius = rand.nextInt(5, 7);
                                                 if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             }
                                         } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.02f * vegetationNoise) || foliageChance > 0.979f) {
@@ -706,13 +706,13 @@ public class Earth extends WorldType {
                                                 int maxHeight = rand.nextInt(10, 16);
                                                 int radius = rand.nextInt(12, 16);
                                                 if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             } else {
                                                 int maxHeight = rand.nextInt(10, 14);
                                                 int radius = rand.nextInt(6, 8);
                                                 if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
-                                                    Blob.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                    Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                                 }
                                             }
                                         } else if (foliageChance > 0.975f) {
@@ -721,51 +721,51 @@ public class Earth extends WorldType {
                                         }
                                     } else if (biome == Biomes.RAINFOREST.id()) {
                                         if (foliageChance < 0.0034f) {
-                                            Blob.generate(bounds, x, surface + 1, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)));
+                                            Disc.generate(bounds, x, surface + 1, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)), 2);
                                         } else if (foliageChance < 0.0075f) {
                                             int maxHeight = rand.nextInt(35, 42);
                                             int radius = rand.nextInt(5, 8);
                                             int leavesHeight = 4;
                                             int branchChance = 1;
                                             if (RainforestTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.MAHOGANY_LOG.id, 0, BlockTypes.MAHOGANY_LEAVES.id, 0, branchChance)) {
-                                                Blob.generate(bounds, x, surface + 1, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface + 1, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99995f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9999f) {
                                             int maxHeight = rand.nextInt(10, 16);
                                             int radius = rand.nextInt(12, 16);
                                             if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99985f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(2, 4);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.9998f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99975f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(5, 7);
                                             if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     }
                                 } else if (fluidIn.x() == BlockTypes.WATER.id) {
                                     if (surface < SEA_LEVEL-25) {
                                         if (foliageChance < 0.001f) {
-                                            Blob.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), new int[]{BlockTypes.WET_SAND.id}, true);
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), 2, new int[]{BlockTypes.WET_SAND.id});
                                         } else if (foliageChance < 0.003f) {
                                             Blob.generate(bounds, x, surface + rand.nextInt((int) Math.max(1, (SEA_LEVEL - surface) * 0.25f)), z, BlockTypes.MARBLE.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 30)), true);
                                         } else if (foliageChance < 0.0034f) {
@@ -786,13 +786,13 @@ public class Earth extends WorldType {
                                     if (biome == Biomes.DESERT.id()) {
                                         if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
                                             if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), new int[]{BlockTypes.SAND.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), 2, new int[]{BlockTypes.SAND.id});
                                             }
                                         }
                                     } else if (biome == Biomes.BEACH.id()) {
                                         if (foliageChance > 0.99998f) {
                                             if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), new int[]{BlockTypes.SAND.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), 2, new int[]{BlockTypes.SAND.id});
                                             }
                                         }
                                     }
@@ -810,29 +810,29 @@ public class Earth extends WorldType {
                                         }
                                         if (foliageChance < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99996f) {
                                             if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), 2, new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id});
                                             }
                                         } else if (foliageChance+0.02f < foliageNoise * 0.015f * (1-vegetationNoise) || foliageChance > 0.99965f) {
                                             if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), 2, new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id});
                                             }
                                         } else if (foliageChance > 0.9996f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(5, 7);
                                             if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99955f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(4, 6);
                                             if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         } else if (foliageChance > 0.99952f) {
                                             int maxHeight = rand.nextInt(6, 10);
                                             int radius = rand.nextInt(2, 4);
                                             if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
-                                                Blob.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), new int[]{BlockTypes.GRASS.id}, true);
+                                                Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
                                             }
                                         }
                                     }
@@ -1016,7 +1016,7 @@ public class Earth extends WorldType {
                                             } else {
                                                 type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
                                             }
-                                            setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? (blockOn.y()*4) : 0)+rand.nextInt(4));
+                                            setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? (blockOn.y() * 4) : 0) + rand.nextInt(4));
                                         }
                                     } else if (blockOn.x() == BlockTypes.SAND.id) {
                                         if (foliageChance < foliageNoise * 0.002f) {
