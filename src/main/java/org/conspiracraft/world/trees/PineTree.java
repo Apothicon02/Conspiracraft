@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.conspiracraft.world.World.*;
 
 public class PineTree {
-    public static void generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, boolean snowy, int logType, int logSubType, int leafType, int leafSubType) {
+    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, boolean snowy, int logType, int logSubType, int leafType, int leafSubType) {
         Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = StraightTrunk.generateTrunk(x, y, z, maxHeight, logType, logSubType);
         AtomicBoolean colliding = new AtomicBoolean(false);
         Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
@@ -28,7 +28,7 @@ public class PineTree {
                 colliding.set(true);
             }
         });
-        if (colliding.get()) {return;}
+        if (colliding.get()) {return false;}
         int minCollisionY = y+3;
         for (Vector3i canopyPos : generatedTrunk.getSecond()) {
             Map<Vector3i, Vector2i> canopy = PineCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z));
@@ -59,6 +59,8 @@ public class PineTree {
 //                    //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
 //                }
             });
+            return true;
         }
+        return false;
     }
 }

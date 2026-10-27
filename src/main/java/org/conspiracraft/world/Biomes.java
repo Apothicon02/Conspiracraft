@@ -9,6 +9,8 @@ public class Biomes {
 
     public static final Biome LAKE = create(1, BlockTypes.WET_SAND.id, 0, 7, BlockTypes.WET_SAND.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome TEMPERATE = create(1, BlockTypes.GRASS.id, 0, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
+    public static final Biome TEMPERATE_FOREST = create(1, BlockTypes.GRASS.id, 0, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
+    public static final Biome TEMPERATE_WOODS = create(1, BlockTypes.GRASS.id, 0, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome TAIGA = create(1, BlockTypes.GRASS.id, 1, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome CHERRY_GROVE = create(1, BlockTypes.GRASS.id, 3, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome REDWOOD_FOREST = create(1, BlockTypes.GRASS.id, 1, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);

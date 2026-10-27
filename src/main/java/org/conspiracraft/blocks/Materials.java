@@ -37,6 +37,7 @@ public class Materials {
             DARK_GRASS_TOP = create("plant/material/dark_grass_top"),
             DRY_GRASS_TOP = create("plant/material/dry_grass_top"),
             LIME_GRASS_TOP = create("plant/material/lime_grass_top"),
+            PODZOL = create("plant/material/podzol"),
             DIRT = create("natural/material/dirt"),
             SNOW = create("natural/material/snow"),
             ICE = create("natural/material/ice"),

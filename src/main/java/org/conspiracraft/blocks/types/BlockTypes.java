@@ -302,7 +302,9 @@ public class BlockTypes {
             DAISY = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType("plant/model/rose", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.DAISY),
                     ROSE.blockProperties)),
             LILY = create(List.of(BlockTags.scytheEfficient, BlockTags.shortFlowers, BlockTags.flowers, BlockTags.survivesOnGrass), new PlantBlockType("plant/model/rose", Map.of(Utils.packColor(255), Materials.STEM, Utils.packColor(255, 0, 0, 255), Materials.LILY),
-                    ROSE.blockProperties));
+                    ROSE.blockProperties)),
+            PODZOL = create(List.of(BlockTags.sediment, BlockTags.grass, BlockTags.spadeEfficient), new BlockType("plant/model/grass", Map.of(Utils.packColor(255), Materials.PODZOL),
+                    GRASS.blockProperties));
 
     private static BlockType create(List<BlockTag> tags, BlockType type) {
         for (BlockTag tag : tags) {
