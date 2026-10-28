@@ -425,9 +425,9 @@ public class Renderer {
             pushUBO.updateAtlasOffset(new Vector2i(10));
         } else {
             pushUBO.updateAtlasOffset(new Vector2i(0));
-            for (Region region : World.getAllRegions()) {
-                region.drawFluids(stack);
-            }
+        }
+        for (Region region : World.getAllRegions()) {
+            region.drawFluids(stack);
         }
         vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
         vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);

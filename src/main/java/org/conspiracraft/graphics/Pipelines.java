@@ -29,7 +29,7 @@ public class Pipelines {
             GUI = new Pipeline("gui.vert", "gui.frag", 1, false),
             SSAO = new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
             CUBE = new Pipeline("raster.vert", "cube.frag", 2, true),
-            FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true),
+            FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true, false),
             RASTER = new Pipeline("raster.vert", "raster.frag", 2, true),
             RASTER_VIEW = new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),
             BLUR_HORIZONTAL = new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2, false),
@@ -86,16 +86,6 @@ public class Pipelines {
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO)
                 .viewportCount(1)
                 .scissorCount(1);
-
-        VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack)
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO)
-                .depthClampEnable(false)
-                .rasterizerDiscardEnable(false)
-                .polygonMode(VK_POLYGON_MODE_LINE)
-                .lineWidth(1.0f)
-                .cullMode(VK_CULL_MODE_BACK_BIT)//VK_CULL_MODE_BACK_BIT
-                .frontFace(VK_FRONT_FACE_CLOCKWISE)
-                .depthBiasEnable(false);
 
         VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);
         multisampling.sType(VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
@@ -164,6 +154,15 @@ public class Pipelines {
                     .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
                     .module(pipeline.frag)
                     .pName(stack.UTF8("main"));
+            VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO)
+                    .depthClampEnable(false)
+                    .rasterizerDiscardEnable(false)
+                    .polygonMode(VK_POLYGON_MODE_LINE)
+                    .lineWidth(1.0f)
+                    .cullMode(pipeline.cullEnabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE)//VK_CULL_MODE_BACK_BIT
+                    .frontFace(VK_FRONT_FACE_CLOCKWISE)
+                    .depthBiasEnable(false);
             VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack)
                     .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
                     .stageCount(2)

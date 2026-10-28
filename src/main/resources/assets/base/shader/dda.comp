@@ -1052,7 +1052,8 @@ void main() {
         color.rgb = mix(color.rgb, primaryTint.rgb, tintAmt*0.67f);
         float reflectMul = 1.f;
         if (underwater) {
-            float fluidFogginess = clamp(sqrt(distance(primaryLightPos, ogPos) / 128) + 0.1f, 0.4f, 1.f);
+            vec3 volumeEndPos = fluidInfront ? fluidPos : primaryLightPos;
+            float fluidFogginess = clamp(sqrt(distance(volumeEndPos, ogPos) / 128) + 0.1f, 0.4f, 1.f);
             primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
             reflectMul = 1-fluidFogginess;
@@ -1060,9 +1061,9 @@ void main() {
             color.rgb = mix(color.rgb, fluidColor, fluidFogginess);
 
             float brightness = max(fluidColor.r, max(fluidColor.g, fluidColor.b));
-            float surfDist = underwater ? 0 : clamp(distance(ogPos, primaryLightPos) / 200.f, 0, 0.4f);
-            vec3 absNorm = abs(primaryFlatNormal.xyz);
-            vec3 causticPos = (floor(primaryLightPos * blockSize) + 0.5f) / blockSizeF;
+            float surfDist = clamp(distance(ogPos, volumeEndPos) / 200.f, 0, 0.4f);
+            vec3 absNorm = abs(fluidInfront ? fluid.xyz : primaryFlatNormal.xyz);
+            vec3 causticPos = (floor(volumeEndPos * blockSize) + 0.5f) / blockSizeF;
             float causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz) :
             (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) : getCaustic(true, causticPos.yz))).r;
             causticness = 1 - min(1, sqrt(sqrt(abs(causticness - 0.5f))));

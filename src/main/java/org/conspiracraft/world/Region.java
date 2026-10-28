@@ -169,6 +169,9 @@ public class Region {
                         updateQueue.add(chunk.cCP);
                     }
                 }
+                if (fluidUpdateSet.add(condensedRegionPos)) {
+                    fluidUpdateQueue.add(condensedRegionPos);
+                }
             }
         }
     }
@@ -227,7 +230,10 @@ public class Region {
     public int indicesAmt = 0;
     public boolean copiedFluid = false;
     public void updateFluidMesh(MemoryStack stack) throws IOException {
-        //long start = System.nanoTime();
+        if (!neighborsGenerated) {
+            return;
+        }
+        long start = System.nanoTime();
         int prevIndicesAmt = indicesAmt;
         FloatArrayList verts = new FloatArrayList();
         IntArrayList indices = new IntArrayList();
@@ -249,7 +255,7 @@ public class Region {
             BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], verts.size() * 4L);
             BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], indices.size() * 4L);
         }
-        //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
+        System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
     }
     public void drawFluids(MemoryStack stack) {
         if (indicesAmt > 0 && generated) {

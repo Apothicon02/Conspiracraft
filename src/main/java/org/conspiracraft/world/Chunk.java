@@ -335,27 +335,33 @@ public class Chunk {
     //Fluids start
     public void updateFluidMesh(Region region, FloatArrayList verts, IntArrayList indices) throws IOException {
         if (fluidPalette.size() > 1 || fluidPalette.getFirst() != 0) {
+            Chunk chunkAbove = getChunkGlobalPos(packChunkPos(cX, cY+1, cZ));
+            Chunk chunkBelow = getChunkGlobalPos(packChunkPos(cX, cY-1, cZ));
+            Chunk chunkNorth = getChunkGlobalPos(packChunkPos(cX, cY, cZ+1));
+            Chunk chunkEast = getChunkGlobalPos(packChunkPos(cX+1, cY, cZ));
+            Chunk chunkSouth = getChunkGlobalPos(packChunkPos(cX, cY, cZ-1));
+            Chunk chunkWest = getChunkGlobalPos(packChunkPos(cX-1, cY, cZ));
             int offX = (cXI%regionSizeChunks)*chunkSize, offY = (cYI%regionSizeChunks)*chunkSize, offZ = (cZI%regionSizeChunks)*chunkSize;
             for (int y = 0; y < chunkSize; y++) {
                 for (int x = 0; x < chunkSize; x++) {
-                    createUpQuad(verts, indices, x, y, offX, offY, offZ);
-                    createDownQuad(verts, indices, x, y, offX, offY, offZ);
-                    createEastQuad(verts, indices, x, y, offX, offY, offZ);
-                    createWestQuad(verts, indices, x, y, offX, offY, offZ);
+                    createUpQuad(chunkAbove, verts, indices, x, y, offX, offY, offZ);
+                    createDownQuad(chunkBelow, verts, indices, x, y, offX, offY, offZ);
+                    createEastQuad(chunkEast, verts, indices, x, y, offX, offY, offZ);
+                    createWestQuad(chunkWest, verts, indices, x, y, offX, offY, offZ);
                 }
                 for (int z = 0; z < chunkSize; z++) {
-                    createNorthQuad(verts, indices, y, z, offX, offY, offZ);
-                    createSouthQuad(verts, indices, y, z, offX, offY, offZ);
+                    createNorthQuad(chunkNorth, verts, indices, y, z, offX, offY, offZ);
+                    createSouthQuad(chunkSouth, verts, indices, y, z, offX, offY, offZ);
                 }
             }
         }
     }
-    public void createUpQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
+    public void createUpQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (y == chunkSize - 1 || faceUnoccluded(x, y + 1, z, fluid));
+            boolean faceUnoccluded = (y == chunkSize - 1 ? neighborChunk.faceUnoccluded(x, 0, z, fluid) : faceUnoccluded(x, y + 1, z, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
@@ -380,12 +386,12 @@ public class Chunk {
         indices.add(start); indices.add(start+2); indices.add(start+1);
         indices.add(start); indices.add(start+3); indices.add(start+2);
     }
-    public void createDownQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
+    public void createDownQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (y == 0 || faceUnoccluded(x, y - 1, z, fluid));
+            boolean faceUnoccluded = (y == 0 ? neighborChunk.faceUnoccluded(x, chunkSize - 1, z, fluid) : faceUnoccluded(x, y - 1, z, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float length = prevZ - startFluid.z();
                 addDownQuad(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 1, 0, length+1);
@@ -408,12 +414,12 @@ public class Chunk {
         indices.add(start); indices.add(start+1); indices.add(start+2);
         indices.add(start+2); indices.add(start+3); indices.add(start);
     }
-    public void createEastQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
+    public void createEastQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (x == chunkSize-1 || faceUnoccluded(x+1, y, z, fluid));
+            boolean faceUnoccluded = (x == chunkSize-1 ? neighborChunk.faceUnoccluded(0, y, z, fluid) : faceUnoccluded(x+1, y, z, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
@@ -438,12 +444,12 @@ public class Chunk {
         indices.add(start); indices.add(start+1); indices.add(start+3);
         indices.add(start); indices.add(start+3); indices.add(start+2);
     }
-    public void createWestQuad(FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
+    public void createWestQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int x, int y, int offX, int offY, int offZ) {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (x == 0 || faceUnoccluded(x-1, y, z, fluid));
+            boolean faceUnoccluded = (x == 0 ? neighborChunk.faceUnoccluded(chunkSize-1, y, z, fluid) : faceUnoccluded(x-1, y, z, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
@@ -468,12 +474,12 @@ public class Chunk {
         indices.add(start); indices.add(start+3); indices.add(start+1);
         indices.add(start); indices.add(start+2); indices.add(start+3);
     }
-    public void createNorthQuad(FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
+    public void createNorthQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (z == chunkSize-1 || faceUnoccluded(x, y, z+1, fluid));
+            boolean faceUnoccluded = (z == chunkSize-1 ? neighborChunk.faceUnoccluded(x, y, 0, fluid) : faceUnoccluded(x, y, z+1, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();
@@ -498,12 +504,12 @@ public class Chunk {
         indices.add(start); indices.add(start+2); indices.add(start+1);
         indices.add(start); indices.add(start+1); indices.add(start+3);
     }
-    public void createSouthQuad(FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
+    public void createSouthQuad(Chunk neighborChunk, FloatArrayList verts, IntArrayList indices, int y, int z, int offX, int offY, int offZ) {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
             Vector2i fluid = getFluid(packLocalPos(x, y, z));
-            boolean faceUnoccluded = (z == 0 || faceUnoccluded(x, y, z-1, fluid));
+            boolean faceUnoccluded = (z == 0 ? neighborChunk.faceUnoccluded(x, y, chunkSize-1, fluid) : faceUnoccluded(x, y, z-1, fluid));
             if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();

@@ -318,9 +318,6 @@ public class Earth extends WorldType {
             long cRP = World.packRegionPos(rX, rY, rZ);
             Region region = getRegion(cRP);
             if (region != null) {
-                try (MemoryStack stack = MemoryStack.stackPush()) {
-                    region.updateFluidMesh(stack);
-                }
                 region.setGenerated();
             }
         }

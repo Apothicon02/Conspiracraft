@@ -14,12 +14,17 @@ public class Pipeline {
     public int colorAttachments;
     public long vkPipeline = -1;
     public boolean depthEnabled = true;
-    public Pipeline(String vert, String frag, int colorAttachments, boolean depthEnabled) {
+    public boolean cullEnabled = true;
+    public Pipeline(String vert, String frag, int colorAttachments, boolean depthEnabled, boolean cullEnabled) {
         vertName = vert;
         fragName = frag;
         this.colorAttachments = colorAttachments;
         this.depthEnabled = depthEnabled;
+        this.cullEnabled = cullEnabled;
         pipelines.add(this);
+    }
+    public Pipeline(String vert, String frag, int colorAttachments, boolean depthEnabled) {
+        this(vert, frag, colorAttachments, depthEnabled, true);
     }
     public void compile() throws IOException {
         this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));
