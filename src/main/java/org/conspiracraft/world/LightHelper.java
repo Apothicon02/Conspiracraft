@@ -36,6 +36,7 @@ public class LightHelper {
         }
     }
     public static void queueLightUpdate(ArrayDeque<Vector3i> queue, Vector3i pos) {
+        if (pos == null) {return;}
         long packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
         Chunk chunk = getChunkGlobalPos(packedCp);
         int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);

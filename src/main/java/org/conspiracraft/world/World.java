@@ -364,8 +364,7 @@ public class World {
         }
     }
     public static void setLight(int x, int y, int z, Light light) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -421,8 +420,8 @@ public class World {
     public static final Set<Long> updateSet = ConcurrentHashMap.newKeySet();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
     public static void breakBlock(int x, int y, int z, boolean updateNeighbors) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        long cP = packChunkPos(cX, cY, cZ);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -432,7 +431,7 @@ public class World {
         BlockDrops.dropDrops(chunk.getBlock(pos), x, y, z);
         chunk.setBlock(lX, lY, lZ, 0, 0);
         updateLod(x, y, z, true);
-        updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+        updateRegion(cX, cY, cZ, !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
         updateHeightmap(x, y, z);
         LightHelper.queueLightUpdate(new Vector3i(x, y, z));
         if (updateSet.add(cP)) {
@@ -491,8 +490,7 @@ public class World {
         return getBlockWorldgen(pos.x(), pos.y(), pos.z());
     }
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return new Vector2i();}
         int lX = x&15;
@@ -501,8 +499,7 @@ public class World {
         return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
     }
     public static Vector2i getFluidWorldgen(int x, int y, int z) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return new Vector2i();}
         int lX = x&15;
@@ -518,8 +515,7 @@ public class World {
         }
     }
     public static void setBlockOrFluidWorldgen(int x, int y, int z, int type, int subType) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -533,8 +529,17 @@ public class World {
         }
     }
     public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
+        Chunk chunk = getChunkGlobalPos(cP);
+        if (chunk == null) {return;}
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        chunk.setBlock(lX, lY, lZ, type, subType);
+    }
+    public static void setBlockWorldgen(Bounds bounds, int x, int y, int z, int type, int subType) {
+        if (bounds.out(x, y, z)) {return;}
+        long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -546,8 +551,8 @@ public class World {
     public static void setBlock(int x, int y, int z, int type, int subType) {setBlock(x, y, z, type, subType, true, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting) {setBlock(x, y, z, type, subType, updateLighting, true, false);}
     public static void setBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors, boolean silent) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        long cP = packChunkPos(cX, cY, cZ);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -570,7 +575,7 @@ public class World {
             } else {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
-                updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+                updateRegion(cX, cY, cZ, !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
             }
         }
         if (updateLighting) {
@@ -599,8 +604,8 @@ public class World {
         replaceBlock(x, y, z, type, subType, true, true);
     }
     public static void replaceBlock(int x, int y, int z, int type, int subType, boolean updateLighting, boolean updateNeighbors) {
-        Vector3i chunkPos = new Vector3i(x>>chunkBits, y>>chunkBits, z>>chunkBits);
-        long cP = packChunkPos(chunkPos.x(), chunkPos.y(), chunkPos.z());
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        long cP = packChunkPos(cX, cY, cZ);
         Chunk chunk = getChunkGlobalPos(cP);
         if (chunk == null) {return;}
         int lX = x&15;
@@ -611,7 +616,7 @@ public class World {
             if (BlockTypes.blockTypes[chunk.getBlock(pos).x()].blockProperties.isFluidReplaceable) {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
-                updateRegion(chunkPos.x(), chunkPos.y(), chunkPos.z(), !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
+                updateRegion(cX, cY, cZ, !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
             }
         }
         if (!generating) {
