@@ -32,7 +32,6 @@ layout(push_constant) uniform PushUBO {
     int materials;
     int noises;
     int blueNoise;
-    int regions;
     int chunks;
     int voxels;
     int lightChunks;
@@ -146,6 +145,7 @@ void updateChunkData(int x, int y, int z) {
     updateChunkData(ivec3(x, y, z) >> 4);
 }
 int getBlockData(int x, int y, int z) {
+    if (chunk.bitsPerValue < 1) {return chunk.valueMask;}
     //if (blockValuesPerInt <= 0) {return 0;}
     ivec3 localPos = ivec3(x, y, z) & ivec3(15);
     int condensedLocalPos = packLocalPos(localPos);//((((localPos.x*chunkSize)+localPos.z)*chunkSize)+localPos.y);
@@ -297,7 +297,9 @@ vec3 hsv2rgb(vec3 c) {
 vec3 desaturate(vec3 color, float factor){
     return color+((vec3(max(color.r, max(color.g, color.b)))-color)*factor);
 }
-const int renderDistance = int(size*0.5f);//-(regionSize*chunkSize);
+const int renderDistance = int(min(2048, size)*0.5f);//-(regionSize*chunkSize);
+const int renderDistanceChunks = int(min(2048, size)*0.5f)/chunkSize;
+const int renderHeightChunks = int((min(1024, height)-chunkSize)*0.5f)/chunkSize;
 //const float maxChunkDist = ((renderDistance/chunkSize)*(renderDistance/chunkSize))-regionSize;
 
 float ambientLight = 0.11f;
@@ -488,8 +490,8 @@ vec4 dda(bool shadow) {
             //if (abs(ddaPos.x-ogChunkPos.x) >= sizeChunks/2 || abs(ddaPos.y-ogChunkPos.y) >= heightChunks/4 || abs(ddaPos.z-ogChunkPos.z) >= sizeChunks/2) {break;}
             ivec3 chunkRayPos = ddaPos;
             updateChunkData(ddaPos);
-            if (abs(chunk.x-globalChunkPos.x) >= sizeChunks*0.5f || abs(chunk.y-globalChunkPos.y) >= (heightChunks-1)*0.5f || abs(chunk.z-globalChunkPos.z) >= sizeChunks*0.5f) {break;}
-            else if (chunk.bitsPerValue > 0) { //temporary if statement until regions re-added
+            if (abs(chunk.x-globalChunkPos.x) >= renderDistanceChunks || abs(chunk.y-globalChunkPos.y) >= renderHeightChunks || abs(chunk.z-globalChunkPos.z) >= renderDistanceChunks) {break;}
+            else if (chunk.bitsPerValue != 0) { //temporary if statement until regions re-added
                 stage = 2;
                 stepAnything = false;
                 chunkPos = ddaPos;
@@ -507,7 +509,7 @@ vec4 dda(bool shadow) {
                 sideDist = chunkSideDist;
             } else {
                 lodPos = (chunkWorldPos/lodSize)+ddaPos;
-                lod = getLod(ddaPos);
+                lod = chunk.bitsPerValue < 1 ? LongStruct(-1, -1) : getLod(ddaPos);
                 if (lod != LongStruct(0, 0)) {
                     stage = 1;
                     stepAnything = false;
@@ -885,14 +887,14 @@ void main() {
         if (maxFogginess > 0.1f) {
             float prevMinLight = minLight;
             minLight = 0.f;
-            float baseDist = min(renderDistance/2, distance(ogPos, primaryShadowPos));
+            float baseDist = min(min(1024, renderDistance)*0.5f, distance(ogPos, primaryShadowPos));
             float lightNoise = blueNoise(coords).r*0.05f;
             rayDir = normalize(globalUbo.skylight.xyz);
             for (int i = 0; i < 19; i++) {
                 lightNoise = lightNoise+0.05f;
                 rayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
-                float dist = distance(ogPos, rayPos)/(0.5f*renderDistance);
+                float dist = min(1.f, distance(ogPos, rayPos)/(0.5f*min(1024, renderDistance)));
                 float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*0.5f*globalUbo.skylightMul.w;
                 vec3 globalFogPos = floor((((floor(globalPos/sizeVec)*sizeVec)+ogPos) + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).x*5)+(noise(globalFogPos.zx*0.015f).x*485);

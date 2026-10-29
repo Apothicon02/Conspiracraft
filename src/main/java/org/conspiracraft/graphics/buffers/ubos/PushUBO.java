@@ -103,12 +103,10 @@ public class PushUBO {
         uniformStorage[12] = Textures.blueNoise.handle;
     }
     public void updateSSBOs() {
-        uniformStorage[13] = Graphics.regionSSBO.buffer.handle;
-        uniformStorage[14] = Graphics.chunkSSBO.buffer.handle;
-        uniformStorage[15] = Graphics.voxelSSBO.buffer.handle;
-        //uniformStorage[16] = Graphics.lodSSBO.buffer.handle;
-        uniformStorage[16] = Graphics.lightChunkSSBO.buffer.handle;
-        uniformStorage[17] = Graphics.lightSSBO.buffer.handle;
+        uniformStorage[13] = Graphics.chunkSSBO.buffer.handle;
+        uniformStorage[14] = Graphics.voxelSSBO.buffer.handle;
+        uniformStorage[15] = Graphics.lightChunkSSBO.buffer.handle;
+        uniformStorage[16] = Graphics.lightSSBO.buffer.handle;
     }
     public ByteBuffer buf = null;
     public void push() {

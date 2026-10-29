@@ -25,7 +25,6 @@ layout(push_constant) uniform PushUBO {
     int materials;
     int noises;
     int blueNoise;
-    int regions;
     int chunks;
     int voxels;
     int lightChunks;

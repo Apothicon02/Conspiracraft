@@ -14,6 +14,7 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.util.vma.VmaStatistics;
 
 import java.io.IOException;
 import java.lang.Math;
@@ -29,6 +30,7 @@ import static org.conspiracraft.Settings.width;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
+import static org.lwjgl.util.vma.Vma.vmaGetVirtualBlockStatistics;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class GUI {
@@ -256,7 +258,31 @@ public class GUI {
         if (showDebug && !pauseMenuOpen) {
             drawText(false, 0, 1, 1.5f, -1.34f - (charHeight*1.33f), ((int) Main.player.pos.x + "x," + (int) Main.player.pos.y + "y," + (int) Main.player.pos.z + "z").toCharArray(), 3);
             drawText(false, 0, 1, -0.5f-pauseOff, -1.34f - (charHeight*1.67f), ("GUI CPU Drawing: " + String.format("%.2f", guiMS) + "ms").toCharArray(), 3);
+            VmaStatistics stats = VmaStatistics.calloc();
+            vmaGetVirtualBlockStatistics(Renderer.blocks.get(0), stats);
+            drawText(false, 0, 1, -0.5f-pauseOff, -1.34f - (charHeight*2.f), ("Blocks VRAM: " + formatBytes(stats.allocationBytes())).toCharArray(), 3);
+            stats.free();
+            stats = VmaStatistics.calloc();
+            vmaGetVirtualBlockStatistics(Renderer.lights.get(0), stats);
+            drawText(false, 0, 1, -0.5f-pauseOff, -1.34f - (charHeight*2.33f), ("Lights VRAM: " + formatBytes(stats.allocationBytes())).toCharArray(), 3);
+            stats.free();
         }
+    }
+    private static final long KB = 1024L;
+    private static final long MB = KB * 1024L;
+    private static final long GB = MB * 1024L;
+    private static final long TB = GB * 1024L;
+    public static String formatBytes(long bytes) {
+        if (bytes < KB) {
+            return bytes+"B";
+        } else if (bytes < MB) {
+            return String.format("%.2f", ((float)bytes)/KB)+"KB";
+        } else if (bytes < GB) {
+            return String.format("%.2f", ((float)bytes)/MB)+"MB";
+        } else if (bytes < TB) {
+            return String.format("%.2f", ((float)bytes)/GB)+"GB";
+        }
+        return String.format("%.2f", ((float)bytes)/TB)+"TB";
     }
     public static void drawSlider(boolean centered, float offsetX, float offsetY, float offsetPX, float offsetPY, char[] chars, Vector4f bgColor, Vector4f txtColor) {
         pushUBO.updateLayer(5); //button/slider

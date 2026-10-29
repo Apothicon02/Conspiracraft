@@ -239,6 +239,7 @@ public class Earth extends WorldType {
             if (!region.generated) {
                 int cXStart = rX * regionSizeChunks, cYStart = rY * regionSizeChunks, cZStart = rZ * regionSizeChunks;
                 int cXEnd = cXStart + regionSizeChunks, cYEnd = cYStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+                //generateUndergroundRegion(rand, region, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
                 if (crust) {
                     generateCrustRegion(rand, region, region2D, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, bounds);
                 } else if (cYEnd <= GROUND_LEVEL_C) {
@@ -347,32 +348,34 @@ public class Earth extends WorldType {
                 for (int cY = cYStart; cY < cYEnd; cY++) {
                     int cP = Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks);
                     Chunk chunk = region.getChunk(cP);
+                    chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
                     chunk.lightPalette.set(0, 0);
-                    for (int lX = 0; lX < chunkSize; lX++) {
-                        int x = (cX * chunkSize) + lX;
-                        for (int lZ = 0; lZ < chunkSize; lZ++) {
-                            int z = (cZ * chunkSize) + lZ;
-                            double foliageNoise = noisePipeline.evaluateNoise(x / 275.d, z / 275.d);
-                            for (int lY = 0; lY < chunkSize; lY++) {
-                                int y = (cY * chunkSize) + lY;
-                                //int caveY = (int)(y+(spikeNoise*Utils.gradient(y, GROUND_LEVEL, GROUND_LEVEL-24, 10, 0)));
-                                double caveNoise = CavernNoise.sample(x*4, y, z*4);//Math.abs(SimplexNoise.noise(x / 500.f, caveY / 500.f, z / 500.f));
-                                if (caveNoise > 0.5f) {} else { //if (Main.player.creative) {Main.player.creative = false; Main.player.pos.set(x, y, z);}
-                                    chunk.setBlock(lX, lY, lZ, caveNoise > 0.2f ? BlockTypes.MARBLE.id : BlockTypes.STONE.id, 0);
-                                    float materialChance = rand.nextFloat();
-                                    if (rand.nextFloat()*0.2f > foliageNoise+0.05f || rand.nextFloat() < 0.00034f) {
-                                        if (materialChance < 0.975f) {
-                                            CoveredBlob.generate(bounds, x, y, z, BlockTypes.DIRT.id, 0, BlockTypes.PORECAP.id, 0, (int) (2 + (rand.nextFloat() * 5)), 0.2f);
-                                        } else {
-                                            Blob.generate(bounds, x, y, z, materialChance < 0.985f ? BlockTypes.FLINT.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 7)));
-                                        }
-                                    } else if (materialChance < 0.0001f) {
-                                        chunk.setBlock(lX, lY, lZ, BlockTypes.KYANITE.id, 0);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    //chunk.lods = Chunk.fullLods.clone();
+//                    for (int lX = 0; lX < chunkSize; lX++) {
+//                        int x = (cX * chunkSize) + lX;
+//                        for (int lZ = 0; lZ < chunkSize; lZ++) {
+//                            int z = (cZ * chunkSize) + lZ;
+//                            double foliageNoise = noisePipeline.evaluateNoise(x / 275.d, z / 275.d);
+//                            for (int lY = 0; lY < chunkSize; lY++) {
+//                                int y = (cY * chunkSize) + lY;
+//                                //int caveY = (int)(y+(spikeNoise*Utils.gradient(y, GROUND_LEVEL, GROUND_LEVEL-24, 10, 0)));
+//                                double caveNoise = CavernNoise.sample(x*4, y, z*4);//Math.abs(SimplexNoise.noise(x / 500.f, caveY / 500.f, z / 500.f));
+//                                if (caveNoise > 0.5f) {} else { //if (Main.player.creative) {Main.player.creative = false; Main.player.pos.set(x, y, z);}
+//                                    chunk.setBlock(lX, lY, lZ, caveNoise > 0.2f ? BlockTypes.MARBLE.id : BlockTypes.STONE.id, 0);
+//                                    float materialChance = rand.nextFloat();
+//                                    if (rand.nextFloat()*0.2f > foliageNoise+0.05f || rand.nextFloat() < 0.00034f) {
+//                                        if (materialChance < 0.975f) {
+//                                            CoveredBlob.generate(bounds, x, y, z, BlockTypes.DIRT.id, 0, BlockTypes.PORECAP.id, 0, (int) (2 + (rand.nextFloat() * 5)), 0.2f);
+//                                        } else {
+//                                            Blob.generate(bounds, x, y, z, materialChance < 0.985f ? BlockTypes.FLINT.id : BlockTypes.MARBLE.id, 0, (int) (2 + (rand.nextFloat() * 7)));
+//                                        }
+//                                    } else if (materialChance < 0.0001f) {
+//                                        chunk.setBlock(lX, lY, lZ, BlockTypes.KYANITE.id, 0);
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
                 }
             }
         }
@@ -473,8 +476,7 @@ public class Earth extends WorldType {
                     if (cY*chunkSize > maxElevation+GROUND_LEVEL) {continue;} else if (((cY+1)*chunkSize) < minElevation+GROUND_LEVEL) {
                         chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
                         chunk.lightPalette.set(0, 0);
-                        //chunk.lods = new long[Chunk.lodsPerChunk];
-                        //Arrays.fill(chunk.lods, 0xFFFFFFFFFFFFFFFFL);
+                        //chunk.lods = Chunk.fullLods.clone();
                         continue;
                     }
                     continueGenerating = true;

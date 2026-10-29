@@ -54,7 +54,6 @@ public class Graphics {
     public static UniformBuffer globalUBOBuf;
     public static ShaderStorageBuffer voxelSSBO;
     public static ShaderStorageBuffer chunkSSBO;
-    public static ShaderStorageBuffer regionSSBO;
     public static ShaderStorageBuffer lightChunkSSBO;
     public static ShaderStorageBuffer lightSSBO;
     public void createBuffers(MemoryStack stack) throws IOException {
@@ -71,7 +70,6 @@ public class Graphics {
 
         globalUBOBuf = new UniformBuffer(stack, globalUBO.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, globalUBO);
 
-        regionSSBO = new ShaderStorageBuffer(stack, regionSSBOByteSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         chunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize,VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         voxelSSBO = new ShaderStorageBuffer(stack, voxelSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);
         lightChunkSSBO = new ShaderStorageBuffer(stack, chunkSSBOSize, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, false);

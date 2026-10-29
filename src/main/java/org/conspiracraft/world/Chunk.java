@@ -13,6 +13,7 @@ import org.joml.*;
 import java.io.IOException;
 import java.lang.Math;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.graphics.Renderer.*;
@@ -64,6 +65,8 @@ public class Chunk {
     public static final int lodBits = Integer.numberOfTrailingZeros(lodSize);
     public static final int sizeLods = chunkSize/lodSize;
     public static final int lodsPerChunk = sizeLods*sizeLods*sizeLods;
+    public static final long[] fullLods = makeFullLods();
+    public static long[] makeFullLods() {long[] lods = new long[Chunk.lodsPerChunk]; Arrays.fill(lods, 0xFFFFFFFFFFFFFFFFL); return lods;}
     public static int packLodPos(int x, int y, int z) {
         return x+y*sizeLods+z*sizeLods*sizeLods;
     }
@@ -192,7 +195,8 @@ public class Chunk {
         return blockPalette.get(index) >> 16;
     }
     public void setBlock(int x, int y, int z, int type, int subType) {
-        if (lods == null && type > 0) {lods = new long[lodsPerChunk];}
+        boolean blockPaletteFullyAir = blockPalette.getFirst() == 0;
+        if (lods == null && ((type > 0 && blockPaletteFullyAir) || (type == 0 && !blockPaletteFullyAir))) {lods = blockPaletteFullyAir ? new long[lodsPerChunk] : fullLods.clone(); }
         if (lods != null) {
             int lodIdx = packLodPos(x >> lodBits, y >> lodBits, z >> lodBits);
             int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
