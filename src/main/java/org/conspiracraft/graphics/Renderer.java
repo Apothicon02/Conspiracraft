@@ -34,7 +34,6 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.vma.VmaVirtualAllocationCreateInfo;
-import org.lwjgl.util.vma.VmaVirtualAllocationInfo;
 import org.lwjgl.util.vma.VmaVirtualBlockCreateInfo;
 import org.lwjgl.vulkan.*;
 
@@ -48,8 +47,6 @@ import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.graphics.Graphics.indexBuf;
 import static org.conspiracraft.graphics.Pipelines.pipelineLayout;
-import static org.conspiracraft.graphics.Pipelines.pipelines;
-import static org.conspiracraft.graphics.Pipelines.computePipelines;
 import static org.conspiracraft.graphics.buffers.CmdBuffer.cmdBuffers;
 import static org.conspiracraft.graphics.Device.*;
 import static org.conspiracraft.graphics.Swapchain.*;
@@ -116,7 +113,7 @@ public class Renderer {
                     while (!fluidUpdateQueue.isEmpty()) {
                         long cRP = fluidUpdateQueue.pollFirst();
                         Region region = getRegion(cRP);
-                        if (region != null) {region.updateFluidMesh(stack);}
+                        if (region != null) {region.updateMesh(stack);}
                         //fluidUpdateSet.remove(cRP);
                     }
                     fluidUpdateSet.clear();
@@ -389,6 +386,14 @@ public class Renderer {
         //for (AmbientParticle particle : Main.player.ambientParticles) {particle.draw();}
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
+//        updatePipeline(Pipelines.BLOCK);
+//        pushUBO.updateTex(Textures.materials);
+//        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+//        for (Region region : World.getAllRegions()) {
+//            int material = (int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
+//            pushUBO.updateAtlasOffset(new Vector2i((material*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(material/(Textures.materials.width/Materials.materialWidth))));
+//            region.drawSolids(stack);
+//        }
         updatePipeline(Pipelines.RASTER);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
@@ -406,9 +411,6 @@ public class Renderer {
         updatePipeline(Pipelines.FLUID);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.fluid}, Textures.fluidDepth, 1, true, true);
         //vkCmdSetPolygonModeEXT(currentCmdBuffer, VK_POLYGON_MODE_LINE);
-        pushUBO.updateTex(null);
-        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-        pushUBO.updateAtlasOffset(new Vector2i(Materials.materialWidth, 0));
         Vector3d globalCam = player.getCameraTranslationInterpolatedUnwrapped();
         if (getFluid(globalCam.x(), globalCam.y(), globalCam.z()).y() > 0) {
 //            Vector3f forward = player.camera.getForward().mul(0.05f);

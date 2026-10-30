@@ -29,6 +29,7 @@ public class Pipelines {
             GUI = new Pipeline("gui.vert", "gui.frag", 1, false),
             SSAO = new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
             CUBE = new Pipeline("raster.vert", "cube.frag", 2, true),
+            BLOCK = new Pipeline("raster.vert", "block.frag", 2, true, false),
             FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true, false),
             RASTER = new Pipeline("raster.vert", "raster.frag", 2, true),
             RASTER_VIEW = new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),

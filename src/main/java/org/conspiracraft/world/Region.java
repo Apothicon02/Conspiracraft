@@ -227,44 +227,80 @@ public class Region {
     public Buffer fluidIndexStagingBuf;
     public Buffer fluidVertexBuf;
     public Buffer fluidIndexBuf;
-    public int indicesAmt = 0;
-    public boolean copiedFluid = false;
-    public void updateFluidMesh(MemoryStack stack) throws IOException {
+    public int fluidIndicesAmt = 0;
+    public Buffer blockVertexStagingBuf;
+    public Buffer blockIndexStagingBuf;
+    public Buffer blockVertexBuf;
+    public Buffer blockIndexBuf;
+    public int blockIndicesAmt = 0;
+    public boolean copiedMesh = false;
+    public void updateMesh(MemoryStack stack) throws IOException {
         if (!neighborsGenerated) {
             return;
         }
         //long start = System.nanoTime();
-        int prevIndicesAmt = indicesAmt;
+        int prevIndicesAmt = blockIndicesAmt;
+        int prevFluidIndicesAmt = fluidIndicesAmt;
+        FloatArrayList fluidVerts = new FloatArrayList();
+        IntArrayList fluidIndices = new IntArrayList();
         FloatArrayList verts = new FloatArrayList();
         IntArrayList indices = new IntArrayList();
         for (Chunk chunk : chunks) {
-            chunk.updateFluidMesh(this, verts, indices);
+            chunk.updateMesh(this, fluidVerts, fluidIndices, verts, indices);
         }
-        indicesAmt = indices.size();
-        if (indicesAmt <= 0) {return;}
-        if (prevIndicesAmt <= 0 || indicesAmt > prevIndicesAmt) {
-            fluidVertexStagingBuf = new Buffer(stack, verts.size()*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-            fluidIndexStagingBuf = new Buffer(stack, indices.size()*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-            fluidVertexBuf = new Buffer(stack, verts.size()*4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
-            fluidIndexBuf = new Buffer(stack, indices.size()*4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+        fluidIndicesAmt = fluidIndices.size();
+        if (fluidIndicesAmt > 0) {
+            if (prevFluidIndicesAmt <= 0 || fluidIndicesAmt > prevFluidIndicesAmt) {
+                fluidVertexStagingBuf = new Buffer(stack, fluidVerts.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+                fluidIndexStagingBuf = new Buffer(stack, fluidIndices.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+                fluidVertexBuf = new Buffer(stack, fluidVerts.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+                fluidIndexBuf = new Buffer(stack, fluidIndices.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+            }
+            memFloatBuffer(fluidVertexStagingBuf.pointer.get(0), fluidVerts.size()).put(fluidVerts.elements(), 0, fluidVerts.size());
+            memIntBuffer(fluidIndexStagingBuf.pointer.get(0), fluidIndices.size()).put(fluidIndices.elements(), 0, fluidIndices.size());
         }
-        memFloatBuffer(fluidVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
-        memIntBuffer(fluidIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
+        blockIndicesAmt = indices.size();
+        if (blockIndicesAmt > 0) {
+            if (prevIndicesAmt <= 0 || blockIndicesAmt > prevIndicesAmt) {
+                blockVertexStagingBuf = new Buffer(stack, verts.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+                blockIndexStagingBuf = new Buffer(stack, indices.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+                blockVertexBuf = new Buffer(stack, verts.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+                blockIndexBuf = new Buffer(stack, indices.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+            }
+            memFloatBuffer(blockVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
+            memIntBuffer(blockIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
+        }
         if (generated) {
-            copiedFluid = true;
-            BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], verts.size() * 4L);
-            BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], indices.size() * 4L);
+            copiedMesh = true;
+            if (fluidIndicesAmt > 0) {
+                BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], fluidVerts.size() * 4L);
+                BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], fluidIndices.size() * 4L);
+            }
+            if (blockIndicesAmt > 0) {
+                BufferHelper.copyBuffer(stack, blockVertexStagingBuf.buffer[0], blockVertexBuf.buffer[0], verts.size() * 4L);
+                BufferHelper.copyBuffer(stack, blockIndexStagingBuf.buffer[0], blockIndexBuf.buffer[0], indices.size() * 4L);
+            }
         }
         //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
     }
     public void drawFluids(MemoryStack stack) {
-        if (indicesAmt > 0 && generated) {
+        if (fluidIndicesAmt > 0 && generated) {
             vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(fluidVertexBuf.buffer), stack.longs(0));
             vkCmdBindIndexBuffer(currentCmdBuffer, fluidIndexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
             int offX = rXI*regionSize, offY = rYI*regionSize, offZ = rZI*regionSize;
             pushUBO.update(new Matrix4f().setTranslation((float) (offX-warpOffset.x()), (float) (offY-warpOffset.y()), (float) (offZ-warpOffset.z())), new Vector4f(1.f));
             pushUBO.push();
-            vkCmdDrawIndexed(currentCmdBuffer, indicesAmt, 1, 0, 0, 0);
+            vkCmdDrawIndexed(currentCmdBuffer, fluidIndicesAmt, 1, 0, 0, 0);
+        }
+    }
+    public void drawSolids(MemoryStack stack) {
+        if (blockIndicesAmt > 0 && generated) {
+            vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(blockVertexBuf.buffer), stack.longs(0));
+            vkCmdBindIndexBuffer(currentCmdBuffer, blockIndexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
+            int offX = rXI*regionSize, offY = rYI*regionSize, offZ = rZI*regionSize;
+            pushUBO.update(new Matrix4f().setTranslation((float) (offX-warpOffset.x()), (float) (offY-warpOffset.y()), (float) (offZ-warpOffset.z())), new Vector4f(1.f));
+            pushUBO.push();
+            vkCmdDrawIndexed(currentCmdBuffer, blockIndicesAmt, 1, 0, 0, 0);
         }
     }
 }
