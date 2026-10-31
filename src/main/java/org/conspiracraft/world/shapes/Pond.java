@@ -1,7 +1,10 @@
 package org.conspiracraft.world.shapes;
 
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Bounds;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -14,7 +17,7 @@ import static org.conspiracraft.world.World.*;
 public class Pond {
     public static void generate(Random random, Bounds bounds, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
         boolean dir = random.nextBoolean();
-        Map<Vector3i, Vector2i> blocks = new HashMap<>();
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap();
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 int xDist = lX - x;
@@ -25,7 +28,7 @@ public class Pond {
                     boolean canReplace = true;
                     if (replace.length > 0) {
                         canReplace = false;
-                        int replacing = getBlock(lX, y, lZ).x;
+                        int replacing = getBlockTypeUnchecked(lX, y, lZ);
                         for (int replaceable : replace) {
                             if (replaceable == replacing) {
                                 canReplace = true;
@@ -33,33 +36,33 @@ public class Pond {
                             }
                         }
                     }
-                    if (!canReplace || getBlock(lX, y+1, lZ).x > 0 || !BlockTypes.blockTypes[getBlock(lX, y-1, lZ).x].blockProperties.isSolid ||
+                    if (!canReplace || getBlockTypeUnchecked(lX, y+1, lZ) > 0 || !BlockTypes.blockTypes[getBlockTypeUnchecked(lX, y-1, lZ)].blockProperties.isSolid ||
                             notSolidOrWater(lX+1, y, lZ) || notSolidOrWater(lX-1, y, lZ) || notSolidOrWater(lX, y, lZ+1) || notSolidOrWater(lX, y, lZ-1)) {return;}
-                    blocks.put(new Vector3i(lX, y, lZ), new Vector2i(blockType, blockSubType));
-                    blocks.put(new Vector3i(lX, y-1, lZ), new Vector2i(BlockTypes.MUD.id, 0));
+                    blocks.put(LongPos.pack(lX, y, lZ), Chunk.packInts(blockType, blockSubType));
+                    blocks.put(LongPos.pack(lX, y-1, lZ), Chunk.packInts(BlockTypes.MUD.id, 0));
                     if (dir) {
-                        blocks.putIfAbsent(new Vector3i(lX - 1, y, lZ), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX, y, lZ - 1), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX - 2, y, lZ), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX, y, lZ - 2), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX-2, y, lZ - 2), new Vector2i(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX - 1, y, lZ), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX, y, lZ - 1), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX - 2, y, lZ), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX, y, lZ - 2), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX-2, y, lZ - 2), Chunk.packInts(BlockTypes.MUD.id, 0));
                     } else {
-                        blocks.putIfAbsent(new Vector3i(lX + 1, y, lZ), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX, y, lZ + 1), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX + 2, y, lZ), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX, y, lZ + 2), new Vector2i(BlockTypes.MUD.id, 0));
-                        blocks.putIfAbsent(new Vector3i(lX+2, y, lZ + 2), new Vector2i(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX + 1, y, lZ), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX, y, lZ + 1), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX + 2, y, lZ), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX, y, lZ + 2), Chunk.packInts(BlockTypes.MUD.id, 0));
+                        blocks.putIfAbsent(LongPos.pack(lX+2, y, lZ + 2), Chunk.packInts(BlockTypes.MUD.id, 0));
                     }
                 }
             }
         }
         blocks.forEach((pos, block) -> {
-            setBlockOrFluidWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+            setBlockOrFluidWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos), block >> 16, block & 0xFFFF);
         });
     }
 
     public static boolean notSolidOrWater(int x, int y, int z) {
-        int blockType = getBlock(x, y, z).x;
+        int blockType = getBlockTypeUnchecked(x, y, z);
         return !(blockType == BlockTypes.WATER.id || BlockTypes.blockTypes[blockType].blockProperties.isSolid);
     }
 

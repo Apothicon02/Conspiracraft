@@ -1,48 +1,45 @@
 package org.conspiracraft.world.shapes;
 
-import org.conspiracraft.world.Bounds;
-import org.conspiracraft.world.Light;
-import org.conspiracraft.world.World;
-import org.joml.Vector2i;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import org.conspiracraft.world.*;
 import org.joml.Vector3i;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.conspiracraft.world.World.*;
 
 public class Blob {
     public static void generate(Bounds bounds, int x, int y, int z, int blockType, int blockSubType, int radius, int[] replace, boolean update) {
-        Map<Vector3i, Vector2i> blocks = new HashMap<>();
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap();
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
-                for (int lY = y - radius; lY <= y + radius; lY++) {
-                    int xDist = lX - x;
-                    int yDist = lY - y;
-                    int zDist = lZ - z;
-                    int dist = xDist * xDist + zDist * zDist + yDist * yDist;
-                    if (dist <= radius * 3) {
-                        if (bounds.out(lX, lY, lZ)) {return;}
-                        boolean canReplace = true;
-                        if (replace.length > 0) {
-                            canReplace = false;
-                            int replacing = getBlock(lX, lY, lZ).x;
-                            for (int replaceable : replace) {
-                                if (replaceable == replacing) {
-                                    canReplace = true;
-                                    break;
-                                }
+                int xDist = lX - x, zDist = lZ - z;
+                int undistance = (radius * 3) - xDist*xDist - zDist*zDist;
+                if (undistance < 0) {continue;}
+                undistance = (int) Math.sqrt(undistance);
+                int lowY = Math.max(y - undistance, y - radius);
+                int highY = Math.min(y + undistance, y + radius);
+                for (int lY = lowY; lY <= highY; lY++) {
+                    if (bounds.out(lX, lY, lZ)) {return;}
+                    boolean canReplace = true;
+                    if (replace.length > 0) {
+                        canReplace = false;
+                        int replacing = getBlockTypeUnchecked(lX, lY, lZ);
+                        for (int replaceable : replace) {
+                            if (replaceable == replacing) {
+                                canReplace = true;
+                                break;
                             }
                         }
-                        if (canReplace) {
-                            blocks.put(new Vector3i(lX, lY, lZ), new Vector2i(blockType, blockSubType));
-                        }
+                    }
+                    if (canReplace) {
+                        blocks.put(LongPos.pack(lX, lY, lZ), Chunk.packInts(blockType, blockSubType));
                     }
                 }
             }
         }
         blocks.forEach((pos, block) -> {
-            setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
+            setBlockWorldgen(pos, block >> 16, block & 0xFFFF);
         });
     }
 
@@ -59,22 +56,22 @@ public class Blob {
     }
 
     public static void generatePostWorldgen(int x, int y, int z, int blockType, int blockSubType, int radius) {
-        Map<Vector3i, Vector2i> blocks = new HashMap<>();
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap();
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
-                for (int lY = y - radius; lY <= y + radius; lY++) {
-                    int xDist = lX - x;
-                    int yDist = lY - y;
-                    int zDist = lZ - z;
-                    int dist = xDist * xDist + zDist * zDist + yDist * yDist;
-                    if (dist <= radius * 3) {
-                        blocks.put(new Vector3i(lX, lY, lZ), new Vector2i(blockType, blockSubType));
-                    }
+                int xDist = lX - x, zDist = lZ - z;
+                int undistance = (radius * 3) - xDist*xDist - zDist*zDist;
+                if (undistance < 0) {continue;}
+                undistance = (int) Math.sqrt(undistance);
+                int lowY = Math.max(y - undistance, y - radius);
+                int highY = Math.min(y + undistance, y + radius);
+                for (int lY = lowY; lY <= highY; lY++) {
+                    blocks.put(LongPos.pack(lX, lY, lZ), Chunk.packInts(blockType, blockSubType));
                 }
             }
         }
         blocks.forEach((pos, block) -> {
-            setBlock(pos.x, pos.y, pos.z, block.x, block.y, true, false, true);
+            setBlock(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos), block >> 16, block & 0xFFFF, true, false, true);
         });
     }
 }

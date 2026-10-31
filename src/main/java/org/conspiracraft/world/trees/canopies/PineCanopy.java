@@ -1,25 +1,26 @@
 package org.conspiracraft.world.trees.canopies;
 
+import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.Directions;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 
 public class PineCanopy extends Canopy {
 
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
-        map.put(pos, new Vector2i(blockType, blockSubType));
+    private static void addToMap(Long2IntOpenHashMap map, long pos, int blockType, int blockSubType) {
+        map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
     
-    public static Map<Vector3i, Vector2i> generateCanopy(Random random, Map<Vector3i, Vector2i> blocks, int x, int ogY, int z, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int ogY, int z, int blockType, int blockSubType, int trunkHeight, long treeOrigin) {
         Vector3i origin = new Vector3i(x, ogY, z);
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
         
-        addToMap(map, origin, blockType, blockSubType);
-        addToMap(map, new Vector3i(origin).add(0, 1, 0), blockType, blockSubType);
-        addToMap(map, new Vector3i(origin).add(0, 2, 0), blockType, blockSubType);
+        addToMap(blocks, LongPos.pack(origin), blockType, blockSubType);
+        addToMap(blocks, LongPos.pack(origin, 0, 1, 0), blockType, blockSubType);
+        addToMap(blocks, LongPos.pack(origin, 0, 2, 0), blockType, blockSubType);
         int max = ogY;
         int min = max-trunkHeight+2;
         for (int y = max; y >= min; y -= 3) {
@@ -27,22 +28,22 @@ public class PineCanopy extends Canopy {
             Vector3i pos = new Vector3i(x, y, z);
 
             if (y <= min+trunkHeight/3 && trunkHeight > 10) {
-                addLargeBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
-                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
-                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
-                addLargeBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
+                addLargeBranch(blocks, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addLargeBranch(blocks, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
+                addLargeBranch(blocks, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+                addLargeBranch(blocks, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
             } else if (y <= max-trunkHeight/5) {
-                addMediumBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
-                addMediumBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
-                addMediumBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
-                addSmallBranch(map, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
+                addMediumBranch(blocks, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addMediumBranch(blocks, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.EAST, dirOffset), blockType, blockSubType);
+                addMediumBranch(blocks, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+                addSmallBranch(blocks, new Vector3i(pos).add(0, random.nextInt(0, 1), 0), random, getDir(Directions.WEST, dirOffset), blockType, blockSubType);
             } else {
-                addSmallBranch(map, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
-                addSmallBranch(map, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
+                addSmallBranch(blocks, pos, random, getDir(Directions.NORTH, dirOffset), blockType, blockSubType);
+                addSmallBranch(blocks, new Vector3i(pos).add(0, random.nextInt(1, 2), 0), random, getDir(Directions.SOUTH, dirOffset), blockType, blockSubType);
             }
         }
 
-        return map;
+        return blocks;
     }
 
     private static Vector3i getDir(Vector3i dir, int offset) {
@@ -70,7 +71,7 @@ public class PineCanopy extends Canopy {
         return dir;
     }
 
-    private static void addLargeBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+    private static void addLargeBranch(Long2IntOpenHashMap map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
         if (random.nextInt(0, 4) == 0) {
             addMediumBranch(map, pos, random, dir, blockType, blockSubType);
         } else {
@@ -90,42 +91,42 @@ public class PineCanopy extends Canopy {
                 x = -1;
                 z = 1;
             }
-            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z), blockType, blockSubType);
 
             y--;
 
-            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, z * 3), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 3, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 3), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z * 3), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 3, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z * 3), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 3, y, z * 2), blockType, blockSubType);
 
             y--;
 
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 3), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 3), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z * 3), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 3, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 3, y, z * 3), blockType, blockSubType);
 
             y--;
 
-            addToMap(map, new Vector3i(pos).add(x * 3, y, z * 3), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 3, y, z * 3), blockType, blockSubType);
         }
     }
 
-    private static void addMediumBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+    private static void addMediumBranch(Long2IntOpenHashMap map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
         if (random.nextInt(0, 4) == 0) {
             addLargeBranch(map, pos, random, dir, blockType, blockSubType);
         } else {
@@ -145,27 +146,27 @@ public class PineCanopy extends Canopy {
                 x = -1;
                 z = 1;
             }
-            addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(0, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, 0), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, 0, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, 0), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z), blockType, blockSubType);
 
             y--;
 
-            addToMap(map, new Vector3i(pos).add(x, y, z * 2), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z), blockType, blockSubType);
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z * 2), blockType, blockSubType);
 
             y--;
 
-            addToMap(map, new Vector3i(pos).add(x * 2, y, z * 2), blockType, blockSubType);
+            addToMap(map, LongPos.pack(pos, x * 2, y, z * 2), blockType, blockSubType);
         }
     }
 
-    private static void addSmallBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
+    private static void addSmallBranch(Long2IntOpenHashMap map, Vector3i pos, Random random, Vector3i dir, int blockType, int blockSubType) {
         int x;
         int y = 0;
         int z;
@@ -183,12 +184,12 @@ public class PineCanopy extends Canopy {
             z = 1;
         }
 
-        addToMap(map, new Vector3i(pos).add(x, y, 0), blockType, blockSubType);
-        addToMap(map, new Vector3i(pos).add(0, y, z), blockType, blockSubType);
-        addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+        addToMap(map, LongPos.pack(pos, x, y, 0), blockType, blockSubType);
+        addToMap(map, LongPos.pack(pos, 0, y, z), blockType, blockSubType);
+        addToMap(map, LongPos.pack(pos, x, y, z), blockType, blockSubType);
 
         y--;
 
-        addToMap(map, new Vector3i(pos).add(x, y, z), blockType, blockSubType);
+        addToMap(map, LongPos.pack(pos, x, y, z), blockType, blockSubType);
     }
 }

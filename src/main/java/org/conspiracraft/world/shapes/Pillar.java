@@ -1,6 +1,7 @@
 package org.conspiracraft.world.shapes;
 
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.world.Chunk;
 import org.joml.Vector2i;
 
 import static org.conspiracraft.world.World.*;
@@ -11,7 +12,7 @@ public class Pillar {
         for (int newY = y; newY < maxHeight; newY++) {
             setBlock(x, newY, z, blockType, blockSubType);
         }
-        if (BlockTypes.blockTypes[blockType].obstructingHeightmap(new Vector2i(blockType, blockSubType))) {
+        if (BlockTypes.blockTypes[blockType].obstructingHeightmap(Chunk.packInts(blockType, blockSubType))) {
             int condensedPos = packPos(x, z);
             int surfaceY = oldHeightmap[condensedPos];
             oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], maxHeight);

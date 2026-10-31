@@ -122,6 +122,7 @@ public class Region {
 
     public void setGenerated() {
         generated = true;
+        regionsGenerated++;
         if (fluidUpdateSet.add(condensedRegionPos)) {
             fluidUpdateQueue.addLast(condensedRegionPos);
         }

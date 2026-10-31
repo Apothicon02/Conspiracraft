@@ -6,10 +6,9 @@ import org.conspiracraft.world.Bounds;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.trees.trunks.TwistingTrunk;
 import org.joml.Vector2i;
-import org.joml.Vector3i;
 
 import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,24 +17,11 @@ import static org.conspiracraft.world.World.*;
 
 public class DeadOakTree {
     public static void generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int logType, int logSubType) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, 3, logType, logSubType, true, 8);
-        Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-        AtomicBoolean colliding = new AtomicBoolean(false);
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, 3, logType, logSubType, true, 8);
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(20*maxHeight);
+        blocks.putAll(generatedTrunk.getFirst());
         blocks.forEach((pos, block) -> {
-            if (bounds.out(pos)) {colliding.set(true); return;}
-            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
-                colliding.set(true);
-            }
-        });
-        if (colliding.get()) {return;}
-        blocks.forEach((pos, block) -> {
-            setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
-//            int condensedPos = packPos(pos.x, pos.z);
-//            int surfaceY = oldHeightmap[condensedPos];
-//            oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], pos.y - 1);
-//                    for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-//                        setLightWorldgen(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-//                    }
+            setBlockWorldgen(pos, block >> 16, block & 0xFFFF);
         });
     }
 }

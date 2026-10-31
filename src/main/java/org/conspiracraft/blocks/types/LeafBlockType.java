@@ -12,8 +12,8 @@ public class LeafBlockType extends BlockType {
         return blockProperties.needsSupport ? true : block.y > 0;
     }
     @Override
-    public boolean obstructingHeightmap(Vector2i block) {
-        return blockProperties.obstructsHeightmap ? true : block.y > 0;
+    public boolean obstructingHeightmap(int block) {
+        return blockProperties.obstructsHeightmap || (block & 0xFFFF) == 0;
     }
     @Override
     public boolean blocksLight(int type, int subType) {

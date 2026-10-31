@@ -330,7 +330,6 @@ public class Earth extends WorldType {
         return ((Math.ceil(noise*0.5f))*2)+(Math.pow((noise*0.5f)%1, 4)*2);
     }
     public void generateCrustRegion(java.util.Random rand, Region region, Region2D region2D, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
-        //long startTime = System.currentTimeMillis();
         RegionNoises regionNoises = new RegionNoises(regionSize);
         byte[] biomes = new byte[regionSize * regionSize];
         generateNoises(cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
@@ -339,7 +338,6 @@ public class Earth extends WorldType {
             generateFeatures(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
             //generateFeaturesOld(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
             generateCover(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
-            //System.out.println("Region took "+(System.currentTimeMillis()-startTime)+"ms to generate");
         }
     }
     public void generateUndergroundRegion(java.util.Random rand, Region region, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {

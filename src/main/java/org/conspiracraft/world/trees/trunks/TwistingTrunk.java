@@ -1,18 +1,20 @@
 package org.conspiracraft.world.trees.trunks;
 
 import kotlin.Pair;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.util.HashSet;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
 
 public class TwistingTrunk extends Trunk {
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, int minCanopyHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
-        Set<Vector3i> canopies = new HashSet<>();
+    public static Pair<Long2IntOpenHashMap, Set<Long>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, int minCanopyHeight, int blockType, int blockSubType, boolean overgrown, int minBranchHeight) {
+        Long2IntOpenHashMap map = new Long2IntOpenHashMap(trunkHeight*8);
+        Set<Long> canopies = new HashSet<>();
 
         int minBranch = minBranchHeight+oY;
         int prevXPositive = 0;
@@ -49,7 +51,7 @@ public class TwistingTrunk extends Trunk {
             pos.add(dir);
             pos.y = height;
             makeSquare(map, new Vector3i(pos.x, pos.y-1, pos.z), blockType, blockSubType);
-            makeSquare(map, pos, blockType, blockSubType);
+            makeSquare(map, new Vector3i(pos), blockType, blockSubType);
             if (branch && pos.y >= minBranch) {
                 canopies.add(makeBranch(map, pos, dir, blockType, blockSubType));
                 if (overgrown) {
@@ -57,12 +59,12 @@ public class TwistingTrunk extends Trunk {
                 }
             }
             if (pos.y == maxHeight) {
-                canopies.add(new Vector3i(pos.x, pos.y+1, pos.z));
+                canopies.add(LongPos.pack(pos.x, pos.y+1, pos.z));
                 if (overgrown) {
-                    canopies.add(new Vector3i(pos.x, pos.y-1, pos.z+3));
-                    canopies.add(new Vector3i(pos.x+3, pos.y, pos.z));
-                    canopies.add(new Vector3i(pos.x, pos.y-1, pos.z-3));
-                    canopies.add(new Vector3i(pos.x-3, pos.y, pos.z));
+                    canopies.add(LongPos.pack(pos.x, pos.y-1, pos.z+3));
+                    canopies.add(LongPos.pack(pos.x+3, pos.y, pos.z));
+                    canopies.add(LongPos.pack(pos.x, pos.y-1, pos.z-3));
+                    canopies.add(LongPos.pack(pos.x-3, pos.y, pos.z));
                 }
             }
         }
@@ -70,19 +72,19 @@ public class TwistingTrunk extends Trunk {
         return new Pair<>(map, canopies);
     }
 
-    private static void makeSquare(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
-        map.put(new Vector3i(pos.x, pos.y, pos.z), new Vector2i(blockType, blockSubType));
-        map.put(new Vector3i(pos.x, pos.y, pos.z+1), new Vector2i(blockType, blockSubType));
-        map.put(new Vector3i(pos.x+1, pos.y, pos.z), new Vector2i(blockType, blockSubType));
-        map.put(new Vector3i(pos.x+1, pos.y, pos.z+1), new Vector2i(blockType, blockSubType));
+    private static void makeSquare(Long2IntOpenHashMap map, Vector3i pos, int blockType, int blockSubType) {
+        map.put(LongPos.pack(pos.x, pos.y, pos.z), Chunk.packInts(blockType, blockSubType));
+        map.put(LongPos.pack(pos.x, pos.y, pos.z+1), Chunk.packInts(blockType, blockSubType));
+        map.put(LongPos.pack(pos.x+1, pos.y, pos.z), Chunk.packInts(blockType, blockSubType));
+        map.put(LongPos.pack(pos.x+1, pos.y, pos.z+1), Chunk.packInts(blockType, blockSubType));
     }
 
-    private static Vector3i makeBranch(Map<Vector3i, Vector2i> map, Vector3i pos, Vector3i dir, int blockType, int blockSubType) {
+    private static long makeBranch(Long2IntOpenHashMap map, Vector3i pos, Vector3i dir, int blockType, int blockSubType) {
         makeSquare(map, new Vector3i(pos.x+dir.x, pos.y, pos.z+dir.z), blockType, blockSubType);
         makeSquare(map, new Vector3i(pos.x+(dir.x*2), pos.y-1, pos.z+(dir.z*2)), blockType, blockSubType);
         makeSquare(map, new Vector3i(pos.x+(dir.x*3), pos.y-1, pos.z+(dir.z*3)), blockType, blockSubType);
-        map.put(new Vector3i(pos.x+(dir.x*4), pos.y, pos.z+(dir.z*4)), new Vector2i(blockType, blockSubType));
-        map.put(new Vector3i(pos.x+(dir.x*5), pos.y, pos.z+(dir.z*5)), new Vector2i(blockType, blockSubType));
-        return new Vector3i(pos.x+(dir.x*5), pos.y+1, pos.z+(dir.z*5));
+        map.put(LongPos.pack(pos.x+(dir.x*4), pos.y, pos.z+(dir.z*4)), Chunk.packInts(blockType, blockSubType));
+        map.put(LongPos.pack(pos.x+(dir.x*5), pos.y, pos.z+(dir.z*5)), Chunk.packInts(blockType, blockSubType));
+        return LongPos.pack(pos.x+(dir.x*5), pos.y+1, pos.z+(dir.z*5));
     }
 }

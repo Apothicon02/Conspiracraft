@@ -2,7 +2,6 @@ package org.conspiracraft.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.Material;
@@ -288,11 +287,12 @@ public class World {
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
     public static final short[] oldHeightmap = new short[1];
-    public static int packPos(int x, int z) {return (x*size)+z;}
+    public static int packPos(int x, int z) {return 0;}
     public static int packPosClamped(int x, int z) {return packPos(Math.clamp(x, 0, size-1), Math.clamp(z, 0, size-1));}
-    public static long packPos(int x, int y, int z) {return x+y*sizeL+z*sizeL*heightL;}
+    public static long packPos(int x, int y, int z) {return 0;}
     private static final ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, Region2D> regions2D = new ConcurrentHashMap<>();
+    public static int regionsGenerated = 0;
     //    public static void unloadChunks(long prevX, long newX, long prevY, long newY, long prevZ, long newZ) {
 //        synchronized (lock) {
 //            long oldMinX = prevX - halfSizeChunks, oldMaxX = prevX + halfSizeChunks, oldMinY = prevY - halfHeightChunks, oldMaxY = prevY + halfHeightChunks, oldMinZ = prevZ - halfSizeChunks, oldMaxZ = prevZ + halfSizeChunks;
@@ -392,6 +392,21 @@ public class World {
             return chunk.getFluid(pos);
         }
     }
+    public static boolean isAir(long pos) {
+        return isAir(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));
+    }
+    public static boolean isAir(int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
+        if (chunk == null) {return true;}
+        return chunk.isAir(x&15, y&15, z&15);
+    }
+    public static boolean isAirUnchecked(int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
+        //if (chunk == null) {return true;}
+        return chunk.isAir(x&15, y&15, z&15);
+    }
     public static int getBlockTypeUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
@@ -443,9 +458,7 @@ public class World {
     }
     public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
-    public static Collection<Region> getAllRegions() {
-        return regions.values();
-    }
+    public static Collection<Region> getAllRegions() {return regions.values();}
     public static Region getRegion(long cRP) {
         return regions.get(cRP);
     }
@@ -486,9 +499,8 @@ public class World {
 //        prevChunk = chunk;
 //        return chunk;
     }
-    public static Vector2i getBlockWorldgen(Vector3i pos) {
-        return getBlockWorldgen(pos.x(), pos.y(), pos.z());
-    }
+    public static Vector2i getBlockWorldgen(Vector3i pos) {return getBlockWorldgen(pos.x(), pos.y(), pos.z());}
+    public static Vector2i getBlockWorldgen(long pos) {return getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
         long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
@@ -527,6 +539,9 @@ public class World {
         } else {
             chunk.setBlock(lX, lY, lZ, type, subType);
         }
+    }
+    public static void setBlockWorldgen(long pos, int type, int subType) {
+        setBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos), type, subType);
     }
     public static void setBlockWorldgen(int x, int y, int z, int type, int subType) {
         long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);

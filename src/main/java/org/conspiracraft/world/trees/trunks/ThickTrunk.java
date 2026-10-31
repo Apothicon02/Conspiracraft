@@ -3,18 +3,20 @@ package org.conspiracraft.world.trees.trunks;
 import kotlin.Pair;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.BlockPos;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.util.HashSet;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
 
 public class ThickTrunk extends Trunk {
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, boolean singleCanopy, int minBranchHeight, int branchChance, int blockType, int blockSubType) {
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
-        Set<Vector3i> canopies = new HashSet<>();
+    public static Pair<Long2IntOpenHashMap, Set<Long>> generateTrunk(Random random, int oX, int oY, int oZ, int trunkHeight, boolean singleCanopy, int minBranchHeight, int branchChance, int blockType, int blockSubType) {
+        Long2IntOpenHashMap map = new Long2IntOpenHashMap(trunkHeight*8*8);
+        Set<Long> canopies = new HashSet<>();
 
         int baseRadius = 1;
         BlockPos pos = new BlockPos(oX, oY-4, oZ);
@@ -61,7 +63,7 @@ public class ThickTrunk extends Trunk {
                 if (baseRadius > 1) {
                     makeSquare(map, pos.immutable(), baseRadius-1, false, blockType, blockSubType);
                 } else {
-                    map.put(pos.immutable(), new Vector2i(blockType, blockSubType));
+                    map.put(LongPos.pack(pos), Chunk.packInts(blockType, blockSubType));
                 }
                 if (!singleCanopy && i < trunkHeight-1 && random.nextInt(0, 10) < branchChance && currentHeight > minBranchHeight) {
                     canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
@@ -79,12 +81,12 @@ public class ThickTrunk extends Trunk {
                 }
             }
         }
-        canopies.add(new Vector3i(oX, oY+trunkHeight+1, oZ));
+        canopies.add(LongPos.pack(oX, oY+trunkHeight+1, oZ));
         
         return new Pair<>(map, canopies);
     }
 
-    private static void makeColumn(Random random, Map<Vector3i, Vector2i> map, Vector3i pos, int minHeight, int maxHeight, int blockType, int blockSubType) {
+    private static void makeColumn(Random random, Long2IntOpenHashMap map, Vector3i pos, int minHeight, int maxHeight, int blockType, int blockSubType) {
         minHeight--;
         if (minHeight >= maxHeight) {
             minHeight = maxHeight-1;
@@ -92,23 +94,23 @@ public class ThickTrunk extends Trunk {
         Vector3i newPos = new Vector3i(pos);
         for (int y = 0; y <= random.nextInt(minHeight, maxHeight); y++) {
             newPos.add(0, 1, 0);
-            map.put(new Vector3i(newPos), new Vector2i(blockType, blockSubType));
+            map.put(LongPos.pack(newPos), Chunk.packInts(blockType, blockSubType));
         }
     }
 
-    private static BlockPos makeBranch(Random random, Map<Vector3i, Vector2i> map, BlockPos pos, int length, int blockType, int blockSubType) {
+    private static long makeBranch(Random random, Long2IntOpenHashMap map, BlockPos pos, int length, int blockType, int blockSubType) {
         BlockPos dir = new BlockPos(random.nextBoolean() ? 1 : -1, 0, random.nextBoolean() ? 1 : -1);
         for (int i = 1; i <= length; i++) {
             BlockPos newPos = new BlockPos(pos.x()+(dir.x()*i), pos.y(), pos.z()+(dir.z()*i));
-            map.put(newPos, new Vector2i(blockType, blockSubType));
+            map.put(LongPos.pack(newPos), Chunk.packInts(blockType, blockSubType));
             if (i == length) {
-                return newPos.above();
+                return LongPos.pack(newPos.above());
             }
         }
-        return pos;
+        return LongPos.pack(pos);
     }
 
-    private static void makeSquare(Map<Vector3i, Vector2i> map, Vector3i pos, int radius, boolean corners, int blockType, int blockSubType) {
+    private static void makeSquare(Long2IntOpenHashMap map, Vector3i pos, int radius, boolean corners, int blockType, int blockSubType) {
         int minX = pos.x()-radius;
         int maxX = pos.x()+radius;
         int minZ = pos.z()-radius;
@@ -116,8 +118,7 @@ public class ThickTrunk extends Trunk {
         for (int x = pos.x()-radius; x <= maxX; x++) {
             for (int z = pos.z()-radius; z <= maxZ; z++) {
                 if (!((x == minX || x == maxX) && (z == minZ || z == maxZ)) || corners) {
-                    BlockPos newPos = new BlockPos(x, pos.y(), z);
-                    map.put(newPos, new Vector2i(blockType, blockSubType));
+                    map.put(LongPos.pack(x, pos.y(), z), Chunk.packInts(blockType, blockSubType));
                 }
             }
         }

@@ -26,8 +26,8 @@ public class PowderBlockType extends BlockType {
     }
 
     @Override
-    public boolean obstructingHeightmap(Vector2i block) {
-        return blockProperties.obstructsHeightmap && block.y == 0;
+    public boolean obstructingHeightmap(int block) {
+        return blockProperties.obstructsHeightmap && (block & 0xFFFF) == 0;
     }
 
     @Override

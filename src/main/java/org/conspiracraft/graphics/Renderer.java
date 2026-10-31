@@ -80,6 +80,7 @@ public class Renderer {
     public static final Vector3f viewPos = new Vector3f();
     public static final Vector3f modelOffset = new Vector3f();
     public static final Vector3d warpOffset = new Vector3d();
+    public static long wgStart = -1;
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -101,7 +102,9 @@ public class Renderer {
                     initialized = true;
                     drawStuff = false;
                 } else {
+                    if (wgStart == -1) {wgStart = System.currentTimeMillis();}
                     World.worldType.tickWorldgen();
+                    if (World.regionsGenerated > 200 && wgStart != -2) {System.out.println("First 200 regions took "+String.format("%.2f", (System.currentTimeMillis()-wgStart)/1000.f)+"s to generate"); wgStart = -2;}
                     boolean wasEmpty = updateQueue.isEmpty();
                     duplicateChunks.clear();
                     while (!updateQueue.isEmpty()) {

@@ -1,22 +1,22 @@
 package org.conspiracraft.world.trees.canopies;
 
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
-import org.joml.Vector3i;
 
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 
 public class LilyCanopy extends Canopy {
 
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
-        map.put(pos, new Vector2i(blockType, blockSubType));
+    private static void addToMap(Long2IntOpenHashMap map, long pos, int blockType, int blockSubType) {
+        map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Map<Vector3i, Vector2i> generateCanopy(Random random, Map<Vector3i, Vector2i> blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
         int nectarHeight = y+(height/2)-1;
-        addToMap(map, new Vector3i(x, nectarHeight, z), BlockTypes.DANDELION_PETALS.id, 0);
+        addToMap(blocks, LongPos.pack(x, nectarHeight, z), BlockTypes.DANDELION_PETALS.id, 0);
         int highestCenter = y;
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
@@ -29,7 +29,7 @@ public class LilyCanopy extends Canopy {
                     int yDistAbove = (lY - y)-3;
                     int distAbove = horizontalDist + yDistAbove * yDistAbove;
                     if (dist <= radius * 3 && distAbove > radius * 3) {
-                        addToMap(map, new Vector3i(lX, lY, lZ), blockType, blockSubType);
+                        addToMap(blocks, LongPos.pack(lX, lY, lZ), blockType, blockSubType);
                         if (lX == x && lZ == z) {
                             highestCenter = Math.max(highestCenter, lY);
                         }
@@ -38,13 +38,13 @@ public class LilyCanopy extends Canopy {
             }
         }
         for (int lY = highestCenter; lY < nectarHeight; lY++) {
-            addToMap(map, new Vector3i(x, lY, z), BlockTypes.STEM_FENCE.id, 0);
+            addToMap(blocks, LongPos.pack(x, lY, z), BlockTypes.STEM_FENCE.id, 0);
         }
-        return map;
+        return blocks;
     }
 
-    private static boolean solid(Vector2i block) {
-        if (block == null) {return false;}
-        return BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
+    private static boolean solid(int block) {
+        if (block == 0) {return false;}
+        return BlockTypes.blockTypes[block >> 16].blockProperties.isSolid;
     }
 }

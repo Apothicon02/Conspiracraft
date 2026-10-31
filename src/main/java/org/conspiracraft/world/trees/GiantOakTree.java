@@ -1,64 +1,36 @@
 package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
-import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.world.World;
+import org.conspiracraft.world.Bounds;
+import org.conspiracraft.world.LongPos;
 import org.conspiracraft.world.trees.canopies.BlobCanopy;
 import org.conspiracraft.world.trees.canopies.BlobDrippyCanopy;
 import org.conspiracraft.world.trees.trunks.ThickTrunk;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.conspiracraft.world.World.*;
 
 public class GiantOakTree {
-    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int branchChance) {
-        if (blockOn.x == 2) {
-            Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = ThickTrunk.generateTrunk(random, x, y, z, maxHeight, false, 3, branchChance, logType, logSubType);
-            AtomicBoolean colliding = new AtomicBoolean(false);
-            Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-            blocks.forEach((pos, block) -> {
-                if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
-                    colliding.set(true);
-                }
-            });
-            if (colliding.get()) {return false;}
-            int minCollisionY = y+5;
-            for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-                int eRadius = radius;
-                if (canopyPos.y() < y+(leavesHeight*2)) {
-                    eRadius /= 8;
-                }
-                Map<Vector3i, Vector2i> canopy;
-                if (canopyPos.y() >= (y+maxHeight)-(leavesHeight/2)) {
-                    canopy = BlobDrippyCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
-                } else {
-                    canopy = BlobCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, eRadius, leavesHeight);
-                }
-                if (!TreeHelper.oldIntegrateCanopy(canopy, blocks, minCollisionY)) {
-                    colliding.set(true);
-                    break;
-                }
+    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int leavesHeight, int logType, int logSubType, int leafType, int leafSubType, int branchChance) {
+        int minCollisionY = y+5;
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = ThickTrunk.generateTrunk(random, x, y, z, maxHeight, false, 3, branchChance, logType, logSubType);
+        if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, false)) {return false;}
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(radius*maxHeight*radius);
+        for (long canopyPos : generatedTrunk.getSecond()) {
+            int eRadius = radius;
+            if (LongPos.y(canopyPos) < y+(leavesHeight*2)) {
+                eRadius /= 8;
             }
-            if (!colliding.get()) {
-                blocks.forEach((pos, block) -> {
-                    setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
-                    int condensedPos = packPos(pos.x, pos.z);
-                    int surfaceY = oldHeightmap[condensedPos];
-                    oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], pos.y - 1);
-                    for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-                        //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-                    }
-                });
+            if (LongPos.y(canopyPos) >= (y+maxHeight)-(leavesHeight/2)) {
+                BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, eRadius, leavesHeight);
+            } else {
+                BlobCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, eRadius, leavesHeight);
             }
-            return !colliding.get();
         }
-        return false;
+        if (TreeHelper.collides(blocks, bounds, minCollisionY, false)) {return false;}
+        TreeHelper.set(blocks);
+        TreeHelper.set(generatedTrunk.getFirst());
+        return true;
     }
 }

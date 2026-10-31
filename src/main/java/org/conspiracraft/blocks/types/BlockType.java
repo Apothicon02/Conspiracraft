@@ -4,6 +4,7 @@ import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.Chunk;
 import org.joml.*;
 import org.conspiracraft.blocks.BlockTag;
 import java.util.List;
@@ -54,6 +55,9 @@ public class BlockType {
     }
 
     public boolean obstructingHeightmap(Vector2i block) {
+        return obstructingHeightmap(Chunk.packInts(block.x(), block.y()));
+    }
+    public boolean obstructingHeightmap(int block) {
         return blockProperties.obstructsHeightmap;
     }
 

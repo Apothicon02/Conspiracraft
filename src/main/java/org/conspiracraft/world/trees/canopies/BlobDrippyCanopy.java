@@ -2,63 +2,52 @@ package org.conspiracraft.world.trees.canopies;
 
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.SimplexNoise;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 
-import static org.conspiracraft.world.World.getBlockWorldgen;
+import static org.conspiracraft.world.World.*;
 
 public class BlobDrippyCanopy extends Canopy {
 
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, int blockType, int blockSubType) {
-        map.put(pos, new Vector2i(blockType, blockSubType));
+    private static void addToMap(Long2IntOpenHashMap map, long pos, int blockType, int blockSubType) {
+        map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Map<Vector3i, Vector2i> generateCanopy(Random random, Map<Vector3i, Vector2i> blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
-                boolean set = false;
+                int xDist = lX - x, zDist = lZ - z;
+                int undistance = (radius * 3) - xDist*xDist - zDist*zDist;
+                if (undistance < 0) {continue;}
+                undistance = (int) Math.sqrt(undistance);
+                int lowY = Math.max(y - undistance, y - height);
+                int highY = Math.min(y + undistance, y + height);
+                if (highY <= lowY) {continue;}
+                lowY -= (int) (SimplexNoise.noise(lX/10.f, lZ/10.f)*6);
                 int minY = y+height;
-                for (int lY = y - height; lY <= y + height; lY++) {
-                    int xDist = lX - x;
-                    int yDist = lY - y;
-                    int zDist = lZ - z;
-                    int dist = xDist * xDist + zDist * zDist + yDist * yDist;
-                    if (dist <= radius * 3) {
-                        addToMap(map, new Vector3i(lX, lY, lZ), blockType, blockSubType);
-                        minY = Math.min(minY, lY);
-                        set = true;
-                    }
+                for (int lY = lowY; lY <= highY; lY++) {
+                    addToMap(blocks, LongPos.pack(lX, lY, lZ), blockType, blockSubType);
+                    minY = Math.min(minY, lY);
                 }
-                if (set) {
-                    int droop = (int) (minY-(SimplexNoise.noise(lX/10.f, lZ/10.f)*6));
-                    Vector3i bPos = new Vector3i(lX, minY - 1, lZ);
-                    Vector3i aPos = new Vector3i(lX, minY, lZ);
-                    for (int i = 0; i <= 24; i++) {
-                        bPos.sub(0, 1, 0);
-                        aPos.sub(0, 1, 0);
-                        if (aPos.y() >= droop) {
-                            addToMap(map, new Vector3i(aPos), blockType, blockSubType);
-                        } else if (BlockTags.leaves.tagged.contains(blockType)) {
-                            if ((!BlockTypes.blockTypes[getBlockWorldgen(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) && !map.containsKey(aPos) &&
-                                    (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
-                                addToMap(map, new Vector3i(aPos), blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
-                                break;
-                            }
-                        }
+                if (BlockTags.leaves.tagged.contains(blockType)) {
+                    long bPos = LongPos.pack(lX, minY-height, lZ);
+                    long aPos = LongPos.pack(lX, (1+minY)-height, lZ);
+                    if ((isAir(aPos) && !blocks.containsKey(aPos) &&
+                            (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                     }
                 }
             }
         }
-        return map;
+        return blocks;
     }
 
-    private static boolean solid(Vector2i block) {
-        if (block == null) {return false;}
-        return BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
+    private static boolean solid(int block) {
+        if (block == 0) {return false;}
+        return BlockTypes.blockTypes[block >> 16].blockProperties.isSolid;
     }
 }

@@ -93,6 +93,13 @@ public class Chunk {
             this.lods = lods;
         }
     }
+    public boolean isAir(int x, int y, int z) {
+        if (lods == null) {return blockPalette.getFirst() == 0;} else {
+            int lodIdx = packLodPos(x >> lodBits, y >> lodBits, z >> lodBits);
+            int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
+            return (lods[lodIdx] & (1L << bitIdx)) == 0;
+        }
+    }
 
     public final IntArrayList blockPalette;
     public BitBuffer blockData;

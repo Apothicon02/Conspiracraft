@@ -1,51 +1,27 @@
 package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
-import org.conspiracraft.blocks.types.BlockTypes;
-import org.conspiracraft.world.World;
+import org.conspiracraft.world.Bounds;
+import org.conspiracraft.world.LongPos;
 import org.conspiracraft.world.trees.canopies.JungleCanopy;
 import org.conspiracraft.world.trees.trunks.TwistingTrunk;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.conspiracraft.world.World.*;
 
 public class JungleTree {
-    public static boolean generate(Random random, Vector2i blockOn, int x, int y, int z, int maxHeight, int radius, int minCanopyHeight, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, minCanopyHeight, logType, logSubType, overgrown, 1);
-        AtomicBoolean colliding = new AtomicBoolean(false);
-        Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-        blocks.forEach((pos, block) -> {
-            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
-                colliding.set(true);
-            }
-        });
-        if (colliding.get()) {return false;}
+    public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int minCanopyHeight, int logType, int logSubType, int leafType, int leafSubType, boolean overgrown) {
         int minCollisionY = y+5;
-        for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-            Map<Vector3i, Vector2i> canopy = JungleCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, radius, 1);
-            if (!TreeHelper.oldIntegrateCanopy(canopy, blocks, minCollisionY)) {
-                colliding.set(true);
-                break;
-            }
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = TwistingTrunk.generateTrunk(random, x, y, z, maxHeight, minCanopyHeight, logType, logSubType, overgrown, 1);
+        if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, false)) {return false;}
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(radius*maxHeight*radius);
+        for (long canopyPos : generatedTrunk.getSecond()) {
+            JungleCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, radius, 1);
         }
-        if (!colliding.get()) {
-            blocks.forEach((pos, block) -> {
-                setBlockWorldgen(pos.x, pos.y, pos.z, block.x, block.y);
-                int condensedPos = packPos(pos.x, pos.z);
-                int surfaceY = oldHeightmap[condensedPos];
-                oldHeightmap[condensedPos] = (short) Math.max(oldHeightmap[condensedPos], pos.y - 1);
-                for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-                    //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-                }
-            });
-        }
-        return !colliding.get();
+        if (TreeHelper.collides(blocks, bounds, minCollisionY, false)) {return false;}
+        TreeHelper.set(blocks);
+        TreeHelper.set(generatedTrunk.getFirst());
+        return true;
     }
 }

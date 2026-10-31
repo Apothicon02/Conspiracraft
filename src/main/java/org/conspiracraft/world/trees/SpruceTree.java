@@ -1,66 +1,27 @@
 package org.conspiracraft.world.trees;
 
 import kotlin.Pair;
-import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Bounds;
-import org.conspiracraft.world.World;
+import org.conspiracraft.world.LongPos;
 import org.conspiracraft.world.trees.canopies.SpruceCanopy;
 import org.conspiracraft.world.trees.trunks.StraightTrunk;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.conspiracraft.world.trees.TreeHelper.integrateCanopy;
 
 public class SpruceTree {
     public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, boolean snowy, int logType, int logSubType, int leafType, int leafSubType) {
-        Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generatedTrunk = StraightTrunk.generateTrunk(x, y, z, maxHeight, logType, logSubType);
-        AtomicBoolean colliding = new AtomicBoolean(false);
-        Map<Vector3i, Vector2i> blocks = new HashMap<>(generatedTrunk.getFirst());
-        blocks.forEach((pos, block) -> {
-            if (bounds.out(pos)) {colliding.set(true); return;}
-            if (World.getBlockWorldgen(pos).x() == BlockTypes.WATER.id) {
-                colliding.set(true);
-            }
-        });
-        if (colliding.get()) {return false;}
         int minCollisionY = y+3;
-        for (Vector3i canopyPos : generatedTrunk.getSecond()) {
-            Map<Vector3i, Vector2i> canopy = SpruceCanopy.generateCanopy(random, blocks, canopyPos.x, canopyPos.y, canopyPos.z, leafType, leafSubType, maxHeight, new Vector3i(x, y, z));
-            if (!integrateCanopy(bounds, canopy, blocks, minCollisionY)) {
-                colliding.set(true);
-                break;
-            }
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = StraightTrunk.generateTrunk(x, y, z, maxHeight, logType, logSubType);
+        if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, false)) {return false;}
+        Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(6*maxHeight*6);
+        for (long canopyPos : generatedTrunk.getSecond()) {
+            SpruceCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, maxHeight, LongPos.pack(x, y, z));
         }
-        if (!colliding.get()) {
-            blocks.forEach((pos, block) -> {
-                int subtype = block.y();
-                if (snowy && block.x() == leafType) {
-                    AtomicBoolean airAbove = new AtomicBoolean(true);
-                    blocks.forEach((nPos, nBlock) -> {
-                        if (nPos.x() == pos.x() && nPos.z() == pos.z() && nPos.y == pos.y()+1) {
-                            airAbove.set(false);
-                        }
-                    });
-                    if (airAbove.get()) {
-                        subtype+=8;
-                    }
-                }
-                World.setBlockWorldgen(pos.x, pos.y, pos.z, block.x, subtype);
-//                int condensedPos = packPos(pos.x, pos.z);
-//                int surfaceY = heightmap[condensedPos];
-//                heightmap[condensedPos] = (short) Math.max(heightmap[condensedPos], pos.y - 1);
-//                for (int extraY = pos.y - 1; extraY >= surfaceY; extraY--) {
-//                    //setLight(pos.x, extraY, pos.z, new Vector4i(0, 0, 0, 0));
-//                }
-            });
-            return true;
-        }
-        return false;
+        if (TreeHelper.collides(blocks, bounds, minCollisionY, false)) {return false;}
+        TreeHelper.set(blocks);
+        TreeHelper.set(generatedTrunk.getFirst());
+        return true;
     }
 }

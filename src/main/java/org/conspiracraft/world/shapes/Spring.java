@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.conspiracraft.world.World.getBlock;
+import static org.conspiracraft.world.World.getBlockTypeUnchecked;
 
 public class Spring {
     public static void generate(int x, int y, int z, int blockType, int blockSubType, int radius) {
@@ -20,9 +21,9 @@ public class Spring {
                 int zDist = lZ - z;
                 int dist = xDist * xDist + zDist * zDist;
                 if (dist <= radius * 2) {
-                    Vector2i belowBlock = getBlock(lX, y-1, lZ);
-                    Vector2i block = getBlock(lX, y, lZ);
-                    if ((belowBlock.x() == BlockTypes.GRASS.id || belowBlock.x() == BlockTypes.DIRT.id || belowBlock.x() == BlockTypes.SNOW.id) && BlockTypes.blockTypes[block.x()].blockProperties.isFluidReplaceable) {
+                    int belowBlock = getBlockTypeUnchecked(lX, y-1, lZ);
+                    int block = getBlockTypeUnchecked(lX, y, lZ);
+                    if ((belowBlock == BlockTypes.GRASS.id || belowBlock == BlockTypes.DIRT.id || belowBlock == BlockTypes.SNOW.id) && BlockTypes.blockTypes[block].blockProperties.isFluidReplaceable) {
                         blocks.add(new Vector3i(lX, y, lZ));
                     }
                 }

@@ -2,24 +2,26 @@ package org.conspiracraft.world.trees.trunks;
 
 import kotlin.Pair;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.LongPos;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.util.HashSet;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 import java.util.Set;
 
 public class ArchingTrunk extends Trunk {
-    private static void addToMap(Map<Vector3i, Vector2i> map, Vector3i pos, Vector2i block) {
+    private static void addToMap(Long2IntOpenHashMap map, long pos, int block) {
         map.put(pos, block);
     }
     
-    public static Pair<Map<Vector3i, Vector2i>, Set<Vector3i>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius, int minBranchHeight, float bendMul) {
+    public static Pair<Long2IntOpenHashMap, Set<Long>> generateTrunk(Random random, int oX, int oY, int oZ, int count, int minTrunkHeight, int maxTrunkHeight, int blockType, int blockSubType, int halfLeafRadius, int minBranchHeight, float bendMul) {
         Vector3i origin = new Vector3i(oX, oY, oZ);
-        Vector2i wood = new Vector2i(blockType, blockSubType);
-        Map<Vector3i, Vector2i> map = new java.util.HashMap<>(Map.of());
-        Set<Vector3i> canopies = new HashSet<>();
+        int wood = Chunk.packInts(blockType, blockSubType);
+        Long2IntOpenHashMap map = new Long2IntOpenHashMap(maxTrunkHeight*4);
+        Set<Long> canopies = new HashSet<>();
         int extra = random.nextInt(0, 10);
         if (extra >= 10) {
             extra = 1;
@@ -44,34 +46,34 @@ public class ArchingTrunk extends Trunk {
             for (int height = origin.y()-1; height <= maxHeight; height++) {
                 float bendFactor = ((float) maxHeight /height)*bendMul;
                 Vector3i pos = new Vector3i(offsetX, height, offsetZ);
-                addToMap(map, pos, wood);
+                addToMap(map, LongPos.pack(pos), wood);
                 boolean straight = !(height > origin.y()+(actualHeight*0.425f));
                 double heightFactor = Math.pow((((float)height / maxHeight)-0.4f)*2, 5);
                 if (heightFactor < 0.1f || straight) {
                     if (mirrored) {
-                        addToMap(map, new Vector3i(pos).add(-1, 0, 0), wood);
-                        addToMap(map, new Vector3i(pos).add(0, 0, -1), wood);
-                        addToMap(map, new Vector3i(pos).add(-1, 0, -1), wood);
+                        addToMap(map, LongPos.pack(pos, -1, 0, 0), wood);
+                        addToMap(map, LongPos.pack(pos, 0, 0, -1), wood);
+                        addToMap(map, LongPos.pack(pos, -1, 0, -1), wood);
                     } else {
-                        addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
-                        addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
-                        addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                        addToMap(map, LongPos.pack(pos, 1, 0, 0), wood);
+                        addToMap(map, LongPos.pack(pos, 0, 0, 1), wood);
+                        addToMap(map, LongPos.pack(pos, 1, 0, 1), wood);
                     }
                     boolean thick = !(height > origin.y()+(actualHeight*0.2f));
                     if (thick) {
                         if (mirrored) {
-                            addToMap(map, new Vector3i(pos).add(1, 0, 0), wood);
-                            addToMap(map, new Vector3i(pos).add(0, 0, 1), wood);
-                            addToMap(map, new Vector3i(pos).add(1, 0, 1), wood);
+                            addToMap(map, LongPos.pack(pos, 1, 0, 0), wood);
+                            addToMap(map, LongPos.pack(pos, 0, 0, 1), wood);
+                            addToMap(map, LongPos.pack(pos, 1, 0, 1), wood);
                         } else {
-                            addToMap(map, new Vector3i(pos).add(-1, 0, 0), wood);
-                            addToMap(map, new Vector3i(pos).add(0, 0, -1), wood);
-                            addToMap(map, new Vector3i(pos).add(-1, 0, -1), wood);
+                            addToMap(map, LongPos.pack(pos, -1, 0, 0), wood);
+                            addToMap(map, LongPos.pack(pos, 0, 0, -1), wood);
+                            addToMap(map, LongPos.pack(pos, -1, 0, -1), wood);
                         }
                     }
                 }
                 if (height == maxHeight) {
-                    canopies.add(Utils.addVec(pos, 0, 1, 0));
+                    canopies.add(LongPos.pack(pos, 0, 1, 0));
                 } else if (height < maxHeight-4 && !straight && random.nextFloat() < heightFactor) {
                     if (trunks == 0 || trunks == 4) {
                         if (random.nextInt(0, 5) < 3-bendFactor) {
@@ -106,16 +108,16 @@ public class ArchingTrunk extends Trunk {
                         height--;
                         if (random.nextFloat() < 0.125f && pos.y()-oY >= minBranchHeight) {
                             for (int y = height+1; y < height+halfLeafRadius; y++) {
-                                addToMap(map, new Vector3i(offsetX, y, offsetZ), wood);
-                                addToMap(map, new Vector3i(offsetX+1, y, offsetZ+1), wood);
+                                addToMap(map, LongPos.pack(offsetX, y, offsetZ), wood);
+                                addToMap(map, LongPos.pack(offsetX+1, y, offsetZ+1), wood);
                             }
-                            canopies.add(Utils.addVec(pos, 0, halfLeafRadius, 0));
+                            canopies.add(LongPos.pack(pos, 0, halfLeafRadius, 0));
                         }
                     } else if (heightFactor > 0.25f && random.nextBoolean()) {
                         height--;
                     }
                     pos = new Vector3i(offsetX, height, offsetZ);
-                    addToMap(map, pos, wood);
+                    addToMap(map, LongPos.pack(pos), wood);
                 }
             }
         }
