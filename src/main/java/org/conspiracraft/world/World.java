@@ -401,6 +401,14 @@ public class World {
         if (chunk == null) {return true;}
         return chunk.isAir(x&15, y&15, z&15);
     }
+    public static boolean isAirUnchecked(Region region, long pos) {
+        return isAirUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));
+    }
+    public static boolean isAirUnchecked(Region region, int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
+        return chunk.isAir(x&15, y&15, z&15);
+    }
     public static boolean isAirUnchecked(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
@@ -499,6 +507,16 @@ public class World {
 //        prevChunk = chunk;
 //        return chunk;
     }
+    public static Vector2i getBlockWorldgenUnchecked(Region region, Vector3i pos) {return getBlockWorldgenUnchecked(region, pos.x(), pos.y(), pos.z());}
+    public static Vector2i getBlockWorldgenUnchecked(Region region, long pos) {return getBlockWorldgenUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
+    public static Vector2i getBlockWorldgenUnchecked(Region region, int x, int y, int z) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
+    }
     public static Vector2i getBlockWorldgen(Vector3i pos) {return getBlockWorldgen(pos.x(), pos.y(), pos.z());}
     public static Vector2i getBlockWorldgen(long pos) {return getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
     public static Vector2i getBlockWorldgen(int x, int y, int z) {
@@ -539,6 +557,17 @@ public class World {
         } else {
             chunk.setBlock(lX, lY, lZ, type, subType);
         }
+    }
+    public static void setBlockWorldgenUnchecked(Region region, long pos, int type, int subType) {
+        setBlockWorldgenUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos), type, subType);
+    }
+    public static void setBlockWorldgenUnchecked(Region region, int x, int y, int z, int type, int subType) {
+        int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
+        Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
+        int lX = x&15;
+        int lY = y&15;
+        int lZ = z&15;
+        chunk.setBlock(lX, lY, lZ, type, subType);
     }
     public static void setBlockWorldgen(long pos, int type, int subType) {
         setBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos), type, subType);

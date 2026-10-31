@@ -3,6 +3,7 @@ package org.conspiracraft.world.trees.canopies;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LongPos;
+import org.conspiracraft.world.Region;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 
@@ -17,7 +18,7 @@ public class BlobCanopy extends Canopy {
         map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, Region region, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 boolean set = false;
@@ -35,8 +36,8 @@ public class BlobCanopy extends Canopy {
                     for (int i = 0; i <= 24; i++) {
                         long bPos = LongPos.pack(lX, y - 1, lZ);
                         long aPos = LongPos.pack(lX, y, lZ);
-                        if ((!BlockTypes.blockTypes[getBlockWorldgen(aPos).x()].blockProperties.isSolid && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((isAirUnchecked(region, aPos) && !blocks.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgenUnchecked(region, bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                             break;
                         }

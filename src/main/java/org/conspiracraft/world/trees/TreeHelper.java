@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Bounds;
 import org.conspiracraft.world.LongPos;
+import org.conspiracraft.world.Region;
 import org.joml.Vector2i;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -21,12 +22,31 @@ public class TreeHelper {
             setBlockWorldgen(entry.getLongKey(), block >> 16, block & 0xFFFF);
         }
     }
+    public static void set(Region region, Long2IntOpenHashMap blocks) {
+        ObjectIterator<Long2IntMap.Entry> iterator = blocks.long2IntEntrySet().fastIterator();
+        while (iterator.hasNext()) {
+            Long2IntMap.Entry entry = iterator.next();
+            int block = entry.getIntValue();
+            setBlockWorldgenUnchecked(region, entry.getLongKey(), block >> 16, block & 0xFFFF);
+        }
+    }
     public static boolean collides(Long2IntOpenHashMap blocks, Bounds bounds, int minCollisionY, boolean ignore) {
         if (ignore) {return false;}
         LongIterator iterator = blocks.keySet().longIterator();
         while (iterator.hasNext()) {
             long pos = iterator.nextLong();
             if (bounds.out(pos) || (LongPos.y(pos) > minCollisionY && !isAirUnchecked(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static boolean collides(Region region, Long2IntOpenHashMap blocks, Bounds bounds, int minCollisionY, boolean ignore) {
+        if (ignore) {return false;}
+        LongIterator iterator = blocks.keySet().longIterator();
+        while (iterator.hasNext()) {
+            long pos = iterator.nextLong();
+            if (bounds.out(pos) || (LongPos.y(pos) > minCollisionY && !isAirUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos)))) {
                 return true;
             }
         }

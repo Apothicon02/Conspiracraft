@@ -3,10 +3,7 @@ package org.conspiracraft.world.trees.canopies;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.BlockPos;
-import org.conspiracraft.world.Chunk;
-import org.conspiracraft.world.Directions;
-import org.conspiracraft.world.LongPos;
+import org.conspiracraft.world.*;
 import org.joml.SimplexNoise;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -14,8 +11,7 @@ import org.joml.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 
-import static org.conspiracraft.world.World.getBlockWorldgen;
-import static org.conspiracraft.world.World.isAir;
+import static org.conspiracraft.world.World.*;
 
 public class DroopingCanopy extends Canopy {
     private static int getLeaves(Random random, long pos, int blockType, int blockSubType) {return Chunk.packInts(blockType, blockSubType);}
@@ -35,7 +31,7 @@ public class DroopingCanopy extends Canopy {
         }
     }
     
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int ogX, int ogY, int ogZ, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin, int height, int maxRadius, float droopiness) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, Region region, int ogX, int ogY, int ogZ, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin, int height, int maxRadius, float droopiness) {
         Vector3i origin = new Vector3i(ogX, ogY, ogZ);
 
         for (int x = origin.x()-maxRadius; x <= origin.x()+maxRadius; x++) {
@@ -77,8 +73,8 @@ public class DroopingCanopy extends Canopy {
                     if (BlockTags.leaves.tagged.contains(blockType)) {
                         long bPos = LongPos.pack(x, minY-height, z);
                         long aPos = LongPos.pack(x, (1+minY)-height, z);
-                        if ((isAir(aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((isAirUnchecked(region, aPos) && !blocks.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgenUnchecked(region, bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                         }
                     }
