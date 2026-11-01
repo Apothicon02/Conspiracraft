@@ -381,7 +381,7 @@ public class Renderer {
             if (activePlanet != null) {
                 quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
             }
-            drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE), new Vector4f(1));
+            drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE*10.f), new Vector4f(1));
         }
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture

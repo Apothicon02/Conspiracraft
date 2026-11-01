@@ -66,18 +66,18 @@ public class ThickTrunk extends Trunk {
                     map.put(LongPos.pack(pos), Chunk.packInts(blockType, blockSubType));
                 }
                 if (!singleCanopy && i < trunkHeight-1 && random.nextInt(0, 10) < branchChance && currentHeight > minBranchHeight) {
-                    canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
+                    canopies.add(makeBranch(random, map, pos.immutable(), random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             } else if (currentHeight >= trunkHeight/1.75) {
                 makeSquare(map, pos.immutable(), baseRadius, false, blockType, blockSubType);
                 if (!singleCanopy && random.nextInt(0, 10) < branchChance && currentHeight > minBranchHeight) {
-                    canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
+                    canopies.add(makeBranch(random, map, pos.immutable(), random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             } else {
                 makeSquare(map, pos.immutable(), baseRadius, true, blockType, blockSubType);
                 double actualTrunkHeight = Utils.gradient(pos.y(), oY+(trunkHeight/4), oY+trunkHeight, 3, 1);
                 if (!singleCanopy && actualTrunkHeight != 1 && random.nextInt(0, 10) < actualTrunkHeight && currentHeight > minBranchHeight) {
-                    canopies.add(makeBranch(random, map, pos, random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
+                    canopies.add(makeBranch(random, map, pos.immutable(), random.nextInt(1, 2)+baseRadius, blockType, blockSubType));
                 }
             }
         }

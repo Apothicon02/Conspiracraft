@@ -24,6 +24,8 @@ public class Texture {
     public long sampler = -1;
     public int usage;
     public boolean windowResizable;
+    public int tileMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    public Texture repeating(int tileMode) {this.tileMode = tileMode; return this;}
 
     public Texture(float resDiv, int width, int height, int channels, int format, int usage, boolean windowResizable) {
         this.handle = Textures.textures.size();
@@ -61,12 +63,12 @@ public class Texture {
                 .sType(VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO)
                 .magFilter(isDepth ? VK_FILTER_NEAREST : VK_FILTER_LINEAR)
                 .minFilter(isDepth ? VK_FILTER_NEAREST : VK_FILTER_LINEAR)
-                .addressModeU(VK_SAMPLER_ADDRESS_MODE_REPEAT)
-                .addressModeV(VK_SAMPLER_ADDRESS_MODE_REPEAT)
-                .addressModeW(VK_SAMPLER_ADDRESS_MODE_REPEAT)
+                .addressModeU(tileMode)
+                .addressModeV(tileMode)
+                .addressModeW(tileMode)
                 .anisotropyEnable(false)
                 .maxAnisotropy(16)
-                .borderColor(VK_BORDER_COLOR_INT_OPAQUE_BLACK)
+                .borderColor(VK_BORDER_COLOR_INT_TRANSPARENT_BLACK)
                 .unnormalizedCoordinates(false);
         LongBuffer samplerBuf = stack.mallocLong(1);
         vkCreateSampler(vkDevice, samplerInfo, null, samplerBuf);

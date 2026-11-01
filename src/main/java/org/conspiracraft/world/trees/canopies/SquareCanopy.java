@@ -5,7 +5,6 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.BlockPos;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LongPos;
-import org.conspiracraft.world.Region;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -20,7 +19,7 @@ public class SquareCanopy extends Canopy {
         map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, Region region, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
         y -= (height-1);
         for (int i = 0; i <= height; i++) {
             int actualRadius = radius;
@@ -29,12 +28,12 @@ public class SquareCanopy extends Canopy {
             } else if (height >= 5 && i == height) {
                 actualRadius -= 2;
             }
-            addSquare(random, blocks, region, new Vector3i(x, y+i, z), actualRadius, false, blockType, blockSubType);
+            addSquare(random, blocks, new Vector3i(x, y+i, z), actualRadius, false, blockType, blockSubType);
         }
         return blocks;
     }
 
-    private static void addSquare(Random random, Long2IntOpenHashMap blocks, Region region, Vector3i pos, int radius, boolean corners, int blockType, int blockSubType) {
+    private static void addSquare(Random random, Long2IntOpenHashMap blocks, Vector3i pos, int radius, boolean corners, int blockType, int blockSubType) {
         int minX = pos.x()-radius;
         int maxX = pos.x()+radius;
         int minZ = pos.z()-radius;
@@ -46,8 +45,8 @@ public class SquareCanopy extends Canopy {
                     if (BlockTags.leaves.tagged.contains(blockType)) {
                         long bPos = LongPos.pack(x, pos.y()-height, z);
                         long aPos = LongPos.pack(x, (1+pos.y())-height, z);
-                        if ((isAirUnchecked(region, aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgenUnchecked(region, bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((isAir(aPos) && !blocks.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                         }
                     }

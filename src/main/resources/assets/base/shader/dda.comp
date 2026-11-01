@@ -260,7 +260,8 @@ vec4 getBlockAndVoxel(vec3 pos) {
     return getBlockAndVoxel(pos.x, pos.y, pos.z);
 }
 vec4 blueNoise(ivec2 coords) {
-    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.blueNoise)], ivec2(coords.x&63, coords.y&63), 0);
+    vec2 offset = globalUbo.proj[2].xy;
+    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.blueNoise)], ivec2((coords.x&63)+offset.x, (coords.y&63)+offset.y), 0);
 }
 
 float lerp(float invLerpValue, float toValue, float fromValue) {
@@ -724,7 +725,7 @@ void main() {
         int pairBase = (coords.x / (2*localSize)) * (2*localSize);
         coords.x = 2*pairBase + 2*localSize - 1 - coords.x;
     }
-    if (!(coords.x > 0 && coords.x < res.x && coords.y > 0 && coords.y < res.y)) {
+    if (!(coords.x >= 0 && coords.x < res.x && coords.y >= 0 && coords.y < res.y)) {
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], ogCoords, vec4(0));
         imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], ogCoords, vec4(0));
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(0));
@@ -760,7 +761,9 @@ void main() {
                 color.a = 1;
             } else {
                 reflectivity = 1 - materialColor.a;
-                color.rgb *= flatNormal.y > 0 ? 1.f : (flatNormal.y < 0 ? 0.75f : (abs(flatNormal.x) > abs(flatNormal.z) ? 0.9f : 0.8f));
+                if (globalUbo.renderToggles.x <= 0) {
+                    color.rgb *= flatNormal.y > 0 ? 1.f : (flatNormal.y < 0 ? 0.825f : (abs(flatNormal.x) > abs(flatNormal.z) ? 0.95f : 0.875f));
+                }
             }
         }
         if (tint.a < 1) { reflectivity = 1.f; }
@@ -823,7 +826,7 @@ void main() {
                     }
                 }
             } else {
-                color.rgb *= mix(primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.75f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.9f : 0.8f)), 1.f, min(0.5f, (0.2f-min(dist, 0.2f))*5));
+                color.rgb *= mix(primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.825f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.95f : 0.875f)), 1.f, min(0.5f, (0.2f-min(dist, 0.2f))*5));
             }
         } else if (!isSky || tint.a < 1) {
             //color.rgb = mipmap(color.rgb);
@@ -895,7 +898,7 @@ void main() {
                 rayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
                 float dist = min(1.f, distance(ogPos, rayPos)/(0.5f*min(1024, renderDistance)));
-                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*0.5f*globalUbo.skylightMul.w;
+                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*0.5f*pow(globalUbo.skylightMul.w, 3);
                 vec3 globalFogPos = floor((((floor(globalPos/sizeVec)*sizeVec)+ogPos) + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).x*5)+(noise(globalFogPos.zx*0.015f).x*485);
                 if (globalFogPos.y > SEA_LEVEL) {
@@ -913,7 +916,7 @@ void main() {
             }
             minLight = prevMinLight;
         }
-        clouds = min(clouds, 1);
+        clouds = min(clouds, 1)*pow(globalUbo.skylightMul.w, 2);
         if (!emissive) {
             if (!celestial || fluidInfront) {
                 if (globalUbo.season == 1) { //autumn
@@ -965,20 +968,21 @@ void main() {
                 vec3 sunDir = unzeroVec(normalize(source - primaryShadowPos));
                 //                float normDot = (dot(bentNormal, normalize(source))/2)+0.5f;
                 //                color.rgb*=(((normDot*0.3f/min(1, globalUbo.skylight.w*2))+(0.1f+(0.6f*globalUbo.skylight.w)))*(0.05f+(globalUbo.skylight.w*0.95f)));
-                if (!isSky && !doReflections && blockLighting.a > 0.f) {
+                if (!isSky && !doReflections && blockLighting.a > 0.f && globalUbo.renderToggles.x > 0) {
                     rayPos = primaryShadowPos;
                     rayDir = sunDir;
                     vec4 shadowColor = vec4(0);
-                    //bool weakShadow = false;
-                    if (globalUbo.skylight.w <= 0.1f || (primaryBlock.x != 4 && primaryBlock.x > 0 && !offsetShadow && dot(primaryFlatNormal, normalize(source)) <= 0.f)) {
+                    float normDot = dot(primaryFlatNormal, normalize(source));
+                    if (globalUbo.skylight.w <= 0.1f || (primaryBlock.x != 4 && primaryBlock.x > 0 && !offsetShadow && normDot <= 0.f)) {
                         shadowColor.a = 1.f;
-                    } else if (globalUbo.renderToggles.x > 0) {
+                    } else {
                         shadowColor = dda(true);
-                        //weakShadow = ((block.x == 31 || block.x == 32) && blockLighting.a >= 1);
                     }
                     if (shadowColor.a > 0.0f) {
-                        shadowFactor = !celestialSource ? 0.02f : 0.5f;//(weakShadow ? 0.875f : 0.5f);//gradient(hitPos.y, 63, 256, 0.85f, 0.367f);//mix(0.66f, 0.15f, min(1.f, distance(primaryLightPos.xz, ogPos.xz)/150.f)));
-                        //blockLighting.a *= shadowFactor;
+                        //                        vec3 maxedSun = globalUbo.sun;
+                        //                        maxedSun.y = max(0, maxedSun.y);
+                        //                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
+                        shadowFactor = !celestialSource ? 0.02f : mix(0.5f, 0.875f, 1-max(0, normDot));
                     }
                 }
                 vec3 idealReflectDir = reflect(ogDir, fluidInfront ? fluid.xyz : primaryFirstNormal);

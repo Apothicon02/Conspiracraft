@@ -4,7 +4,6 @@ import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LongPos;
-import org.conspiracraft.world.Region;
 import org.joml.Vector2i;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -17,7 +16,7 @@ public class JungleCanopy extends Canopy {
         map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, Region region, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
         addSquare(blocks, x, y+1, z, radius-1, false, blockType, blockSubType);
         for (int i = 0; i < height; i++) {
             addSquare(blocks, x, y-i, z, radius, false, blockType, blockSubType);
@@ -40,8 +39,8 @@ public class JungleCanopy extends Canopy {
                 if (BlockTags.leaves.tagged.contains(blockType)) {
                     long bPos = LongPos.pack(lX, minY-height, lZ);
                     long aPos = LongPos.pack(lX, (1+minY)-height, lZ);
-                    if ((isAirUnchecked(region, aPos) && !blocks.containsKey(aPos) &&
-                            (BlockTypes.blockTypes[getBlockWorldgenUnchecked(region, bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                    if ((isAir(aPos) && !blocks.containsKey(aPos) &&
+                            (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                         addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                     }
                 }

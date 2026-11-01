@@ -31,7 +31,7 @@ public class DroopingCanopy extends Canopy {
         }
     }
     
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, Region region, int ogX, int ogY, int ogZ, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin, int height, int maxRadius, float droopiness) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int ogX, int ogY, int ogZ, int blockType, int blockSubType, int trunkHeight, Vector3i treeOrigin, int height, int maxRadius, float droopiness) {
         Vector3i origin = new Vector3i(ogX, ogY, ogZ);
 
         for (int x = origin.x()-maxRadius; x <= origin.x()+maxRadius; x++) {
@@ -73,8 +73,8 @@ public class DroopingCanopy extends Canopy {
                     if (BlockTags.leaves.tagged.contains(blockType)) {
                         long bPos = LongPos.pack(x, minY-height, z);
                         long aPos = LongPos.pack(x, (1+minY)-height, z);
-                        if ((isAirUnchecked(region, aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgenUnchecked(region, bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                        if ((isAir(aPos) && !blocks.containsKey(aPos) &&
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                         }
                     }
