@@ -825,6 +825,7 @@ void main() {
                         //                        color.rgb = mix(color.rgb, lighting, min(0.75f, fogginessMul));
                     }
                 }
+                if (dist >= 900000000) {isSky = true;}
             } else {
                 color.rgb *= mix(primaryFlatNormal.y > 0 ? 1.f : (primaryFlatNormal.y < 0 ? 0.825f : (abs(primaryFlatNormal.x) > abs(primaryFlatNormal.z) ? 0.95f : 0.875f)), 1.f, min(0.5f, (0.2f-min(dist, 0.2f))*5));
             }
@@ -843,7 +844,6 @@ void main() {
         }
         ambientLight-=min(0.175f, distance(camPos, primaryLightPos)/5000.f);
         float maxFogginess = globalUbo.fogginess > 0 ? 1.f-max(0, globalUbo.fogginess-1) : 0;
-        float primaryFogginess = getFogginess(isSky, primaryLightPos, fogginessMul, maxFogginess);
         //        bool isNight = globalUbo.skylight.w < 1.f;
         //        float nightness = 1-globalUbo.skylightMul.w;
         //        float desaturationFactor = min(0.05f, nightness);
@@ -887,18 +887,21 @@ void main() {
         }
         float clouds = 0;
         vec3 lightshaft = vec3(0);
+        float dayness = max(0, globalUbo.skylightMul.w-0.5f)*2;
         if (maxFogginess > 0.1f) {
             float prevMinLight = minLight;
             minLight = 0.f;
             float baseDist = min(min(1024, renderDistance)*0.5f, distance(ogPos, primaryShadowPos));
             float lightNoise = blueNoise(coords).r*0.05f;
             rayDir = normalize(globalUbo.skylight.xyz);
+            float lightshaftMul = 0.5f*max(0.5f, dayness);
+            vec3 lightshaftColor = pow(mix(globalUbo.nightAtmosphere.rgb, vec3(1), dayness), vec3(2.5f));
             for (int i = 0; i < 19; i++) {
                 lightNoise = lightNoise+0.05f;
                 rayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
                 float dist = min(1.f, distance(ogPos, rayPos)/(0.5f*min(1024, renderDistance)));
-                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*0.5f*pow(globalUbo.skylightMul.w, 3);
+                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*lightshaftMul;
                 vec3 globalFogPos = floor((((floor(globalPos/sizeVec)*sizeVec)+ogPos) + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).x*5)+(noise(globalFogPos.zx*0.015f).x*485);
                 if (globalFogPos.y > SEA_LEVEL) {
@@ -909,14 +912,18 @@ void main() {
                     float cloudiness = max(0, noise((globalFogPos.xz*0.2f)+(globalUbo.time*0.001f)).r-0.75f)*4;
                     clouds += 0.2f*(gradient(globalFogPos.y, 100, 126, cloudiness, 0)*gradient(globalFogPos.y, 126, 148, 0, 1));
                 }
-                lightshaft += max(vec3(0), min(max(light.rgb, vec3(light.a*godray)) / vec3(100), vec3(dist)))*clamp(distance(rayPos, primaryShadowPos)/maxBlocklightLevel, 0, 1);
+                lightshaft += max(vec3(0), min(max(light.rgb, light.a*godray*lightshaftColor) / vec3(100), vec3(dist)))*clamp(distance(rayPos, primaryShadowPos)/maxBlocklightLevel, 0, 1);
             }
             if (lightshaft.r > 1 || lightshaft.g > 1 || lightshaft.b > 1) {
                 lightshaft /= max(lightshaft.r, max(lightshaft.g, lightshaft.b));
             }
             minLight = prevMinLight;
         }
-        clouds = min(clouds, 1)*pow(globalUbo.skylightMul.w, 2);
+        clouds = min(clouds, 1);
+        if (isSky) {
+            maxFogginess *= mix(pow(globalUbo.skylightMul.w, 4), 1, 1 - clamp(sqrt(ogDir.y) * mix(3 * (1 - max(lightshaft.r, max(lightshaft.g, lightshaft.b))), 1.5f, dayness), 0, 1));
+        }
+        float primaryFogginess = getFogginess(isSky, primaryLightPos, fogginessMul, maxFogginess);
         if (!emissive) {
             if (!celestial || fluidInfront) {
                 if (globalUbo.season == 1) { //autumn
@@ -1047,7 +1054,7 @@ void main() {
                 outNormal = vec4(primaryFlatNormal, 1);
             }
         }
-        color.rgb = mix(color.rgb, vec3(1), clouds);
+        color.rgb = mix(color.rgb, mix(globalUbo.nightAtmosphere.rgb*0.5f, vec3(1), dayness), clouds);
         outNormal.a = max(outNormal.a, clouds);
         primaryTint.rgb = mix(primaryTint.rgb, firstTintAddition, 0.5f);
         float fogginess = getFogginess(isSky, primaryTintLightPos, fogginessMul, maxFogginess);
