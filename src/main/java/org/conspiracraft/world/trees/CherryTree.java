@@ -16,14 +16,14 @@ public class CherryTree {
     }
     public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, int count, int minBranchHeight, float bendMul, boolean ignoreCollision) {
         int minCollisionY = y+5;
-        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = ArchingTrunk.generateTrunk(random, x, y, z, count, maxHeight-5, maxHeight, logType, logSubType, radius/2, minBranchHeight, bendMul);
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = ArchingTrunk.generateTrunk(random, x, y, z, count, maxHeight-5, maxHeight, logType, logSubType, 1, minBranchHeight, bendMul);
         generatedTrunk.getFirst().trim();
         if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, false)) {return false;}
         Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(radius*maxHeight*radius);
         for (long canopyPos : generatedTrunk.getSecond()) {
-            BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, radius, LongPos.y(canopyPos) - y);
+            BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, radius, LongPos.y(canopyPos) - y, 4);
         }
-blocks.trim();
+        blocks.trim();
         if (TreeHelper.collides(blocks, bounds, minCollisionY, false)) {return false;}
         TreeHelper.set(blocks);
         TreeHelper.set(generatedTrunk.getFirst());

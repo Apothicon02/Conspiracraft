@@ -2,6 +2,7 @@ package org.conspiracraft.world.trees.canopies;
 
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.LongPos;
 import org.joml.SimplexNoise;
@@ -17,17 +18,17 @@ public class BlobDrippyCanopy extends Canopy {
         map.put(pos, Chunk.packInts(blockType, blockSubType));
     }
 
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int y, int z, int blockType, int blockSubType, int radius, int height, int droopiness) {
         for (int lX = x - radius; lX <= x + radius; lX++) {
             for (int lZ = z - radius; lZ <= z + radius; lZ++) {
                 int xDist = lX - x, zDist = lZ - z;
                 int undistance = (radius * 3) - xDist*xDist - zDist*zDist;
                 if (undistance < 0) {continue;}
                 undistance = (int) Math.sqrt(undistance);
-                int lowY = Math.max(y - undistance, y - height);
+                int lowY = (int) Utils.mix(Math.max(y - undistance, y - height), y, 0.7f);
                 int highY = Math.min(y + undistance, y + height);
                 if (highY <= lowY) {continue;}
-                lowY -= (int) (SimplexNoise.noise(lX/10.f, lZ/10.f)*6);
+                lowY -= (int) (SimplexNoise.noise(lX/10.f, lZ/10.f)*droopiness);
                 int minY = y+height;
                 for (int lY = lowY; lY <= highY; lY++) {
                     addToMap(blocks, LongPos.pack(lX, lY, lZ), blockType, blockSubType);

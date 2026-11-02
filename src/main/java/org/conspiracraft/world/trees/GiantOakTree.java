@@ -24,7 +24,7 @@ public class GiantOakTree {
                 eRadius /= 8;
             }
             if (LongPos.y(canopyPos) >= (y+maxHeight)-(leavesHeight/2)) {
-                BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, eRadius, leavesHeight);
+                BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, eRadius, leavesHeight, 6);
             } else {
                 BlobCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, eRadius, leavesHeight);
             }

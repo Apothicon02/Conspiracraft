@@ -27,7 +27,7 @@ public class Biomes {
     public static final Biome STONY_RIDGE = create(1, BlockTypes.FLINT.id, 0, 4, BlockTypes.FLINT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome GRAVELLY_HILL = create(1, BlockTypes.GRAVEL.id, 0, 4, BlockTypes.GRAVEL.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome OASIS = create(1, BlockTypes.WET_SAND.id, 0, 7, BlockTypes.WET_SAND.id, 0, BlockTypes.SANDSTONE.id, 0);
-    public static final Biome RAINFOREST = create(1, BlockTypes.GRASS.id, 3, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
+    public static final Biome RAINFOREST = create(1, BlockTypes.GRASS.id, 1, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome PALMY_HILLS = create(1, BlockTypes.GRASS.id, 3, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome POND = create(1, BlockTypes.MUD.id, 0, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);
     public static final Biome ROOFED_FOREST = create(1, BlockTypes.GRASS.id, 1, 4, BlockTypes.DIRT.id, 0, BlockTypes.STONE.id, 0);

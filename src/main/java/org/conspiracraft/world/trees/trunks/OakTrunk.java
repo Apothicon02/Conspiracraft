@@ -58,7 +58,7 @@ public class OakTrunk extends Trunk {
             map.put(LongPos.pack(pos.x, pos.y()-1, pos.z), Chunk.packInts(blockType, blockSubType));
             map.put(LongPos.pack(pos.x, pos.y, pos.z), Chunk.packInts(blockType, blockSubType));
             if (pos.y == maxHeight-4) {
-                canopies.add(LongPos.pack(pos.x, pos.y()+5, pos.z));
+                canopies.add(LongPos.pack(pos.x, pos.y()+4, pos.z));
             }
         }
 

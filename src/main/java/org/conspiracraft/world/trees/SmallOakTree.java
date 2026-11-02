@@ -7,6 +7,8 @@ import org.conspiracraft.world.trees.canopies.BlobDrippyCanopy;
 import org.conspiracraft.world.trees.trunks.OakTrunk;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import org.conspiracraft.world.trees.trunks.StraightTrunk;
+
 import java.util.Random;
 import java.util.Set;
 
@@ -16,14 +18,14 @@ public class SmallOakTree {
     }
     public static boolean generate(Random random, Bounds bounds, int x, int y, int z, int maxHeight, int radius, int logType, int logSubType, int leafType, int leafSubType, boolean ignoreCollision) {
         int minCollisionY = y+5;
-        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = OakTrunk.generateTrunk(random, x, y, z, maxHeight, logType, logSubType, radius/2);
+        Pair<Long2IntOpenHashMap, Set<Long>> generatedTrunk = StraightTrunk.generateTrunk(x, y, z, maxHeight, logType, logSubType);
         generatedTrunk.getFirst().trim();
         if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, ignoreCollision)) {return false;}
         Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(radius*maxHeight*radius);
         for (long canopyPos : generatedTrunk.getSecond()) {
-            BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, radius, LongPos.y(canopyPos) - y);
+            BlobDrippyCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, radius, LongPos.y(canopyPos) - y, 3);
         }
-blocks.trim();
+        blocks.trim();
         if (TreeHelper.collides(blocks, bounds, minCollisionY, ignoreCollision)) {return false;}
         TreeHelper.set(blocks);
         TreeHelper.set(generatedTrunk.getFirst());
