@@ -465,7 +465,7 @@ public class World {
             updateNeighbors(x, y, z);
         }
     }
-    public static final int wgThreads = 5;
+    public static final int wgThreads = 7;
     public static ExecutorService wgPool = null;
     public static boolean wgResetPending = false;
     public static final Future<?>[] wgFutures = new Future[wgThreads];

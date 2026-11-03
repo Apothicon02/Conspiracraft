@@ -39,10 +39,12 @@ public class LightHelper {
         if (pos == null) {return;}
         long packedCp = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
         Chunk chunk = getChunkGlobalPos(packedCp);
+        if (chunk == null) {return;}
         int packedLp = Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15);
         synchronized (queue) {
-            if (chunk == null || chunk.lightUpdateArr() == null) {return;}
-            boolean exists = chunk.lightUpdateArr()[packedLp];
+            boolean[] arr = chunk.lightUpdateArr();
+            if (arr == null) {return;}
+            boolean exists = arr[packedLp];
             if (!exists) {
                 chunk.lightUpdateArr[packedLp] = true;
                 queue.add(pos);
