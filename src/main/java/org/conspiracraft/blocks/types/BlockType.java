@@ -39,24 +39,21 @@ public class BlockType {
         return blockProperties.resistance;
     }
 
-    public boolean blocksLight(Vector2i block) {
-        return blocksLight(block.x(), block.y());
+    public boolean blocksLight(int block) {
+        return blocksLight(block >> 16, (block & 0xFFFF));
     }
     public boolean blocksLight(int type, int subType) {
         return blockProperties.blocksLight;
     }
 
-    public boolean needsSupport(Vector2i block) {
+    public boolean needsSupport(int block) {
         return blockProperties.needsSupport;
     }
 
-    public void lostSupport(Vector3i pos, Vector2i block) {
+    public void lostSupport(Vector3i pos, int block) {
         //World.setBlock(pos.x, pos.y, pos.z, 0, 0, true, false, 2, false);
     }
 
-    public boolean obstructingHeightmap(Vector2i block) {
-        return obstructingHeightmap(Chunk.packInts(block.x(), block.y()));
-    }
     public boolean obstructingHeightmap(int block) {
         return blockProperties.obstructsHeightmap;
     }
@@ -85,17 +82,17 @@ public class BlockType {
         this.blockProperties = blockProperties;
     }
 
-    public int use(Vector3d pos, Vector2i block) {return use((int)pos.x(), (int)pos.y(), (int)pos.z(), block);}
-    public int use(int x, int y, int z, Vector2i block) {return 0;}
-    public void neighborUpdated(int x, int y, int z, Vector2i block) {}
+    public int use(Vector3d pos, int block) {return use((int)pos.x(), (int)pos.y(), (int)pos.z(), block);}
+    public int use(int x, int y, int z, int block) {return 0;}
+    public void neighborUpdated(int x, int y, int z, int block) {}
 
     public void updateSupport(Vector3i pos) {
-//        Vector2i block = getBlock(pos);
+//        int block = getBlock(pos);
 //        if (!blockProperties.isSolid) {
 //            Vector3i abovePos = new Vector3i(pos.x, pos.y + 1, pos.z);
 //            Vector2i aboveBlock = getBlock(abovePos);
 //            if (aboveBlock != null) {
-//                int aboveBlockId = aboveBlock.x();
+//                int aboveBlockId = aboveblock >> 16;
 //                if (BlockTypes.blockTypes[aboveBlockId].needsSupport(aboveBlock)) {
 //                    lostSupport(abovePos, aboveBlock);
 //                }
@@ -104,7 +101,7 @@ public class BlockType {
 //        if (needsSupport(block)) {
 //            Vector2i belowBlock = getBlock(new Vector3i(pos.x, pos.y - 1, pos.z));
 //            if (belowBlock != null) {
-//                int belowBlockId = belowBlock.x();
+//                int belowBlockId = belowblock >> 16;
 //                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
 //                    lostSupport(pos, block);
 //                }
@@ -117,15 +114,15 @@ public class BlockType {
         updateSupport(justPos);
     }
 
-    public boolean whilePlayerBreaking(Vector3i pos, Vector2i blockBreaking, Vector2i hand) {
+    public boolean whilePlayerBreaking(Vector3i pos, int blockBreaking, Vector2i hand) {
         return true;
     }
 
-    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public int onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
-        return new Vector2i(blockType, blockSubType);
+        return Chunk.packInts(blockType, blockSubType);
 //        for (Vector3i nPos : new Vector3i[]{new Vector3i(pos.x, pos.y - 1, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x - 1, pos.y, pos.z),
 //                new Vector3i(pos.x + 1, pos.y, pos.z), new Vector3i(pos.x, pos.y, pos.z - 1), new Vector3i(pos.x, pos.y, pos.z + 1)}) {
 //            Vector2i nBlock = World.getBlock(nPos.x, nPos.y, nPos.z);

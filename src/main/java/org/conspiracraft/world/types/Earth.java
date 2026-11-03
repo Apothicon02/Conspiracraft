@@ -28,7 +28,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.conspiracraft.world.Biomes.getBadlandsBands;
@@ -179,22 +181,33 @@ public class Earth extends WorldType {
     @Override
     public void tickWorldgen() {
         int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
-        if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads);}
-        if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
+        if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads); Arrays.fill(wgFutures, CompletableFuture.completedFuture(null));}
+        //if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
         if (prevPlayerRX != playerRX || prevPlayerRY != playerRY || prevPlayerRZ != playerRZ) {
-            Arrays.fill(generationIdxs, 0);
+            prevPlayerRX = playerRX; prevPlayerRY = playerRY; prevPlayerRZ = playerRZ;
+            wgResetPending = true;
             //unloadChunks(prevPlayerRX*regionSizeChunksL, playerRX*regionSizeChunksL, prevPlayerRY*regionSizeChunksL, playerRY*regionSizeChunksL, prevPlayerRZ*regionSizeChunksL, playerRZ*regionSizeChunksL);
         }
-        prevPlayerRX = playerRX; prevPlayerRY = playerRY; prevPlayerRZ = playerRZ;
+        if (wgResetPending) {
+            for (Future<?> future : wgFutures) {
+                if (!future.isDone()) {
+                    return;
+                }
+            }
+            Arrays.fill(generationIdxs, 0);
+            wgResetPending = false;
+        }
         for (int thread = 0; thread < wgThreads; thread++) {
             int t = thread;
-            wgPool.submit(() -> {
-                try {
-                    generateRegion(t, playerRX, playerRY, playerRZ);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            });
+            if (wgFutures[t].isDone()) {
+                wgFutures[t] = wgPool.submit(() -> {
+                    try {
+                        generateRegion(t, playerRX, playerRY, playerRZ);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
         //pool.shutdown();
     }
@@ -258,16 +271,16 @@ public class Earth extends WorldType {
                             for (int cY = regionSizeChunks - 1; cY >= 0; cY--) {
                                 int cP = Region.packLocalPos(cX, cY, cZ);
                                 Chunk chunk = region.getChunk(cP);
-                                Vector2i firstBlock = chunk.getBlock(0);
-                                if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock.x()].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
+                                int firstBlock = chunk.getBlock(0);
+                                if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock >> 16].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
                                     for (int x = 0; x < chunkSize; x++) {
                                         for (int z = 0; z < chunkSize; z++) {
                                             int rlX = x + (cX * chunkSize), rlZ = z + (cZ * chunkSize);
                                             int packed = (rlX * regionSize) + rlZ;
                                             if (region2D.heights[packed] == -1) {
                                                 for (int y = chunkSize - 1; y >= 0; y--) {
-                                                    Vector2i block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
-                                                    if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+                                                    int block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
+                                                    if (BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block)) {
                                                         Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
                                                         region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
                                                         break;
@@ -292,11 +305,11 @@ public class Earth extends WorldType {
                     if (height > 0) {
                         int gY = height+Earth.GROUND_LEVEL;
                         Vector3i globalPos = new Vector3i(x, gY+1, z);
-                        Vector2i nBlock1 = getBlock(globalPos.x() + 1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() + 1), nBlock3 = getBlock(globalPos.x() - 1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() - 1);
-                        if ((getLight(globalPos.x() + 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1.x()].blocksLight(nBlock1)) ||
-                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() + 1).s() == 0 && !BlockTypes.blockTypes[nBlock2.x()].blocksLight(nBlock2)) ||
-                                (getLight(globalPos.x() - 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3.x()].blocksLight(nBlock3)) ||
-                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() - 1).s() == 0 && !BlockTypes.blockTypes[nBlock4.x()].blocksLight(nBlock4))) {
+                        int nBlock1 = getBlock(globalPos.x() + 1, globalPos.y(), globalPos.z()), nBlock2 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() + 1), nBlock3 = getBlock(globalPos.x() - 1, globalPos.y(), globalPos.z()), nBlock4 = getBlock(globalPos.x(), globalPos.y(), globalPos.z() - 1);
+                        if ((getLight(globalPos.x() + 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock1 >> 16].blocksLight(nBlock1)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() + 1).s() == 0 && !BlockTypes.blockTypes[nBlock2 >> 16].blocksLight(nBlock2)) ||
+                                (getLight(globalPos.x() - 1, globalPos.y(), globalPos.z()).s() == 0 && !BlockTypes.blockTypes[nBlock3 >> 16].blocksLight(nBlock3)) ||
+                                (getLight(globalPos.x(), globalPos.y(), globalPos.z() - 1).s() == 0 && !BlockTypes.blockTypes[nBlock4 >> 16].blocksLight(nBlock4))) {
                             LightHelper.queueLightUpdate(LightHelper.lightQueueWG, globalPos);
                         }
                     }
@@ -567,10 +580,10 @@ public class Earth extends WorldType {
                             double vegetationNoise = regionNoises.vegetation()[packed];
                             double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                             double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
-                            Vector2i blockIn = getBlockWorldgen(x, surface+1, z);
+                            int blockIn = getBlockWorldgen(x, surface+1, z);
                             int fluidIn = getFluidWorldgen(x, surface+1, z);
-                            Vector2i blockOn = getBlockWorldgen(x, surface, z);
-                            if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.PODZOL.id || blockOn.x() == BlockTypes.SNOW.id) {
+                            int blockOn = getBlockWorldgen(x, surface, z);
+                            if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id || blockOn >> 16 == BlockTypes.SNOW.id) {
                                 if (biome == Biomes.SNOWY_TAIGA.id()) {
                                     if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
                                         int maxHeight = rand.nextInt(19) + 5;
@@ -870,7 +883,7 @@ public class Earth extends WorldType {
                                         CoveredBlob.generate(bounds, x, surface, z, BlockTypes.MAGMA.id, 0, BlockTypes.MAGMA.id, 0, rand.nextInt(2, 5), 0.f, true);
                                     }
                                 }
-                            } else if (blockOn.x() == BlockTypes.WET_SAND.id) {
+                            } else if (blockOn >> 16 == BlockTypes.WET_SAND.id) {
                                 if (biome == Biomes.DESERT.id()) {
                                     if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.998f) {
                                         PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0);
@@ -880,7 +893,7 @@ public class Earth extends WorldType {
                                         PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
                                     }
                                 }
-                            } else if (blockOn.x() == BlockTypes.SAND.id) {
+                            } else if (blockOn >> 16 == BlockTypes.SAND.id) {
                                 if (biome == Biomes.DESERT.id()) {
                                     if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
                                         if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
@@ -894,7 +907,7 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 }
-                            } else if (blockOn.x() == BlockTypes.ORANGE_SAND.id) {
+                            } else if (blockOn >> 16 == BlockTypes.ORANGE_SAND.id) {
                                 if (biome == Biomes.PALMY_PLAINS.id()) {
                                     if (absDetailNoise > 0.7f) {
                                         int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
@@ -934,7 +947,7 @@ public class Earth extends WorldType {
                                         }
                                     }
                                 }
-                            } else if (blockOn.x() == BlockTypes.MAGMA.id) {
+                            } else if (blockOn >> 16 == BlockTypes.MAGMA.id) {
                                 if (absDetailNoise > 0.7f) {
                                     int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
                                     for (int y = surface-3; y <= height; y++) {
@@ -965,8 +978,8 @@ public class Earth extends WorldType {
                         if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
                             double foliageNoise = regionNoises.plains()[packed];
                             double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
-                            Vector2i blockOn = getBlockWorldgen(x, surface, z);
-                            if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.SNOW.id) {
+                            int blockOn = getBlockWorldgen(x, surface, z);
+                            if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.SNOW.id) {
                                 if (foliageChance < 0.05f*foliageNoise && lX >= 2 && lZ >= 2 && lX < chunkSize-2 && lZ < chunkSize-2) {
                                     int maxHeight = rand.nextInt(5, 8);
                                     World.setBlockWorldgen(bounds, x, surface+maxHeight+1, z, BlockTypes.OAK_LEAVES.id, 0);
@@ -1104,22 +1117,22 @@ public class Earth extends WorldType {
                         if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
                             double foliageNoise = Math.abs(regionNoises.plains()[packed]);
                             double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
-                            Vector2i blockOn = getBlockWorldgen(x, surface, z);
-                            Vector2i blockIn = getBlockWorldgen(x, surface + 1, z);
-                            if (blockIn.x() == 0) {
-                                if (blockOn.x() == BlockTypes.GRASS.id || blockOn.x() == BlockTypes.PODZOL.id) {
+                            int blockOn = getBlockWorldgen(x, surface, z);
+                            int blockIn = getBlockWorldgen(x, surface + 1, z);
+                            if (blockIn >> 16 == 0) {
+                                if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id) {
                                     if (foliageChance < 0.3f) {
                                         int type;
-                                        if (blockOn.y() == 3) {
+                                        if ((blockOn & 0xFFFF) == 3) {
                                             type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.032f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
-                                        } else if (blockOn.y() == 1) {
+                                        } else if ((blockOn & 0xFFFF) == 1) {
                                             type = foliageNoise < 0.06f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
                                         } else {
                                             type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
                                         }
-                                        setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? (blockOn.y() * 4) : 0) + rand.nextInt(4));
+                                        setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? ((blockOn & 0xFFFF) * 4) : 0) + rand.nextInt(4));
                                     }
-                                } else if (blockOn.x() == BlockTypes.SAND.id) {
+                                } else if (blockOn >> 16 == BlockTypes.SAND.id) {
                                     if (foliageChance < foliageNoise * 0.002f) {
                                         int height = surface + rand.nextInt(5) + 2;
                                         for (int y = surface + 1; y <= height; y++) {
@@ -1529,9 +1542,9 @@ public class Earth extends WorldType {
 //                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
 //                                int elevation = heightmap[(x * size) + z];
 //                                byte biome = biomes[x * size + z];
-//                                Vector2i blockOn = getBlock(x, elevation, z);
+//                                int blockOn = getBlock(x, elevation, z);
 //                                if (blockOn.x() != BlockTypes.WATER.id && blockOn.x() != BlockTypes.ICE.id) {
-//                                    Vector2i blockIn = getBlock(x, elevation+1, z);
+//                                    int blockIn = getBlock(x, elevation+1, z);
 //                                    float randomNumber = rand.nextFloat();
 //                                    float featureNoise = SimplexNoise.noise(x / 300.f, z / 300.f);
 //                                    float featureNoiseSmall = SimplexNoise.noise(x / 100.f, z / 100.f);
@@ -1819,8 +1832,8 @@ public class Earth extends WorldType {
 //                    Chunk chunk = World.oldchunks[packChunkPos(cX, cY, cZ)];
 //                    if (chunk.blockPalette != null) {
 //                        for (int data : chunk.blockPalette) {
-//                            Vector2i block = Chunk.unpackInt(data);
-//                            boolean obstructingHeightmap = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+//                            int block = Chunk.unpackInt(data);
+//                            boolean obstructingHeightmap = BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block);
 //                            if (!foundMax && obstructingHeightmap) {
 //                                foundMax = true;
 //                                chunksMaxElevations[packChunkPos(cX, cZ)] = cY;
@@ -1856,11 +1869,11 @@ public class Earth extends WorldType {
 //                                for (int z = 0; z < chunkSize; z++) {
 //                                    for (int y = chunkSize - 1; y >= 0; y--) {
 //                                        int localPos = Chunk.condenseLocalPos(x, y, z);
-//                                        Vector2i block = chunk.getBlock(localPos);
+//                                        int block = chunk.getBlock(localPos);
 //                                        int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
 //                                        int gY = (cY*chunkSize)+y;
 //                                        short elevation = heightmap[pos];
-//                                        if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+//                                        if (BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block)) {
 //                                            heightmap[pos] = (short) Math.max(elevation, gY);
 //                                            chunk.setLight(x, y, z, 0);
 //                                        } else if (gY <= elevation) {
@@ -1896,8 +1909,8 @@ public class Earth extends WorldType {
 //                                int maxY = heightmap[packedHorizontalPos];
 //                                boolean prevBlocking = false;
 //                                for (int y = maxY; y >= minY; y--) {
-//                                    Vector2i block = World.getBlock(x, y, z);
-//                                    boolean blocking = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+//                                    int block = World.getBlock(x, y, z);
+//                                    boolean blocking = BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block);
 //                                    if (prevBlocking && !blocking) {
 //                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z + 1).s() >= maxSunlightLevel || getLight(x - 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z - 1).s() >= maxSunlightLevel)) {
 //                                            LightHelper.queueLightUpdate(new Vector3i(x, y, z));

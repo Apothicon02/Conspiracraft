@@ -66,9 +66,9 @@ public class HandManager {
         if (Main.timeMsLong - delayStart >= delay) {
             delayStart = Main.timeMsLong;
             delay = 0;
-            Vector2i block = World.getBlock(player.selectedBlock.x(), player.selectedBlock.y(), player.selectedBlock.z());
+            int block = World.getBlock(player.selectedBlock.x(), player.selectedBlock.y(), player.selectedBlock.z());
             if (rmbDown && !player.crouching) {
-                BlockType blockType = BlockTypes.blockTypes[block.x()];
+                BlockType blockType = BlockTypes.blockTypes[block >> 16];
                 if (blockType != null) {
                     delay = blockType.use(player.selectedBlock, block);
                 }
@@ -89,7 +89,7 @@ public class HandManager {
                     }
                 }
                 if (blockSoundGain > 0.f) {
-                    BlockSFX sfx = BlockTypes.blockTypes[block.x()].blockProperties.blockSFX;
+                    BlockSFX sfx = BlockTypes.blockTypes[block >> 16].blockProperties.blockSFX;
                     Source source = new Source(new Vector3f(ddaResult.hitD), blockSoundGain*(sfx.placeGain + ((sfx.placeGain * Player.playerRand.nextFloat()) / 3)), sfx.placePitch + ((sfx.placePitch * Player.playerRand.nextFloat()) / 3), 0.f, 0);
                     source.play(sfx.placeIds[sfx.placeIds.length == 1 ? 0 : Player.playerRand.nextInt(sfx.placeIds.length - 1)], true);
                     AudioController.disposableSources.add(source);
@@ -108,13 +108,13 @@ public class HandManager {
             }
         }
         Vector3i selectedBlockI = new Vector3i((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
-        Vector2i block = World.getBlock(selectedBlockI);
-        float resistance = BlockTypes.blockTypes[block.x()].getResistance();
+        int block = World.getBlock(selectedBlockI);
+        float resistance = BlockTypes.blockTypes[block >> 16].getResistance();
         if (resistance <= 0) {damage = 10000000;} else {damage = (int)(((float)damage)/resistance);}
         if (entity == null) {
             entity = new CracksEntity(EntityTypes.SLIGHTLY_CRACKED, new Vector3d(player.selectedBlock).add(0.5d, 0.5d, 0.5d), new Matrix4f().translate(0.5f, 0.5f, 0.5f).scale(1.01f), 0);
             World.entities.add(entity);
-        } else if (entity.mine(damage, BlockTypes.blockTypes[block.x()].blockProperties.blockSFX)) {
+        } else if (entity.mine(damage, BlockTypes.blockTypes[block >> 16].blockProperties.blockSFX)) {
             World.breakBlock((int)player.selectedBlock.x(), (int)player.selectedBlock.y(), (int)player.selectedBlock.z());
             return 300;
         }

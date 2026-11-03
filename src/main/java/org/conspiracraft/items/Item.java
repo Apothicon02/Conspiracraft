@@ -69,8 +69,8 @@ public class Item implements Cloneable {
     }
     public void baseTick() {
         prevPos.set(pos);
-        Vector2i block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
-        if (block != null && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid) {
+        int block = World.getBlock(pos.x(), pos.y()-0.125d, pos.z());
+        if (!BlockTypes.blockTypes[block >> 16].blockProperties.isSolid) {
             this.pos.y -= 0.125f;
         }
 //            int start = (int)(Math.random()*Math.max(1, World.items.size()-10));
@@ -156,7 +156,7 @@ public class Item implements Cloneable {
         type.sound.placed(pos);
     }
 
-    public Vector2i place() {
+    public int place() {
         return type.blockToPlace;
     }
 

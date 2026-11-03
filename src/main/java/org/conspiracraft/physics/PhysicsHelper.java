@@ -16,7 +16,7 @@ import static org.conspiracraft.world.World.regionBits;
 
 public class PhysicsHelper {
     public static double voxelSize = 1;//0.125f;
-    public record BlockResult(double x, double y, double z, Vector2i block){};
+    public record BlockResult(double x, double y, double z, int block){};
     public static BlockResult getClosestBlock(AABB aabb, Vector3d ref) {
         //final float mX = aabb.xMin+((aabb.xMax-aabb.xMin)/2), mY = aabb.yMin+((aabb.yMax-aabb.yMin)/2), mZ = aabb.zMin+((aabb.zMax-aabb.zMin)/2);
         BlockResult closestBlock = null;
@@ -28,11 +28,11 @@ public class PhysicsHelper {
                 for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
                     double dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
                     double dist = (dX*dX)+(dY*dY)+(dZ*dZ);
-                    Vector2i blockIn = World.getBlock(x, y, z);
-                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    int blockIn = World.getBlock(x, y, z);
+                    BlockType blockType = BlockTypes.blockTypes[blockIn>> 16];
                     boolean collided = false;
                     if (blockType.blockProperties.isCollidable) {
-                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        AABB[] aabbArr = blockType.getAABB((blockIn & 0xFFFF), x, y, z, true);
                         if (aabbArr != null) {
                             for (AABB blockAABB : aabbArr) {
                                 if (blockAABB.intersects(aabb) && dist < closestDist) {
@@ -44,7 +44,7 @@ public class PhysicsHelper {
                             }
                         }
                     }
-                    if (!collided && blockIn.x() > 0 && dist < closestUncollidableDist) {
+                    if (!collided && blockIn>> 16 > 0 && dist < closestUncollidableDist) {
                         closestUncollidableDist = dist;
                         closestBlockUncollidable = new BlockResult(x, y, z, blockIn);
                     }
@@ -54,15 +54,15 @@ public class PhysicsHelper {
         if (closestBlock != null) {return closestBlock;} else if (closestBlockUncollidable != null) {return closestBlockUncollidable;} else {return null;}
     }
     public static BlockResult getAnyBlock(AABB aabb) {
-        Vector2i block = new Vector2i();
+        int block = 0;
         double hX = -1, hY = -1, hZ = -1;
         for (double x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
             for (double y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
                 for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
-                    Vector2i blockIn = World.getBlock(x, y, z);
-                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    int blockIn = World.getBlock(x, y, z);
+                    BlockType blockType = BlockTypes.blockTypes[blockIn>> 16];
                     if (blockType.blockProperties.isCollidable) {
-                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        AABB[] aabbArr = blockType.getAABB((blockIn & 0xFFFF), x, y, z, true);
                         if (aabbArr != null) {
                             for (AABB blockAABB : aabbArr) {
                                 if (blockAABB.intersects(aabb)) {
@@ -71,9 +71,9 @@ public class PhysicsHelper {
                             }
                         }
                     }
-                    if (blockIn.x() > 0) {
+                    if (blockIn>> 16 > 0) {
                         hX = x; hY = y; hZ = z;
-                        block.set(blockIn); //return non-collidable block if none are collidable
+                        block = blockIn; //return non-collidable block if none are collidable
                     }
                 }
             }
@@ -113,7 +113,7 @@ public class PhysicsHelper {
         for (int i = 0; i < maxDist*2; i++) {
             ddaPosD.set(dir).mul(travelled).add(pos);
             if (travelled > maxDist) {return new DDAResult(prevDDAPos, ddaPos, ddaPosD, false);}
-            if (World.getBlock(ddaPos).x() > 0) {return new DDAResult(prevDDAPos, ddaPos, ddaPosD, true);}
+            if (World.getBlock(ddaPos)>> 16 > 0) {return new DDAResult(prevDDAPos, ddaPos, ddaPosD, true);}
             mask.set(Utils.step(sideDist, Math.min(Math.min(sideDist.x(), sideDist.y()), sideDist.z()) + 0.000000001f));
             prevDDAPos.set(ddaPos);
 
@@ -157,10 +157,10 @@ public class PhysicsHelper {
         for (double x = regionAABB.xMin; x < regionAABB.xMax; x+=1) {
             for (double y = regionAABB.yMin; y < regionAABB.yMax; y+=1) {
                 for (double z = regionAABB.zMin; z < regionAABB.zMax; z+=1) {
-                    Vector2i blockIn = World.getBlock(x, y, z);
-                    BlockType blockType = BlockTypes.blockTypes[blockIn.x()];
+                    int blockIn = World.getBlock(x, y, z);
+                    BlockType blockType = BlockTypes.blockTypes[blockIn>> 16];
                     if (blockType.blockProperties.isCollidable) {
-                        AABB[] aabbArr = blockType.getAABB(blockIn.y(), x, y, z, true);
+                        AABB[] aabbArr = blockType.getAABB((blockIn & 0xFFFF), x, y, z, true);
                         if (aabbArr != null) {
                             for (AABB aabb : aabbArr) {
                                 aabbs.add(aabb);

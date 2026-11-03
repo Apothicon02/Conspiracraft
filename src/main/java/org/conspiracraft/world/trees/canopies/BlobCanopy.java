@@ -36,7 +36,7 @@ public class BlobCanopy extends Canopy {
                         long bPos = LongPos.pack(lX, y - 1, lZ);
                         long aPos = LongPos.pack(lX, y, lZ);
                         if ((isAir(aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos) >> 16].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                             break;
                         }

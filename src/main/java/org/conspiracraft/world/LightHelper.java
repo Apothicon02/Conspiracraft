@@ -118,29 +118,29 @@ public class LightHelper {
         dirtyChunks.clear();
     }
 
-    public static void updateLight(Vector3i pos, Vector2i block, Light light) {
+    public static void updateLight(Vector3i pos, int block, Light light) {
         updateLight(lightQueue, pos, block, light);
     }
     public static final Vector3i[] neighborPositions = new Vector3i[]{
             new Vector3i(0, 0, 1), new Vector3i(1, 0, 0), new Vector3i(0, 0, -1),
             new Vector3i(-1, 0, 0), new Vector3i(0, 1, 0), new Vector3i(0, -1, 0)};
-    public static final Vector2i[] neighborBlocks = new Vector2i[6];
+    public static final int[] neighborBlocks = new int[6];
     public static final BlockType[] neighborBlockTypes = new BlockType[6];
     public static final Light[] neighborLights = new Light[6];
-    public static void updateLight(ArrayDeque<Vector3i> queue, Vector3i pos, Vector2i block, Light light) {
-        BlockType blockType = BlockTypes.blockTypes[block.x()];
+    public static void updateLight(ArrayDeque<Vector3i> queue, Vector3i pos, int block, Light light) {
+        BlockType blockType = BlockTypes.blockTypes[block >> 16];
         boolean isLight = blockType instanceof LightBlockType;
         boolean isSlab = blockType.blockProperties.hasSlab, isTopSlab = false, isBottomSlab = false;
         if (isSlab) {
-            if (block.y() == 1) {
+            if ((block & 0xFFFF) == 1) {
                 isTopSlab = true;
-            } else if (block.y() == 2) {
+            } else if ((block & 0xFFFF) == 2) {
                 isBottomSlab = true;
             } else {
                 isSlab = false;
             }
         }
-        if (!BlockTypes.blockTypes[block.x()].blocksLight(block) || isLight || isSlab) {
+        if (!BlockTypes.blockTypes[block >> 16].blocksLight(block) || isLight || isSlab) {
             int r = Math.max(light.r(), isLight ? ((LightBlockType) blockType).lightBlockProperties().r : 0);
             int g = Math.max(light.g(), isLight ? ((LightBlockType) blockType).lightBlockProperties().g : 0);
             int b = Math.max(light.b(), isLight ? ((LightBlockType) blockType).lightBlockProperties().b : 0);
@@ -155,9 +155,9 @@ public class LightHelper {
             int s = (aboveHeightmap ? maxSunlightLevel : light.s());
             for (int i = 0; i < 6; i++) {
                 Vector3i neighborPos = neighborPositions[i];
-                Vector2i neighbor = getBlock(pos.x()+neighborPos.x(), pos.y()+neighborPos.y(), pos.z()+neighborPos.z());
+                int neighbor = getBlock(pos.x()+neighborPos.x(), pos.y()+neighborPos.y(), pos.z()+neighborPos.z());
                 neighborBlocks[i] = neighbor;
-                BlockType neighborBlockType = BlockTypes.blockTypes[neighbor.x()];
+                BlockType neighborBlockType = BlockTypes.blockTypes[neighbor >> 16];
                 neighborBlockTypes[i] = neighborBlockType;
                 Light neighborLight = getLight(pos.x()+neighborPos.x(), pos.y()+neighborPos.y(), pos.z()+neighborPos.z());
                 neighborLights[i] = neighborLight;
@@ -165,11 +165,11 @@ public class LightHelper {
                     boolean isNLight = neighborBlockType instanceof LightBlockType;
                     boolean isNSlab = neighborBlockType.blockProperties.hasSlab;
                     if (isNSlab) {
-                        if (neighbor.y() == 1) { //top slab
+                        if ((neighbor & 0xFFFF) == 1) { //top slab
                             if (neighborPos.y()+pos.y() < pos.y()) {
                                 isNSlab = false;
                             }
-                        } else if (neighbor.y() == 2) { //bottom slab
+                        } else if ((neighbor & 0xFFFF) == 2) { //bottom slab
                             if (neighborPos.y()+pos.y() > pos.y()) {
                                 isNSlab = false;
                             }
@@ -188,7 +188,7 @@ public class LightHelper {
             setLight(pos.x, pos.y, pos.z, new Light(r, g, b, s));
             for (int i = 0; i < 6; i++) {
                 Vector3i neighborPos = neighborPositions[i];
-                Vector2i nBlock = neighborBlocks[i];
+                int nBlock = neighborBlocks[i];
                 if (!neighborBlockTypes[i].blocksLight(nBlock)) {
                     Light nLight = neighborLights[i];
                     if (isDarker(r, g, b, s, nLight)) {
@@ -225,8 +225,8 @@ public class LightHelper {
                             new Vector3i(pos.x - 1, pos.y, pos.z), new Vector3i(pos.x, pos.y + 1, pos.z), new Vector3i(pos.x, pos.y - 1, pos.z)
                     }) {
                         if (removalSet.add(neighborPos)) {
-                            Vector2i nBlock = getBlock(neighborPos);
-                            if (!BlockTypes.blockTypes[nBlock.x()].blocksLight(nBlock)) {
+                            int nBlock = getBlock(neighborPos);
+                            if (!BlockTypes.blockTypes[nBlock >> 16].blocksLight(nBlock)) {
                                 lightQueue.add(neighborPos);
                                 long packedCp = World.packChunkPos(neighborPos.x() >> chunkBits, neighborPos.y() >> chunkBits, neighborPos.z() >> chunkBits);
                                 Chunk chunk = getChunkGlobalPos(packedCp);
@@ -254,13 +254,13 @@ public class LightHelper {
 //            Light light = new Light(node.r(), node.g(), node.b(), node.s());
 //            if (light.r() > 0 || light.g() > 0 || light.b() > 0 || light.s() > 0) {
 //                setLight(pos.x(), pos.y(), pos.z(), new Light(0, 0, 0, 0));
-//                Vector2i block = World.getBlock(pos);
-//                BlockType blockType = BlockTypes.blockTypes[block.x()];
+//                int block = World.getBlock(pos);
+//                BlockType blockType = BlockTypes.blockTypes[block >> 16];
 //                boolean isTopSlab = false, isBottomSlab = false;
 //                if (blockType.blockProperties.hasSlab) {
-//                    if (block.y() == 1) {
+//                    if ((block & 0xFFFF) == 1) {
 //                        isTopSlab = true;
-//                    } else if (block.y() == 2) {
+//                    } else if ((block & 0xFFFF) == 2) {
 //                        isBottomSlab = true;
 //                    }
 //                }

@@ -34,10 +34,10 @@ public class GrappleItemType extends ItemType {
         if (item instanceof GrappleItem grappleItem) {
             if (lmbDown) {
                 if (grappleItem.grapplePos.y() == -1) {
-                    Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
-                    if (BlockTypes.blockTypes[block.x()].blockProperties.resistance > 0.01f) {
+                    int block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
+                    if (BlockTypes.blockTypes[block >> 16].blockProperties.resistance > 0.01f) {
                         item = grappleItem.damage(1);
-                        grappleItem.grappleBlock.set(block);
+                        grappleItem.grappleBlock = block;
                         grappleItem.grapplePos.set(dda.hitD);
                         grappleItem.maxDistance = new Vector3d(Main.player.pos).sub(grappleItem.grapplePos).length()-6;
 

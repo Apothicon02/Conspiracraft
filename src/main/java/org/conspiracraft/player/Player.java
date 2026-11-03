@@ -269,7 +269,7 @@ public class Player {
         }
     }
 
-    public Vector2i blockOn = new Vector2i();
+    public int blockOn = 0;
     public boolean onSolid = true;
     public float friction = 0.75f;
 
@@ -307,11 +307,11 @@ public class Player {
         if (World.worldType == WorldTypes.SPACE && timeMs-enteredWorld > 2000) {
             newMovement.mul(1000000);
         }
-        Vector2i blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
+        int blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
         AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin - 0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
-        blockOn.set(PhysicsHelper.getAnyBlock(footAABB).block());
+        blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean prevOnSolid = onSolid;
-        onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
+        onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
         if (!onSolid) {
             entityOn = getAnyEntityPlayerCollidesWith(footAABB);
             if (entityOn != null) {
@@ -352,12 +352,12 @@ public class Player {
         float modifiedGrav = World.worldType.gravity();
         friction = 0.99f; //1-airFriction=maxFriction
         if (!flying) {
-            if (blockIn.x() == BlockTypes.WATER.id) {
+            if (blockIn >> 16 == BlockTypes.WATER.id) {
                 modifiedGrav *= 0.2f;
                 friction *= 0.9f;
                 newMovement.mul(0.5f);
-            } else if (BlockTags.leaves.tagged.contains(blockIn.x())) {
-                if (blockIn.y() == 0) {
+            } else if (BlockTags.leaves.tagged.contains(blockIn >> 16)) {
+                if ((blockIn & 0xFFFF) == 0) {
                     friction *= 0.5f;
                     newMovement.mul(0.5f);
                 } else {
@@ -450,7 +450,7 @@ public class Player {
     }
 
     public void stepFx() {
-        BlockSFX stepSFX = BlockTypes.blockTypes[blockOn.x()].blockProperties.blockSFX;
+        BlockSFX stepSFX = BlockTypes.blockTypes[blockOn >> 16].blockProperties.blockSFX;
         if (stepSFX != null && stepSFX.stepIds.length > 0) {
             Source stepSource = new Source(new Vector3f(pos), stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
             AudioController.disposableSources.add(stepSource);
@@ -489,7 +489,7 @@ public class Player {
         Particle particle = new Particle(new Vector3d(pos), new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())));
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         particle.tex = Textures.materials;
-        int id = ((Material) BlockTypes.blockTypes[blockOn.x()].materials.values().toArray()[0]).id();
+        int id = ((Material) BlockTypes.blockTypes[blockOn >> 16].materials.values().toArray()[0]).id();
         particle.texOffset.set((id*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);
     }

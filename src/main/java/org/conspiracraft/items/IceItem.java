@@ -17,7 +17,7 @@ public class IceItem extends Item implements Cloneable {
         long time = Main.timeMsLong;
         if (prevTickTime != 0) {
             long dif = time - prevTickTime;
-            if (!BlockTypes.blockTypes[World.getBlock(pos.x(), pos.y()-0.125f, pos.z()).x()].blockProperties.isSolid) {
+            if (!BlockTypes.blockTypes[World.getBlock(pos.x(), pos.y()-0.125f, pos.z()) >> 16].blockProperties.isSolid) {
                 this.pos.y -= 0.125f;
             }
 //            int start = (int)(Math.random()*Math.max(1, World.items.size()-10));

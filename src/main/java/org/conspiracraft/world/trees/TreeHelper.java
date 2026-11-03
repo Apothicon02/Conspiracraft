@@ -48,12 +48,12 @@ public class TreeHelper {
 //    }
     public static boolean oldIntegrateCanopy(Long2IntOpenHashMap canopy, Long2IntOpenHashMap blocks, int minCollisionY) {
         for (long pos : canopy.keySet()) {
-            Vector2i existingBlock = getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));
+            int existingBlock = getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));
             if (!blocks.containsKey(pos)) {
-                if (BlockTypes.blockTypes[existingBlock.x()].blockProperties.isFluidReplaceable) {
+                if (BlockTypes.blockTypes[existingBlock >> 16].blockProperties.isFluidReplaceable) {
                     blocks.put(pos, canopy.get(pos));
                 }
-                if (LongPos.y(pos) > minCollisionY && existingBlock.x() != 0) {
+                if (LongPos.y(pos) > minCollisionY && existingBlock >> 16 != 0) {
                     return false;
                 }
             }

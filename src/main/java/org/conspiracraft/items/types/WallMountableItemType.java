@@ -17,11 +17,11 @@ public class WallMountableItemType extends ItemType {
 
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything) {
-            Vector2i block = World.getBlock(dda.prevHit);
-            BlockType blockType = BlockTypes.blockTypes[block.x()];
+        if (blockToPlace >> 16 > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything) {
+            int block = World.getBlock(dda.prevHit);
+            BlockType blockType = BlockTypes.blockTypes[block >> 16];
             if (blockType.blockProperties.isFluidReplaceable) {
-                int subType = blockToPlace.y();
+                int subType = blockToPlace & 0xFFFF;
                 Vector3f normal = new Vector3f(dda.hit).sub(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z()).negate();
                 if (normal.y() == 0) {
                     if (normal.x() > 0.f) {
@@ -34,7 +34,7 @@ public class WallMountableItemType extends ItemType {
                         subType += 4;
                     }
                 }
-                World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), subType);
+                World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace >> 16, subType);
                 if (!player.creative) {item.amount--;}
                 return new ItemUseResult(200, item, 1.f);
             }

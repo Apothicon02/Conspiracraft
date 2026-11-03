@@ -2,6 +2,7 @@ package org.conspiracraft.blocks.types;
 
 import kotlin.Pair;
 import org.conspiracraft.blocks.Material;
+import org.conspiracraft.world.Chunk;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -16,21 +17,21 @@ import static org.conspiracraft.world.World.getBlock;
 public class PlantBlockType extends BlockType {
 
     @Override
-    public void lostSupport(Vector3i pos, Vector2i block) {
+    public void lostSupport(Vector3i pos, int block) {
 //        boolean onSediment = BlockTags.sediment.tagged.contains(getBlock(pos.x, pos.y-1, pos.z).x);
 //        World.setBlock(pos.x, pos.y, pos.z, onSediment ? BlockTypes.DEAD_BUSH) : 0, onSediment ? (int)(Math.random()*1.9) : 0, true, false, 2, false);
     }
 
     @Override
-    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public int onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
-        Vector2i blockOn = getBlock(x, y-1, z);
+        int blockOn = getBlock(x, y-1, z);
         boolean survives = false;
         for (Pair<BlockTag, BlockTag> pair : BlockTags.survivalTags) {
             if (pair.getFirst().tagged.contains(x)) {
-                if (pair.getSecond().tagged.contains(blockOn.x)) {
+                if (pair.getSecond().tagged.contains(blockOn >> 16)) {
                     survives = true;
                     break;
                 }
@@ -39,7 +40,7 @@ public class PlantBlockType extends BlockType {
         if (!survives) {
             //lostSupport(x, y, z, blockType, blockSubType);
         }
-        return new Vector2i(blockType, blockSubType);
+        return Chunk.packInts(blockType, blockSubType);
     }
 
     public PlantBlockType(String name, BlockProperties blockProperties) {

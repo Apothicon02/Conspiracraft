@@ -31,10 +31,10 @@ public class ToolItemType extends ItemType {
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
         if (lmbDown && item instanceof DurableItem durableItem) {
-            Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
+            int block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             boolean rightTool = false;
             for (BlockTag tag : uses) {
-                if (tag.tagged.contains(block.x())) {
+                if (tag.tagged.contains(block >> 16)) {
                     rightTool = true;
                     break;
                 }

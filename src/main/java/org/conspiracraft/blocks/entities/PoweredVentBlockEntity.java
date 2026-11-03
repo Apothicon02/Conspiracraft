@@ -32,7 +32,7 @@ public class PoweredVentBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void tick(Vector2i block, Vector3i pos) {
+    public void tick(int block, Vector3i pos) {
         boolean inAudibleRange = pos.distance(new Vector3i((int) Main.player.pos.x(), (int) (Main.player.pos.y()+Main.player.eyeHeight), (int) Main.player.pos.z())) < 50;
         if (inAudibleRange) {
             if (source == null) {

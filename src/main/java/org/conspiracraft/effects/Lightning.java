@@ -43,7 +43,7 @@ public class Lightning extends Effect {
         AudioController.disposableSources.add(source);
 
         Vector3i iPos = new Vector3i(intPos);
-        int blockStruck = World.getBlock(iPos).x();
+        int blockStruck = World.getBlock(iPos) >> 16;
         if (BlockTags.leaves.tagged.contains(blockStruck)) {
             Source sizzleSource = new Source(new Vector3f((float) pos.x(), (float) pos.y(), (float) pos.z()), 1.f, 1.f, 0, 0);
             sizzleSource.play(Math.random() < 0.5f ? Sounds.SIZZLE1 : Sounds.SIZZLE2);
@@ -82,7 +82,7 @@ public class Lightning extends Effect {
     public void incinerate(int blockStruck, Vector3i iPos) {
         int dx = iPos.x - intPos.x(), dy = iPos.y - intPos.y(), dz = iPos.z - intPos.z();
         if (dx * dx + ((dy * dy)/2) + dz * dz <= RADIUS) {
-            if (World.getBlock(iPos).x() == blockStruck) {
+            if (World.getBlock(iPos) >> 16 == blockStruck) {
                 for (Vector3i nPos : new Vector3i[]{
                         new Vector3i(iPos.x, iPos.y, iPos.z + 1), new Vector3i(iPos.x + 1, iPos.y, iPos.z), new Vector3i(iPos.x, iPos.y, iPos.z - 1),
                         new Vector3i(iPos.x - 1, iPos.y, iPos.z), new Vector3i(iPos.x, iPos.y + 1, iPos.z), new Vector3i(iPos.x, iPos.y - 1, iPos.z)

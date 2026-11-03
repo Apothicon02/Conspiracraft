@@ -8,8 +8,8 @@ import java.util.Map;
 public class LeafBlockType extends BlockType {
 
     @Override
-    public boolean needsSupport(Vector2i block) {
-        return blockProperties.needsSupport ? true : block.y > 0;
+    public boolean needsSupport(int block) {
+        return blockProperties.needsSupport ? true : (block & 0xFFFF) > 0;
     }
     @Override
     public boolean obstructingHeightmap(int block) {

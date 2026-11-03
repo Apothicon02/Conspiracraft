@@ -11,7 +11,7 @@ public class CrateBlockType extends BlockType {
     }
 
     @Override
-    public int use(int x, int y, int z, Vector2i block) {
+    public int use(int x, int y, int z, int block) {
 
         return 200;
     }

@@ -65,9 +65,9 @@ public class BlockDrops {
             Map.entry(BlockTypes.DEAD_LEAVES, LootTables.LEAVES)
     );
 
-    public static ArrayList<Item> getDrops(Vector2i block) {
+    public static ArrayList<Item> getDrops(int block) {
         ArrayList<Item> drops = new ArrayList<>();
-        Map<Pair<Float, Integer>[], Item> items = blockTypeDropTable.get(BlockTypes.blockTypes[block.x()]);
+        Map<Pair<Float, Integer>[], Item> items = blockTypeDropTable.get(BlockTypes.blockTypes[block >> 16]);
         if (items != null) {
             boolean droppedAnything = false;
             for (Pair<Float, Integer>[] drop : items.keySet()) {
@@ -81,7 +81,7 @@ public class BlockDrops {
         }
         return drops;
     }
-    public static void dropDrops(Vector2i block, int x, int y, int z) {
+    public static void dropDrops(int block, int x, int y, int z) {
         ArrayList<Item> drops = getDrops(block);
         for (Item item : drops) {
             item.pos.set(x+0.5f, y+0.5f, z+0.5f);

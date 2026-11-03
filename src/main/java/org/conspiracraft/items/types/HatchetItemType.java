@@ -20,10 +20,10 @@ public class HatchetItemType extends ToolItemType {
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
         if (lmbDown && item instanceof DurableItem durableItem) {
-            Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
+            int block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             boolean rightTool = false;
             for (BlockTag tag : uses) {
-                if (tag.tagged.contains(block.x())) {
+                if (tag.tagged.contains(block >> 16)) {
                     rightTool = true;
                     break;
                 }
@@ -32,10 +32,10 @@ public class HatchetItemType extends ToolItemType {
             if (rightTool && delay > 1) {item = durableItem.damage(1);}
             return new ItemUseResult(delay, item, 1.f);
         } else if (rmbDown && item instanceof DurableItem durableItem) {
-            Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
-            Integer result = Recipes.strippingRecipes.get(block.x());
+            int block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
+            Integer result = Recipes.strippingRecipes.get(block >> 16);
             if (result != null) {
-                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), result, block.y());
+                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), result, (block & 0xFFFF));
                 item = durableItem.damage(1);
                 return new ItemUseResult(1, item, 1.f);
             } else {

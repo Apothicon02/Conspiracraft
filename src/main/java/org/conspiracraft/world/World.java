@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 
@@ -421,17 +422,17 @@ public class World {
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         return chunk.getBlockType(pos);
     }
-    public static Vector2i getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
-    public static Vector2i getBlock(double x, double y, double z) {
+    public static int getBlock(Vector3i pos) {return getBlock(pos.x(), pos.y(), pos.z());}
+    public static int getBlock(double x, double y, double z) {
         return getBlock((int)x, (int)y, (int)z);
     }
-    public static Vector2i getBlock(float x, float y, float z) {
+    public static int getBlock(float x, float y, float z) {
         return getBlock((int)x, (int)y, (int)z);
     }
-    public static Vector2i getBlock(int x, int y, int z) {
+    public static int getBlock(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
-        if (chunk == null) {return new Vector2i(0);}
+        if (chunk == null) {return 0;}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getBlock(pos);
@@ -466,6 +467,8 @@ public class World {
     }
     public static final int wgThreads = 5;
     public static ExecutorService wgPool = null;
+    public static boolean wgResetPending = false;
+    public static final Future<?>[] wgFutures = new Future[wgThreads];
     public static Collection<Region> getAllRegions() {return regions.values();}
     public static Region getRegion(long cRP) {
         return regions.get(cRP);
@@ -507,9 +510,9 @@ public class World {
 //        prevChunk = chunk;
 //        return chunk;
     }
-    public static Vector2i getBlockWorldgenUnchecked(Region region, Vector3i pos) {return getBlockWorldgenUnchecked(region, pos.x(), pos.y(), pos.z());}
-    public static Vector2i getBlockWorldgenUnchecked(Region region, long pos) {return getBlockWorldgenUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
-    public static Vector2i getBlockWorldgenUnchecked(Region region, int x, int y, int z) {
+    public static int getBlockWorldgenUnchecked(Region region, Vector3i pos) {return getBlockWorldgenUnchecked(region, pos.x(), pos.y(), pos.z());}
+    public static int getBlockWorldgenUnchecked(Region region, long pos) {return getBlockWorldgenUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
+    public static int getBlockWorldgenUnchecked(Region region, int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
         int lX = x&15;
@@ -517,12 +520,12 @@ public class World {
         int lZ = z&15;
         return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
     }
-    public static Vector2i getBlockWorldgen(Vector3i pos) {return getBlockWorldgen(pos.x(), pos.y(), pos.z());}
-    public static Vector2i getBlockWorldgen(long pos) {return getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
-    public static Vector2i getBlockWorldgen(int x, int y, int z) {
+    public static int getBlockWorldgen(Vector3i pos) {return getBlockWorldgen(pos.x(), pos.y(), pos.z());}
+    public static int getBlockWorldgen(long pos) {return getBlockWorldgen(LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}
+    public static int getBlockWorldgen(int x, int y, int z) {
         long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
-        if (chunk == null) {return new Vector2i();}
+        if (chunk == null) {return 0;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;
@@ -604,9 +607,9 @@ public class World {
         int lZ = z&15;
         if (!generating) {
             BlockType blockType = BlockTypes.blockTypes[type];
-            Vector2i newBlock = blockType.onPlace(x, y, z, type, subType, silent);
-            type = newBlock.x();
-            subType = newBlock.y();
+            int newBlock = blockType.onPlace(x, y, z, type, subType, silent);
+            type = newBlock >> 16;
+            subType = (newBlock & 0xFFFF);
         }
         BlockType blockType = BlockTypes.blockTypes[type];
         synchronized (chunk) {
@@ -657,7 +660,7 @@ public class World {
         int lZ = z&15;
         int pos = Chunk.packLocalPos(lX, lY, lZ);
         synchronized (chunk) {
-            if (BlockTypes.blockTypes[chunk.getBlock(pos).x()].blockProperties.isFluidReplaceable) {
+            if (BlockTypes.blockTypes[chunk.getBlock(pos) >> 16].blockProperties.isFluidReplaceable) {
                 chunk.setBlock(lX, lY, lZ, type, subType);
                 updateLod(x, y, z, type == 0);
                 updateRegion(cX, cY, cZ, !(chunk.blockPalette.size() > 1 || chunk.blockPalette.getFirst() != 0));
@@ -678,11 +681,11 @@ public class World {
             }
         }
     }
-    public static void spawnParticle(Vector3d particlePos, Vector2i block) {
+    public static void spawnParticle(Vector3d particlePos, int block) {
         Particle particle = new Particle(new Vector3d(particlePos), new Matrix4f().scale(0.075f + (float) (0.1f * Math.random())));
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         particle.tex = Textures.materials;
-        Material[] mats = BlockTypes.blockTypes[block.x()].materialsArr;
+        Material[] mats = BlockTypes.blockTypes[block >> 16].materialsArr;
         int id = mats[(int) (Math.random()*mats.length)].id();
         particle.texOffset.set((id* Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);
@@ -697,16 +700,16 @@ public class World {
         updateNeighbor(x, y, z);
     }
     public static void updateNeighbor(int x, int y, int z) {
-        Vector2i block = getBlock(x, y, z);
-        BlockTypes.blockTypes[block.x()].neighborUpdated(x, y, z, block);
+        int block = getBlock(x, y, z);
+        BlockTypes.blockTypes[block >> 16].neighborUpdated(x, y, z, block);
     }
     public static void updateHeightmap(int x, int newY, int z) {
         Region2D region2D = getRegion2D(packRegionPos(x>>regionBits, 0, z>>regionBits));
         int rlX = x%regionSize, rlZ = z%regionSize;
         int packed = (rlX * regionSize) + rlZ;
         for (int y = Earth.SKY_LEVEL-1; y >= Earth.GROUND_LEVEL; y--) {
-            Vector2i block = getBlock(x, y, z);
-            if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {;
+            int block = getBlock(x, y, z);
+            if (BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block)) {;
                 region2D.heights[packed] = (short) (y - Earth.GROUND_LEVEL);
                 break;
             } else {

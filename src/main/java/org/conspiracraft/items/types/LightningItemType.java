@@ -24,8 +24,8 @@ public class LightningItemType extends ItemType {
             Vector3d lightningPos = new Vector3d(player.selectedBlock).max(new Vector3d(0, World.height, 0));
             for (int i = 1; i < World.height; i++) {
                 lightningPos.sub(0, 1, 0);
-                Vector2i block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
-                if (BlockTypes.blockTypes[block.x()].blocksLight(block) || BlockTags.leaves.tagged.contains(block.x())) {
+                int block = World.getBlock((int)lightningPos.x(), (int)lightningPos.y(), (int)lightningPos.z());
+                if (BlockTypes.blockTypes[block >> 16].blocksLight(block) || BlockTags.leaves.tagged.contains(block >> 16)) {
                     World.effects.add(new Lightning(new Vector3d(lightningPos.x(), lightningPos.y()+1, lightningPos.z()), new Matrix4f().scale(1, i, 1)));
                     if (!player.creative) {item.amount--;}
                     break;

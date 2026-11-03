@@ -36,8 +36,8 @@ public class Particle extends Effect {
         }
         prevPos.set(pos);
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
-        Vector2i blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
-        boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
+        int blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
+        boolean onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
         float friction = 0.99f; //1-airFriction=maxFriction
         if (onSolid) {
             friction *= 0.75f;

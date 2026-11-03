@@ -323,7 +323,7 @@ public class Lazuli extends WorldType {
 //                            for (int z = cZ * chunkSize; z < (cZ * chunkSize) + chunkSize; z++) {
 //                                int elevation = oldHeightmap[(x * size) + z];
 //                                byte biome = biomes[x * size + z];
-//                                Vector2i blockOn = getBlock(x, elevation, z);
+//                                int blockOn = getBlock(x, elevation, z);
 //                                float randomNumber = rand.nextFloat();
 //                                boolean onOrangeSand = blockOn.x() == BlockTypes.ORANGE_SAND.id;
 //                                if (biome != Biomes.LAZULI_BADLANDS.id && randomNumber < (onOrangeSand ? 0.0002f : 0.0001f)) {
@@ -400,8 +400,8 @@ public class Lazuli extends WorldType {
 //                    Chunk chunk = World.oldchunks[oldpackChunkPos(cX, cY, cZ)];
 //                    if (chunk.blockPalette != null) {
 //                        for (int data : chunk.blockPalette) {
-//                            Vector2i block = Chunk.unpackInt(data);
-//                            boolean obstructingHeightmap = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+//                            int block = Chunk.unpackInt(data);
+//                            boolean obstructingHeightmap = BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block);
 //                            if (!foundMax && obstructingHeightmap) {
 //                                foundMax = true;
 //                                chunksMaxElevations[oldpackChunkPos(cX, cZ)] = cY;
@@ -437,11 +437,11 @@ public class Lazuli extends WorldType {
 //                                for (int z = 0; z < chunkSize; z++) {
 //                                    for (int y = chunkSize - 1; y >= 0; y--) {
 //                                        int localPos = Chunk.packLocalPos(x, y, z);
-//                                        Vector2i block = chunk.getBlock(localPos);
+//                                        int block = chunk.getBlock(localPos);
 //                                        int pos = packPos((cX*chunkSize)+x, (cZ*chunkSize)+z);
 //                                        int gY = (cY*chunkSize)+y;
 //                                        short elevation = oldHeightmap[pos];
-//                                        if (BlockTypes.blockTypes[block.x()].obstructingHeightmap(block)) {
+//                                        if (BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block)) {
 //                                            oldHeightmap[pos] = (short) Math.max(elevation, gY);
 //                                            chunk.setLight(x, y, z, 0);
 //                                        } else if (gY <= elevation) {
@@ -477,8 +477,8 @@ public class Lazuli extends WorldType {
 //                                int maxY = oldHeightmap[packedHorizontalPos];
 //                                boolean prevBlocking = false;
 //                                for (int y = maxY; y >= minY; y--) {
-//                                    Vector2i block = World.getBlock(x, y, z);
-//                                    boolean blocking = BlockTypes.blockTypes[block.x()].obstructingHeightmap(block);
+//                                    int block = World.getBlock(x, y, z);
+//                                    boolean blocking = BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block);
 //                                    if (prevBlocking && !blocking) {
 //                                        if (getLight(x, y, z).s() == 0 && (getLight(x + 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z + 1).s() >= maxSunlightLevel || getLight(x - 1, y, z).s() >= maxSunlightLevel || getLight(x, y, z - 1).s() >= maxSunlightLevel)) {
 //                                            LightHelper.queueLightUpdate(new Vector3i(x, y, z));

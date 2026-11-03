@@ -33,7 +33,7 @@ public class ScheduledTicker {
             ArrayList<Vector4i> positions = schedule.get(scheduledTick);
             if (positions != null) {
                 positions.forEach((pos) -> {
-                    BlockTypes.blockTypes[World.getBlock(pos.xyz(new Vector3i())).x()].tick(pos);
+                    BlockTypes.blockTypes[World.getBlock(pos.xyz(new Vector3i())) >> 16].tick(pos);
                 });
             }
             schedule.remove(scheduledTick);

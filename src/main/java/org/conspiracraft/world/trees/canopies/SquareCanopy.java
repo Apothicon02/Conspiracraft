@@ -46,7 +46,7 @@ public class SquareCanopy extends Canopy {
                         long bPos = LongPos.pack(x, pos.y()-height, z);
                         long aPos = LongPos.pack(x, (1+pos.y())-height, z);
                         if ((isAir(aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos)>> 16].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                         }
                     }

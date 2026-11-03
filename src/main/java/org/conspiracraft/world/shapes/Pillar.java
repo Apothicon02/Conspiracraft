@@ -7,7 +7,7 @@ import org.joml.Vector2i;
 import static org.conspiracraft.world.World.*;
 
 public class Pillar {
-    public static void generate(Vector2i blockOn, int x, int y, int z, int height, int blockType, int blockSubType) {
+    public static void generate(int blockOn, int x, int y, int z, int height, int blockType, int blockSubType) {
         int maxHeight = y+height;
         for (int newY = y; newY < maxHeight; newY++) {
             setBlock(x, newY, z, blockType, blockSubType);

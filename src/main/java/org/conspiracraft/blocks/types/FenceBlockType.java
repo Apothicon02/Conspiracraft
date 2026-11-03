@@ -46,16 +46,16 @@ public class FenceBlockType extends BlockType {
 
     public static final int[] shapeMapping = new int[]{0, 3, 4, 9, 1, 5, 10, 13, 2, 8, 6, 12, 7, 11, 14, 15};
     @Override
-    public void neighborUpdated(int x, int y, int z, Vector2i block) {
+    public void neighborUpdated(int x, int y, int z, int block) {
         boolean north = canConnectTo(new Vector3i(x, y, z+1)), east = canConnectTo(new Vector3i(x+1, y, z)),
                 south = canConnectTo(new Vector3i(x, y, z-1)), west = canConnectTo(new Vector3i(x-1, y, z));
         byte shape = (byte) ((north ? 1 << 3 : 0) | (east ? 1 << 2 : 0) | (south ? 1 << 1 : 0) | (west ? 1 : 0));
-        World.setBlock(x, y, z, block.x(), shapeMapping[shape], false, false, true);
+        World.setBlock(x, y, z, block >> 16, shapeMapping[shape], false, false, true);
     }
 
     public static boolean canConnectTo(Vector3i pos) {
-        Vector2i nBlock = World.getBlock(pos);
-        BlockType nType = BlockTypes.blockTypes[nBlock.x()];
+        int nBlock = World.getBlock(pos);
+        BlockType nType = BlockTypes.blockTypes[nBlock >> 16];
         return nType instanceof FenceBlockType || nType instanceof GateBlockType || nType.blockProperties.isSolid;
     }
 }

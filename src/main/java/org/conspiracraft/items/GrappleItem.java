@@ -26,7 +26,7 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_SPACE;
 
 public class GrappleItem extends DurableItem implements Cloneable {
     public static final SFX[] lengthSFXs = new SFX[]{Sounds.GEAR_CLICK1, Sounds.GEAR_CLICK2, Sounds.GEAR_CLICK3};
-    public Vector2i grappleBlock = new Vector2i(-1);
+    public int grappleBlock = -1;
     public Vector3d grapplePos = new Vector3d(-1);
     public double maxDistance = 0.f;
     public Source lengthSource = null;

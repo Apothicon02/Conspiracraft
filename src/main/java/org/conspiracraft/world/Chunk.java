@@ -183,9 +183,9 @@ public class Chunk {
     public int getBlockKey(int pos) {
         return blockData.getValue(pos);
     }
-    public Vector2i getBlock(int pos) {
+    public int getBlock(int pos) {
         int index = getBlockKey(pos);
-        return unpackInt(blockPalette.get(index));
+        return blockPalette.get(index);
     }
     public int getBlockType(int pos) {
         int index = getBlockKey(pos);
@@ -399,15 +399,15 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (y == chunkSize - 1 ? neighborChunk.faceUnoccluded(x, 0, z, block) : faceUnoccluded(x, y + 1, z, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevZ - startBlock.z();
                 addUpQuad(verts, indices, offX+x, offY+y+1, offZ+startBlock.z(), 1, 0, length+1);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), z);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -449,15 +449,15 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (y == 0 ? neighborChunk.faceUnoccluded(x, chunkSize - 1, z, block) : faceUnoccluded(x, y - 1, z, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevZ - startBlock.z();
                 addDownQuad(verts, indices, offX+x, offY+y, offZ+startBlock.z(), 1, 0, length+1);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), z);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -501,15 +501,15 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (x == chunkSize-1 ? neighborChunk.faceUnoccluded(0, y, z, block) : faceUnoccluded(x+1, y, z, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevZ - startBlock.z();
                 addQuadEast(verts, indices, offX+x+1, offY+y, offZ+startBlock.z(), 0, 1, length+1);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), z);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -553,15 +553,15 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (x == 0 ? neighborChunk.faceUnoccluded(chunkSize-1, y, z, block) : faceUnoccluded(x-1, y, z, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevZ - startBlock.z();
                 addQuadWest(verts, indices, offX+x, offY+y, offZ+startBlock.z(), 0, 1, length+1);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), z);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -605,15 +605,15 @@ public class Chunk {
         int prevX = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (z == chunkSize-1 ? neighborChunk.faceUnoccluded(x, y, 0, block) : faceUnoccluded(x, y, z+1, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevX - startBlock.z();
                 addQuadNorth(verts, indices, offX+startBlock.z(), offY+y, offZ+z+1, length+1, 1, 0);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), x);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), x);
             }
             prevX = x;
         }
@@ -657,15 +657,15 @@ public class Chunk {
         int prevX = 0;
         Vector3i startBlock = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
-            Vector2i block = getBlock(packLocalPos(x, y, z));
+            int block = getBlock(packLocalPos(x, y, z));
             boolean faceUnoccluded = (z == 0 ? neighborChunk.faceUnoccluded(x, y, chunkSize-1, block) : faceUnoccluded(x, y, z-1, block));
-            if (startBlock.x() > -1 && (!faceUnoccluded || block.x() != startBlock.x() || block.y() != startBlock.y())) {
+            if (startBlock.x() > -1 && (!faceUnoccluded || block >> 16 != startBlock.x() || (block & 0xFFFF) != startBlock.y())) {
                 float length = prevX - startBlock.z();
                 addQuadSouth(verts, indices, offX+startBlock.z(), offY+y, offZ+z, length+1, 1, 0);
                 startBlock.set(-1);
             }
-            if (startBlock.x() == -1 && BlockTypes.blockTypes[block.x()].blockProperties.isSolid && faceUnoccluded) {
-                startBlock.set(block.x(), block.y(), x);
+            if (startBlock.x() == -1 && BlockTypes.blockTypes[block >> 16].blockProperties.isSolid && faceUnoccluded) {
+                startBlock.set(block >> 16, (block & 0xFFFF), x);
             }
             prevX = x;
         }
@@ -689,11 +689,11 @@ public class Chunk {
     }
     public boolean faceUnoccludedFluid(int x, int y, int z, int fluid) {
         int pos = packLocalPos(x, y, z);
-        Vector2i block = getBlock(pos);
-        return getFluid(pos) >> 16 != fluid >> 16 && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
+        int block = getBlock(pos);
+        return getFluid(pos) >> 16 != fluid >> 16 && !BlockTypes.blockTypes[block >> 16].blockProperties.isSolid;
     }
-    public boolean faceUnoccluded(int x, int y, int z, Vector2i block) {
-        return !BlockTypes.blockTypes[getBlock(packLocalPos(x, y, z)).x()].blockProperties.isSolid;
+    public boolean faceUnoccluded(int x, int y, int z, int block) {
+        return !BlockTypes.blockTypes[getBlock(packLocalPos(x, y, z)) >> 16].blockProperties.isSolid;
     }
     public final IntArrayList fluidPalette;
     public BitBuffer fluidData;

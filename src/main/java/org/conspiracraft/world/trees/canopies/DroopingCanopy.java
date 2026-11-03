@@ -74,7 +74,7 @@ public class DroopingCanopy extends Canopy {
                         long bPos = LongPos.pack(x, minY-height, z);
                         long aPos = LongPos.pack(x, (1+minY)-height, z);
                         if ((isAir(aPos) && !blocks.containsKey(aPos) &&
-                                (BlockTypes.blockTypes[getBlockWorldgen(bPos).x()].blockProperties.isSolid || solid(blocks.get(bPos))))) {
+                                (BlockTypes.blockTypes[getBlockWorldgen(bPos)>> 16].blockProperties.isSolid || solid(blocks.get(bPos))))) {
                             addToMap(blocks, aPos, random, blockType, (int) Math.abs(random.nextDouble() * 6) + 1);
                         }
                     }

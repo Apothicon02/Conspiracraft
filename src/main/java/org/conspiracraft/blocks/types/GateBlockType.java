@@ -3,6 +3,7 @@ package org.conspiracraft.blocks.types;
 import org.conspiracraft.Main;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.physics.AABB;
+import org.conspiracraft.world.Chunk;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -21,19 +22,19 @@ public class GateBlockType extends BlockType {
     }
 
     @Override
-    public int use(int x, int y, int z, Vector2i block) {
-        boolean isEven = (block.y() | 1) > block.y();
-        World.setBlock(x, y, z, block.x(), isEven ? block.y()+1 : block.y()-1, false, false, false);
+    public int use(int x, int y, int z, int block) {
+        boolean isEven = ((block & 0xFFFF) | 1) > (block & 0xFFFF);
+        World.setBlock(x, y, z, block >> 16, isEven ? (block & 0xFFFF)+1 : (block & 0xFFFF)-1, false, false, false);
         return 200;
     }
 
     @Override
-    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public int onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         if (!isSilent) {
             blockProperties.blockSFX.placed(new Vector3f(x, y, z));
         }
-        Vector2i existing = World.getBlock(x, y, z);
-        if (existing.x() != blockType) {
+        int existing = World.getBlock(x, y, z);
+        if (existing >> 16 != blockType) {
             double zDist = z-Main.player.pos.z(), xDist = x-Main.player.pos.x();
             double zDistAbs = Math.abs(z-Main.player.pos.z()), xDistAbs = Math.abs(x-Main.player.pos.x());
             if (zDistAbs > xDistAbs) {
@@ -48,6 +49,6 @@ public class GateBlockType extends BlockType {
                 }
             }
         }
-        return new Vector2i(blockType, blockSubType);
+        return Chunk.packInts(blockType, blockSubType);
     }
 }

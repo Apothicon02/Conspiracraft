@@ -30,11 +30,11 @@ public class IceItemType extends ItemType {
     }
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
-        if (blockToPlace != null && blockToPlace.x() > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything && item.amount >= 1000) {
-            Vector2i block = World.getBlock(dda.prevHit);
-            BlockType blockType = BlockTypes.blockTypes[block.x()];
+        if (blockToPlace >> 16 > 0 && player.inputHandler.rightButtonPressed && dda.hitAnything && item.amount >= 1000) {
+            int block = World.getBlock(dda.prevHit);
+            BlockType blockType = BlockTypes.blockTypes[block >> 16];
             if (blockType.blockProperties.isFluidReplaceable) {
-                World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace.x(), blockToPlace.y());
+                World.setBlock(dda.prevHit.x(), dda.prevHit.y(), dda.prevHit.z(), blockToPlace >> 16, blockToPlace & 0xFFFF);
                 if (!player.creative) {
                     item.amount -= 1000;
                 }

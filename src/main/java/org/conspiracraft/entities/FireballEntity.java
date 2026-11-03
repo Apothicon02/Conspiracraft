@@ -25,8 +25,8 @@ public class FireballEntity extends Entity {
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
         PhysicsHelper.BlockResult blockIn = PhysicsHelper.getClosestBlock(aabb.copy().grow(0.1f), new Vector3d(pos).sub(vel));
-        if (blockIn != null && blockIn.block() != null && blockIn.block().x() > 0) {
-            World.setBlock((int) blockIn.x(), (int) blockIn.y(), (int) blockIn.z(), blockIn.block().x() == BlockTypes.WATER.id ? BlockTypes.OBSIDIAN.id : BlockTypes.MAGMA.id, 0);
+        if (blockIn != null && blockIn.block() >> 16 > 0) {
+            World.setBlock((int) blockIn.x(), (int) blockIn.y(), (int) blockIn.z(), blockIn.block() >> 16 == BlockTypes.WATER.id ? BlockTypes.OBSIDIAN.id : BlockTypes.MAGMA.id, 0);
             Source source = new Source(matrix.getTranslation(new Vector3f()), 1.f, 1.f, 0, 0);
             source.play(Math.random() < 0.5f ? Sounds.SIZZLE1 : Sounds.SIZZLE2);
             AudioController.disposableSources.add(source);

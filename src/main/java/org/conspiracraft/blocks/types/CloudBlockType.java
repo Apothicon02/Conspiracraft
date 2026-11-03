@@ -1,6 +1,7 @@
 package org.conspiracraft.blocks.types;
 
 import org.conspiracraft.blocks.Material;
+import org.conspiracraft.world.Chunk;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -30,7 +31,7 @@ public class CloudBlockType extends BlockType {
     }
 
     @Override
-    public Vector2i onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
+    public int onPlace(int x, int y, int z, int blockType, int blockSubType, boolean isSilent) {
         //ScheduledTicker.scheduleTick(Main.currentTick+200+(int)(Math.random()*1000), pos, 1);
 
         if (!isSilent) {
@@ -39,19 +40,17 @@ public class CloudBlockType extends BlockType {
 
         if (!blockProperties.isSolid) {
             Vector3i abovePos = new Vector3i(x, y + 1, z);
-            Vector2i aboveBlock = getBlock(abovePos);
-            if (aboveBlock != null) {
-                int aboveBlockId = aboveBlock.x();
-                if (BlockTypes.blockTypes[aboveBlockId].needsSupport(aboveBlock)) {
-                    lostSupport(abovePos, aboveBlock);
-                }
+            int aboveBlock = getBlock(abovePos);
+            int aboveBlockId = aboveBlock >> 16;
+            if (BlockTypes.blockTypes[aboveBlockId].needsSupport(aboveBlock)) {
+                lostSupport(abovePos, aboveBlock);
             }
         }
-        return new Vector2i(blockType, blockSubType);
+        return Chunk.packInts(blockType, blockSubType);
 //        if (needsSupport(blockType, blockSubType)) {
 //            Vector2i belowBlock = getBlock(new Vector3i(x, y - 1, z));
 //            if (belowBlock != null) {
-//                int belowBlockId = belowBlock.x();
+//                int belowBlockId = belowblock >> 16;
 //                if (!BlockTypes.blockTypes[belowBlockId].blockProperties.isSolid) {
 //                    lostSupport(x, y, z, blockType, blockSubType);
 //                }

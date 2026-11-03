@@ -19,11 +19,11 @@ public class ChiselItemType extends ToolItemType {
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
         if (lmbDown && item instanceof DurableItem durableItem) {
-            Vector2i block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
+            int block = World.getBlock(dda.hit.x(), dda.hit.y(), dda.hit.z());
             int delay = 0;
-            //if (BlockTypes.blockTypes[block.x()].blockProperties.hasSlab) {
+            //if (BlockTypes.blockTypes[block >> 16].blockProperties.hasSlab) {
                 delay = 400;
-                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), block.x(), block.y()+1, true); //block.y() >= 2 ? 0 :
+                World.setBlock(dda.hit.x(), dda.hit.y(), dda.hit.z(), block >> 16, (block & 0xFFFF)+1, true); //(block & 0xFFFF) >= 2 ? 0 :
                 item = durableItem.damage(1);
             //}
             return new ItemUseResult(delay, item, 1.f);

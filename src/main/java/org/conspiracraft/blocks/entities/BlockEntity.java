@@ -15,5 +15,5 @@ public class BlockEntity {
         World.blockEntities.remove(xyz);
     }
 
-    public void tick(Vector2i block, Vector3i pos) {}
+    public void tick(int block, Vector3i pos) {}
 }

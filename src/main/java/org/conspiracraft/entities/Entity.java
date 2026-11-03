@@ -80,8 +80,8 @@ public class Entity {
         matrix.identity();
         Vector3f halfScale = new Vector3f(scale).div(2);
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
-        Vector2i blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
-        boolean onSolid = BlockTypes.blockTypes[blockOn.x()].blockProperties.isCollidable;
+        int blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
+        boolean onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
         float friction = 0.99f; //1-airFriction=maxFriction
         if (onSolid) {
             friction *= 0.75f;
@@ -96,11 +96,11 @@ public class Entity {
         return false;
     }
 
-    public void addParticle(Vector3d particlePos, Vector2i blockOn) {
+    public void addParticle(Vector3d particlePos, int blockOn) {
         Particle particle = new Particle(new Vector3d(particlePos), new Matrix4f().scale(0.075f + (float) (0.1f * Math.random())));
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         particle.tex = Textures.materials;
-        Material[] mats = BlockTypes.blockTypes[blockOn.x()].materialsArr;
+        Material[] mats = BlockTypes.blockTypes[blockOn >> 16].materialsArr;
         int id = mats[(int) (Math.random()*mats.length)].id();
         particle.texOffset.set((id* Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);

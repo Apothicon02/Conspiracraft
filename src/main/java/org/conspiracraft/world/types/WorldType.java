@@ -74,8 +74,8 @@ public class WorldType {
                 }
             }
         }
-        Cube.generate(new Vector2i(), (World.size/2)+48, (World.height/2)-24, (World.size/2)+24, BlockTypes.STEEL_PLATING.id, 0, chunkSize/3);
-        Cube.generate(new Vector2i(), (World.size/2)+48, (World.height/2)-24, (World.size/2)+48, BlockTypes.HAZARD.id, 0, chunkSize/3);
+        Cube.generate(0, (World.size/2)+48, (World.height/2)-24, (World.size/2)+24, BlockTypes.STEEL_PLATING.id, 0, chunkSize/3);
+        Cube.generate(0, (World.size/2)+48, (World.height/2)-24, (World.size/2)+48, BlockTypes.HAZARD.id, 0, chunkSize/3);
         for (int x = (World.size/2)+12-chunkSize; x <= (World.size/2)+12+chunkSize; x++) {
             for (int z = (World.size / 2) + 12-chunkSize; z <= (World.size / 2) + 54+chunkSize; z++) {
                 if (x > (World.size/2)+6 && x < (World.size/2)+18) {
