@@ -377,16 +377,16 @@ public class World {
             chunk.setLight(lX, lY, lZ, light);
         }
     }
-    public static Vector2i getFluid(double x, double y, double z) {
+    public static int getFluid(double x, double y, double z) {
         return getFluid((int)x, (int)y, (int)z);
     }
-    public static Vector2i getFluid(float x, float y, float z) {
+    public static int getFluid(float x, float y, float z) {
         return getFluid((int)x, (int)y, (int)z);
     }
-    public static Vector2i getFluid(int x, int y, int z) {
+    public static int getFluid(int x, int y, int z) {
         int cX = x>>chunkBits, cY = y>>chunkBits, cZ = z>>chunkBits;
         Chunk chunk = getChunkGlobalPos(packChunkPos(cX, cY, cZ));
-        if (chunk == null) {return new Vector2i(0);}
+        if (chunk == null) {return 0;}
         int pos = Chunk.packLocalPos(x&15, y&15, z&15);
         synchronized (chunk) {
             return chunk.getFluid(pos);
@@ -528,10 +528,10 @@ public class World {
         int lZ = z&15;
         return chunk.getBlock(Chunk.packLocalPos(lX, lY, lZ));
     }
-    public static Vector2i getFluidWorldgen(int x, int y, int z) {
+    public static int getFluidWorldgen(int x, int y, int z) {
         long cP = packChunkPos(x>>chunkBits, y>>chunkBits, z>>chunkBits);
         Chunk chunk = getChunkGlobalPos(cP);
-        if (chunk == null) {return new Vector2i();}
+        if (chunk == null) {return 0;}
         int lX = x&15;
         int lY = y&15;
         int lZ = z&15;

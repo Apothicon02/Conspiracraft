@@ -17,7 +17,7 @@ public class SpruceTree {
         if (TreeHelper.collides(generatedTrunk.getFirst(), bounds, minCollisionY, false)) {return false;}
         Long2IntOpenHashMap blocks = new Long2IntOpenHashMap(6*maxHeight*6);
         for (long canopyPos : generatedTrunk.getSecond()) {
-            SpruceCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, maxHeight, LongPos.pack(x, y, z));
+            SpruceCanopy.generateCanopy(random, blocks, LongPos.x(canopyPos), LongPos.y(canopyPos), LongPos.z(canopyPos), leafType, leafSubType, maxHeight);
         }
         if (TreeHelper.collides(blocks, bounds, minCollisionY, false)) {return false;}
         TreeHelper.set(blocks);

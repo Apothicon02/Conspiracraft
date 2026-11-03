@@ -901,7 +901,7 @@ void main() {
                 rayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
                 float dist = min(1.f, distance(ogPos, rayPos)/(0.5f*min(1024, renderDistance)));
-                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*min(1, pow(distance(ogPos, rayPos)*0.001, 4))*lightshaftMul;
+                float godray = globalUbo.renderToggles.x == 2 ? 0 : mix(noise(((rayPos.xz-rayDir.xz*(rayPos.y/rayDir.y))*2)+(globalUbo.time*0.0025f)).x-0.9f, 1.f, clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*min(1, pow(distance(ogPos, rayPos)*0.01f, 4))*lightshaftMul;
                 vec3 globalFogPos = floor((((floor(globalPos/sizeVec)*sizeVec)+ogPos) + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).x*5)+(noise(globalFogPos.zx*0.015f).x*485);
                 if (globalFogPos.y > SEA_LEVEL) {
@@ -987,9 +987,9 @@ void main() {
                         shadowColor = dda(true);
                     }
                     if (shadowColor.a > 0.0f) {
-//                        vec3 maxedSun = globalUbo.sun;
-//                        maxedSun.y = max(0, maxedSun.y);
-//                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
+                        //                        vec3 maxedSun = globalUbo.sun;
+                        //                        maxedSun.y = max(0, maxedSun.y);
+                        //                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
                         shadowFactor = !celestialSource ? 0.02f : mix(0.5f, 0.875f, 1-max(0, normDot));
                     }
                 }

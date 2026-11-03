@@ -375,16 +375,16 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (y == chunkSize - 1 ? neighborChunk.faceUnoccludedFluid(x, 0, z, fluid) : faceUnoccludedFluid(x, y + 1, z, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
                 addUpQuad(verts, indices, offX+x, offY+y+level, offZ+startFluid.z(), 1, 0, length+1);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), z);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -427,15 +427,15 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (y == 0 ? neighborChunk.faceUnoccludedFluid(x, chunkSize - 1, z, fluid) : faceUnoccludedFluid(x, y - 1, z, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float length = prevZ - startFluid.z();
                 addDownQuad(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 1, 0, length+1);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), z);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -477,16 +477,16 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (x == chunkSize-1 ? neighborChunk.faceUnoccludedFluid(0, y, z, fluid) : faceUnoccludedFluid(x+1, y, z, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
                 addQuadEast(verts, indices, offX+x+1, offY+y, offZ+startFluid.z(), 0, level, length+1);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), z);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -529,16 +529,16 @@ public class Chunk {
         int prevZ = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int z = 0; z < chunkSize; z++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (x == 0 ? neighborChunk.faceUnoccludedFluid(chunkSize-1, y, z, fluid) : faceUnoccludedFluid(x-1, y, z, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevZ - startFluid.z();
                 addQuadWest(verts, indices, offX+x, offY+y, offZ+startFluid.z(), 0, level, length+1);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), z);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), z);
             }
             prevZ = z;
         }
@@ -581,16 +581,16 @@ public class Chunk {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (z == chunkSize-1 ? neighborChunk.faceUnoccludedFluid(x, y, 0, fluid) : faceUnoccludedFluid(x, y, z+1, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();
                 addQuadNorth(verts, indices, offX+startFluid.z(), offY+y, offZ+z+1, length+1, level, 0);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), x);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), x);
             }
             prevX = x;
         }
@@ -633,16 +633,16 @@ public class Chunk {
         int prevX = 0;
         Vector3i startFluid = new Vector3i(-1);
         for (int x = 0; x < chunkSize; x++) {
-            Vector2i fluid = getFluid(packLocalPos(x, y, z));
+            int fluid = getFluid(packLocalPos(x, y, z));
             boolean faceUnoccluded = (z == 0 ? neighborChunk.faceUnoccludedFluid(x, y, chunkSize-1, fluid) : faceUnoccludedFluid(x, y, z-1, fluid));
-            if (startFluid.x() > -1 && (!faceUnoccluded || fluid.x() != startFluid.x() || fluid.y() != startFluid.y())) {
+            if (startFluid.x() > -1 && (!faceUnoccluded || fluid >> 16 != startFluid.x() || (fluid & 0xFFFF) != startFluid.y())) {
                 float level = startFluid.y() / 15.f;
                 float length = prevX - startFluid.z();
                 addQuadSouth(verts, indices, offX+startFluid.z(), offY+y, offZ+z, length+1, level, 0);
                 startFluid.set(-1);
             }
-            if (startFluid.x() == -1 && fluid.y() > 0 && faceUnoccluded) {
-                startFluid.set(fluid.x(), fluid.y(), x);
+            if (startFluid.x() == -1 && (fluid & 0xFFFF) > 0 && faceUnoccluded) {
+                startFluid.set(fluid >> 16, (fluid & 0xFFFF), x);
             }
             prevX = x;
         }
@@ -687,10 +687,10 @@ public class Chunk {
         verts.add(x+width); verts.add(y); verts.add(z+length);
         verts.add(x); verts.add(y+height); verts.add(z+length);
     }
-    public boolean faceUnoccludedFluid(int x, int y, int z, Vector2i fluid) {
+    public boolean faceUnoccludedFluid(int x, int y, int z, int fluid) {
         int pos = packLocalPos(x, y, z);
         Vector2i block = getBlock(pos);
-        return getFluid(pos).x() != fluid.x() && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
+        return getFluid(pos) >> 16 != fluid >> 16 && !BlockTypes.blockTypes[block.x()].blockProperties.isSolid;
     }
     public boolean faceUnoccluded(int x, int y, int z, Vector2i block) {
         return !BlockTypes.blockTypes[getBlock(packLocalPos(x, y, z)).x()].blockProperties.isSolid;
@@ -758,9 +758,9 @@ public class Chunk {
     public int getFluidKey(int pos) {
         return fluidData.getValue(pos);
     }
-    public Vector2i getFluid(int pos) {
+    public int getFluid(int pos) {
         int index = getFluidKey(pos);
-        return unpackInt(fluidPalette.get(index));
+        return fluidPalette.get(index);
     }
     public int getFluidType(int pos) {
         int index = getFluidKey(pos);

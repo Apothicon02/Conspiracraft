@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.Random;
 
 public class SpruceCanopy extends Canopy {
-    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int ogY, int z, int blockType, int blockSubType, int trunkHeight, long treeOrigin) {
+    public static Long2IntOpenHashMap generateCanopy(Random random, Long2IntOpenHashMap blocks, int x, int ogY, int z, int blockType, int blockSubType, int trunkHeight) {
         BlockPos origin = new BlockPos(x, ogY, z);
 
         int leaves = Chunk.packInts(blockType, blockSubType);

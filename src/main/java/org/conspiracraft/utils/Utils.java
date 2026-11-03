@@ -25,7 +25,8 @@ import static org.lwjgl.system.MemoryUtil.memAlloc;
 public class Utils {
     public static Random random = new Random(67);
     public static float randomFloat(float mul) {return random.nextFloat()*mul;}
-
+    public static float sqrtInv(float in) {return 1.0f/(float)Math.sqrt(in);}
+    public static double sqrtInv(double in) {return 1.0d/Math.sqrt(in);}
     public static float absMax(float a, float b) {
         return Math.max(Math.abs(a), Math.abs(b));
     }
