@@ -208,7 +208,7 @@ public class Renderer {
         long startTime = System.currentTimeMillis();
         Materials.fillTexture(stack);
         BlockTypes.fillTexture(stack);
-        ByteBuffer noisesBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/coherent_noise"));
+        ByteBuffer noisesBuffer = Utils.imagesToBuffer(Utils.loadImage("generic/texture/waves"), Utils.loadImage("generic/texture/coherent_noise"));
         ImageHelper.fillImage(stack, Textures.noises, noisesBuffer);
         memFree(noisesBuffer);
         ByteBuffer blueNoiseBuffer = Utils.imageToBuffer(Utils.loadImage("generic/texture/blue_noise"));

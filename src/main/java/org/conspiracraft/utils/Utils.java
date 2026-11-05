@@ -72,6 +72,20 @@ public class Utils {
     public static int packColor(int r, int g, int b, int a) {
         return (r) | (g << 8) | (b << 16) | (a << 24);
     }
+    public static ByteBuffer imagesToBuffer(BufferedImage image, BufferedImage alphaImage) {
+        int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        int[] alphaPixels = alphaImage.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        ByteBuffer buffer = memAlloc(pixels.length * 4);
+        for (int i = 0; i < pixels.length; i++) {
+            int pixel = pixels[i];
+            buffer.put((byte) ((pixel >> 16) & 0xFF));
+            buffer.put((byte) ((pixel >> 8) & 0xFF));
+            buffer.put((byte) (pixel & 0xFF));
+            buffer.put((byte) ((alphaPixels[i] >> 16) & 0xFF));
+        }
+        buffer.flip();
+        return buffer;
+    }
     public static ByteBuffer imageToBuffer(BufferedImage image) {
         int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
         ByteBuffer buffer = memAlloc(pixels.length * 4);

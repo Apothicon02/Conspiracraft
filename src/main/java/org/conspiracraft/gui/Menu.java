@@ -270,7 +270,7 @@ public class Menu {
         drawBackground(selected, Math.round(offX + offPxX), Math.round(offY + offPxY), sizeX, sizeY);
     }
     public void drawBackground(boolean selected, int offX, int offY, int sizeX, int sizeY) {
-        color.set(1);
+        menuColor(color);
         pushUBO.updateTex(Textures.gui);
         pushUBO.updateLayer(selected ? 2 : 1); //selector or inventory
         pushUBO.updateAtlasOffset(new Vector2i(0, 2160-13));
