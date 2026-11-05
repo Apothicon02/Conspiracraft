@@ -20,8 +20,9 @@ public class ImageHelper {
         data.rewind();
         Buffer stagingBuffer = new Buffer(stack, data.remaining(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
         memCopy(memAddress(data), stagingBuffer.pointer.get(0), data.remaining());
+        int layers = texture == Textures.skybox ? 6 : 1;
 
-        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image, layers,
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
                 VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
@@ -34,18 +35,19 @@ public class ImageHelper {
                         .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
                         .mipLevel(0)
                         .baseArrayLayer(0)
-                        .layerCount(1))
+                        .layerCount(layers))
                 .imageOffset(o -> o.set(0, 0, 0))
                 .imageExtent(e -> e.set(texture.width, texture.height, texture instanceof Texture3D texture3D ? texture3D.depth : 1));
         vkCmdCopyBufferToImage(Renderer.currentCmdBuffer, stagingBuffer.buffer[0], texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
 
-        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image, layers,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
     public static void fillImage(MemoryStack stack, Texture texture, Buffer stagingBuffer) {
-        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+        int layers = texture == Textures.skybox ? 6 : 1;
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image, layers,
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 0, VK_ACCESS_2_TRANSFER_WRITE_BIT,
                 VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
@@ -58,22 +60,22 @@ public class ImageHelper {
                         .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
                         .mipLevel(0)
                         .baseArrayLayer(0)
-                        .layerCount(1))
+                        .layerCount(layers))
                 .imageOffset(o -> o.set(0, 0, 0))
                 .imageExtent(e -> e.set(texture.width, texture.height, texture instanceof Texture3D texture3D ? texture3D.depth : 1));
         vkCmdCopyBufferToImage(Renderer.currentCmdBuffer, stagingBuffer.buffer[0], texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageCopy);
 
-        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image,
+        transitionImageLayout(stack, Renderer.currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, texture.image, layers,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT,
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
     }
 
-    public static long createImageView(MemoryStack stack, boolean threeDimensional, long image, int format, int channels) {
+    public static long createImageView(MemoryStack stack, int viewType, long image, int format, int channels) {
         VkImageViewCreateInfo createInfo = VkImageViewCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO)
                 .image(image)
-                .viewType(threeDimensional ? VK_IMAGE_VIEW_TYPE_3D : VK_IMAGE_VIEW_TYPE_2D)
+                .viewType(viewType)
                 .format(format);
         if (channels > 0) {
             createInfo.components().r(VK_COMPONENT_SWIZZLE_IDENTITY);
@@ -93,21 +95,22 @@ public class ImageHelper {
                 .baseMipLevel(0)
                 .levelCount(1)
                 .baseArrayLayer(0)
-                .layerCount(1);
+                .layerCount(viewType == VK_IMAGE_VIEW_TYPE_CUBE ? 6 : 1);
         LongBuffer pView = stack.mallocLong(1);
         int err = vkCreateImageView(vkDevice, createInfo, null, pView);
         if (err != VK_SUCCESS) throw new RuntimeException("Failed to create image view: " + err);
         return pView.get(0);
     }
 
-    public static long[] createImage(MemoryStack stack, int width, int height, int depth, int format, int tiling, int usage, int memoryProperties) {
+    public static long[] createImage(MemoryStack stack, int width, int height, int depth, int format, int tiling, int usage, int memoryProperties, int layers) {
         VkImageCreateInfo imageInfo = VkImageCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO)
                 .imageType(depth > 1 ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D)
                 .format(format)
                 .extent(e -> e.width(width).height(height).depth(depth))
                 .mipLevels(1)
-                .arrayLayers(1)
+                .arrayLayers(layers)
+                .flags(layers == 6 ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0)
                 .samples(VK_SAMPLE_COUNT_1_BIT)
                 .tiling(tiling)
                 .usage(usage)
@@ -145,7 +148,7 @@ public class ImageHelper {
         throw new RuntimeException("Failed to find suitable memory type");
     }
 
-    public static void transitionImageLayout(MemoryStack stack, VkCommandBuffer cmdBuffer, int aspectMask, long image, int oldLayout, int newLayout, long srcAccessMask, long dstAccessMask, long srcStageMask, long dstStageMask) {
+    public static void transitionImageLayout(MemoryStack stack, VkCommandBuffer cmdBuffer, int aspectMask, long image, int layers, int oldLayout, int newLayout, long srcAccessMask, long dstAccessMask, long srcStageMask, long dstStageMask) {
         VkImageMemoryBarrier2.Buffer barrier = VkImageMemoryBarrier2.calloc(1, stack)
                 .sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2)
                 .srcStageMask(srcStageMask)
@@ -162,7 +165,7 @@ public class ImageHelper {
                 .baseMipLevel(0)
                 .levelCount(1)
                 .baseArrayLayer(0)
-                .layerCount(1);
+                .layerCount(layers);
         VkDependencyInfo depInfo = VkDependencyInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
                 .pImageMemoryBarriers(barrier);
@@ -170,7 +173,7 @@ public class ImageHelper {
     }
 
     public static void transitionStorageWrite(MemoryStack stack, VkCommandBuffer cmdBuffer, Texture tex) {
-        transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+        transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image, 1,
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
                 VK_ACCESS_2_NONE, VK_ACCESS_2_SHADER_WRITE_BIT,
                 VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT);

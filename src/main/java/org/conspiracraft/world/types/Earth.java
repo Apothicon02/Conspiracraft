@@ -124,7 +124,7 @@ public class Earth extends WorldType {
                     }
                 }
             }
-            skylightMul.set(0.5f, 0.375f, 1, 0.5f);
+            skylightMul.set(0.925f, 0.9f, 1, 0.5f);
             return new Vector4f(pos.x(), Math.max(starDist*0.2f, pos.y()), pos.z(), 0.99f);
         } else {
             skylightMul.set(1);

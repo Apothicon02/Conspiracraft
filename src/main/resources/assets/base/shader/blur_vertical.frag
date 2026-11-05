@@ -32,8 +32,6 @@ layout(push_constant) uniform PushUBO {
     int lights;
 } pushUbo;
 layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
-layout(set = 0, binding = 18) uniform sampler2D colors;
-layout(set = 0, binding = 25) uniform sampler2D bloomColors;
 layout(location = 0) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;

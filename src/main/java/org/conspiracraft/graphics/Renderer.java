@@ -217,11 +217,11 @@ public class Renderer {
         GUI.fillTexture();
         EntityTypes.fillTexture(stack);
         Celestials.fillTexture(stack);
-        int texSize = Textures.skybox.width*Textures.skybox.height;
+        int texSize = Textures.skybox.width*Textures.skybox.height*6;
         Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-        ByteBuffer entityBuf = Utils.imageToBuffer(Utils.loadImage("generic/texture/skybox"));
-        memCopy(memAddress(entityBuf), stagingBuffer.pointer.get(0), texSize * 4L);
-        memFree(entityBuf);
+        ByteBuffer skyboxBuf = Utils.imageToBuffer(Utils.loadImage("generic/texture/skybox"));
+        memCopy(memAddress(skyboxBuf), stagingBuffer.pointer.get(0), texSize*4L);
+        memFree(skyboxBuf);
         ImageHelper.fillImage(stack, Textures.skybox, stagingBuffer);
         System.out.println("Texture initialization took " + (System.currentTimeMillis() - startTime) + "ms");
     }
@@ -373,15 +373,6 @@ public class Renderer {
             pushUBO.updateTex(null); //use no texture
             //drawClouds();
             drawStars();
-            pushUBO.updateTex(Textures.skybox);
-            pushUBO.updateAtlasOffset(new Vector2i(0));
-            pushUBO.updateSize(new Vector2i(Textures.skybox.width));
-            Planet activePlanet = Main.player.getPlanet();
-            Quaternionf quaternion = new Quaternionf();
-            if (activePlanet != null) {
-                quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
-            }
-            drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE*10.f), new Vector4f(1));
         }
         modelOffset.set(0);
         pushUBO.updateTex(null); //use no texture
@@ -397,6 +388,16 @@ public class Renderer {
 //            pushUBO.updateAtlasOffset(new Vector2i((material*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(material/(Textures.materials.width/Materials.materialWidth))));
 //            region.drawSolids(stack);
 //        }
+//        updatePipeline(Pipelines.SKYBOX);
+//        pushUBO.updateTex(Textures.skybox);
+//        pushUBO.updateAtlasOffset(new Vector2i(0));
+//        pushUBO.updateSize(new Vector2i(Textures.skybox.width));
+//        Planet activePlanet = Main.player.getPlanet();
+//        Quaternionf quaternion = new Quaternionf();
+//        if (activePlanet != null) {
+//            quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
+//        }
+//        drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE*10.f), new Vector4f(1));
         updatePipeline(Pipelines.RASTER);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
@@ -434,7 +435,7 @@ public class Renderer {
     public static void drawDDA(MemoryStack stack) {
         pushUBO.update(new Matrix4f().setTranslation(((int)player.pos.x())+0.5f, ((int)player.pos.y())+0.5f, ((int)player.pos.z())+0.5f), new Vector4f(1));
         pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
-        pushUBO.updateTex2(Textures.fluid, Textures.fluidDepth, Textures.emissive);
+        pushUBO.updateTex2(Textures.fluid, Textures.fluidDepth, Textures.emissive, Textures.skybox);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, Textures.reflections);
         pushUBO.push();
         updateComputePipeline(Pipelines.DDA);
@@ -692,12 +693,12 @@ public class Renderer {
     public static void unbindImagesDrawingTo(MemoryStack stack, long[] images, long depthImage) {
         vkCmdEndRendering(currentCmdBuffer);
         for (long image : images) {
-            ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+            ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image, 1,
                     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                     VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                     VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
         }
-        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, depthImage,
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, depthImage, 1,
                 VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
@@ -739,12 +740,12 @@ public class Renderer {
     }
     public static void unbindComputeImages(MemoryStack stack, long[] images, long depthImage) {
         for (long image : images) {
-            ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+            ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image, 1,
                     VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                     VK_ACCESS_2_SHADER_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                     VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
         }
-        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, depthImage,
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, depthImage, 1,
                 VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ACCESS_2_SHADER_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
@@ -754,7 +755,7 @@ public class Renderer {
         for (int i = 0; i < textures.length; i++) {
             Texture tex = textures[i];
             int prevLayout = tex.isLayoutUnset() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image,
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, tex.image, 1,
                     prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                     prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_ACCESS_2_NONE : VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, clear ? VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT,
                     prevLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -771,7 +772,7 @@ public class Renderer {
     }
     public static void unbindPresentImage(MemoryStack stack) {
         vkCmdEndRendering(currentCmdBuffer);
-        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx],
+        ImageHelper.transitionImageLayout(stack, currentCmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, Swapchain.images[imageIdx], 1,
                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                 VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_2_NONE,
                 VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_NONE);
@@ -795,7 +796,7 @@ public class Renderer {
     }
 
     public static VkRenderingAttachmentInfo.Buffer getPresentColorAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout) {
-        ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image,
+        ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, image, 1,
                 prevLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
                 VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -810,12 +811,12 @@ public class Renderer {
     }
     public static VkRenderingAttachmentInfo getDepthAttachment(MemoryStack stack, VkCommandBuffer cmdBuffer, long image, long imageView, int prevLayout, boolean clear) {
         if (depthImage == image) {
-            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image, 1,
                     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
                     VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, clear ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
                     VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
         } else {
-            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image,
+            ImageHelper.transitionImageLayout(stack, cmdBuffer, VK_IMAGE_ASPECT_DEPTH_BIT, image, 1,
                     prevLayout, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
                     VK_ACCESS_2_NONE, clear ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
                     VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);

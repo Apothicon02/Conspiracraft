@@ -45,9 +45,9 @@ public class Swapchain {
     public static void createImageViews(MemoryStack stack) {
         imageViews = new long[images.length];
         for (int i = 0; i < images.length; i++) {
-            imageViews[i] = createImageView(stack, false, images[i], vkSurfFormat.format(), 4);
+            imageViews[i] = createImageView(stack, VK_IMAGE_VIEW_TYPE_2D, images[i], vkSurfFormat.format(), 4);
         }
-        depthImageView = createImageView(stack, false, depthImage, VK_FORMAT_D32_SFLOAT, 1);
+        depthImageView = createImageView(stack, VK_IMAGE_VIEW_TYPE_2D, depthImage, VK_FORMAT_D32_SFLOAT, 1);
     }
     public static void createSwapchain(MemoryStack stack) {
         VkSurfaceCapabilitiesKHR caps = VkSurfaceCapabilitiesKHR.malloc(stack);
@@ -133,7 +133,7 @@ public class Swapchain {
         Settings.width = eWidth;
         Settings.height = eHeight;
 
-        long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        long[] depthImageInfo = ImageHelper.createImage(stack, eWidth, eHeight, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 1);
         depthImage = depthImageInfo[0];
         depthImageMemory = depthImageInfo[1];
     }
