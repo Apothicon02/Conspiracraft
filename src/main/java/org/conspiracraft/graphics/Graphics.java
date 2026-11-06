@@ -57,6 +57,7 @@ public class Graphics {
     public static ShaderStorageBuffer lightChunkSSBO;
     public static ShaderStorageBuffer lightSSBO;
     public void createBuffers(MemoryStack stack) throws IOException {
+        BufferHelper.startCopyCmdBuffer(stack);
         int bufferSize = Vertex.SIZE*1000;//up to 1000 vertexes.
         vertexStagingBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
         indexStagingBuf = new Buffer(stack, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);

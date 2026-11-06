@@ -1,14 +1,17 @@
 package org.conspiracraft;
 
 import org.conspiracraft.audio.AudioController;
+import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.gui.Languages;
 import org.conspiracraft.player.Player;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.LightHelper;
+import org.conspiracraft.world.Region;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,12 +22,15 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import static org.conspiracraft.Settings.*;
-import static org.conspiracraft.world.World.wgPool;
+import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.World.fluidUpdateSet;
 
 public class Main {
     public static String mainFolder = System.getenv("APPDATA")+"/Conspiracraft/";
@@ -64,6 +70,23 @@ public class Main {
         player = new Player();
         player.create();
         World.load(World.worldType.getWorldPath() + "/");
+        ExecutorService meshPool = Executors.newFixedThreadPool(1);
+        meshPool.submit(() -> {
+            while (!isClosing) {
+                try (MemoryStack stack = MemoryStack.stackPush()){
+                    if (!fluidUpdateQueue.isEmpty()) {
+                        long cRP = fluidUpdateQueue.pollFirst();
+                        Region region = getRegion(cRP);
+                        if (region != null) {
+                            region.updateMesh(stack);
+                        }
+                        fluidUpdateSet.remove(cRP);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
         long prevTime = System.nanoTime();
         while (!isClosing) {
             long start = System.nanoTime();

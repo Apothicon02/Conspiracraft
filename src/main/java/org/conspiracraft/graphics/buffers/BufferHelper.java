@@ -44,8 +44,39 @@ public class BufferHelper {
         }
         return size;
     }
-
+    public static VkCommandBuffer copyCmdBuffer = null;
+    public static void startCopyCmdBuffer(MemoryStack stack) {
+        VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
+                .commandPool(CmdBuffer.cmdPool)
+                .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+                .commandBufferCount(1);
+        PointerBuffer copyCommandBuffersBuf = stack.mallocPointer(1);
+        if (vkAllocateCommandBuffers(vkDevice, allocInfo, copyCommandBuffersBuf) != VK_SUCCESS) {throw new RuntimeException("Failed to allocate command buffer!");}
+        copyCmdBuffer = new VkCommandBuffer(copyCommandBuffersBuf.get(0), vkDevice);
+        VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack)
+                .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
+                .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+        vkBeginCommandBuffer(copyCmdBuffer, beginInfo);
+    }
     public static void copyBuffer(MemoryStack stack, long src, long dst, long size) {
+        VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack)
+                .size(size);
+        vkCmdCopyBuffer(copyCmdBuffer, src, dst, copyRegion);
+    }
+    public static void endCopyCmdBuffer(MemoryStack stack) {
+        if (copyCmdBuffer != null) {
+            vkEndCommandBuffer(copyCmdBuffer);
+            VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
+                    .pCommandBuffers(stack.pointers(copyCmdBuffer));
+            vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
+            vkQueueWaitIdle(graphicsQueue);
+            vkFreeCommandBuffers(vkDevice, CmdBuffer.cmdPool, copyCmdBuffer);
+            copyCmdBuffer = null;
+        }
+    }
+    public static void copyBufferSlow(MemoryStack stack, long src, long dst, long size) {
         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
                 .commandPool(CmdBuffer.cmdPool)

@@ -234,24 +234,26 @@ public class Region {
     public Buffer blockVertexBuf;
     public Buffer blockIndexBuf;
     public int blockIndicesAmt = 0;
-    public boolean copiedMesh = false;
+    private final FloatArrayList fluidVerts = new FloatArrayList();
+    private final IntArrayList fluidIndices = new IntArrayList();
+    private final FloatArrayList verts = new FloatArrayList();
+    private final IntArrayList indices = new IntArrayList();
     public void updateMesh(MemoryStack stack) throws IOException {
         if (!neighborsGenerated) {
             return;
         }
         //long start = System.nanoTime();
-        int prevIndicesAmt = blockIndicesAmt;
-        int prevFluidIndicesAmt = fluidIndicesAmt;
-        FloatArrayList fluidVerts = new FloatArrayList();
-        IntArrayList fluidIndices = new IntArrayList();
-        FloatArrayList verts = new FloatArrayList();
-        IntArrayList indices = new IntArrayList();
+        int prevIndicesAmt = indices.size();
+        int prevFluidIndicesAmt = fluidIndices.size();
+        fluidVerts.clear();
+        fluidIndices.clear();
+        verts.clear();
+        indices.clear();
         for (Chunk chunk : chunks) {
             chunk.updateMesh(this, fluidVerts, fluidIndices, verts, indices);
         }
-        fluidIndicesAmt = fluidIndices.size();
-        if (fluidIndicesAmt > 0) {
-            if (prevFluidIndicesAmt <= 0 || fluidIndicesAmt > prevFluidIndicesAmt) {
+        if (!fluidIndices.isEmpty()) {
+            if (prevFluidIndicesAmt <= 0 || fluidIndices.size() > prevFluidIndicesAmt) {
                 fluidVertexStagingBuf = new Buffer(stack, fluidVerts.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
                 fluidIndexStagingBuf = new Buffer(stack, fluidIndices.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
                 fluidVertexBuf = new Buffer(stack, fluidVerts.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
@@ -259,10 +261,12 @@ public class Region {
             }
             memFloatBuffer(fluidVertexStagingBuf.pointer.get(0), fluidVerts.size()).put(fluidVerts.elements(), 0, fluidVerts.size());
             memIntBuffer(fluidIndexStagingBuf.pointer.get(0), fluidIndices.size()).put(fluidIndices.elements(), 0, fluidIndices.size());
+            if (fluidUploadSet.add(condensedRegionPos)) {
+                fluidUploadQueue.addLast(condensedRegionPos);
+            }
         }
-        blockIndicesAmt = indices.size();
-        if (blockIndicesAmt > 0) {
-            if (prevIndicesAmt <= 0 || blockIndicesAmt > prevIndicesAmt) {
+        if (!indices.isEmpty()) {
+            if (prevIndicesAmt <= 0 || indices.size() > prevIndicesAmt) {
                 blockVertexStagingBuf = new Buffer(stack, verts.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
                 blockIndexStagingBuf = new Buffer(stack, indices.size() * 4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
                 blockVertexBuf = new Buffer(stack, verts.size() * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
@@ -270,19 +274,23 @@ public class Region {
             }
             memFloatBuffer(blockVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
             memIntBuffer(blockIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
-        }
-        if (generated) {
-            copiedMesh = true;
-            if (fluidIndicesAmt > 0) {
-                BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], fluidVerts.size() * 4L);
-                BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], fluidIndices.size() * 4L);
-            }
-            if (blockIndicesAmt > 0) {
-                BufferHelper.copyBuffer(stack, blockVertexStagingBuf.buffer[0], blockVertexBuf.buffer[0], verts.size() * 4L);
-                BufferHelper.copyBuffer(stack, blockIndexStagingBuf.buffer[0], blockIndexBuf.buffer[0], indices.size() * 4L);
+            if (uploadSet.add(condensedRegionPos)) {
+                uploadQueue.addLast(condensedRegionPos);
             }
         }
         //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
+    }
+    public void uploadMesh(MemoryStack stack) {
+        if (!fluidIndices.isEmpty()) {
+            fluidIndicesAmt = fluidIndices.size();
+            BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], fluidVerts.size() * 4L);
+            BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], fluidIndices.size() * 4L);
+        }
+        if (!indices.isEmpty()) {
+            blockIndicesAmt = indices.size();
+            BufferHelper.copyBuffer(stack, blockVertexStagingBuf.buffer[0], blockVertexBuf.buffer[0], verts.size() * 4L);
+            BufferHelper.copyBuffer(stack, blockIndexStagingBuf.buffer[0], blockIndexBuf.buffer[0], indices.size() * 4L);
+        }
     }
     public void drawFluids(MemoryStack stack) {
         if (fluidIndicesAmt > 0 && generated) {

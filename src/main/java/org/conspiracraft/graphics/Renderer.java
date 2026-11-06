@@ -11,6 +11,7 @@ import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.Main;
+import org.conspiracraft.graphics.buffers.BufferHelper;
 import org.conspiracraft.graphics.buffers.ubos.PushUBO;
 import org.conspiracraft.graphics.models.Index;
 import org.conspiracraft.graphics.models.Models;
@@ -113,13 +114,13 @@ public class Renderer {
                         //updateSet.remove(chunkPos);
                     }
                     updateSet.clear();
-                    while (!fluidUpdateQueue.isEmpty()) {
-                        long cRP = fluidUpdateQueue.pollFirst();
+                    while (!fluidUploadQueue.isEmpty()) {
+                        long cRP = fluidUploadQueue.pollFirst();
                         Region region = getRegion(cRP);
-                        if (region != null) {region.updateMesh(stack);}
-                        //fluidUpdateSet.remove(cRP);
+                        if (region != null) {region.uploadMesh(stack);}
+                        //fluidUploadSet.remove(cRP);
                     }
-                    fluidUpdateSet.clear();
+                    fluidUploadSet.clear();
                     if (!wasEmpty) {
                         ssboBarriers(stack);
                         //System.out.println("SSBO uploads took " + String.format("%.2f", (System.nanoTime() - startTime)/1000000.d) + "ms");
@@ -652,6 +653,9 @@ public class Renderer {
 //        vkResetFences(vkDevice, cmdFences[frameIdx]);
         vkResetCommandBuffer(currentCmdBuffer, 0);
         CmdBufferHelper.recordCmdBuffer(stack, currentCmdBuffer);
+
+        BufferHelper.endCopyCmdBuffer(stack);
+        BufferHelper.startCopyCmdBuffer(stack);
         return true;
     }
     public static void submitCommandBuffers(MemoryStack stack) {

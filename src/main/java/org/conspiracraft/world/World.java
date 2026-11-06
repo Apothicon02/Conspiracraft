@@ -43,7 +43,7 @@ import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 public class World {
     public static final int seed = 67;
     public static final int seaLevel = 63;
-    public static final int size = 2048;
+    public static final int size = 8192;
     public static final long sizeL = size;
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
@@ -438,8 +438,12 @@ public class World {
             return chunk.getBlock(pos);
         }
     }
+    public static final ConcurrentLinkedDeque<Long> fluidUploadQueue = new ConcurrentLinkedDeque<>();
+    public static final Set<Long> fluidUploadSet = ConcurrentHashMap.newKeySet();
     public static final ConcurrentLinkedDeque<Long> fluidUpdateQueue = new ConcurrentLinkedDeque<>();
     public static final Set<Long> fluidUpdateSet = ConcurrentHashMap.newKeySet();
+    public static final ConcurrentLinkedDeque<Long> uploadQueue = new ConcurrentLinkedDeque<>();
+    public static final Set<Long> uploadSet = ConcurrentHashMap.newKeySet();
     public static final ConcurrentLinkedDeque<Long> updateQueue = new ConcurrentLinkedDeque<>();
     public static final Set<Long> updateSet = ConcurrentHashMap.newKeySet();
     public static void breakBlock(int x, int y, int z) {breakBlock(x, y, z, true);}
