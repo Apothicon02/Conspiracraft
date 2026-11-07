@@ -67,7 +67,7 @@ layout(set = 0, binding = 3, r32f) uniform image2D DepthImage2D[];
 const float PI = 3.14159265;
 const int GROUND_LEVEL = 500736;
 const int SEA_LEVEL = GROUND_LEVEL+95;
-const int size = 8192;
+const int size = 2048;
 const int height = 1024;
 const ivec3 sizeVec = ivec3(size, height, size);
 const int chunkSize = 16;

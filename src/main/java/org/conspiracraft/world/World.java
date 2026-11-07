@@ -41,7 +41,7 @@ import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 public class World {
     public static final int seed = 67;
     public static final int seaLevel = 63;
-    public static final int size = 8192;
+    public static final int size = 2048;
     public static final long sizeL = size;
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
