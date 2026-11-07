@@ -70,23 +70,6 @@ public class Main {
         player = new Player();
         player.create();
         World.load(World.worldType.getWorldPath() + "/");
-        ExecutorService meshPool = Executors.newFixedThreadPool(1);
-        meshPool.submit(() -> {
-            while (!isClosing) {
-                try (MemoryStack stack = MemoryStack.stackPush()){
-                    if (!fluidUpdateQueue.isEmpty()) {
-                        long cRP = fluidUpdateQueue.pollFirst();
-                        Region region = getRegion(cRP);
-                        if (region != null) {
-                            region.updateMesh(stack);
-                        }
-                        fluidUpdateSet.remove(cRP);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
         long prevTime = System.nanoTime();
         while (!isClosing) {
             long start = System.nanoTime();

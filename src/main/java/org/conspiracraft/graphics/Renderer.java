@@ -84,7 +84,7 @@ public class Renderer {
     public static long wgStart = -1;
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.create(1000000).push()) {
             boolean drawStuff = true;
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
@@ -434,7 +434,8 @@ public class Renderer {
     }
     public static final int swizzle = 16;
     public static void drawDDA(MemoryStack stack) {
-        pushUBO.update(new Matrix4f().setTranslation(((int)player.pos.x())+0.5f, ((int)player.pos.y())+0.5f, ((int)player.pos.z())+0.5f), new Vector4f(1));
+        Vector3d interpolatedPlayerPos = player.getCameraTranslationInterpolatedUnwrapped();
+        pushUBO.update(new Matrix4f().setTranslation(((int)interpolatedPlayerPos.x())+0.5f, ((int)interpolatedPlayerPos.y())+0.5f, ((int)interpolatedPlayerPos.z())+0.5f), new Vector4f(1));
         pushUBO.updateTex(Textures.depth3, Textures.colors2, Textures.depth2, Textures.norms2);
         pushUBO.updateTex2(Textures.fluid, Textures.fluidDepth, Textures.emissive, Textures.skybox);
         pushUBO.updateWriteTex(Textures.colors1, Textures.depth1, Textures.norms1, Textures.reflections);

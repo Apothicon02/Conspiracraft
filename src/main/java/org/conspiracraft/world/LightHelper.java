@@ -55,7 +55,6 @@ public class LightHelper {
     public static void iterateLightQueue() {
         int i = 0;
         while (!lightQueue.isEmpty()) {
-            //i++;
             Vector3i pos = lightQueue.pollFirst();
             int rX = pos.x()>>regionBits, rY = pos.y()>>regionBits, rZ = pos.z()>>regionBits;
             Region region = getRegion(packRegionPos(rX, rY, rZ));
@@ -68,7 +67,7 @@ public class LightHelper {
                 chunk.lightUpdateArr()[Chunk.packLocalPos(pos.x()&15, pos.y()&15, pos.z()&15)] = false;
             }
         }
-        while (!lightQueueWG.isEmpty()) {
+        while (!lightQueueWG.isEmpty() && i < 10000) {
             //if (i++ > 15000) {break;}
             Vector3i pos = lightQueueWG.pollFirst();
             if (pos == null) {continue;}
@@ -77,6 +76,7 @@ public class LightHelper {
             if (!region.neighborsGenerated) {
                 region.lightQueueSkipWG.add(pos);
             } else {
+                i++;
                 updateLight(lightQueueWG, pos, getBlock(pos), getLight(pos));
                 long cCP = World.packChunkPos(pos.x()>>chunkBits, pos.y()>>chunkBits, pos.z()>>chunkBits);
                 Chunk chunk = getChunkGlobalPos(cCP);
@@ -86,7 +86,7 @@ public class LightHelper {
         for (Chunk chunk : dirtyChunks) {
             chunk.lightUpdateArr = null;
             if (updateSet.add(chunk.cCP)) {
-                updateQueue.add(chunk.cCP);
+                updateQueue.addLast(chunk.cCP);
             }
         }
         dirtyChunks.clear();

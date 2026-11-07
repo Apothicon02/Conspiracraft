@@ -167,7 +167,7 @@ public class Region {
                 }
                 for (Chunk chunk : chunks) {
                     if (updateSet.add(chunk.cCP)) {
-                        updateQueue.add(chunk.cCP);
+                        updateQueue.addLast(chunk.cCP);
                     }
                 }
                 if (fluidUpdateSet.add(condensedRegionPos)) {
@@ -209,9 +209,9 @@ public class Region {
     public void unload() throws IOException {
         save(World.worldType.getWorldPath() + "/");
         for (Chunk chunk : chunks) {
-            vmaVirtualFree(Renderer.blocks.get(0), Renderer.chunkBlockAllocs.get(chunk.cCP));
-            vmaVirtualFree(Renderer.lights.get(0), Renderer.chunkLightBlockAllocs.get(chunk.cCP));
-            long wPackedChunkPos = ((((chunk.cX % sizeChunks) * sizeChunks) + (chunk.cZ % sizeChunks)) * heightChunks) + (chunk.cY % heightChunks);
+            long wPackedChunkPos = World.wrapChunkPos(chunk.cX, chunk.cY, chunk.cZ);
+            vmaVirtualFree(blocks.get(0), chunkBlockAllocs.get(wPackedChunkPos));
+            vmaVirtualFree(lights.get(0), chunkLightBlockAllocs.get(wPackedChunkPos));
             long chunkPtr = chunkSSBO.stagingBuffer.pointer.get(0);
             long chunkBufOffset = wPackedChunkPos * Renderer.chunkByteSize;
             MemoryUtil.memIntBuffer(chunkPtr + chunkBufOffset, 7);
@@ -274,9 +274,9 @@ public class Region {
             }
             memFloatBuffer(blockVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
             memIntBuffer(blockIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
-            if (uploadSet.add(condensedRegionPos)) {
-                uploadQueue.addLast(condensedRegionPos);
-            }
+//            if (uploadSet.add(condensedRegionPos)) {
+//                uploadQueue.addLast(condensedRegionPos);
+//            }
         }
         //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
     }

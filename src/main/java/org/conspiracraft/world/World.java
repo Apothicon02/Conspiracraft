@@ -22,6 +22,7 @@ import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
 import org.conspiracraft.world.types.WorldTypes;
 import org.joml.*;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.*;
 import java.lang.Math;
@@ -33,10 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static org.conspiracraft.world.LightHelper.maxSunlightLevel;
 
@@ -188,6 +186,25 @@ public class World {
     }
     public static boolean previouslyGenerated = false;
     public static void load(String path) throws IOException, InterruptedException {
+        ExecutorService meshPool = Executors.newFixedThreadPool(1);
+        meshPool.submit(() -> {
+            while (!Main.isClosing) {
+                try (MemoryStack stack = MemoryStack.stackPush()){
+                    if (!fluidUpdateQueue.isEmpty()) {
+                        long cRP = fluidUpdateQueue.pollFirst();
+                        Region region = getRegion(cRP);
+                        if (region != null) {
+                            region.updateMesh(stack);
+                        }
+                        fluidUpdateSet.remove(cRP);
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    //throw new RuntimeException(e);
+                }
+            }
+            meshPool.shutdownNow();
+        });
         long start = System.currentTimeMillis();
         if (previouslyGenerated) {
             //Arrays.fill(lods, 0L);
