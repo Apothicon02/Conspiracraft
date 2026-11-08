@@ -35,6 +35,7 @@ layout(push_constant) uniform PushUBO {
 layout(set = 0, binding = 2) uniform sampler2D Sampler2D[];
 layout(location = 0) in vec3 localPos;
 layout(location = 1) in vec3 pos;
+layout(location = 2) in vec3 scale;
 //layout(location = 2) pervertexEXT in vec3 vPos[];
 
 layout(location = 0) out vec4 outColor;
@@ -46,39 +47,49 @@ void main() {
     outNormal = vec4(absNorm.x > max(absNorm.y, absNorm.z) ? vec3(sign(normal.x), 0, 0) : (absNorm.y > absNorm.z ? vec3(0, sign(normal.y), 0) : vec3(0, 0, sign(normal.z))), 0);
     outColor = pushUbo.color;
     if (pushUbo.tex.x >= 0) {
+        ivec2 absSize = abs(pushUbo.size);
         vec3 localNorm = normalize(cross(dFdx(localPos), dFdy(localPos)));
         vec3 absLocalNorm = abs(localNorm);
         localNorm = absLocalNorm.x > max(absLocalNorm.y, absLocalNorm.z) ? vec3(sign(localNorm.x), 0, 0) : (absLocalNorm.y > absLocalNorm.z ? vec3(0, sign(localNorm.y), 0) : vec3(0, 0, sign(localNorm.z)));
         int sideOffset = 0;
         vec2 uv = vec2(0);
-        if (abs(localNorm.x) > max(abs(localNorm.y), abs(localNorm.z))) {
+        if (pushUbo.size.x < 0) {
+            if (absLocalNorm.x > absLocalNorm.y && absLocalNorm.x > absLocalNorm.z) {
+                uv = localPos.yz*(scale.yz*absSize);
+            } else if (absLocalNorm.y > absLocalNorm.z) {
+                uv = localPos.xz*(scale.xz*absSize);
+            } else {
+                uv = localPos.xy*(scale.xy*absSize);
+            }
+            uv = fract(uv);
+        } else if (absLocalNorm.x > max(absLocalNorm.y, absLocalNorm.z)) {
             uv = localPos.zy;
             if (localNorm.x > 0) {
                 uv.x = 1-abs(uv.x);
-                sideOffset = pushUbo.size.x*2;
+                sideOffset = absSize.x*2;
             } else {
-                sideOffset = pushUbo.size.x*4;
+                sideOffset = absSize.x*4;
             }
-        } else if (abs(localNorm.y) > max(abs(localNorm.x), abs(localNorm.z))) {
+        } else if (absLocalNorm.y > max(absLocalNorm.x, absLocalNorm.z)) {
             uv = localPos.xz;
             if (localNorm.y > 0) {
                 uv.x = 1-uv.x;
                 sideOffset = 0;
             } else {
-                sideOffset = pushUbo.size.x*5;
+                sideOffset = absSize.x*5;
             }
-        } else if (abs(localNorm.z) > max(abs(localNorm.x), abs(localNorm.y))) {
+        } else if (absLocalNorm.z > max(absLocalNorm.x, absLocalNorm.y)) {
             uv = localPos.xy;
             if (localNorm.z > 0) {
                 uv.x = 1-uv.x;
-                sideOffset = pushUbo.size.x;
+                sideOffset = absSize.x;
             } else {
-                sideOffset = pushUbo.size.x*3;
+                sideOffset = absSize.x*3;
             }
         }
         uv = abs(uv);
 
-        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*pushUbo.size.x), pushUbo.atlasOffset.y+(uv.y*pushUbo.size.y)+sideOffset);
+        ivec2 coords = ivec2(pushUbo.atlasOffset.x+(uv.x*absSize.x), pushUbo.atlasOffset.y+(uv.y*absSize.y)+sideOffset);
         outColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0)*outColor;
         if (outColor.a <= 0) {
             discard;

@@ -597,6 +597,12 @@ public class Renderer {
         Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize());
         Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, width), color);
     }
+    public static void drawLineFixedWidth(Vector3f og, Vector3f dest, Quaternionf rotation, float width, float thickness, Vector4f color) {
+        Vector3f dir = new Vector3f(dest).sub(og);
+        float length = dir.length();
+        Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), dir.normalize()).mul(rotation);
+        Renderer.drawCube(new Matrix4f().rotation(rot).setTranslation(og).translate(0, length*0.5f, 0).scale(width, length, thickness), color);
+    }
     public static void drawCube(Matrix4f modelMatrix, Vector4f color) {
         pushUBO.update(modelMatrix, color);
         pushUBO.push();

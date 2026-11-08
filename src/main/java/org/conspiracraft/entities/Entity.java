@@ -28,6 +28,7 @@ public class Entity {
     public Matrix4f matrix;
     public Vector3d pos;
     public Vector3d vel;
+    public Vector3f dir;
 
     public AABB aabb;
     public Entity(EntityType type, Vector3d pos, Matrix4f matrix, float scaleOffset) {
@@ -42,6 +43,7 @@ public class Entity {
         scale.div(2);
         aabb = new AABB(pos.x()-scale.x(), pos.x()+scale.x(), pos.y()-scale.y(), pos.y()+scale.y(), pos.z()-scale.z(), pos.z()+scale.z());
         vel = new Vector3d();
+        dir = new Vector3f();
     }
 
     public boolean playerCollidesWith() {return true;}
@@ -107,6 +109,9 @@ public class Entity {
     }
 
     public void draw() {
+        drawBase();
+    }
+    public void drawBase() {
         pushUBO.updateTex(Textures.entities);
         pushUBO.updateAtlasOffset(type.atlasOffset);
         pushUBO.updateSize(new Vector2i(EntityTypes.entityTexWidth));

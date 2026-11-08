@@ -40,8 +40,11 @@ public class FireballEntity extends Entity {
             sfxSource.setPos(new Vector3f(pos));
         }
         PhysicsHelper.move(aabb, vel);
-        Vector3f dir = new Vector3f(vel).normalize().negate();
-        matrix.identity().lookAlong(dir, up).invert().scale(scale);
+        if (vel.length() > 0.01f) {
+            dir.set(vel).normalize().negate();
+        }
+        Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
+        if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         ticksAlive++;
         if (ticksAlive >= 4) {

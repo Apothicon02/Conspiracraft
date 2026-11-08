@@ -27,5 +27,8 @@
 - F3 + C: Toggle creative mode
 
 # Credits 
-Sound effects are sourced from [ZapSplat](https://www.zapsplat.com/)
+Frog croak sound effect is from [Pixabay DRAGON-STUDIO](https://pixabay.com/sound-effects/nature-frog-croaking-sound-effect-322956/)
+
+Other sound effects are sourced from [ZapSplat](https://www.zapsplat.com/)
+
 Skybox texture is provided by https://www.cgtrader.com/designers/msgamedevelopment?utm_source=credit&utm_source=credit_item_page

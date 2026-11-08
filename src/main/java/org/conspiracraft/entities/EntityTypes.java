@@ -39,7 +39,9 @@ public class EntityTypes {
             CRACKED = create(new EntityType("misc/texture/cracked")),
             VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
             COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked")),
-            ROPE = create(new EntityType("misc/texture/rope"));
+            ROPE = create(new EntityType("misc/texture/rope")),
+            ZOMBIE = create(new EntityType("mob/texture/zombie")),
+            FROG = create(new EntityType("animal/texture/frog"));
 
     private static EntityType create(EntityType type) {
         entityTypeMap.put(entityTypeMap.size(), type);

@@ -2,6 +2,8 @@ package org.conspiracraft.player;
 
 import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
+import org.conspiracraft.entities.FrogEntity;
+import org.conspiracraft.entities.ZombieEntity;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
 import org.conspiracraft.Window;
@@ -105,7 +107,7 @@ public class InputHandler {
                             entitiesAddQueue.removeLast();
                         }
                     } else if (keyRelease(SDL_SCANCODE_V)) {
-                        AnimalEntity entity = new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
+                        FrogEntity entity = new FrogEntity(EntityTypes.FROG, //new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Vector3d(player.pos).add(0, player.eyeHeight, 0),
                                 new Matrix4f().rotateXYZ(r, r, 0),
                                 (float)(Math.random()*-0.1f));

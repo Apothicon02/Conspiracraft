@@ -4,6 +4,7 @@ import org.conspiracraft.Main;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -45,8 +46,11 @@ public class AnimalEntity extends Entity {
             vel.y -= modifiedGrav;
         }
         PhysicsHelper.moveWithStepping(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
-        Vector3f dir = new Vector3f(vel).normalize().negate();
-        matrix.identity().lookAlong(dir, up).invert().scale(scale);
+        if (vel.length() > 0.01f) {
+            dir.set(vel).normalize().negate();
+        }
+        Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
+        if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         return false;
     }

@@ -53,8 +53,8 @@ public class Particle extends Effect {
         Vector3f halfScale = new Vector3f(scale).div(2);
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         Vector3f dir = new Vector3f(vel).normalize().negate();
-        matrix.getScale(scale);
-        matrix.identity().lookAlong(dir, up).invert().scale(scale);
+        Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
+        if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         return false;
     }
 }

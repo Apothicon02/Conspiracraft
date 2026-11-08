@@ -43,4 +43,8 @@ public class Sounds {
     public static SFX FIREBALL_QUICK = AudioController.loadSound("generic/sound/fireball_quick.wav");
     public static SFX ASH = AudioController.loadSound("generic/sound/ash.wav");
     public static SFX HOOK = AudioController.loadSound("generic/sound/hook.wav");
+    public static SFX FROG_CROAK1 = AudioController.loadSound("generic/sound/frog_croak1.wav");
+    public static SFX FROG_CROAK2 = AudioController.loadSound("generic/sound/frog_croak2.wav");
+    public static SFX FROG_CROAK3 = AudioController.loadSound("generic/sound/frog_croak3.wav");
+    public static SFX FROG_CROAK4 = AudioController.loadSound("generic/sound/frog_croak4.wav");
 }
