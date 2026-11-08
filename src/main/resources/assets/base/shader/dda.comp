@@ -887,7 +887,7 @@ void main() {
                 vec4 light = getLight(int(rayPos.x), int(rayPos.y), int(rayPos.z));
                 float dist = min(1.f, distance(ogPos, rayPos)/(0.5f*min(1024, renderDistance)));
                 if (underwater) {dist = max(0.5f, dist);}
-                float bigness = 1-min(0.97f, pow(distance(ogPos, rayPos)*0.02f, 4));
+                float bigness = 1-min(0.97f, pow(distance(ogPos, rayPos)*(underwater ? 0.02f : 0.003f), 4));
                 vec3 globalRayPos = globalRayStart + ogDir * (lightNoise*baseDist);
                 vec2 causticPos = (globalRayPos.xz-rayDir.xz*(mod(globalRayPos.y, height)/rayDir.y));
                 vec4 lightshaftNoise = mix(getCausticInv(true, causticPos/10)+0.5f, underwater ? (getCaustic(true, causticPos)+0.5f)*vec4(1, 1, 1, 0.9f) : vec4(0), bigness);
@@ -940,9 +940,9 @@ void main() {
                 vec3 absNorm = abs(tiltedNormal);
                 vec3 causticPos = (floor((primaryTint.a < 1 ? primaryTintLightPos : (fluidInfront ? fluidPos : primaryLightPos))*blockSize)+0.5f)/blockSizeF;
                 vec3 causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz).xzy :
-                    absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy).xyz : getCaustic(true, causticPos.yz).zyx).xyz;
+                absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy).xyz : getCaustic(true, causticPos.yz).zyx).xyz;
                 tiltedNormal = normalize(tiltedNormal+(roughness*causticness));//(absNorm.y > max(absNorm.x, absNorm.z) ? vec3(causticness.x, 0, causticness.z) :
-                    //(absNorm.z > max(absNorm.x, absNorm.y) ? vec3(causticness.x, causticness.y, 0) : vec3(0, causticness.y, causticness.z)))));
+                //(absNorm.z > max(absNorm.x, absNorm.y) ? vec3(causticness.x, causticness.y, 0) : vec3(0, causticness.y, causticness.z)))));
                 //vec3 bentNormal = mix(fluidInfront ? fluid.xyz : primaryNormal, tiltedNormal, roughness * 2);
                 bool inBounds = distance(camPos, primaryLightPos.xyz) < size*2;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
                 if (inBounds) {
@@ -976,9 +976,9 @@ void main() {
                         shadowColor = dda(true);
                     }
                     if (shadowColor.a > 0.0f) {
-//                        vec3 maxedSun = globalUbo.sun;
-//                        maxedSun.y = max(0, maxedSun.y);
-//                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
+                        //                        vec3 maxedSun = globalUbo.sun;
+                        //                        maxedSun.y = max(0, maxedSun.y);
+                        //                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
                         shadowFactor = !celestialSource ? 0.02f : mix(0.5f, 0.875f, 1-max(0, normDot));
                     }
                 }
@@ -1086,7 +1086,7 @@ void main() {
             vec3 absNorm = abs(fluid.xyz);
             vec3 causticPos = (floor(fluidPos*blockSize)+0.5f)/blockSizeF;
             float causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz) :
-                (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) : getCaustic(true, causticPos.yz))).w;
+            (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) : getCaustic(true, causticPos.yz))).w;
             causticness += 1;
             causticness *= 0.15f;
             color.rgb = mix(color.rgb, vec3(max(fluidColor.r, max(fluidColor.g, fluidColor.b))), max(vec3(0), causticness-surfDist));
