@@ -11,6 +11,7 @@ import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.gui.menus.HealthMenu;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.AABB;
@@ -89,10 +90,14 @@ public class Player {
     }
 
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
+    public static HealthMenu healthMenu;
 
     public void create() throws IOException {
         inputHandler.init();
         inv.init();
+        healthMenu = new HealthMenu();
+        healthMenu.setName("Health").hideName().setParent(inv.menu).aboveParent().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
+        GUI.menus.add(healthMenu);
 
         if (Files.exists(plrPath)) {
             int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));
@@ -421,8 +426,8 @@ public class Player {
             playerAABB.move(totalVel.x()*10, totalVel.y()*10, totalVel.z()*10);
             totalVel.set(0);
         } else if (sprinting && !flying) {
-            //PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
-            PhysicsHelper.move(playerAABB, totalVel, aabbs);
+            PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 1.f);
+            //PhysicsHelper.move(playerAABB, totalVel, aabbs);
         } else if (onSolid) {
             //PhysicsHelper.moveWithStepping(playerAABB, totalVel, aabbs, 0.5f);
             PhysicsHelper.move(playerAABB, totalVel, aabbs);

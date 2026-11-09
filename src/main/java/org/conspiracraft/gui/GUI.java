@@ -53,13 +53,13 @@ public class GUI {
     public static float guiScaleMul = 4f; //even-though it's a float, should always be set to a round number to prevent distortion of pixel-art
     public static float aspectRatio = 0f;
 
-    public static int hotbarSizeX = 282;
-    public static int hotbarSizeY = 22;
+    public static final int hotbarSizeX = 282;
+    public static final int hotbarSizeY = 22;
     public static float hotbarPosX = 0.f;
     public static float hotbarPosY = 0.f;
-    public static int slotSize = 20;
-    public static int slotSizeY = 22;
-    public static int enlargedSlotSize = 22;
+    public static final int slotSize = 20;
+    public static final int slotSizeY = 22;
+    public static final int enlargedSlotSize = 22;
     public static float containerPosY = 0;
     public static void update() {
         aspectRatio = (float) width / height;

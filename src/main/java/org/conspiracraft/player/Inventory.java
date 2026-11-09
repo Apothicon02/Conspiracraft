@@ -2,6 +2,9 @@ package org.conspiracraft.player;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.gui.*;
+import org.conspiracraft.gui.menus.CreativeMenu;
+import org.conspiracraft.gui.menus.HealthMenu;
+import org.conspiracraft.gui.menus.InvMenu;
 import org.conspiracraft.items.*;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
@@ -14,7 +17,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
 
 public class Inventory {
     public Item cursorItem = null;
@@ -40,7 +42,7 @@ public class Inventory {
         creativeMenu.setName("Creative").setPos(0.5f, 0.65f);
         //containerMenu = new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f);
         menu = new InvMenu();
-        menu.setName("Inventory").setPos(0.5f, 0.0075f).setCentered(true, false).disableBackground();
+        menu.setName("Inventory").hideName().setPos(0.5f, 0.0075f).setCentered(true, false).disableBackground();
         GUI.menus.add(menu);
     }
 

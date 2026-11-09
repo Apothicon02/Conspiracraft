@@ -37,12 +37,22 @@ public class Menu {
     public int scroll = 0, maxScroll = 0;
     public Item[] items = null;
     public boolean backround = true;
+    public boolean hideSlots = false;
+    public boolean hideName = false;
+    public Menu parent = null;
+    public boolean aboveParent = false;
+    public boolean rightOfParent = false;
     public Menu() {}
 
     public Menu setName(String name) {this.name = name; return this;}
+    public Menu setParent(Menu menu) {this.parent = menu; return this;}
     public Menu setPos(float posX, float posY) {menuPosRaw.set(posX, posY); return this;}
     public Menu setCentered(boolean centeredMenuX, boolean centeredMenuY) {this.centeredMenuX = centeredMenuX; this.centeredMenuY = centeredMenuY; return this;}
     public Menu disableBackground() {this.backround = false; return this;}
+    public Menu hideSlots() {this.hideSlots = true; return this;}
+    public Menu hideName() {this.hideName = true; return this;}
+    public Menu aboveParent() {this.aboveParent = true; return this;}
+    public Menu rightOfParent() {this.rightOfParent = true; return this;}
 
     public void menuColor(Vector4f col) {col.set(1, 0.95f, 0.875f, 1);}
 
@@ -50,7 +60,27 @@ public class Menu {
     public Vector2i getPos() {return new Vector2i(menuPos);}
     public void update() {
         menuSize.set(menuSizeRaw);//.div(guiScale).mul(1, aspectRatio);
-        menuPos.set((int)(menuPosRaw.x()*width), (int)(menuPosRaw.y()*height));
+        float x = menuPosRaw.x(), y = menuPosRaw.y();
+        if (parent != null) {
+            x/=guiScale;
+            x+=parent.menuPosRaw.x();
+            if (parent.centeredMenuX) {
+                x-=(parent.menuSizeRaw.x()*0.5f)/guiScale;
+            }
+            if (parent.centeredMenuY) {
+                y-=(parent.menuSizeRaw.y()*0.5f)/guiScale;
+            }
+            y/=guiScale;
+            y*=aspectRatio;
+            y+=parent.menuPosRaw.y();
+            if (rightOfParent) {
+                x+=parent.menuSize.x()/guiScale;
+            }
+            if (aboveParent) {
+                y+=(parent.menuSize.y()/guiScale)*aspectRatio;
+            }
+        }
+        menuPos.set((int)(x*width), (int)(y*height));
         if (centeredMenuX) {menuPos.sub((int)(width*((menuSize.x()*0.5f)/guiScale)), 0);}
         if (centeredMenuY) {menuPos.sub(0, (int)(height*(((menuSize.y()*0.5f)/guiScale)*aspectRatio)));}
         for (GUIElement element : elements) {element.update(this);}
@@ -196,7 +226,7 @@ public class Menu {
         drawBase();
     }
     public void drawBase() {
-        if (inventoryOpen) {
+        if (inventoryOpen && !hideName) {
             color.set(1);
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(0);
@@ -235,8 +265,10 @@ public class Menu {
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(1); //inventory
             pushUBO.updateAtlasOffset(new Vector2i(backround ? 0 : slotSize, 0));
-            menuColor(color);
-            drawQuad(slot.posRaw.x(), slot.posRaw.y(), slotSize, slotSize, 1);
+            if (!hideSlots) {
+                menuColor(color);
+                drawQuad(slot.posRaw.x(), slot.posRaw.y(), slotSize, slotSize, 1);
+            }
             color.set(1);
             if (items != null && slot.id < items.length) {
                 drawItem(getItem(slot.id), slot.posRaw.x() + 2, slot.posRaw.y()+2);

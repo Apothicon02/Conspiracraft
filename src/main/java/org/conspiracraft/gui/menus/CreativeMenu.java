@@ -1,5 +1,8 @@
-package org.conspiracraft.gui;
+package org.conspiracraft.gui.menus;
 
+import org.conspiracraft.gui.GUI;
+import org.conspiracraft.gui.Menu;
+import org.conspiracraft.gui.Slot;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
