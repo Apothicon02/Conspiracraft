@@ -42,7 +42,8 @@ vec3 hash(vec3 vec) {
     return fract(sin(p)*43758.5453123);
 }
 vec3 noise(ivec2 coords) {
-    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], ivec2(coords.x&63, coords.y&63), 0).rgb;
+    vec2 offset = globalUbo.proj[2].xy*globalUbo.res*19;
+    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], ivec2(int(coords.x+offset.x)&63, int(coords.y+offset.y)&63), 0).rgb;
 }
 const float PI = 3.141592653589793f;
 vec3 randomVec(ivec2 coords) {
@@ -63,8 +64,8 @@ vec3 reconstructViewPos(vec2 uvPos, float depth) {
     return view.xyz/view.w;
 }
 vec4 normal = vec4(0);
-float getAO(float depth) {
-    if (depth >= 1.f) {return 1.f;}
+vec4 getAO(vec3 color, float depth) {
+    if (depth >= 1.f) {return vec4(color.rgb, 1.f);}
     float radius = AO_RADIUS*max(0.0625f, sqrt(noise(ivec2(gl_FragCoord.xy)).r));//mix(AO_RADIUS, AO_RADIUS*10, normal.a*2);
     vec3 normalVS = normalize((globalUbo.view * vec4(normal.xyz, 0.f)).xyz);
     vec3 posVS = reconstructViewPos(uv, depth);
@@ -76,8 +77,8 @@ float getAO(float depth) {
     mat3 TBN = mat3(tangent, bitangent, normalVS);
     float occlusion = 0.f;
     for (int i = 0; i < KERNEL_SIZE; i++) {
-        vec3 sampleVec = TBN*SSAO_KERNEL[i];//randomVec(ivec2(gl_FragCoord.x+(i*2), gl_FragCoord.y+i));
-        sampleVec = posVS + sampleVec * radius;
+        vec3 sampleVecOg = TBN*SSAO_KERNEL[i];//randomVec(ivec2(gl_FragCoord.x+(i*2), gl_FragCoord.y+i));
+        vec3 sampleVec = posVS + sampleVecOg * radius;
         vec4 offset = globalUbo.proj * vec4(sampleVec, 1.0);
         offset.xyz /= offset.w;
         vec2 sampleUV = (offset.xy*0.5)+0.5;
@@ -88,9 +89,23 @@ float getAO(float depth) {
                 occlusion += rangeCheck;
             }
         }
+
+//        sampleVec = posVS + sampleVecOg * radius * 10;
+//        offset = globalUbo.proj * vec4(sampleVec, 1.0);
+//        offset.xyz /= offset.w;
+//        sampleUV = (offset.xy*0.5)+0.5;
+//        if (!(sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)) {
+//            vec3 sampleVS = reconstructViewPos(sampleUV, texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], ivec2(sampleUV*globalUbo.res), 0).r);
+//            float rangeCheck = smoothstep(0, 1, (radius*10)/(length(posVS-sampleVS)+0.001f));
+//            if (sampleVS.z+bias < sampleVec.z) {
+//                vec3 sampleColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], ivec2(sampleUV * globalUbo.res), 0).rgb;
+//                color.rgb = mix(color.rgb, color.rgb*sampleColor, sqrt(rangeCheck) * pow(max(sampleColor.r, max(sampleColor.g, sampleColor.b)), 2) * 0.5f);
+//            }
+//        }
     }
     occlusion = 1.0 - occlusion / KERNEL_SIZE;
-    return pow(clamp(occlusion, 0.f, 1), 3);//mix(5.f, 2.25f, radius));
+    occlusion = pow(clamp(occlusion, 0.f, 1), 3);
+    return vec4(color.rgb, occlusion);//mix(5.f, 2.25f, radius));
 }
 vec4 reflection = vec4(0);
 bool sampleReflection(bool forced, int x, int y) {
@@ -156,5 +171,5 @@ void main() {
 //    outColor.a = 1;
     //outColor = vec4(vec3(getAO(depth, normal.xyz)), 1);
     float antiAO = normal.a;
-    outColor = antiAO > 0.95f ? vec4(color.rgb, 1) : vec4(color.rgb, mix(getAO(depth), 1, antiAO));
+    outColor = antiAO > 0.95f ? vec4(color.rgb, 1) : mix(getAO(color.rgb, depth), vec4(color.rgb, 1), antiAO);
 }
