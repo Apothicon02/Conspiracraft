@@ -7,27 +7,17 @@ import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.player.HandManager;
 import org.conspiracraft.world.World;
-import org.joml.Vector2i;
 
-import static org.conspiracraft.Main.player;
 import static org.conspiracraft.player.HandManager.lmbDown;
 
-public class ToolItemType extends ItemType {
+public class ToolItemType extends DurableItemType {
     public int strength;
-    public int maxDurability;
     public BlockTag[] uses;
     public ToolItemType(String name, int strength, int maxDurability, BlockTag[] uses) {
-        super(name);
+        super(name, maxDurability);
         this.strength = strength;
-        this.maxDurability = maxDurability;
         this.uses = uses;
     }
-    @Override
-    public Item createItem() {
-        return new DurableItem().durability(maxDurability).type(this);
-    }
-    @Override
-    public int maxDurability() {return maxDurability;}
     @Override
     public ItemUseResult use(DDAResult dda, Item item) {
         if (lmbDown && item instanceof DurableItem durableItem) {

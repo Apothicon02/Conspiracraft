@@ -34,6 +34,7 @@ public class Item implements Cloneable {
         return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeSpawned};
     }
 
+    public ItemType type() {return type;}
     public void drawHeld(Matrix4f handMatrix) {
     }
     public void drawHeldView(Matrix4f handMatrix) {

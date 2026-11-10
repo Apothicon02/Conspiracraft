@@ -39,6 +39,7 @@ public class ZombieEntity extends Entity {
             }
             double playerDist = Main.player.pos.distance(pos);
             if (playerDist < 1.05f) {
+                Main.player.hurt(150);
                 Main.player.vel.add(new Vector3d(Main.player.pos).sub(pos).normalize());
             } else if (playerDist < 20) {
                 vel.add(new Vector3d(Main.player.pos).sub(pos).normalize().mul(0.1f, 0.f, 0.1f));

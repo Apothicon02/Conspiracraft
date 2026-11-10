@@ -1,5 +1,6 @@
 package org.conspiracraft.items;
 
+import org.conspiracraft.items.types.DurableItemType;
 import org.conspiracraft.items.types.ItemTypes;
 import org.joml.Vector3f;
 
@@ -17,6 +18,9 @@ public class DurableItem extends Item implements Cloneable {
     public int[] getData() {
         return new int[]{dataLength, ItemTypes.getId(type), (int)(pos.x()*1000), (int)(pos.y()*1000), (int)(pos.z()*1000), (int)(rot*1000), (int)(hover*1000), hoverMeridiem ? 1 : 0, amount, timeSpawned, durability};
     }
+
+    @Override
+    public DurableItemType type() {return (DurableItemType) type;}
 
     public DurableItem durability(int durability) {
         this.durability = durability;

@@ -5,13 +5,12 @@ import org.conspiracraft.audio.BlockSFX;
 import org.conspiracraft.audio.Sounds;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
-import org.conspiracraft.effects.AmbientParticle;
-import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.menus.HealthMenu;
+import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.AABB;
@@ -24,7 +23,6 @@ import org.conspiracraft.gui.GUI;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.Directions;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
@@ -36,15 +34,12 @@ import java.lang.Math;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.graphics.Renderer.*;
 import static org.conspiracraft.physics.PhysicsHelper.getAnyEntityPlayerCollidesWith;
 import static org.conspiracraft.world.World.*;
-import static org.conspiracraft.world.World.size;
 import static org.lwjgl.sdl.SDLScancode.*;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 
@@ -119,6 +114,7 @@ public class Player {
         if (Files.exists(Inventory.invPath)) {
             Main.player.inv.load();
         }
+        hurtSource = new Source(new Vector3f(pos), 0.5f, 1.f, 0, 0);
         speedWindSource = new Source(new Vector3f(0), 0.f, 1.f, 0.f, 1);
         speedWindSource.play(Sounds.WIND);
     }
@@ -452,6 +448,8 @@ public class Player {
         dynamicSpeed = Math.clamp((movement.length() - 0.1f) * 4, 0, 1);
 
         speedWindSource.setGain(Utils.mix((float)Math.max(0.f, (vel.length()*0.15f)-0.15f), speedWindSource.baseGain, 0.9f));
+        hurtSource.setPos(new Vector3f(pos));
+        hurtSource.setVel(new Vector3f(vel).add(new Vector3f(movement)));
     }
 
     public void stepFx() {
@@ -506,6 +504,23 @@ public class Player {
         cam.positiveZ(forward).negate();
         cam.positiveY(up);
         AudioController.setListenerData(new Vector3f((float) pos.x(), (float) (pos.y() + eyeHeight), (float) pos.z()), new Vector3f(vel), new float[]{forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z()});
+    }
+
+    public long lastTickHurt = 0;
+    public Source hurtSource = null;
+    public void hurt(int dmg) {
+        if (currentTick-lastTickHurt < 10) {return;}
+        lastTickHurt = currentTick;
+        hurtSource.play(Sounds.HURT, true);
+        for (int i = healthMenu.slotAmt-1; i >= 0; i--) {
+            DurableItem item = (DurableItem) healthMenu.getItem(i);
+            int prevDurability = item.durability;
+            item = item.damage(dmg);
+            int newDurability = 0;
+            if (item == null) {healthMenu.setItem(i, null);} else {newDurability = item.durability;}
+            dmg -= Math.max(0, prevDurability-newDurability);
+            if (dmg <= 0) {break;}
+        }
     }
 
     public Planet getPlanet() {

@@ -107,7 +107,7 @@ public class InputHandler {
                             entitiesAddQueue.removeLast();
                         }
                     } else if (keyRelease(SDL_SCANCODE_V)) {
-                        FrogEntity entity = new FrogEntity(EntityTypes.FROG, //new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
+                        ZombieEntity entity = new ZombieEntity(EntityTypes.ZOMBIE, //new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Vector3d(player.pos).add(0, player.eyeHeight, 0),
                                 new Matrix4f().rotateXYZ(r, r, 0),
                                 (float)(Math.random()*-0.1f));

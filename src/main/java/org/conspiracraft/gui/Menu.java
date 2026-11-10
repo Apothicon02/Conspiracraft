@@ -416,7 +416,7 @@ public class Menu {
             pushUBO.updateTex(Textures.items);
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
             drawQuad(x, y, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
-            if (item instanceof DurableItem durableItem && durableItem.durability < item.type.maxDurability()) {
+            if (item instanceof DurableItem durableItem && durableItem.durability < item.type.maxDurability() && !durableItem.type().hideDurability) {
                 pushUBO.updateTex(null); //use no texture
                 float durabilityPercent = (float) durableItem.durability / item.type.maxDurability();
                 color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);

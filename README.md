@@ -27,8 +27,12 @@
 - F3 + C: Toggle creative mode
 
 # Credits 
-Frog croak sound effect is from [Pixabay DRAGON-STUDIO](https://pixabay.com/sound-effects/nature-frog-croaking-sound-effect-322956/)
+Frog croak sounds: [Pixabay DRAGON-STUDIO](https://pixabay.com/sound-effects/nature-frog-croaking-sound-effect-322956/) License: https://pixabay.com/service/license-summary/
 
-Other sound effects are sourced from [ZapSplat](https://www.zapsplat.com/)
+Hurt sound: [Freesound thecheeseman](https://freesound.org/s/44429/) License: Attribution 4.0
 
-Skybox texture is provided by https://www.cgtrader.com/designers/msgamedevelopment?utm_source=credit&utm_source=credit_item_page
+Button sound: [Freesound junggle](https://freesound.org/s/29301/) License: Attribution 4.0
+
+Other sounds: [ZapSplat](https://www.zapsplat.com/) License: https://www.zapsplat.com/license-type/standard-license/
+
+Skybox texture: [cgtrader msgamedevelopment](https://www.cgtrader.com/designers/msgamedevelopment?utm_source=credit&utm_source=credit_item_page) License: https://www.cgtrader.com/pages/terms-and-conditions#royalty-free-license

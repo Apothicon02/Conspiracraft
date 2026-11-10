@@ -52,7 +52,7 @@ public class AudioController {
 //        }
         AudioController.setListenerData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new float[6]);
         hoverSource = new Source(new Vector3f(), 0.15f, 1.6f, 1.f, 0);
-        buttonSource = new Source(new Vector3f(), 0.3f, 1.1f, 1.f, 0);
+        buttonSource = new Source(new Vector3f(), 0.9f, 1.0f, 1.f, 0);
         sliderSource = new Source(new Vector3f(), 1.f, 1.1f, 1.f, 1);
         //System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-audioInitStarted)/1000.f)+"s to init openAL.\n");
     }
@@ -61,7 +61,7 @@ public class AudioController {
         hoverSource.play(Math.random() > 0.5f ? Sounds.ROCK_PLACE1 : Sounds.ROCK_PLACE2, true);
     }
     public static void playButtonSound() {
-        buttonSource.play(Math.random() > 0.5f ? Sounds.ROCK_PLACE1 : Sounds.ROCK_PLACE2, true);
+        buttonSource.play(Sounds.BUTTON, true);
     }
     public static boolean playedSliderSound = false;
     public static float prevX = 0;
