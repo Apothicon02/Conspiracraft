@@ -10,6 +10,7 @@ import org.conspiracraft.entities.EntityTags;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.menus.HealthMenu;
+import org.conspiracraft.gui.menus.ManaMenu;
 import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.HeartItem;
 import org.conspiracraft.items.Item;
@@ -88,6 +89,7 @@ public class Player {
 
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
     public static HealthMenu healthMenu;
+    public static ManaMenu manaMenu;
 
     public void create() throws IOException {
         inputHandler.init();
@@ -95,6 +97,9 @@ public class Player {
         healthMenu = new HealthMenu();
         healthMenu.setName("Health").hideName().setParent(inv.menu).aboveParent().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
         GUI.menus.add(healthMenu);
+        manaMenu = new ManaMenu();
+        manaMenu.setName("Mana").hideName().setParent(inv.menu).aboveParent().rightOfParent().insetX().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
+        GUI.menus.add(manaMenu);
 
         if (Files.exists(plrPath)) {
             int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));

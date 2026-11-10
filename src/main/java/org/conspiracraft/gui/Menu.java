@@ -42,6 +42,8 @@ public class Menu {
     public Menu parent = null;
     public boolean aboveParent = false;
     public boolean rightOfParent = false;
+    public boolean insetY = false;
+    public boolean insetX = false;
     public Menu() {}
 
     public Menu setName(String name) {this.name = name; return this;}
@@ -53,6 +55,8 @@ public class Menu {
     public Menu hideName() {this.hideName = true; return this;}
     public Menu aboveParent() {this.aboveParent = true; return this;}
     public Menu rightOfParent() {this.rightOfParent = true; return this;}
+    public Menu insetY() {this.insetY = true; return this;}
+    public Menu insetX() {this.insetX = true; return this;}
 
     public void menuColor(Vector4f col) {col.set(1, 0.95f, 0.875f, 1);}
 
@@ -75,9 +79,15 @@ public class Menu {
             y+=parent.menuPosRaw.y();
             if (rightOfParent) {
                 x+=parent.menuSize.x()/guiScale;
+                if (insetX) {
+                    x-=menuSize.x()/guiScale;
+                }
             }
             if (aboveParent) {
                 y+=(parent.menuSize.y()/guiScale)*aspectRatio;
+                if (insetY) {
+                    y-=menuSize.y()/guiScale;
+                }
             }
         }
         menuPos.set((int)(x*width), (int)(y*height));

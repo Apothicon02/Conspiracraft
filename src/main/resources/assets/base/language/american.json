@@ -6,6 +6,9 @@
     "item/food/texture/orange": "Orange",
 
     "item/magic/texture/heart": "Heart",
+    "item/magic/texture/heart_half": "Half Heart",
+    "item/magic/texture/heart_broken": "Broken Heart",
+    "item/magic/texture/skull": "Skull",
     "item/magic/texture/fireball": "Fireball",
     "item/magic/texture/fracture": "Fracture",
     "item/magic/texture/lightning": "Lightning",

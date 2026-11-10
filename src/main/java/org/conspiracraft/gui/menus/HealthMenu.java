@@ -7,7 +7,7 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.joml.Vector2i;
 
 public class HealthMenu extends Menu {
-    public static final int menuSlotSize = 16;
+    public static final int menuSlotSize = 13;
     public int slotAmt = 10;
     public HealthMenu() {
         this.menuSizeRaw = new Vector2i(menuSlotSize*slotAmt, menuSlotSize);
