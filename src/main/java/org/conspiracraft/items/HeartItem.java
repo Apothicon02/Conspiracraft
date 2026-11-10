@@ -7,8 +7,8 @@ public class HeartItem extends DurableItem implements Cloneable {
     @Override
     public HeartItemType type() {return (HeartItemType) type;}
     @Override
-    public HeartItem damage(int damage) {
-        this.durability = Math.max(0, this.durability-damage);
+    public HeartItem durability(int durability) {
+        this.durability = durability;
         if (this.durability <= 0) {
             this.type(ItemTypes.HEART_BROKEN);
         } else if (this.durability <= 50) {

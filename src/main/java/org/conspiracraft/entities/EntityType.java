@@ -3,12 +3,11 @@ package org.conspiracraft.entities;
 import org.joml.Vector2i;
 
 public class EntityType {
+    public final int id;
     public String name;
     public Vector2i atlasOffset = null;
     public float size = 1.f;
-    public EntityType(String name) {
-        this.name = name;
-    }
+    public EntityType(String name) {this.id = EntityTypes.entityTypeMap.size(); this.name = name;}
     public EntityType atlasOffset(int x, int y) {
         atlasOffset = new Vector2i(x, y);
         return this;

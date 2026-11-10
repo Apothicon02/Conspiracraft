@@ -51,6 +51,7 @@ public class ItemTypes {
             HEART = create(new HeartItemType("magic/texture/heart", 100).hideDurability().maxStackSize(1)),
             HEART_HALF = create(new HeartItemType("magic/texture/heart_half", 100).hideDurability().maxStackSize(1)),
             HEART_BROKEN = create(new HeartItemType("magic/texture/heart_broken", 100).hideDurability().maxStackSize(1)),
+            SKULL = create(new ItemType("magic/texture/skull").immovable().maxStackSize(1)),
             APPLE = create(new ItemType("food/texture/apple").maxStackSize(1).blockToPlace(1, 15)),
             ORANGE = create(new ItemType("food/texture/orange").maxStackSize(1)),
             CHERRY = create(new ItemType("food/texture/cherry").maxStackSize(1)),

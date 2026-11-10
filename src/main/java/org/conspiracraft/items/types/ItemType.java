@@ -26,6 +26,7 @@ public class ItemType {
     public Vector2i atlasOffset = null;
     public int blockToPlace = 0;
     public ItemSFX sound = new ItemSFX(new SFX[]{Sounds.CLOUD}, 0.2f, 1);
+    public boolean immovable = false;
 
     public ItemType(String name) {
         this.name = name;
@@ -38,6 +39,7 @@ public class ItemType {
         maxStackSize = size;
         return this;
     }
+    public ItemType immovable() {this.immovable = true; return this;}
     public ItemType useSpeed(float speed) {
         useSpeed = speed;
         return this;

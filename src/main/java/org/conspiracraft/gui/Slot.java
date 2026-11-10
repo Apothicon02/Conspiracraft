@@ -3,7 +3,6 @@ package org.conspiracraft.gui;
 import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.items.Item;
-import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
 
 import java.util.ArrayList;
@@ -25,10 +24,14 @@ public class Slot extends GUIElement {
         if (GUI.cursorPos.x() > globalPos.x() && GUI.cursorPos.y() > globalPos.y() && GUI.cursorPos.x() < globalPos.x()+size.x() && GUI.cursorPos.y() < globalPos.y()+size.y()) {
             if (GUI.canInteract) {
                 menu.selectedSlot = this;
+                Item slotItem = menu.getItem(id);
+                if (slotItem != null && slotItem.type.immovable) {
+                    return;
+                }
                 boolean slotReal = menu.items != null && id < menu.items.length;
                 if (Main.player.inputHandler.keyRelease(SDL_SCANCODE_Q)) {
-                    if (menu.getItem(id) != null) {
-                        World.dropItem(menu.getItem(id));
+                    if (slotItem != null) {
+                        World.dropItem(slotItem);
                         menu.setItem(id, null);
                     }
                 } else if (Main.player.inputHandler.leftButtonPressed) {
@@ -39,7 +42,7 @@ public class Slot extends GUIElement {
                     if (slotReal) {
                         if (Main.timeMsLong - prevLClick < 200) { //double click
                             if (Main.player.inv.cursorItem == null) { //pickup item hovering over if none is being carried by cursor
-                                Main.player.inv.cursorItem = menu.getItem(id).clone();
+                                Main.player.inv.cursorItem = slotItem.clone();
                                 menu.setItem(id, null);
                             }
                             if (Main.player.inv.cursorItem != null) {
@@ -65,31 +68,31 @@ public class Slot extends GUIElement {
                                     }
                                 }
                             }
-                        } else if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT) && menu.getItem(id) != null) {
+                        } else if (Main.player.inputHandler.isKeyDown(SDL_SCANCODE_LSHIFT) && slotItem != null) {
                             if (menu == Main.player.inv.menu) {
                                 if (Main.player.inv.containerMenu != null) {
-                                    menu.setItem(id, Main.player.inv.containerMenu.addItem(menu.getItem(id)));
+                                    menu.setItem(id, Main.player.inv.containerMenu.addItem(slotItem));
                                 }
                             } else {
-                                menu.setItem(id, Main.player.inv.menu.addItem(menu.getItem(id)));
+                                menu.setItem(id, Main.player.inv.menu.addItem(slotItem));
                             }
                         } else if (Main.player.inv.cursorItem == null) {
-                            if (menu.getItem(id) != null) {
-                                Main.player.inv.cursorItem = menu.getItem(id).clone();
+                            if (slotItem != null) {
+                                Main.player.inv.cursorItem = slotItem.clone();
                                 menu.setItem(id, null);
                             }
-                        } else if (menu.getItem(id) == null || menu.getItem(id).amount <= 0) {
+                        } else if (slotItem == null || slotItem.amount <= 0) {
                             menu.setItem(id, Main.player.inv.cursorItem.clone());
                             Main.player.inv.cursorItem = null;
-                        } else if (menu.getItem(id).type == Main.player.inv.cursorItem.type) {
-                            int transferAmt = Math.min(Main.player.inv.cursorItem.amount, menu.getItem(id).type.maxStackSize - menu.getItem(id).amount);
+                        } else if (slotItem.type == Main.player.inv.cursorItem.type) {
+                            int transferAmt = Math.min(Main.player.inv.cursorItem.amount, slotItem.type.maxStackSize - slotItem.amount);
                             Main.player.inv.cursorItem.amount -= transferAmt;
-                            menu.getItem(id).amount += transferAmt;
+                            slotItem.amount += transferAmt;
                             if (Main.player.inv.cursorItem.amount <= 0) {
                                 Main.player.inv.cursorItem = null;
                             }
                         } else {
-                            Item newCursorItem = menu.getItem(id).clone();
+                            Item newCursorItem = slotItem.clone();
                             menu.setItem(id, Main.player.inv.cursorItem.clone());
                             Main.player.inv.cursorItem = newCursorItem;
                         }
@@ -102,31 +105,31 @@ public class Slot extends GUIElement {
                 } else if (Main.player.inputHandler.rightButtonClick) {
                     if (slotReal) {
                         if (Main.player.inv.cursorItem == null) {
-                            if (menu.getItem(id) != null) {
-                                int transferAmt = menu.getItem(id).amount / 2;
-                                Main.player.inv.cursorItem = menu.getItem(id).clone();
+                            if (slotItem != null) {
+                                int transferAmt = slotItem.amount / 2;
+                                Main.player.inv.cursorItem = slotItem.clone();
                                 Main.player.inv.cursorItem.amount = transferAmt;
-                                menu.getItem(id).amount -= transferAmt;
-                                if (menu.getItem(id).amount <= 0) {
+                                slotItem.amount -= transferAmt;
+                                if (slotItem.amount <= 0) {
                                     menu.setItem(id, null);
                                 }
                             }
-                        } else if (menu.getItem(id) == null || menu.getItem(id).amount <= 0) {
+                        } else if (slotItem == null || slotItem.amount <= 0) {
                             menu.setItem(id, Main.player.inv.cursorItem.clone());
-                            menu.getItem(id).amount = 1;
+                            slotItem.amount = 1;
                             Main.player.inv.cursorItem.amount -= 1;
                             if (Main.player.inv.cursorItem.amount <= 0) {
                                 Main.player.inv.cursorItem = null;
                             }
-                        } else if (menu.getItem(id).type == Main.player.inv.cursorItem.type) {
-                            int transferAmt = Math.min(1, menu.getItem(id).type.maxStackSize - menu.getItem(id).amount);
+                        } else if (slotItem.type == Main.player.inv.cursorItem.type) {
+                            int transferAmt = Math.min(1, slotItem.type.maxStackSize - slotItem.amount);
                             Main.player.inv.cursorItem.amount -= transferAmt;
-                            menu.getItem(id).amount += transferAmt;
+                            slotItem.amount += transferAmt;
                             if (Main.player.inv.cursorItem.amount <= 0) {
                                 Main.player.inv.cursorItem = null;
                             }
                         } else {
-                            Item newCursorItem = menu.getItem(id).clone();
+                            Item newCursorItem = slotItem.clone();
                             menu.setItem(id, Main.player.inv.cursorItem.clone());
                             Main.player.inv.cursorItem = newCursorItem;
                         }

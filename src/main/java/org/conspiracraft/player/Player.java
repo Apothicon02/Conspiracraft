@@ -1,28 +1,28 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Main;
-import org.conspiracraft.audio.BlockSFX;
-import org.conspiracraft.audio.Sounds;
+import org.conspiracraft.audio.*;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.entities.Entity;
+import org.conspiracraft.entities.EntityTags;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.menus.HealthMenu;
 import org.conspiracraft.items.DurableItem;
+import org.conspiracraft.items.HeartItem;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
-import org.conspiracraft.audio.AudioController;
-import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.BlockTags;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.Directions;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
@@ -46,6 +46,8 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LCTRL;
 public class Player {
     public InputHandler inputHandler = new InputHandler();
     public Camera camera = new Camera();
+    public ArrayList<Vector3d> safePositions = new ArrayList<>();
+    public Vector3d spawnPoint = new Vector3d();
     public Vector3d prevPos = new Vector3d();
     public Vector3d pos = new Vector3d();
     public Vector3d movement = new Vector3d();
@@ -117,6 +119,7 @@ public class Player {
         hurtSource = new Source(new Vector3f(pos), 0.5f, 1.f, 0, 0);
         speedWindSource = new Source(new Vector3f(0), 0.f, 1.f, 0.f, 1);
         speedWindSource.play(Sounds.WIND);
+        spawnPoint.set(new Vector3d(pos));
     }
 
     public void save() throws IOException {
@@ -210,9 +213,22 @@ public class Player {
 //                ambientParticles[ambientParticleIdx] = particle;
 //            }
 //        }
-        movementTick();
-        HandManager.tick();
-        movementTickFinish();
+        if (teleportPos != null) {
+            prevPos.set(pos);
+            if (teleportPos != null) {
+                pos.set(Utils.mix(pos, teleportPos, 0.034f));
+                if (pos.distance(teleportPos) < 1) {
+                    teleportPos = null;
+                    Source respawnSource = new Source(new Vector3f(pos), 1.f, 1.f, 1.f, 0);
+                    respawnSource.play(Sounds.FIREBALL_SLOW);
+                    AudioController.disposableSources.add(respawnSource);
+                }
+            }
+        } else if (currentTick-tickDied > 150) {
+            movementTick();
+            HandManager.tick();
+            movementTickFinish();
+        }
         if (breath > 0) {
             breath--;
         } else {
@@ -347,6 +363,12 @@ public class Player {
                         addParticle();
                         addParticle();
                     }
+                }
+            }
+            if ((safePositions.isEmpty() || safePositions.getLast().distance(pos) > 10) && safe(pos)) {
+                safePositions.addLast(new Vector3d(pos));
+                if (safePositions.size() > 50) {
+                    safePositions.removeFirst();
                 }
             }
         }
@@ -506,20 +528,77 @@ public class Player {
         AudioController.setListenerData(new Vector3f((float) pos.x(), (float) (pos.y() + eyeHeight), (float) pos.z()), new Vector3f(vel), new float[]{forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z()});
     }
 
+    public boolean safe(Vector3d pos) {
+        for (Entity entity : entities) {
+            if (EntityTags.hostile.tagged.contains(entity.type.id) && entity.pos.distance(pos) < 24) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public long tickDied = -1500000;
+    public Vector3d teleportPos = null;
+    public void returnToSafePos() {
+        while (!safePositions.isEmpty()) {
+            Vector3d safePos = safePositions.getLast();
+            if (safe(safePos)) {
+                teleportPos = new Vector3d(safePos);
+                safePositions.clear();
+                return;
+            }
+            safePositions.removeLast();
+        }
+        teleportPos = spawnPoint();
+        teleportPos.set(teleportPos.x(), Math.max(teleportPos.y(), World.getSurfaceHeight(teleportPos.x(), teleportPos.z())+1), teleportPos.z());
+        safePositions.clear();
+    }
+    public Vector3d spawnPoint() {
+        return new Vector3d(spawnPoint);
+    }
+
+    public int iTicks = 10;
     public long lastTickHurt = 0;
     public Source hurtSource = null;
     public void hurt(int dmg) {
-        if (currentTick-lastTickHurt < 10) {return;}
+        if (currentTick-lastTickHurt < iTicks) {return;}
+        iTicks = 10;
         lastTickHurt = currentTick;
         hurtSource.play(Sounds.HURT, true);
         for (int i = healthMenu.slotAmt-1; i >= 0; i--) {
-            DurableItem item = (DurableItem) healthMenu.getItem(i);
-            int prevDurability = item.durability;
-            item = item.damage(dmg);
-            int newDurability = 0;
-            if (item == null) {healthMenu.setItem(i, null);} else {newDurability = item.durability;}
-            dmg -= Math.max(0, prevDurability-newDurability);
-            if (dmg <= 0) {break;}
+            Item item = healthMenu.getItem(i);
+            if (item instanceof DurableItem durableItem) {
+                int prevDurability = durableItem.durability;
+                durableItem = durableItem.damage(dmg);
+                int newDurability = 0;
+                if (durableItem == null) {
+                    healthMenu.setItem(i, null);
+                } else {
+                    newDurability = durableItem.durability;
+                }
+                dmg -= Math.max(0, prevDurability - newDurability);
+                if (dmg <= 0) {break;}
+            }
+        }
+        if (dmg > 0) { //death
+            boolean setSkull = false;
+            for (int i = 0; i < healthMenu.slotAmt-1; i++) {
+                Item item = healthMenu.getItem(i);
+                if (item instanceof HeartItem heartItem) {
+                    if (setSkull) {
+                        heartItem.durability(heartItem.type().maxDurability);
+                        healthMenu.setItem(i, heartItem);
+                        break;
+                    }
+                    healthMenu.setItem(i, new Item().type(ItemTypes.SKULL));
+                    setSkull = true;
+                }
+            }
+            iTicks = 500;
+            tickDied = currentTick;
+            returnToSafePos();
+            Source deathSource = new Source(new Vector3f(pos), 1.f, 1.f, 1.f, 0);
+            deathSource.play(Sounds.DEATH);
+            AudioController.disposableSources.add(deathSource);
         }
     }
 

@@ -1,8 +1,6 @@
 package org.conspiracraft.player;
 
-import org.conspiracraft.entities.AnimalEntity;
 import org.conspiracraft.entities.EntityTypes;
-import org.conspiracraft.entities.FrogEntity;
 import org.conspiracraft.entities.ZombieEntity;
 import org.conspiracraft.gui.GUI;
 import org.conspiracraft.Main;
@@ -12,13 +10,10 @@ import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.gui.Menu;
 import org.conspiracraft.items.Item;
 import org.conspiracraft.items.types.ItemTypes;
-import org.conspiracraft.world.Bounds;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.shapes.Blob;
 import org.joml.*;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.sdl.SDL_DisplayMode;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.Math;

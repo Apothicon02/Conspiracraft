@@ -269,6 +269,12 @@ public class Utils {
     public static double mix(double min, double max, double factor) {
         return min * (1 - factor) + max * factor;
     }
+    public static Vector3d mix(Vector3d min, Vector3d max, double factor) {
+        return new Vector3d(mix(min.x(), max.x(), factor), mix(min.y(), max.y(), factor), mix(min.z(), max.z(), factor));
+    }
+    public static Vector3f mix(Vector3f min, Vector3f max, float factor) {
+        return new Vector3f(mix(min.x(), max.x(), factor), mix(min.y(), max.y(), factor), mix(min.z(), max.z(), factor));
+    }
     public static Vector3d getInterpolatedVec(Vector3d old, Vector3d current) {
         return new Vector3d(mix(old.x, current.x, Main.interpolationTime), mix(old.y, current.y, Main.interpolationTime), mix(old.z, current.z, Main.interpolationTime));
     }

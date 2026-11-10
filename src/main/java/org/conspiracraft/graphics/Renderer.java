@@ -44,6 +44,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
+import static org.conspiracraft.Main.currentTick;
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.graphics.Graphics.indexBuf;
@@ -152,25 +153,27 @@ public class Renderer {
                     labelInfo.pLabelName(MemoryUtil.memUTF8("Rstr"));
                     EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                     drawRaster(stack);
-                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
-                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                    drawDDA(stack);
-                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
-                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                    drawSSAO(stack);
-                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
-                    labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
-                    labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
-                    EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
-                    drawAA(stack);
-                    EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    if (Main.currentTick-player.tickDied > 150) {
+                        EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                        labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                        labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                        labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
+                        EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                        drawDDA(stack);
+                        EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                        labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                        labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                        labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
+                        EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                        drawSSAO(stack);
+                        EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                        labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
+                        labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
+                        labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
+                        EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
+                        drawAA(stack);
+                        EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
+                    }
                     labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                     labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
                     labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
@@ -514,7 +517,9 @@ public class Renderer {
         updatePipeline(Pipelines.GUI);
         bindImagesToDrawTo(stack, currentPipeline.vkPipeline, new Texture[]{Textures.colors1}, Textures.depth2, 1, true, true);
         Renderer.drawQuad(new Matrix4f().translate(-1.f, -1.f, 0.f).scale(2), new Vector4f(-1.f));
-        GUI.draw();
+        if (Main.currentTick-player.tickDied > 150) {
+            GUI.draw();
+        }
         unbindImagesDrawingTo(stack, new long[]{Textures.colors1.image}, Textures.depth2.image);
     }
 
@@ -560,7 +565,7 @@ public class Renderer {
         Planet activePlanet = Main.player.getPlanet();
         Quaternionf quaternion = new Quaternionf();
         int amt = 256;
-        if (activePlanet != null) {
+        if (activePlanet != null && Main.currentTick-player.tickDied > 150) {
             quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
             float dist = activePlanet.pos.distance(StarSystem.pos);
             amt = (int) -Math.min(0, StarSystem.relativePos.y()/(0.001f*dist));

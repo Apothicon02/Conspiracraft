@@ -9,6 +9,7 @@ import org.lwjgl.system.MemoryStack;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.system.MemoryUtil.*;
@@ -40,10 +41,17 @@ public class EntityTypes {
             VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
             COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked")),
             ROPE = create(new EntityType("misc/texture/rope")),
-            ZOMBIE = create(new EntityType("mob/texture/zombie")),
+            ZOMBIE = create(List.of(EntityTags.hostile), new EntityType("mob/texture/zombie")),
             FROG = create(new EntityType("animal/texture/frog"));
 
     private static EntityType create(EntityType type) {
+        entityTypeMap.put(entityTypeMap.size(), type);
+        return type;
+    }
+    private static EntityType create(List<EntityTag> tags, EntityType type) {
+        for (EntityTag tag : tags) {
+            tag.tagged.add(entityTypeMap.size());
+        }
         entityTypeMap.put(entityTypeMap.size(), type);
         return type;
     }

@@ -31,6 +31,8 @@ Frog croak sounds: [Pixabay DRAGON-STUDIO](https://pixabay.com/sound-effects/nat
 
 Hurt sound: [Freesound thecheeseman](https://freesound.org/s/44429/) License: Attribution 4.0
 
+Death sound: [Freesound F.M.Audio](https://freesound.org/people/F.M.Audio/sounds/695389/) License: Attribution 4.0
+
 Button sound: [Freesound junggle](https://freesound.org/s/29301/) License: Attribution 4.0
 
 Other sounds: [ZapSplat](https://www.zapsplat.com/) License: https://www.zapsplat.com/license-type/standard-license/

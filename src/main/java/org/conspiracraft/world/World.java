@@ -738,6 +738,15 @@ public class World {
             }
         }
     }
+    public static int getSurfaceHeight(double x, double z) {
+        return getSurfaceHeight((int)x, (int)z);
+    }
+    public static int getSurfaceHeight(int x, int z) {
+        Region2D region2D = getRegion2D(packRegionPos(x>>regionBits, 0, z>>regionBits));
+        int rlX = x%regionSize, rlZ = z%regionSize;
+        int packed = (rlX * regionSize) + rlZ;
+        return region2D.heights[packed]+Earth.GROUND_LEVEL;
+    }
     public static void updateLod(int x, int y, int z, boolean empty) {
 //        int lodIdx = packLodPos(x >>lodBits, y >>lodBits, z >>lodBits);
 //        int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;

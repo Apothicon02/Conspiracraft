@@ -1,7 +1,8 @@
 package org.conspiracraft.blocks.types;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.blocks.Material;
-import org.joml.Vector2i;
+import org.conspiracraft.gui.GUI;
 
 import java.util.Map;
 
@@ -12,7 +13,8 @@ public class CrateBlockType extends BlockType {
 
     @Override
     public int use(int x, int y, int z, int block) {
-
+        GUI.inventoryOpen = true;
+        GUI.menus.add(Main.player.inv.containerMenu);
         return 200;
     }
 }
