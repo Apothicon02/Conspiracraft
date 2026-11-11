@@ -7,12 +7,12 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.joml.Vector2i;
 
 public class ManaMenu extends Menu {
-    public static final int menuSlotSize = 12;
+    public static final int menuSlotSize = 6;
     public int slotAmt = 5;
     public ManaMenu() {
-        this.menuSizeRaw = new Vector2i(menuSlotSize*slotAmt, menuSlotSize);
+        this.menuSizeRaw = new Vector2i(menuSlotSize, menuSlotSize*slotAmt);
         for (int i = 0; i < slotAmt; i++) {
-            addSlot(new Slot().setPos(menuSlotSize*i, 0));
+            addSlot(new Slot().setPos(0, menuSlotSize*i));
         }
         this.items = new Item[slotAmt];
         for (int i = 0; i < slotAmt; i++) {

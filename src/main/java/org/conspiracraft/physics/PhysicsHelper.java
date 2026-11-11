@@ -15,7 +15,7 @@ import static org.conspiracraft.world.World.entities;
 import static org.conspiracraft.world.World.regionBits;
 
 public class PhysicsHelper {
-    public static double voxelSize = 1;//0.125f;
+    public static double voxelSize = 1;//0.0625f;
     public record BlockResult(double x, double y, double z, int block){};
     public static BlockResult getClosestBlock(AABB aabb, Vector3d ref) {
         //final float mX = aabb.xMin+((aabb.xMax-aabb.xMin)/2), mY = aabb.yMin+((aabb.yMax-aabb.yMin)/2), mZ = aabb.zMin+((aabb.zMax-aabb.zMin)/2);
@@ -23,9 +23,12 @@ public class PhysicsHelper {
         double closestDist = Double.MAX_VALUE;
         BlockResult closestBlockUncollidable = null;
         double closestUncollidableDist = Double.MAX_VALUE;
-        for (double x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
-            for (double y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
-                for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
+        double startX = Math.floor(aabb.xMin/voxelSize), endX = Math.floor(aabb.xMax/voxelSize),
+                startY = Math.floor(aabb.yMin/voxelSize), endY = Math.floor(aabb.yMax/voxelSize),
+                startZ = Math.floor(aabb.zMin/voxelSize), endZ = Math.floor(aabb.zMax/voxelSize);
+        for (double x = startX; x <= endX; x += voxelSize) {
+            for (double y = startY; y <= endY; y += voxelSize) {
+                for (double z = startZ; z <= endZ; z += voxelSize) {
                     double dX = ref.x()-x, dY = ref.y()-y, dZ = ref.z()-z;
                     double dist = (dX*dX)+(dY*dY)+(dZ*dZ);
                     int blockIn = World.getBlock(x, y, z);
@@ -44,7 +47,7 @@ public class PhysicsHelper {
                             }
                         }
                     }
-                    if (!collided && blockIn>> 16 > 0 && dist < closestUncollidableDist) {
+                    if (!collided && (blockIn>>16) > 0 && dist < closestUncollidableDist) {
                         closestUncollidableDist = dist;
                         closestBlockUncollidable = new BlockResult(x, y, z, blockIn);
                     }
@@ -56,9 +59,12 @@ public class PhysicsHelper {
     public static BlockResult getAnyBlock(AABB aabb) {
         int block = 0;
         double hX = -1, hY = -1, hZ = -1;
-        for (double x = aabb.xMin; x <= aabb.xMax; x += voxelSize) {
-            for (double y = aabb.yMin; y <= aabb.yMax; y += voxelSize) {
-                for (double z = aabb.zMin; z <= aabb.zMax; z += voxelSize) {
+        double startX = Math.floor(aabb.xMin/voxelSize), endX = Math.floor(aabb.xMax/voxelSize),
+                startY = Math.floor(aabb.yMin/voxelSize), endY = Math.floor(aabb.yMax/voxelSize),
+                startZ = Math.floor(aabb.zMin/voxelSize), endZ = Math.floor(aabb.zMax/voxelSize);
+        for (double x = startX; x <= endX; x += voxelSize) {
+            for (double y = startY; y <= endY; y += voxelSize) {
+                for (double z = startZ; z <= endZ; z += voxelSize) {
                     int blockIn = World.getBlock(x, y, z);
                     BlockType blockType = BlockTypes.blockTypes[blockIn>> 16];
                     if (blockType.blockProperties.isCollidable) {
@@ -71,7 +77,7 @@ public class PhysicsHelper {
                             }
                         }
                     }
-                    if (blockIn>> 16 > 0) {
+                    if ((blockIn>>16) > 0) {
                         hX = x; hY = y; hZ = z;
                         block = blockIn; //return non-collidable block if none are collidable
                     }

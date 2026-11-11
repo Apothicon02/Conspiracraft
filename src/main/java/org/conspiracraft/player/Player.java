@@ -98,7 +98,7 @@ public class Player {
         healthMenu.setName("Health").hideName().setParent(inv.menu).aboveParent().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
         GUI.menus.add(healthMenu);
         manaMenu = new ManaMenu();
-        manaMenu.setName("Mana").hideName().setParent(inv.menu).aboveParent().rightOfParent().insetX().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
+        manaMenu.setName("Mana").hideName().setParent(inv.menu).leftOfParent().setPos(-3, -3).setCentered(false, false).disableBackground().hideSlots();
         GUI.menus.add(manaMenu);
 
         if (Files.exists(plrPath)) {
@@ -330,7 +330,7 @@ public class Player {
             newMovement.mul(1000000);
         }
         int blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
-        AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin - 0.075f, playerAABB.yMax, playerAABB.zMin, playerAABB.zMax);
+        AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin - 0.075f, playerAABB.yMin, playerAABB.zMin, playerAABB.zMax);
         blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean prevOnSolid = onSolid;
         onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;

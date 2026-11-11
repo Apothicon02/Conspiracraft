@@ -42,6 +42,7 @@ public class Menu {
     public Menu parent = null;
     public boolean aboveParent = false;
     public boolean rightOfParent = false;
+    public boolean leftOfParent = false;
     public boolean insetY = false;
     public boolean insetX = false;
     public Menu() {}
@@ -55,6 +56,7 @@ public class Menu {
     public Menu hideName() {this.hideName = true; return this;}
     public Menu aboveParent() {this.aboveParent = true; return this;}
     public Menu rightOfParent() {this.rightOfParent = true; return this;}
+    public Menu leftOfParent() {this.leftOfParent = true; return this;}
     public Menu insetY() {this.insetY = true; return this;}
     public Menu insetX() {this.insetX = true; return this;}
 
@@ -82,6 +84,8 @@ public class Menu {
                 if (insetX) {
                     x-=menuSize.x()/guiScale;
                 }
+            } else if (leftOfParent) {
+                x-=(menuSize.x()*3)/guiScale;
             }
             if (aboveParent) {
                 y+=(parent.menuSize.y()/guiScale)*aspectRatio;
