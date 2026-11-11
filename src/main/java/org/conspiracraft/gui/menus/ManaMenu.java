@@ -18,5 +18,6 @@ public class ManaMenu extends Menu {
         for (int i = 0; i < slotAmt; i++) {
             setItem(i, ItemTypes.ARGON_ICE.createItem());
         }
+        init();
     }
 }

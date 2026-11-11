@@ -7,6 +7,7 @@ import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.types.ItemType;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.physics.DDAResult;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.*;
 
@@ -46,23 +47,7 @@ public class Item implements Cloneable {
     }
 
     public String amountString() {
-        String amtStr = String.valueOf(amount);
-        if (amount >= 1000000000) {
-            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"b";
-        } else if (amount >= 100000000) {
-            amtStr = amtStr.substring(0, 3)+"m";
-        } else if (amount >= 10000000) {
-            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"m";
-        } else if (amount >= 1000000) {
-            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"m";
-        } else if (amount >= 100000) {
-            amtStr = amtStr.substring(0, 3)+"k";
-        } else if (amount >= 10000) {
-            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"k";
-        } else if (amount >= 1000) {
-            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"k";
-        }
-        return amtStr;
+        return Utils.shortenHugeNumber(amount);
     }
 
     public void tick() {

@@ -22,5 +22,6 @@ public class BarrelMenu extends Menu {
         setItem(0, ItemTypes.STICK.createItem().amount(64));
         setItem(1, ItemTypes.PAPER.createItem().amount(32));
         setItem(2, ItemTypes.STEEL_HATCHET.createItem().amount(1));
+        init();
     }
 }

@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.mouseSensitivity;
 import static org.conspiracraft.gui.GUI.menus;
+import static org.conspiracraft.gui.GUI.moveUpfrontMenus;
 import static org.conspiracraft.world.World.*;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetKeyboardState;
 import static org.lwjgl.sdl.SDLKeyboard.SDL_GetModState;
@@ -36,6 +37,7 @@ public class InputHandler {
     public ByteBuffer keys;
     public ByteBuffer prevKeys;
     public int mouse;
+    public boolean mousePressed = false;
     public boolean leftButtonPressed = false;
     public boolean middleButtonPressed = false;
     public boolean rightButtonPressed = false;
@@ -85,6 +87,17 @@ public class InputHandler {
                     HandManager.input();
                 }
                 for (Menu menu : menus) {if (menu != null) {menu.tick();}}
+                while (!moveUpfrontMenus.isEmpty()) {
+                    Menu menu = moveUpfrontMenus.pollFirst();
+                    menus.remove(menu);
+                    menus.addLast(menu);
+                }
+                GUI.moveUpfrontMenusSet.clear();
+                while (!GUI.removeMenus.isEmpty()) {
+                    Menu menu = GUI.removeMenus.pollFirst();
+                    menus.remove(menu);
+                }
+                GUI.removeMenusSet.clear();
                 if (keyRelease(SDL_SCANCODE_F3)) {
                     GUI.showDebug = !GUI.showDebug;
                     //System.out.println(GUI.guiMS+"ms");
@@ -193,6 +206,7 @@ public class InputHandler {
         leftButtonPressed = leftButtonNowPressed;
         rightButtonPressed = rightButtonNowPressed;
         middleButtonPressed = middleButtonNowPressed;
+        mousePressed = leftButtonPressed || rightButtonPressed || middleButtonPressed;
     }
     public void resetInputs() {
         displVec.set(0);
@@ -202,6 +216,7 @@ public class InputHandler {
         leftButtonPressed = false;
         rightButtonPressed = false;
         middleButtonPressed = false;
+        mousePressed = false;
     }
     public boolean keyRelease(int scanCode) {return (!isKeyDown(scanCode)) && wasKeyDown(scanCode);}
     public boolean isKeyDown(int scanCode) {return keys.get(scanCode) > 0;}

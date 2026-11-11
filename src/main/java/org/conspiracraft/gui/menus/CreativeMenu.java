@@ -15,12 +15,13 @@ public class CreativeMenu extends Menu {
     public int rows = 7;
     public int slotAmt = slotsPerRow*rows;
     public CreativeMenu() {
-        this.menuSizeRaw = new Vector2i(slotSize*slotsPerRow, slotSize*rows);
+        this.menuSizeRaw = new Vector2i(slotSize*slotsPerRow, (slotSize*rows)+(hideName ? 0 : 12));
         for (int i = 0; i < slotAmt; i++) {
             addSlot(new Slot().setPos(GUI.slotSize*(i%slotsPerRow), (GUI.slotSize*(i/slotsPerRow))));
         }
         this.items = new Item[slotAmt];
         maxScroll = (ItemTypes.itemTypeMap.size()/slotsPerRow);
+        init();
     }
 
     public void tick() {

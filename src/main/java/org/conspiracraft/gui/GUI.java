@@ -12,6 +12,9 @@ import org.conspiracraft.gui.buttons.*;
 import org.conspiracraft.gui.sliders.*;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.utils.Utils;
+import org.conspiracraft.world.Chunk;
+import org.conspiracraft.world.Region;
+import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.vma.VmaStatistics;
@@ -19,10 +22,9 @@ import org.lwjgl.util.vma.VmaStatistics;
 import java.io.IOException;
 import java.lang.Math;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.height;
@@ -77,8 +79,13 @@ public class GUI {
     public static Vector4f color = new Vector4f(1.f);
     public static Object objectOnPrev = null;
 
+    public static Set<Menu> removeMenusSet = ConcurrentHashMap.newKeySet();
+    public static final ConcurrentLinkedDeque<Menu> removeMenus = new ConcurrentLinkedDeque<>();
+    public static Set<Menu> moveUpfrontMenusSet = ConcurrentHashMap.newKeySet();
+    public static final ConcurrentLinkedDeque<Menu> moveUpfrontMenus = new ConcurrentLinkedDeque<>();
     public static List<Menu> menus = new ArrayList<>();//List.of(new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f)));
     public static Vector2i cursorPos = new Vector2i();
+    public static boolean dragging = false;
     public static void tick() {
         boolean shouldSetObjectOnPrev = true;
         cursorPos.set(cursorPxX(), cursorPxY());
@@ -131,6 +138,17 @@ public class GUI {
                 pushUBO.updateAtlasOffset(new Vector2i(0));
                 color.set(1.f);
                 drawQuad(true, true, 0.5f, 0.5f, 1, 1); //crosshair
+
+                if (player.inv.cursorItem != null && player.inv.cursorItem.amount > 0) {
+                    pushUBO.updateTex(Textures.items); //items
+                    pushUBO.updateAtlasOffset(player.inv.cursorItem.type.atlasOffset);
+                    drawSlot(true, true, cursorX(), cursorY(), 0, 0, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+
+                    pushUBO.updateTex(Textures.gui); //use gui atlas
+                    char[] chars = player.inv.cursorItem.amountString().toCharArray();
+                    float startOffset = 7 - (chars.length * (charWidth/2.f));
+                    drawText(false, cursorX(), cursorY(), startOffset, 1-charHeight, chars, 2);
+                }
             }
             drawDebug();
         }

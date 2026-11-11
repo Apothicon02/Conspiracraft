@@ -45,7 +45,19 @@ public class Menu {
     public boolean leftOfParent = false;
     public boolean insetY = false;
     public boolean insetX = false;
+    public Focuser focuser;
     public Menu() {}
+
+    public void init() {
+        focuser = (Focuser)new Focuser().setSize(menuSizeRaw.x(), menuSizeRaw.y());
+
+        if (!hideName) {
+            GUIElement dragger = new Dragger().setPos(0, menuSizeRaw.y()-12).setSize(menuSizeRaw.x() - 12, 12);
+            elements.add(dragger);
+            GUIElement close = new Close().setPos(menuSizeRaw.x() - 12, menuSizeRaw.y()-12).setSize(12, 12);
+            elements.add(close);
+        }
+    }
 
     public Menu setName(String name) {this.name = name; return this;}
     public Menu setParent(Menu menu) {this.parent = menu; return this;}
@@ -65,6 +77,9 @@ public class Menu {
     public ArrayList<GUIElement> elements = new ArrayList<>();
     public Vector2i getPos() {return new Vector2i(menuPos);}
     public void update() {
+        baseUpdate();
+    }
+    public void baseUpdate() {
         menuSize.set(menuSizeRaw);//.div(guiScale).mul(1, aspectRatio);
         float x = menuPosRaw.x(), y = menuPosRaw.y();
         if (parent != null) {
@@ -97,6 +112,7 @@ public class Menu {
         menuPos.set((int)(x*width), (int)(y*height));
         if (centeredMenuX) {menuPos.sub((int)(width*((menuSize.x()*0.5f)/guiScale)), 0);}
         if (centeredMenuY) {menuPos.sub(0, (int)(height*(((menuSize.y()*0.5f)/guiScale)*aspectRatio)));}
+        focuser.update(this);
         for (GUIElement element : elements) {element.update(this);}
     }
     public ArrayList<Slot> slots = new ArrayList<>();
@@ -232,6 +248,7 @@ public class Menu {
             selectedSlotsR.clear();
         }
         selectedSlot = null;
+        focuser.tick(this);
         for (GUIElement element : elements) {element.tick(this);}
         GUI.canInteract = true;
     }
@@ -240,12 +257,22 @@ public class Menu {
         drawBase();
     }
     public void drawBase() {
-        if (inventoryOpen && !hideName) {
+        if (!hideName) {
+            pushUBO.updateTex(null);
+            menuColor(color);
+            color.set(0.807f, 0.8f, 0.768f, 0.88f);
+            drawQuad(0, menuSizeRaw.y()-12, menuSizeRaw.x(), 12, 1);
+
             color.set(1);
             pushUBO.updateTex(Textures.gui);
+            pushUBO.updateLayer(4);
+            pushUBO.updateAtlasOffset(new Vector2i(0, 0));
+            pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
+            drawQuad(menuSizeRaw.x()-12+1, menuSizeRaw.y()-12, 12, 12, 1);
+
             pushUBO.updateLayer(0);
             pushUBO.updateAtlasOffset(new Vector2i());
-            drawText(false, 0, menuSizeRaw.y() + (backround ? 4 : 3), 0, 0, name.toCharArray(), 1);
+            drawText(false, -1, menuSizeRaw.y() - 9, 0, 0, name.toCharArray(), 1);
         }
         if (backround) {
             drawBackground(false, 0, 0, 0, 0, menuSizeRaw.x(), menuSizeRaw.y());
@@ -288,25 +315,27 @@ public class Menu {
                 drawItem(getItem(slot.id), slot.posRaw.x() + 2, slot.posRaw.y()+2);
             }
         }
-        pushUBO.updateTex(Textures.gui);
-        pushUBO.updateLayer(2); //selector
-        pushUBO.updateAtlasOffset(new Vector2i());
-        for (Slot slot : selectedSlotsL) {
-            drawQuad(slot.posRaw.x()-1, slot.posRaw.y()-2, enlargedSlotSize, enlargedSlotSize, 1);
-        }
-        for (Slot slot : selectedSlotsR) {
-            drawQuad(slot.posRaw.x()-1, slot.posRaw.y()-2, enlargedSlotSize, enlargedSlotSize, 1);
-        }
-        if (selectedSlot != null) {
+        if (!dragging) {
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(2); //selector
             pushUBO.updateAtlasOffset(new Vector2i());
-            drawQuad(selectedSlot.posRaw.x()-1, selectedSlot.posRaw.y()-1, enlargedSlotSize, enlargedSlotSize, 1);
-            if (selectedSlot.id < items.length && inventoryOpen) {
-                Item item = getItem(selectedSlot.id);
-                if (item != null && item.type != ItemTypes.AIR) {
-                    int x = (int)((cursorPxX()-menuPos.x())/guiScaleMul), y = (int)((cursorPxY()-menuPos.y()+(enlargedSlotSize * 0.5f))/guiScaleMul);
-                    drawItemHoverDetails(x, y, item);
+            for (Slot slot : selectedSlotsL) {
+                drawQuad(slot.posRaw.x() - 1, slot.posRaw.y() - 2, enlargedSlotSize, enlargedSlotSize, 1);
+            }
+            for (Slot slot : selectedSlotsR) {
+                drawQuad(slot.posRaw.x() - 1, slot.posRaw.y() - 2, enlargedSlotSize, enlargedSlotSize, 1);
+            }
+            if (selectedSlot != null) {
+                pushUBO.updateTex(Textures.gui);
+                pushUBO.updateLayer(2); //selector
+                pushUBO.updateAtlasOffset(new Vector2i());
+                drawQuad(selectedSlot.posRaw.x() - 1, selectedSlot.posRaw.y() - 1, enlargedSlotSize, enlargedSlotSize, 1);
+                if (selectedSlot.id < items.length && inventoryOpen) {
+                    Item item = getItem(selectedSlot.id);
+                    if (item != null && item.type != ItemTypes.AIR) {
+                        int x = (int) ((cursorPxX() - menuPos.x()) / guiScaleMul), y = (int) ((cursorPxY() - menuPos.y() + (enlargedSlotSize * 0.5f)) / guiScaleMul);
+                        drawItemHoverDetails(x, y, item);
+                    }
                 }
             }
         }

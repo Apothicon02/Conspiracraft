@@ -317,4 +317,23 @@ public class Utils {
     public static double lerp(double invLerpValue, double toValue, double fromValue) {
         return toValue + invLerpValue * (fromValue - toValue);
     }
+    public static String shortenHugeNumber(int number) {
+        String amtStr = String.valueOf(number);
+        if (number >= 1000000000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"b";
+        } else if (number >= 100000000) {
+            amtStr = amtStr.substring(0, 3)+"m";
+        } else if (number >= 10000000) {
+            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"m";
+        } else if (number >= 1000000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"m";
+        } else if (number >= 100000) {
+            amtStr = amtStr.substring(0, 3)+"k";
+        } else if (number >= 10000) {
+            amtStr = amtStr.substring(0, 2)+"."+amtStr.charAt(2)+"k";
+        } else if (number >= 1000) {
+            amtStr = amtStr.charAt(0)+"."+amtStr.substring(1, 3)+"k";
+        }
+        return amtStr;
+    }
 }

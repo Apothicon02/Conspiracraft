@@ -18,5 +18,6 @@ public class HealthMenu extends Menu {
         for (int i = 0; i < slotAmt; i++) {
             setItem(i, ItemTypes.HEART.createItem());
         }
+        init();
     }
 }

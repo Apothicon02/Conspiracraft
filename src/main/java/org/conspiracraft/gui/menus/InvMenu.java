@@ -21,5 +21,6 @@ public class InvMenu extends Menu {
         setItem(1, ItemTypes.STEEL_PICK.createItem().amount(1));
         setItem(2, ItemTypes.STEEL_HATCHET.createItem().amount(1));
         setItem(3, ItemTypes.STEEL_SPADE.createItem().amount(1));
+        init();
     }
 }

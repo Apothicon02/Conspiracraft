@@ -9,6 +9,7 @@ import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTags;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.gui.menus.HistogramMenu;
 import org.conspiracraft.gui.menus.HealthMenu;
 import org.conspiracraft.gui.menus.ManaMenu;
 import org.conspiracraft.items.DurableItem;
@@ -23,7 +24,6 @@ import org.conspiracraft.gui.GUI;
 import org.conspiracraft.space.Planet;
 import org.conspiracraft.space.StarSystem;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.Directions;
 import org.conspiracraft.world.World;
 import org.conspiracraft.world.types.Earth;
 import org.conspiracraft.world.types.WorldType;
@@ -90,6 +90,7 @@ public class Player {
     public static Path plrPath = Path.of(Main.mainFolder + "player.data");
     public static HealthMenu healthMenu;
     public static ManaMenu manaMenu;
+    public static HistogramMenu histogramMenu;
 
     public void create() throws IOException {
         inputHandler.init();
@@ -100,6 +101,9 @@ public class Player {
         manaMenu = new ManaMenu();
         manaMenu.setName("Mana").hideName().setParent(inv.menu).leftOfParent().setPos(-3, -3).setCentered(false, false).disableBackground().hideSlots();
         GUI.menus.add(manaMenu);
+        histogramMenu = new HistogramMenu();
+        histogramMenu.setName("Block palette lengths: ").setPos(0.015f, 0.52f).setCentered(false, true).hideSlots();
+        GUI.menus.add(histogramMenu);
 
         if (Files.exists(plrPath)) {
             int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));

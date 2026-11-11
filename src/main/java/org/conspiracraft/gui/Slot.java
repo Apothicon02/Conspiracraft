@@ -24,6 +24,7 @@ public class Slot extends GUIElement {
         if (GUI.cursorPos.x() > globalPos.x() && GUI.cursorPos.y() > globalPos.y() && GUI.cursorPos.x() < globalPos.x()+size.x() && GUI.cursorPos.y() < globalPos.y()+size.y()) {
             if (GUI.canInteract) {
                 menu.selectedSlot = this;
+                if (GUI.menus.getLast() != menu) {return;}
                 Item slotItem = menu.getItem(id);
                 if (slotItem != null && slotItem.type.immovable) {
                     return;
@@ -41,7 +42,7 @@ public class Slot extends GUIElement {
                 } else if (Main.player.inputHandler.leftButtonClick) {
                     if (slotReal) {
                         if (Main.timeMsLong - prevLClick < 200) { //double click
-                            if (Main.player.inv.cursorItem == null) { //pickup item hovering over if none is being carried by cursor
+                            if (Main.player.inv.cursorItem == null && slotItem != null) { //pickup item hovering over if none is being carried by cursor
                                 Main.player.inv.cursorItem = slotItem.clone();
                                 menu.setItem(id, null);
                             }
@@ -115,7 +116,8 @@ public class Slot extends GUIElement {
                                 }
                             }
                         } else if (slotItem == null || slotItem.amount <= 0) {
-                            menu.setItem(id, Main.player.inv.cursorItem.clone());
+                            slotItem = Main.player.inv.cursorItem.clone();
+                            menu.setItem(id, slotItem);
                             slotItem.amount = 1;
                             Main.player.inv.cursorItem.amount -= 1;
                             if (Main.player.inv.cursorItem.amount <= 0) {
