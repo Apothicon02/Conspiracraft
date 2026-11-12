@@ -890,7 +890,7 @@ void main() {
                 float bigness = 1-min(0.97f, pow(distance(ogPos, rayPos)*(underwater ? 0.02f : 0.003f), 4));
                 vec3 globalRayPos = globalRayStart + ogDir * (lightNoise*baseDist);
                 vec2 causticPos = (globalRayPos.xz-rayDir.xz*(mod(globalRayPos.y, height)/rayDir.y));
-                vec4 lightshaftNoise = mix(getCausticInv(true, causticPos/10)+0.5f, underwater ? (getCaustic(true, causticPos)+0.5f)*vec4(1, 1, 1, 0.9f) : vec4(0), bigness);
+                vec4 lightshaftNoise = mix(getCausticInv(true, causticPos/13)+0.5f, underwater ? (getCaustic(true, causticPos)+0.5f)*vec4(1, 1, 1, 0.9f) : vec4(0), bigness);
                 if (!underwater) {lightshaftNoise.rgb = vec3(lightshaftNoise.w);}
                 vec3 godray = globalUbo.renderToggles.x == 2 ? vec3(0) : mix((lightshaftNoise.rgb*lightshaftNoise.w)-0.9f, vec3(1.f), clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*lightshaftMul;
                 vec3 globalFogPos = floor((globalRayStart + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
