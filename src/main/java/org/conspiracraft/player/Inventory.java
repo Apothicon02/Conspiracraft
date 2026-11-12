@@ -39,10 +39,10 @@ public class Inventory {
 
     public void init() {
         creativeMenu = new CreativeMenu();
-        creativeMenu.setName("Creative").setPos(0.5f, 0.65f);
+        creativeMenu.setName("Creative").setPos(0.5f, 0.65f).init();
         //containerMenu = new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f);
         menu = new InvMenu();
-        menu.setName("Inventory").hideName().setPos(0.5f, 0.0075f).setCentered(true, false).disableBackground();
+        menu.setName("Inventory").hideName().setPos(0.5f, 0.0075f).setCentered(true, false).disableBackground().init();
         GUI.menus.add(menu);
     }
 

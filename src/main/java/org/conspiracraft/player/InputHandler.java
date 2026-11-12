@@ -86,6 +86,9 @@ public class InputHandler {
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
                     HandManager.input();
                 }
+                for (int i = menus.size()-1; i >= 0; i--) {
+                    if (menus.get(i) == null) {menus.remove(i);}
+                }
                 for (Menu menu : menus) {if (menu != null) {menu.tick();}}
                 while (!moveUpfrontMenus.isEmpty()) {
                     Menu menu = moveUpfrontMenus.pollFirst();

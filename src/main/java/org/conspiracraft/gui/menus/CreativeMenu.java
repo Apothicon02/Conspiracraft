@@ -21,7 +21,6 @@ public class CreativeMenu extends Menu {
         }
         this.items = new Item[slotAmt];
         maxScroll = (ItemTypes.itemTypeMap.size()/slotsPerRow);
-        init();
     }
 
     public void tick() {

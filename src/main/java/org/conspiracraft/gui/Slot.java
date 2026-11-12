@@ -13,7 +13,7 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LSHIFT;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_Q;
 
 public class Slot extends GUIElement {
-    int id = 0;
+    public int id = 0;
     long prevLClick = 0;
     public Slot() {}
 

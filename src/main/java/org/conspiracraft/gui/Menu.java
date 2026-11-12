@@ -268,7 +268,7 @@ public class Menu {
             pushUBO.updateLayer(4);
             pushUBO.updateAtlasOffset(new Vector2i(0, 0));
             pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
-            drawQuad(menuSizeRaw.x()-12+1, menuSizeRaw.y()-12, 12, 12, 1);
+            drawQuad(menuSizeRaw.x()-10, menuSizeRaw.y()-13, 12, 12, 1);
 
             pushUBO.updateLayer(0);
             pushUBO.updateAtlasOffset(new Vector2i());
@@ -455,11 +455,14 @@ public class Menu {
         drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
     }
     public void drawItem(Item item, int x, int y) {
+        drawItem(item, x, y, false);
+    }
+    public void drawItem(Item item, int x, int y, boolean hideDurability) {
         if (item != null) {
             pushUBO.updateTex(Textures.items);
             pushUBO.updateAtlasOffset(item.type.atlasOffset);
             drawQuad(x, y, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
-            if (item instanceof DurableItem durableItem && durableItem.durability < item.type.maxDurability() && !durableItem.type().hideDurability) {
+            if (!hideDurability && item instanceof DurableItem durableItem && durableItem.durability < item.type.maxDurability() && !durableItem.type().hideDurability) {
                 pushUBO.updateTex(null); //use no texture
                 float durabilityPercent = (float) durableItem.durability / item.type.maxDurability();
                 color.set(Utils.mix(1, 0, durabilityPercent), Utils.mix(0, 1, durabilityPercent), 0, 1);

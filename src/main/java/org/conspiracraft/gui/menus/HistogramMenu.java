@@ -16,12 +16,11 @@ import static org.conspiracraft.graphics.Renderer.pushUBO;
 import static org.conspiracraft.gui.GUI.*;
 
 public class HistogramMenu extends Menu {
-    int rowHeight = 10;
+    int rowHeight = 6;
     final float[] lengths = new float[10];
     final int[] amounts = new int[10];
     public HistogramMenu() {
-        this.menuSizeRaw = new Vector2i(GUI.slotSize*8, (rowHeight*10)+(hideName ? 0 : 12));
-        init();
+        this.menuSizeRaw = new Vector2i(GUI.slotSize*5, (rowHeight*10)+(hideName ? 0 : 12));
     }
 
     public static final Vector4f[] colors = new Vector4f[]{
@@ -37,7 +36,7 @@ public class HistogramMenu extends Menu {
 
         pushUBO.updateTex(null);
         color.set(0.329f, 0.333f, 0.341f, 0.88f);
-        drawQuad(0, 0, menuSizeRaw.x(), menuSizeRaw.y()-rowHeight, 1);
+        drawQuad(0, 0, menuSizeRaw.x(), menuSizeRaw.y()-12, 1);
         for (int i = 0; i < 10; i++) {
             pushUBO.updateTex(null);
             color.set(colors[i]);
@@ -49,11 +48,11 @@ public class HistogramMenu extends Menu {
             color.set(1);
             pushUBO.updateTex(Textures.gui);
             pushUBO.updateLayer(0);
-            drawText(false, 0, 0, 0, rowHeight*(i+0.1f), labels[i], 1, invert && barLength > 0.1f);
+            drawText(false, 0, 0, 0, rowHeight*(i+0.1f), labels[i], 2, invert && barLength > 0.1f);
             char[] chars = (Utils.shortenHugeNumber(amounts[i])+" chunks").toCharArray();
-            drawText(false, (int)(((menuSizeRaw.x()-(chars.length*charWidth))*0.5f)-2), 0, 0, rowHeight*(i+0.1f), chars, 1, invert && barLength > 0.5f);
+            drawText(false, (int)(((menuSizeRaw.x()-(chars.length*charWidth*0.5f))*0.5f)-2), 0, 0, rowHeight*(i+0.1f), chars, 2, invert && barLength > 0.5f);
             chars = (String.format("%.2f", lengths[i]*100)+"%").toCharArray();
-            drawText(false, (menuSizeRaw.x()-(chars.length*charWidth)-2), 0, 0, rowHeight*(i+0.1f), chars, 1, invert && barLength > 0.9f);
+            drawText(false, (int) (menuSizeRaw.x()-(chars.length*charWidth*0.5f)-2), 0, 0, rowHeight*(i+0.1f), chars, 2, invert && barLength > 0.9f);
         }
     }
 

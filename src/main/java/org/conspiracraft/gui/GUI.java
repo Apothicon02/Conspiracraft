@@ -144,10 +144,12 @@ public class GUI {
                     pushUBO.updateAtlasOffset(player.inv.cursorItem.type.atlasOffset);
                     drawSlot(true, true, cursorX(), cursorY(), 0, 0, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
 
-                    pushUBO.updateTex(Textures.gui); //use gui atlas
-                    char[] chars = player.inv.cursorItem.amountString().toCharArray();
-                    float startOffset = 7 - (chars.length * (charWidth/2.f));
-                    drawText(false, cursorX(), cursorY(), startOffset, 1-charHeight, chars, 2);
+                    if (player.inv.cursorItem.amount > 1) {
+                        pushUBO.updateTex(Textures.gui); //use gui atlas
+                        char[] chars = player.inv.cursorItem.amountString().toCharArray();
+                        float startOffset = 7 - (chars.length * (charWidth/2.f));
+                        drawText(false, cursorX(), cursorY(), startOffset, 1-charHeight, chars, 2);
+                    }
                 }
             }
             drawDebug();

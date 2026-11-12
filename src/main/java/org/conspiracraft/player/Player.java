@@ -96,13 +96,13 @@ public class Player {
         inputHandler.init();
         inv.init();
         healthMenu = new HealthMenu();
-        healthMenu.setName("Health").hideName().setParent(inv.menu).aboveParent().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots();
+        healthMenu.setName("Health").hideName().setParent(inv.menu).aboveParent().setPos(-3, -2).setCentered(false, false).disableBackground().hideSlots().init();
         GUI.menus.add(healthMenu);
         manaMenu = new ManaMenu();
-        manaMenu.setName("Mana").hideName().setParent(inv.menu).leftOfParent().setPos(-3, -3).setCentered(false, false).disableBackground().hideSlots();
+        manaMenu.setName("Mana").hideName().setParent(inv.menu).leftOfParent().setPos(-3, -3).setCentered(false, false).disableBackground().hideSlots().init();
         GUI.menus.add(manaMenu);
         histogramMenu = new HistogramMenu();
-        histogramMenu.setName("Block palette lengths: ").setPos(0.015f, 0.52f).setCentered(false, true).hideSlots();
+        histogramMenu.setName("Block palettes").setPos(0.015f, 0.52f).setCentered(false, true).hideSlots().init();
         GUI.menus.add(histogramMenu);
 
         if (Files.exists(plrPath)) {

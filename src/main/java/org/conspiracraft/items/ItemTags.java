@@ -6,5 +6,7 @@ public class ItemTags {
     public static ItemTag log = new ItemTag();
     public static ItemTag axe = new ItemTag();
     public static ItemTag stone = new ItemTag();
-    public static List<ItemTag> tags = List.of(log, axe, stone);
+    public static ItemTag armor = new ItemTag();
+    public static ItemTag healthBar = new ItemTag();
+    public static List<ItemTag> tags = List.of(log, axe, stone, armor, healthBar);
 }
