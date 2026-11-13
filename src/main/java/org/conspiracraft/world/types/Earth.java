@@ -1121,7 +1121,7 @@ public class Earth extends WorldType {
                             int blockIn = getBlockWorldgen(x, surface + 1, z);
                             if (blockIn >> 16 == 0) {
                                 if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id) {
-                                    if (foliageChance < 0.3f) {
+                                    if (foliageChance < 0.367f) {
                                         int type;
                                         if ((blockOn & 0xFFFF) == 3) {
                                             type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.032f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));

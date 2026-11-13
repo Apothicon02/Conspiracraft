@@ -17,7 +17,7 @@ public class CreativeMenu extends Menu {
     public CreativeMenu() {
         this.menuSizeRaw = new Vector2i(slotSize*slotsPerRow, (slotSize*rows)+(hideName ? 0 : 12));
         for (int i = 0; i < slotAmt; i++) {
-            addSlot(new Slot().setPos(GUI.slotSize*(i%slotsPerRow), (GUI.slotSize*(i/slotsPerRow))));
+            addSlot(new Slot().setPos(GUI.slotSize*(i%slotsPerRow), (GUI.slotSize*(i/slotsPerRow))).setSize(GUI.slotSize, GUI.slotSizeY));
         }
         this.items = new Item[slotAmt];
         maxScroll = (ItemTypes.itemTypeMap.size()/slotsPerRow);

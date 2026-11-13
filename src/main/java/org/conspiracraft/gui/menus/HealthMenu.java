@@ -1,10 +1,12 @@
 package org.conspiracraft.gui.menus;
 
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.gui.Menu;
 import org.conspiracraft.gui.Slot;
 import org.conspiracraft.items.DurableItem;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemTag;
 import org.conspiracraft.items.ItemTags;
 import org.conspiracraft.items.types.ItemTypes;
 import org.joml.Vector2i;
@@ -17,8 +19,9 @@ public class HealthMenu extends Menu {
     public int slotAmt = 10;
     public HealthMenu() {
         this.menuSizeRaw = new Vector2i(menuSlotSize*slotAmt, menuSlotSize);
+        ItemTag[] tags = new ItemTag[]{ItemTags.armor, ItemTags.healthBar};
         for (int i = 0; i < slotAmt; i++) {
-            addSlot(new Slot().setPos(menuSlotSize*i, 0));
+            addSlot(new Slot().setTags(tags).setPos(menuSlotSize*i, 0).setSize(menuSlotSize, GUI.slotSizeY));
         }
         this.items = new Item[slotAmt];
         for (int i = 0; i < slotAmt; i++) {

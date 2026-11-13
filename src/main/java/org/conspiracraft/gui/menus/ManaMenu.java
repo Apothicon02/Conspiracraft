@@ -1,5 +1,6 @@
 package org.conspiracraft.gui.menus;
 
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.gui.Menu;
 import org.conspiracraft.gui.Slot;
 import org.conspiracraft.items.Item;
@@ -12,7 +13,7 @@ public class ManaMenu extends Menu {
     public ManaMenu() {
         this.menuSizeRaw = new Vector2i(menuSlotSize, menuSlotSize*slotAmt);
         for (int i = 0; i < slotAmt; i++) {
-            addSlot(new Slot().setPos(0, menuSlotSize*i));
+            addSlot(new Slot().setOffset(0, 3).setPos(0, menuSlotSize*i).setSize(GUI.slotSize, i == slotAmt-1 ? (int)(menuSlotSize*2.5f) : menuSlotSize));
         }
         this.items = new Item[slotAmt];
         for (int i = 0; i < slotAmt; i++) {

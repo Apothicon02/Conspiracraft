@@ -4,6 +4,7 @@ import kotlin.Pair;
 import org.conspiracraft.Main;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.ItemTag;
 import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
 import org.joml.Vector2i;
@@ -19,18 +20,33 @@ import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LSHIFT;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_Q;
 
 public class Slot extends GUIElement {
+    public ItemTag[] tags = null;
+    public int offsetX = 0, offsetY = 0;
     public int id = 0;
     long prevLClick = 0;
     public Slot() {}
 
     public void id(int id) {this.id = id;}
+    public Slot setTags(ItemTag[] tags) {this.tags = tags; return this;}
+    public Slot setOffset(int x, int y) {this.offsetX = x; this.offsetY = y; return this;}
 
     @Override
     public void tick(Menu menu) {
-        if (GUI.cursorPos.x() > globalPos.x() && GUI.cursorPos.y() > globalPos.y() && GUI.cursorPos.x() < globalPos.x()+size.x() && GUI.cursorPos.y() < globalPos.y()+size.y()) {
+        float offX = GUI.cursorPos.x()-(offsetX*GUI.guiScaleMul);
+        float offY = GUI.cursorPos.y()-(offsetY*GUI.guiScaleMul);
+        if (offX > globalPos.x() && offY > globalPos.y() && offX < globalPos.x()+size.x() && offY < globalPos.y()+size.y()) {
             if (GUI.canInteract) {
                 menu.selectedSlot = this;
                 if (GUI.menus.getLast() != menu) {return;}
+                success:
+                if (Main.player.inv.cursorItem != null && tags != null) {
+                    for (ItemTag tag : tags) {
+                        if (tag.tagged.contains(Main.player.inv.cursorItem.type())) {
+                            break success;
+                        }
+                    }
+                    return;
+                }
                 Item slotItem = menu.getItem(id);
                 if (slotItem != null && slotItem.type.immovable) {
                     return;

@@ -222,15 +222,14 @@ public class Player {
 //            }
 //        }
         if (teleportPos != null) {
+            vel.set(0);
             prevPos.set(pos);
-            if (teleportPos != null) {
-                pos.set(Utils.mix(pos, teleportPos, 0.034f));
-                if (pos.distance(teleportPos) < 1) {
-                    teleportPos = null;
-                    Source respawnSource = new Source(new Vector3f(pos), 1.f, 1.f, 1.f, 0);
-                    respawnSource.play(Sounds.FIREBALL_SLOW);
-                    AudioController.disposableSources.add(respawnSource);
-                }
+            pos.set(Utils.mix(pos, teleportPos, 0.034f));
+            if (pos.distance(teleportPos) < 1) {
+                teleportPos = null;
+                Source respawnSource = new Source(new Vector3f(pos), 1.f, 1.f, 1.f, 0);
+                respawnSource.play(Sounds.FIREBALL_SLOW);
+                AudioController.disposableSources.add(respawnSource);
             }
         } else if (currentTick-tickDied > 150) {
             movementTick();
@@ -333,7 +332,8 @@ public class Player {
             newMovement.mul(1000000);
         }
         int blockIn = World.getBlock(pos.x(), pos.y(), pos.z());
-        AABB footAABB = new AABB(playerAABB.xMin, playerAABB.xMax, playerAABB.yMin - 0.075f, playerAABB.yMin, playerAABB.zMin, playerAABB.zMax);
+        float shrink = width*0.05f;
+        AABB footAABB = new AABB(playerAABB.xMin+shrink, playerAABB.xMax-shrink, playerAABB.yMin - 0.075f, playerAABB.yMin, playerAABB.zMin+shrink, playerAABB.zMax-shrink);
         blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean prevOnSolid = onSolid;
         onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
@@ -477,7 +477,7 @@ public class Player {
         dynamicSpeedOld = dynamicSpeed;
         dynamicSpeed = Math.clamp((movement.length() - 0.1f) * 4, 0, 1);
 
-        speedWindSource.setGain(Utils.mix((float)Math.max(0.f, (vel.length()*0.15f)-0.15f), speedWindSource.baseGain, 0.9f));
+        speedWindSource.setGain(Utils.mix((float)Math.max(0.02f, (vel.length()*0.15f)-0.15f), speedWindSource.baseGain, 0.9f));
         hurtSource.setPos(new Vector3f(pos));
         hurtSource.setVel(new Vector3f(vel).add(new Vector3f(movement)));
     }
@@ -485,7 +485,7 @@ public class Player {
     public void stepFx() {
         BlockSFX stepSFX = BlockTypes.blockTypes[blockOn >> 16].blockProperties.blockSFX;
         if (stepSFX != null && stepSFX.stepIds.length > 0) {
-            Source stepSource = new Source(new Vector3f(pos), stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3), stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
+            Source stepSource = new Source(new Vector3f(pos), (stepSFX.stepGain + ((stepSFX.stepGain * playerRand.nextFloat()) / 3))*0.5f, stepSFX.stepPitch + ((stepSFX.stepPitch * playerRand.nextFloat()) / 3), 0, 0);
             AudioController.disposableSources.add(stepSource);
             stepSource.setVel(new Vector3f(vel).add(new Vector3f(movement)));
             stepSource.play((stepSFX.stepIds[stepSFX.stepIds.length == 1 ? 0 : playerRand.nextInt(stepSFX.stepIds.length - 1)]), true);

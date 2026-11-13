@@ -121,7 +121,6 @@ public class Menu {
     public void addSlot(GUIElement slot) {addSlot((Slot)slot);}
     public void addSlot(Slot slot) {
         slot.id(slots.size());
-        slot.setSize(slotSize, slotSizeY);
         slots.add(slot);
         elements.add(slot);
     }

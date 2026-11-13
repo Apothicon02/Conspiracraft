@@ -14,7 +14,7 @@ public class InvMenu extends Menu {
     public InvMenu() {
         this.menuSizeRaw = new Vector2i(slotSize*slotAmt, slotSize);
         for (int i = 0; i < slotAmt; i++) {
-            addSlot(new Slot().setPos(GUI.slotSize*i, 0));
+            addSlot(new Slot().setPos(GUI.slotSize*i, 0).setSize(GUI.slotSize, GUI.slotSizeY));
         }
         this.items = new Item[slotAmt];
         setItem(0, ItemTypes.STEEL_SCYTHE.createItem().amount(1));
