@@ -33,7 +33,7 @@ public class AnimalEntity extends Entity {
         if (onSolid) {
             friction *= 0.75f;
             if (Math.random() < 0.05f) {
-                vel.add(new Vector3f((float) (Math.random()-0.5f), 0, (float) (Math.random()-0.5f)));
+                vel.add(new Vector3f((float) Utils.mix(Math.random()-0.5f, -dir.x(), 0.4f), 0, (float) Utils.mix(Math.random()-0.5f, -dir.z(), 0.4f)));
                 addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
                 addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
                 addParticle(new Vector3d((Math.random()-0.5f)+pos.x(), pos.y(), (Math.random()-0.5f)+pos.z()), blockOn);
@@ -46,9 +46,7 @@ public class AnimalEntity extends Entity {
             vel.y -= modifiedGrav;
         }
         PhysicsHelper.moveWithStepping(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
-        if (vel.length() > 0.01f) {
-            dir.set(vel).normalize().negate();
-        }
+        Utils.normalize(dir.set(vel)).negate();
         Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
         if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());

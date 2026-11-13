@@ -1,6 +1,7 @@
 package org.conspiracraft.player;
 
 import org.conspiracraft.Settings;
+import org.conspiracraft.utils.Utils;
 import org.joml.*;
 
 public class Camera {
@@ -14,15 +15,15 @@ public class Camera {
     public Matrix4f getViewMatrixWithoutPitch() {return new Matrix4f(viewMatrix);}
     public Vector3f getForward() {
         Matrix4f viewMatrix = getViewMatrix();
-        return new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22()).normalize();
+        return Utils.normalize(new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22()));
     }
     public Vector3f getForwardWithoutPitch() {
         Matrix4f viewMatrix = getViewMatrixWithoutPitch();
-        return new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22()).normalize();
+        return Utils.normalize(new Vector3f(viewMatrix.m20(), viewMatrix.m21(), viewMatrix.m22()));
     }
     public Vector3f getRightWithoutPitch() {
         Matrix4f viewMatrix = getViewMatrixWithoutPitch();
-        return new Vector3f(viewMatrix.m00(), viewMatrix.m01(), viewMatrix.m02()).normalize();
+        return Utils.normalize(new Vector3f(viewMatrix.m00(), viewMatrix.m01(), viewMatrix.m02()));
     }
     public void rotate(float x, float y) {
         pitch.rotateX(-x);

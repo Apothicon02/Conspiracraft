@@ -7,6 +7,7 @@ import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -54,9 +55,7 @@ public class AshEntity extends Entity {
         }
         vel.mul(friction);
         PhysicsHelper.move(aabb, vel, new ArrayList<>());
-        if (vel.length() > 0.01f) {
-            dir.set(vel).normalize().negate();
-        }
+        Utils.normalize(dir.set(vel)).negate();
         Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
         if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());

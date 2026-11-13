@@ -106,7 +106,7 @@ public class PhysicsHelper {
         Vector3d ddaPosD = new Vector3d(pos.x(), pos.y(), pos.z());
         Vector3i ddaPos = new Vector3i((int) pos.x(), (int) pos.y(), (int) pos.z());
         Vector3i prevDDAPos = new Vector3i(ddaPos);
-        Vector3d dir = Utils.unzeroVec(ogDir.normalize());
+        Vector3d dir = Utils.unzeroVec(Utils.normalize(ogDir));
         Vector3d raySign = sign(dir);
         Vector3d dist = new Vector3d(1.0f).div(new Vector3d(dir).absolute());
         Vector3d sideDist = new Vector3d();

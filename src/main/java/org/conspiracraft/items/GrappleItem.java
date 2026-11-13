@@ -12,6 +12,7 @@ import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.player.HandManager;
 import org.conspiracraft.player.InputHandler;
 import org.conspiracraft.player.Player;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.*;
 
@@ -72,7 +73,7 @@ public class GrappleItem extends DurableItem implements Cloneable {
             Vector3d dir = new Vector3d(Main.player.pos).sub(grapplePos);
             double dist = dir.length();
             if (dist > maxDistance) {
-                dir.normalize();
+                Utils.normalize(dir);
                 double velocity = Main.player.vel.dot(dir);
                 if (velocity > 0) {Main.player.vel.sub(new Vector3d(dir).mul(velocity));}
                 Main.player.vel.add(new Vector3d(dir).mul(-0.01f*(dist-maxDistance)));

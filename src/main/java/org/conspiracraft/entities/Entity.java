@@ -46,6 +46,7 @@ public class Entity {
         dir = new Vector3f();
     }
 
+    public boolean hostile() {return EntityTags.hostile.tagged.contains(type.id);}
     public boolean playerCollidesWith() {return true;}
     public static Entity load(IntBuffer data) {
         EntityType entityType = EntityTypes.entityTypeMap.get(data.get());

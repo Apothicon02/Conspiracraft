@@ -5,6 +5,7 @@ import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
+import org.conspiracraft.utils.Utils;
 import org.conspiracraft.world.World;
 import org.joml.*;
 
@@ -52,7 +53,7 @@ public class Particle extends Effect {
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);
         pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
-        Vector3f dir = new Vector3f(vel).normalize().negate();
+        Vector3f dir = Utils.normalize(new Vector3f(vel)).negate();
         Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
         if (newMatrix.isFinite()) {matrix.set(newMatrix);}
         return false;

@@ -91,20 +91,20 @@ public class FrogEntity extends Entity {
         if (length > 2.f) {
             tongueRetracting = true;
             length-=tongueSpeed;
-            dir.set(pos.x()-Main.player.pos.x(), vel.y(), pos.z()-Main.player.pos.z()).normalize();
+            Utils.normalize(dir.set(pos.x()-Main.player.pos.x(), vel.y(), pos.z()-Main.player.pos.z()));
         } else if (length > 0.f) {
             if (tongueRetracting) {
                 length-=tongueSpeed;
             } else {
                 length+=tongueSpeed;
             }
-            dir.set(pos.x()-Main.player.pos.x(), vel.y(), pos.z()-Main.player.pos.z()).normalize();
+            Utils.normalize(dir.set(pos.x()-Main.player.pos.x(), vel.y(), pos.z()-Main.player.pos.z()));
             if (prevLength < 1.f && length >= 1.f) {
                 double playerDist = Main.player.pos.distance(pos);
                 Main.player.vel.add(new Vector3d(Main.player.pos).sub(pos).mul(-0.1f, 0.f, -0.1f).add(0, playerDist*0.05f, 0));
             }
-        } else if (vel.length() > 0.01f) {
-            dir.set(vel).normalize().negate();
+        } else {
+            Utils.normalize(dir.set(vel)).negate();
         }
         Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
         if (newMatrix.isFinite()) {matrix.set(newMatrix);}

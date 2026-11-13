@@ -50,7 +50,7 @@ public class AmbientParticle extends Particle {
 //        matrix.getScale(scale);
 //        Vector3f halfScale = new Vector3f(scale).div(2);
 //        pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
-//        Vector3f dir = new Vector3f(vel).normalize().negate();
+//        Vector3f dir = Utils.normalize(new Vector3f(vel)).negate();
 //        matrix.getScale(scale);
 //        matrix.identity().lookAlong(dir, up).invert().scale(scale);
         return false;

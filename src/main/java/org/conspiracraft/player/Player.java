@@ -175,7 +175,7 @@ public class Player {
             selItem.drawHeldView(matrix);
         }
         pushUBO.updateTex(null);
-        Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.88f, 0.5f, 1.f));
+        Renderer.drawCube(new Matrix4f(matrix).scale(1.f, 0.15f, 0.15f), new Vector4f(0.88f, 0.8f, 0.5f, 1.f));
         Renderer.drawCube(new Matrix4f(matrix).translate(-0.134f, 0, 0).scale(1.f, 0.155f, 0.155f), new Vector4f(0.7f, 0.25f, 0.25f, 1.f));
     }
 
@@ -207,7 +207,7 @@ public class Player {
         }
 
 //        if (currentTick > 50) {
-//            Vector3f dir = new Vector3f(worldType.getSkylight().xyz(new Vector3f())).normalize().negate();
+//            Vector3f dir = Utils.normalize(new Vector3f(worldType.getSkylight().xyz(new Vector3f()))).negate();
 //            Matrix4f baseMatrix = new Matrix4f().lookAlong(dir, Directions.UPF).invert();
 //            for (int i = 0; i < 50; i++) {
 //                ambientParticleIdx++;
@@ -322,9 +322,7 @@ public class Player {
                 newMovement.add(0, -1, 0);
             }
         }
-        if (newMovement.length() > 0) {
-            newMovement.normalize();
-        }
+        Utils.normalize(newMovement);
         newMovement.mul(speed * (downward ? 0.65f : 1.f));
         newMovement.mul(sprinting ? ((flying ? 2 : 1) * sprintSpeed) : 1.f);
         newMovement.mul(superSprinting ? 25.f : 1.f);

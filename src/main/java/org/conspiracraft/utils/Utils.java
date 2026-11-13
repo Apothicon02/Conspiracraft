@@ -287,6 +287,18 @@ public class Utils {
     public static float getInterpolatedFloat(float old, float current) {
         return mix(old, current, (float) Main.interpolationTime);
     }
+    public static Vector3f normalize(Vector3f vec) {
+        float scalar = org.joml.Math.invsqrt(org.joml.Math.fma(vec.x, vec.x, org.joml.Math.fma(vec.y, vec.y, vec.z * vec.z)));
+        if (!Float.isFinite(scalar)) {return vec;}
+        vec.mul(scalar);
+        return vec;
+    }
+    public static Vector3d normalize(Vector3d vec) {
+        double scalar = org.joml.Math.invsqrt(org.joml.Math.fma(vec.x, vec.x, org.joml.Math.fma(vec.y, vec.y, vec.z * vec.z)));
+        if (!Double.isFinite(scalar)) {return vec;}
+        vec.mul(scalar);
+        return vec;
+    }
     public static double averageLongs(List<Long> numbers) {
         double sum = 0.0;
         for (double num : numbers) {
