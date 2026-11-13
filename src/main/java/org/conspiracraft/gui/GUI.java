@@ -9,12 +9,11 @@ import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.gui.buttons.*;
+import org.conspiracraft.gui.menus.DebugMenu;
 import org.conspiracraft.gui.sliders.*;
 import org.conspiracraft.items.types.ItemTypes;
+import org.conspiracraft.player.InputHandler;
 import org.conspiracraft.utils.Utils;
-import org.conspiracraft.world.Chunk;
-import org.conspiracraft.world.Region;
-import org.conspiracraft.world.World;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.vma.VmaStatistics;
@@ -30,6 +29,7 @@ import static org.conspiracraft.Main.*;
 import static org.conspiracraft.Settings.height;
 import static org.conspiracraft.Settings.width;
 import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_F4;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.util.vma.Vma.vmaGetVirtualBlockStatistics;
@@ -79,6 +79,8 @@ public class GUI {
     public static Vector4f color = new Vector4f(1.f);
     public static Object objectOnPrev = null;
 
+    public static Set<Menu> addMenusSet = ConcurrentHashMap.newKeySet();
+    public static final ConcurrentLinkedDeque<Menu> addMenus = new ConcurrentLinkedDeque<>();
     public static Set<Menu> removeMenusSet = ConcurrentHashMap.newKeySet();
     public static final ConcurrentLinkedDeque<Menu> removeMenus = new ConcurrentLinkedDeque<>();
     public static Set<Menu> moveUpfrontMenusSet = ConcurrentHashMap.newKeySet();
@@ -86,41 +88,16 @@ public class GUI {
     public static List<Menu> menus = new ArrayList<>();//List.of(new BarrelMenu().setName("Barrel").setPos(0.5f, 0.65f)));
     public static Vector2i cursorPos = new Vector2i();
     public static boolean dragging = false;
+    public static DebugMenu debugMenu = null;
     public static void tick() {
-        boolean shouldSetObjectOnPrev = true;
-        cursorPos.set(cursorPxX(), cursorPxY());
-        color.set(1);
-        pushUBO.updateTex(Textures.gui); //use gui atlas
-        pushUBO.updateLayer(5); //button
-        for (Button button : buttons) {
-            if (cursorPos.x() > button.bounds.x() && cursorPos.x() < button.bounds.z() && cursorPos.y() > button.bounds.y() && cursorPos.y() < button.bounds.w()) {
-                Vector2i borderData = getButtonBorderData(button.width);
-                pushUBO.updateAtlasOffset(new Vector2i(0, borderData.y()+128));
-                drawQuad(false, false, (float) button.bounds.x() / width, (float) button.bounds.y() / height, button.width, 16);
-                if (Main.player.inputHandler.leftButtonClick) {
-                    button.clicked();
-                } else if (objectOnPrev == null || !objectOnPrev.getClass().equals(button.getClass())) {
-                    AudioController.playHoverSound();
-                }
-                objectOnPrev = button;
-                shouldSetObjectOnPrev = false;
+        if (player.inputHandler.keyRelease(SDL_SCANCODE_F4)) {
+            if (menus.contains(debugMenu)) {
+                menus.remove(debugMenu);
+            } else {
+                debugMenu = new DebugMenu();
+                debugMenu.setName("Debug").setPos(0.5f, 0.52f).setCentered(true, true).unlocksMouse().init();
+                menus.add(debugMenu);
             }
-        }
-        for (Slider slider : sliders) {
-            if (cursorPos.x() > slider.bounds.x() && cursorPos.x() < slider.bounds.z() && cursorPos.y() > slider.bounds.y() && cursorPos.y() < slider.bounds.w()) {
-                pushUBO.updateAtlasOffset(new Vector2i(277, 320));
-                drawQuad(true, false, (float) cursorPos.x() / width, (float) slider.bounds.y() / height, 5, 16);
-                if (Main.player.inputHandler.leftButtonPressed) {
-                    slider.pressed(cursorPos.x());
-                } else if (objectOnPrev == null || !objectOnPrev.getClass().equals(slider.getClass())) {
-                    AudioController.playHoverSound();
-                }
-                objectOnPrev = slider;
-                shouldSetObjectOnPrev = false;
-            }
-        }
-        if (shouldSetObjectOnPrev) {
-            objectOnPrev = null;
         }
     }
     public static boolean showUI = true;
@@ -161,7 +138,41 @@ public class GUI {
             double avgNs = Utils.averageLongs(guiTimes);
             guiMS = avgNs/1000000;
         }
-        tick();
+        boolean shouldSetObjectOnPrev = true;
+        cursorPos.set(cursorPxX(), cursorPxY());
+        color.set(1);
+        pushUBO.updateTex(Textures.gui); //use gui atlas
+        pushUBO.updateLayer(5); //button
+        for (Button button : buttons) {
+            if (cursorPos.x() > button.bounds.x() && cursorPos.x() < button.bounds.z() && cursorPos.y() > button.bounds.y() && cursorPos.y() < button.bounds.w()) {
+                Vector2i borderData = getButtonBorderData(button.width);
+                pushUBO.updateAtlasOffset(new Vector2i(0, borderData.y()+128));
+                drawQuad(false, false, (float) button.bounds.x() / width, (float) button.bounds.y() / height, button.width, 16);
+                if (Main.player.inputHandler.leftButtonClick) {
+                    button.clicked();
+                } else if (objectOnPrev == null || !objectOnPrev.getClass().equals(button.getClass())) {
+                    AudioController.playHoverSound();
+                }
+                objectOnPrev = button;
+                shouldSetObjectOnPrev = false;
+            }
+        }
+        for (Slider slider : sliders) {
+            if (cursorPos.x() > slider.bounds.x() && cursorPos.x() < slider.bounds.z() && cursorPos.y() > slider.bounds.y() && cursorPos.y() < slider.bounds.w()) {
+                pushUBO.updateAtlasOffset(new Vector2i(277, 320));
+                drawQuad(true, false, (float) cursorPos.x() / width, (float) slider.bounds.y() / height, 5, 16);
+                if (Main.player.inputHandler.leftButtonPressed) {
+                    slider.pressed(cursorPos.x());
+                } else if (objectOnPrev == null || !objectOnPrev.getClass().equals(slider.getClass())) {
+                    AudioController.playHoverSound();
+                }
+                objectOnPrev = slider;
+                shouldSetObjectOnPrev = false;
+            }
+        }
+        if (shouldSetObjectOnPrev) {
+            objectOnPrev = null;
+        }
     }
     public static Vector4f menuBgColor = new Vector4f(1.f);
     public static void drawAlwaysVisible() {

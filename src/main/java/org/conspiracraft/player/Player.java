@@ -103,7 +103,6 @@ public class Player {
         GUI.menus.add(manaMenu);
         histogramMenu = new HistogramMenu();
         histogramMenu.setName("Block palettes").setPos(0.015f, 0.52f).setCentered(false, true).hideSlots().init();
-        GUI.menus.add(histogramMenu);
 
         if (Files.exists(plrPath)) {
             int[] plrData = Utils.flipIntArray(Utils.byteArrayToIntArray(new FileInputStream(plrPath.toFile()).readAllBytes()));

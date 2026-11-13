@@ -26,7 +26,7 @@ public class Pipelines {
     
     public static final Pipeline 
             PRESENT = new Pipeline("fullscreen.vert", "present.frag", 1, false),
-            GUI = new Pipeline("gui.vert", "gui.frag", 1, false),
+            GUI = new Pipeline("gui.vert", "gui.frag", 1, true),
             SSAO = new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
             CUBE = new Pipeline("raster.vert", "cube.frag", 2, true),
 //            SKYBOX = new Pipeline("raster.vert", "skybox.frag", 2, true),
@@ -116,7 +116,7 @@ public class Pipelines {
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
                     .depthTestEnable(true)
                     .depthWriteEnable(true)
-                    .depthCompareOp(pipeline.depthEnabled ? VK_COMPARE_OP_GREATER : VK_COMPARE_OP_ALWAYS)
+                    .depthCompareOp(pipeline.depthEnabled ? VK_COMPARE_OP_GREATER_OR_EQUAL : VK_COMPARE_OP_ALWAYS)
                     .depthBoundsTestEnable(false)
                     .stencilTestEnable(false);
 

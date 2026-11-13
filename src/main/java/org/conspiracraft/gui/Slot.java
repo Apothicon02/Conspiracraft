@@ -2,13 +2,19 @@ package org.conspiracraft.gui;
 
 import kotlin.Pair;
 import org.conspiracraft.Main;
+import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
+import org.conspiracraft.items.types.ItemTypes;
 import org.conspiracraft.world.World;
+import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.conspiracraft.graphics.Renderer.pushUBO;
+import static org.conspiracraft.gui.GUI.*;
+import static org.conspiracraft.gui.GUI.guiScaleMul;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_LSHIFT;
 import static org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_Q;
 
@@ -137,6 +143,39 @@ public class Slot extends GUIElement {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Override
+    public void draw(Menu menu) {
+        pushUBO.updateTex(Textures.gui);
+        pushUBO.updateLayer(1); //inventory
+        pushUBO.updateAtlasOffset(new Vector2i(0, 0));
+        if (!menu.hideSlots) {
+            menu.menuColor(color);
+            menu.drawQuad(posRaw.x(), posRaw.y(), slotSize, slotSize, 1);
+        }
+        color.set(1);
+        if (menu.items != null && id < menu.items.length) {
+            menu.drawItem(menu.getItem(id), posRaw.x() + 2, posRaw.y()+2);
+        }
+
+        if (!dragging) {
+            pushUBO.updateTex(Textures.gui);
+            pushUBO.updateLayer(2); //selector
+            pushUBO.updateAtlasOffset(new Vector2i());
+            if (menu.selectedSlot == this) {
+                menu.drawQuad(posRaw.x() - 1, posRaw.y() - 1, enlargedSlotSize, enlargedSlotSize, 0.9f, 1);
+                if (id < menu.items.length && inventoryOpen) {
+                    Item item = menu.getItem(id);
+                    if (item != null && item.type != ItemTypes.AIR) {
+                        int x = (int) ((cursorPxX() - menu.menuPos.x()) / guiScaleMul), y = (int) ((cursorPxY() - menu.menuPos.y() + (enlargedSlotSize * 0.5f)) / guiScaleMul);
+                        menu.drawItemHoverDetails(x, y, item);
+                    }
+                }
+            } else if (menu.selectedSlotsL.contains(this) || menu.selectedSlotsR.contains(this)) {
+                menu.drawQuad(posRaw.x() - 1, posRaw.y() - 2, enlargedSlotSize, enlargedSlotSize, 0.9f, 1);
             }
         }
     }

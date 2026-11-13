@@ -36,6 +36,7 @@ public class Menu {
     public Slot selectedSlot = null;
     public int scroll = 0, maxScroll = 0;
     public Item[] items = null;
+    public boolean unlocksMouse = false;
     public boolean backround = true;
     public boolean hideSlots = false;
     public boolean hideName = false;
@@ -54,7 +55,7 @@ public class Menu {
         if (!hideName) {
             GUIElement dragger = new Dragger().setPos(0, menuSizeRaw.y()-12).setSize(menuSizeRaw.x() - 12, 12);
             elements.add(dragger);
-            GUIElement close = new Close().setPos(menuSizeRaw.x() - 12, menuSizeRaw.y()-12).setSize(12, 12);
+            GUIElement close = new Close().setPos(menuSizeRaw.x() - 10, menuSizeRaw.y()-13).setSize(12, 12);
             elements.add(close);
         }
     }
@@ -71,6 +72,7 @@ public class Menu {
     public Menu leftOfParent() {this.leftOfParent = true; return this;}
     public Menu insetY() {this.insetY = true; return this;}
     public Menu insetX() {this.insetX = true; return this;}
+    public Menu unlocksMouse() {this.unlocksMouse = true; return this;}
 
     public void menuColor(Vector4f col) {col.set(1, 0.95f, 0.875f, 1);}
 
@@ -257,6 +259,9 @@ public class Menu {
         drawBase();
     }
     public void drawBase() {
+        if (backround) {
+            drawBackground(false, true, 0, 0, 0, 0, menuSizeRaw.x(), menuSizeRaw.y());
+        }
         if (!hideName) {
             pushUBO.updateTex(null);
             menuColor(color);
@@ -265,194 +270,138 @@ public class Menu {
 
             color.set(1);
             pushUBO.updateTex(Textures.gui);
-            pushUBO.updateLayer(4);
-            pushUBO.updateAtlasOffset(new Vector2i(0, 0));
-            pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));
-            drawQuad(menuSizeRaw.x()-10, menuSizeRaw.y()-13, 12, 12, 1);
-
             pushUBO.updateLayer(0);
             pushUBO.updateAtlasOffset(new Vector2i());
             drawText(false, -1, menuSizeRaw.y() - 9, 0, 0, name.toCharArray(), 1);
         }
-        if (backround) {
-            drawBackground(false, 0, 0, 0, 0, menuSizeRaw.x(), menuSizeRaw.y());
-//            color.set(1);
-//            pushUBO.updateTex(Textures.gui);
-//            pushUBO.updateLayer(1); //inventory
-//            pushUBO.updateAtlasOffset(new Vector2i(0, 2160-13));
-//            drawQuad(-3, -3, 13, 13, 1);
-//            pushUBO.updateAtlasOffset(new Vector2i(3840-13, 2160-13));
-//            drawQuad(menuSizeRaw.x()-10, -3, 13, 13, 1);
-//            pushUBO.updateAtlasOffset(new Vector2i(0, 20));
-//            drawQuad(-3, menuSizeRaw.y()-10, 13, 13, 1);
-//            pushUBO.updateAtlasOffset(new Vector2i(3840-13, 20));
-//            drawQuad(menuSizeRaw.x()-10, menuSizeRaw.y()-10, 13, 13, 1);
-//            int horizontalLength = menuSizeRaw.x()-20;
-//            if (horizontalLength > 0) {
-//                pushUBO.updateAtlasOffset(new Vector2i(13, 2160-3));
-//                drawQuad(10, -3, horizontalLength, 3, 1);
-//                pushUBO.updateAtlasOffset(new Vector2i(13, 20));
-//                drawQuad(10, menuSizeRaw.y(), horizontalLength, 3, 1);
-//            }
-//            int verticalLength = menuSizeRaw.y()-20;
-//            if (verticalLength > 0) {
-//                pushUBO.updateAtlasOffset(new Vector2i(0, 33));
-//                drawQuad(-3, 10, 3, verticalLength, 1);
-//                pushUBO.updateAtlasOffset(new Vector2i(3840-3, 33));
-//                drawQuad(menuSizeRaw.x(), 10, 3, verticalLength, 1);
-//            }
-        }
-        for (Slot slot : slots) {
-            pushUBO.updateTex(Textures.gui);
-            pushUBO.updateLayer(1); //inventory
-            pushUBO.updateAtlasOffset(new Vector2i(backround ? 0 : slotSize, 0));
-            if (!hideSlots) {
-                menuColor(color);
-                drawQuad(slot.posRaw.x(), slot.posRaw.y(), slotSize, slotSize, 1);
-            }
-            color.set(1);
-            if (items != null && slot.id < items.length) {
-                drawItem(getItem(slot.id), slot.posRaw.x() + 2, slot.posRaw.y()+2);
-            }
-        }
-        if (!dragging) {
-            pushUBO.updateTex(Textures.gui);
-            pushUBO.updateLayer(2); //selector
-            pushUBO.updateAtlasOffset(new Vector2i());
-            for (Slot slot : selectedSlotsL) {
-                drawQuad(slot.posRaw.x() - 1, slot.posRaw.y() - 2, enlargedSlotSize, enlargedSlotSize, 1);
-            }
-            for (Slot slot : selectedSlotsR) {
-                drawQuad(slot.posRaw.x() - 1, slot.posRaw.y() - 2, enlargedSlotSize, enlargedSlotSize, 1);
-            }
-            if (selectedSlot != null) {
-                pushUBO.updateTex(Textures.gui);
-                pushUBO.updateLayer(2); //selector
-                pushUBO.updateAtlasOffset(new Vector2i());
-                drawQuad(selectedSlot.posRaw.x() - 1, selectedSlot.posRaw.y() - 1, enlargedSlotSize, enlargedSlotSize, 1);
-                if (selectedSlot.id < items.length && inventoryOpen) {
-                    Item item = getItem(selectedSlot.id);
-                    if (item != null && item.type != ItemTypes.AIR) {
-                        int x = (int) ((cursorPxX() - menuPos.x()) / guiScaleMul), y = (int) ((cursorPxY() - menuPos.y() + (enlargedSlotSize * 0.5f)) / guiScaleMul);
-                        drawItemHoverDetails(x, y, item);
-                    }
-                }
-            }
+        for (GUIElement element : elements) {
+            element.draw(this);
         }
     }
 
-    public void drawBackground(boolean selected, float offX, float offY, float offPxX, float offPxY, int sizeX, int sizeY) {
-        drawBackground(selected, Math.round(offX + offPxX), Math.round(offY + offPxY), sizeX, sizeY);
+    public void drawBackground(boolean selected, boolean filled, float offX, float offY, float offPxX, float offPxY, int sizeX, int sizeY) {
+        drawBackground(selected, filled, offX, offY, offPxX, offPxY, sizeX, sizeY, 0.f);
     }
-    public void drawBackground(boolean selected, int offX, int offY, int sizeX, int sizeY) {
+    public void drawBackground(boolean selected, boolean filled, float offX, float offY, float offPxX, float offPxY, int sizeX, int sizeY, float layer) {
+        drawBackground(selected, filled, Math.round(offX + offPxX), Math.round(offY + offPxY), sizeX, sizeY, layer);
+    }
+    public void drawBackground(boolean selected, boolean filled, int offX, int offY, int sizeX, int sizeY, float layer) {
+        if (filled) {
+            pushUBO.updateTex(null);
+            color.set(0.862f, 0.988f, 0.988f, 1);
+            drawQuad(offX, offY, sizeX, sizeY, layer, 1);
+        }
         menuColor(color);
         pushUBO.updateTex(Textures.gui);
         pushUBO.updateLayer(selected ? 2 : 1); //selector or inventory
         pushUBO.updateAtlasOffset(new Vector2i(0, 2160-13));
-        drawQuad(-3+offX, -3+offY, 13, 13, 1);
+        drawQuad(-3+offX, -3+offY, 13, 13, layer, 1);
         pushUBO.updateAtlasOffset(new Vector2i(3840-13, 2160-13));
-        drawQuad(sizeX-10+offX, -3+offY, 13, 13, 1);
+        drawQuad(sizeX-10+offX, -3+offY, 13, 13, layer, 1);
         pushUBO.updateAtlasOffset(new Vector2i(0, 22));
-        drawQuad(-3+offX, sizeY-10+offY, 13, 13, 1);
+        drawQuad(-3+offX, sizeY-10+offY, 13, 13, layer, 1);
         pushUBO.updateAtlasOffset(new Vector2i(3840-13, 22));
-        drawQuad(sizeX-10+offX, sizeY-10+offY, 13, 13, 1);
+        drawQuad(sizeX-10+offX, sizeY-10+offY, 13, 13, layer, 1);
         int horizontalLength = sizeX-20;
         if (horizontalLength > 0) {
             pushUBO.updateAtlasOffset(new Vector2i(13, 2160-3));
-            drawQuad(10+offX, -3+offY, horizontalLength, 3, 1);
+            drawQuad(10+offX, -3+offY, horizontalLength, 3, layer, 1);
             pushUBO.updateAtlasOffset(new Vector2i(13, 22));
-            drawQuad(10+offX, sizeY+offY, horizontalLength, 3, 1);
+            drawQuad(10+offX, sizeY+offY, horizontalLength, 3, layer, 1);
         }
         int verticalLength = sizeY-20;
         if (verticalLength > 0) {
             pushUBO.updateAtlasOffset(new Vector2i(0, 35));
-            drawQuad(-3+offX, 10+offY, 3, verticalLength, 1);
+            drawQuad(-3+offX, 10+offY, 3, verticalLength, layer, 1);
             pushUBO.updateAtlasOffset(new Vector2i(3840-3, 35));
-            drawQuad(sizeX+offX, 10+offY, 3, verticalLength, 1);
+            drawQuad(sizeX+offX, 10+offY, 3, verticalLength, layer, 1);
         }
     }
 
     public void drawItemHoverDetails(int offX, int offY, Item item) {
 //        pushUBO.updateTex(null); //use no texture
 //        color.set(0.015f, 0.023f, 0.027f, 1.f);
-        int detailsWidth = 0;
+        char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
+        int detailsWidth = 1+((chars.length+1)*charWidth);
+        boolean nameOnly = true;
         if (item instanceof BlueprintItem bpItem) {
-            detailsWidth = (GUI.enlargedSlotSize * 4);
-            drawBackground(true, offX+1, offY+1, enlargedSlotSize * 0.5f, 3 - GUI.enlargedSlotSize, detailsWidth, GUI.enlargedSlotSize + 16);
-            //drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - GUI.enlargedSlotSize, 0, 0, detailsWidth, GUI.enlargedSlotSize + 2, 1);
-            drawBlueprint(offX, offY, 0, ItemTypes.FORGE, ItemTypes.STEEL_FRAME);
+            nameOnly = false;
+            detailsWidth = Math.max(detailsWidth, GUI.enlargedSlotSize * 4);
+            drawBackground(true, true, offX+1, offY+1, enlargedSlotSize * 0.5f, 3 - GUI.enlargedSlotSize, detailsWidth, GUI.enlargedSlotSize + 16, 0.9f);
+            //drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - GUI.enlargedSlotSize, 0, 0, detailsWidth, GUI.enlargedSlotSize + 2, 0.9f, 1);
+            drawBlueprint(offX, offY, 0, ItemTypes.FORGE, ItemTypes.STEEL_FRAME, 0.9f);
         } else {
             List<Pair<ItemType, ItemType>> uses = Recipes.getHandcraftingUses(item.type);
             if (!uses.isEmpty()) {
-                detailsWidth = (GUI.enlargedSlotSize * 3);
-                drawBackground(true, offX+1, offY+1, enlargedSlotSize * 0.5f, 3 - (GUI.enlargedSlotSize * (uses.size())), detailsWidth, (GUI.enlargedSlotSize * uses.size()) + 16);
-                //drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - (GUI.enlargedSlotSize * (uses.size())), 0, 0, detailsWidth, (GUI.enlargedSlotSize * uses.size()) + 2, 1);
+                nameOnly = false;
+                detailsWidth = Math.max(detailsWidth, GUI.enlargedSlotSize * 3);
+                drawBackground(true, true, offX+1, offY+1, enlargedSlotSize * 0.5f, 3 - (GUI.enlargedSlotSize * (uses.size())), detailsWidth, (GUI.enlargedSlotSize * uses.size()) + 16, 0.9f);
+                //drawSlot(offX, offY, enlargedSlotSize * 0.5f, 3 - (GUI.enlargedSlotSize * (uses.size())), 0, 0, detailsWidth, (GUI.enlargedSlotSize * uses.size()) + 2, 0.9f, 1);
                 int offPxY = 0;
                 for (int i = 0; i < uses.size(); i++) {
                     Pair<ItemType, ItemType> recipe = uses.get(i);
-                    drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond());
+                    drawRecipe(offX, offY, offPxY, recipe.getFirst(), recipe.getSecond(), 0.9f);
                     offPxY -= GUI.enlargedSlotSize;
                 }
             }
         }
 
         offX += 1;
-        char[] chars = Languages.translate("item/"+item.type.name).toCharArray();
         color.set(1.f);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
-        int textBoxAtlasOffsetX = detailsWidth == 0 ? 321 : 110;
+        int textBoxAtlasOffsetX = nameOnly ? 321 : 110;
         pushUBO.updateAtlasOffset(new Vector2i(textBoxAtlasOffsetX, 0));
-        drawSlot(offX, offY, (charWidth*2) - 1, charHeight - 4, 0, 0, 10, 16, 1);
+        drawSlot(offX, offY, (charWidth*2) - 1, charHeight - 4, 0, 0, 10, 16, 0.9f, 1);
         int centerWidth = Math.max(detailsWidth-20, (charWidth*chars.length)-12);
         if (centerWidth > 0) {
             pushUBO.updateAtlasOffset(new Vector2i(textBoxAtlasOffsetX+10, 0));
-            drawSlot(offX, offY, ((charWidth * 2) - 1) + 10, charHeight - 4, 0, 0, centerWidth, 16, 1);
+            drawSlot(offX, offY, ((charWidth * 2) - 1) + 10, charHeight - 4, 0, 0, centerWidth, 16, 0.9f, 1);
         }
         pushUBO.updateAtlasOffset(new Vector2i(textBoxAtlasOffsetX+201, 0));
-        drawSlot(offX, offY, ((charWidth*2) - 1)+10+centerWidth, charHeight - 4, 0, 0, 10, 16, 1);
+        drawSlot(offX, offY, ((charWidth*2) - 1)+10+centerWidth, charHeight - 4, 0, 0, 10, 16, 0.9f, 1);
         pushUBO.updateLayer(0); //text
-        drawText(false, offX, offY, charWidth*2, charHeight, chars, 1, detailsWidth == 0);
+        drawText(false, offX, offY, charWidth*2, charHeight, chars, 0.9f, 1, detailsWidth == 0);
     }
-    public void drawRecipe(int offX, int offY, int offPxY, ItemType ingredient, ItemType product) {
+    public void drawRecipe(int offX, int offY, int offPxY, ItemType ingredient, ItemType product, float layer) {
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
         color.set(1, 1, 1, 0.85f);
         pushUBO.updateAtlasOffset(new Vector2i(44, 0));
-        drawSlot(offX, offY, (charWidth*2)+ GUI.enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+ GUI.enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
         pushUBO.updateAtlasOffset(new Vector2i(22, 0));
-        drawSlot(offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
-        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
         color.set(1.f);
         pushUBO.updateTex(Textures.items); //items
         pushUBO.updateAtlasOffset(ingredient.atlasOffset);
-        drawSlot(offX, offY, (charWidth*2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, layer, 1);
         pushUBO.updateAtlasOffset(product.atlasOffset);
-        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *2)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, layer, 1);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(0); //text
-        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize *1.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), layer, 1, true);
     }
-    public void drawBlueprint(int offX, int offY, int offPxY, ItemType station, ItemType product) {
+    public void drawBlueprint(int offX, int offY, int offPxY, ItemType station, ItemType product, float layer) {
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(2); //selector
         color.set(1, 1, 1, 0.85f);
         pushUBO.updateAtlasOffset(new Vector2i(44, 0));
-        drawSlot(offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
-        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, charWidth*2, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
         pushUBO.updateAtlasOffset(new Vector2i(22, 0));
-        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
-        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize, ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3), ((charHeight*-2.5f)+2)+offPxY, 0, 0, GUI.enlargedSlotSize, GUI.enlargedSlotSize, layer, 1);
         color.set(1.f);
         pushUBO.updateTex(Textures.items); //items
         pushUBO.updateAtlasOffset(station.atlasOffset);
-        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+GUI.enlargedSlotSize+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, layer, 1);
         pushUBO.updateAtlasOffset(product.atlasOffset);
-        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, 1);
+        drawSlot(offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*3)+3, ((charHeight*-2.5f)+5)+offPxY, 0, 0, ItemTypes.itemTexSize, ItemTypes.itemTexSize, layer, 1);
         pushUBO.updateTex(Textures.gui); //use gui atlas
         pushUBO.updateLayer(0); //text
-        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*0.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
-        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), 1, true);
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*0.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), layer, 1, true);
+        drawText(true, offX, offY, (charWidth*2)+(GUI.enlargedSlotSize*2.5f)+1, ((charHeight*-1.5f)+1)+offPxY, "-->".toCharArray(), layer, 1, true);
     }
     public void drawItem(Item item, int x, int y) {
         drawItem(item, x, y, false);
@@ -481,6 +430,9 @@ public class Menu {
         drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars, iScale, false);
     }
     public void drawText(boolean centered, int offsetX, int offsetY, float offsetPX, float offsetPY, char[] chars, int iScale, boolean inverted) {
+        drawText(centered, offsetX, offsetY, offsetPX, offsetPY, chars, 0.f, iScale, inverted);
+    }
+    public void drawText(boolean centered, int offsetX, int offsetY, float offsetPX, float offsetPY, char[] chars, float layer, int iScale, boolean inverted) {
         int scaledCharWidth = charWidth/iScale;
         float size = chars.length * scaledCharWidth;
         float centeredOffset = centered ? size*0.5f : 0.f;
@@ -489,7 +441,7 @@ public class Menu {
             int charAtlasOffset = getCharAtlasOffset(character);
             if (charAtlasOffset >= 0) {
                 pushUBO.updateAtlasOffset(new Vector2i(charAtlasOffset, inverted ? charHeight : 0));
-                drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : scaledCharWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight, iScale);
+                drawSlot(offsetX, offsetY, (offsetPX + offset - centeredOffset) + (centered ? 0 : scaledCharWidth*0.5f), offsetPY, 0, 0, charWidth, charHeight, layer, iScale);
             }
             offset += scaledCharWidth;
         }
@@ -500,10 +452,22 @@ public class Menu {
     public void drawSlot(boolean centeredX, boolean centeredY, float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, int iScale) {
         drawQuad(centeredX, centeredY, Math.round(x + offsetX + offPxX), Math.round(y + offsetY + offPxY), sizeX, sizeY, iScale);
     }
+    public void drawSlot(float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, float layer, int iScale) {
+        drawSlot(false, false, offsetX, offsetY, offPxX, offPxY, x, y, sizeX, sizeY, layer, iScale);
+    }
+    public void drawSlot(boolean centeredX, boolean centeredY, float offsetX, float offsetY, float offPxX, float offPxY, int x, int y, int sizeX, int sizeY, float layer, int iScale) {
+        drawQuad(centeredX, centeredY, Math.round(x + offsetX + offPxX), Math.round(y + offsetY + offPxY), sizeX, sizeY, layer, iScale);
+    }
     public void drawQuad(int x, int y, int scaleX, int scaleY, int iScale) {
         drawQuad(false, false, x, y, scaleX, scaleY, iScale);
     }
     public void drawQuad(boolean centeredX, boolean centeredY, int x, int y, int scaleX, int scaleY, int iScale) {
+        drawQuad(centeredX, centeredY, x, y, scaleX, scaleY, 0.f, iScale);
+    }
+    public void drawQuad(int x, int y, int scaleX, int scaleY, float layer, int iScale) {
+        drawQuad(false, false, x, y, scaleX, scaleY, layer, iScale);
+    }
+    public void drawQuad(boolean centeredX, boolean centeredY, int x, int y, int scaleX, int scaleY, float layer, int iScale) {
         if (iScale > 1) {
             GUI.updateScale(iScale);
         }
@@ -515,6 +479,6 @@ public class Menu {
         float xOffset = ((((menuPos.x()+(x*guiScaleMul))*2)-width)/width) + (centeredX ? 0 : xScale);
         float yOffset = ((((menuPos.y()+(y*guiScaleMul))*-2)+height)/height) - (centeredY ? 0 : yScale);
         pushUBO.updateSize(new Vector2i(scaleX, scaleY));
-        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, 0.f).scale(xScale, yScale, 1), color);
+        Renderer.drawQuadCentered(new Matrix4f().translate(xOffset, yOffset, layer).scale(xScale, yScale, 1), color);
     }
 }

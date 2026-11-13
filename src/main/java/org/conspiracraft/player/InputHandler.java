@@ -79,13 +79,23 @@ public class InputHandler {
                 }
             } else {
                 keyMods = SDL_GetModState();
-                if (GUI.pauseMenuOpen || GUI.inventoryOpen) {
+                boolean freeMouse = isKeyDown(SDL_SCANCODE_LALT) || GUI.pauseMenuOpen || GUI.inventoryOpen;
+                if (!freeMouse) {
+                    for (Menu menu : menus) {
+                        if (menu.unlocksMouse) {
+                            freeMouse = true;
+                            break;
+                        }
+                    }
+                }
+                if (freeMouse) {
                     SDL_SetWindowRelativeMouseMode(Window.window, false);
                 } else {
                     SDL_SetWindowRelativeMouseMode(Window.window, true);
                     player.rotate(displVec.x * (mouseSensitivity / 10), displVec.y * (mouseSensitivity / 10));
                     HandManager.input();
                 }
+                GUI.tick();
                 for (int i = menus.size()-1; i >= 0; i--) {
                     if (menus.get(i) == null) {menus.remove(i);}
                 }
@@ -101,6 +111,10 @@ public class InputHandler {
                     menus.remove(menu);
                 }
                 GUI.removeMenusSet.clear();
+                while (!GUI.addMenus.isEmpty()) {
+                    menus.addLast(GUI.addMenus.pollFirst());
+                }
+                GUI.addMenusSet.clear();
                 if (keyRelease(SDL_SCANCODE_F3)) {
                     GUI.showDebug = !GUI.showDebug;
                     //System.out.println(GUI.guiMS+"ms");

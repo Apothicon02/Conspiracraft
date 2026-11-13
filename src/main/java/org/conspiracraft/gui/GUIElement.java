@@ -19,4 +19,5 @@ public class GUIElement {
         size.set((int) (sizeRaw.x()*GUI.guiScaleMul), (int) (sizeRaw.y()*GUI.guiScaleMul));
     }
     public void tick(Menu menu) {}
+    public void draw(Menu menu) {}
 }
