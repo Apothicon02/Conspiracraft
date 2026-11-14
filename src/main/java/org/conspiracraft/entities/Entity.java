@@ -1,11 +1,15 @@
 package org.conspiracraft.entities;
 
 import org.conspiracraft.Main;
+import org.conspiracraft.audio.AudioController;
+import org.conspiracraft.audio.BlockSFX;
+import org.conspiracraft.audio.Source;
 import org.conspiracraft.blocks.Material;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Particle;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.gui.GUI;
 import org.conspiracraft.physics.AABB;
 import org.conspiracraft.physics.PhysicsHelper;
 import org.conspiracraft.utils.Utils;
@@ -29,6 +33,14 @@ public class Entity {
     public Vector3d pos;
     public Vector3d vel;
     public Vector3f dir;
+    public Random rand;
+    public boolean prevOnSolid = true;
+    public boolean bobbingDir = true;
+    public double prevBobbing = 0d;
+    public double bobbing = 0d;
+    public float bobbingScale = 0.f;
+    public float dynamicSpeed = 0.f;
+    public float dynamicSpeedOld = 0.f;
 
     public AABB aabb;
     public Entity(EntityType type, Vector3d pos, Matrix4f matrix, float scaleOffset) {
@@ -38,12 +50,14 @@ public class Entity {
             this.matrix.scale(this.type.size + scaleOffset);
         }
         this.pos = pos;
-        Vector3f scale = new Vector3f();
-        matrix.getScale(scale);
+        Vector3f scale = type.getScale();
+        scale.mul(matrix.getScale(new Vector3f()));
+        bobbingScale = scale.y() * -0.05f;
         scale.div(2);
         aabb = new AABB(pos.x()-scale.x(), pos.x()+scale.x(), pos.y()-scale.y(), pos.y()+scale.y(), pos.z()-scale.z(), pos.z()+scale.z());
         vel = new Vector3d();
         dir = new Vector3f();
+        rand = new Random();
     }
 
     public boolean hostile() {return EntityTags.hostile.tagged.contains(type.id);}
@@ -77,26 +91,27 @@ public class Entity {
 
     public Vector3d prevPos = new Vector3d();
     public boolean tick() {
-        prevPos.set(pos);
-        Vector3f scale = new Vector3f();
-        matrix.getScale(scale);
-        matrix.identity();
-        Vector3f halfScale = new Vector3f(scale).div(2);
-        AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
-        int blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
-        boolean onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
-        float friction = 0.99f; //1-airFriction=maxFriction
-        if (onSolid) {
-            friction *= 0.75f;
-        }
-        vel.mul(friction);
-        float modifiedGrav = World.worldType.gravity();
-        if (!onSolid) {
-            vel.y -= modifiedGrav;
-        }
-        PhysicsHelper.move(aabb, vel, new ArrayList<>(List.of(Main.player.playerAABB)));
-        pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
         return false;
+    }
+    public void baseTick() {
+        prevPos.set(pos);
+        prevBobbing = bobbing;
+    }
+    public void baseTickEnd(Vector3f scale, Matrix4f newMatrix) {
+        if (newMatrix.isFinite()) {matrix.set(newMatrix);}
+        pos.set(aabb.xMin+(scale.x()*0.5f), aabb.yMin+(scale.y()*0.5f), aabb.zMin+(scale.z()*0.5f));
+        dynamicSpeedOld = dynamicSpeed;
+        dynamicSpeed = (float) Math.clamp((vel.length() - 0.1f) * 4, 0, 1);
+    }
+
+    public void stepFx(Random rand, int blockOn) {
+        BlockSFX stepSFX = BlockTypes.blockTypes[blockOn >> 16].blockProperties.blockSFX;
+        if (stepSFX != null && stepSFX.stepIds.length > 0) {
+            Source stepSource = new Source(new Vector3f(pos), (stepSFX.stepGain + ((stepSFX.stepGain * rand.nextFloat()) / 3))*0.5f, stepSFX.stepPitch + ((stepSFX.stepPitch * rand.nextFloat()) / 3), 0, 0);
+            AudioController.disposableSources.add(stepSource);
+            stepSource.setVel(new Vector3f(vel));
+            stepSource.play((stepSFX.stepIds[stepSFX.stepIds.length == 1 ? 0 : rand.nextInt(stepSFX.stepIds.length - 1)]), true);
+        }
     }
 
     public void addParticle(Vector3d particlePos, int blockOn) {
@@ -120,5 +135,16 @@ public class Entity {
         Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
         interpolatedMatrix.setTranslation((float) (interpolatedPos.x()-warpOffset.x()), (float) (interpolatedPos.y()-warpOffset.y()), (float) (interpolatedPos.z()-warpOffset.z()));
         drawCube(interpolatedMatrix, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
+        drawDebug();
+    }
+    public void drawDebug() {
+        if (GUI.showDebug) {
+            pushUBO.updateTex(null);
+            Matrix4f interpolatedMatrix = new Matrix4f();
+            Vector3d interpolatedPos = Utils.getInterpolatedVec(prevPos, pos);
+            interpolatedMatrix.setTranslation((float) (interpolatedPos.x() - warpOffset.x()), (float) (interpolatedPos.y() - warpOffset.y()), (float) (interpolatedPos.z() - warpOffset.z()));
+            interpolatedMatrix.translate(0, 0.5f, 0).scale((float) (aabb.xMax - aabb.xMin), (float) (aabb.yMax - aabb.yMin), (float) (aabb.zMax - aabb.zMin));
+            drawCube(interpolatedMatrix, new Vector4f(0.95f, 0.95f, 0.95f, 1.f));
+        }
     }
 }

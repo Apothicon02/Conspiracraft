@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -40,6 +41,7 @@ public class Main {
     public static SDL_Event events;
     public static Player player;
 
+    public static AtomicBoolean pauseWorldTicking = new AtomicBoolean(false);
     public static boolean isClosing = false;
     public static boolean isSaving = false;
     public static List<Long> frameTimes = new ArrayList<>(List.of());
@@ -90,13 +92,16 @@ public class Main {
                 currentTick++;
                 timeAccum -= tickTimeNs;
                 if (ticksDone < 3) {
-                    World.tick();
-                    World.worldType.tick();
-                    World.tickItems();
+                    if (!pauseWorldTicking.get()) {
+                        World.tick();
+                        World.worldType.tick();
+                        World.tickItems();
+                    }
+
                     player.tick();
                 }
             }
-            interpolationTime = timeAccum/ tickTimeNs;
+            interpolationTime = pauseWorldTicking.get() ? 1 : (timeAccum/tickTimeNs);
 
             LightHelper.iterateLightQueue();
             Renderer.render();

@@ -39,11 +39,10 @@ public class FrogEntity extends Entity {
     public int croakSFXI = 0;
     @Override
     public boolean tick() {
-        prevPos.set(pos);
+        baseTick();
         prevLength = length;
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
-        Vector3f halfScale = new Vector3f(scale).div(2);
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
         int blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
@@ -107,8 +106,7 @@ public class FrogEntity extends Entity {
             Utils.normalize(dir.set(vel)).negate();
         }
         Matrix4f newMatrix = new Matrix4f().lookAlong(dir, up).invert().scale(scale);
-        if (newMatrix.isFinite()) {matrix.set(newMatrix);}
-        pos.set(aabb.xMin+halfScale.x(), aabb.yMin+halfScale.y(), aabb.zMin+halfScale.z());
+        baseTickEnd(scale, newMatrix);
         return false;
     }
 

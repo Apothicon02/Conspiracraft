@@ -1,5 +1,6 @@
 package org.conspiracraft.player;
 
+import org.conspiracraft.entities.ComplexEntityTypes;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.entities.ZombieEntity;
 import org.conspiracraft.gui.GUI;
@@ -82,7 +83,7 @@ public class InputHandler {
                 boolean freeMouse = isKeyDown(SDL_SCANCODE_LALT) || GUI.pauseMenuOpen || GUI.inventoryOpen;
                 if (!freeMouse) {
                     for (Menu menu : menus) {
-                        if (menu.unlocksMouse) {
+                        if (menu != null && menu.unlocksMouse) {
                             freeMouse = true;
                             break;
                         }
@@ -132,9 +133,9 @@ public class InputHandler {
                             entitiesAddQueue.removeLast();
                         }
                     } else if (keyRelease(SDL_SCANCODE_V)) {
-                        ZombieEntity entity = new ZombieEntity(EntityTypes.ZOMBIE, //new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
+                        ZombieEntity entity = new ZombieEntity(ComplexEntityTypes.ZOMBIE, //new AnimalEntity(Math.random() > 0.5f ? EntityTypes.SHEEP : EntityTypes.COW,
                                 new Vector3d(player.pos).add(0, player.eyeHeight, 0),
-                                new Matrix4f().rotateXYZ(r, r, 0),
+                                new Matrix4f().rotateXYZ(r, r, 0),//.scale(0.8f, 1.95f, 0.8f),
                                 (float)(Math.random()*-0.1f));
                         entity.vel = new Vector3d(player.camera.getForward()).mul(2).add(player.vel);
                         entitiesAddQueue.addLast(entity);

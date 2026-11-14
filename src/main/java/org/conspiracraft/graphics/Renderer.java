@@ -7,6 +7,7 @@ import org.conspiracraft.Settings;
 import org.conspiracraft.blocks.Materials;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.effects.Effect;
+import org.conspiracraft.entities.ComplexEntityTypes;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.entities.EntityTypes;
 import org.conspiracraft.graphics.buffers.Buffer;
@@ -220,6 +221,7 @@ public class Renderer {
         memFree(blueNoiseBuffer);
         GUI.fillTexture();
         EntityTypes.fillTexture(stack);
+        ComplexEntityTypes.fillTexture(stack);
         Celestials.fillTexture(stack);
         int texSize = Textures.skybox.width*Textures.skybox.height*6;
         Buffer stagingBuffer = new Buffer(stack, texSize*4, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
@@ -384,6 +386,7 @@ public class Renderer {
         //for (AmbientParticle particle : Main.player.ambientParticles) {particle.draw();}
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
+        for (Entity entity : entitiesComplex) {entity.draw();}
 //        updatePipeline(Pipelines.BLOCK);
 //        pushUBO.updateTex(Textures.materials);
 //        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
@@ -402,6 +405,7 @@ public class Renderer {
 //            quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
 //        }
 //        drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE*10.f), new Vector4f(1));
+
         updatePipeline(Pipelines.RASTER);
         pushUBO.updateTex(Textures.items);
         pushUBO.updateSize(new Vector2i(ItemTypes.itemTexSize));

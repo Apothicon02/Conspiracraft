@@ -13,6 +13,7 @@ import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.blocks.types.LightBlockType;
 import org.conspiracraft.effects.Effect;
 import org.conspiracraft.effects.Particle;
+import org.conspiracraft.entities.ComplexEntityType;
 import org.conspiracraft.entities.Entity;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.items.Item;
@@ -763,11 +764,22 @@ public class World {
     public static final ArrayDeque<Entity> entitiesAddQueue = new ArrayDeque<>();
     public static final List<Effect> effects = new ArrayList<>();
     public static final List<Entity> entities = new ArrayList<>(); //never add to this, add to the queue instead.
+    public static final List<Entity> entitiesComplex = new ArrayList<>(); //never add to this, add to the queue instead.
     public static void tick() {
         for (int i = 0; i < entities.size(); i++) {
             if(entities.get(i).tick()) {entities.remove(i--);}
         }
-        while (!entitiesAddQueue.isEmpty()) {entities.add(entitiesAddQueue.poll());}
+        for (int i = 0; i < entitiesComplex.size(); i++) {
+            if(entitiesComplex.get(i).tick()) {entitiesComplex.remove(i--);}
+        }
+        while (!entitiesAddQueue.isEmpty()) {
+            Entity entity = entitiesAddQueue.poll();
+            if (entity.type instanceof ComplexEntityType) {
+                entitiesComplex.add(entity);
+            } else {
+                entities.add(entity);
+            }
+        }
         for (int i = 0; i < effects.size(); i++) {
             if (effects.get(i).tick()) {effects.remove(i--);}
         }

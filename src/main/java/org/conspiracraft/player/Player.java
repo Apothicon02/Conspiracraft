@@ -446,6 +446,11 @@ public class Player {
                 aabbs.add(entity.aabb);
             }
         }
+        for (Entity entity : entitiesComplex) {
+            if (entity.playerCollidesWith()) {
+                aabbs.add(entity.aabb);
+            }
+        }
         if (World.worldType == WorldTypes.SPACE) {
             playerAABB.move(totalVel.x()*10, totalVel.y()*10, totalVel.z()*10);
             totalVel.set(0);
@@ -536,6 +541,11 @@ public class Player {
 
     public boolean safe(Vector3d pos) {
         for (Entity entity : entities) {
+            if (EntityTags.hostile.tagged.contains(entity.type.id) && entity.pos.distance(pos) < 24) {
+                return false;
+            }
+        }
+        for (Entity entity : entitiesComplex) {
             if (EntityTags.hostile.tagged.contains(entity.type.id) && entity.pos.distance(pos) < 24) {
                 return false;
             }

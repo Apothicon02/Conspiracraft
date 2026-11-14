@@ -66,9 +66,9 @@ void main() {
             uv = localPos.zy;
             if (localNorm.x > 0) {
                 uv.x = 1-abs(uv.x);
-                sideOffset = absSize.x*2;
+                sideOffset = absSize.y*2;
             } else {
-                sideOffset = absSize.x*4;
+                sideOffset = absSize.y*4;
             }
         } else if (absLocalNorm.y > max(absLocalNorm.x, absLocalNorm.z)) {
             uv = localPos.xz;
@@ -76,15 +76,15 @@ void main() {
                 uv.x = 1-uv.x;
                 sideOffset = 0;
             } else {
-                sideOffset = absSize.x*5;
+                sideOffset = absSize.y*5;
             }
         } else if (absLocalNorm.z > max(absLocalNorm.x, absLocalNorm.y)) {
             uv = localPos.xy;
             if (localNorm.z > 0) {
                 uv.x = 1-uv.x;
-                sideOffset = absSize.x;
+                sideOffset = absSize.y;
             } else {
-                sideOffset = absSize.x*3;
+                sideOffset = absSize.y*3;
             }
         }
         uv = abs(uv);

@@ -34,7 +34,7 @@ public class AshEntity extends Entity {
                 return true;
             }
         }
-        prevPos.set(pos);
+        baseTick();
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);

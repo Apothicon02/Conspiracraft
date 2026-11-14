@@ -32,6 +32,7 @@ public class Pipelines {
 //            SKYBOX = new Pipeline("raster.vert", "skybox.frag", 2, true),
 //            BLOCK = new Pipeline("raster.vert", "block.frag", 2, true, false),
             FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true, false),
+//            RASTER_COMPLEX = new Pipeline("raster.vert", "raster_complex.frag", 2, true),
             RASTER = new Pipeline("raster.vert", "raster.frag", 2, true),
             RASTER_VIEW = new Pipeline("raster_view.vert", "raster_infront.frag", 2, true),
             BLUR_HORIZONTAL = new Pipeline("quarterscreen.vert", "blur_horizontal.frag", 2, false),

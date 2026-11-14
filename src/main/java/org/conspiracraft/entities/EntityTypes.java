@@ -41,7 +41,6 @@ public class EntityTypes {
             VERY_CRACKED = create(new EntityType("misc/texture/very_cracked")),
             COMPLETELY_CRACKED = create(new EntityType("misc/texture/completely_cracked")),
             ROPE = create(new EntityType("misc/texture/rope")),
-            ZOMBIE = create(List.of(EntityTags.hostile), new EntityType("mob/texture/zombie")),
             FROG = create(new EntityType("animal/texture/frog"));
 
     private static EntityType create(EntityType type) {

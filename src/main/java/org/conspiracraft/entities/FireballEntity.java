@@ -21,7 +21,7 @@ public class FireballEntity extends Entity {
     public int ticksAlive = 0;
     @Override
     public boolean tick() {
-        prevPos.set(pos);
+        baseTick();
         Vector3f scale = new Vector3f();
         matrix.getScale(scale);
         Vector3f halfScale = new Vector3f(scale).div(2);

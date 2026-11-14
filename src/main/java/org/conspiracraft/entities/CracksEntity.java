@@ -29,7 +29,7 @@ public class CracksEntity extends Entity {
     public boolean tick() {
         if (Main.currentTick-minedLast > 50) {durability+=50;}
         if (durability <= 0 || durability > 1000) {return true;}
-        prevPos.set(pos);
+        baseTick();
         updateType();
         return false;
     }
