@@ -202,6 +202,10 @@ vec4 getCaustic(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/300.f : 0.f;
     return noise((checkPos*32)+time);
 }
+vec4 getCausticTwice(bool animated, vec2 checkPos, float dist) {
+    vec4 large = getCaustic(animated, checkPos);
+    return mix(max(getCaustic(animated, checkPos*6)*mix(large, vec4(1.f), 0.5f), large), large, dist);
+}
 vec4 getCausticInv(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/300.f : 0.f;
     return noiseInv((checkPos*32)+time);
@@ -406,6 +410,7 @@ vec4 getMaterialColor(vec4 model) {
     vec3 absNorm = abs(flatNormal);
     vec2 matUV = floatingHitPos.xz;//(absNorm.x > absNorm.y && absNorm.x > absNorm.z) ? floatingHitPos.yz : ((absNorm.y > absNorm.x && absNorm.y > absNorm.z) ? floatingHitPos.xz : floatingHitPos.xy);
     int yOff = 0; //top
+    vec2 dir = vec2(rayDir.xz);
     if (flatNormal.y < flatNormal.x && flatNormal.y < flatNormal.z) { //bottom
         yOff = materialHeight-materialWidth;
         matUV = floatingHitPos.zx;
@@ -413,10 +418,12 @@ vec4 getMaterialColor(vec4 model) {
         vec3 floatingUV = floatingHitPos;
         floatingUV.y = 1-floatingUV.y;
         if (absNorm.x > absNorm.z) {
+            dir = rayDir.zy;
             matUV = floatingUV.zy;
             if (flatNormal.x < 0) { matUV.x = 1-matUV.x; }
             yOff = flatNormal.x > 0 ? materialWidth : materialWidth*3;
         } else {
+            dir = rayDir.xy;
             matUV = floatingUV.xy;
             if (flatNormal.z > 0) { matUV.x = 1-matUV.x; }
             yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
@@ -429,19 +436,29 @@ vec4 getMaterialColor(vec4 model) {
     materialId-=(materialY*materialsPerRow);
     ivec2 localTexel = ivec2(floor(matUV*float(materialWidth)));
     localTexel = clamp(localTexel, ivec2(0), ivec2(materialWidth-1));
-    return texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
+    vec4 materialColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
+//    if (max(materialColor.r, max(materialColor.g, materialColor.b)) < 0.55f) {
+//        localTexel = ivec2(mod((matUV*float(materialWidth))+(dir*2), materialWidth));
+//        materialColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
+//        float pomDepth = clamp(length(dir)*0.5f, 0, 0.9f);
+//        if (max(materialColor.r, max(materialColor.g, materialColor.b)) >= 0.55f) {
+//            materialColor.rgb *= 1 - pomDepth;
+//        }
+//        materialColor.rgb *= 0.95f;
+//    }
+    return materialColor;
 }
 vec3 firstTintAddition = vec3(0);
 vec4 prevTintAddition = vec4(0);
 vec4 tint = vec4(1);
 vec3 tintNormal = vec3(0);
-void addTint(vec4 voxelColor, vec3 normal, bool shadow) {
+void addTint(vec4 voxelColor, vec3 thisNormal, bool shadow) {
     voxelColor.rgb = getMaterialColor(voxelColor).rgb;
     if (tintNormal == vec3(0)) {
-        tintNormal = normal;
+        tintNormal = thisNormal;
     }
     if (prevTintAddition != voxelColor) {
-        float brightness = dot((tint.a < 1 ? -1 : 1) * normal, globalUbo.skylight.xyz)*-0.0001f;
+        float brightness = dot((tint.a < 1 ? -1 : 1) * thisNormal, globalUbo.skylight.xyz)*-0.0001f;
         float tintMul = clamp(0.875f+brightness, 0.75f, 1.f);
         prevTintAddition = voxelColor;
         if (firstTintAddition == vec3(0)) {
@@ -455,6 +472,7 @@ void addTint(vec4 voxelColor, vec3 normal, bool shadow) {
 
 bool isGlass(int block) {return block == 11 || block == 12 || block == 13 || block == 66 || block == 67;}
 
+vec3 normal = vec3(0);
 ivec3 firstVoxelRayPos = ivec3(0);
 ivec3 firstBlockPos = ivec3(0);
 vec3 firstHitPos = vec3(0);
@@ -462,7 +480,6 @@ ivec2 firstBlock = ivec2(0);
 vec3 firstNormal = vec3(0);
 vec3 ogChunkPos = vec3(0);
 vec3 raySign = vec3(0);
-vec3 normal = vec3(0);
 ivec2 block = ivec2(0);
 LongStruct lod = LongStruct(0, 0);
 vec4 dda(bool shadow) {
@@ -939,8 +956,9 @@ void main() {
                 tiltedNormal = tint.a < 1 ? primaryTintNormal : (fluidInfront ? fluid.xyz : primaryNormal);
                 vec3 absNorm = abs(tiltedNormal);
                 vec3 causticPos = (floor((primaryTint.a < 1 ? primaryTintLightPos : (fluidInfront ? fluidPos : primaryLightPos))*blockSize)+0.5f)/blockSizeF;
-                vec3 causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz).xzy :
-                    absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy).xyz : getCaustic(true, causticPos.yz).zyx).xyz;
+                float surfDist = underwater ? 0 : clamp(distance(ogPos, causticPos)/200.f, 0, 0.4f);
+                vec3 causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCausticTwice(true, causticPos.xz, surfDist).xzy :
+                    absNorm.z > max(absNorm.x, absNorm.y) ? getCausticTwice(true, causticPos.xy, surfDist).xyz : getCausticTwice(true, causticPos.yz, surfDist).zyx).xyz;
                 tiltedNormal = normalize(tiltedNormal+(roughness*causticness));//(absNorm.y > max(absNorm.x, absNorm.z) ? vec3(causticness.x, 0, causticness.z) :
                     //(absNorm.z > max(absNorm.x, absNorm.y) ? vec3(causticness.x, causticness.y, 0) : vec3(0, causticness.y, causticness.z)))));
                 //vec3 bentNormal = mix(fluidInfront ? fluid.xyz : primaryNormal, tiltedNormal, roughness * 2);
@@ -1022,7 +1040,7 @@ void main() {
                     if (!isReflectEmissive) {
                         reflectColor.rgb = min(reflectColor.rgb, vec3(1));
                     }
-                    reflectFrensel = ((frensel * 0.75f) + 0.25f) * reflectivity;
+                    reflectFrensel = ((frensel * 0.9f) + 0.1f) * reflectivity;
                 }
                 if (isSky) {
                     blockLighting.w = 0;
@@ -1078,15 +1096,15 @@ void main() {
             outNormal.a = max(outNormal.a, fluidFogginess);
             vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb;
             vec3 sunDir = unzeroVec(normalize(source - fluidPos));
-            float normDot = mix(min(1, dot(tiltedNormal, normalize(source))*2), 1, fluidFogginess);
+            float normDot = mix(min(1, (dot(tiltedNormal, normalize(source))-0.5f)*4), 1, fluidFogginess);
             fluidColor.rgb*=normDot;
             color.rgb = mix(color.rgb, fluidColor, fluidFogginess);
 
             float surfDist = underwater ? 0 : clamp(distance(ogPos, fluidPos)/200.f, 0, 0.4f);
             vec3 absNorm = abs(fluid.xyz);
             vec3 causticPos = (floor(fluidPos*blockSize)+0.5f)/blockSizeF;
-            float causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCaustic(true, causticPos.xz) :
-                (absNorm.z > max(absNorm.x, absNorm.y) ? getCaustic(true, causticPos.xy) : getCaustic(true, causticPos.yz))).w;
+            float causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCausticTwice(true, causticPos.xz, surfDist) :
+                (absNorm.z > max(absNorm.x, absNorm.y) ? getCausticTwice(true, causticPos.xy, surfDist) : getCausticTwice(true, causticPos.yz, surfDist))).w;
             causticness += 1;
             causticness *= 0.15f;
             color.rgb = mix(color.rgb, vec3(max(fluidColor.r, max(fluidColor.g, fluidColor.b))), max(vec3(0), causticness-surfDist));

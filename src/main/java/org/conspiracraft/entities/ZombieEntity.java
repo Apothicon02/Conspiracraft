@@ -30,7 +30,7 @@ public class ZombieEntity extends Entity {
         AABB footAABB = new AABB(aabb.xMin, aabb.xMax, aabb.yMin - 0.075f, aabb.yMin, aabb.zMin, aabb.zMax);
         int blockOn = PhysicsHelper.getAnyBlock(footAABB).block();
         boolean onSolid = BlockTypes.blockTypes[blockOn >> 16].blockProperties.isCollidable;
-        ArrayList<AABB> aabbs = new ArrayList<>(List.of(Main.player.playerAABB));
+        ArrayList<AABB> aabbs = new ArrayList<>(List.of());
         for (Entity entity : World.entities) {
             if (entity.hostile()) {
                 aabbs.add(entity.aabb);

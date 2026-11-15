@@ -393,16 +393,18 @@ public class Renderer {
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
         for (Entity entity : entitiesComplex) {entity.draw();}
-        updatePipeline(Pipelines.BLOCK);
-        pushUBO.updateTex(Textures.materials);
-        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-        int material = Materials.TALL_GRASS.id();//(int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
-        pushUBO.updateAtlasOffset(new Vector2i((material*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(material/(Textures.materials.width/Materials.materialWidth))));
-        for (Region region : World.getAllRegions()) {
-            region.drawSolids(stack);
+        if (Main.currentTick-player.tickDied > 150) {
+            updatePipeline(Pipelines.BLOCK);
+            pushUBO.updateTex(Textures.materials);
+            pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+            int material = Materials.TALL_GRASS.id();//(int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
+            pushUBO.updateAtlasOffset(new Vector2i((material * Materials.materialWidth) % Textures.materials.width, Materials.materialHeight * (material / (Textures.materials.width / Materials.materialWidth))));
+            for (Region region : World.getAllRegions()) {
+                region.drawSolids(stack);
+            }
+            vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+            vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
         }
-        vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
-        vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
 
         updatePipeline(Pipelines.RASTER);
         pushUBO.updateTex(Textures.items);

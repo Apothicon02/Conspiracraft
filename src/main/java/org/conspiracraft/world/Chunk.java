@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.blocks.types.BlockTypes;
 import org.conspiracraft.utils.BitBuffer;
 import org.joml.*;
+import org.joml.Math;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -359,7 +360,7 @@ public class Chunk {
         if (blockPalette.size() > 1 || blockPalette.getFirst() != 0) {
             boolean containsTallGrass = false;
             for (int block : blockPalette) {
-                if ((block >> 16) == BlockTypes.TALL_GRASS.id) {
+                if ((block >> 16) == BlockTypes.GRASS.id) {
                     containsTallGrass = true;
                     break;
                 }
@@ -369,13 +370,17 @@ public class Chunk {
                     for (int x = 0; x < chunkSize; x++) {
                         for (int z = 0; z < chunkSize; z++) {
                             int block = getBlock(packLocalPos(x, y, z));
-                            if ((block >> 16) == BlockTypes.TALL_GRASS.id) {
-                                addQuadNorth(verts, indices, offX + x, offY + y, offZ + z + 0.5f, 1, 1, 0);
-                                addQuadEast(verts, indices, offX + x + 0.5f, offY + y, offZ + z, 0, 1, 1);
+                            if ((block >> 16) == BlockTypes.GRASS.id) {
+                                addUpQuad(verts, indices, offX + x + (0.25f*((int)(2*Math.random())-1)), offY + y + 1.0625f, offZ + z + (0.25f*((int)(2*Math.random())-1)), 1.25f, 0, 1.25f);
+//                                addQuadNorth(verts, indices, offX + x, offY + y, offZ + z + 0.5f, 1, 1, 0);
+//                                addQuadEast(verts, indices, offX + x + 0.5f, offY + y, offZ + z, 0, 1, 1);
 //                                addUpQuad(verts, indices, offX + x, offY + y + 1, offZ + z + 1.f, 1, 0, 0.3f);
 //                                addUpQuad(verts, indices, offX + x, offY + y + 1, offZ + z - 0.3f, 1, 0, 0.3f);
 //                                addUpQuad(verts, indices, offX + x + 1.f, offY + y + 1, offZ + z, 0.3f, 0, 1);
 //                                addUpQuad(verts, indices, offX + x - 0.3f, offY + y + 1, offZ + z, 0.3f, 0, 1);
+                            } else if ((block >> 16) == BlockTypes.TALL_GRASS.id) {
+                                addQuadNorth(verts, indices, offX + x, offY + y, offZ + z + 0.5f, 1, 1, 0);
+                                addQuadEast(verts, indices, offX + x + 0.5f, offY + y, offZ + z, 0, 1, 1);
                             }
                         }
                     }

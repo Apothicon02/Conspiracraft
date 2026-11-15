@@ -1124,11 +1124,11 @@ public class Earth extends WorldType {
                                     if (foliageChance < 0.367f) {
                                         int type;
                                         if ((blockOn & 0xFFFF) == 3) {
-                                            type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.032f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
+                                            type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.132f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
                                         } else if ((blockOn & 0xFFFF) == 1) {
-                                            type = foliageNoise < 0.06f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
+                                            type = foliageNoise < 0.16f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
                                         } else {
-                                            type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
+                                            type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.1f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
                                         }
                                         setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? ((blockOn & 0xFFFF) * 4) : 0) + rand.nextInt(4));
                                     }
