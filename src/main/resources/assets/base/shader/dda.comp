@@ -786,7 +786,7 @@ void main() {
             vec4 clip = vec4(uv*2.0f-1.0f, depth, 1.0f);
             vec4 view = invProj*clip;
             view/=view.w;
-            primaryLightPos = (invView*view).xyz;
+            primaryLightPos = (invView*view).xyz;//+(primaryFlatNormal*0.5f);
             primaryShadowPos = primaryLightPos;
             blockPos = ivec3(primaryLightPos);
             block = ivec2(0);
@@ -979,7 +979,7 @@ void main() {
 //                        vec3 maxedSun = globalUbo.sun;
 //                        maxedSun.y = max(0, maxedSun.y);
 //                        float sunHeight = abs(dot(normalize(maxedSun - primaryShadowPos), vec3(0, 1, 0)));
-                        shadowFactor = !celestialSource ? 0.02f : mix(0.5f, 0.875f, 1-max(0, normDot));
+                        shadowFactor = !celestialSource ? 0.02f : mix(0.5f, 0.75f, 1-max(0, normDot));
                     }
                 }
                 vec3 idealReflectDir = reflect(ogDir, fluidInfront ? fluid.xyz : primaryFirstNormal);

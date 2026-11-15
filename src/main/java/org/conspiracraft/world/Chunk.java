@@ -198,7 +198,7 @@ public class Chunk {
             int lodIdx = packLodPos(x >> lodBits, y >> lodBits, z >> lodBits);
             int bitIdx = (x % lodSize) + (y % lodSize) * lodSize + (z % lodSize) * lodSize * lodSize;
             long mask = 1L << bitIdx;
-            if (type <= 0) {lods[lodIdx] &= ~mask;} else {lods[lodIdx] |= mask;}
+            if (type <= 0 || type == BlockTypes.TALL_GRASS.id) {lods[lodIdx] &= ~mask;} else {lods[lodIdx] |= mask;}
         }
         int block = packInts(type, subType);
         int key = blockPalette.indexOf(block);
@@ -353,6 +353,32 @@ public class Chunk {
                 for (int z = 0; z < chunkSize; z++) {
                     createNorthQuadFluid(chunkNorth, fluidVerts, fluidIndices, y, z, offX, offY, offZ);
                     createSouthQuadFluid(chunkSouth, fluidVerts, fluidIndices, y, z, offX, offY, offZ);
+                }
+            }
+        }
+        if (blockPalette.size() > 1 || blockPalette.getFirst() != 0) {
+            boolean containsTallGrass = false;
+            for (int block : blockPalette) {
+                if ((block >> 16) == BlockTypes.TALL_GRASS.id) {
+                    containsTallGrass = true;
+                    break;
+                }
+            }
+            if (containsTallGrass) {
+                for (int y = 0; y < chunkSize; y++) {
+                    for (int x = 0; x < chunkSize; x++) {
+                        for (int z = 0; z < chunkSize; z++) {
+                            int block = getBlock(packLocalPos(x, y, z));
+                            if ((block >> 16) == BlockTypes.TALL_GRASS.id) {
+                                addQuadNorth(verts, indices, offX + x, offY + y, offZ + z + 0.5f, 1, 1, 0);
+                                addQuadEast(verts, indices, offX + x + 0.5f, offY + y, offZ + z, 0, 1, 1);
+//                                addUpQuad(verts, indices, offX + x, offY + y + 1, offZ + z + 1.f, 1, 0, 0.3f);
+//                                addUpQuad(verts, indices, offX + x, offY + y + 1, offZ + z - 0.3f, 1, 0, 0.3f);
+//                                addUpQuad(verts, indices, offX + x + 1.f, offY + y + 1, offZ + z, 0.3f, 0, 1);
+//                                addUpQuad(verts, indices, offX + x - 0.3f, offY + y + 1, offZ + z, 0.3f, 0, 1);
+                            }
+                        }
+                    }
                 }
             }
         }

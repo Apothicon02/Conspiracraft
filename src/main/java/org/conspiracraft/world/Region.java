@@ -274,19 +274,21 @@ public class Region {
             }
             memFloatBuffer(blockVertexStagingBuf.pointer.get(0), verts.size()).put(verts.elements(), 0, verts.size());
             memIntBuffer(blockIndexStagingBuf.pointer.get(0), indices.size()).put(indices.elements(), 0, indices.size());
-//            if (uploadSet.add(condensedRegionPos)) {
-//                uploadQueue.addLast(condensedRegionPos);
-//            }
+            if (uploadSet.add(condensedRegionPos)) {
+                uploadQueue.addLast(condensedRegionPos);
+            }
         }
         //System.out.println("Took "+((System.nanoTime()-start)/1000000)+"ms to mesh fluid in a 128^3 region.");
     }
-    public void uploadMesh(MemoryStack stack) {
+    public void uploadFluidMesh(MemoryStack stack) {
         if (!fluidIndices.isEmpty()) {
             fluidIndicesAmt = fluidIndices.size();
             BufferHelper.copyBuffer(stack, fluidVertexStagingBuf.buffer[0], fluidVertexBuf.buffer[0], fluidVerts.size() * 4L);
             BufferHelper.copyBuffer(stack, fluidIndexStagingBuf.buffer[0], fluidIndexBuf.buffer[0], fluidIndices.size() * 4L);
         }
-        if (!indices.isEmpty()) {
+    }
+    public void uploadMeshSolid(MemoryStack stack) {
+        if (!indices.isEmpty() && blockVertexBuf != null && blockIndexBuf != null) {
             blockIndicesAmt = indices.size();
             BufferHelper.copyBuffer(stack, blockVertexStagingBuf.buffer[0], blockVertexBuf.buffer[0], verts.size() * 4L);
             BufferHelper.copyBuffer(stack, blockIndexStagingBuf.buffer[0], blockIndexBuf.buffer[0], indices.size() * 4L);

@@ -30,7 +30,7 @@ public class Pipelines {
             SSAO = new Pipeline("fullscreen.vert", "ssao.frag", 1, false),
             CUBE = new Pipeline("raster.vert", "cube.frag", 2, true),
 //            SKYBOX = new Pipeline("raster.vert", "skybox.frag", 2, true),
-//            BLOCK = new Pipeline("raster.vert", "block.frag", 2, true, false),
+            BLOCK = new Pipeline("raster.vert", "block.frag", 2, true, false),
             FLUID = new Pipeline("raster.vert", "fluid.frag", 1, true, false),
 //            RASTER_COMPLEX = new Pipeline("raster.vert", "raster_complex.frag", 2, true),
             RASTER = new Pipeline("raster.vert", "raster.frag", 2, true),

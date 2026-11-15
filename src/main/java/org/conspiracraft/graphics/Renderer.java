@@ -45,7 +45,6 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
-import static org.conspiracraft.Main.currentTick;
 import static org.conspiracraft.Main.player;
 import static org.conspiracraft.graphics.Graphics.*;
 import static org.conspiracraft.graphics.Graphics.indexBuf;
@@ -116,10 +115,17 @@ public class Renderer {
                         //updateSet.remove(chunkPos);
                     }
                     updateSet.clear();
+                    while (!uploadQueue.isEmpty()) {
+                        long cRP = uploadQueue.pollFirst();
+                        Region region = getRegion(cRP);
+                        if (region != null) {region.uploadMeshSolid(stack);}
+                        //uploadSet.remove(cRP);
+                    }
+                    uploadSet.clear();
                     while (!fluidUploadQueue.isEmpty()) {
                         long cRP = fluidUploadQueue.pollFirst();
                         Region region = getRegion(cRP);
-                        if (region != null) {region.uploadMesh(stack);}
+                        if (region != null) {region.uploadFluidMesh(stack);}
                         //fluidUploadSet.remove(cRP);
                     }
                     fluidUploadSet.clear();
@@ -387,24 +393,16 @@ public class Renderer {
         for (Effect effect : effects) {effect.draw();}
         for (Entity entity : entities) {entity.draw();}
         for (Entity entity : entitiesComplex) {entity.draw();}
-//        updatePipeline(Pipelines.BLOCK);
-//        pushUBO.updateTex(Textures.materials);
-//        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-//        for (Region region : World.getAllRegions()) {
-//            int material = (int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
-//            pushUBO.updateAtlasOffset(new Vector2i((material*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(material/(Textures.materials.width/Materials.materialWidth))));
-//            region.drawSolids(stack);
-//        }
-//        updatePipeline(Pipelines.SKYBOX);
-//        pushUBO.updateTex(Textures.skybox);
-//        pushUBO.updateAtlasOffset(new Vector2i(0));
-//        pushUBO.updateSize(new Vector2i(Textures.skybox.width));
-//        Planet activePlanet = Main.player.getPlanet();
-//        Quaternionf quaternion = new Quaternionf();
-//        if (activePlanet != null) {
-//            quaternion.rotationXYZ(-activePlanet.rot.x, -activePlanet.rot.y, -activePlanet.rot.z);
-//        }
-//        drawCubeInv(new Matrix4f().rotate(quaternion).scale(Integer.MAX_VALUE*10.f), new Vector4f(1));
+        updatePipeline(Pipelines.BLOCK);
+        pushUBO.updateTex(Textures.materials);
+        pushUBO.updateSize(new Vector2i(Materials.materialWidth));
+        int material = Materials.TALL_GRASS.id();//(int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
+        pushUBO.updateAtlasOffset(new Vector2i((material*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(material/(Textures.materials.width/Materials.materialWidth))));
+        for (Region region : World.getAllRegions()) {
+            region.drawSolids(stack);
+        }
+        vkCmdBindVertexBuffers(currentCmdBuffer, 0, stack.longs(vertexBuf.buffer), stack.longs(0));
+        vkCmdBindIndexBuffer(currentCmdBuffer, indexBuf.buffer[0], 0, VK_INDEX_TYPE_UINT32);
 
         updatePipeline(Pipelines.RASTER);
         pushUBO.updateTex(Textures.items);
