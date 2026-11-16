@@ -11,6 +11,7 @@ import org.conspiracraft.world.LightHelper;
 import org.conspiracraft.world.Region;
 import org.conspiracraft.world.World;
 import org.lwjgl.sdl.SDL_Event;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class Main {
             System.err.println("Uncaught exception in thread " + thread.getName());
             throwable.printStackTrace();
         });
+        Configuration.STACK_SIZE.set(128); //double default stack size.
         ByteBuffer eventContainer = ByteBuffer.allocateDirect(128);
         events = new SDL_Event(eventContainer);
         window = new Window();

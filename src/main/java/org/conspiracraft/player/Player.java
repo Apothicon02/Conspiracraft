@@ -525,7 +525,7 @@ public class Player {
         Particle particle = new Particle(new Vector3d(pos), new Matrix4f().scale(0.075f + (float) (0.05f * Math.random())));
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         particle.tex = Textures.materials;
-        int id = ((Material) BlockTypes.blockTypes[blockOn >> 16].materials.values().toArray()[0]).id();
+        int id = ((Material) BlockTypes.blockTypes[blockOn >> 16].materials.values().toArray()[0]).id()*2;
         particle.texOffset.set((id*Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);
     }

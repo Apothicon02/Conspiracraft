@@ -49,12 +49,12 @@ public class Pipelines {
         for (Pipeline pipeline : pipelines) {pool.submit(() -> {
             try {
                 pipeline.compile();
-            } catch (IOException e) {e.printStackTrace();}
+            } catch (Throwable e) {e.printStackTrace();}
         });}
         for (ComputePipeline pipeline : computePipelines) {pool.submit(() -> {
             try {
                 pipeline.compile();
-            } catch (IOException e) {e.printStackTrace();}
+            } catch (Throwable e) {e.printStackTrace();}
         });}
         pool.shutdown();
     }

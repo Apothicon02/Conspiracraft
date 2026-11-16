@@ -1,9 +1,7 @@
 package org.conspiracraft.blocks;
 
-import org.conspiracraft.blocks.types.BlockType;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.textures.ImageHelper;
-import org.conspiracraft.graphics.textures.Texture3D;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
@@ -11,9 +9,13 @@ import org.lwjgl.system.MemoryStack;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.conspiracraft.Main.mainFolder;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
 import static org.lwjgl.vulkan.VK10.*;
@@ -135,34 +137,52 @@ public class Materials {
             Material material = materials[i];
             BufferedImage image = Utils.loadImage("block/"+material.path());
             int height = image.getHeight();
-            ByteBuffer matBuf = Utils.imageToBuffer(image);
-            if (height <= materialWidth) {
-                copyTexture(matBuf, i, materialWidth, 0, 0);
-                copyTexture(matBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width);
-                copyTexture(matBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*2);
-                copyTexture(matBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*3);
-                copyTexture(matBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*4);
-                copyTexture(matBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*5);
+            String normPath = "block/"+material.path()+"_n";
+            BufferedImage imageNorm;
+            if (Files.exists(Paths.get(mainFolder + "assets/base/" + normPath+".png"))) {
+                imageNorm = Utils.loadImage(normPath);
+            } else if (height <= materialWidth) {
+                imageNorm = Utils.loadImage("block/misc/material/air_norm");
             } else if (height < materialHeight) {
-                copyTexture(matBuf, i, materialWidth, 0, 0);
-                copyTexture(matBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width);
-                copyTexture(matBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*2);
-                copyTexture(matBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*3);
-                copyTexture(matBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*4);
-                copyTexture(matBuf, i, materialWidth, materialWidth*materialWidth*2, materialWidthL*Textures.materials.width*5);
+                imageNorm = Utils.loadImage("block/misc/material/debug_3_norm");
+            }  else {
+                imageNorm = Utils.loadImage("block/misc/material/debug_6_norm");
+            }
+            ByteBuffer matBuf = Utils.imageToBuffer(image);
+            ByteBuffer normBuf = Utils.imageToBuffer(imageNorm);
+            if (height != imageNorm.getHeight()) {
+                System.out.println("Albedo and normal heights do not match!");
+            }
+            if (height <= materialWidth) {
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, 0);
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width);
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*2);
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*3);
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*4);
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*5);
+            } else if (height < materialHeight) {
+                copyTextures(matBuf, normBuf, i, materialWidth, 0, 0);
+                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width);
+                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*2);
+                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*3);
+                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*4);
+                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth*2, materialWidthL*Textures.materials.width*5);
             } else {
-                copyTexture(matBuf, i, materialHeight, 0, 0);
+                copyTextures(matBuf, normBuf, i, materialHeight, 0, 0);
             }
         }
         ImageHelper.fillImage(stack, Textures.materials, materialBuffer);
     }
-    public static void copyTexture(ByteBuffer buf, int i, int height, long srcOffset, long dstOffset) {
-        long loopedI = i * materialWidthL;
+    public static void copyTextures(ByteBuffer buf, ByteBuffer normBuf, int i, int height, long srcOffset, long dstOffset) {
+        long loopedI = i * 2 * materialWidthL;
         long matRow = loopedI/Textures.materials.width;
         loopedI = (loopedI-(matRow*Textures.materials.width))+(matRow*Textures.materials.width*materialHeight);
         for (long row = 0; row < height; row++) {
             memCopy(memAddress(buf) + ((srcOffset+(row * materialWidth)) * 4L),
                     materialBuffer.pointer.get(0) + ((dstOffset + (row * Textures.materials.width + loopedI)) * 4L),
+                    materialWidth * 4L);
+            memCopy(memAddress(normBuf) + ((srcOffset+(row * materialWidth)) * 4L),
+                    materialBuffer.pointer.get(0) + ((dstOffset + (row * Textures.materials.width + loopedI + materialWidth)) * 4L),
                     materialWidth * 4L);
         }
     }
