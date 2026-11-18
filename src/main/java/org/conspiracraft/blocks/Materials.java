@@ -111,6 +111,11 @@ public class Materials {
             BARREL = create("crafted/barrel/material/oak"),
             PAPER = create("crafted/material/paper"),
             SHOJI = create("crafted/material/shoji"),
+            BRICKS = create("crafted/material/bricks"),
+            STONE_BRICKS = create("crafted/material/stone_bricks"),
+            MARBLE_BRICKS = create("crafted/material/marble_bricks"),
+            BASALT_BRICKS = create("crafted/material/basalt_bricks"),
+            ICE_BRICKS = create("crafted/material/ice_bricks"),
             BLUEPRINT = create("machine/material/blueprint"),
             STEEL = create("crafted/material/steel"),
             OBSIDIAN_DUST = create("natural/material/obsidian_dust");

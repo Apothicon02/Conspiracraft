@@ -1088,6 +1088,12 @@ void main() {
                 vec3 sunDir = unzeroVec(normalize(source - fluidPos));
                 float normDot = mix(min(1, dot(-tiltedNormal, normalize(source))*2), 1, fluidFogginess);
                 fluidColor.rgb*=mix(normDot, 1.f, fluidFogginess);
+
+                vec3 absNorm = abs(fluid.xyz);
+                vec3 causticPos = (floor(fluidPos*blockSize)+0.5f)/blockSizeF;
+                float causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCausticSmall(true, causticPos.xz) :
+                (absNorm.z > max(absNorm.x, absNorm.y) ? getCausticSmall(true, causticPos.xy) : getCausticSmall(true, causticPos.yz))).w;
+                color.rgb = mix(color.rgb, vec3(1.f), max(vec3(0), causticness-fluidFogginess));
             }
             primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
@@ -1099,9 +1105,9 @@ void main() {
             primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
             vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb;
-            vec3 sunDir = unzeroVec(normalize(source - fluidPos));
-            float normDot = mix(min(1, (dot(tiltedNormal, normalize(source))-0.5f)*4), 1, fluidFogginess);
-            fluidColor.rgb*=normDot;
+//            vec3 sunDir = unzeroVec(normalize(source - fluidPos));
+//            float normDot = mix(min(1, (dot(tiltedNormal, normalize(source))-0.5f)*4), 1, fluidFogginess);
+//            fluidColor.rgb*=normDot;
             color.rgb = mix(color.rgb, fluidColor, fluidFogginess);
 
             float surfDist = underwater ? 0 : clamp(distance(ogPos, fluidPos)/30.f, 0, 0.9f);
