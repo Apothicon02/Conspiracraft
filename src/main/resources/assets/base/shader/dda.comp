@@ -213,9 +213,10 @@ vec4 getCaustic(bool animated, vec2 checkPos) {
     return noise((checkPos*32)+time);
 }
 const int materialWidth = 16;
+const int materialSetWidth = materialWidth*3;
 const int materialHeight = materialWidth*6;
-const int materialAtlasWidth = 512;
-const int materialsPerRow = materialAtlasWidth/materialWidth;
+const int materialAtlasWidth = 2304;
+const int materialsPerRow = materialAtlasWidth/materialSetWidth;
 vec4 getCausticSmall(bool animated, vec2 checkPos) {
     float time = animated ? globalUbo.time/50.f : 0.f;
     vec3 model = sampleAtlas(4, 4, 4, 1, 15).rgb;
@@ -230,9 +231,9 @@ vec4 getCausticSmall(bool animated, vec2 checkPos) {
     small.rgb = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2((materialId*materialWidth*2)+materialWidth, materialY*materialHeight)+localTexel), 0).rgb*0.4f;
     return small;
 }
-vec4 getCausticTwice(bool animated, vec2 checkPos, float dist) {
-    vec4 large = getCaustic(animated, checkPos*0.25f);
-    return mix(max(getCausticSmall(animated, checkPos), vec4(0, 0, 0, large.a)), large, pow(clamp((dist-0.025f)*10, 0, 1), 0.67f)-0.1f);
+vec4 getCausticThrice(bool animated, vec2 checkPos, float dist) {
+    vec4 large = mix(getCaustic(animated, checkPos), getCaustic(animated, checkPos*0.25f), min(1, dist*2))*max(0.1f, sqrt(0.5f-dist));
+    return mix(max(getCausticSmall(animated, checkPos), vec4(0, 0, 0, large.a)), large, pow(clamp((dist-0.025f)*10, 0, 1), 0.67f));
     //    return mix(max(pow(getCaustic(animated, (checkPos*24)+time), vec4(1.f, 1.f, 1.f, 2.5f))*vec4(1.5f, 1.5f, 1.5f, 4.f), large), large, pow(clamp((dist-0.025f)*10, 0, 1), 0.67f)-0.1f);
 }
 vec4 getCausticInv(bool animated, vec2 checkPos) {
@@ -394,8 +395,9 @@ ivec3 voxelRayPos = ivec3(0);
 struct MaterialStruct {
     vec4 albedo;
     vec4 norm;
+    vec4 fx;
 };
-MaterialStruct getMaterialColor(vec4 model) {
+MaterialStruct getMaterialColor(int materialId) {
     vec3 unoffsetHitPos = hitPos-(flatNormal*0.0006f);
     vec3 floatingHitPos = unoffsetHitPos-floor(unoffsetHitPos);
     vec3 absNorm = abs(flatNormal);
@@ -420,13 +422,13 @@ MaterialStruct getMaterialColor(vec4 model) {
             yOff = flatNormal.z > 0 ? materialWidth*2 : materialWidth*4;
         }
     }
-    int materialId = int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16));
     int materialY = int(materialId/materialsPerRow);
     materialId-=(materialY*materialsPerRow);
     ivec2 localTexel = ivec2(floor(matUV*float(materialWidth)));
     localTexel = clamp(localTexel, ivec2(0), ivec2(materialWidth-1));
-    vec4 materialColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth*2, (materialY*materialHeight)+yOff)+localTexel), 0);
-    vec4 materialNorm = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2((materialId*materialWidth*2)+materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
+    vec4 materialColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth*3, (materialY*materialHeight)+yOff)+localTexel), 0);
+    vec4 materialNorm = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2((materialId*materialWidth*3)+materialWidth, (materialY*materialHeight)+yOff)+localTexel), 0);
+    vec4 materialFx = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2((materialId*materialWidth*3)+(materialWidth*2), (materialY*materialHeight)+yOff)+localTexel), 0);
     materialNorm.xyz = (materialNorm.xyz*2)-1;
 
 //    if (max(materialColor.r, max(materialColor.g, materialColor.b)) < 0.55f) {
@@ -438,7 +440,10 @@ MaterialStruct getMaterialColor(vec4 model) {
 //        }
 //        materialColor.rgb *= 0.95f;
 //    }
-    return MaterialStruct(materialColor, materialNorm);
+    return MaterialStruct(materialColor, materialNorm, materialFx);
+}
+MaterialStruct getMaterialColor(vec4 model) {
+    return getMaterialColor(int(int(round(model.r*255)) | (int(round(model.g*255)) << 8) | (int(round(model.b*255)) << 16)));
 }
 vec3 firstTintAddition = vec3(0);
 vec4 prevTintAddition = vec4(0);
@@ -676,7 +681,7 @@ vec3 mipmap(vec3 color) {
 float fogDist = pow(globalUbo.fogginess, 4);
 float getFogginess(bool isSky, vec3 pos, float mul, float maxFog) {
     float elevation = (floor(globalPos.y/height)*height)+pos.y;
-    return globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFog : clamp((sqrt(max(abs(ogPos.x-pos.x), max(abs(ogPos.y-pos.y), abs(ogPos.z-pos.z))) / (renderDistance * fogDist))-0.25f) * (gradient(elevation, SEA_LEVEL, SEA_LEVEL+32, 0, max(0, (noiseInv(pos.xz).w+1.f)*0.5f))+gradient(elevation, SEA_LEVEL+32, SEA_LEVEL+320, 0.75f, 1)) * mul, 0.f, maxFog));
+    return globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFog : clamp((sqrt(max(abs(ogPos.x-pos.x), max(abs(ogPos.y-pos.y), abs(ogPos.z-pos.z))) / (renderDistance * fogDist))-0.25f) * (gradient(elevation, SEA_LEVEL, SEA_LEVEL+32, 0, max(0, (noiseInv(pos.xz).w+0.5f)*0.5f))+gradient(elevation, SEA_LEVEL+32, SEA_LEVEL+320, 0.75f, 1)) * mul, 0.f, maxFog));
 }
 vec3 hueShift(vec3 color, float hue) {
     const vec3 k = vec3(0.57735, 0.57735, 0.57735);
@@ -741,21 +746,22 @@ void main() {
         bool emissive = false;
         vec4 outNormal = vec4(0);
         vec4 color = dda(false);
-        vec4 materialNorm = vec4(0.f, 0.f, 1.f, 0.f);
+        MaterialStruct material = MaterialStruct(vec4(0), vec4(0, 0, 1, 0), vec4(0));
+        float materialBrightness = 0.f;
         float reflectivity = 0;//(tint.a < 1 || block.x == 74 || block.x == 81) ? 1.f : ((block.x == 57 || block.x == 59)  ? 0.2f : ((block.x == 56 || block.x == 60 || block.x == 61) ? 0.75f : ((block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 84 || block.x == 83 || block.x == 90) ? 0.5f : 0.f)));
         vec3 source = globalUbo.fogginess <= 0 ? globalUbo.skylight.xyz : vec3(globalUbo.skylight.x, globalUbo.skylight.y > 0 ? max(globalUbo.skylight.y, shadowPos.y + 9) : globalUbo.skylight.y, globalUbo.skylight.z);
         if (color.a > 0.f) {
-            MaterialStruct material = getMaterialColor(color);
+            material = getMaterialColor(color);
+            materialBrightness = max(material.albedo.r, max(material.albedo.g, material.albedo.b));
             color = material.albedo;
-            materialNorm = material.norm;
+            reflectivity = material.fx.g;
             vec3 tangent = (abs(normal.y) > 0.999) ? vec3(1.0, 0.0, 0.0) : normalize(cross(vec3(0.0, 1.0, 0.0), normal));
-            normal.xyz = normalize(tangent * materialNorm.x + cross(normal, tangent) * materialNorm.y + normal * materialNorm.z);
-            //normal.xyz = normalize(normal.xyz+materialNorm.xyz);
-            if (material.albedo.a > alphaMax && material.albedo.a < 1.f) {
+            normal.xyz = normalize(tangent * material.norm.x + cross(normal, tangent) * material.norm.y + normal * material.norm.z);
+            //normal.xyz = normalize(normal.xyz+material.norm.xyz);
+            if (material.fx.a < 1.f) {
                 emissive = true;
-                color.rgb *= 2;
+                color.rgb *= 2-material.fx.a;
             } else {
-                reflectivity = 1 - material.albedo.a;
                 color.rgb *= sqrt((dot(normal.xyz, normalize(source))*0.8f)+0.9f);
                 if (globalUbo.renderToggles.x <= 0) {
                     color.rgb *= normal.y > 0 ? 1.f : (normal.y < 0 ? 0.825f : (abs(normal.x) > abs(normal.z) ? 0.95f : 0.875f));
@@ -787,7 +793,7 @@ void main() {
         float infrontDepth = min(1.f, texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.x)], coords, 0).r);
         if (infrontDepth > 0) {infrontDepth = (infrontDepth*0.1f)+0.9f;}
         float rasterDepth = max(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.z)], coords, 0).r, infrontDepth);
-        float roughness = (tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f));
+        float roughness = material.fx.x;//(tint.a < 1 || block.x == 79 || block.x == 80 || block.x == 94 || block.x == 86 || block.x == 87 || block.x == 88 || block.x == 64 || block.x == 59 || block.x == 84 || block.x == 83) ? 0.012f : ((block.x == 57 || block.x == 90) ? 0.3f : ((block.x == 56 || block.x == 74 || block.x == 60 || block.x == 61 || block.x == 81) ? 0.009f : 0.f));
         float fogginessMul = 1.f;
         float nightHueFactor = mix(0.97f, 0.f, dayness);
         vec4 rasterColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.y)], coords, 0);
@@ -877,12 +883,16 @@ void main() {
         vec3 fluidPos = vec3(-1);
         bool fluidInfront = fluidDepth > depth;
         if (fluidInfront) {
-            reflectivity = 0.8f;
             vec4 clip = vec4(uv*2.0f-1.0f, fluidDepth, 1.0f);
             vec4 view = invProj*clip;
             view/=view.w;
             fluidPos = (invView*view).xyz;
-            roughness = 0.25f;
+            celestial = false;
+            emissive = false;
+            fogginessMul = 1.f;
+            material = getMaterialColor(1);
+            reflectivity = 0.8f;
+            roughness = material.fx.x;
         }
         bool isGodray = false;
         float godrayDist = 1+(blueNoise(coords).r*distance(ogPos, primaryShadowPos));
@@ -939,6 +949,7 @@ void main() {
         if (!isSky) {
             clouds *= primaryFogginess;
         }
+        vec3 reflectDir = ogDir;
         vec3 tiltedNormal = vec3(primaryFlatNormal);
         if (!emissive) {
             if (!celestial || fluidInfront) {
@@ -962,8 +973,8 @@ void main() {
                 vec3 causticPos = (floor((primaryTint.a < 1 ? primaryTintLightPos : (fluidInfront ? fluidPos : primaryLightPos))*blockSize)+0.5f)/blockSizeF;
                 float surfDist = underwater ? 0 : clamp(distance(ogPos, causticPos)/200.f, 0, 0.4f);
                 if (fluidInfront) {
-                    vec3 causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCausticTwice(true, causticPos.xz, surfDist).xzy :
-                    absNorm.z > max(absNorm.x, absNorm.y) ? getCausticTwice(true, causticPos.xy, surfDist).xyz : getCausticTwice(true, causticPos.yz, surfDist).zyx).xyz;
+                    vec3 causticness = (absNorm.y > max(absNorm.x, absNorm.z) ? getCausticThrice(true, causticPos.xz, surfDist).xzy :
+                    absNorm.z > max(absNorm.x, absNorm.y) ? getCausticThrice(true, causticPos.xy, surfDist).xyz : getCausticThrice(true, causticPos.yz, surfDist).zyx).xyz;
                     tiltedNormal = normalize(tiltedNormal + (roughness * ((causticness*2)-1)));
                 }
                 bool inBounds = distance(camPos, primaryLightPos.xyz) < size*2;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
@@ -1005,20 +1016,21 @@ void main() {
                     }
                 }
                 vec3 idealReflectDir = reflect(ogDir, fluidInfront ? fluid.xyz : primaryFirstNormal);
-                vec3 reflectDir = unzeroVec(vec3(reflect(ogDir.x, tiltedNormal.x), reflect(ogDir.y, tiltedNormal.y), reflect(ogDir.z, tiltedNormal.z)));//reflect(ogDir, tiltedNormal));//unzeroVec(mix(idealReflectDir, (idealReflectDir / 2) + (reflect(ogDir, tiltedNormal) / 2), roughness));
+                reflectDir = unzeroVec(vec3(reflect(ogDir.x, tiltedNormal.x), reflect(ogDir.y, tiltedNormal.y), reflect(ogDir.z, tiltedNormal.z)));//reflect(ogDir, tiltedNormal));//unzeroVec(mix(idealReflectDir, (idealReflectDir / 2) + (reflect(ogDir, tiltedNormal) / 2), roughness));
                 if (primaryBlock.x == 90) {
                     vec3 temp = abs(reflectDir);
                     color.r = (temp.r + temp.g + temp.b) / 2.5f;
                 }
+                vec3 viewDir = normalize(ogDir);
+                vec3 halfVec = normalize(viewDir - reflectDir);
+                float ang = max(dot(viewDir, halfVec), 0.f);
+                vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
+                reflectFrensel = (frensel * 0.9f) + 0.1f;
                 if (reflectivity > 0.f && doReflections) {
-                    vec3 viewDir = normalize(ogDir);
-                    vec3 halfVec = normalize(viewDir - reflectDir);
-                    float ang = max(dot(viewDir, halfVec), 0.f);
-                    vec3 frensel = frensel(ang, vec3(0.02f, 0.019f, 0.018f));
                     vec3 reflectPos = primaryTint.a < 1 ? primaryTintLightPos : (fluidInfront ? fluidPos : primaryLightPos);
                     rayPos = reflectPos;
                     rayDir = reflectDir;
-                    updateChunkData(ivec3(rayPos/chunkSize));
+                    updateChunkData(ivec3(rayPos / chunkSize));
                     ivec2 reflectBlockIn = getBlock(rayPos);
                     reflectColor = globalUbo.renderToggles.y > 0 ? dda(false) : vec4(0);
                     bool isReflectEmissive = false;
@@ -1026,12 +1038,13 @@ void main() {
                         if (globalUbo.fogginess > 0) {
                             reflectColor = getLightingColor(celestialSource, reflectPos + reflectDir * renderDistance, vec4(0, 0, 0, 1.f), true, maxFogginess, false);
                         }
-                        reflectColor.rgb += texture(SamplerCube[nonuniformEXT(pushUbo.tex2.w)], reflectDir).rgb*(1-dayness);
+                        reflectColor.rgb += texture(SamplerCube[nonuniformEXT(pushUbo.tex2.w)], reflectDir).rgb * (1 - dayness);
                     } else {
-                        reflectColor = getMaterialColor(reflectColor).albedo;
-                        if (reflectColor.a > alphaMax && reflectColor.a < 1.f) {
+                        MaterialStruct reflectMaterial = getMaterialColor(reflectColor);
+                        reflectColor = reflectMaterial.albedo;
+                        if (reflectMaterial.fx.a < 1.f) {
                             isReflectEmissive = true;
-                            reflectColor.rgb *= 4;
+                            reflectColor.rgb *= 4 - (reflectMaterial.fx.a * 3);
                         } else {
                             //reflectColor.rgb = mipmap(reflectColor.rgb); //can be disabled with minimal quality degradation.
                             reflectColor.rgb = hueMix(reflectColor.rgb, 4.1f, nightHueFactor);
@@ -1044,8 +1057,8 @@ void main() {
                     if (!isReflectEmissive) {
                         reflectColor.rgb = min(reflectColor.rgb, vec3(1));
                     }
-                    reflectFrensel = ((frensel * 0.9f) + 0.1f) * reflectivity;
                 }
+
                 if (isSky) {
                     blockLighting.w = 0;
                 }
@@ -1124,6 +1137,12 @@ void main() {
             color.rgb = mix(color.rgb, fogColor, borderFogginess);
             reflectMul = max(0, reflectMul-borderFogginess)*(1+(1-pow(globalUbo.skylightMul.w, 25)));
         }
+        if (material.fx.z > 0.f) {
+            vec3 specStretch = vec3(1, max(0.4f, (1-primaryFogginess)*0.8f), 1);
+            float specular = dot(normalize((globalUbo.skylight.xyz-globalPos)*specStretch), normalize(reflectDir*specStretch));
+            color.rgb += max(vec3(0), max(min(0.5f, 2*pow(specular, 5)), 40*pow(specular, 400))*material.fx.z*reflectFrensel);
+        }
+        reflectFrensel *= reflectivity;
         float maxFrensel = min(1, max(reflectFrensel.r, max(reflectFrensel.g, reflectFrensel.b))*reflectMul);
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.w)], coords, vec4(reflectColor.rgb, maxFrensel > 0.f ? maxFrensel : 3.f));
         //color.rgb = desaturate(color.rgb, 1-clamp(blockLighting.a*globalUbo.skylightMul.w, fogginess, 1));

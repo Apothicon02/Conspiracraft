@@ -397,7 +397,7 @@ public class Renderer {
             updatePipeline(Pipelines.BLOCK);
             pushUBO.updateTex(Textures.materials);
             pushUBO.updateSize(new Vector2i(Materials.materialWidth));
-            int material = Materials.TALL_GRASS.id()*2;//(int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
+            int material = Materials.TALL_GRASS.id()*3;//(int) Math.max(1, region.condensedRegionPos%Materials.materials.length);
             pushUBO.updateAtlasOffset(new Vector2i((material * Materials.materialWidth) % Textures.materials.width, Materials.materialHeight * (material / (Textures.materials.width / Materials.materialWidth))));
             for (Region region : World.getAllRegions()) {
                 region.drawSolids(stack);

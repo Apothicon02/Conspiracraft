@@ -153,33 +153,42 @@ public class Materials {
             }  else {
                 imageNorm = Utils.loadImage("block/misc/material/debug_6_norm");
             }
+            String fxPath = "block/"+material.path()+"_fx";
+            BufferedImage imageFx;
+            if (Files.exists(Paths.get(mainFolder + "assets/base/" + fxPath+".png"))) {
+                imageFx = Utils.loadImage(fxPath);
+            } else if (height <= materialWidth) {
+                imageFx = Utils.loadImage("block/misc/material/air_fx");
+            } else if (height < materialHeight) {
+                imageFx = Utils.loadImage("block/misc/material/debug_3_fx");
+            }  else {
+                imageFx = Utils.loadImage("block/misc/material/debug_6_fx");
+            }
             ByteBuffer matBuf = Utils.imageToBuffer(image);
             ByteBuffer normBuf = Utils.imageToBuffer(imageNorm);
-            if (height != imageNorm.getHeight()) {
-                System.out.println("Albedo and normal heights do not match!");
-            }
+            ByteBuffer fxBuf = Utils.imageToBuffer(imageFx);
             if (height <= materialWidth) {
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, 0);
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width);
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*2);
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*3);
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*4);
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*5);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, 0);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*2);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*3);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*4);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, materialWidthL*Textures.materials.width*5);
             } else if (height < materialHeight) {
-                copyTextures(matBuf, normBuf, i, materialWidth, 0, 0);
-                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width);
-                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*2);
-                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*3);
-                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*4);
-                copyTextures(matBuf, normBuf, i, materialWidth, materialWidth*materialWidth*2, materialWidthL*Textures.materials.width*5);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, 0, 0);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*2);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*3);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, materialWidth*materialWidth, materialWidthL*Textures.materials.width*4);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialWidth, materialWidth*materialWidth*2, materialWidthL*Textures.materials.width*5);
             } else {
-                copyTextures(matBuf, normBuf, i, materialHeight, 0, 0);
+                copyTextures(matBuf, normBuf, fxBuf, i, materialHeight, 0, 0);
             }
         }
         ImageHelper.fillImage(stack, Textures.materials, materialBuffer);
     }
-    public static void copyTextures(ByteBuffer buf, ByteBuffer normBuf, int i, int height, long srcOffset, long dstOffset) {
-        long loopedI = i * 2 * materialWidthL;
+    public static void copyTextures(ByteBuffer buf, ByteBuffer normBuf, ByteBuffer fxBuf, int i, int height, long srcOffset, long dstOffset) {
+        long loopedI = i * 3 * materialWidthL;
         long matRow = loopedI/Textures.materials.width;
         loopedI = (loopedI-(matRow*Textures.materials.width))+(matRow*Textures.materials.width*materialHeight);
         for (long row = 0; row < height; row++) {
@@ -188,6 +197,9 @@ public class Materials {
                     materialWidth * 4L);
             memCopy(memAddress(normBuf) + ((srcOffset+(row * materialWidth)) * 4L),
                     materialBuffer.pointer.get(0) + ((dstOffset + (row * Textures.materials.width + loopedI + materialWidth)) * 4L),
+                    materialWidth * 4L);
+            memCopy(memAddress(fxBuf) + ((srcOffset+(row * materialWidth)) * 4L),
+                    materialBuffer.pointer.get(0) + ((dstOffset + (row * Textures.materials.width + loopedI + (2*materialWidth))) * 4L),
                     materialWidth * 4L);
         }
     }

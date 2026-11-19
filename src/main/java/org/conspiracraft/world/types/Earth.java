@@ -507,7 +507,8 @@ public class Earth extends WorldType {
 //                            int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
 //                            int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
                             if (SEA_LEVEL < ((cY + 1) * chunkSize) && SEA_LEVEL >= (cY * chunkSize) && SEA_LEVEL > elevation) {
-                                chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                                //chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                                chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.MUD.id, 0);
                             }
                             int localYOffset = cY * chunkSize;
                             int startY = Math.min(((cY + 1) * chunkSize) - 1, SEA_LEVEL - 1) - localYOffset;

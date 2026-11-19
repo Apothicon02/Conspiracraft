@@ -119,7 +119,7 @@ public class Entity {
         particle.vel.set((float) (Math.random() - 0.5f) / 4, (float) (Math.random()) / 15, (float) (Math.random() - 0.5f) / 4);
         particle.tex = Textures.materials;
         Material[] mats = BlockTypes.blockTypes[blockOn >> 16].materialsArr;
-        int id = mats[(int) (Math.random()*mats.length)].id()*2;
+        int id = mats[(int) (Math.random()*mats.length)].id()*3;
         particle.texOffset.set((id* Materials.materialWidth)%Textures.materials.width, Materials.materialHeight*(id/(Textures.materials.width/Materials.materialWidth)));
         effects.addLast(particle);
     }
