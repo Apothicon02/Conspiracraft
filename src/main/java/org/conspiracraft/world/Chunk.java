@@ -721,7 +721,7 @@ public class Chunk {
     public boolean faceUnoccludedFluid(int x, int y, int z, int fluid) {
         int pos = packLocalPos(x, y, z);
         int block = getBlock(pos);
-        return getFluid(pos) >> 16 != fluid >> 16 && !BlockTypes.blockTypes[block >> 16].blockProperties.isSolid;
+        return getFluid(pos) >> 16 != fluid >> 16 && !BlockTypes.blockTypes[block >> 16].blockProperties.blocksLight;
     }
     public boolean faceUnoccluded(int x, int y, int z, int block) {
         return !BlockTypes.blockTypes[getBlock(packLocalPos(x, y, z)) >> 16].blockProperties.isSolid;
