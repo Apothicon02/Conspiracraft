@@ -208,8 +208,8 @@ vec4 noise(vec2 coords) {
 vec4 noiseInv(vec2 coords) {
     return ((1-textureLod(Sampler2D[nonuniformEXT(pushUbo.noises)], vec2(coords/1024), 0))*2)-1.f;
 }
-vec4 getCaustic(bool animated, vec2 checkPos) {
-    float time = animated ? globalUbo.time/300.f : 0.f;
+vec4 getCaustic(float speed, vec2 checkPos) {
+    float time = globalUbo.time*speed;
     return noise((checkPos*32)+time);
 }
 const int materialWidth = 16;
@@ -232,12 +232,13 @@ vec4 getCausticSmall(bool animated, vec2 checkPos) {
     return small;
 }
 vec4 getCausticThrice(bool animated, vec2 checkPos, float dist) {
-    vec4 large = (mix(getCaustic(animated, floor(checkPos)), getCaustic(animated, floor(checkPos*0.25f)), min(1, dist*2))-0.5f)*max(0.1f, sqrt(0.5f-dist));
+    float speed = animated ? 0.00333f : 0.f;
+    vec4 large = (mix(getCaustic(speed, floor(checkPos)), getCaustic(speed, floor(checkPos*0.25f)), min(1, dist*2))-0.5f)*max(0.1f, sqrt(0.5f-dist));
     return mix(max(getCausticSmall(animated, checkPos), vec4(0, 0, 0, large.a)), large, pow(clamp((dist-0.025f)*10, 0, 1), 0.67f));
     //    return mix(max(pow(getCaustic(animated, (checkPos*24)+time), vec4(1.f, 1.f, 1.f, 2.5f))*vec4(1.5f, 1.5f, 1.5f, 4.f), large), large, pow(clamp((dist-0.025f)*10, 0, 1), 0.67f)-0.1f);
 }
-vec4 getCausticInv(bool animated, vec2 checkPos) {
-    float time = animated ? globalUbo.time/300.f : 0.f;
+vec4 getCausticInv(float speed, vec2 checkPos) {
+    float time = globalUbo.time*speed;
     return noiseInv((checkPos*32)+time);
 }
 int getBlockType(float x, float y, float z) {
@@ -426,7 +427,7 @@ MaterialStruct getMaterial(int materialId, vec3 pos, vec3 norm, bool animated) {
     materialId-=(materialY*materialsPerRow);
     ivec2 localTexel = ivec2(floor(matUV*float(materialWidth)));
     if (animated) {
-        localTexel.y = int(mod(localTexel.y + (globalUbo.time / 50.f), materialWidth));
+        localTexel.y = int(mod(localTexel.y - (globalUbo.time / 50.f), materialWidth));
     }
     localTexel = clamp(localTexel, ivec2(0), ivec2(materialWidth-1));
     vec4 materialColor = texelFetch(Sampler2D[nonuniformEXT(pushUbo.materials)], ivec2(ivec2(materialId*materialWidth*3, (materialY*materialHeight)+yOff)+localTexel), 0);
@@ -940,7 +941,7 @@ void main() {
                 float bigness = 1-min(0.97f, pow(distance(ogPos, rayPos)*(submerged ? 0.01f : 0.003f), 4));
                 vec3 globalRayPos = globalRayStart + ogDir * (lightNoise*baseDist);
                 vec2 causticPos = (globalRayPos.xz-rayDir.xz*(mod(globalRayPos.y, height)/rayDir.y));
-                vec4 lightshaftNoise = mix(getCausticInv(true, causticPos/13)+0.5f, submerged ? (getCaustic(true, causticPos)+0.5f)*vec4(1, 1, 1, 0.75f) : vec4(0), bigness);
+                vec4 lightshaftNoise = mix(getCausticInv(0.00333f, causticPos/13)+0.5f, submerged ? (getCaustic(0.00333f, causticPos)+0.5f)*vec4(1, 1, 1, 0.75f) : vec4(0), bigness);
                 lightshaftNoise.rgb = vec3(lightshaftNoise.w);//mix(lightshaftNoise.rgb, vec3(lightshaftNoise.w), underwater && submerged ? 0.5f : 1.f);
                 vec3 godray = globalUbo.renderToggles.x == 2 ? vec3(0) : mix((lightshaftNoise.rgb*lightshaftNoise.w)-0.9f, vec3(1.f), clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*lightshaftMul;
                 vec3 globalFogPos = floor((globalRayStart + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
@@ -1136,25 +1137,24 @@ void main() {
             //primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
             vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb*0.8f;
+            vec3 foam = vec3(max(fluidColor.r, max(fluidColor.g, fluidColor.b))*1.1f);
+            vec3 causticPos = (floor(fluidPos*blockSize)+0.5f)*0.15f;
+            vec3 absNorm = abs(tiltedNormal);
+            causticPos.xy = absNorm.y > max(absNorm.x, absNorm.z) ? causticPos.xz : absNorm.z > max(absNorm.x, absNorm.y) ? causticPos.xy : causticPos.yz;
+            vec4 caustic = 0.75f*getCaustic(0.15f, causticPos.xy*4)+(getCausticInv(0.15f, causticPos.xy));
             float shallowness = clamp(distance(primaryLightPos, fluidPos)/25.f, 0.f, 1.f);
-            color.rgb = mix(color.rgb, mix(vec3(max(fluidColor.r, max(fluidColor.g, fluidColor.b))*1.1f), mix(fluidColor.xzy, fluidColor, max(0.5f, shallowness)), min(1, shallowness*8)), fluidFogginess);
+            color.rgb = mix(color.rgb, mix(foam, mix(fluidColor.xzy, fluidColor, max(0.5f, shallowness)), min(1, shallowness*((4*(0.4f+(min(0.6f, dot(fluid.xyz, normalize(source))))))+24*abs(caustic.w)))), fluidFogginess);
 
-            if (fluidInfrontOfTransparent) {
-                vec3 sunDir = unzeroVec(normalize((source - globalPos) * vec3(1, 0.3f, 1)));
-                float normDot = clamp((dot(tiltedNormal, sunDir) * 0.75f) + 0.75f, 0.25f, 1.25f);
-                color.rgb *= normDot;
+            float surfDist = clamp(distance(ogPos, fluidPos) / 75.f, 0, 0.9f);
+            color.rgb = mix(color.rgb, vec3(1.f), max(vec3(0), material.albedo.rgb - surfDist));
+            float surfFogginess = getFogginess(false, fluidPos, fogginessMul, maxFogginess);
+            vec3 fogColor = getLightingColor(celestialSource, fluidPos, blockLighting, false, 1, false).rgb;
+            color.rgb = mix(color.rgb, fogColor, surfFogginess);
 
-                float surfDist = clamp(distance(ogPos, fluidPos) / 75.f, 0, 0.9f);
-                color.rgb = mix(color.rgb, vec3(1.f), max(vec3(0), material.albedo.rgb - surfDist));
-                float surfFogginess = getFogginess(false, fluidPos, fogginessMul, maxFogginess);
-                vec3 fogColor = getLightingColor(celestialSource, fluidPos, blockLighting, false, 1, false).rgb;
-                color.rgb = mix(color.rgb, fogColor, surfFogginess);
-
-                float borderFogginess = (clamp(max(abs(ogPos.x - fluidPos.x), max(abs(ogPos.y - fluidPos.y), abs(ogPos.z - fluidPos.z))) / renderDistance, 0.9f, 1.f) - 0.9f) * 10;
-                fogColor = getLightingColor(celestialSource, fluidPos, vec4(0, 0, 0, 1), true, 1, false).rgb;
-                color.rgb = mix(color.rgb, fogColor, borderFogginess);
-                reflectMul = max(0, reflectMul - borderFogginess) * (1 + (1 - pow(globalUbo.skylightMul.w, 25)));
-            }
+            float borderFogginess = (clamp(max(abs(ogPos.x - fluidPos.x), max(abs(ogPos.y - fluidPos.y), abs(ogPos.z - fluidPos.z))) / renderDistance, 0.9f, 1.f) - 0.9f) * 10;
+            fogColor = getLightingColor(celestialSource, fluidPos, vec4(0, 0, 0, 1), true, 1, false).rgb;
+            color.rgb = mix(color.rgb, fogColor, borderFogginess);
+            reflectMul = max(0, reflectMul - borderFogginess) * (1 + (1 - pow(globalUbo.skylightMul.w, 25)));
         }
         if (material.fx.z > 0.f || tintMaterial.fx.z > 0.f) {
             vec3 specStretch = vec3(1, max(0.4f, (1-primaryFogginess)*0.8f), 1);
