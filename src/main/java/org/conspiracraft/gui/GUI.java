@@ -208,15 +208,18 @@ public class GUI {
                 drawButton(true, 0.5f, 0.5f, -35.5f, charHeight, (Settings.dynamicFoVEnabled ? " FoV VFX " : "No FoV VFX").toCharArray(), menuBgColor, new Vector4f(1.f));
                 drawingButton = new UpscaleButton();
                 drawButton(true, 0.5f, 0.5f, 35.5f, charHeight, (Settings.upscaled ? "Upscaled" : "  Native  ").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawingSlider = new FPSSlider();
+                sliderX = (Settings.targetFps - 20) / 340.f;
+                drawSlider(true, 0.5f, 0.5f, 0, (-charHeight) - 1, ("Target FPS:" + Settings.targetFps).toCharArray(), menuBgColor, new Vector4f(1.f));
                 drawingButton = new ShadowsButton();
-                drawButton(true, 0.5f, 0.5f, -35.5f, (-charHeight) - 1, (Settings.shadows == 2 ? "Godrays" : Settings.shadows == 1 ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawButton(true, 0.5f, 0.5f, -35.5f, (charHeight * -3) - 2, (Settings.shadows == 2 ? "Godrays" : Settings.shadows == 1 ? "Shadowed" : "Unshadowed").toCharArray(), menuBgColor, new Vector4f(1.f));
                 drawingButton = new TAAButton();
-                drawButton(true, 0.5f, 0.5f, 35.5f, (-charHeight) - 1, (Settings.taaEnabled ? "   TAA   " : "  No AA  ").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawButton(true, 0.5f, 0.5f, 35.5f, (charHeight * -3) - 2, (Settings.taaEnabled ? "   TAA   " : "  No AA  ").toCharArray(), menuBgColor, new Vector4f(1.f));
                 drawingButton = new ReflectionsButton();
-                drawButton(true, 0.5f, 0.5f, 0, (charHeight * -3) - 2, (Settings.reflectionsEnabled ? "Reflections Enabled" : "Reflections Disabled").toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawButton(true, 0.5f, 0.5f, 0, (charHeight * -5) - 3, (Settings.reflectionsEnabled ? "Reflections Enabled" : "Reflections Disabled").toCharArray(), menuBgColor, new Vector4f(1.f));
                 drawingSlider = new AmbientLightSlider();
                 sliderX = Settings.ambientLight;
-                drawSlider(true, 0.5f, 0.5f, 0, (charHeight * -5) - 3, ("Ambient Light:" + String.format("%.1f", sliderX)).toCharArray(), menuBgColor, new Vector4f(1.f));
+                drawSlider(true, 0.5f, 0.5f, 0, (charHeight * -7) - 4, ("Ambient Light:" + String.format("%.1f", sliderX)).toCharArray(), menuBgColor, new Vector4f(1.f));
             } else if (controlsSettingMenuOpen) {
                 menuBgColor = new Vector4f(0.75f, 1.f, 0.75f, 1.f);
                 drawText(true, 0.5f, 1, 0, -10 - charHeight, "Control Settings".toCharArray());

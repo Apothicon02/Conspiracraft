@@ -1219,9 +1219,9 @@ void main() {
             bloom.rgb = color.rgb*clamp(dot(ogDir, normalize(source)), 0, 1);
         }
         imageStore(Image2D[nonuniformEXT(pushUbo.tex2.z)], coords, bloom);
-        vec4 sunOnly = getLightingColor(celestialSource, primaryLightPos, vec4(0, 0, 0, blockLighting.w), false, 0, false);
-        float sunBrightness = max(sunOnly.r, max(sunOnly.g, sunOnly.b));
-        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(clamp(shadowFactor+maxLightshaft, 0.02f, 0.99f), 1, max(max(clouds, primaryFogginess), (1-min(1, sunBrightness))+max(blockLighting.r, max(blockLighting.g, blockLighting.b))))) : 3)));
+        vec4 sunOnly = getLightingColor(celestialSource, primaryLightPos, vec4(0, 0, 0, blockLighting.w), false, 0, false)*0.5f;
+        float blocklightBrightness = max(0, max(blockLighting.r-sunOnly.r, max(blockLighting.g-sunOnly.g, blockLighting.b-sunOnly.b)));
+        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.x)], coords, vec4(color.rgb, (celestial || isSky) ? 1 : (shadowFactor < 1 ? min(1, mix(clamp(shadowFactor+maxLightshaft, 0.02f, 0.99f), 1, max(max(clouds, primaryFogginess), blocklightBrightness))) : 3)));
         imageStore(DepthImage2D[nonuniformEXT(pushUbo.writeTex.y)], coords, vec4(depth, 0, 0, 0));
         imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], coords, outNormal);
     }

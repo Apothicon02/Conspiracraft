@@ -16,7 +16,7 @@ public class Settings {
     public static int width = 1280;
     public static int height = 720;
     public static float fov = 73;
-    public static int targetFps = 4200;
+    public static int targetFps = 360;
     public static int shadows = 1;
     public static boolean reflectionsEnabled = true;
     public static boolean taaEnabled = true;

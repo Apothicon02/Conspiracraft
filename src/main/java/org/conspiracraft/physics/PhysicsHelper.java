@@ -139,12 +139,15 @@ public class PhysicsHelper {
     public static void moveWithStepping(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs, double stepHeight) {
         if (World.getRegion(World.packRegionPos(((int)objAABB.xMin)>>regionBits, ((int)objAABB.yMin)>>regionBits, ((int)objAABB.zMin)>>regionBits)) == null) {return;}
         Vector3d ogVel = new Vector3d(vel);
-        move(objAABB, vel, new ArrayList<>(aabbs));
+        AABB tempAABB = objAABB.copy();
+        move(tempAABB, vel, new ArrayList<>(aabbs));
         if (vel.x() != ogVel.x() || vel.z() != ogVel.z()) { //if obstructed horizontally
             vel.set(ogVel);
             move(objAABB, new Vector3d(0, stepHeight, 0), new ArrayList<>(aabbs));
             move(objAABB, vel, new ArrayList<>(aabbs));
             move(objAABB, new Vector3d(0, -stepHeight, 0), new ArrayList<>(aabbs));
+        } else {
+            objAABB.set(tempAABB);
         }
     }
 

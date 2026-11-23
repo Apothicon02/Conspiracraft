@@ -132,7 +132,10 @@ public class Item implements Cloneable {
     @Override
     public Item clone() {
         try {
-            return (Item) super.clone();
+            Item clone = (Item) super.clone();
+            clone.pos = new Vector3d(this.pos);
+            clone.prevPos = new Vector3d(this.prevPos);
+            return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
