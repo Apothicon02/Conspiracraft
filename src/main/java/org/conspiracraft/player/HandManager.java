@@ -137,16 +137,14 @@ public class HandManager {
         if (tiltTarget == 0 && Math.abs(tilt - tiltTarget) < 10f) {
             tilt = 0;
         } else {
-            float tiltSpeed = 10.f;
+            float tiltSpeed = ItemType.DEFAULT_USE_SPEED;
             if (!(selectedItem == null || selectedItem.amount <= 0)) {
                 tiltSpeed = selectedItem.useSpeed();
-            } else {
-                tiltSpeed = ItemType.DEFAULT_USE_SPEED;
             }
             if (tilt < tiltTarget) {
-                tilt += tiltSpeed;
+                tilt = Math.min(tiltTarget, tilt+tiltSpeed);
             } else if (tilt > tiltTarget) {
-                tilt -= tiltSpeed;
+                tilt = Math.max(tiltTarget, tilt-tiltSpeed);
             }
             if (tilt >= 30) {
                 tiltTarget = -30;

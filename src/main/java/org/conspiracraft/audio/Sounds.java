@@ -47,6 +47,10 @@ public class Sounds {
     public static SFX FROG_CROAK2 = AudioController.loadSound("generic/sound/frog_croak2.wav");
     public static SFX FROG_CROAK3 = AudioController.loadSound("generic/sound/frog_croak3.wav");
     public static SFX FROG_CROAK4 = AudioController.loadSound("generic/sound/frog_croak4.wav");
+    public static SFX BITE = AudioController.loadSound("generic/sound/bite1.wav");
+    public static SFX BITE2 = AudioController.loadSound("generic/sound/bite2.wav");
+    public static SFX BITE3 = AudioController.loadSound("generic/sound/bite3.wav");
+    public static SFX BURP = AudioController.loadSound("generic/sound/burp.wav");
     public static SFX HURT = AudioController.loadSound("generic/sound/hurt.wav");
     public static SFX DEATH = AudioController.loadSound("generic/sound/death.wav");
     public static SFX BUTTON = AudioController.loadSound("generic/sound/button.wav");

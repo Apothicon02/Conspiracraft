@@ -617,6 +617,17 @@ public class Player {
             AudioController.disposableSources.add(deathSource);
         }
     }
+    public void heal(int regen) {
+        for (int i = 0; i < healthMenu.slotAmt; i++) {
+            Item item = healthMenu.getItem(i);
+            if (item instanceof DurableItem durableItem) {
+                int prevDurability = durableItem.durability;
+                durableItem = durableItem.damage(-regen);
+                regen -= Math.max(0, durableItem.durability-prevDurability);
+                if (regen <= 0) {break;}
+            }
+        }
+    }
 
     public Planet getPlanet() {
         return World.worldType.getPlanet();

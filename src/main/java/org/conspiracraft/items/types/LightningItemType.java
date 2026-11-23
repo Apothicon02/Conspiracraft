@@ -8,9 +8,7 @@ import org.conspiracraft.items.ItemUseResult;
 import org.conspiracraft.physics.DDAResult;
 import org.conspiracraft.world.World;
 import org.joml.Matrix4f;
-import org.joml.Vector2i;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
 
 import static org.conspiracraft.Main.player;
 

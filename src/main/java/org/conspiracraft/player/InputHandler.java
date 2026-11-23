@@ -72,7 +72,6 @@ public class InputHandler {
                 } else {
                     GUI.pauseMenuOpen = !GUI.pauseMenuOpen;
                     if (GUI.pauseMenuOpen) {
-                        AL10.alListenerf(AL10.AL_GAIN, AudioController.masterVolume);
                         timeMul = 0.f;
                     } else {
                         timeMul = 1.f;

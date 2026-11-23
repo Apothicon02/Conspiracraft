@@ -27,6 +27,6 @@ public class DurableItem extends Item implements Cloneable {
         return this.durability <= 0 ? null : this;
     }
     public DurableItem damage(int damage) {
-        return durability(Math.max(0, this.durability-damage));
+        return durability(Math.clamp(this.durability-damage, 0, this.type.maxDurability()));
     }
 }

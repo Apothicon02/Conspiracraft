@@ -1,11 +1,9 @@
 package org.conspiracraft.audio;
 
-import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
 import org.conspiracraft.Main;
-import org.conspiracraft.world.World;
 
 import java.io.File;
 import java.io.IOException;
