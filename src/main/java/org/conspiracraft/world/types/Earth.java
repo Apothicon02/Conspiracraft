@@ -33,6 +33,7 @@ import java.util.concurrent.*;
 
 import static org.conspiracraft.world.Biomes.getBadlandsBands;
 import static org.conspiracraft.world.World.*;
+import static org.conspiracraft.world.World.setBlockWorldgen;
 
 public class Earth extends WorldType {
     public static class EarthSpace extends WorldType {
@@ -144,9 +145,9 @@ public class Earth extends WorldType {
     @Override
     public void tick() {}
     public static int prevPlayerRX = -1, prevPlayerRY = -1, prevPlayerRZ = -1;
-    public static final int GROUND_LEVEL = 0, SEA_LEVEL = GROUND_LEVEL+127, SKY_LEVEL = GROUND_LEVEL+512;
-    public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
-    public static final int GROUND_LEVEL_R = GROUND_LEVEL>>regionBits, SEA_LEVEL_R = SEA_LEVEL>>regionBits, SKY_LEVEL_R = SKY_LEVEL>>regionBits;
+    public static final int GROUND_LEVEL = 0, SEA_FLOOR_LEVEL = GROUND_LEVEL+127, SEA_LEVEL = GROUND_LEVEL+255, SKY_LEVEL = GROUND_LEVEL+640;
+    public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_FLOOR_LEVEL_C = SEA_FLOOR_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
+    public static final int GROUND_LEVEL_R = GROUND_LEVEL>>regionBits, SEA_FLOOR_LEVEL_R = SEA_FLOOR_LEVEL>>regionBits, SEA_LEVEL_R = SEA_LEVEL>>regionBits, SKY_LEVEL_R = SKY_LEVEL>>regionBits;
     public static final int MID = 500000, HOT = MID-1000, COLD = MID+1000, TEMP_RANGE = 2000;
     private void generateRegion(int t, int rX, int rZ) throws IOException {
         final java.util.Random rand = new java.util.Random(seed + t);
@@ -280,12 +281,12 @@ public class Earth extends WorldType {
     public void generateCrustRegion(java.util.Random rand, Region region, Region2D region2D, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
         RegionNoises regionNoises = new RegionNoises(regionSize);
         byte[] biomes = new byte[regionSize * regionSize];
-        generateNoises(cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
+        //generateNoises(cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
         generateHeightAndBiomes(cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
         if (generateSurface(rand, bounds, cXStart, cXEnd, cYStart, cYEnd, cZStart, cZEnd, region, region2D, biomes, regionNoises)) {
             generateFeatures(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
             //generateFeaturesOld(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
-            generateCover(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
+            //generateCover(rand, bounds, cXStart, cXEnd, cZStart, cZEnd, region2D, biomes, regionNoises);
         }
     }
     public void generateUndergroundRegion(java.util.Random rand, Region region, int cXStart, int cXEnd, int cYStart, int cYEnd, int cZStart, int cZEnd, Bounds bounds) {
@@ -332,25 +333,25 @@ public class Earth extends WorldType {
     public static JNoise detailNoisePipeline = JNoise.newBuilder().fastSimplex(135131, Simplex2DVariant.IMPROVE_X, Simplex3DVariant.IMPROVE_XY, Simplex4DVariant.IMPROVE_XYZ_IMPROVE_XZ)
             .octavate(4,1,1.25f, FractalFunction.RIDGED_MULTI,false).build();
 
-    public static void generateNoises(int cXStart, int cXEnd, int cZStart, int cZEnd, Region2D region2D, byte[] biomes, RegionNoises regionNoises) {
-        for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
-            for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z ++) {
-                int rlX = x - (cXStart * chunkSize), rlZ = z - (cZStart * chunkSize);
-                int packed = (rlX * regionSize) + rlZ;
-
-                regionNoises.continents()[packed] = SimplexNoise.noise(x / 15000.f, z / 15000.f);
-                regionNoises.vegetation()[packed] = SimplexNoise.noise(x / 725.f, z / 725.f);
-                regionNoises.dunes()[packed] = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
-                regionNoises.detail()[packed] = SimplexNoise.noise(z / 50.f, x / 50.f);
-                regionNoises.plains()[packed] = SimplexNoise.noise(x / 100.f, z / 100.f);
-                regionNoises.hills()[packed] = SimplexNoise.noise(z / 600.f, x / 600.f);
-                regionNoises.whiteNoise()[packed] = whitenoisePipeline.evaluateNoise(x, z);
-                regionNoises.ridges()[packed] = noisePipeline.evaluateNoise(x / 1250.d, z / 1250.d);
-                regionNoises.geographic()[packed] = SimplexNoise.noise(x / 1666.f, z / 1666.f);
-                regionNoises.biome()[packed] = SimplexNoise.noise(x / 1200.f, z / 1200.f);
-            }
-        }
-    }
+//    public static void generateNoises(int cXStart, int cXEnd, int cZStart, int cZEnd, Region2D region2D, byte[] biomes, RegionNoises regionNoises) {
+//        for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
+//            for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z ++) {
+//                int rlX = x - (cXStart * chunkSize), rlZ = z - (cZStart * chunkSize);
+//                int packed = (rlX * regionSize) + rlZ;
+//
+//                regionNoises.continents()[packed] = SimplexNoise.noise(x / 15000.f, z / 15000.f);
+//                regionNoises.vegetation()[packed] = SimplexNoise.noise(x / 725.f, z / 725.f);
+//                regionNoises.dunes()[packed] = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
+//                regionNoises.detail()[packed] = SimplexNoise.noise(z / 50.f, x / 50.f);
+//                regionNoises.plains()[packed] = SimplexNoise.noise(x / 100.f, z / 100.f);
+//                regionNoises.hills()[packed] = SimplexNoise.noise(z / 600.f, x / 600.f);
+//                regionNoises.whiteNoise()[packed] = whitenoisePipeline.evaluateNoise(x, z);
+//                regionNoises.ridges()[packed] = noisePipeline.evaluateNoise(x / 1250.d, z / 1250.d);
+//                regionNoises.geographic()[packed] = SimplexNoise.noise(x / 1666.f, z / 1666.f);
+//                regionNoises.biome()[packed] = SimplexNoise.noise(x / 1200.f, z / 1200.f);
+//            }
+//        }
+//    }
     public static void generateHeightAndBiomes(int cXStart, int cXEnd, int cZStart, int cZEnd, Region2D region2D, byte[] biomes, RegionNoises regionNoises) {
         for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
             for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z++) {
@@ -1043,47 +1044,47 @@ public class Earth extends WorldType {
             }
         }
     }
-    public static void generateCover(java.util.Random rand, Bounds bounds, int cXStart, int cXEnd, int cZStart, int cZEnd, Region2D region2D, byte[] biomes, RegionNoises regionNoises) {
-        for (int cX = cXStart; cX < cXEnd; cX++) {
-            for (int cZ = cZStart; cZ < cZEnd; cZ++) {
-                for (int lX = 0; lX < chunkSize; lX++) {
-                    for (int lZ = 0; lZ < chunkSize; lZ++) {
-                        int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
-                        int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
-                        int surface = GROUND_LEVEL + region2D.heights[packed];
-                        if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
-                            double foliageNoise = Math.abs(regionNoises.plains()[packed]);
-                            double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
-                            int blockOn = getBlockWorldgen(x, surface, z);
-                            int blockIn = getBlockWorldgen(x, surface + 1, z);
-                            if (blockIn >> 16 == 0) {
-                                if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id) {
-                                    if (foliageChance < 0.367f) {
-                                        int type;
-                                        if ((blockOn & 0xFFFF) == 3) {
-                                            type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.132f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
-                                        } else if ((blockOn & 0xFFFF) == 1) {
-                                            type = foliageNoise < 0.16f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
-                                        } else {
-                                            type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.1f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
-                                        }
-                                        setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? ((blockOn & 0xFFFF) * 4) : 0) + rand.nextInt(4));
-                                    }
-                                } else if (blockOn >> 16 == BlockTypes.SAND.id) {
-                                    if (foliageChance < foliageNoise * 0.002f) {
-                                        int height = surface + rand.nextInt(5) + 2;
-                                        for (int y = surface + 1; y <= height; y++) {
-                                            setBlockWorldgen(x, y, z, BlockTypes.CACTUS.id, 0);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    public static void generateCover(java.util.Random rand, Bounds bounds, int cXStart, int cXEnd, int cZStart, int cZEnd, Region2D region2D, byte[] biomes, RegionNoises regionNoises) {
+//        for (int cX = cXStart; cX < cXEnd; cX++) {
+//            for (int cZ = cZStart; cZ < cZEnd; cZ++) {
+//                for (int lX = 0; lX < chunkSize; lX++) {
+//                    for (int lZ = 0; lZ < chunkSize; lZ++) {
+//                        int x = (cX * chunkSize) + lX, z = (cZ * chunkSize) + lZ;
+//                        int packed = ((x - (cXStart * chunkSize)) * regionSize) + (z - (cZStart * chunkSize));
+//                        int surface = GROUND_LEVEL + region2D.heights[packed];
+//                        if (surface >= GROUND_LEVEL && surface < SKY_LEVEL) {
+//                            double foliageNoise = Math.abs(regionNoises.plains()[packed]);
+//                            double foliageChance = Math.abs(regionNoises.whiteNoise()[packed]);
+//                            int blockOn = getBlockWorldgen(x, surface, z);
+//                            int blockIn = getBlockWorldgen(x, surface + 1, z);
+//                            if (blockIn >> 16 == 0) {
+//                                if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id) {
+//                                    if (foliageChance < 0.367f) {
+//                                        int type;
+//                                        if ((blockOn & 0xFFFF) == 3) {
+//                                            type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.132f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
+//                                        } else if ((blockOn & 0xFFFF) == 1) {
+//                                            type = foliageNoise < 0.16f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
+//                                        } else {
+//                                            type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.1f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
+//                                        }
+//                                        setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? ((blockOn & 0xFFFF) * 4) : 0) + rand.nextInt(4));
+//                                    }
+//                                } else if (blockOn >> 16 == BlockTypes.SAND.id) {
+//                                    if (foliageChance < foliageNoise * 0.002f) {
+//                                        int height = surface + rand.nextInt(5) + 2;
+//                                        for (int y = surface + 1; y <= height; y++) {
+//                                            setBlockWorldgen(x, y, z, BlockTypes.CACTUS.id, 0);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     public static boolean fillLake(int x, int y, int z, Lake lake) {
         int packedPos = packPos(x, z);
@@ -1100,11 +1101,824 @@ public class Earth extends WorldType {
         return true;
     }
 
+    public void initRegions(int t, int rX, int rZ) {
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = new Region2D(r2DPos);
+        putRegion2D(r2DPos, region2D);
+        for (int rY = 0; rY < heightRegions; rY++) {
+            long cRP = packRegionPos(rX, rY, rZ);
+            Region region = new Region(cRP);
+            if (rY <= SEA_FLOOR_LEVEL_R) {
+                for (Chunk chunk : region.chunks) {
+                    chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.BASALT.id, 0));
+                }
+                region.setGenerated();
+            }
+            putRegion(cRP, region);
+        }
+    }
+    public void generateNoises(int t, int rX, int rZ) {
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        int cXStart = rX * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+        int cXEnd = cXStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+        for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
+            for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z ++) {
+                int rlX = x - (cXStart * chunkSize), rlZ = z - (cZStart * chunkSize);
+                int packed = (rlX * regionSize) + rlZ;
+
+                region2D.noises.continents()[packed] = SimplexNoise.noise(x / 15000.f, z / 15000.f);
+                region2D.noises.vegetation()[packed] = SimplexNoise.noise(x / 725.f, z / 725.f);
+                region2D.noises.dunes()[packed] = noisePipeline.evaluateNoise(x / 525.d, z / 525.d);
+                region2D.noises.detail()[packed] = SimplexNoise.noise(z / 50.f, x / 50.f);
+                region2D.noises.plains()[packed] = SimplexNoise.noise(x / 100.f, z / 100.f);
+                region2D.noises.hills()[packed] = SimplexNoise.noise(z / 600.f, x / 600.f);
+                region2D.noises.whiteNoise()[packed] = whitenoisePipeline.evaluateNoise(x, z);
+                region2D.noises.ridges()[packed] = noisePipeline.evaluateNoise(x / 1250.d, z / 1250.d);
+                region2D.noises.geographic()[packed] = SimplexNoise.noise(x / 1666.f, z / 1666.f);
+                region2D.noises.biome()[packed] = SimplexNoise.noise(x / 1200.f, z / 1200.f);
+            }
+        }
+    }
+    public void generateHeightsAndBiomes(int t, int rX, int rZ) {
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        int cXStart = rX * regionSizeChunks, cZStart = rZ * regionSizeChunks;
+        int cXEnd = cXStart + regionSizeChunks, cZEnd = cZStart + regionSizeChunks;
+        for (int x = cXStart * chunkSize; x < cXEnd * chunkSize; x++) {
+            for (int z = cZStart * chunkSize; z < cZEnd * chunkSize; z ++) {
+                int rlX = x - (cXStart * chunkSize), rlZ = z - (cZStart * chunkSize);
+                int packed = (rlX * regionSize) + rlZ;
+
+                region2D.heights[packed] = (short) (SEA_LEVEL+(region2D.noises.plains()[packed]*10));
+                double biomeNoise = region2D.noises.biome()[packed];
+                double detailNoise = region2D.noises.detail()[packed];
+                double ridges = region2D.noises.ridges()[packed];
+                double geographicNoise = region2D.noises.geographic()[packed];
+                double dunesNoise = region2D.noises.dunes()[packed];
+                double continents = region2D.noises.continents()[packed];
+                double temperature = 0.f;
+                boolean isBadlands = false;
+                boolean isDune = false;
+                boolean isBeach = false;
+                double desertness = 0.f;
+                Biome temperate = (biomeNoise < -0.5f ? Biomes.TEMPERATE_FOREST : biomeNoise < -0.25f ? Biomes.TEMPERATE_WOODS : Biomes.TEMPERATE);
+                Biome biome = isBadlands ? Biomes.BADLANDS : !isDune && ridges+(10*detailNoise) > 30 ? Biomes.STONY_RIDGE : !isDune && ridges-(5*detailNoise) > 24 ? Biomes.GRAVELLY_HILL : isBeach ? Biomes.BEACH : isDune || (geographicNoise < -0.9f && desertness > 0.015f) ? ((dunesNoise*0.06f)+continents <= 0.3f ? Biomes.PALMY_PLAINS : Biomes.DESERT) : (temperature > 0.1f ? (biomeNoise > 0.f ? Biomes.RAINFOREST : temperate) : (temperature > 0 ? temperate : (temperature < -0.1f ? Biomes.SNOWY_TAIGA : (biomeNoise > 0.f ? Biomes.TAIGA : Biomes.CHERRY_GROVE))));
+                region2D.biomes[packed] = biome.id();
+            }
+        }
+    }
+    public static void generateFeatures(int t, int rX, int rZ) {
+        final java.util.Random rand = new java.util.Random(seed + t);
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        Bounds bounds = new Bounds(0, size, 0, height, 0, size);
+        for (int cX = 0; cX < regionSizeChunks; cX++) {
+            for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                for (int lX = 0; lX < chunkSize; lX++) {
+                    for (int lZ = 0; lZ < chunkSize; lZ++) {
+                        int rlX = lX + (cX * chunkSize), rlZ = lZ + (cZ * chunkSize);
+                        int packed = (rlX * regionSize) + rlZ;
+                        short surface = region2D.heights[packed];
+                        int x = rlX+(rX*regionSize), z = rlZ+(rZ*regionSize);
+
+                        byte biome = region2D.biomes[packed];
+                        double detailNoise = region2D.noises.detail()[packed];
+                        double absDetailNoise = Math.abs(detailNoise);
+                        double vegetationNoise = region2D.noises.vegetation()[packed];
+                        double foliageNoise = Math.abs(region2D.noises.plains()[packed]);
+                        double foliageChance = Math.abs(region2D.noises.whiteNoise()[packed]);
+                        int blockIn = getBlockWorldgen(x, surface+1, z);
+                        int fluidIn = getFluidWorldgen(x, surface+1, z);
+                        int blockOn = getBlockWorldgen(x, surface, z);
+                        if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id || blockOn >> 16 == BlockTypes.SNOW.id) {
+                            if (biome == Biomes.SNOWY_TAIGA.id()) {
+                                if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
+                                    int maxHeight = rand.nextInt(19) + 5;
+                                    if (PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < 0.00003f) {
+                                    int maxHeight = rand.nextInt(6) + 12;
+                                    if (SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99995f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9999f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            } else if (biome == Biomes.TAIGA.id()) {
+                                if (foliageChance < foliageNoise * 0.05f * vegetationNoise) {
+                                    int maxHeight = rand.nextInt(6) + 12;
+                                    if (SpruceTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < 0.00003f) {
+                                    int maxHeight = rand.nextInt(19) + 5;
+                                    if (PineTree.generate(rand, bounds, x, surface + 1, z, maxHeight, false, BlockTypes.SPRUCE_LOG.id, 0, BlockTypes.SPRUCE_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99995f) {
+                                    int maxHeight = rand.nextInt(10, 16);
+                                    int radius = rand.nextInt(12, 16);
+                                    if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9999f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            } else if (biome == Biomes.CHERRY_GROVE.id()) {
+                                if (foliageChance < foliageNoise * 0.002f) {
+                                    int maxHeight = rand.nextInt(13, 16);
+                                    int radius = rand.nextInt(9, 12);
+                                    int count = rand.nextInt(2, 3);
+                                    if (CherryTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.CHERRY_LOG.id, 0, BlockTypes.CHERRY_LEAVES.id, 0, count, 4, 2.f)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (25 + (10*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < 0.0022f) {
+                                    int maxHeight = rand.nextInt(8, 11);
+                                    int radius = rand.nextInt(6, 8);
+                                    int leavesHeight = maxHeight/3;
+                                    int count = rand.nextInt(1, 2);
+                                    if (WillowTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.WILLOW_LOG.id, 0, BlockTypes.WILLOW_LEAVES.id, 0, count)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (3 + (rand.nextFloat()*3)), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99995f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9999f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(2, 4);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99985f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            } else if (biome == Biomes.TEMPERATE.id()) {
+                                if (foliageChance > 0.99999f) {
+                                    int maxHeight = rand.nextInt(13, 16);
+                                    int radius = rand.nextInt(9, 12);
+                                    int count = rand.nextInt(2, 3);
+                                    if (OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 2.f)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (25 + (10*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99995f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(6, 8);
+                                    if (BirchTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < foliageNoise * 0.0015f * vegetationNoise) {
+                                    int maxHeight = rand.nextInt(4, 10);
+                                    int radius = rand.nextInt(6, 8);
+                                    if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.006f * vegetationNoise)) {
+                                    float variant = rand.nextFloat();
+                                    if (variant < 0.34f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(2, 4);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.67f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.85f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(5, 7);
+                                        if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    }
+                                } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.03f * vegetationNoise) || foliageChance > 0.9999f) {
+                                    int maxHeight = rand.nextInt(10, 16);
+                                    int radius = rand.nextInt(12, 16);
+                                    if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9995f) {
+                                    int radius = rand.nextInt(8, 15);
+                                    Pond.generate(rand, bounds, x, surface, z, BlockTypes.WATER.id, 13, radius, new int[]{BlockTypes.GRASS.id, BlockTypes.DIRT.id}, true);
+                                }
+                            } else if (biome == Biomes.TEMPERATE_WOODS.id()) {
+                                if (foliageChance > 0.9998f) {
+                                    int maxHeight = rand.nextInt(10, 13);
+                                    int radius = rand.nextInt(9, 12);
+                                    if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (10 + (10*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.001f * vegetationNoise)) {
+                                    float variant = rand.nextFloat();
+                                    if (variant < 0.34f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(2, 4);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.67f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.85f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(5, 7);
+                                        if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    }
+                                } else if (foliageChance > 0.995f) {
+                                    int maxHeight = rand.nextInt(4, 10);
+                                    int radius = rand.nextInt(6, 8);
+                                    if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9942f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(6, 8);
+                                    if (BirchTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            } else if (biome == Biomes.TEMPERATE_FOREST.id()) {
+                                if (foliageChance > 0.99f) {
+                                    int maxHeight = rand.nextInt(13, 16);
+                                    int radius = rand.nextInt(9, 12);
+                                    int count = rand.nextInt(2, 3);
+                                    if (OakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0, count, 4, 2.f)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (25 + (10*rand.nextFloat())), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance < Math.max(0.001f, foliageNoise * 0.0005f * vegetationNoise)) {
+                                    float variant = rand.nextFloat();
+                                    if (variant < 0.34f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(2, 4);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.67f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (variant < 0.85f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(4, 6);
+                                        if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(5, 7);
+                                        if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    }
+                                } else if (foliageChance > 0.989f) {
+                                    if (foliageNoise < 0.2f) {
+                                        int maxHeight = rand.nextInt(10, 16);
+                                        int radius = rand.nextInt(12, 16);
+                                        if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else if (foliageChance > 0.995f) {
+                                        int maxHeight = rand.nextInt(6, 10);
+                                        int radius = rand.nextInt(6, 8);
+                                        if (BirchTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.BIRCH_LOG.id, 0, BlockTypes.BIRCH_LEAVES.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    } else {
+                                        int maxHeight = rand.nextInt(4, 10);
+                                        int radius = rand.nextInt(6, 8);
+                                        if (SmallOakTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.OAK_LOG.id, 0, BlockTypes.OAK_LEAVES.id, 0)) {
+                                            Disc.generate(bounds, x, surface, z, BlockTypes.PODZOL.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                        }
+                                    }
+                                } else if (foliageChance > 0.985f) {
+                                    int radius = rand.nextInt(8, 15);
+                                    Pond.generate(rand, bounds, x, surface, z, BlockTypes.WATER.id, 13, radius, new int[]{BlockTypes.GRASS.id, BlockTypes.DIRT.id}, true);
+                                }
+                            } else if (biome == Biomes.RAINFOREST.id()) {
+                                if (foliageChance < 0.0034f) {
+                                    Disc.generate(bounds, x, surface + 1, z, 48, 0, (int) (2 + (rand.nextFloat() * 7)), 2);
+                                } else if (foliageChance < 0.0075f) {
+                                    int maxHeight = rand.nextInt(15, 28);
+                                    int radius = rand.nextInt(5, 8);
+                                    int leavesHeight = 4;
+                                    int branchChance = 3;
+                                    if (RainforestTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, leavesHeight, BlockTypes.MAHOGANY_LOG.id, 0, BlockTypes.MAHOGANY_LEAVES.id, 0, branchChance)) {
+                                        Disc.generate(bounds, x, surface + 1, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99995f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.HYDRAMGEA_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9999f) {
+                                    int maxHeight = rand.nextInt(10, 16);
+                                    int radius = rand.nextInt(12, 16);
+                                    if (RoseTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.ROSE_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99985f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(2, 4);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.9998f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99975f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(5, 7);
+                                    if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            }
+                        } else if (fluidIn >> 16 == BlockTypes.WATER.id) {
+                            if (surface < SEA_LEVEL-25) {
+                                if (foliageChance < 0.001f) {
+                                    Disc.generate(bounds, x, surface, z, BlockTypes.MUD.id, 0, (int) (40 + ((rand.nextFloat() + 1) * 10)), 2, new int[]{BlockTypes.WET_SAND.id});
+                                } else if (foliageChance < 0.003f) {
+                                    Blob.generate(bounds, x, surface + rand.nextInt((int) Math.max(1, (SEA_LEVEL - surface) * 0.25f)), z, BlockTypes.MARBLE.id, 0, (int) (10 + ((rand.nextFloat() + 1) * 30)), true);
+                                } else if (foliageChance < 0.0034f) {
+                                    CoveredBlob.generate(bounds, x, surface, z, BlockTypes.MAGMA.id, 0, BlockTypes.MAGMA.id, 0, rand.nextInt(2, 5), 0.f, true);
+                                }
+                            }
+                        } else if (blockOn >> 16 == BlockTypes.WET_SAND.id) {
+                            if (biome == Biomes.DESERT.id()) {
+                                if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.998f) {
+                                    PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0);
+                                }
+                            } else if (biome == Biomes.BEACH.id()) {
+                                if (foliageChance > 0.998f) {
+                                    PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0);
+                                }
+                            }
+                        } else if (blockOn >> 16 == BlockTypes.SAND.id) {
+                            if (biome == Biomes.DESERT.id()) {
+                                if (foliageChance + 0.02f < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99998f) {
+                                    if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), 2, new int[]{BlockTypes.SAND.id});
+                                    }
+                                }
+                            } else if (biome == Biomes.BEACH.id()) {
+                                if (foliageChance > 0.99998f) {
+                                    if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(3, 22), 25, 0, 27, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.ORANGE_SAND.id, 0, (int) (4 + (rand.nextFloat() * 15)), 2, new int[]{BlockTypes.SAND.id});
+                                    }
+                                }
+                            }
+                        } else if (blockOn >> 16 == BlockTypes.ORANGE_SAND.id) {
+                            if (biome == Biomes.PALMY_PLAINS.id()) {
+                                if (absDetailNoise > 0.7f) {
+                                    int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
+                                    for (int y = surface; y <= height; y++) {
+                                        setBlockWorldgen(x, y, z, BlockTypes.ORANGE_SANDSTONE.id, 0);
+                                    }
+                                } else if (absDetailNoise > 0.2f) {
+                                    setBlockWorldgen(x, surface, z, BlockTypes.GRASS.id, 3);
+                                } else {
+                                    setBlockWorldgen(x, surface, z, 0, 0);
+                                }
+                                if (foliageChance < foliageNoise * 0.05f * vegetationNoise || foliageChance > 0.99996f) {
+                                    if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(8, 22), 25, 0, 27, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), 2, new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id});
+                                    }
+                                } else if (foliageChance+0.02f < foliageNoise * 0.015f * (1-vegetationNoise) || foliageChance > 0.99965f) {
+                                    if (PalmTree.generate(rand, bounds, x, surface + 1, z, rand.nextInt(2, 5), 25, 0, 27, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.GRASS.id, 3, (int) (4 + (rand.nextFloat()*15)), 2, new int[]{BlockTypes.ORANGE_SAND.id, BlockTypes.SAND.id});
+                                    }
+                                } else if (foliageChance > 0.9996f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(5, 7);
+                                    if (LilyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.LILY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99955f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(4, 6);
+                                    if (DaisyTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DAISY_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                } else if (foliageChance > 0.99952f) {
+                                    int maxHeight = rand.nextInt(6, 10);
+                                    int radius = rand.nextInt(2, 4);
+                                    if (HydrangeaTree.generate(rand, bounds, x, surface + 1, z, maxHeight, radius, BlockTypes.STEM.id, 0, BlockTypes.DANDELION_PETALS.id, 0)) {
+                                        Disc.generate(bounds, x, surface, z, BlockTypes.DRY_MUD.id, 0, (int) (2 + rand.nextFloat()), 2, new int[]{BlockTypes.GRASS.id});
+                                    }
+                                }
+                            }
+                        } else if (blockOn >> 16 == BlockTypes.MAGMA.id) {
+                            if (absDetailNoise > 0.7f) {
+                                int height = (int) (surface+Math.max(0, 24*(absDetailNoise-0.7f)));
+                                for (int y = surface-3; y <= height; y++) {
+                                    setBlockWorldgen(x, y, z, BlockTypes.FLINT.id, 0);
+                                }
+                            } else if (absDetailNoise > 0.2f) {
+                                for (int y = surface-3; y <= surface; y++) {
+                                    setBlockWorldgen(x, y, z, BlockTypes.OBSIDIAN_DUST.id, 0);
+                                }
+                            } else {
+                                setBlockWorldgen(x, surface, z, 0, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public static void generateCover(int t, int rX, int rZ) {
+        final java.util.Random rand = new java.util.Random(seed + t);
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        for (int cX = 0; cX < regionSizeChunks; cX++) {
+            for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                for (int lX = 0; lX < chunkSize; lX++) {
+                    for (int lZ = 0; lZ < chunkSize; lZ++) {
+                        int rlX = lX + (cX * chunkSize), rlZ = lZ + (cZ * chunkSize);
+                        int packed = (rlX * regionSize) + rlZ;
+                        short surface = region2D.heights[packed];
+                        int x = rlX+(rX*regionSize), z = rlZ+(rZ*regionSize);
+
+                        double foliageNoise = Math.abs(region2D.noises.plains()[packed]);
+                        double foliageChance = Math.abs(region2D.noises.whiteNoise()[packed]);
+                        int blockOn = getBlockWorldgen(x, surface, z);
+                        int blockIn = getBlockWorldgen(x, surface + 1, z);
+                        if (blockIn >> 16 == 0) {
+                            if (blockOn >> 16 == BlockTypes.GRASS.id || blockOn >> 16 == BlockTypes.PODZOL.id) {
+                                if (foliageChance < 0.367f) {
+                                    int type;
+                                    if ((blockOn & 0xFFFF) == 3) {
+                                        type = foliageNoise < 0.1f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.02f ? BlockTypes.DAISY.id : (foliageChance < 0.132f ? BlockTypes.LILY.id : BlockTypes.TALL_GRASS.id));
+                                    } else if ((blockOn & 0xFFFF) == 1) {
+                                        type = foliageNoise < 0.16f ? BlockTypes.ROSE.id : (foliageChance < 0.01f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id);
+                                    } else {
+                                        type = foliageNoise < 0.03f ? BlockTypes.ROSE.id : (foliageChance < 0.006f ? BlockTypes.HYDRANGEA.id : (foliageChance < 0.1f ? BlockTypes.DANDELION.id : BlockTypes.TALL_GRASS.id));
+                                    }
+                                    setBlockWorldgen(x, surface + 1, z, type, (type == BlockTypes.TALL_GRASS.id ? ((blockOn & 0xFFFF) * 4) : 0) + rand.nextInt(4));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public void generateSurface(int t, int rX, int rZ) {
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        for (int rY = 0; rY < heightRegions; rY++) {
+            long cRP = packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            for (int cX = 0; cX < regionSizeChunks; cX++) {
+                for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                    for (int cY = regionSizeChunks - 1; cY >= 0; cY--) {
+                        int cP = Region.packLocalPos(cX, cY, cZ);
+                        Chunk chunk = region.getChunk(cP);
+                        for (int lX = 0; lX < chunkSize; lX++) {
+                            for (int lZ = 0; lZ < chunkSize; lZ++) {
+                                int rlX = lX + (cX * chunkSize), rlZ = lZ + (cZ * chunkSize);
+                                int packed = (rlX * regionSize) + rlZ;
+                                short elevation = region2D.heights[packed];
+//                                int endY = Math.max(elevation, (rY*regionSize)+(cY*chunkSize));
+//                                int startY = Math.min(SEA_LEVEL, endY+chunkSize-1);
+//                                for (int gY = startY; gY >= endY; gY--) {
+//                                    chunk.setFluid(lX, gY%chunkSize, lZ, BlockTypes.WATER.id, gY == elevation ? 13 : 15);
+//                                }
+//                                endY = (rY*regionSize)+(cY*chunkSize);
+//                                startY = Math.min(elevation, endY+chunkSize-1);
+//                                int type = elevation > SEA_LEVEL+2 ? BlockTypes.DIRT.id : (elevation > SEA_LEVEL ? BlockTypes.SAND.id : BlockTypes.WET_SAND.id);
+//                                for (int gY = startY; gY >= endY; gY--) {
+//                                    chunk.setBlock(lX, gY%chunkSize, lZ, type, 0);
+//                                }
+
+                                double hillsNoise = region2D.noises.hills()[packed];// - hillCracks;//-(dunesNoise*0.2f);
+                                byte biomeId = region2D.biomes[packed];
+                                Biome biome = Biomes.biomes[biomeId];
+//                                int topType = elevation <= SEA_LEVEL ? BlockTypes.WET_SAND.id : (elevation <= SEA_LEVEL + 3 || biomeId == Biomes.DESERT.id ? BlockTypes.SAND.id : (hillCracks > 0.02f && hillsNoise > 0.02f ? BlockTypes.STONE.id : (biomeId == Biomes.SNOWY_TAIGA.id ? BlockTypes.SNOW.id : BlockTypes.GRASS.id)));
+//                                int midType = topType == BlockTypes.GRASS.id || topType == BlockTypes.SNOW.id ? BlockTypes.DIRT.id : (topType == BlockTypes.STONE.id ? BlockTypes.STONE.id : BlockTypes.SANDSTONE.id);
+//                                int topDepth = topType == BlockTypes.GRASS.id ? 1 : (topType == BlockTypes.SNOW.id ? 3 : 7);
+                                int localYOffset = (rY * regionSize)+(cY * chunkSize);
+                                if (SEA_LEVEL < localYOffset + chunkSize && SEA_LEVEL >= (localYOffset) && SEA_LEVEL > elevation) {
+                                    chunk.setFluid(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.WATER.id, 13);
+                                    //chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, BlockTypes.ICE.id, 0);
+                                    //chunk.setBlock(lX, SEA_LEVEL % chunkSize, lZ, (lX%8) < 2 ? BlockTypes.BLUE_STAINED_GLASS.id : (lX%8) < 4 ? BlockTypes.RED_STAINED_GLASS.id : (lX%8) < 6 ? BlockTypes.LIME_STAINED_GLASS.id : BlockTypes.MAGENTA_STAINED_GLASS.id, 0);
+                                }
+                                int startY = Math.min(localYOffset + chunkSize - 1, SEA_LEVEL - 1) - localYOffset;
+                                int endY = Math.max(elevation + 1, localYOffset) - localYOffset;
+                                for (int lY = startY; lY >= endY; lY--) {
+                                    chunk.setFluid(lX, lY, lZ, BlockTypes.WATER.id, 15);
+                                }
+                                if (biome == Biomes.BADLANDS) {
+                                    double plainsNoise = region2D.noises.plains()[packed];
+                                    startY = Math.min(localYOffset + chunkSize - 1, elevation);
+                                    endY = Math.max(localYOffset, GROUND_LEVEL);
+                                    for (int y = startY; y >= endY; y--) {
+                                        chunk.setBlock(lX, y-(localYOffset), lZ, getBadlandsBands((int) (y+(((24*plainsNoise+y))%8)), (int) (3+Math.abs(hillsNoise*3))), 0);
+                                    }
+                                } else {
+                                    int topType = biome.surfaceBlockType();
+                                    int topSubtype = biome.surfaceBlockSubtype();
+                                    int midType = biome.subsurfaceBlockType();
+                                    int midSubtype = biome.subsurfaceBlockSubtype();
+                                    int groundType = biome.groundBlockType();
+                                    int groundSubtype = biome.groundBlockSubtype();
+                                    if (elevation <= SEA_LEVEL) {
+                                        topType = BlockTypes.WET_SAND.id;
+                                        topSubtype = 0;
+                                        midType = BlockTypes.WET_SAND.id;
+                                        midSubtype = 0;
+                                        groundType = BlockTypes.SANDSTONE.id;
+                                        groundSubtype = 0;
+                                    }
+                                    int surfaceDepth = biome.surfaceDepth();
+                                    int subsurfaceDepth = biome.subsurfaceDepth();
+                                    startY = Math.min(localYOffset + chunkSize - 1, elevation) - localYOffset;
+                                    endY = Math.max(elevation + 1 - surfaceDepth, localYOffset) - localYOffset;
+                                    for (int lY = startY; lY >= endY; lY--) {
+                                        chunk.setBlock(lX, lY, lZ, topType, topSubtype);
+                                    }
+                                    startY = Math.min(localYOffset + chunkSize - 1, elevation - surfaceDepth) - localYOffset;
+                                    endY = Math.max(elevation + 1 - subsurfaceDepth, localYOffset) - localYOffset;
+                                    for (int lY = startY; lY >= endY; lY--) {
+                                        chunk.setBlock(lX, lY, lZ, midType, midSubtype);
+                                    }
+                                    startY = Math.min(localYOffset + chunkSize - 1, elevation - subsurfaceDepth) - localYOffset;
+                                    endY = Math.max(localYOffset, GROUND_LEVEL) - localYOffset;
+                                    for (int lY = startY; lY >= endY; lY--) {
+                                        chunk.setBlock(lX, lY, lZ, groundType, groundSubtype);
+                                    }
+                                }
+//                                if (elevation < SKY_LEVEL && elevation >= GROUND_LEVEL) {
+//                                    region2D.heights[packed] = (short) (elevation - GROUND_LEVEL);
+//                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public void initLighting(int t, int rX, int rZ) {
+        long r2DPos = packRegionPos(rX, 0, rZ);
+        Region2D region2D = World.getRegion2D(r2DPos);
+        Arrays.fill(region2D.heights, (short)-1);
+        for (int rY = SKY_LEVEL_R-1; rY > SEA_FLOOR_LEVEL_R; rY--) {
+            long cRP = packRegionPos(rX, rY, rZ);
+            Region region = getRegion(cRP);
+            for (int cX = 0; cX < regionSizeChunks; cX++) {
+                for (int cZ = 0; cZ < regionSizeChunks; cZ++) {
+                    for (int cY = regionSizeChunks - 1; cY >= 0; cY--) {
+                        int cP = Region.packLocalPos(cX, cY, cZ);
+                        Chunk chunk = region.getChunk(cP);
+                        int firstBlock = chunk.getBlock(0);
+                        if (chunk.blockPalette.size() > 1 || BlockTypes.blockTypes[firstBlock >> 16].obstructingHeightmap(firstBlock)) { //skip chunk if theres only one type of block in it and that block cant obstruct heightmaps
+                            for (int x = 0; x < chunkSize; x++) {
+                                for (int z = 0; z < chunkSize; z++) {
+                                    int rlX = x + (cX * chunkSize), rlZ = z + (cZ * chunkSize);
+                                    int packed = (rlX * regionSize) + rlZ;
+                                    if (region2D.heights[packed] == -1) {
+                                        for (int y = chunkSize - 1; y >= 0; y--) {
+                                            int block = chunk.getBlock(Chunk.packLocalPos(x, y, z));
+                                            if (BlockTypes.blockTypes[block >> 16].obstructingHeightmap(block)) {
+                                                Vector3i globalPos = new Vector3i(x + (cX * chunkSize) + (rX * regionSize), y + (cY * chunkSize) + (rY * regionSize), z + (cZ * chunkSize) + (rZ * regionSize));
+                                                region2D.heights[packed] = (short) (globalPos.y() - GROUND_LEVEL);
+                                                break;
+                                            } else {
+                                                chunk.setLight(x, y, z, (byte) 0, (byte) 0, (byte) 0, (byte) LightHelper.maxSunlightLevel);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            chunk.lightPalette.set(0, LightHelper.fullSunlight);
+                        }
+                    }
+                }
+            }
+        }
+        for (int x = rX*regionSize; x < (rX*regionSize)+regionSize; x++) {
+            for (int z = rZ*regionSize; z < (rZ*regionSize)+regionSize; z++) {
+                int height = region2D.heights[Region2D.packLocalPos(x%regionSize, z%regionSize)];
+                if (height > 0) {
+                    int gY = height+1;
+                    int nBlock1 = getBlock(x + 1, gY, z), nBlock2 = getBlock(x, gY, z + 1), nBlock3 = getBlock(x - 1, gY, z), nBlock4 = getBlock(x, gY, z - 1);
+                    if ((getLight(x + 1, gY, z).s() == 0 && !BlockTypes.blockTypes[nBlock1 >> 16].blocksLight(nBlock1)) ||
+                            (getLight(x, gY, z + 1).s() == 0 && !BlockTypes.blockTypes[nBlock2 >> 16].blocksLight(nBlock2)) ||
+                            (getLight(x - 1, gY, z).s() == 0 && !BlockTypes.blockTypes[nBlock3 >> 16].blocksLight(nBlock3)) ||
+                            (getLight(x, gY, z - 1).s() == 0 && !BlockTypes.blockTypes[nBlock4 >> 16].blocksLight(nBlock4))) {
+                        LightHelper.queueLightUpdate(LightHelper.lightQueueWG, new Vector3i(x, gY, z));
+                    }
+                }
+            }
+        }
+    }
+    public void finalizeRegions(int t, int rX, int rZ) {
+        for (int rY = 0; rY < heightRegions; rY++) {
+            Region2D region2D = getRegion2D(packRegionPos(rX, 0, rZ));
+            region2D.noises = null;
+            region2D.biomes = null;
+            long cRP = packRegionPos(rX, rY, rZ);
+            Region region = World.getRegion(cRP);
+            if (!region.generated) {
+                region.setGenerated();
+            }
+        }
+    }
+
     @Override
     public void generate() throws InterruptedException, IOException {
         long startTime = System.currentTimeMillis();
         int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
         ExecutorService pool = Executors.newFixedThreadPool(threads);
+        final int initInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * initInterval;
+            final int endX = Math.min(startX + initInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        initRegions(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to init regions. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int noisesInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * noisesInterval;
+            final int endX = Math.min(startX + noisesInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        generateNoises(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate noises. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int heightInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * heightInterval;
+            final int endX = Math.min(startX + heightInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        generateHeightsAndBiomes(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate heights. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int surfaceInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * surfaceInterval;
+            final int endX = Math.min(startX + surfaceInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        generateSurface(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate surface. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int featuresInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * featuresInterval;
+            final int endX = Math.min(startX + featuresInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        generateFeatures(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate features. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int coverInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * coverInterval;
+            final int endX = Math.min(startX + coverInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        generateCover(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate cover. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
+        final int lightingInterval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * lightingInterval;
+            final int endX = Math.min(startX + lightingInterval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        initLighting(threadId, rX, rZ);
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to init lighting. \n");
+
+        startTime = System.currentTimeMillis();
+        threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        pool = Executors.newFixedThreadPool(threads);
         final int interval = sizeRegions/threads;
         for (int thread = 0; thread < threads; thread++) {
             final int threadId = thread;
@@ -1113,18 +1927,14 @@ public class Earth extends WorldType {
             pool.execute(() -> {
                 for (int rX = startX; rX < endX; rX++) {
                     for (int rZ = 0; rZ < sizeRegions; rZ++) {
-                        try {
-                            generateRegion(threadId, rX, rZ);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        finalizeRegions(threadId, rX, rZ);
                     }
                 }
             });
         }
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate world. \n");
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to finalize regions. \n");
 //        for (int cX = 0; cX < 135; cX++) {
 //            for (int cZ = 0; cZ < 175; cZ++) {
 //                for (int cY = 0; cY < heightChunks; cY++) {

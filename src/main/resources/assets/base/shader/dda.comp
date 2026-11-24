@@ -65,9 +65,9 @@ layout(set = 0, binding = 2) uniform sampler3D Sampler3D[];
 layout(set = 0, binding = 3, rgba16f) uniform image2D Image2D[];
 layout(set = 0, binding = 3, r32f) uniform image2D DepthImage2D[];
 const float PI = 3.14159265;
-const int SEA_LEVEL = 127;
+const int SEA_LEVEL = 255;
 const int size = 2048;
-const int height = 1024;
+const int height = 640;
 const ivec3 sizeVec = ivec3(size, height, size);
 const int chunkSize = 16;
 const int sizeChunks = size / chunkSize;
@@ -1027,7 +1027,7 @@ void main() {
                     tiltedNormal.xyz = normalize(mix(normalize(tangent * roughNorm.x + cross(tiltedNormal, tangent) * roughNorm.y + tiltedNormal * roughNorm.z), tiltedNormal.xyz, clamp(distance(ogPos, fluidInfrontOfTransparent ? fluidPos : primaryTintLightPos)/75.f, 0, 0.5f)));
                 }
                 bool offsetShadow = false;
-                float shadowOffset = mix(0, voxelSize * 3, clamp(distance(ogPos, primaryShadowPos), 0, 100) / 100);
+                float shadowOffset = airAbove ? mix(0, voxelSize * 3, clamp(distance(ogPos, primaryShadowPos), 0, 100) / 100) : 0;
                 if (fract(primaryShadowPos.y) > 1 - shadowOffset && globalUbo.renderToggles.x > 0) {
                     primaryShadowPos.y = floor(primaryShadowPos.y) + 1 + shadowOffset;
                     offsetShadow = true;

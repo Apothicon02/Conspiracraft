@@ -182,10 +182,10 @@ public class BlockTypes {
             RED_SANDSTONE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.RED_SANDSTONE),
                     SANDSTONE.blockProperties.copy())),
             RED_GRAVEL = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType("natural/texture/red_gravel",  GRAVEL.blockProperties.copy())),
-            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.WET_SAND),  SAND.blockProperties.copy())),
-            ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.ICE),  GLASS.blockProperties.copy().blocksLight(true))),
-            BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType("geological/texture/basalt",  STONE.blockProperties.copy())), //75
-            GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType("geological/texture/granite",  new BlockProperties().hasSlab())),
+            WET_SAND = create(List.of(BlockTags.sediment, BlockTags.sand, BlockTags.spadeEfficient), new PowderBlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.WET_SAND), SAND.blockProperties.copy())),
+            ICE = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.ICE), GLASS.blockProperties.copy().blocksLight(true))),
+            BASALT = create(List.of(BlockTags.pickEfficient, BlockTags.blunt), new BlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.BASALT), STONE.blockProperties.copy())), //75
+            GRANITE = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType("geological/texture/granite", new BlockProperties().hasSlab())),
             CINNABAR = create(List.of(BlockTags.pickEfficient, BlockTags.rocks, BlockTags.blunt), new BlockType("geological/texture/cinnabar",  new BlockProperties().hasSlab())),
             OBSIDIAN_DUST = create(List.of(BlockTags.sediment, BlockTags.spadeEfficient), new PowderBlockType("misc/model/cube", Map.of(Utils.packColor(255), Materials.OBSIDIAN_DUST), SAND.blockProperties.copy().blockSFX(
                     new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1, new SFX[]{Sounds.GRAVEL_STEP1, Sounds.GRAVEL_STEP2}, 0.4f, 1))),

@@ -126,6 +126,11 @@ public class Region {
         if (fluidUpdateSet.add(condensedRegionPos)) {
             fluidUpdateQueue.addLast(condensedRegionPos);
         }
+        for (Chunk chunk : chunks) {
+            if (updateSet.add(chunk.cCP)) {
+                updateQueue.addLast(chunk.cCP);
+            }
+        }
         updateNeighborsGeneratedAndTheirNeighbors();
     }
     public void updateNeighborsGeneratedAndTheirNeighbors() {
@@ -239,7 +244,6 @@ public class Region {
     private final FloatArrayList verts = new FloatArrayList();
     private final IntArrayList indices = new IntArrayList();
     public void updateMesh(MemoryStack stack) throws IOException {
-        if (World.generating) {return;}
         //long start = System.nanoTime();
         int prevIndicesAmt = indices.size();
         int prevFluidIndicesAmt = fluidIndices.size();

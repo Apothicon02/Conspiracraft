@@ -47,7 +47,7 @@ public class World {
     public static final int halfSize = size/2;
     public static final int quarterSize = size/4;
     public static final int eigthSize = size/8;
-    public static final int height = 1024;
+    public static final int height = 640;
     public static final int halfHeight = height/2;
     public static final long heightL = height;
     public static final byte chunkSize = 16;
@@ -191,7 +191,7 @@ public class World {
         meshPool.submit(() -> {
             while (!Main.isClosing) {
                 try (MemoryStack stack = MemoryStack.stackPush()){
-                    if (!fluidUpdateQueue.isEmpty()) {
+                    if (!fluidUpdateQueue.isEmpty() && !World.generating) {
                         long cRP = fluidUpdateQueue.pollFirst();
                         Region region = getRegion(cRP);
                         if (region != null) {
@@ -304,11 +304,13 @@ public class World {
             worldType.generate();
         }
         generating = false;
-        try (MemoryStack stack = MemoryStack.create(1000000).push()) {
-            for (Region region : regions.values()) {
-                region.updateMesh(stack);
-            }
-        }
+//        try (MemoryStack stack = MemoryStack.create(10000).push()) {
+//            for (Region region : regions.values()) {
+//                try (MemoryStack regionStack = stack.push()) {
+//                    region.updateMesh(regionStack);
+//                }
+//            }
+//        }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
     public static final short[] oldHeightmap = new short[1];

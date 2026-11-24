@@ -7,6 +7,8 @@ public class Region2D {
     public final long rX, rZ;
     public final int rXI, rZI;
     public final short[] heights;
+    public RegionNoises noises;
+    public byte[] biomes;;
     public Region2D(long rPos) {
         this.rPos = rPos;
         this.rX = (rPos >> 42) & 0x3FFFFF;
@@ -14,6 +16,8 @@ public class Region2D {
         this.rXI = (int)this.rX;
         this.rZI = (int)this.rZ;
         heights = new short[regionSize * regionSize];
+        noises = new RegionNoises(regionSize);
+        biomes = new byte[regionSize * regionSize];
     }
 
     public static int packLocalPos(int x, int z) {

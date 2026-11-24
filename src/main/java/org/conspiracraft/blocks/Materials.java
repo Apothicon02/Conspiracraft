@@ -70,6 +70,7 @@ public class Materials {
             TORCH_FLAME = create("crafted/material/torch_flame"),
             MARBLE = create("geological/material/marble"),
             STONE = create("geological/material/stone"),
+            BASALT = create("geological/material/basalt"),
             IGNEOUS = create("geological/material/igneous"),
             MAGMA = create("geological/material/magma"),
             KYANITE = create("geological/material/kyanite"),
