@@ -239,9 +239,7 @@ public class Region {
     private final FloatArrayList verts = new FloatArrayList();
     private final IntArrayList indices = new IntArrayList();
     public void updateMesh(MemoryStack stack) throws IOException {
-        if (!neighborsGenerated) {
-            return;
-        }
+        if (World.generating) {return;}
         //long start = System.nanoTime();
         int prevIndicesAmt = indices.size();
         int prevFluidIndicesAmt = fluidIndices.size();

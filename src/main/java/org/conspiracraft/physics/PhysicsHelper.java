@@ -155,7 +155,18 @@ public class PhysicsHelper {
         move(objAABB, vel, new ArrayList<>());
     }
     public static void move(AABB objAABB, Vector3d vel, ArrayList<AABB> aabbs) {
-        if (World.getRegion(World.packRegionPos(((int)objAABB.xMin)>>regionBits, ((int)objAABB.yMin)>>regionBits, ((int)objAABB.zMin)>>regionBits)) == null) {return;}
+        //if (World.getRegion(World.packRegionPos(((int)objAABB.xMin)>>regionBits, ((int)objAABB.yMin)>>regionBits, ((int)objAABB.zMin)>>regionBits)) == null) {return;}
+        int max = World.size-1;
+        int maxY = World.height-1;
+        int min = 1;
+        double clampX = objAABB.xMin < min ? -(objAABB.xMin-min) : objAABB.xMax >= max ? -(objAABB.xMax-max) : 0;
+        double clampY = objAABB.yMin < min ? -(objAABB.yMin-min) : objAABB.yMax >= maxY ? -(objAABB.yMax-maxY) : 0;
+        double clampZ = objAABB.zMin < min ? -(objAABB.zMin-min) : objAABB.zMax >= max ? -(objAABB.zMax-max) : 0;
+        objAABB.move(clampX*10, clampY*10, clampZ*10);
+        if (clampX != 0) {vel.x = 0;}
+        if (clampY != 0) {vel.y = 0;}
+        if (clampZ != 0) {vel.z = 0;}
+
         AABB regionAABB = new AABB(
                 objAABB.xMin-1, objAABB.xMax+1,
                 objAABB.yMin-1, objAABB.yMax+1,

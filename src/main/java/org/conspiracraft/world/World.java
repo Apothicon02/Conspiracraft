@@ -68,7 +68,7 @@ public class World {
     public static final int quarterHeightRegions = heightRegions/2;
 //    public static final int sizeLods = size >>lodBits;
 //    public static final int heightLods = height >>lodBits;
-    public static boolean generating = false;
+    public static boolean generating = true;
     public static WorldType worldType = WorldTypes.EARTH;
     public static final ObjectOpenHashSet<Item> items = new ObjectOpenHashSet<>();
     public static final Int2ObjectOpenHashMap<BlockEntity> blockEntities = new Int2ObjectOpenHashMap<>();
@@ -301,7 +301,13 @@ public class World {
                 in.close();
             }
         } else {
-            //worldType.generate();
+            worldType.generate();
+        }
+        generating = false;
+        try (MemoryStack stack = MemoryStack.create(1000000).push()) {
+            for (Region region : regions.values()) {
+                region.updateMesh(stack);
+            }
         }
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms to load world.");
     }
@@ -487,10 +493,6 @@ public class World {
             updateNeighbors(x, y, z);
         }
     }
-    public static final int wgThreads = 7;
-    public static ExecutorService wgPool = null;
-    public static boolean wgResetPending = false;
-    public static final Future<?>[] wgFutures = new Future[wgThreads];
     public static Collection<Region> getAllRegions() {return regions.values();}
     public static Region getRegion(long cRP) {
         return regions.get(cRP);
@@ -531,6 +533,14 @@ public class World {
 //        Chunk chunk = region.getChunk(Region.packLocalPos(cX%regionSizeChunks, cY%regionSizeChunks, cZ%regionSizeChunks));
 //        prevChunk = chunk;
 //        return chunk;
+    }
+    public static Chunk getChunkGlobalPosOrTemp(long globalCP) {
+        Chunk chunk = getChunkGlobalPos(globalCP);
+        if (chunk == null) {
+            chunk = new Chunk(globalCP);
+            chunk.blockPalette.set(0, Chunk.packInts(BlockTypes.STONE.id, 0));
+        }
+        return chunk;
     }
     public static int getBlockWorldgenUnchecked(Region region, Vector3i pos) {return getBlockWorldgenUnchecked(region, pos.x(), pos.y(), pos.z());}
     public static int getBlockWorldgenUnchecked(Region region, long pos) {return getBlockWorldgenUnchecked(region, LongPos.x(pos), LongPos.y(pos), LongPos.z(pos));}

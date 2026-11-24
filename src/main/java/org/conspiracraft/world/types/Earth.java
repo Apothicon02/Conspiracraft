@@ -24,14 +24,12 @@ import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.lang.Math;
+import java.lang.Runtime;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 import static org.conspiracraft.world.Biomes.getBadlandsBands;
 import static org.conspiracraft.world.World.*;
@@ -145,78 +143,15 @@ public class Earth extends WorldType {
     public int getSeason() {return 0;};
     @Override
     public void tick() {}
-    public static final int[][] generationOffsets = createGenerationOffsets();
-    public static int[][] createGenerationOffsets() {
-        ArrayList<Vector3i>[] positions = new ArrayList[wgThreads];
-        for (int i = 0; i < positions.length; i++) {positions[i] = new ArrayList<>();}
-        int intsPerThread = 0;
-        int thread = 0;
-        for (int rX = -halfSizeRegions+1; rX < halfSizeRegions; rX++) {
-            for (int rY = -quarterHeightRegions+1; rY < quarterHeightRegions; rY++) {
-                for (int rZ = -halfSizeRegions+1; rZ < halfSizeRegions; rZ++) {
-                    if (thread >= wgThreads) {thread = 0;}
-                    if (thread == 0) {intsPerThread+=3;}
-                    positions[thread++].add(new Vector3i(rX, rY, rZ));
-                }
-            }
-        }
-        int[][] offsets = new int[wgThreads][intsPerThread];
-        for (int t = 0; t < wgThreads; t++) {
-            ArrayList<Vector3i> list = positions[t];
-            list.sort(Comparator.comparingInt(v -> v.x * v.x + v.y * v.y + v.z * v.z));
-            int i = 0;
-            for (Vector3i pos : list) {
-                offsets[t][i++] = pos.x();
-                offsets[t][i++] = pos.y();
-                offsets[t][i++] = pos.z();
-            }
-        }
-        return offsets;
-    }
     public static int prevPlayerRX = -1, prevPlayerRY = -1, prevPlayerRZ = -1;
-    public static final int[] generationIdxs = new int[wgThreads];
-    public static final int GROUND_LEVEL = 500736, SEA_LEVEL = GROUND_LEVEL+95, SKY_LEVEL = GROUND_LEVEL+512;
+    public static final int GROUND_LEVEL = 0, SEA_LEVEL = GROUND_LEVEL+127, SKY_LEVEL = GROUND_LEVEL+512;
     public static final int GROUND_LEVEL_C = GROUND_LEVEL>>chunkBits, SEA_LEVEL_C = SEA_LEVEL>>chunkBits, SKY_LEVEL_C = SKY_LEVEL>>chunkBits;
     public static final int GROUND_LEVEL_R = GROUND_LEVEL>>regionBits, SEA_LEVEL_R = SEA_LEVEL>>regionBits, SKY_LEVEL_R = SKY_LEVEL>>regionBits;
-    @Override
-    public void tickWorldgen() {
-        int playerRX = (int)(Main.player.pos.x()/regionSize), playerRY = (int)(Main.player.pos.y()/regionSize), playerRZ = (int)(Main.player.pos.z()/regionSize);
-        if (wgPool == null) {wgPool = Executors.newFixedThreadPool(wgThreads); Arrays.fill(wgFutures, CompletableFuture.completedFuture(null));}
-        //if (((ThreadPoolExecutor)World.wgPool).getActiveCount() > 0) {return;}
-        if (prevPlayerRX != playerRX || prevPlayerRY != playerRY || prevPlayerRZ != playerRZ) {
-            prevPlayerRX = playerRX; prevPlayerRY = playerRY; prevPlayerRZ = playerRZ;
-            wgResetPending = true;
-            //unloadChunks(prevPlayerRX*regionSizeChunksL, playerRX*regionSizeChunksL, prevPlayerRY*regionSizeChunksL, playerRY*regionSizeChunksL, prevPlayerRZ*regionSizeChunksL, playerRZ*regionSizeChunksL);
-        }
-        if (wgResetPending) {
-            for (Future<?> future : wgFutures) {
-                if (!future.isDone()) {
-                    return;
-                }
-            }
-            Arrays.fill(generationIdxs, 0);
-            wgResetPending = false;
-        }
-        for (int thread = 0; thread < wgThreads; thread++) {
-            int t = thread;
-            if (wgFutures[t].isDone()) {
-                wgFutures[t] = wgPool.submit(() -> {
-                    try {
-                        generateRegion(t, playerRX, playerRY, playerRZ);
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        }
-        //pool.shutdown();
-    }
     public static final int MID = 500000, HOT = MID-1000, COLD = MID+1000, TEMP_RANGE = 2000;
-    private void generateRegion(int t, int playerRX, int playerRY, int playerRZ) throws IOException {
-        if (generationIdxs[t] >= generationOffsets[t].length-3) {return;}
+    private void generateRegion(int t, int rX, int rZ) throws IOException {
         final java.util.Random rand = new java.util.Random(seed + t);
-        int rX = generationOffsets[t][generationIdxs[t]++] + playerRX, rYStart = generationOffsets[t][generationIdxs[t]++] + playerRY, rZ = generationOffsets[t][generationIdxs[t]++] + playerRZ;
-        int rYEnd = rYStart;
+        int rYStart = 0;
+        int rYEnd = 0;
         boolean crust = false;
         Region2D region2D = null;
         if (rYStart >= GROUND_LEVEL_R && rYStart < SKY_LEVEL_R) {
@@ -1164,13 +1099,32 @@ public class Earth extends WorldType {
         }
         return true;
     }
-    
-    public static final int generationSize = 4096;
-    static final int[] xOffset = { 3, -3, 0, 0, 3, -3, -3, 3 };
-    static final int[] zOffset = { 0, 0, 3, -3, 3, -3, 3, -3 };
+
     @Override
-    public void generate() throws InterruptedException {
-        generating = true;
+    public void generate() throws InterruptedException, IOException {
+        long startTime = System.currentTimeMillis();
+        int threads = Math.min(Runtime.getRuntime().availableProcessors(), sizeRegions);
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        final int interval = sizeRegions/threads;
+        for (int thread = 0; thread < threads; thread++) {
+            final int threadId = thread;
+            final int startX = thread * interval;
+            final int endX = Math.min(startX + interval, sizeRegions);
+            pool.execute(() -> {
+                for (int rX = startX; rX < endX; rX++) {
+                    for (int rZ = 0; rZ < sizeRegions; rZ++) {
+                        try {
+                            generateRegion(threadId, rX, rZ);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        System.out.print("Took "+String.format("%.2f", (System.currentTimeMillis()-startTime)/1000.f)+"s to generate world. \n");
 //        for (int cX = 0; cX < 135; cX++) {
 //            for (int cZ = 0; cZ < 175; cZ++) {
 //                for (int cY = 0; cY < heightChunks; cY++) {

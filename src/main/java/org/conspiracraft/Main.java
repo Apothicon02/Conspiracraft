@@ -126,8 +126,6 @@ public class Main {
                 prevCheck = System.nanoTime();
             }
         }
-        wgPool.shutdown();
-        wgPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         Window.graphics.cleanup();
     }
 

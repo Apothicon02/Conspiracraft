@@ -336,12 +336,12 @@ public class Chunk {
     //Lights end
     //Fluids start
     public void updateMesh(Region region, FloatArrayList fluidVerts, IntArrayList fluidIndices, FloatArrayList verts, IntArrayList indices) throws IOException {
-        Chunk chunkAbove = getChunkGlobalPos(packChunkPos(cX, cY+1, cZ));
-        Chunk chunkBelow = getChunkGlobalPos(packChunkPos(cX, cY-1, cZ));
-        Chunk chunkNorth = getChunkGlobalPos(packChunkPos(cX, cY, cZ+1));
-        Chunk chunkEast = getChunkGlobalPos(packChunkPos(cX+1, cY, cZ));
-        Chunk chunkSouth = getChunkGlobalPos(packChunkPos(cX, cY, cZ-1));
-        Chunk chunkWest = getChunkGlobalPos(packChunkPos(cX-1, cY, cZ));
+        Chunk chunkAbove = getChunkGlobalPosOrTemp(packChunkPos(cX, cY+1, cZ));
+        Chunk chunkBelow = getChunkGlobalPosOrTemp(packChunkPos(cX, cY-1, cZ));
+        Chunk chunkNorth = getChunkGlobalPosOrTemp(packChunkPos(cX, cY, cZ+1));
+        Chunk chunkEast = getChunkGlobalPosOrTemp(packChunkPos(cX+1, cY, cZ));
+        Chunk chunkSouth = getChunkGlobalPosOrTemp(packChunkPos(cX, cY, cZ-1));
+        Chunk chunkWest = getChunkGlobalPosOrTemp(packChunkPos(cX-1, cY, cZ));
         int offX = (cXI%regionSizeChunks)*chunkSize, offY = (cYI%regionSizeChunks)*chunkSize, offZ = (cZI%regionSizeChunks)*chunkSize;
         if (fluidPalette.size() > 1 || fluidPalette.getFirst() != 0) {
             for (int y = 0; y < chunkSize; y++) {

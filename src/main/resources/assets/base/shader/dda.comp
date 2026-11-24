@@ -65,8 +65,7 @@ layout(set = 0, binding = 2) uniform sampler3D Sampler3D[];
 layout(set = 0, binding = 3, rgba16f) uniform image2D Image2D[];
 layout(set = 0, binding = 3, r32f) uniform image2D DepthImage2D[];
 const float PI = 3.14159265;
-const int GROUND_LEVEL = 500736;
-const int SEA_LEVEL = GROUND_LEVEL+95;
+const int SEA_LEVEL = 127;
 const int size = 2048;
 const int height = 1024;
 const ivec3 sizeVec = ivec3(size, height, size);
@@ -94,15 +93,15 @@ int packLocalPos(vec3 pos) {
 int packLocalPos(ivec3 pos) {
     return ((((pos.x*chunkSize)+pos.z)*chunkSize)+pos.y);//pos.x+pos.y*chunkSize+pos.z*(chunkSize*chunkSize);
 }
-int wrapCoord(int v, int coordScale) {
-    return (v+coordScale)%coordScale;
-}
 ChunkStruct lightChunk = ChunkStruct(0, 0, 0, 0, 0, 0, 0);
 int lightValuesPerInt = -1;
+int lightchunkBufLength = chunkBuf[nonuniformEXT(pushUbo.lightChunks)].data.length();
 void updateLightChunkData(ivec3 chunkPos) {
-    int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
-    lightChunk = chunkBuf[nonuniformEXT(pushUbo.lightChunks)].data[condensedChunkPos];
-    lightValuesPerInt = lightChunk.bitsPerValue <= 0 ? lightChunk.bitsPerValue : 32/lightChunk.bitsPerValue;
+    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    if (condensedChunkPos >= 0 && condensedChunkPos < lightchunkBufLength) {
+        lightChunk = chunkBuf[nonuniformEXT(pushUbo.lightChunks)].data[condensedChunkPos];
+        lightValuesPerInt = lightChunk.bitsPerValue <= 0 ? lightChunk.bitsPerValue : 32 / lightChunk.bitsPerValue;
+    }
 }
 void updateLightChunkData(int x, int y, int z) {
     updateLightChunkData(ivec3(x, y, z) >> 4);
@@ -111,6 +110,7 @@ const int maxBlocklightLevel = 31;
 const int maxSunlightLevel = 23;
 const vec4 maxLightLevel = vec4(maxBlocklightLevel, maxBlocklightLevel, maxBlocklightLevel, maxSunlightLevel);
 const int fullSunlight = 385875968;
+int lightBufLength = intBuf[nonuniformEXT(pushUbo.lights)].data.length();
 int getLightData(int x, int y, int z) {
     updateLightChunkData(x, y, z);
     if (lightValuesPerInt <= 0) {return fullSunlight;} // if (lightValuesPerInt <= 0) {return lightValuesPerInt == 0 ? fullSunlight : 0;}
@@ -120,9 +120,10 @@ int getLightData(int x, int y, int z) {
     int bitIndex = (condensedLocalPos - intIndex * lightValuesPerInt) * lightChunk.bitsPerValue;
 
     int index = lightChunk.pointer+lightChunk.paletteSize+intIndex;
-    if (index < 0 || index >= 500000000) return fullSunlight;
-    int key = (intBuf[nonuniformEXT(pushUbo.lights)].data[index] >> bitIndex) & lightChunk.valueMask;
-    return intBuf[nonuniformEXT(pushUbo.lights)].data[lightChunk.pointer+key];
+    //if (index < 0 || index >= lightBufLength) return fullSunlight;
+    int key = lightChunk.pointer+((intBuf[nonuniformEXT(pushUbo.lights)].data[index] >> bitIndex) & lightChunk.valueMask);
+    //if (key < 0 || key >= lightBufLength) return fullSunlight;
+    return intBuf[nonuniformEXT(pushUbo.lights)].data[key];
 }
 vec4 getLight(int x, int y, int z) {
     int lightData = getLightData(x, y, z);
@@ -169,14 +170,18 @@ vec4 getLightSmooth(vec3 pos, vec3 norm) {
 
 ChunkStruct chunk = ChunkStruct(0, 0, 0, 0, 0, 0, 0);
 int blockValuesPerInt = 0;
+int chunkBufLength = chunkBuf[nonuniformEXT(pushUbo.chunks)].data.length();
 void updateChunkData(ivec3 chunkPos) {
-    int condensedChunkPos = (((wrapCoord(chunkPos.x, sizeChunks)*sizeChunks)+wrapCoord(chunkPos.z, sizeChunks))*heightChunks)+wrapCoord(chunkPos.y, heightChunks);
-    chunk = chunkBuf[nonuniformEXT(pushUbo.chunks)].data[condensedChunkPos];
-    blockValuesPerInt = chunk.bitsPerValue <= 0 ? 0 : 32/chunk.bitsPerValue;
+    int condensedChunkPos = (((chunkPos.x*sizeChunks)+chunkPos.z)*heightChunks)+chunkPos.y;
+    if (condensedChunkPos >= 0 && condensedChunkPos < chunkBufLength) {
+        chunk = chunkBuf[nonuniformEXT(pushUbo.chunks)].data[condensedChunkPos];
+        blockValuesPerInt = chunk.bitsPerValue <= 0 ? 0 : 32 / chunk.bitsPerValue;
+    }
 }
 void updateChunkData(int x, int y, int z) {
     updateChunkData(ivec3(x, y, z) >> 4);
 }
+int voxelBufLength = intBuf[nonuniformEXT(pushUbo.voxels)].data.length();
 int getBlockData(int x, int y, int z) {
     if (chunk.bitsPerValue < 1) {return chunk.valueMask;}
     //if (blockValuesPerInt <= 0) {return 0;}
@@ -186,10 +191,11 @@ int getBlockData(int x, int y, int z) {
     int bitIndex = (condensedLocalPos - intIndex * blockValuesPerInt) * chunk.bitsPerValue;
 
     int index = chunk.pointer+chunk.paletteSize+intIndex;
-    if (index < 0 || index >= 500000000) return 0;
+    //if (index < 0 || index >= voxelBufLength) return 0;
 
-    int key = (intBuf[nonuniformEXT(pushUbo.voxels)].data[index] >> bitIndex) & chunk.valueMask;
-    return intBuf[nonuniformEXT(pushUbo.voxels)].data[chunk.pointer+key];
+    int key = chunk.pointer+((intBuf[nonuniformEXT(pushUbo.voxels)].data[index] >> bitIndex) & chunk.valueMask);
+    //if (key < 0 || key >= voxelBufLength) return 0;
+    return intBuf[nonuniformEXT(pushUbo.voxels)].data[key];
 }
 ivec2 getBlock(int x, int y, int z) {
     int blockData = getBlockData(x, y, z);
@@ -273,19 +279,11 @@ vec4 getCausticInv(float speed, vec2 checkPos) {
     return noiseInv((checkPos*32)+time);
 }
 int getBlockType(float x, float y, float z) {
-    //    int iX = int(x) % size;
-    //    int iY = int(y) % height;
-    //    int iZ = int(z) % size;
-    //    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
     updateChunkData(int(x), int(y), int(z));
     int blockData = getBlockData(int(x), int(y), int(z));
     return (blockData >> 16) & 0xFFFF;
 }
 vec4 getBlockAndVoxel(float x, float y, float z) {
-    //    int iX = int(x) % size;
-    //    int iY = int(y) % height;
-    //    int iZ = int(z) % size;
-    //    if (x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height) {return vec4(0);}
     updateChunkData(int(x), int(y), int(z));
     int blockData = getBlockData(int(x), int(y), int(z));
     int type = (blockData >> 16) & 0xFFFF;
@@ -341,8 +339,6 @@ const int renderHeightChunks = int((min(1024, height)-chunkSize)*0.5f)/chunkSize
 //const float maxChunkDist = ((renderDistance/chunkSize)*(renderDistance/chunkSize))-regionSize;
 
 float ambientLight = 0.11f;
-vec3 globalPos = (pushUbo.model)[3].xyz;
-vec3 globalChunkPos = globalPos/chunkSize;
 vec3 ogPos = vec3(0);
 vec3 ogDir = vec3(0);
 vec3 ogRayPos = vec3(0);
@@ -352,9 +348,7 @@ float skyWhiteline = 0.9f;
 float skyDensity = 1.f;
 float sunBrightnessMul = 1.1f;
 float minLight = 0.f;
-const int groundLevel = 500000;
 vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool isSky, float fogginess, bool negateSun) {
-    //lightPos.y -= groundLevel;
     vec3 maxedSun = globalUbo.sun;
     maxedSun.y = max(0, maxedSun.y);
     float sunHeight = globalUbo.fogginess < 0 ? 1 : abs(dot(normalize(maxedSun - lightPos), vec3(0, 1, 0)));
@@ -364,13 +358,10 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     float nightness = (clamp(sunDepth, 0.1f, 0.2f)-0.1f)*10;
     sunColor = mix(globalUbo.atmosphere.rgb, globalUbo.nightAtmosphere.rgb, nightness);
     vec3 horizonColor = mix(mix(globalUbo.sunsetAtmosphere.rgb, globalUbo.deepSunsetAtmosphere.rgb, min(sunDepth, 0.1f)*10), vec3(1), min(max(max(0.f, sunDepth-0.5f), sunHeight), 0.1f)*10);
-    float whiteness = (isSky ? (1.f-clamp((((lightPos.y-ogPos.y)+globalPos.y-SEA_LEVEL)/512)-0.25f, 0, 1)) : 1.f)-(0.7f*nightness);
+    float whiteness = (isSky ? (1.f-clamp(((lightPos.y-ogPos.y)/512)-0.25f, 0, 1)) : 1.f)-(0.7f*nightness);
     sunColor = mix(sunColor, horizonColor, whiteness);
 
     sunColor=sunColor*globalUbo.skylightMul.rgb*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2);//mix(sunColor*globalUbo.skylightMul.rgb, sunColor*mix(lighting.a, 1.f, (max(sqrt(fogginess), 0.5f)-0.5f)*2), 0.5f);
-    if (globalPos.y <= GROUND_LEVEL) {
-        sunColor = globalUbo.nightAtmosphere.rgb*max(0, 0.1f-(fogginess*0.2f));
-    }
     //sunColor*=max(vec3(0.45f, 0.45f, 0.55f), globalUbo.skylightMul.rgb);
     //sunColor *= hsv2rgb(mix(rgb2hsv(sunColor), rgb2hsv(globalUbo.skylightMul.rgb), vec3(1.f, 0.f, 0.f)));
     if (!isSky && !celestialSource) {
@@ -381,9 +372,6 @@ vec4 getLightingColor(bool celestialSource, vec3 lightPos, vec4 lighting, bool i
     //        sunColor*=min(sunBrightnessMul, sunBrightnessMul <= 1.f ? 1.f : max(1.f, sunBrightnessMul-fogginess));
     //    }
     float thickness = 1;//sunHeight < 0 ? gradient(lightPos.y, 128, 512-max(0, sunHeight*512), 1+(sunHeight/2), 1)-mix(0.33f, 0, clamp(sunHeight, 0, 1)) : 1;
-    //    if (globalPos.y <= GROUND_LEVEL) {
-    //        return vec4(max(vec3(isSky ? 0.f : ambientLight), lighting.rgb), thickness);
-    //    }
     vec4 color = vec4(max(lighting.rgb, max(vec3(mix(minLight, 0.f, fogginess)), sunColor*thickness*globalUbo.skylight.w)), thickness);
     return isSky ? color*gradient(lightPos.y, 72, 320, skyDensity, 1) : color;
 }
@@ -553,11 +541,9 @@ vec4 dda(bool shadow) {
         //steps++;
         bool stepAnything = true;
         if (stage == 3) {
-            //if (abs(ddaPos.x-ogChunkPos.x) >= sizeChunks/2 || abs(ddaPos.y-ogChunkPos.y) >= heightChunks/4 || abs(ddaPos.z-ogChunkPos.z) >= sizeChunks/2) {break;}
-            ivec3 chunkRayPos = ddaPos;
+            if (ddaPos.x < 0 || ddaPos.x >= sizeChunks || ddaPos.y < 0 || ddaPos.y >= heightChunks || ddaPos.z < 0 || ddaPos.z >= sizeChunks) {break;}
             updateChunkData(ddaPos);
-            if (abs(chunk.x-globalChunkPos.x) >= renderDistanceChunks || abs(chunk.y-globalChunkPos.y) >= renderHeightChunks || abs(chunk.z-globalChunkPos.z) >= renderDistanceChunks) {break;}
-            else if (chunk.bitsPerValue != 0) { //temporary if statement until regions re-added
+            if (chunk.bitsPerValue != 0) { //temporary if statement until regions re-added
                 stage = 2;
                 stepAnything = false;
                 chunkPos = ddaPos;
@@ -717,8 +703,7 @@ vec3 mipmap(vec3 color) {
 }
 float fogDist = pow(globalUbo.fogginess, 4);
 float getFogginess(bool isSky, vec3 pos, float mul, float maxFog) {
-    float elevation = (floor(globalPos.y/height)*height)+pos.y;
-    return globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFog : clamp((sqrt(max(abs(ogPos.x-pos.x), max(abs(ogPos.y-pos.y), abs(ogPos.z-pos.z))) / (renderDistance * fogDist))-0.25f) * (gradient(elevation, SEA_LEVEL, SEA_LEVEL+32, 0, max(0, (noiseInv(pos.xz).w+0.5f)*0.5f))+gradient(elevation, SEA_LEVEL+32, SEA_LEVEL+320, 0.75f, 1)) * mul, 0.f, maxFog));
+    return globalUbo.fogginess <= 0 ? 0 : (isSky ? maxFog : clamp((sqrt(max(abs(ogPos.x-pos.x), max(abs(ogPos.y-pos.y), abs(ogPos.z-pos.z))) / (renderDistance * fogDist))-0.25f) * (gradient(pos.y, SEA_LEVEL, SEA_LEVEL+32, 0, max(0, (noiseInv(pos.xz).w+0.5f)*0.5f))+gradient(pos.y, SEA_LEVEL+32, SEA_LEVEL+320, 0.75f, 1)) * mul, 0.f, maxFog));
 }
 vec3 hueShift(vec3 color, float hue) {
     const vec3 k = vec3(0.57735, 0.57735, 0.57735);
@@ -771,7 +756,7 @@ void main() {
         //        imageStore(Image2D[nonuniformEXT(pushUbo.writeTex.z)], ogCoords, vec4(texelFetch(Sampler2D[nonuniformEXT(pushUbo.tex.w)], coords, 0).xyz, 1));
         vec3 camPos = invView[3].xyz;
         ivec3 iCamPos = ivec3(camPos);
-        ogPos = camPos;//vec3(iCamPos.x%size, iCamPos.y%height, iCamPos.z%size)+(camPos-iCamPos);
+        ogPos = camPos;
         ogChunkPos = ogPos / chunkSize;
         ogDir = getDir(uv);
         rayPos = ogPos;
@@ -793,7 +778,7 @@ void main() {
             color = material.albedo;
             reflectivity = material.fx.g;
             vec3 tangent = (abs(normal.y) > 0.999) ? vec3(1.0, 0.0, 0.0) : normalize(cross(vec3(0.0, 1.0, 0.0), normal));
-            float roughness = material.fx.x*(1+clamp((dot(normalize(source.xyz-globalPos), normal)-0.4f)*50, 0, 1));
+            float roughness = material.fx.x*(1+clamp((dot(normalize(source.xyz), normal)-0.4f)*50, 0, 1));
             vec3 roughNorm = normalize(material.norm.xyz*vec3(roughness, roughness, 1));
             normal.xyz = normalize(tangent * roughNorm.x + cross(normal, tangent) * roughNorm.y + normal * roughNorm.z);
             //normal.xyz = normalize(normal.xyz+material.norm.xyz);
@@ -918,12 +903,9 @@ void main() {
         float shadowFactor = 1.f;
         bool celestialSource = distance(camPos, globalUbo.skylight.xyz) > size*2;//globalUbo.skylight.x < 0 || globalUbo.skylight.x >= size || globalUbo.skylight.y < 0 || globalUbo.skylight.y >= height || globalUbo.skylight.z < 0 || globalUbo.skylight.z >= size;
         vec4 blockLighting = vec4(0, 0, 0, 1.f);
-        bool inBounds = distance(camPos, primaryLightPos.xyz) < size*2;//!(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
+        bool inBounds = !(primaryLightPos.x < 0 || primaryLightPos.y < 0 || primaryLightPos.z < 0 || primaryLightPos.x >= size || primaryLightPos.y >= height || primaryLightPos.z >= size);
         if (inBounds) {
             blockLighting = min(vec4(1), getLightSmooth(primaryLightPos, primaryFlatNormal) / maxLightLevel);
-            if ((floor(globalPos.y/height)*height)+primaryLightPos.y <= GROUND_LEVEL) {
-                blockLighting.a = 0;
-            }
             if (globalUbo.season == 2 && airAbove && blockLighting.w > 0.75f && blockLighting.r <= 0.f && blockLighting.g <= 0.f && blockLighting.b <= 0.f) { //snow
                 color.rgb = getMaterial(sampleAtlas(primaryVoxelRayPos.x, primaryVoxelRayPos.y, primaryVoxelRayPos.z, 54, 0), primaryLightPos, primaryFlatNormal, false).albedo.rgb;
             }
@@ -972,7 +954,6 @@ void main() {
             rayDir = normalize(globalUbo.skylight.xyz);
             float lightshaftMul = 0.5f*max(0.125f, dayness);
             vec3 lightshaftColor = pow(mix(globalUbo.nightAtmosphere.rgb, vec3(1), dayness), vec3(2.5f));
-            vec3 globalRayStart = (floor(globalPos/sizeVec)*sizeVec)+ogPos;
             float fluidDist = fluidInfront || underwater ? distance(ogPos, fluidPos) : 999999999;
             for (int i = 0; i < 19; i++) {
                 lightNoise = lightNoise+0.05f;
@@ -984,12 +965,12 @@ void main() {
                 float unmaxedDist = dist;
                 if (submerged) {dist = max(0.5f, dist);}
                 float bigness = 1-min(0.97f, pow(distance(ogPos, rayPos)*(submerged ? 0.01f : 0.003f), 4));
-                vec3 globalRayPos = globalRayStart + ogDir * (lightNoise*baseDist);
+                vec3 globalRayPos = ogPos + ogDir * (lightNoise*baseDist);
                 vec2 causticPos = (globalRayPos.xz-rayDir.xz*(mod(globalRayPos.y, height)/rayDir.y));
                 vec4 lightshaftNoise = mix(getCausticInv(0.00333f, causticPos/13)+0.5f, submerged ? (getCaustic(0.00333f, causticPos)+0.5f)*vec4(1, 1, 1, 0.75f) : vec4(0), bigness);
                 lightshaftNoise.rgb = vec3(lightshaftNoise.w);//mix(lightshaftNoise.rgb, vec3(lightshaftNoise.w), underwater && submerged ? 0.5f : 1.f);
                 vec3 godray = globalUbo.renderToggles.x == 2 ? vec3(0) : mix((lightshaftNoise.rgb*lightshaftNoise.w)-0.9f, vec3(1.f), clamp((dist-0.5f)*2*max(0, dot(rayDir, ogDir)), 0.f, 1.f))*lightshaftMul;
-                vec3 globalFogPos = floor((globalRayStart + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
+                vec3 globalFogPos = floor((ogPos + ogDir * (lightNoise*((depth < 0.00000001f ? 5 : 1)*baseDist)))/32)*32;
                 globalFogPos.y -= (noise(globalFogPos.xz*4).w*5)+(noise(globalFogPos.zx*0.015f).w*485);
                 if (globalFogPos.y > SEA_LEVEL) {
                     float layer = floor(globalFogPos.y / 512);
@@ -1153,7 +1134,7 @@ void main() {
         if (underwater) {
             vec3 volumeEndPos = fluidInfront ? fluidPos : primaryLightPos;
             float fluidFogginess = clamp(sqrt(distance(volumeEndPos, ogPos) / 128) + (fluidInfront ? 0.2f : 0.f), 0.4f, 1.f);
-            vec3 fluidColor = getLightingColor(celestialSource, vec3(ogPos.x, GROUND_LEVEL + height, ogPos.z), blockLighting, true, fluidFogginess, false).rgb*0.8f;
+            vec3 fluidColor = getLightingColor(celestialSource, vec3(ogPos.x, height, ogPos.z), blockLighting, true, fluidFogginess, false).rgb*0.8f;
             if (fluidInfront) {
                 vec3 sunDir = unzeroVec(normalize((source - fluidPos)*vec3(1, -0.3f, 1)));
                 float normDot = clamp((dot(tiltedNormal, sunDir)*0.75f)+0.75f, 0.25f, 1.25f);
@@ -1170,7 +1151,7 @@ void main() {
             float fluidFogginess = clamp(sqrt(distance(primaryLightPos, fluidPos) / 128) + 0.1f, 0.6f, 1.f);
             //primaryFogginess = max(primaryFogginess, fluidFogginess);
             outNormal.a = max(outNormal.a, fluidFogginess);
-            vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, GROUND_LEVEL + height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb*0.8f;
+            vec3 fluidColor = getLightingColor(celestialSource, vec3(fluidPos.x, height, fluidPos.z), blockLighting, true, fluidFogginess, false).rgb*0.8f;
             vec3 foam = vec3(max(fluidColor.r, max(fluidColor.g, fluidColor.b))*1.1f);
             vec3 causticPos = (floor(fluidPos*blockSize)+0.5f)*0.15f;
             vec3 absNorm = abs(tiltedNormal);
@@ -1192,7 +1173,7 @@ void main() {
         }
         if (material.fx.z > 0.f || tintMaterial.fx.z > 0.f) {
             vec3 specStretch = vec3(1, max(0.4f, (1-primaryFogginess)*0.8f), 1);
-            float specular = dot(normalize((globalUbo.skylight.xyz-globalPos)*specStretch), normalize(reflectDir*specStretch));
+            float specular = dot(normalize(globalUbo.skylight.xyz*specStretch), normalize(reflectDir*specStretch));
             color.rgb += max(vec3(0), max(min(0.5f, 2*pow(specular, 5)), 40*pow(specular, 400))*max(material.fx.z, tintMaterial.fx.z)*reflectFrensel);
         }
         reflectFrensel *= reflectivity;

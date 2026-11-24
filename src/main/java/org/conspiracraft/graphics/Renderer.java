@@ -82,7 +82,6 @@ public class Renderer {
     public static final Vector3f viewPos = new Vector3f();
     public static final Vector3f modelOffset = new Vector3f();
     public static final Vector3d warpOffset = new Vector3d();
-    public static long wgStart = -1;
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
         try (MemoryStack stack = MemoryStack.create(1000000).push()) {
@@ -91,7 +90,6 @@ public class Renderer {
                 clearedDepth = false;
                 if (!initialized) {
                     //System.out.println("atlas = " + Long.toHexString(Textures.atlas.image));System.out.println("noises = " + Long.toHexString(Textures.noises.image));System.out.println("colors1 = " + Long.toHexString(Textures.colors1.image));System.out.println("depth1 = " + Long.toHexString(Textures.depth1.image));System.out.println("norms1 = " + Long.toHexString(Textures.norms1.image));System.out.println("colors2 = " + Long.toHexString(Textures.colors2.image));System.out.println("depth2 = " + Long.toHexString(Textures.depth2.image));System.out.println("norms2 = " + Long.toHexString(Textures.norms2.image));System.out.println("gui = " + Long.toHexString(Textures.gui.image));System.out.println("items = " + Long.toHexString(Textures.items.image));System.out.println("entities = " + Long.toHexString(Textures.entities.image));System.out.println("blurred_horizontally = " + Long.toHexString(Textures.blurred_horizontally.image));System.out.println("blurred = " + Long.toHexString(Textures.blurred.image));System.out.println("blueNoise = " + Long.toHexString(Textures.blueNoise.image));System.out.println("vrs = " + Long.toHexString(Textures.vrs.image));System.out.println("colorsOld = " + Long.toHexString(Textures.colorsOld.image));
-                    generating = false;
                     for (int i = 0; i < xOffsets.length; i++) {
                         double[] haltonVec = halton.nextVector();
                         xOffsets[i] = (float) (haltonVec[0]-0.5f)*2;
@@ -104,9 +102,6 @@ public class Renderer {
                     initialized = true;
                     drawStuff = false;
                 } else {
-                    if (wgStart == -1) {wgStart = System.currentTimeMillis();}
-                    World.worldType.tickWorldgen();
-                    if (World.regionsGenerated > 200 && wgStart != -2) {System.out.println("First 200 regions took "+String.format("%.2f", (System.currentTimeMillis()-wgStart)/1000.f)+"s to generate"); wgStart = -2;}
                     boolean wasEmpty = updateQueue.isEmpty();
                     duplicateChunks.clear();
                     while (!updateQueue.isEmpty()) {
@@ -147,8 +142,8 @@ public class Renderer {
                 }
                 if (drawStuff) {
                     viewPos.set(Main.player.getCameraTranslationInterpolated());
-                    warpOffset.set(Main.player.getCameraTranslationInterpolatedUnwrapped());
-                    warpOffset.set(((int)(warpOffset.x()/size))*size, ((int)(warpOffset.y()/height))*height, ((int)(warpOffset.z()/size))*size);
+//                    warpOffset.set(Main.player.getCameraTranslationInterpolatedUnwrapped());
+//                    warpOffset.set(((int)(warpOffset.x()/size))*size, ((int)(warpOffset.y()/height))*height, ((int)(warpOffset.z()/size))*size);
                     globalUBO.update(stack);
                     globalUBO.push(stack);
                     vkCmdBindDescriptorSets(currentCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, stack.longs(Descriptors.descriptorSet), null);
