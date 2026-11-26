@@ -48,7 +48,7 @@ public class Chunk {
     }
 
     public int getNeededBitsPerValue(int uniqueValues) {
-        return 32-Integer.numberOfLeadingZeros(uniqueValues);
+        return 32-Integer.numberOfLeadingZeros(Math.max(0, uniqueValues-1));
     }
 
     //Blocks start
