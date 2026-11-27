@@ -24,7 +24,6 @@ import static org.lwjgl.sdl.SDLMouse.SDL_SetWindowRelativeMouseMode;
 import static org.lwjgl.sdl.SDLVideo.*;
 import static org.lwjgl.sdl.SDLVideo.SDL_SetWindowResizable;
 import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_CreateSurface;
-import static org.lwjgl.system.MemoryUtil.memUTF8;
 import static org.lwjgl.vulkan.EXTExtendedDynamicState3.VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME;
 import static org.lwjgl.vulkan.EXTExtendedDynamicState3.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
 import static org.lwjgl.vulkan.EXTFragmentShaderInterlock.VK_EXT_FRAGMENT_SHADER_INTERLOCK_EXTENSION_NAME;
@@ -121,7 +120,7 @@ public class Device {
 //                .attachmentFragmentShadingRate(false)
 //                .pNext(descriptorIndexing.address());
 
-        VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc()
+        VkPhysicalDeviceFeatures enabledFeatures = VkPhysicalDeviceFeatures.calloc(stack)
                 .samplerAnisotropy(true)
                 .shaderInt64(false)
                 .shaderFloat64(false)
@@ -194,6 +193,7 @@ public class Device {
         LongBuffer surface = MemoryUtil.memAllocLong(1);
         if (!SDL_Vulkan_CreateSurface(window, vkInst, null, surface)) {throw new RuntimeException("Failed to create surface: %s\n" + SDL_GetError());}
         vkSurf = surface.get(0);
+        MemoryUtil.memFree(surface);
     }
     public static void createSDLWindow() {
         window = SDLVideo.SDL_CreateWindow(Constants.GAME_NAME, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
@@ -210,8 +210,8 @@ public class Device {
         for (int i = 0; i < extCount; i++) {
             extensions.put(i, extBuffer.get(i));
         }
-        extensions.put(extCount, memUTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
-        extensions.put(extCount+1, memUTF8(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
+        extensions.put(extCount, stack.UTF8(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME));
+        extensions.put(extCount+1, stack.UTF8(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
 
         VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack)
                 .sType(VK14.VK_STRUCTURE_TYPE_APPLICATION_INFO)
@@ -238,12 +238,13 @@ public class Device {
 //        for (int i = 0; i < extensions.capacity(); i++) {
 //            long addr = extensions.get(i);
 //            if (addr == 0) continue;
-//            System.out.println("  " + MemoryUtil.memUTF8(addr));
+//            System.out.println("  " + MemoryUtil.UTF8stack.(addr));
 //        }
 
         PointerBuffer pInstance = stack.mallocPointer(1);
         int err = VK14.vkCreateInstance(createInfo, null, pInstance);
         if (err != VK14.VK_SUCCESS) {throw new RuntimeException("Failed to create Vulkan instance: " + err);}
         vkInst = new VkInstance(pInstance.get(0), createInfo);
+        MemoryUtil.memFree(extensions);
     }
 }

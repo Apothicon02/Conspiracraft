@@ -1,6 +1,7 @@
 package org.conspiracraft.graphics;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.conspiracraft.Constants;
 import org.conspiracraft.Settings;
@@ -82,9 +83,10 @@ public class Renderer {
     public static final Vector3f viewPos = new Vector3f();
     public static final Vector3f modelOffset = new Vector3f();
     public static final Vector3d warpOffset = new Vector3d();
+    public static final MemoryStack renderStack = MemoryStack.create(100000000);
     public static void render() throws Exception {
         if (!initialized && !LightHelper.lightQueue.isEmpty()) {return;}
-        try (MemoryStack stack = MemoryStack.create(1000000).push()) {
+        try (MemoryStack stack = renderStack.push()) {
             boolean drawStuff = true;
             if (startCommandBuffers(stack)) {
                 clearedDepth = false;
@@ -152,39 +154,39 @@ public class Renderer {
 
                     VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                     labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("Rstr"));
+                    labelInfo.pLabelName(stack.UTF8("Rstr"));
                     EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                     drawRaster(stack);
                     if (Main.currentTick-player.tickDied > 150) {
                         EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                         labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                         labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                        labelInfo.pLabelName(MemoryUtil.memUTF8("DDA"));
+                        labelInfo.pLabelName(stack.UTF8("DDA"));
                         EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                         drawDDA(stack);
                         EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                         labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                         labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                        labelInfo.pLabelName(MemoryUtil.memUTF8("AO"));
+                        labelInfo.pLabelName(stack.UTF8("AO"));
                         EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                         drawSSAO(stack);
                         EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                         labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                         labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                        labelInfo.pLabelName(MemoryUtil.memUTF8("AA"));
+                        labelInfo.pLabelName(stack.UTF8("AA"));
                         EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                         drawAA(stack);
                         EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                     }
                     labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                     labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("Blur"));
+                    labelInfo.pLabelName(stack.UTF8("Blur"));
                     EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                     drawBlur(stack);
                     EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
                     labelInfo = VkDebugUtilsLabelEXT.calloc(stack);
                     labelInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT);
-                    labelInfo.pLabelName(MemoryUtil.memUTF8("GUI"));
+                    labelInfo.pLabelName(stack.UTF8("GUI"));
                     EXTDebugUtils.vkCmdBeginDebugUtilsLabelEXT(currentCmdBuffer, labelInfo);
                     drawGUI(stack);
                     EXTDebugUtils.vkCmdEndDebugUtilsLabelEXT(currentCmdBuffer);
@@ -244,7 +246,7 @@ public class Renderer {
             }
             duplicateChunks.put(wrappedPackedChunkPos, packedChunkPos);
             updateChunkBlocks(stack, wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
-            updateChunkLights(wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
+            updateChunkLights(stack, wrappedPackedChunkPos, chunkPos, packedChunkPos, chunk);
         }
     }
     public static final int lodsByteSize = lodsPerChunk*8;
@@ -254,7 +256,7 @@ public class Renderer {
         if (initialized) {
             vmaVirtualFree(blocks.get(0), chunkBlockAllocs.get(wPackedChunkPos));
         }
-        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.calloc(stack);
         allocCreateInfo.alignment(4);
         int paletteSize = chunk.getBlockPaletteSize();
         int bitsPerValue = chunk.bitsPerBlock();
@@ -295,10 +297,10 @@ public class Renderer {
             }
             if (initialized) {
                 //updateRegion(World.packRegionPos(new Vector3i(chunkPos).div(regionSizeChunks)));
-                VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(chunkByteSize);
+                VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(chunkByteSize);
                 vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
                 if (compressedBlocks != null) {
-                    VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(pointer).dstOffset(pointer).size(((paletteSize + compressedBlocks.length) * 4L)+lodsBytes);
+                    VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(pointer).dstOffset(pointer).size(((paletteSize + compressedBlocks.length) * 4L)+lodsBytes);
                     vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
                 }
 //                Vector3i ogLodPos = new Vector3i(chunkPos).mul(lodSize);
@@ -315,7 +317,7 @@ public class Renderer {
             Main.isClosing = true;
         }
     }
-    public static void updateChunkLights(long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
+    public static void updateChunkLights(MemoryStack stack, long wPackedChunkPos, Vector3i chunkPos, long packedChunkPos, Chunk chunk) {
         if (!getRegion(packRegionPos(chunkPos.x()>>regionBitsChunks, chunkPos.y()>>regionBitsChunks, chunkPos.z()>>regionBitsChunks)).neighborsGenerated) {
             return;
         }
@@ -324,7 +326,7 @@ public class Renderer {
         if (initialized) {
             vmaVirtualFree(lights.get(0), chunkLightBlockAllocs.get(wPackedChunkPos));
         }
-        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.create();
+        VmaVirtualAllocationCreateInfo allocCreateInfo = VmaVirtualAllocationCreateInfo.calloc(stack);
         allocCreateInfo.alignment(4);
         int paletteSize = chunk.getLightPaletteSize();
         int bitsPerValue = chunk.bitsPerLight();
@@ -353,10 +355,10 @@ public class Renderer {
                         .put(0, compressedLights);
             }
             if (initialized) {
-                VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(chunkByteSize);
+                VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(chunkBufOffset).dstOffset(chunkBufOffset).size(chunkByteSize);
                 vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], chunkBufferCopy);
                 if (compressedLights != null) {
-                    VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(pointer).dstOffset(pointer).size((paletteSize + compressedLights.length) * 4L);
+                    VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(pointer).dstOffset(pointer).size((paletteSize + compressedLights.length) * 4L);
                     vkCmdCopyBuffer(currentCmdBuffer, lightSSBO.stagingBuffer.buffer[0], lightSSBO.buffer.buffer[0], lightBufferCopy);
                 }
             }
@@ -864,28 +866,28 @@ public class Renderer {
         }
         blocks = BufferUtils.createPointerBuffer(1);
         lights = BufferUtils.createPointerBuffer(1);
-        VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.create();
+        VmaVirtualBlockCreateInfo blockCreateInfo = VmaVirtualBlockCreateInfo.calloc(stack);
         blockCreateInfo.size(voxelSSBOSize);
         vmaCreateVirtualBlock(blockCreateInfo, blocks);
         chunkBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
-        VmaVirtualBlockCreateInfo lightBlockCreateInfo = VmaVirtualBlockCreateInfo.create();
+        VmaVirtualBlockCreateInfo lightBlockCreateInfo = VmaVirtualBlockCreateInfo.calloc(stack);
         lightBlockCreateInfo.size(lightSSBOSize);
         vmaCreateVirtualBlock(lightBlockCreateInfo, lights);
         chunkLightBlockAllocs = new Long2LongOpenHashMap(chunkArrSize);
 
-        VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
+        VkBufferCopy.Buffer chunkBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, chunkSSBO.stagingBuffer.buffer[0], chunkSSBO.buffer.buffer[0], chunkBufferCopy);
-        VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
+        VkBufferCopy.Buffer voxelBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(0).dstOffset(0).size(voxelSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, voxelSSBO.stagingBuffer.buffer[0], voxelSSBO.buffer.buffer[0], voxelBufferCopy);
-        VkBufferCopy.Buffer lightChunkBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
+        VkBufferCopy.Buffer lightChunkBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(0).dstOffset(0).size(chunkSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightChunkSSBO.stagingBuffer.buffer[0], lightChunkSSBO.buffer.buffer[0], lightChunkBufferCopy);
-        VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1).srcOffset(0).dstOffset(0).size(lightSSBOSize);
+        VkBufferCopy.Buffer lightBufferCopy = VkBufferCopy.calloc(1, stack).srcOffset(0).dstOffset(0).size(lightSSBOSize);
         vkCmdCopyBuffer(currentCmdBuffer, lightSSBO.stagingBuffer.buffer[0], lightSSBO.buffer.buffer[0], lightBufferCopy);
         ssboBarriers(stack);
         System.out.println("Took "+(System.currentTimeMillis()-startTime)+"ms to fill SSBOs.");
     }
     public static void ssboBarriers(MemoryStack stack) {
-        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(4);
+        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(4, stack);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
                 .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
@@ -928,7 +930,7 @@ public class Renderer {
         vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
     }
     public static void atlasBarriers(MemoryStack stack) {
-        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(1);
+        VkBufferMemoryBarrier2.Buffer barrierBuf = VkBufferMemoryBarrier2.calloc(1, stack);
         barrierBuf.get(0)
                 .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2)
                 .srcStageMask(VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT)
@@ -942,5 +944,19 @@ public class Renderer {
                 .sType(VK13.VK_STRUCTURE_TYPE_DEPENDENCY_INFO)
                 .pBufferMemoryBarriers(barrierBuf);
         vkCmdPipelineBarrier2(currentCmdBuffer, dependencyInfo);
+    }
+
+    public static void cleanup() {
+        System.out.println("Cleaning up renderer. ");
+        long pointer = blocks.get(0);
+        for (LongIterator iterator = chunkBlockAllocs.values().longIterator(); iterator.hasNext();) {
+            vmaVirtualFree(pointer, iterator.nextLong());
+        }
+        vmaDestroyVirtualBlock(blocks.get(0));
+        pointer = lights.get(0);
+        for (LongIterator iterator = chunkLightBlockAllocs.values().longIterator(); iterator.hasNext();) {
+            vmaVirtualFree(pointer, iterator.nextLong());
+        }
+        vmaDestroyVirtualBlock(lights.get(0));
     }
 }

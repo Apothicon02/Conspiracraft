@@ -25,7 +25,7 @@ public class ShaderHelper {
         }
     }
 
-    public static ByteBuffer compileGLSLString(String path, int stage) throws IOException {
+    public static ByteBuffer compileGLSLString(MemoryStack stack, String path, int stage) throws IOException {
         StringBuilder glsl = new StringBuilder("#version 450 \n");
         glsl.append(Utils.appendNewlinesAndMerge(Utils.readFile("assets/base/shader/" + path)));
         long compiler = Shaderc.shaderc_compiler_initialize();
@@ -41,7 +41,7 @@ public class ShaderHelper {
         if (status != Shaderc.shaderc_compilation_status_success) {System.out.print("Shader compile error:\n" + Shaderc.shaderc_result_get_error_message(result));}
 
         ByteBuffer spirv = Shaderc.shaderc_result_get_bytes(result);
-        ByteBuffer copy = MemoryUtil.memAlloc(spirv.remaining());
+        ByteBuffer copy = stack.malloc(spirv.remaining());
         copy.put(spirv.duplicate().rewind());
         copy.flip();
         Shaderc.shaderc_compile_options_release(options);

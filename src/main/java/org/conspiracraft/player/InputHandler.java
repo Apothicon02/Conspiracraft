@@ -176,6 +176,7 @@ public class InputHandler {
                     }
                     if (keyRelease(SDL_SCANCODE_F4)) {
                         System.out.println(Main.fps+"fps | "+Main.ms+"ms");
+
                     }
                     if (!GUI.pauseMenuOpen) {
                         if (keyRelease(SDL_SCANCODE_TAB)) {
@@ -238,4 +239,8 @@ public class InputHandler {
     public boolean keyRelease(int scanCode) {return (!isKeyDown(scanCode)) && wasKeyDown(scanCode);}
     public boolean isKeyDown(int scanCode) {return keys.get(scanCode) > 0;}
     public boolean wasKeyDown(int scanCode) {return prevKeys.get(scanCode) > 0;}
+
+    public void cleanup() {
+        MemoryUtil.memFree(prevKeys);
+    }
 }

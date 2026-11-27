@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.shaderc.Shaderc;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class ComputePipeline {
         this.name = name;
         computePipelines.add(this);
     }
-    public void compile() throws IOException {
-        this.comp = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(name, Shaderc.shaderc_glsl_compute_shader));
+    public void compile(MemoryStack stack) throws IOException {
+        this.comp = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(stack, name, Shaderc.shaderc_glsl_compute_shader));
     }
 }

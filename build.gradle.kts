@@ -7,13 +7,15 @@ tasks.withType<Jar> {
         attributes["Main-Class"] = "org.conspiracraft.Main"
     }
 }
-
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("--enable-preview")
 }
 tasks.test {
     useJUnitPlatform()
     jvmArgs("--enable-preview")
+}
+tasks.withType<JavaExec> {
+    jvmArgs(project.findProperty("org.gradle.jvmargs").toString().split(" "))
 }
 
 group = "org.apothicon"

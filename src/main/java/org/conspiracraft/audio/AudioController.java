@@ -131,8 +131,9 @@ public class AudioController {
         WaveData waveFile = WaveData.create(file);
         if (waveFile != null) {
             AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
+            float length = (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate;
             waveFile.dispose();
-            return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
+            return new SFX(buffer, length);
         }
         return new SFX(buffer, 0);
     }
@@ -150,8 +151,9 @@ public class AudioController {
                 prevRandomSound = name;
                 WaveData waveFile = WaveData.createFromAppdata(folder + name);
                 AL10.alBufferData(buffer, waveFile.format, waveFile.data, waveFile.sampleRate);
+                float length = (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate;
                 waveFile.dispose();
-                return new SFX(buffer, (float) (waveFile.totalBytes / waveFile.bytesPerFrame) / waveFile.sampleRate);
+                return new SFX(buffer, length);
             }
         } else {
             Files.createDirectory(folderPath);

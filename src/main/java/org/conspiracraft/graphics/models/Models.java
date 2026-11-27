@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.conspiracraft.graphics.Renderer;
 import org.conspiracraft.utils.Utils;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,5 +53,13 @@ public class Models {
         Model model = new Model(vertexPtr, indexPtr, verts.toFloatArray(), indices.toIntArray());
         models.addLast(model);
         return model;
+    }
+
+    public static void cleanup() {
+        for (int i = 0; i < models.size(); i++) {
+            Model model = models.get(i);
+            MemoryUtil.memFree(model.indexData);
+            MemoryUtil.memFree(model.vertexData);
+        }
     }
 }

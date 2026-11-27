@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.shaderc.Shaderc;
 
 import java.io.IOException;
@@ -26,8 +27,8 @@ public class Pipeline {
     public Pipeline(String vert, String frag, int colorAttachments, boolean depthEnabled) {
         this(vert, frag, colorAttachments, depthEnabled, true);
     }
-    public void compile() throws IOException {
-        this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(vertName, Shaderc.shaderc_glsl_vertex_shader));
-        this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(fragName, Shaderc.shaderc_glsl_fragment_shader));
+    public void compile(MemoryStack stack) throws IOException {
+        this.vert = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(stack, vertName, Shaderc.shaderc_glsl_vertex_shader));
+        this.frag = ShaderHelper.createShaderModule(ShaderHelper.compileGLSLString(stack, fragName, Shaderc.shaderc_glsl_fragment_shader));
     }
 }

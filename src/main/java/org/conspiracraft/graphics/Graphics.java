@@ -1,5 +1,6 @@
 package org.conspiracraft.graphics;
 
+import org.conspiracraft.Main;
 import org.conspiracraft.audio.AudioController;
 import org.conspiracraft.graphics.buffers.Buffer;
 import org.conspiracraft.graphics.buffers.BufferHelper;
@@ -11,6 +12,7 @@ import org.conspiracraft.graphics.buffers.ubos.UniformBuffer;
 import org.conspiracraft.graphics.models.Models;
 import org.conspiracraft.graphics.models.Vertex;
 import org.conspiracraft.graphics.textures.Textures;
+import org.conspiracraft.player.InputHandler;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
@@ -126,7 +128,13 @@ public class Graphics {
         vkFreeMemory(vkDevice, depthImageMemory, null);
     }
     public void cleanup() {
+        Main.player.inputHandler.cleanup();
         AudioController.cleanup();
+        Renderer.cleanup();
+        Models.cleanup();
+        vkDeviceWaitIdle(vkDevice);
+        vkDestroyDevice(vkDevice, null);
+        vkDestroyInstance(vkInst, null);
         SDL_DestroyWindow(window);
         SDL_Quit();
     }

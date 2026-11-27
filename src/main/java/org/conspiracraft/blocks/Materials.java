@@ -5,6 +5,7 @@ import org.conspiracraft.graphics.textures.ImageHelper;
 import org.conspiracraft.graphics.textures.Textures;
 import org.conspiracraft.utils.Utils;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -185,6 +186,9 @@ public class Materials {
             } else {
                 copyTextures(matBuf, normBuf, fxBuf, i, materialHeight, 0, 0);
             }
+            MemoryUtil.memFree(matBuf);
+            MemoryUtil.memFree(normBuf);
+            MemoryUtil.memFree(fxBuf);
         }
         ImageHelper.fillImage(stack, Textures.materials, materialBuffer);
     }

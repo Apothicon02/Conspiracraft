@@ -47,14 +47,18 @@ public class Pipelines {
         pool = Executors.newFixedThreadPool(Math.min(1+pipelines.size(), Runtime.getRuntime().availableProcessors()));
         pool.execute(() -> createPipelineCache(stack));
         for (Pipeline pipeline : pipelines) {pool.submit(() -> {
+            MemoryStack tempStack = MemoryStack.create(640000).push();
             try {
-                pipeline.compile();
+                pipeline.compile(tempStack);
             } catch (Throwable e) {e.printStackTrace();}
+            tempStack.close();
         });}
         for (ComputePipeline pipeline : computePipelines) {pool.submit(() -> {
+            MemoryStack tempStack = MemoryStack.create(640000).push();
             try {
-                pipeline.compile();
+                pipeline.compile(tempStack);
             } catch (Throwable e) {e.printStackTrace();}
+            tempStack.close();
         });}
         pool.shutdown();
     }
@@ -77,8 +81,8 @@ public class Pipelines {
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO)
-                .pVertexBindingDescriptions(Vertex.getBindingDescription())
-                .pVertexAttributeDescriptions(Vertex.getAttributeDescriptions());
+                .pVertexBindingDescriptions(Vertex.getBindingDescription(stack))
+                .pVertexAttributeDescriptions(Vertex.getAttributeDescriptions(stack));
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.calloc(stack)
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO)
